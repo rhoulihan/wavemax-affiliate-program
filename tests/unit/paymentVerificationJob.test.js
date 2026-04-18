@@ -83,10 +83,10 @@ describe('PaymentVerificationJob', () => {
       actualWeight: 22,
       numberOfBags: 2,
       status: 'processed', // WDF complete
-      v2PaymentStatus: 'awaiting',
-      v2PaymentAmount: 50.00,
-      v2PaymentRequestedAt: new Date(),
-      v2PaymentCheckAttempts: 0
+      paymentStatus: 'awaiting',
+      paymentAmount: 50.00,
+      paymentRequestedAt: new Date(),
+      paymentCheckAttempts: 0
     });
   });
 
@@ -134,12 +134,12 @@ describe('PaymentVerificationJob', () => {
       await paymentVerificationJob.processOrder(testOrder);
 
       const updatedOrder = await Order.findById(testOrder._id);
-      expect(updatedOrder.v2PaymentCheckAttempts).toBe(1);
-      expect(updatedOrder.v2LastPaymentCheck).toBeDefined();
+      expect(updatedOrder.paymentCheckAttempts).toBe(1);
+      expect(updatedOrder.lastPaymentCheck).toBeDefined();
     });
 
     it('should mark order as failed after max attempts', async () => {
-      testOrder.v2PaymentCheckAttempts = 47; // One attempt away from max
+      testOrder.paymentCheckAttempts = 47; // One attempt away from max
       await testOrder.save();
 
       paymentEmailScanner.checkOrderPayment.mockResolvedValue(false);
@@ -148,36 +148,36 @@ describe('PaymentVerificationJob', () => {
       await paymentVerificationJob.processOrder(testOrder);
 
       const updatedOrder = await Order.findById(testOrder._id);
-      expect(updatedOrder.v2PaymentStatus).toBe('failed');
-      expect(updatedOrder.v2PaymentCheckAttempts).toBe(48);
+      expect(updatedOrder.paymentStatus).toBe('failed');
+      expect(updatedOrder.paymentCheckAttempts).toBe(48);
     });
   });
 
   describe('Payment reminders', () => {
     it('should send first reminder after 30 minutes (6 attempts)', () => {
-      const shouldRemind = paymentVerificationJob.shouldSendReminder({ v2PaymentCheckAttempts: 6 });
+      const shouldRemind = paymentVerificationJob.shouldSendReminder({ paymentCheckAttempts: 6 });
       expect(shouldRemind).toBe(true);
     });
 
     it('should send hourly reminders after first 30 minutes', () => {
       // After 1 hour (12 attempts from 30 min mark)
-      const oneHour = paymentVerificationJob.shouldSendReminder({ v2PaymentCheckAttempts: 18 });
+      const oneHour = paymentVerificationJob.shouldSendReminder({ paymentCheckAttempts: 18 });
       expect(oneHour).toBe(true);
 
       // After 2 hours
-      const twoHours = paymentVerificationJob.shouldSendReminder({ v2PaymentCheckAttempts: 30 });
+      const twoHours = paymentVerificationJob.shouldSendReminder({ paymentCheckAttempts: 30 });
       expect(twoHours).toBe(true);
 
       // After 3 hours
-      const threeHours = paymentVerificationJob.shouldSendReminder({ v2PaymentCheckAttempts: 42 });
+      const threeHours = paymentVerificationJob.shouldSendReminder({ paymentCheckAttempts: 42 });
       expect(threeHours).toBe(true);
     });
 
     it('should not send reminders between hourly intervals', () => {
-      const notHourly = paymentVerificationJob.shouldSendReminder({ v2PaymentCheckAttempts: 20 });
+      const notHourly = paymentVerificationJob.shouldSendReminder({ paymentCheckAttempts: 20 });
       expect(notHourly).toBe(false);
 
-      const notHourly2 = paymentVerificationJob.shouldSendReminder({ v2PaymentCheckAttempts: 35 });
+      const notHourly2 = paymentVerificationJob.shouldSendReminder({ paymentCheckAttempts: 35 });
       expect(notHourly2).toBe(false);
     });
 
@@ -207,7 +207,7 @@ describe('PaymentVerificationJob', () => {
     });
 
     it('should include urgency information in reminders', async () => {
-      testOrder.v2PaymentCheckAttempts = 36; // 3 hours elapsed
+      testOrder.paymentCheckAttempts = 36; // 3 hours elapsed
       
       paymentLinkService.generatePaymentLinks.mockResolvedValue({
         links: {},
@@ -229,8 +229,8 @@ describe('PaymentVerificationJob', () => {
 
   describe('Admin escalation', () => {
     it('should escalate to admin after 4 hours', async () => {
-      testOrder.v2PaymentCheckAttempts = 48;
-      testOrder.v2PaymentRequestedAt = new Date(Date.now() - 4 * 60 * 60 * 1000);
+      testOrder.paymentCheckAttempts = 48;
+      testOrder.paymentRequestedAt = new Date(Date.now() - 4 * 60 * 60 * 1000);
       await testOrder.save();
 
       // Populate the customer for the test
@@ -299,7 +299,7 @@ describe('PaymentVerificationJob', () => {
         estimatedWeight: 15,
         numberOfBags: 1,
         status: 'processed',
-        v2PaymentCheckAttempts: 0
+        paymentCheckAttempts: 0
       });
 
       // Populate the customer for the test
@@ -309,18 +309,18 @@ describe('PaymentVerificationJob', () => {
 
       // Should not update V1 order
       const unchangedOrder = await Order.findById(v1Order._id);
-      expect(unchangedOrder.v2PaymentCheckAttempts).toBe(0);
+      expect(unchangedOrder.paymentCheckAttempts).toBe(0);
     });
 
     it('should handle orders already verified', async () => {
-      testOrder.v2PaymentStatus = 'verified';
+      testOrder.paymentStatus = 'verified';
       await testOrder.save();
 
       await paymentVerificationJob.processOrder(testOrder);
 
       // Should not increment attempts
       const unchangedOrder = await Order.findById(testOrder._id);
-      expect(unchangedOrder.v2PaymentCheckAttempts).toBe(0);
+      expect(unchangedOrder.paymentCheckAttempts).toBe(0);
     });
   });
 

@@ -386,16 +386,16 @@ describe('Order Controller - Additional Coverage', () => {
       });
     });
 
-    it('should allow refund on complete orders regardless of payment status', async () => {
+    it('should record refund fields on complete orders', async () => {
       req.params.orderId = 'ORD001';
-      req.body.paymentStatus = 'refunded';
+      req.body.paymentStatus = 'verified';
       req.body.refundAmount = 50;
       req.body.refundReason = 'Customer request';
 
       const mockOrder = {
         orderId: 'ORD001',
         status: 'complete',
-        paymentStatus: 'pending', // Not completed but can still refund
+        paymentStatus: 'verified',
         save: jest.fn().mockResolvedValue(true)
       };
 
@@ -405,13 +405,18 @@ describe('Order Controller - Additional Coverage', () => {
       await handler(req, res, next);
 
       expect(mockOrder.save).toHaveBeenCalled();
+      expect(mockOrder.refundAmount).toBe(50);
+      expect(mockOrder.refundReason).toBe('Customer request');
+      expect(mockOrder.refundedAt).toBeInstanceOf(Date);
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.json).toHaveBeenCalledWith({
         success: true,
         message: 'Payment status updated successfully',
         order: expect.objectContaining({
           orderId: 'ORD001',
-          paymentStatus: 'refunded'
+          paymentStatus: 'verified',
+          refundAmount: 50,
+          refundReason: 'Customer request'
         })
       });
     });

@@ -22,16 +22,16 @@ async function sendPaymentReminder(order) {
     }
     
     // Update reminder tracking
-    order.v2ReminderCount = (order.v2ReminderCount || 0) + 1;
-    order.v2LastReminderSentAt = new Date();
+    order.reminderCount = (order.reminderCount || 0) + 1;
+    order.lastReminderSentAt = new Date();
     
     // Add to reminders array
-    if (!order.v2PaymentReminders) {
-      order.v2PaymentReminders = [];
+    if (!order.paymentReminders) {
+      order.paymentReminders = [];
     }
-    order.v2PaymentReminders.push({
+    order.paymentReminders.push({
       sentAt: new Date(),
-      reminderNumber: order.v2ReminderCount,
+      reminderNumber: order.reminderCount,
       method: 'email'
     });
     
@@ -39,13 +39,13 @@ async function sendPaymentReminder(order) {
     await emailService.sendV2PaymentReminder({
       customer,
       order,
-      reminderNumber: order.v2ReminderCount,
-      paymentAmount: order.v2PaymentAmount,
-      paymentLinks: order.v2PaymentLinks,
-      qrCodes: order.v2PaymentQRCodes
+      reminderNumber: order.reminderCount,
+      paymentAmount: order.paymentAmount,
+      paymentLinks: order.paymentLinks,
+      qrCodes: order.paymentQRCodes
     });
     
-    logger.info(`Payment reminder #${order.v2ReminderCount} sent for order ${order.orderId}`);
+    logger.info(`Payment reminder #${order.reminderCount} sent for order ${order.orderId}`);
     
     await order.save();
   } catch (error) {
@@ -55,7 +55,7 @@ async function sendPaymentReminder(order) {
 
 // Helper function to generate payment URLs and QR codes
 async function generatePaymentURLs(order) {
-  const amount = order.v2PaymentAmount.toFixed(2);
+  const amount = order.paymentAmount.toFixed(2);
   const orderNote = `WaveMAX Order ${order.orderId}`;
   
   // Generate payment URLs for each service
@@ -1064,7 +1064,7 @@ exports.weighBags = async (req, res) => {
     // Update bag counts
     order.bagsWeighed = order.bags.filter(b => b.weight > 0).length;
     
-    // Save order first to calculate v2PaymentAmount
+    // Save order first to calculate paymentAmount
     await order.save();
     
     // V2 Payment Flow: Send payment request if all bags are weighed
@@ -1075,17 +1075,17 @@ exports.weighBags = async (req, res) => {
       // Get customer for payment request
       const customer = await Customer.findOne({ customerId: order.customerId });
       if (customer) {
-        // Use actualTotal if v2PaymentAmount is not set
-        const paymentAmount = order.v2PaymentAmount || order.actualTotal || 
+        // Use actualTotal if paymentAmount is not set
+        const paymentAmount = order.paymentAmount || order.actualTotal || 
                             (order.actualWeight * (order.baseRate || 1.25) + (order.addOnTotal || 0));
         
         // Generate payment URLs and QR codes with correct amount
-        const paymentURLs = await generatePaymentURLs({...order.toObject(), v2PaymentAmount: paymentAmount});
-        order.v2PaymentLinks = paymentURLs.links;
-        order.v2PaymentQRCodes = paymentURLs.qrCodes;
-        order.v2PaymentStatus = 'awaiting';
-        order.v2PaymentRequestedAt = new Date();
-        order.v2PaymentAmount = paymentAmount; // Ensure it's set
+        const paymentURLs = await generatePaymentURLs({...order.toObject(), paymentAmount: paymentAmount});
+        order.paymentLinks = paymentURLs.links;
+        order.paymentQRCodes = paymentURLs.qrCodes;
+        order.paymentStatus = 'awaiting';
+        order.paymentRequestedAt = new Date();
+        order.paymentAmount = paymentAmount; // Ensure it's set
         
         // Save again with payment info
         await order.save();
@@ -1311,7 +1311,7 @@ exports.scanProcessed = async (req, res) => {
       order.status = 'processed';
       
       // V2 Payment Flow: Check payment status before sending notifications
-      if (order.v2PaymentStatus === 'verified' || order.v2PaymentStatus === 'paid') {
+      if (order.paymentStatus === 'verified' || order.paymentStatus === 'paid') {
         // Payment received - send ready for pickup notification to affiliate ONLY
         const emailService = require('../utils/emailService');
         

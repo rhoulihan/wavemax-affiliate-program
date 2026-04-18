@@ -364,6 +364,8 @@ class Formatters {
       },
       payment: {
         pending: 'Pending',
+        awaiting: 'Awaiting Payment',
+        confirming: 'Confirming',
         verified: 'Verified',
         failed: 'Failed',
         refunded: 'Refunded',

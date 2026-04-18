@@ -74,7 +74,7 @@ class V2PaymentModal {
    */
   showLoadingModal() {
     const modalHtml = `
-      <div id="v2PaymentModal" class="modal fade show modal-backdrop-dark d-block">
+      <div id="paymentModal" class="modal fade show modal-backdrop-dark d-block">
         <div class="modal-dialog modal-lg">
           <div class="modal-content">
             <div class="modal-header">
@@ -94,7 +94,7 @@ class V2PaymentModal {
 
     // Add modal to page
     document.body.insertAdjacentHTML('beforeend', modalHtml);
-    this.modal = document.getElementById('v2PaymentModal');
+    this.modal = document.getElementById('paymentModal');
 
     // Add spinner using SwirlSpinner class
     if (window.SwirlSpinner) {
@@ -135,7 +135,7 @@ class V2PaymentModal {
     `).join('');
     
     const modalHtml = `
-      <div id="v2PaymentModal" class="modal fade show modal-backdrop-dark d-block">
+      <div id="paymentModal" class="modal fade show modal-backdrop-dark d-block">
         <div class="modal-dialog modal-lg">
           <div class="modal-content">
             <div class="modal-header">
@@ -172,7 +172,7 @@ class V2PaymentModal {
                 <p class="text-muted">Please complete the payment in the popup window</p>
                 <p class="text-sm text-secondary">If the popup window doesn't appear, please check your browser's popup blocker settings.</p>
                 <div id="testModeCancelButton" class="d-none mt-3">
-                  <button type="button" class="btn btn-warning" onclick="v2Payment.cancelTestPayment()">
+                  <button type="button" class="btn btn-warning" onclick="payment.cancelTestPayment()">
                     Cancel Test Payment
                   </button>
                 </div>
@@ -207,7 +207,7 @@ class V2PaymentModal {
     
     // Add new modal
     document.body.insertAdjacentHTML('beforeend', modalHtml);
-    this.modal = document.getElementById('v2PaymentModal');
+    this.modal = document.getElementById('paymentModal');
     
     // Add event listeners
     this.attachEventListeners();
@@ -765,12 +765,12 @@ class V2PaymentModal {
    */
   showError(message) {
     const modalHtml = `
-      <div id="v2PaymentModal" class="modal fade show modal-backdrop-dark d-block">
+      <div id="paymentModal" class="modal fade show modal-backdrop-dark d-block">
         <div class="modal-dialog">
           <div class="modal-content">
             <div class="modal-header bg-danger text-white">
               <h5 class="modal-title">Payment Error</h5>
-              <button type="button" class="close text-white" onclick="v2Payment.closeModal()">
+              <button type="button" class="close text-white" onclick="payment.closeModal()">
                 <span>&times;</span>
               </button>
             </div>
@@ -780,7 +780,7 @@ class V2PaymentModal {
               </div>
             </div>
             <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" onclick="v2Payment.closeModal()">
+              <button type="button" class="btn btn-secondary" onclick="payment.closeModal()">
                 Close
               </button>
             </div>
@@ -794,7 +794,7 @@ class V2PaymentModal {
     
     // Add error modal
     document.body.insertAdjacentHTML('beforeend', modalHtml);
-    this.modal = document.getElementById('v2PaymentModal');
+    this.modal = document.getElementById('paymentModal');
   }
   
   /**
@@ -841,10 +841,10 @@ class V2PaymentModal {
 }
 
 // Create global instance
-const v2Payment = new V2PaymentModal();
+const payment = new V2PaymentModal();
 
 // Make it available globally
-window.v2Payment = v2Payment;
+window.payment = payment;
 
 // Export for use in other scripts
 if (typeof module !== 'undefined' && module.exports) {

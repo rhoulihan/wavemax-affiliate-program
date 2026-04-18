@@ -45,9 +45,9 @@ describe('Venmo Payment Email Parsing', () => {
       actualTotal: 2.35,
       numberOfBags: 1,
       status: 'processing',
-      v2PaymentStatus: 'awaiting',
-      v2PaymentAmount: 2.35,
-      v2PaymentRequestedAt: new Date()
+      paymentStatus: 'awaiting',
+      paymentAmount: 2.35,
+      paymentRequestedAt: new Date()
     });
     // Save without triggering the pre-save hook that recalculates
     await testOrder.save({ validateBeforeSave: false });
@@ -152,10 +152,10 @@ describe('Venmo Payment Email Parsing', () => {
 
       // Check order was updated
       const updatedOrder = await Order.findOne({ orderId: testOrder.orderId });
-      expect(updatedOrder.v2PaymentStatus).toBe('verified');
-      expect(updatedOrder.v2PaymentMethod).toBe('venmo');
-      expect(updatedOrder.v2PaymentVerifiedAt).toBeDefined();
-      expect(updatedOrder.v2PaymentTransactionId).toBe('4410913674527352924');
+      expect(updatedOrder.paymentStatus).toBe('verified');
+      expect(updatedOrder.paymentMethod).toBe('venmo');
+      expect(updatedOrder.paymentVerifiedAt).toBeDefined();
+      expect(updatedOrder.paymentTransactionId).toBe('4410913674527352924');
     });
 
     it('should reject payment with incorrect amount', async () => {
@@ -173,7 +173,7 @@ describe('Venmo Payment Email Parsing', () => {
 
       // Check order was not updated
       const order = await Order.findOne({ orderId: testOrder.orderId });
-      expect(order.v2PaymentStatus).toBe('awaiting');
+      expect(order.paymentStatus).toBe('awaiting');
     });
   });
 
@@ -184,7 +184,7 @@ describe('Venmo Payment Email Parsing', () => {
       
       expect(order).toBeDefined();
       expect(order.orderId).toBe('ORD-12345678-1234-1234-1234-123456789012');
-      expect(order.v2PaymentStatus).toBe('awaiting');
+      expect(order.paymentStatus).toBe('awaiting');
     });
 
     it('should handle UUID format in order ID', async () => {

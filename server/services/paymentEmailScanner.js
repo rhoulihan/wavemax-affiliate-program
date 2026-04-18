@@ -276,10 +276,10 @@ class PaymentEmailScanner {
    */
   async findOrderById(orderId) {
     try {
-      // Find order with matching orderId and v2PaymentStatus = 'awaiting'
+      // Find order with matching orderId and paymentStatus = 'awaiting'
       const order = await Order.findOne({
         orderId: orderId,
-        v2PaymentStatus: 'awaiting'
+        paymentStatus: 'awaiting'
       });
       
       return order;
@@ -305,12 +305,12 @@ class PaymentEmailScanner {
       }
       
       // Check if already verified - this would be a duplicate payment
-      if (order.v2PaymentStatus === 'verified') {
+      if (order.paymentStatus === 'verified') {
         console.log('Order already verified - duplicate payment detected:', payment.orderId);
         
         // Notify admin about duplicate payment
         try {
-          await this.notifyAdminPaymentIssue(order, payment, order.v2PaymentAmount || order.actualTotal, 'duplicate');
+          await this.notifyAdminPaymentIssue(order, payment, order.paymentAmount || order.actualTotal, 'duplicate');
         } catch (error) {
           console.error('Error notifying admin about duplicate payment:', error);
         }
@@ -319,7 +319,7 @@ class PaymentEmailScanner {
       }
       
       // Verify amount - payment must be >= order amount
-      const expectedAmount = order.v2PaymentAmount || order.actualTotal || order.estimatedTotal;
+      const expectedAmount = order.paymentAmount || order.actualTotal || order.estimatedTotal;
       const paymentDifference = payment.amount - expectedAmount;
       
       if (payment.amount < expectedAmount) {
@@ -338,14 +338,14 @@ class PaymentEmailScanner {
       
       // Payment is sufficient (exact or overpayment)
       // Update order with payment verification
-      order.v2PaymentStatus = 'verified';
-      order.v2PaymentVerifiedAt = new Date();
-      order.v2PaymentTransactionId = payment.transactionId;
-      order.v2PaymentMethod = payment.provider;
+      order.paymentStatus = 'verified';
+      order.paymentVerifiedAt = new Date();
+      order.paymentTransactionId = payment.transactionId;
+      order.paymentMethod = payment.provider;
       
       if (paymentDifference > 0) {
         // Customer overpaid - note this and notify admin
-        order.v2PaymentNotes = `Payment verified. Amount variance: Overpayment of $${paymentDifference.toFixed(2)} received`;
+        order.paymentNotes = `Payment verified. Amount variance: Overpayment of $${paymentDifference.toFixed(2)} received`;
         
         // Notify admin about overpayment
         try {
@@ -355,7 +355,7 @@ class PaymentEmailScanner {
         }
       } else {
         // Exact payment
-        order.v2PaymentNotes = `Payment verified via email from ${payment.sender}`;
+        order.paymentNotes = `Payment verified via email from ${payment.sender}`;
       }
       
       await order.save();
@@ -425,8 +425,8 @@ class PaymentEmailScanner {
     try {
       const order = await Order.findById(orderId);
       
-      if (!order || order.v2PaymentStatus === 'verified') {
-        return order?.v2PaymentStatus === 'verified';
+      if (!order || order.paymentStatus === 'verified') {
+        return order?.paymentStatus === 'verified';
       }
       
       // Search emails for this order ID (using the full ORD-UUID format)
@@ -467,7 +467,7 @@ class PaymentEmailScanner {
       
       // Get all orders awaiting payment
       const pendingOrders = await Order.find({
-        v2PaymentStatus: 'awaiting'
+        paymentStatus: 'awaiting'
       });
       
       console.log(`Processing ${pendingOrders.length} pending orders`);

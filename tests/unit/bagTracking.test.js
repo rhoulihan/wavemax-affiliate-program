@@ -435,7 +435,7 @@ describe('Bag Tracking System', () => {
         status: 'processing',
         affiliateCommission: 5.5,
         actualTotal: 15.5,
-        v2PaymentStatus: 'verified',  // Add payment status to trigger email
+        paymentStatus: 'verified',  // Add payment status to trigger email
         numberOfBags: 2,
         bagsWeighed: 2,
         bagsProcessed: 1,

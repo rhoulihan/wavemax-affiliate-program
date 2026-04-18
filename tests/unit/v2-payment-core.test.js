@@ -188,8 +188,8 @@ describe('V2 Payment Core Functionality', () => {
   describe('Payment Verification Job Logic', () => {
     it.skip('should determine when to send first reminder (30 minutes)', () => {
       const order = {
-        v2PaymentRequestedAt: new Date(Date.now() - 31 * 60 * 1000), // 31 minutes ago
-        v2PaymentReminderCount: 0
+        paymentRequestedAt: new Date(Date.now() - 31 * 60 * 1000), // 31 minutes ago
+        paymentReminderCount: 0
       };
       
       const shouldRemind = paymentVerificationJob.shouldSendReminder(order);
@@ -198,8 +198,8 @@ describe('V2 Payment Core Functionality', () => {
 
     it('should not send reminder before 30 minutes', () => {
       const order = {
-        v2PaymentRequestedAt: new Date(Date.now() - 25 * 60 * 1000), // 25 minutes ago
-        v2PaymentReminderCount: 0
+        paymentRequestedAt: new Date(Date.now() - 25 * 60 * 1000), // 25 minutes ago
+        paymentReminderCount: 0
       };
       
       const shouldRemind = paymentVerificationJob.shouldSendReminder(order);
@@ -209,9 +209,9 @@ describe('V2 Payment Core Functionality', () => {
     it.skip('should send hourly reminders after first reminder', () => {
       // 1.5 hours since request, 1 hour since last reminder
       const order = {
-        v2PaymentRequestedAt: new Date(Date.now() - 90 * 60 * 1000),
-        v2PaymentLastReminderAt: new Date(Date.now() - 60 * 60 * 1000),
-        v2PaymentReminderCount: 1
+        paymentRequestedAt: new Date(Date.now() - 90 * 60 * 1000),
+        paymentLastReminderAt: new Date(Date.now() - 60 * 60 * 1000),
+        paymentReminderCount: 1
       };
       
       const shouldRemind = paymentVerificationJob.shouldSendReminder(order);
@@ -220,11 +220,11 @@ describe('V2 Payment Core Functionality', () => {
 
     it.skip('should determine urgency correctly', () => {
       const order1hour = {
-        v2PaymentRequestedAt: new Date(Date.now() - 60 * 60 * 1000)
+        paymentRequestedAt: new Date(Date.now() - 60 * 60 * 1000)
       };
       
       const order3hours = {
-        v2PaymentRequestedAt: new Date(Date.now() - 180 * 60 * 1000)
+        paymentRequestedAt: new Date(Date.now() - 180 * 60 * 1000)
       };
       
       expect(paymentVerificationJob.isUrgent(order1hour)).toBe(false);
@@ -233,18 +233,18 @@ describe('V2 Payment Core Functionality', () => {
 
     it.skip('should determine when to escalate to admin (4 hours)', () => {
       const orderNew = {
-        v2PaymentRequestedAt: new Date(Date.now() - 120 * 60 * 1000), // 2 hours
-        v2PaymentEscalated: false
+        paymentRequestedAt: new Date(Date.now() - 120 * 60 * 1000), // 2 hours
+        paymentEscalated: false
       };
       
       const orderOld = {
-        v2PaymentRequestedAt: new Date(Date.now() - 241 * 60 * 1000), // 4+ hours
-        v2PaymentEscalated: false
+        paymentRequestedAt: new Date(Date.now() - 241 * 60 * 1000), // 4+ hours
+        paymentEscalated: false
       };
       
       const orderAlreadyEscalated = {
-        v2PaymentRequestedAt: new Date(Date.now() - 300 * 60 * 1000), // 5 hours
-        v2PaymentEscalated: true
+        paymentRequestedAt: new Date(Date.now() - 300 * 60 * 1000), // 5 hours
+        paymentEscalated: true
       };
       
       expect(paymentVerificationJob.shouldEscalate(orderNew)).toBe(false);
@@ -260,7 +260,7 @@ describe('V2 Payment Core Functionality', () => {
         orderId: 'TEST-001',
         customerId: '507f1f77bcf86cd799439011',
         affiliateId: '507f1f77bcf86cd799439012',
-        v2PaymentStatus: 'pending',
+        paymentStatus: 'pending',
         estimatedWeight: 20,
         numberOfBags: 2,
         pickupDate: new Date(),
@@ -270,12 +270,12 @@ describe('V2 Payment Core Functionality', () => {
       
       // Simulate weighing
       order.actualWeight = 22;
-      order.v2PaymentStatus = 'awaiting';
-      order.v2PaymentRequestedAt = new Date();
+      order.paymentStatus = 'awaiting';
+      order.paymentRequestedAt = new Date();
       order.status = 'weighed';
       
-      expect(order.v2PaymentStatus).toBe('awaiting');
-      expect(order.v2PaymentRequestedAt).toBeDefined();
+      expect(order.paymentStatus).toBe('awaiting');
+      expect(order.paymentRequestedAt).toBeDefined();
     });
 
     it('should transition from awaiting to confirming on customer confirmation', () => {
@@ -283,7 +283,7 @@ describe('V2 Payment Core Functionality', () => {
         orderId: 'TEST-002',
         customerId: '507f1f77bcf86cd799439011',
         affiliateId: '507f1f77bcf86cd799439012',
-        v2PaymentStatus: 'awaiting',
+        paymentStatus: 'awaiting',
         actualWeight: 22,
         estimatedWeight: 20,
         numberOfBags: 2,
@@ -293,12 +293,12 @@ describe('V2 Payment Core Functionality', () => {
       });
       
       // Customer confirms payment
-      order.v2PaymentStatus = 'confirming';
+      order.paymentStatus = 'confirming';
       order.v2CustomerConfirmedPayment = true;
       order.v2CustomerConfirmedAt = new Date();
-      order.v2PaymentMethod = 'venmo';
+      order.paymentMethod = 'venmo';
       
-      expect(order.v2PaymentStatus).toBe('confirming');
+      expect(order.paymentStatus).toBe('confirming');
       expect(order.v2CustomerConfirmedPayment).toBe(true);
     });
 
@@ -307,7 +307,7 @@ describe('V2 Payment Core Functionality', () => {
         orderId: 'TEST-003',
         customerId: '507f1f77bcf86cd799439011',
         affiliateId: '507f1f77bcf86cd799439012',
-        v2PaymentStatus: 'confirming',
+        paymentStatus: 'confirming',
         v2CustomerConfirmedPayment: true,
         actualWeight: 22,
         estimatedWeight: 20,
@@ -318,12 +318,12 @@ describe('V2 Payment Core Functionality', () => {
       });
       
       // Payment verified
-      order.v2PaymentStatus = 'verified';
-      order.v2PaymentConfirmedAt = new Date();
-      order.v2PaymentAmount = 45.50;
+      order.paymentStatus = 'verified';
+      order.paymentConfirmedAt = new Date();
+      order.paymentAmount = 45.50;
       order.isPaid = true;
       
-      expect(order.v2PaymentStatus).toBe('verified');
+      expect(order.paymentStatus).toBe('verified');
       expect(order.isPaid).toBe(true);
     });
   });

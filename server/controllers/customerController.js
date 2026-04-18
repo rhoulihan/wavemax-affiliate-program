@@ -343,7 +343,7 @@ exports.getCustomerOrders = [
         status: 'status',
         startDate: 'createdAt',
         endDate: 'createdAt',
-        paymentStatus: 'v2PaymentStatus'
+        paymentStatus: 'paymentStatus'
       }
     );
 
@@ -370,8 +370,8 @@ exports.getCustomerOrders = [
       formattedTotal: Formatters.currency(order.actualTotal),
       numberOfBags: order.numberOfBags,
       bagsSummary: Formatters.plural(order.numberOfBags, 'bag'),
-      v2PaymentStatus: order.v2PaymentStatus,
-      formattedPaymentStatus: Formatters.status(order.v2PaymentStatus, 'payment'),
+      paymentStatus: order.paymentStatus,
+      formattedPaymentStatus: Formatters.status(order.paymentStatus, 'payment'),
       createdAt: order.createdAt,
       timeAgo: Formatters.relativeTime(order.createdAt)
     }));
@@ -474,7 +474,7 @@ exports.getCustomerDashboardStats = [
         status: Formatters.status(activeOrder.status, 'order'),
         pickupDate: Formatters.date(activeOrder.pickupDate),
         timeUntilPickup: Formatters.relativeTime(activeOrder.pickupDate),
-        paymentStatus: Formatters.status(activeOrder.v2PaymentStatus, 'payment')
+        paymentStatus: Formatters.status(activeOrder.paymentStatus, 'payment')
       } : null
     };
 
@@ -965,14 +965,14 @@ exports.initiateV2Payment = ControllerHelpers.asyncWrapper(async (req, res) => {
   const order = await Order.findOne({ 
     orderId: orderId,
     customerId: customerId,
-    v2PaymentStatus: { $in: ['pending', 'awaiting'] }
+    paymentStatus: { $in: ['pending', 'awaiting'] }
   });
   
   if (!order) {
     // Debug: Check if order exists without payment status filter
     const orderDebug = await Order.findOne({ orderId: orderId });
     if (orderDebug) {
-      console.log('[V2 Payment] Order found but not eligible. customerId:', orderDebug.customerId, 'v2PaymentStatus:', orderDebug.v2PaymentStatus);
+      console.log('[V2 Payment] Order found but not eligible. customerId:', orderDebug.customerId, 'paymentStatus:', orderDebug.paymentStatus);
       console.log('[V2 Payment] Expected customerId:', customerId);
     } else {
       console.log('[V2 Payment] Order not found with orderId:', orderId);
@@ -1073,55 +1073,45 @@ exports.updateV2OrderPayment = async (paymentToken) => {
       const authCode = paygistixResponse.AuthCode || paygistixResponse.authCode || '';
       const amount = paygistixResponse.Amount || paygistixResponse.amount || order.estimatedTotal;
       
-      // Update V2 payment fields
-      order.v2PaymentStatus = 'verified';
-      order.v2PaymentMethod = 'credit_card';
-      order.v2PaymentAmount = parseFloat(amount) || order.estimatedTotal;
-      order.v2PaymentTransactionId = paymentToken.transactionId;
-      order.v2PaymentVerifiedAt = new Date();
-      
+      // Update payment fields
+      order.paymentStatus = 'verified';
+      order.paymentMethod = 'credit_card';
+      order.paymentAmount = parseFloat(amount) || order.estimatedTotal;
+      order.paymentTransactionId = paymentToken.transactionId;
+      order.paymentVerifiedAt = new Date();
+
       // Store card details in notes field for reference
       const cardDetails = cardType && last4 ? `${cardType} ending in ${last4}` : 'Credit Card';
       const authDetails = authCode ? ` (Auth: ${authCode})` : '';
-      order.v2PaymentNotes = `Payment via ${cardDetails}${authDetails}`;
-      
-      // Also update legacy payment fields for compatibility
-      order.paymentStatus = 'completed';
-      order.isPaid = true;
-      order.paymentReference = paymentToken.transactionId;
-      order.paymentDate = new Date();
-      order.transactionId = paymentToken.transactionId;
-      
-      logger.info('[V2 Payment Update] Order payment verified and updated:', {
+      order.paymentNotes = `Payment via ${cardDetails}${authDetails}`;
+
+      logger.info('[Payment Update] Order payment verified and updated:', {
         orderId: order._id,
         orderNumber: order.orderId,
         transactionId: paymentToken.transactionId,
-        amount: order.v2PaymentAmount,
-        v2PaymentStatus: order.v2PaymentStatus,
-        v2PaymentMethod: order.v2PaymentMethod,
+        amount: order.paymentAmount,
+        paymentStatus: order.paymentStatus,
+        paymentMethod: order.paymentMethod,
         cardType: cardType,
         last4: last4
       });
     } else if (paymentToken.status === 'failed') {
-      order.v2PaymentStatus = 'failed';
-      order.paymentError = paymentToken.errorMessage || paygistixResponse.Message || 'Payment declined';
       order.paymentStatus = 'failed';
-      
+
       // Store failure details in notes
       const failureCode = paygistixResponse.Result || paygistixResponse.result || '';
       const failureMsg = paygistixResponse.Message || paygistixResponse.message || paymentToken.errorMessage;
-      order.v2PaymentNotes = `Payment failed: ${failureMsg}${failureCode ? ` (Code: ${failureCode})` : ''}`;
-      
-      logger.error('V2 order payment failed:', {
+      order.paymentNotes = `Payment failed: ${failureMsg}${failureCode ? ` (Code: ${failureCode})` : ''}`;
+
+      logger.error('Order payment failed:', {
         orderId: order._id,
         error: paymentToken.errorMessage
       });
     } else if (paymentToken.status === 'cancelled') {
-      order.v2PaymentStatus = 'pending';
       order.paymentStatus = 'pending';
-      order.v2PaymentNotes = 'Payment cancelled by user';
-      
-      logger.info('V2 order payment cancelled:', {
+      order.paymentNotes = 'Payment cancelled by user';
+
+      logger.info('Order payment cancelled:', {
         orderId: order._id
       });
     }
@@ -1143,22 +1133,22 @@ exports.getV2PaymentStatus = ControllerHelpers.asyncWrapper(async (req, res) => 
   const customerId = req.user.id;
   
   // Get order with payment status
-  const order = await Order.findOne({ 
+  const order = await Order.findOne({
     _id: orderId,
-    customerId: customerId 
-  }).select('v2PaymentStatus paymentStatus transactionId paymentError paymentDate');
-  
+    customerId: customerId
+  }).select('paymentStatus paymentMethod paymentTransactionId paymentVerifiedAt paymentNotes');
+
   if (!order) {
     return ControllerHelpers.sendError(res, 'Order not found', 404);
   }
-  
+
   // Also check if there's an active payment token for real-time status
   const PaymentToken = require('../models/PaymentToken');
   const activeToken = await PaymentToken.findOne({
     'customerData.orderId': orderId,
     status: { $in: ['pending', 'processing'] }
   }).sort('-createdAt');
-  
+
   // If there's an active payment token, return its status
   if (activeToken) {
     res.json({
@@ -1174,10 +1164,10 @@ exports.getV2PaymentStatus = ControllerHelpers.asyncWrapper(async (req, res) => 
     // Return order's stored payment status
     res.json({
       success: true,
-      paymentStatus: order.v2PaymentStatus || order.paymentStatus,
-      transactionId: order.transactionId,
-      paymentDate: order.paymentDate,
-      error: order.paymentError,
+      paymentStatus: order.paymentStatus,
+      transactionId: order.paymentTransactionId,
+      paymentDate: order.paymentVerifiedAt,
+      error: null,
       isActive: false
     });
   }

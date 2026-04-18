@@ -2751,7 +2751,7 @@ exports.sendV2PaymentRequest = async ({ customer, order, paymentAmount, paymentL
     const wdfAmount = order.actualWeight * (order.baseRate || 1.25);
     const addOnsAmount = order.addOnTotal || 0;
     const deliveryFee = order.feeBreakdown?.totalFee || 0;
-    const totalAmount = paymentAmount || order.v2PaymentAmount || (wdfAmount + addOnsAmount + deliveryFee);
+    const totalAmount = paymentAmount || order.paymentAmount || (wdfAmount + addOnsAmount + deliveryFee);
     
     // Replace template variables (using {{}} syntax for V2 templates)
     const emailData = {
@@ -2829,10 +2829,10 @@ exports.sendV2PaymentReminder = async ({ customer, order, reminderNumber, paymen
     const wdfAmount = order.actualWeight * (order.baseRate || 1.25);
     const addOnsAmount = order.addOnTotal || 0;
     const deliveryFee = order.feeBreakdown?.totalFee || 0;
-    const totalAmount = paymentAmount || order.v2PaymentAmount || order.actualTotal || (wdfAmount + addOnsAmount + deliveryFee);
+    const totalAmount = paymentAmount || order.paymentAmount || order.actualTotal || (wdfAmount + addOnsAmount + deliveryFee);
 
     // Calculate time-based values
-    const paymentRequestedAt = order.v2PaymentRequestedAt ? new Date(order.v2PaymentRequestedAt) : new Date();
+    const paymentRequestedAt = order.paymentRequestedAt ? new Date(order.paymentRequestedAt) : new Date();
     const now = new Date();
     const hoursElapsed = Math.floor((now - paymentRequestedAt) / (1000 * 60 * 60));
     const paymentDeadlineHours = 24; // 24 hour payment window
@@ -2859,12 +2859,12 @@ exports.sendV2PaymentReminder = async ({ customer, order, reminderNumber, paymen
       confirmationLink: `https://wavemax.promo/embed-app-v2.html?route=/customer-dashboard&affid=${order.affiliateId}&confirmPayment=${order.orderId}`,
       dashboardLink: `https://wavemax.promo/embed-app-v2.html?route=/customer-dashboard&affid=${order.affiliateId}`,
       customerLoginLink: `https://wavemax.promo/embed-app-v2.html?route=/customer-login&affid=${order.affiliateId}`,
-      venmoLink: paymentLinks?.venmo || order.v2PaymentLinks?.venmo || '#',
-      paypalLink: paymentLinks?.paypal || order.v2PaymentLinks?.paypal || '#',
-      cashappLink: paymentLinks?.cashapp || order.v2PaymentLinks?.cashapp || '#',
-      venmoQR: qrCodes?.venmo || order.v2PaymentQRCodes?.venmo || '',
-      paypalQR: qrCodes?.paypal || order.v2PaymentQRCodes?.paypal || '',
-      cashappQR: qrCodes?.cashapp || order.v2PaymentQRCodes?.cashapp || '',
+      venmoLink: paymentLinks?.venmo || order.paymentLinks?.venmo || '#',
+      paypalLink: paymentLinks?.paypal || order.paymentLinks?.paypal || '#',
+      cashappLink: paymentLinks?.cashapp || order.paymentLinks?.cashapp || '#',
+      venmoQR: qrCodes?.venmo || order.paymentQRCodes?.venmo || '',
+      paypalQR: qrCodes?.paypal || order.paymentQRCodes?.paypal || '',
+      cashappQR: qrCodes?.cashapp || order.paymentQRCodes?.cashapp || '',
       isUrgent: reminderNumber >= 2 || hoursRemaining <= 6,
       maxReminders: 3
     };
@@ -2928,12 +2928,12 @@ exports.sendV2PaymentVerified = async (order, customer, paymentData) => {
       customerName: customer.name || `${customer.firstName} ${customer.lastName}`,
       orderId: order.orderId,
       shortOrderId: order._id.toString().slice(-8).toUpperCase(),
-      amount: (order.v2PaymentAmount || order.actualTotal).toFixed(2),
+      amount: (order.paymentAmount || order.actualTotal).toFixed(2),
       actualWeight: order.actualWeight,
       numberOfBags: order.numberOfBags,
-      paymentMethod: order.v2PaymentMethod,
-      transactionId: order.v2PaymentTransactionId || 'N/A',
-      verifiedTime: new Date(order.v2PaymentVerifiedAt).toLocaleString(),
+      paymentMethod: order.paymentMethod,
+      transactionId: order.paymentTransactionId || 'N/A',
+      verifiedTime: new Date(order.paymentVerifiedAt).toLocaleString(),
       isProcessing: order.status === 'processing',
       subtotal: ((order.actualWeight || order.estimatedWeight) * (order.baseRate || 1.25)).toFixed(2),
       addOnsTotal: order.addOnTotal ? order.addOnTotal.toFixed(2) : null
@@ -3051,7 +3051,7 @@ exports.sendV2PickupReadyNotification = async (order, customer, affiliate) => {
             <li>Order ID: #${order.orderId}</li>
             <li>Number of Bags: ${order.numberOfBags}</li>
             <li>Total Weight: ${order.actualWeight} lbs</li>
-            <li>Amount Paid: $${(order.v2PaymentAmount || order.actualTotal).toFixed(2)}</li>
+            <li>Amount Paid: $${(order.paymentAmount || order.actualTotal).toFixed(2)}</li>
           </ul>
           
           <p>Your affiliate ${affiliate.firstName} ${affiliate.lastName} will deliver your clean laundry to your address soon.</p>

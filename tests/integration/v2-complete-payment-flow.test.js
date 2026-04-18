@@ -147,7 +147,7 @@ describe('V2 Complete Payment Flow', () => {
       testOrder = await Order.create(orderData);
       
       expect(testOrder).toBeDefined();
-      expect(testOrder.v2PaymentStatus).toBe('pending');
+      expect(testOrder.paymentStatus).toBe('pending');
       expect(testOrder.status).toBe('pending');
     });
   });
@@ -164,7 +164,7 @@ describe('V2 Complete Payment Flow', () => {
         numberOfBags: 2,
         estimatedWeight: 20,
         status: 'pending',
-        v2PaymentStatus: 'pending'
+        paymentStatus: 'pending'
       });
       
       // Simulate operator weighing the bags
@@ -178,12 +178,12 @@ describe('V2 Complete Payment Flow', () => {
       
       // Calculate actual total: 10 lbs * $1.25 = $12.50
       order.actualTotal = 12.50;
-      order.v2PaymentStatus = 'awaiting';
-      order.v2PaymentAmount = 12.50;
-      order.v2PaymentRequestedAt = new Date();
+      order.paymentStatus = 'awaiting';
+      order.paymentAmount = 12.50;
+      order.paymentRequestedAt = new Date();
       
       // Generate payment links (simulated)
-      order.v2PaymentLinks = {
+      order.paymentLinks = {
         venmo: `venmo://paycharge?txn=pay&recipients=wavemax&amount=12.50&note=Order%20${order._id.toString().slice(-8).toUpperCase()}`,
         paypal: `https://paypal.me/wavemax/12.50USD`,
         cashapp: `https://cash.app/$wavemax/12.50`
@@ -191,9 +191,9 @@ describe('V2 Complete Payment Flow', () => {
       
       await order.save({ validateBeforeSave: false });
       
-      expect(order.v2PaymentStatus).toBe('awaiting');
-      expect(order.v2PaymentAmount).toBe(12.50);
-      expect(order.v2PaymentLinks).toBeDefined();
+      expect(order.paymentStatus).toBe('awaiting');
+      expect(order.paymentAmount).toBe(12.50);
+      expect(order.paymentLinks).toBeDefined();
     });
   });
 
@@ -212,9 +212,9 @@ describe('V2 Complete Payment Flow', () => {
                      actualWeight: 10,
                      actualTotal: 12.50,
                      status: 'processing',
-                     v2PaymentStatus: 'awaiting',
-                     v2PaymentAmount: 12.50,
-                     v2PaymentRequestedAt: new Date()
+                     paymentStatus: 'awaiting',
+                     paymentAmount: 12.50,
+                     paymentRequestedAt: new Date()
                    });
       }
       
@@ -278,10 +278,10 @@ describe('V2 Complete Payment Flow', () => {
       // Check order status was updated if payment was parsed
       if (paymentDetails && paymentDetails.orderId) {
         const updatedOrder = await Order.findById(paymentDetails.orderId);
-        expect(updatedOrder.v2PaymentStatus).toBe('verified');
-        expect(updatedOrder.v2PaymentMethod).toBe('venmo');
-        expect(updatedOrder.v2PaymentVerifiedAt).toBeDefined();
-        expect(updatedOrder.v2PaymentTransactionId).toBe('4410913674527352924');
+        expect(updatedOrder.paymentStatus).toBe('verified');
+        expect(updatedOrder.paymentMethod).toBe('venmo');
+        expect(updatedOrder.paymentVerifiedAt).toBeDefined();
+        expect(updatedOrder.paymentTransactionId).toBe('4410913674527352924');
       }
     });
   });
@@ -303,8 +303,8 @@ describe('V2 Complete Payment Flow', () => {
             actualWeight: 10,
             actualTotal: 12.50,
             status: 'processing',
-            v2PaymentStatus: 'verified',
-            v2PaymentAmount: 12.50,
+            paymentStatus: 'verified',
+            paymentAmount: 12.50,
             bags: [
               { bagId: 'bag-001', weight: 5, status: 'processing', bagNumber: 1 },
               { bagId: 'bag-002', weight: 5, status: 'processing', bagNumber: 2 }
@@ -326,7 +326,7 @@ describe('V2 Complete Payment Flow', () => {
       await order.save();
 
       // Since payment is verified, send pickup ready notification
-      expect(order.v2PaymentStatus).toBe('verified');
+      expect(order.paymentStatus).toBe('verified');
       expect(order.status).toBe('processed');
       
       // In real flow, this would trigger pickup ready email
@@ -355,8 +355,8 @@ describe('V2 Complete Payment Flow', () => {
             actualWeight: 10,
             actualTotal: 12.50,
             status: 'processed',
-            v2PaymentStatus: 'verified',
-            v2PaymentAmount: 12.50,
+            paymentStatus: 'verified',
+            paymentAmount: 12.50,
             bags: [
               { bagId: 'bag-001', weight: 5, status: 'processed', bagNumber: 1 },
               { bagId: 'bag-002', weight: 5, status: 'processed', bagNumber: 2 }
@@ -382,7 +382,7 @@ describe('V2 Complete Payment Flow', () => {
       await order.save();
 
       expect(order.status).toBe('complete');
-      expect(order.v2PaymentStatus).toBe('verified');
+      expect(order.paymentStatus).toBe('verified');
       expect(order.completedAt).toBeDefined();
     });
   });
@@ -399,8 +399,8 @@ describe('V2 Complete Payment Flow', () => {
         estimatedWeight: 10,
         actualWeight: 10,
         actualTotal: 12.50,
-        v2PaymentStatus: 'awaiting',
-        v2PaymentAmount: 12.50
+        paymentStatus: 'awaiting',
+        paymentAmount: 12.50
       });
 
       const shortOrderId = newOrder._id.toString().slice(-8).toUpperCase();
@@ -421,7 +421,7 @@ describe('V2 Complete Payment Flow', () => {
 
       // Check order status was not updated
       const order = await Order.findById(newOrder._id);
-      expect(order.v2PaymentStatus).toBe('awaiting');
+      expect(order.paymentStatus).toBe('awaiting');
     });
 
     it('should handle order not found scenario', async () => {

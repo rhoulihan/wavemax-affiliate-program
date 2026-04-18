@@ -836,12 +836,12 @@ function startOrderMonitoring() {
                 const updatedOrder = await response.json();
                 
                 // Check for changes in V2 payment status or regular payment status
-                if (updatedOrder.v2PaymentStatus !== currentOrderSnapshot.v2PaymentStatus ||
+                if (updatedOrder.paymentStatus !== currentOrderSnapshot.paymentStatus ||
                     updatedOrder.paymentStatus !== currentOrderSnapshot.paymentStatus ||
                     updatedOrder.status !== currentOrderSnapshot.status) {
                     
                     // Check if payment was actually detected (not just status change)
-                    if ((updatedOrder.v2PaymentStatus === 'verified' && currentOrderSnapshot.v2PaymentStatus !== 'verified') ||
+                    if ((updatedOrder.paymentStatus === 'verified' && currentOrderSnapshot.paymentStatus !== 'verified') ||
                         (updatedOrder.paymentStatus === 'completed' && currentOrderSnapshot.paymentStatus !== 'completed')) {
                         // Payment detected!
                         onPaymentDetected(updatedOrder);
@@ -872,15 +872,15 @@ function onPaymentDetected(updatedOrder) {
     
     // Build result details
     let resultHtml = `
-        <p><strong>V2 Payment Status:</strong> <span class="badge bg-success">${updatedOrder.v2PaymentStatus || 'N/A'}</span></p>
-        <p><strong>V2 Payment Method:</strong> ${updatedOrder.v2PaymentMethod || 'N/A'}</p>
+        <p><strong>V2 Payment Status:</strong> <span class="badge bg-success">${updatedOrder.paymentStatus || 'N/A'}</span></p>
+        <p><strong>V2 Payment Method:</strong> ${updatedOrder.paymentMethod || 'N/A'}</p>
         <p><strong>Order Status:</strong> ${updatedOrder.status}</p>
     `;
     
     // Show V2 payment records if available
-    if (updatedOrder.v2PaymentRecords && updatedOrder.v2PaymentRecords.length > 0) {
+    if (updatedOrder.paymentRecords && updatedOrder.paymentRecords.length > 0) {
         resultHtml += '<p><strong>V2 Payments Detected:</strong></p><ul class="list-group">';
-        updatedOrder.v2PaymentRecords.forEach(payment => {
+        updatedOrder.paymentRecords.forEach(payment => {
             const statusBadge = payment.status === 'verified' ? 'success' : 
                                payment.status === 'overpaid' ? 'warning' : 
                                payment.status === 'underpaid' ? 'danger' : 'secondary';
@@ -912,8 +912,8 @@ function onPaymentDetected(updatedOrder) {
     document.getElementById('paymentResultDetails').innerHTML = resultHtml;
     
     // Show notification with V2 status
-    const v2Status = updatedOrder.v2PaymentStatus || updatedOrder.paymentStatus;
-    showStatus(`Payment detected! V2 Status: ${v2Status}, Method: ${updatedOrder.v2PaymentMethod || 'N/A'}`, 'success');
+    const v2Status = updatedOrder.paymentStatus || updatedOrder.paymentStatus;
+    showStatus(`Payment detected! V2 Status: ${v2Status}, Method: ${updatedOrder.paymentMethod || 'N/A'}`, 'success');
     
     // Stop monitoring since payment was detected
     stopOrderMonitoring();

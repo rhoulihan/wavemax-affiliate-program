@@ -101,9 +101,9 @@ class PaymentVerificationJob {
     try {
       // Get orders awaiting payment that have been weighed (WDF complete)
       const pendingOrders = await Order.find({
-        v2PaymentStatus: 'awaiting',
+        paymentStatus: 'awaiting',
         status: { $in: ['processing', 'processed'] }, // Order has been weighed
-        v2PaymentCheckAttempts: { $lt: this.maxAttempts }
+        paymentCheckAttempts: { $lt: this.maxAttempts }
       });
       
       if (pendingOrders.length === 0) {
@@ -130,7 +130,7 @@ class PaymentVerificationJob {
   async processOrder(order) {
     try {
       // Skip already verified or failed orders
-      if (order.v2PaymentStatus === 'verified' || order.v2PaymentStatus === 'failed') {
+      if (order.paymentStatus === 'verified' || order.paymentStatus === 'failed') {
         return; // Order payment already resolved
       }
 
@@ -155,13 +155,13 @@ class PaymentVerificationJob {
       }
       
       // Payment not found, increment check attempts
-      order.v2PaymentCheckAttempts = (order.v2PaymentCheckAttempts || 0) + 1;
-      order.v2LastPaymentCheck = new Date();
+      order.paymentCheckAttempts = (order.paymentCheckAttempts || 0) + 1;
+      order.lastPaymentCheck = new Date();
       
       // Check if we should send a reminder or escalate
-      if (order.v2PaymentCheckAttempts >= this.maxAttempts) {
+      if (order.paymentCheckAttempts >= this.maxAttempts) {
         // Max attempts reached - mark as failed and escalate
-        order.v2PaymentStatus = 'failed';
+        order.paymentStatus = 'failed';
         await order.save();
         
         console.log(`Payment timeout for order ${order._id} - escalating to admin`);
@@ -187,7 +187,7 @@ class PaymentVerificationJob {
    * Determine if a payment reminder should be sent
    */
   shouldSendReminder(order) {
-    const attempts = order.v2PaymentCheckAttempts || 0;
+    const attempts = order.paymentCheckAttempts || 0;
     
     // Send reminders hourly after the first 30 minutes
     // First reminder after 30 minutes (6 attempts at 5-minute intervals)
@@ -215,7 +215,7 @@ class PaymentVerificationJob {
       }
       
       // Calculate time elapsed and urgency
-      const hoursElapsed = Math.floor((order.v2PaymentCheckAttempts || 0) * this.checkInterval / 60);
+      const hoursElapsed = Math.floor((order.paymentCheckAttempts || 0) * this.checkInterval / 60);
       const hoursRemaining = Math.max(0, 4 - hoursElapsed);
       const isUrgent = hoursRemaining <= 1;
       
@@ -225,13 +225,13 @@ class PaymentVerificationJob {
       const paymentLinkService = require('../services/paymentLinkService');
       const { links, qrCodes, shortOrderId } = await paymentLinkService.generatePaymentLinks(
         order._id,
-        order.v2PaymentAmount || order.actualTotal || order.estimatedTotal,
+        order.paymentAmount || order.actualTotal || order.estimatedTotal,
         customer.name || `${customer.firstName} ${customer.lastName}`
       );
       
       // Update order with fresh links
-      order.v2PaymentLinks = links;
-      order.v2PaymentQRCodes = qrCodes;
+      order.paymentLinks = links;
+      order.paymentQRCodes = qrCodes;
       await order.save();
       
       // Generate "already paid?" confirmation link
@@ -257,17 +257,17 @@ class PaymentVerificationJob {
   async sendReminderEmail(order, customer, reminderInfo) {
     try {
       // Calculate reminder number based on attempts
-      const reminderNumber = Math.floor((order.v2PaymentCheckAttempts - 6) / 12) + 1;
+      const reminderNumber = Math.floor((order.paymentCheckAttempts - 6) / 12) + 1;
       
       // Update reminder tracking on order
-      order.v2ReminderCount = reminderNumber;
-      order.v2LastReminderSentAt = new Date();
+      order.reminderCount = reminderNumber;
+      order.lastReminderSentAt = new Date();
       
       // Add to reminders array
-      if (!order.v2PaymentReminders) {
-        order.v2PaymentReminders = [];
+      if (!order.paymentReminders) {
+        order.paymentReminders = [];
       }
-      order.v2PaymentReminders.push({
+      order.paymentReminders.push({
         sentAt: new Date(),
         reminderNumber: reminderNumber,
         method: 'email'
@@ -280,9 +280,9 @@ class PaymentVerificationJob {
         customer,
         order,
         reminderNumber,
-        paymentAmount: order.v2PaymentAmount,
-        paymentLinks: order.v2PaymentLinks,
-        qrCodes: order.v2PaymentQRCodes
+        paymentAmount: order.paymentAmount,
+        paymentLinks: order.paymentLinks,
+        qrCodes: order.paymentQRCodes
       });
       
       console.log(`Payment reminder #${reminderNumber} sent to ${customer.email} for order ${order.orderId}`);
@@ -344,7 +344,7 @@ class PaymentVerificationJob {
       const adminEmail = await SystemConfig.getValue('admin_notification_email', 'admin@wavemax.promo');
       
       // Calculate time since payment requested
-      const hoursSinceRequest = Math.round((Date.now() - order.v2PaymentRequestedAt.getTime()) / (1000 * 60 * 60));
+      const hoursSinceRequest = Math.round((Date.now() - order.paymentRequestedAt.getTime()) / (1000 * 60 * 60));
       
       // Prepare escalation details
       const escalationDetails = {
@@ -355,10 +355,10 @@ class PaymentVerificationJob {
         customerPhone: customer?.phone || 'Unknown',
         affiliateName: affiliate ? `${affiliate.firstName} ${affiliate.lastName}` : 'Unknown',
         affiliateEmail: affiliate?.email || 'Unknown',
-        paymentAmount: order.v2PaymentAmount || order.actualTotal || 'Unknown',
+        paymentAmount: order.paymentAmount || order.actualTotal || 'Unknown',
         hoursSinceRequest,
-        paymentRequestedAt: order.v2PaymentRequestedAt,
-        attemptsMade: order.v2PaymentCheckAttempts || 0
+        paymentRequestedAt: order.paymentRequestedAt,
+        attemptsMade: order.paymentCheckAttempts || 0
       };
       
       // Log escalation details

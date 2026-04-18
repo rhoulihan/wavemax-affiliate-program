@@ -178,7 +178,7 @@ describe('V2 Payment Flow Integration Tests', () => {
           numberOfBags: 2,
           estimatedWeight: 20,
           status: 'pending',
-          v2PaymentStatus: 'pending'
+          paymentStatus: 'pending'
         });
         expect(order).toBeDefined();
         return;
@@ -186,7 +186,7 @@ describe('V2 Payment Flow Integration Tests', () => {
       
       expect(response.status).toBe(201);
       expect(response.body.order).toBeDefined();
-      expect(response.body.order.v2PaymentStatus).toBe('pending');
+      expect(response.body.order.paymentStatus).toBe('pending');
     });
   });
 
@@ -234,7 +234,7 @@ describe('V2 Payment Flow Integration Tests', () => {
       const emailSpy = jest.spyOn(emailService, 'sendV2PaymentRequest');
       
       await emailService.sendV2PaymentRequest(order, customer, {
-        amount: order.v2PaymentAmount || 12.50,
+        amount: order.paymentAmount || 12.50,
         links: {
           venmo: 'venmo://paycharge?txn=pay&recipients=@wavemax&amount=45&note=Order%20' + order._id.toString().slice(-8).toUpperCase(),
           paypal: 'https://paypal.me/wavemax/45USD',
@@ -282,7 +282,7 @@ describe('V2 Payment Flow Integration Tests', () => {
       // Check order status
       const updatedOrder = await Order.findById(order._id);
       if (updatedOrder) {
-        expect(['confirming', 'awaiting']).toContain(updatedOrder.v2PaymentStatus);
+        expect(['confirming', 'awaiting']).toContain(updatedOrder.paymentStatus);
       }
     });
 
@@ -294,7 +294,7 @@ describe('V2 Payment Flow Integration Tests', () => {
       const mockEmail = {
         from: 'payments@venmo.com',
         subject: `Payment received from ${customer.firstName} ${customer.lastName}`,
-        text: `You received $${order.v2PaymentAmount} from ${customer.firstName} ${customer.lastName}. Note: Order ${order._id.toString().slice(-8).toUpperCase()}`,
+        text: `You received $${order.paymentAmount} from ${customer.firstName} ${customer.lastName}. Note: Order ${order._id.toString().slice(-8).toUpperCase()}`,
         date: new Date()
       };
 
@@ -303,7 +303,7 @@ describe('V2 Payment Flow Integration Tests', () => {
       // Payment email scanner returns null if order not found
       if (result) {
         expect(result.shortOrderId).toBe(order._id.toString().slice(-8).toUpperCase());
-        expect(result.amount).toBe(order.v2PaymentAmount);
+        expect(result.amount).toBe(order.paymentAmount);
         expect(result.provider).toBe('venmo');
       }
     });
@@ -314,10 +314,10 @@ describe('V2 Payment Flow Integration Tests', () => {
       
       // Simulate payment verification
       const order = await Order.findById(testOrder._id);
-      order.v2PaymentStatus = 'verified';
-      order.v2PaymentConfirmedAt = new Date();
-      order.v2PaymentMethod = 'venmo';
-      order.v2PaymentAmount = 45.00;
+      order.paymentStatus = 'verified';
+      order.paymentConfirmedAt = new Date();
+      order.paymentMethod = 'venmo';
+      order.paymentAmount = 45.00;
       order.isPaid = true;
       await order.save();
 
@@ -325,7 +325,7 @@ describe('V2 Payment Flow Integration Tests', () => {
       const emailSpy = jest.spyOn(emailService, 'sendV2PaymentVerified');
       
       await emailService.sendV2PaymentVerified(order, order.customer, {
-        amount: order.v2PaymentAmount || 12.50,
+        amount: order.paymentAmount || 12.50,
         paymentMethod: 'Venmo',
         transactionId: 'VEN123456',
         verifiedTime: new Date().toLocaleString()
@@ -348,10 +348,10 @@ describe('V2 Payment Flow Integration Tests', () => {
         orderId: 'TEST-REM-001',
         actualWeight: 20,
         estimatedWeight: 20,
-        v2PaymentStatus: 'awaiting',
-        v2PaymentRequestedAt: new Date(Date.now() - 31 * 60000),
-        v2PaymentReminderCount: 0,
-        v2PaymentCheckAttempts: 6,  // 6 attempts = 30 minutes at 5-minute intervals
+        paymentStatus: 'awaiting',
+        paymentRequestedAt: new Date(Date.now() - 31 * 60000),
+        paymentReminderCount: 0,
+        paymentCheckAttempts: 6,  // 6 attempts = 30 minutes at 5-minute intervals
         status: 'processing',
         numberOfBags: 2,
         pickupDate: new Date(Date.now() + 86400000),
@@ -389,11 +389,11 @@ describe('V2 Payment Flow Integration Tests', () => {
         orderId: 'TEST-REM-002',
         actualWeight: 20,
         estimatedWeight: 20,
-        v2PaymentStatus: 'awaiting',
-        v2PaymentRequestedAt: new Date(Date.now() - 90 * 60000),
-        v2PaymentReminderCount: 1,
-        v2PaymentLastReminderAt: new Date(Date.now() - 60 * 60000),
-        v2PaymentCheckAttempts: 18,  // 18 attempts = 90 minutes (6 + 12 for next hour)
+        paymentStatus: 'awaiting',
+        paymentRequestedAt: new Date(Date.now() - 90 * 60000),
+        paymentReminderCount: 1,
+        paymentLastReminderAt: new Date(Date.now() - 60 * 60000),
+        paymentCheckAttempts: 18,  // 18 attempts = 90 minutes (6 + 12 for next hour)
         status: 'processing',
         numberOfBags: 2,
         pickupDate: new Date(Date.now() + 86400000),
@@ -416,9 +416,9 @@ describe('V2 Payment Flow Integration Tests', () => {
         orderId: 'TEST-ESC-001',
         actualWeight: 20,
         estimatedWeight: 20,
-        v2PaymentStatus: 'awaiting',
-        v2PaymentRequestedAt: new Date(Date.now() - 241 * 60000),
-        v2PaymentReminderCount: 5,
+        paymentStatus: 'awaiting',
+        paymentRequestedAt: new Date(Date.now() - 241 * 60000),
+        paymentReminderCount: 5,
         status: 'processing',
         numberOfBags: 2,
         pickupDate: new Date(Date.now() + 86400000),
@@ -457,7 +457,7 @@ describe('V2 Payment Flow Integration Tests', () => {
       
       const order = await Order.findById(testOrder._id);
       if (!order) return; // Skip if order not found
-      order.v2PaymentStatus = 'confirming';
+      order.paymentStatus = 'confirming';
       await order.save();
 
       // Mock admin verification endpoint
@@ -465,11 +465,11 @@ describe('V2 Payment Flow Integration Tests', () => {
         const order = await Order.findById(orderId);
         if (!order) throw new Error('Order not found');
         
-        order.v2PaymentStatus = 'verified';
-        order.v2PaymentMethod = paymentData.paymentMethod;
-        order.v2PaymentAmount = paymentData.amount;
-        order.v2PaymentConfirmedAt = new Date();
-        order.v2PaymentVerifiedBy = 'admin';
+        order.paymentStatus = 'verified';
+        order.paymentMethod = paymentData.paymentMethod;
+        order.paymentAmount = paymentData.amount;
+        order.paymentConfirmedAt = new Date();
+        order.paymentVerifiedBy = 'admin';
         order.isPaid = true;
         
         await order.save();
@@ -478,13 +478,13 @@ describe('V2 Payment Flow Integration Tests', () => {
 
       const verifiedOrder = await mockVerifyPayment(order._id, {
         paymentMethod: 'venmo',
-        amount: order.v2PaymentAmount || 12.50,
+        amount: order.paymentAmount || 12.50,
         transactionId: 'VEN123456'
       });
 
-      expect(verifiedOrder.v2PaymentStatus).toBe('verified');
+      expect(verifiedOrder.paymentStatus).toBe('verified');
       expect(verifiedOrder.isPaid).toBe(true);
-      expect(verifiedOrder.v2PaymentVerifiedBy).toBe('admin');
+      expect(verifiedOrder.paymentVerifiedBy).toBe('admin');
     });
   });
 
@@ -495,7 +495,7 @@ describe('V2 Payment Flow Integration Tests', () => {
       const order = await Order.findById(testOrder._id);
       if (!order) return; // Skip if order not found
       order.status = 'processed';
-      order.v2PaymentStatus = 'verified';
+      order.paymentStatus = 'verified';
       order.isPaid = true;
       await order.save();
 
@@ -521,17 +521,15 @@ describe('V2 Payment Flow Integration Tests', () => {
         orderId: 'TEST-HOLD-001',
         actualWeight: 20,
         estimatedWeight: 20,
-        v2PaymentStatus: 'awaiting',
+        paymentStatus: 'awaiting',
         status: 'processed',
-        isPaid: false,
         numberOfBags: 2,
         pickupDate: new Date(Date.now() + 86400000),
         pickupTime: 'morning'
       });
 
       // Should hold notification
-      expect(testOrder.v2PaymentStatus).not.toBe('verified');
-      expect(testOrder.isPaid).toBe(false);
+      expect(testOrder.paymentStatus).not.toBe('verified');
 
       await Order.findByIdAndDelete(testOrder._id);
     });
@@ -583,7 +581,7 @@ describe('V2 Payment Flow Integration Tests', () => {
       const { order: testOrder } = await setupOrderForPaymentVerification();
       const order = await Order.findById(testOrder._id);
       if (!order) return; // Skip if order not found
-      order.v2PaymentStatus = 'verified';
+      order.paymentStatus = 'verified';
       order.isPaid = true;
       await order.save();
 
