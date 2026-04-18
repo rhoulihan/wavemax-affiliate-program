@@ -333,10 +333,10 @@ class PaymentController {
       isSuccess: isSuccess
     });
 
-    // Check if this is a V2 order payment and update accordingly
+    // Apply the payment result to the associated order, if any
     if (paymentToken.customerData && paymentToken.customerData.orderId) {
-      const customerController = require('./customerController');
-      await customerController.updateV2OrderPayment(paymentToken);
+      const orderPaymentService = require('../services/orderPaymentService');
+      await orderPaymentService.updateOrderPayment(paymentToken);
     }
 
     // Redirect to callback handler with all parameters
