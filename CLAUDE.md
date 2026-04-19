@@ -26,6 +26,7 @@ This codebase is mid-refactor. Canonical documents:
 - **Write the failing test first.** Confirm it fails for the right reason before writing implementation.
 - No production code lands without a test that would have caught the regression.
 - Prefer integration tests at controller/route seams; reserve unit tests for pure logic (pricing, encryption, formatters).
+- **Fix everything before advancing.** When a refactor subtask breaks tests, fix them before moving to the next subtask. Don't leave broken tests for later — triage and fix as you go (surgical assertion updates where the change was intentional, skip-with-comment only if the test is coupled to removed functionality).
 - Tests run clean without `--forceExit` after Phase 1.
 - `SystemConfig.initializeDefaults()` is required in `tests/setup.js` — tests that depend on config will fail until this runs.
 
@@ -55,10 +56,13 @@ This codebase is mid-refactor. Canonical documents:
 - Runtime business values live in `SystemConfig` (MongoDB), not in code.
 - Use `await SystemConfig.getValue(key, defaultValue)` — never hardcode rates, fees, limits.
 
-### Commits
+### Commits & workflow automation
 
-- Don't commit without explicit authorization.
-- Destructive git operations (force-push, `filter-repo`, `reset --hard`) require explicit authorization.
+- **Auto-commit logical units during active refactor work.** Each completed subtask (frontend cleanup, controller split, etc.) commits with a descriptive message and pushes. No per-commit approval needed during Phase 2+ execution — the `~/.claude/settings.json` permission allowlist pre-approves `git add/commit/push` for this.
+- **File deletions / moves, `npm test` / `npm install` / `npx` commands also pre-approved globally.** Proceed without asking.
+- **Destructive git operations always confirm first** (even though they're listed in the `ask` set, I will also verbally confirm before running): force-push, `git push -f`, `--force-with-lease`, `filter-repo`, `reset --hard`, `branch -D`, `rm -rf` on `keys/` / `secure/` / `.git/`.
+- **Production config edits still confirm:** `.env.example`, `Dockerfile`, `ecosystem.config.js`, `docker-compose.yml`, CI configs.
+- **Scope changes confirm:** if a task grows to touch anything outside its plan scope, surface that before expanding.
 - Never use `--no-verify` or skip hooks.
 
 ### When refactoring
