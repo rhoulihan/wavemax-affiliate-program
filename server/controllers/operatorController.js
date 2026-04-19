@@ -14,48 +14,7 @@ const Formatters = require('../utils/formatters');
 const orderQueueService = require('../services/operatorOrderQueueService');
 const shiftStatsService = require('../services/operatorShiftStatsService');
 const supportService = require('../services/operatorSupportService');
-
-// Helper function to send payment reminder
-async function sendPaymentReminder(order) {
-  try {
-    // Get customer
-    const customer = await Customer.findOne({ customerId: order.customerId });
-    if (!customer) {
-      logger.error(`Customer not found for order ${order.orderId}`);
-      return;
-    }
-    
-    // Update reminder tracking
-    order.reminderCount = (order.reminderCount || 0) + 1;
-    order.lastReminderSentAt = new Date();
-    
-    // Add to reminders array
-    if (!order.paymentReminders) {
-      order.paymentReminders = [];
-    }
-    order.paymentReminders.push({
-      sentAt: new Date(),
-      reminderNumber: order.reminderCount,
-      method: 'email'
-    });
-    
-    // Send reminder email
-    await emailService.sendV2PaymentReminder({
-      customer,
-      order,
-      reminderNumber: order.reminderCount,
-      paymentAmount: order.paymentAmount,
-      paymentLinks: order.paymentLinks,
-      qrCodes: order.paymentQRCodes
-    });
-    
-    logger.info(`Payment reminder #${order.reminderCount} sent for order ${order.orderId}`);
-    
-    await order.save();
-  } catch (error) {
-    logger.error(`Failed to send payment reminder for order ${order.orderId}:`, error);
-  }
-}
+const pickupService = require('../services/operatorPickupService');
 
 // Helper function to generate payment URLs and QR codes
 async function generatePaymentURLs(order) {
@@ -910,7 +869,7 @@ exports.scanProcessed = async (req, res) => {
         // Do NOT notify customer yet - wait until affiliate picks up
       } else {
         // Payment not received - send payment reminder
-        await sendPaymentReminder(order);
+        await pickupService.sendPaymentReminder(order);
         
         logger.info(`Order ${order.orderId} processed but awaiting payment. Reminder sent.`);
       }
@@ -972,218 +931,45 @@ exports.scanProcessed = async (req, res) => {
 // Mark order as ready for pickup (deprecated - use scanProcessed instead)
 exports.markOrderReady = async (req, res) => {
   try {
-    const { orderId } = req.params;
-    const operatorId = req.user.id;
-
-    const order = await Order.findOne({ orderId });
-
-    if (!order) {
-      return res.status(404).json({ 
-        success: false,
-        error: 'Order not found' 
-      });
-    }
-
-    // Update order status
-    order.processedAt = new Date();
-    order.status = 'processed';
-    order.bagsProcessed = order.numberOfBags; // All bags are processed
-    await order.save();
-
-    // Only notify affiliate when ALL bags are processed
-    const emailService = require('../utils/emailService');
-    if (order.affiliateId && order.bagsProcessed === order.numberOfBags) {
-      // Manually fetch affiliate and customer data
-      const Affiliate = require('../models/Affiliate');
-      const affiliate = await Affiliate.findOne({ affiliateId: order.affiliateId });
-      
-      let customerName = 'N/A';
-      if (order.customerId) {
-        const customer = await Customer.findOne({ customerId: order.customerId });
-        if (customer) {
-          customerName = `${customer.firstName} ${customer.lastName}`;
-        }
-      }
-      
-      if (affiliate && affiliate.email) {
-        await emailService.sendOrderReadyNotification(
-          affiliate.email,
-          {
-            affiliateName: affiliate.contactPerson || affiliate.businessName,
-            orderId: order.orderId,
-            customerName: customerName,
-            numberOfBags: order.numberOfBags,
-            totalWeight: order.actualWeight
-          }
-        );
-      }
-    }
-
-    await logAuditEvent(AuditEvents.ORDER_STATUS_CHANGED, {
-      operatorId,
-      orderId,
-      action: 'order_marked_ready',
-      affiliateNotified: order.bagsProcessed === order.numberOfBags,
-      bagsProcessed: order.bagsProcessed,
-      totalBags: order.numberOfBags,
-      newStatus: 'ready'
-    }, req);
-
-    res.json({
-      success: true,
-      message: 'Order marked as ready for pickup',
-      order
+    const order = await pickupService.markOrderReady({
+      orderId: req.params.orderId,
+      operatorId: req.user.id,
+      req
     });
-  } catch (error) {
-    logger.error('Error marking order ready:', error);
-    res.status(500).json({ 
-      success: false,
-      error: 'Failed to mark order as ready' 
-    });
+    res.json({ success: true, message: 'Order marked as ready for pickup', order });
+  } catch (err) {
+    if (err.isPickupError) {
+      return res.status(err.status).json({ success: false, error: err.message, ...err.details });
+    }
+    logger.error('Error marking order ready:', err);
+    res.status(500).json({ success: false, error: 'Failed to mark order as ready' });
   }
 };
 
 // New endpoint for completing pickup with bag verification
 exports.completePickup = async (req, res) => {
   try {
-    const { bagIds, orderId } = req.body;
-    const operatorId = req.user.id;
-    
-    logger.info('completePickup called with:', { bagIds, orderId, operatorId });
-
-    const order = await Order.findOne({ orderId });
-
-    if (!order) {
-      return res.status(404).json({
-        success: false,
-        error: 'Order not found'
-      });
-    }
-
-    // Verify all bags are accounted for
-    if (bagIds.length !== order.bags.length) {
-      return res.status(400).json({
-        success: false,
-        error: 'Bag count mismatch',
-        message: `Expected ${order.bags.length} bags but received ${bagIds.length}`
-      });
-    }
-
-    // Verify all bag IDs match
-    const orderBagIds = new Set(order.bags.map(b => b.bagId));
-    const scannedBagIds = new Set(bagIds);
-    
-    for (const bagId of scannedBagIds) {
-      if (!orderBagIds.has(bagId)) {
-        return res.status(400).json({
-          success: false,
-          error: 'Invalid bag',
-          message: `Bag ${bagId} does not belong to this order`
-        });
-      }
-    }
-
-    // Update all bags to completed
-    const now = new Date();
-    logger.info('Updating bags to completed. Current bag statuses:', order.bags.map(b => ({ bagId: b.bagId, status: b.status })));
-    
-    for (const bag of order.bags) {
-      bag.status = 'completed';
-      bag.scannedAt.completed = now;
-      bag.scannedBy.completed = operatorId;
-    }
-
-    // Update order to completed
-    order.status = 'complete';
-    order.completedAt = now;
-    order.bagsPickedUp = order.bags.length;
-    
-    logger.info('Before save - Order status:', order.status);
-    logger.info('Before save - Bag statuses:', order.bags.map(b => ({ bagId: b.bagId, status: b.status })));
-
-    try {
-      await order.save();
-      
-      logger.info('After save - Order status:', order.status);
-      logger.info('After save - Bag statuses:', order.bags.map(b => ({ bagId: b.bagId, status: b.status })));
-    } catch (saveError) {
-      logger.error('Error saving order:', saveError);
-      return res.status(500).json({
-        success: false,
-        error: 'Failed to save order',
-        message: saveError.message
-      });
-    }
-
-    // Send notifications for completed order
-    try {
-      const emailService = require('../utils/emailService');
-      const Customer = require('../models/Customer');
-      const Affiliate = require('../models/Affiliate');
-      
-      const customer = await Customer.findOne({ customerId: order.customerId });
-      
-      // Get affiliate information first
-      let affiliate = null;
-      if (order.affiliateId) {
-        affiliate = await Affiliate.findOne({ affiliateId: order.affiliateId });
-      }
-      
-      // 1. Send delivery notification to customer with affiliate info
-      if (customer && customer.email) {
-        await emailService.sendOrderPickedUpNotification(
-          customer.email,
-          {
-            customerName: `${customer.firstName} ${customer.lastName}`,
-            orderId: order.orderId,
-            numberOfBags: order.bags.length,
-            totalWeight: order.actualWeight,
-            affiliateName: affiliate ? (affiliate.contactPerson || affiliate.businessName) : 'Your laundry service provider',
-            businessName: affiliate ? affiliate.businessName : null
-          }
-        );
-        logger.info(`Delivery notification sent to customer ${customer.email}`);
-      }
-      
-      // 2. Send commission earned notification to affiliate
-      if (order.affiliateId && affiliate) {
-        
-        if (affiliate && affiliate.email) {
-          await emailService.sendAffiliateCommissionEmail(
-            affiliate,
-            order,
-            customer
-          );
-          logger.info(`Commission notification sent to affiliate ${affiliate.email}`);
-        }
-      }
-    } catch (emailError) {
-      logger.error('Error sending email notifications:', emailError);
-      // Don't fail the whole operation if email fails
-    }
-
-    await logAuditEvent(AuditEvents.ORDER_STATUS_CHANGED, {
-      operatorId,
-      orderId,
-      action: 'order_picked_up',
-      numberOfBags: order.bags.length,
-      newStatus: 'complete'
-    }, req);
-
+    const order = await pickupService.completePickup({
+      orderId: req.body.orderId,
+      bagIds: req.body.bagIds,
+      operatorId: req.user.id,
+      req
+    });
     res.json({
       success: true,
       message: 'Order completed successfully',
       orderComplete: true,
-      order: order
+      order
     });
-  } catch (error) {
-    logger.error('Error in completePickup:', error);
-    logger.error('Error stack:', error.stack);
-    logger.error('Error completing pickup:', error);
+  } catch (err) {
+    if (err.isPickupError) {
+      return res.status(err.status).json({ success: false, error: err.message, ...err.details });
+    }
+    logger.error('Error completing pickup:', err);
     res.status(500).json({
       success: false,
       error: 'Failed to complete pickup',
-      message: error.message
+      message: err.message
     });
   }
 };
@@ -1191,81 +977,19 @@ exports.completePickup = async (req, res) => {
 // Confirm pickup by affiliate (legacy)
 exports.confirmPickup = async (req, res) => {
   try {
-    const { orderId, numberOfBags } = req.body;
-    const operatorId = req.user.id;
-
-    const order = await Order.findOne({ orderId });
-
-    if (!order) {
-      return res.status(404).json({
-        success: false,
-        error: 'Order not found'
-      });
-    }
-
-    // Update bags picked up count
-    const bagsToPickup = numberOfBags || 1; // Default to 1 if not specified
-    order.bagsPickedUp = Math.min(order.bagsPickedUp + bagsToPickup, order.numberOfBags);
-
-    // Check if all bags have been picked up
-    if (order.bagsPickedUp >= order.numberOfBags) {
-      // All bags picked up, complete the order
-      order.status = 'complete';
-      order.completedAt = new Date();
-
-      // Notify customer with affiliate info
-      const emailService = require('../utils/emailService');
-      if (order.customerId) {
-        const customer = await Customer.findOne({ customerId: order.customerId });
-        
-        // Get affiliate information
-        let affiliate = null;
-        if (order.affiliateId) {
-          const Affiliate = require('../models/Affiliate');
-          affiliate = await Affiliate.findOne({ affiliateId: order.affiliateId });
-        }
-        
-        if (customer && customer.email) {
-          await emailService.sendOrderPickedUpNotification(
-            customer.email,
-            {
-              customerName: `${customer.firstName} ${customer.lastName}`,
-              orderId: order.orderId,
-              numberOfBags: order.numberOfBags,
-              totalWeight: order.actualWeight,
-              affiliateName: affiliate ? (affiliate.contactPerson || affiliate.businessName) : 'Your laundry service provider',
-              businessName: affiliate ? affiliate.businessName : null
-            }
-          );
-        }
-      }
-    }
-
-    await order.save();
-
-    await logAuditEvent(AuditEvents.ORDER_STATUS_CHANGED, {
-      operatorId,
-      orderId,
-      action: 'bags_pickup_confirmed',
-      bagsPickedUp: bagsToPickup,
-      totalBagsPickedUp: order.bagsPickedUp,
-      orderComplete: order.status === 'complete',
-      newStatus: order.status
-    }, req);
-
-    res.json({
-      success: true,
-      message: 'Pickup confirmed',
-      bagsPickedUp: order.bagsPickedUp,
-      totalBags: order.numberOfBags,
-      orderComplete: order.status === 'complete'
+    const result = await pickupService.confirmPickup({
+      orderId: req.body.orderId,
+      numberOfBags: req.body.numberOfBags,
+      operatorId: req.user.id,
+      req
     });
-  } catch (error) {
-    logger.error('Error confirming pickup:', error);
-    res.status(500).json({ 
-      success: false,
-      error: 'Failed to confirm pickup' 
-    });
+    res.json({ success: true, message: 'Pickup confirmed', ...result });
+  } catch (err) {
+    if (err.isPickupError) {
+      return res.status(err.status).json({ success: false, error: err.message, ...err.details });
+    }
+    logger.error('Error confirming pickup:', err);
+    res.status(500).json({ success: false, error: 'Failed to confirm pickup' });
   }
 };
 
