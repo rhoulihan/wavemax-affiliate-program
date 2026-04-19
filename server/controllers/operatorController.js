@@ -13,6 +13,7 @@ const Formatters = require('../utils/formatters');
 
 const orderQueueService = require('../services/operatorOrderQueueService');
 const shiftStatsService = require('../services/operatorShiftStatsService');
+const supportService = require('../services/operatorSupportService');
 
 // Helper function to send payment reminder
 async function sendPaymentReminder(order) {
@@ -150,70 +151,18 @@ exports.updateOrderStatus = async (req, res) => {
 // Perform quality check
 exports.performQualityCheck = async (req, res) => {
   try {
-    const { orderId } = req.params;
-    const { passed, notes, issues } = req.body;
-    const operatorId = req.user.id;
-
-    const order = await Order.findById(orderId);
-    if (!order) {
-      return res.status(404).json({ error: 'Order not found' });
-    }
-
-    if (order.orderProcessingStatus !== 'quality_check') {
-      return res.status(400).json({ error: 'Order not ready for quality check' });
-    }
-
-    // Update order
-    order.qualityCheckPassed = passed;
-    order.qualityCheckBy = operatorId;
-    order.qualityCheckNotes = notes;
-
-    if (passed) {
-      order.orderProcessingStatus = 'ready';
-      order.processingCompleted = new Date();
-      order.processingTimeMinutes = Math.round(
-        (order.processingCompleted - order.processingStarted) / (1000 * 60)
-      );
-    } else {
-      // Send back for reprocessing
-      order.orderProcessingStatus = 'washing';
-      if (issues) {
-        order.operatorNotes = `Quality issues: ${issues}. ${order.operatorNotes || ''}`;
-      }
-    }
-
-    await order.save();
-
-    // Update operator quality score
-    const operator = await Operator.findById(order.assignedOperator);
-    if (operator && passed) {
-      const qualityChecks = await Order.countDocuments({
-        assignedOperator: operator._id,
-        qualityCheckPassed: { $ne: null }
-      });
-      const passedChecks = await Order.countDocuments({
-        assignedOperator: operator._id,
-        qualityCheckPassed: true
-      });
-      operator.qualityScore = Math.round((passedChecks / qualityChecks) * 100);
-      await operator.save();
-    }
-
-    await logAuditEvent(AuditEvents.ORDER_STATUS_CHANGED, {
-      operatorId,
-      orderId,
-      orderNumber: order.orderNumber,
-      action: 'quality_check',
-      passed,
-      issues
-    }, req);
-
-    res.json({
-      message: `Quality check ${passed ? 'passed' : 'failed'}`,
-      order: await order.populate('customer', 'firstName lastName email phone')
+    const { passed, order } = await supportService.performQualityCheck({
+      orderId: req.params.orderId,
+      operatorId: req.user.id,
+      passed: req.body.passed,
+      notes: req.body.notes,
+      issues: req.body.issues,
+      req
     });
-  } catch (error) {
-    logger.error('Error performing quality check:', error);
+    res.json({ message: `Quality check ${passed ? 'passed' : 'failed'}`, order });
+  } catch (err) {
+    if (err.isSupportError) return res.status(err.status).json({ error: err.message });
+    logger.error('Error performing quality check:', err);
     res.status(500).json({ error: 'Failed to perform quality check' });
   }
 };
@@ -221,40 +170,11 @@ exports.performQualityCheck = async (req, res) => {
 // Get my orders
 exports.getMyOrders = async (req, res) => {
   try {
-    const operatorId = req.user.id;
-    const { status, dateFrom, dateTo, page = 1, limit = 20 } = req.query;
-
-    const query = { assignedOperator: operatorId };
-
-    if (status) {
-      query.orderProcessingStatus = status;
-    }
-
-    if (dateFrom || dateTo) {
-      query.processingStarted = {};
-      if (dateFrom) query.processingStarted.$gte = new Date(dateFrom);
-      if (dateTo) query.processingStarted.$lte = new Date(dateTo);
-    }
-
-    const skip = (page - 1) * limit;
-
-    const [orders, total] = await Promise.all([
-      Order.find(query)
-        .populate('customer', 'firstName lastName email phone')
-        .sort({ processingStarted: -1 })
-        .skip(skip)
-        .limit(parseInt(limit)),
-      Order.countDocuments(query)
-    ]);
-
-    res.json({
-      orders,
-      pagination: {
-        total,
-        page: parseInt(page),
-        pages: Math.ceil(total / limit)
-      }
+    const result = await supportService.getMyOrders({
+      operatorId: req.user.id,
+      ...req.query
     });
+    res.json(result);
   } catch (error) {
     logger.error('Error fetching operator orders:', error);
     res.status(500).json({ error: 'Failed to fetch orders' });
@@ -264,33 +184,8 @@ exports.getMyOrders = async (req, res) => {
 // Get workstation status
 exports.getWorkstationStatus = async (req, res) => {
   try {
-    const workstations = ['W1', 'W2', 'W3', 'W4', 'W5', 'D1', 'D2', 'D3', 'F1', 'F2'];
-
-    const status = await Promise.all(workstations.map(async (workstation) => {
-      const operator = await Operator.findOne({
-        workStation: workstation,
-        isActive: true
-      }).select('firstName lastName operatorId');
-
-      const activeOrders = await Order.countDocuments({
-        assignedOperator: operator?._id,
-        orderProcessingStatus: { $in: ['washing', 'drying', 'folding'] }
-      });
-
-      return {
-        workstation,
-        type: workstation.startsWith('W') ? 'washing' :
-          workstation.startsWith('D') ? 'drying' : 'folding',
-        operator: operator ? {
-          name: `${operator.firstName} ${operator.lastName}`,
-          operatorId: operator.operatorId
-        } : null,
-        activeOrders,
-        available: !operator || activeOrders < 3
-      };
-    }));
-
-    res.json({ workstations: status });
+    const workstations = await supportService.getWorkstationStatus();
+    res.json({ workstations });
   } catch (error) {
     logger.error('Error fetching workstation status:', error);
     res.status(500).json({ error: 'Failed to fetch workstation status' });
@@ -332,27 +227,13 @@ exports.getPerformanceStats = async (req, res) => {
 // Get customer details
 exports.getCustomerDetails = async (req, res) => {
   try {
-    const { customerId } = req.params;
-
-    const customer = await Customer.findById(customerId)
-      .select('firstName lastName email phone address preferences notes');
-
-    if (!customer) {
-      return res.status(404).json({ error: 'Customer not found' });
-    }
-
-    // Get customer order history
-    const recentOrders = await Order.find({ customer: customerId })
-      .select('orderNumber scheduledPickup weight totalAmount orderProcessingStatus')
-      .sort({ createdAt: -1 })
-      .limit(5);
-
-    res.json({
-      customer,
-      recentOrders
+    const result = await supportService.getCustomerDetails({
+      customerId: req.params.customerId
     });
-  } catch (error) {
-    logger.error('Error fetching customer details:', error);
+    res.json(result);
+  } catch (err) {
+    if (err.isSupportError) return res.status(err.status).json({ error: err.message });
+    logger.error('Error fetching customer details:', err);
     res.status(500).json({ error: 'Failed to fetch customer details' });
   }
 };
@@ -360,44 +241,16 @@ exports.getCustomerDetails = async (req, res) => {
 // Add customer note
 exports.addCustomerNote = async (req, res) => {
   try {
-    const { customerId } = req.params;
-    const { note } = req.body;
-    const operatorId = req.user.id;
-
-    const customer = await Customer.findById(customerId);
-    if (!customer) {
-      return res.status(404).json({ error: 'Customer not found' });
-    }
-
-    // Add note with operator info
-    const operatorNote = {
-      note,
-      addedBy: operatorId,
-      addedAt: new Date()
-    };
-
-    if (!customer.notes) {
-      customer.notes = [];
-    }
-    customer.notes.push(operatorNote);
-    await customer.save();
-
-    await logAuditEvent(AuditEvents.ACCOUNT_UPDATED, {
-      operatorId,
-      action: 'customer_note_added',
-      customerId,
-      note: note.substring(0, 100) // Log first 100 chars
-    }, req);
-
-    res.json({
-      message: 'Note added successfully',
-      customer: {
-        id: customer._id,
-        notes: customer.notes
-      }
+    const customer = await supportService.addCustomerNote({
+      customerId: req.params.customerId,
+      note: req.body.note,
+      operatorId: req.user.id,
+      req
     });
-  } catch (error) {
-    logger.error('Error adding customer note:', error);
+    res.json({ message: 'Note added successfully', customer });
+  } catch (err) {
+    if (err.isSupportError) return res.status(err.status).json({ error: err.message });
+    logger.error('Error adding customer note:', err);
     res.status(500).json({ error: 'Failed to add customer note' });
   }
 };
