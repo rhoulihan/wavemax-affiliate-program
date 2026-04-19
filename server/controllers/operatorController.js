@@ -1,65 +1,13 @@
-const Operator = require('../models/Operator');
-const Order = require('../models/Order');
-const Customer = require('../models/Customer');
 const logger = require('../utils/logger');
-const { logAuditEvent, AuditEvents } = require('../utils/auditLogger');
-const emailService = require('../utils/emailService');
-const QRCode = require('qrcode');
 
 // Utility modules for consistent error handling and responses
 const ControllerHelpers = require('../utils/controllerHelpers');
-const AuthorizationHelpers = require('../middleware/authorizationHelpers');
-const Formatters = require('../utils/formatters');
 
 const orderQueueService = require('../services/operatorOrderQueueService');
 const shiftStatsService = require('../services/operatorShiftStatsService');
 const supportService = require('../services/operatorSupportService');
 const pickupService = require('../services/operatorPickupService');
-
-// Helper function to generate payment URLs and QR codes
-async function generatePaymentURLs(order) {
-  const amount = order.paymentAmount.toFixed(2);
-  const orderNote = `WaveMAX Order ${order.orderId}`;
-  
-  // Generate payment URLs for each service
-  // Note: Custom payment links only work with Venmo business profiles
-  // Known issue: Venmo app adds business profile + username as two recipients when scanning QR
-  const links = {
-    venmo: `https://venmo.com/wavemaxatx?txn=pay&amount=${amount}&note=${encodeURIComponent(orderNote)}`,
-    paypal: `https://www.paypal.me/WaveMAXLaundry/${amount}?locale.x=en_US&country.x=US`,
-    cashapp: `https://cash.app/$WaveMAXLaundry/${amount}?note=${encodeURIComponent(orderNote)}`
-  };
-  
-  // Use the same URL for QR codes as the button
-  const qrUrls = {
-    venmo: links.venmo,
-    paypal: links.paypal,
-    cashapp: links.cashapp
-  };
-  
-  const qrCodes = {};
-  for (const [service, url] of Object.entries(qrUrls)) {
-    try {
-      // Log the URL being encoded in the QR code
-      logger.info(`Generating ${service} QR code for URL:`, url);
-      
-      // Generate QR code as base64 string
-      qrCodes[service] = await QRCode.toDataURL(url, {
-        width: 300,
-        margin: 1,
-        color: {
-          dark: '#000000',
-          light: '#FFFFFF'
-        }
-      });
-    } catch (error) {
-      logger.error(`Failed to generate QR code for ${service}:`, error);
-      qrCodes[service] = null;
-    }
-  }
-  
-  return { links, qrCodes };
-}
+const bagWorkflowService = require('../services/operatorBagWorkflowService');
 
 // Get order queue
 exports.getOrderQueue = ControllerHelpers.asyncWrapper(async (req, res) => {
@@ -217,191 +165,18 @@ exports.addCustomerNote = async (req, res) => {
 // Scan customer card
 exports.scanCustomer = async (req, res) => {
   try {
-    let { customerId, bagId } = req.body;
-    const operatorId = req.user.id;
-
-    logger.info('scanCustomer called with:', { customerId, bagId });
-
-    // Handle QR code format: cust-UUID-bagNumber or CUST-UUID-bagNumber
-    let cleanCustomerId = customerId;
-    let extractedBagNumber = null;
-    
-    // Check if the customerId has a bag number suffix (e.g., -1, -2, etc.)
-    const bagNumberMatch = customerId.match(/^(cust-[a-f0-9-]+)-(\d+)$/i);
-    if (bagNumberMatch) {
-      cleanCustomerId = bagNumberMatch[1];
-      extractedBagNumber = parseInt(bagNumberMatch[2]);
-      logger.info(`Extracted customer ID: ${cleanCustomerId}, bag number: ${extractedBagNumber}`);
+    const result = await bagWorkflowService.scanCustomer({
+      customerId: req.body.customerId,
+      bagId: req.body.bagId,
+      operatorId: req.user.id,
+      req
+    });
+    res.json({ success: true, currentOrder: true, ...result });
+  } catch (err) {
+    if (err.isBagWorkflowError) {
+      return res.status(err.status).json({ success: false, error: err.message, ...err.details });
     }
-    
-    // Normalize the customer ID format (handle case differences)
-    // Convert to uppercase CUST and lowercase UUID
-    cleanCustomerId = cleanCustomerId.replace(/^cust-/i, 'CUST-').toLowerCase();
-    cleanCustomerId = cleanCustomerId.replace(/^cust-/, 'CUST-'); // Ensure CUST is uppercase
-    
-    logger.info(`Normalized customer ID: ${cleanCustomerId}`);
-
-    // Find customer (case-insensitive search as fallback)
-    let customer = await Customer.findOne({ customerId: cleanCustomerId });
-    
-    // If not found, try case-insensitive search
-    if (!customer) {
-      customer = await Customer.findOne({ 
-        customerId: { $regex: new RegExp('^' + cleanCustomerId.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '$', 'i') }
-      });
-    }
-    
-    if (!customer) {
-      return res.status(404).json({
-        success: false,
-        error: 'Customer not found',
-        message: 'Invalid customer ID',
-        searchedId: cleanCustomerId,
-        originalId: customerId
-      });
-    }
-
-    // Find current active order for this customer
-    const currentOrder = await Order.findOne({
-      customerId: customer.customerId,
-      status: { $in: ['pending', 'processing', 'processed'] }
-    })
-    .sort({ createdAt: -1 });
-
-    if (!currentOrder) {
-      return res.status(404).json({
-        success: false,
-        error: 'No active order',
-        message: 'No active order found for this customer',
-        customer: {
-          name: `${customer.firstName} ${customer.lastName}`,
-          customerId: customer.customerId
-        }
-      });
-    }
-
-    // Determine action based on order status and bags processed
-    let action;
-    if (currentOrder.bagsWeighed < currentOrder.numberOfBags) {
-      // Not all bags weighed yet - first scan
-      action = 'weight_input';
-    } else if (currentOrder.bagsProcessed < currentOrder.numberOfBags) {
-      // All bags weighed but not all processed - second scan after WDF
-      action = 'process_complete';
-    } else if (currentOrder.bagsPickedUp < currentOrder.numberOfBags) {
-      // All bags processed, ready for pickup - third scan
-      action = 'pickup_scan';
-    } else {
-      action = 'status_check';
-    }
-
-    // Get affiliate name if needed
-    let affiliateName = 'N/A';
-    if (currentOrder.affiliateId) {
-      const Affiliate = require('../models/Affiliate');
-      const affiliate = await Affiliate.findOne({ affiliateId: currentOrder.affiliateId });
-      if (affiliate) {
-        affiliateName = affiliate.businessName;
-      }
-    }
-
-    // Handle bag registration if we have a bagId or extracted bag number
-    let bagRegistered = false;
-    let bagAlreadyExists = false;
-    
-    if (bagId || extractedBagNumber) {
-      // Generate bagId if we only have a bag number
-      if (!bagId && extractedBagNumber) {
-        bagId = `${currentOrder.orderId}-BAG${extractedBagNumber}`;
-      }
-      
-      // Initialize bags array if it doesn't exist
-      if (!currentOrder.bags) {
-        currentOrder.bags = [];
-      }
-      
-      // Check if this bag already exists in the order
-      const existingBag = currentOrder.bags.find(b => b.bagId === bagId);
-      
-      if (!existingBag) {
-        // Add the bag to the order
-        const newBag = {
-          bagId: bagId,
-          bagNumber: extractedBagNumber || currentOrder.bags.length + 1,
-          status: 'processing',
-          weight: 0,
-          scannedAt: {
-            processing: new Date()
-          },
-          scannedBy: {
-            processing: operatorId
-          }
-        };
-        
-        currentOrder.bags.push(newBag);
-        await currentOrder.save();
-        bagRegistered = true;
-        
-        logger.info(`Bag ${bagId} registered for order ${currentOrder.orderId}. Total bags scanned: ${currentOrder.bags.length}/${currentOrder.numberOfBags}`);
-      } else {
-        bagAlreadyExists = true;
-        logger.info(`Bag ${bagId} already exists in order ${currentOrder.orderId}`);
-      }
-    }
-    
-    // Update action based on current bag count
-    if (currentOrder.bags && currentOrder.bags.length === currentOrder.numberOfBags && currentOrder.bagsWeighed < currentOrder.numberOfBags) {
-      // All bags scanned, ready for weight input
-      action = 'weight_input';
-    } else if (currentOrder.bags && currentOrder.bags.length < currentOrder.numberOfBags) {
-      // Still need more bags to be scanned
-      action = 'scan_required';
-    }
-
-    // Format response
-    const response = {
-      success: true,
-      currentOrder: true,
-      action,
-      bagRegistered: bagRegistered,
-      bagAlreadyExists: bagAlreadyExists,
-      order: {
-        orderId: currentOrder.orderId,
-        customerName: `${customer.firstName} ${customer.lastName}`,
-        affiliateName: affiliateName,
-        numberOfBags: currentOrder.numberOfBags,
-        bagsScanned: currentOrder.bags ? currentOrder.bags.length : 0,
-        bagsWeighed: currentOrder.bagsWeighed,
-        bagsProcessed: currentOrder.bagsProcessed,
-        bagsPickedUp: currentOrder.bagsPickedUp,
-        estimatedWeight: currentOrder.estimatedWeight,
-        actualWeight: currentOrder.actualWeight,
-        status: currentOrder.status,
-        bags: currentOrder.bags || [], // Include bags array
-        addOns: currentOrder.addOns, // Include addOns
-        addOnTotal: currentOrder.addOnTotal // Include addOn total
-      }
-    };
-    
-    // If bagId was provided, include it in response
-    if (bagId) {
-      response.scannedBagId = bagId;
-    }
-
-    await logAuditEvent(AuditEvents.SENSITIVE_DATA_ACCESS, {
-      operatorId,
-      customerId: customer.customerId,
-      orderId: currentOrder.orderId,
-      action: 'customer_card_scanned',
-      scanAction: action
-    }, req);
-
-    res.json(response);
-  } catch (error) {
-    logger.error('Error in scanCustomer:', error);
-    if (logger && logger.error) {
-      logger.error('Error scanning customer card:', error);
-    }
+    logger.error('Error in scanCustomer:', err);
     res.status(500).json({
       success: false,
       error: 'Failed to scan customer card',
@@ -413,58 +188,21 @@ exports.scanCustomer = async (req, res) => {
 // Scan bag for processing (new format: customerId#bagId)
 exports.scanBag = async (req, res) => {
   try {
-    const { qrCode } = req.body;
-    
-    // Parse QR code format: customerId#bagId
-    if (!qrCode || !qrCode.includes('#')) {
-      // Legacy format - just customer ID
-      req.body.customerId = qrCode || req.body.bagId;
+    const result = await bagWorkflowService.scanBag({ qrCode: req.body.qrCode });
+    if (result.legacy) {
+      req.body.customerId = result.customerId || req.body.bagId;
       return exports.scanCustomer(req, res);
     }
-    
-    const [customerId, bagId] = qrCode.split('#');
-    
-    // Find customer
-    const customer = await Customer.findOne({ customerId });
-    if (!customer) {
-      return res.status(404).json({
-        success: false,
-        error: 'Customer not found',
-        message: 'Invalid customer ID'
-      });
+    res.json({ success: true, ...result });
+  } catch (err) {
+    if (err.isBagWorkflowError) {
+      return res.status(err.status).json({ success: false, error: err.message, ...err.details });
     }
-    
-    // Find current active order for this customer
-    const currentOrder = await Order.findOne({
-      customerId: customer.customerId,
-      status: { $in: ['pending', 'processing', 'processed'] }
-    })
-    .sort({ createdAt: -1 })
-    .populate('customer', 'firstName lastName phone email address');
-    
-    if (!currentOrder) {
-      return res.status(404).json({
-        success: false,
-        error: 'No active order',
-        message: 'No active order found for this customer'
-      });
-    }
-    
-    // Return order info with bag data
-    return res.json({
-      success: true,
-      order: currentOrder,
-      customer: currentOrder.customer,
-      bagId: bagId,
-      action: 'show_order'
-    });
-    
-  } catch (error) {
-    logger.error('Error scanning bag:', error);
-    res.status(500).json({ 
+    logger.error('Error scanning bag:', err);
+    res.status(500).json({
       success: false,
       error: 'Failed to scan bag',
-      message: 'An error occurred while processing the scan' 
+      message: 'An error occurred while processing the scan'
     });
   }
 };
@@ -472,461 +210,92 @@ exports.scanBag = async (req, res) => {
 // Receive order with weights
 exports.receiveOrder = async (req, res) => {
   try {
-    const { orderId } = req.params;
-    const { bagWeights, totalWeight } = req.body;
-    const operatorId = req.user.id;
-
-    const order = await Order.findOne({ orderId });
-    if (!order) {
-      return res.status(404).json({ 
-        success: false,
-        error: 'Order not found' 
-      });
+    const order = await bagWorkflowService.receiveOrder({
+      orderId: req.params.orderId,
+      bagWeights: req.body.bagWeights,
+      totalWeight: req.body.totalWeight,
+      operatorId: req.user.id,
+      req
+    });
+    res.json({ success: true, message: 'Order received and marked as in progress', order });
+  } catch (err) {
+    if (err.isBagWorkflowError) {
+      return res.status(err.status).json({ success: false, error: err.message, ...err.details });
     }
-
-    // Update order with actual weight and bag tracking
-    order.actualWeight = totalWeight;
-    order.status = 'processing';
-    order.assignedOperator = operatorId;
-    order.processingStarted = new Date();
-    order.processingStartedAt = new Date();
-    
-    // Add to existing bags weighed count
-    const existingBagsWeighed = order.bagsWeighed || 0;
-    order.bagsWeighed = existingBagsWeighed + bagWeights.length;
-    
-    // Append to existing bag weights array or create new one
-    if (!order.bagWeights) {
-      order.bagWeights = [];
-    }
-    
-    // Add new bag weights
-    bagWeights.forEach(bw => {
-      order.bagWeights.push({
-        bagNumber: bw.bagNumber,
-        weight: bw.weight,
-        receivedAt: new Date()
-      });
-    });
-    
-    await order.save();
-
-    await logAuditEvent(AuditEvents.ORDER_STATUS_CHANGED, {
-      operatorId,
-      orderId,
-      action: 'order_received',
-      totalWeight,
-      numberOfBags: bagWeights.length,
-      newStatus: 'processing'
-    }, req);
-
-    res.json({
-      success: true,
-      message: 'Order received and marked as in progress',
-      order
-    });
-  } catch (error) {
-    logger.error('Error receiving order:', error);
-    res.status(500).json({ 
-      success: false,
-      error: 'Failed to receive order' 
-    });
+    logger.error('Error receiving order:', err);
+    res.status(500).json({ success: false, error: 'Failed to receive order' });
   }
 };
 
 // New endpoint for weighing bags with bag tracking
 exports.weighBags = async (req, res) => {
   try {
-    const { bags, orderId } = req.body;
-    const operatorId = req.user.id;
-
-    const order = await Order.findOne({ orderId });
-    if (!order) {
-      return res.status(404).json({ 
-        success: false,
-        error: 'Order not found' 
-      });
-    }
-
-    // Update weights for existing bags or add new ones
-    for (const bagData of bags) {
-      // Check if bag already exists in order
-      const existingBagIndex = order.bags.findIndex(b => b.bagId === bagData.bagId);
-      
-      if (existingBagIndex >= 0) {
-        // Update existing bag with weight
-        order.bags[existingBagIndex].weight = bagData.weight;
-        order.bags[existingBagIndex].status = 'processing';
-        if (!order.bags[existingBagIndex].scannedAt.processing) {
-          order.bags[existingBagIndex].scannedAt.processing = new Date();
-        }
-        if (!order.bags[existingBagIndex].scannedBy.processing) {
-          order.bags[existingBagIndex].scannedBy.processing = operatorId;
-        }
-      } else {
-        // Add new bag if it doesn't exist
-        order.bags.push({
-          bagId: bagData.bagId,
-          bagNumber: order.bags.length + 1,
-          status: 'processing',
-          weight: bagData.weight,
-          scannedAt: {
-            processing: new Date()
-          },
-          scannedBy: {
-            processing: operatorId
-          }
-        });
-      }
-    }
-    
-    // Calculate total weight from all bags
-    const totalWeight = order.bags.reduce((sum, bag) => sum + (bag.weight || 0), 0);
-    
-    // Update order with actual weight
-    order.actualWeight = totalWeight;
-    order.status = 'processing';
-    order.assignedOperator = operatorId;
-    
-    if (!order.processingStartedAt) {
-      order.processingStartedAt = new Date();
-    }
-    
-    // Update bag counts
-    order.bagsWeighed = order.bags.filter(b => b.weight > 0).length;
-    
-    // Save order first to calculate paymentAmount
-    await order.save();
-    
-    // V2 Payment Flow: Send payment request if all bags are weighed
-    if (order.bagsWeighed === order.numberOfBags) {
-      // Calculate weight difference for reference
-      order.weightDifference = order.actualWeight - order.estimatedWeight;
-      
-      // Get customer for payment request
-      const customer = await Customer.findOne({ customerId: order.customerId });
-      if (customer) {
-        // Use actualTotal if paymentAmount is not set
-        const paymentAmount = order.paymentAmount || order.actualTotal || 
-                            (order.actualWeight * (order.baseRate || 1.25) + (order.addOnTotal || 0));
-        
-        // Generate payment URLs and QR codes with correct amount
-        const paymentURLs = await generatePaymentURLs({...order.toObject(), paymentAmount: paymentAmount});
-        order.paymentLinks = paymentURLs.links;
-        order.paymentQRCodes = paymentURLs.qrCodes;
-        order.paymentStatus = 'awaiting';
-        order.paymentRequestedAt = new Date();
-        order.paymentAmount = paymentAmount; // Ensure it's set
-        
-        // Save again with payment info
-        await order.save();
-
-        // Send payment request email (non-blocking - don't let email errors stop the response)
-        try {
-          await emailService.sendV2PaymentRequest({
-            customer,
-            order,
-            paymentAmount: paymentAmount,
-            paymentLinks: paymentURLs.links,
-            qrCodes: paymentURLs.qrCodes
-          });
-          logger.info(`V2 Payment request sent for order ${order.orderId}, amount: $${paymentAmount}`);
-        } catch (emailError) {
-          logger.error(`Failed to send payment request email for order ${order.orderId}:`, emailError);
-          // Order is still saved with payment info, email can be resent manually if needed
-        }
-      }
-    }
-
-    await logAuditEvent(AuditEvents.ORDER_STATUS_CHANGED, {
-      operatorId,
-      orderId,
-      action: 'bags_weighed',
-      totalWeight: order.actualWeight,
-      numberOfBags: order.bags.length,
-      newBags: bags.length
-    }, req);
-
-    // Return updated order with bag progress
-    res.json({
-      success: true,
-      order: order,
-      orderProgress: {
-        totalBags: order.bags.length,
-        bagsWeighed: order.bags.length,
-        bagsProcessed: order.bags.filter(b => b.status === 'processed').length,
-        bagsCompleted: order.bags.filter(b => b.status === 'completed').length
-      },
-      message: 'Bags weighed successfully'
+    const { order, orderProgress } = await bagWorkflowService.weighBags({
+      orderId: req.body.orderId,
+      bags: req.body.bags,
+      operatorId: req.user.id,
+      req
     });
-  } catch (error) {
-    logger.error('Error weighing bags:', error);
-    res.status(500).json({ 
-      success: false,
-      error: 'Failed to weigh bags' 
-    });
+    res.json({ success: true, order, orderProgress, message: 'Bags weighed successfully' });
+  } catch (err) {
+    if (err.isBagWorkflowError) {
+      return res.status(err.status).json({ success: false, error: err.message, ...err.details });
+    }
+    logger.error('Error weighing bags:', err);
+    res.status(500).json({ success: false, error: 'Failed to weigh bags' });
   }
 };
 
 // Mark bag as processed after WDF
 exports.markBagProcessed = async (req, res) => {
   try {
-    const { orderId } = req.params;
-    const operatorId = req.user.id;
-
-    const order = await Order.findOne({ orderId });
-
-    if (!order) {
-      return res.status(404).json({ 
-        success: false,
-        error: 'Order not found' 
-      });
-    }
-
-    // Increment processed bags count
-    order.bagsProcessed = Math.min((order.bagsProcessed || 0) + 1, order.numberOfBags);
-    
-    // Check if all bags are now processed
-    if (order.bagsProcessed === order.numberOfBags) {
-      // All bags processed, update order status
-      order.processedAt = new Date();
-      order.status = 'processed';
-      
-      // Notify affiliate that order is ready for pickup
-      const emailService = require('../utils/emailService');
-      if (order.affiliateId) {
-        // Manually fetch affiliate and customer data
-        const Affiliate = require('../models/Affiliate');
-        const affiliate = await Affiliate.findOne({ affiliateId: order.affiliateId });
-        
-        let customerName = 'N/A';
-        if (order.customerId) {
-          const customer = await Customer.findOne({ customerId: order.customerId });
-          if (customer) {
-            customerName = `${customer.firstName} ${customer.lastName}`;
-          }
-        }
-        
-        if (affiliate && affiliate.email) {
-          await emailService.sendOrderReadyNotification(
-            affiliate.email,
-            {
-              affiliateName: affiliate.contactPerson || affiliate.businessName,
-              orderId: order.orderId,
-              customerName: customerName,
-              numberOfBags: order.numberOfBags,
-              totalWeight: order.actualWeight
-            }
-          );
-        }
-      }
-    }
-    
-    await order.save();
-
-    await logAuditEvent(AuditEvents.ORDER_STATUS_CHANGED, {
-      operatorId,
-      orderId,
-      action: 'bag_processed',
-      bagNumber: order.bagsProcessed,
-      totalBags: order.numberOfBags,
-      allBagsProcessed: order.bagsProcessed === order.numberOfBags,
-      affiliateNotified: order.bagsProcessed === order.numberOfBags
-    }, req);
-
+    const result = await bagWorkflowService.markBagProcessed({
+      orderId: req.params.orderId,
+      operatorId: req.user.id,
+      req
+    });
     res.json({
       success: true,
-      message: `Bag ${order.bagsProcessed} of ${order.numberOfBags} marked as processed`,
-      bagsProcessed: order.bagsProcessed,
-      totalBags: order.numberOfBags,
-      orderReady: order.bagsProcessed === order.numberOfBags
+      message: `Bag ${result.bagsProcessed} of ${result.totalBags} marked as processed`,
+      ...result
     });
-  } catch (error) {
-    logger.error('Error marking bag as processed:', error);
-    res.status(500).json({ 
-      success: false,
-      error: 'Failed to mark bag as processed' 
-    });
+  } catch (err) {
+    if (err.isBagWorkflowError) {
+      return res.status(err.status).json({ success: false, error: err.message, ...err.details });
+    }
+    logger.error('Error marking bag as processed:', err);
+    res.status(500).json({ success: false, error: 'Failed to mark bag as processed' });
   }
 };
 
 // New endpoint for scanning processed bags
 exports.scanProcessed = async (req, res) => {
   try {
-    const { qrCode } = req.body;
-    const operatorId = req.user.id;
-    
-    logger.info('scanProcessed called with:', { qrCode, operatorId });
-    
-    // Parse QR code format: customerId#bagId
-    if (!qrCode || !qrCode.includes('#')) {
-      return res.status(400).json({
-        success: false,
-        error: 'Invalid QR code format',
-        message: 'Expected format: customerId#bagId'
-      });
-    }
-    
-    const [customerId, bagId] = qrCode.split('#');
-    
-    // Find order containing this bag
-    const order = await Order.findOne({
-      customerId: customerId,
-      'bags.bagId': bagId,
-      status: { $in: ['processing', 'processed'] }
+    const result = await bagWorkflowService.scanProcessed({
+      qrCode: req.body.qrCode,
+      operatorId: req.user.id,
+      req
     });
-    
-    if (!order) {
-      return res.status(404).json({
-        success: false,
-        error: 'Bag not found',
-        message: 'This bag is not associated with any active order'
-      });
+    if (result.warning) {
+      return res.json({ success: false, ...result });
     }
-    
-    // Fetch customer data separately since Order doesn't have a customer reference
-    const customer = await Customer.findOne({ customerId: order.customerId });
-    if (customer) {
-      order.customer = customer; // Attach customer to order for email sending
+    if (result.action === 'show_pickup_modal') {
+      return res.json({ success: true, ...result, message: 'All bags processed - ready for pickup' });
     }
-    
-    // Find the specific bag
-    const bag = order.bags.find(b => b.bagId === bagId);
-    
-    // Check bag status
-    if (bag.status === 'processed') {
-      // Check if all bags are processed
-      const allBagsProcessed = order.bags.every(b => b.status === 'processed' || b.status === 'completed');
-      
-      if (allBagsProcessed) {
-        // Show pickup modal
-        return res.json({
-          success: true,
-          action: 'show_pickup_modal',
-          order: order,
-          allBagsProcessed: true,
-          message: 'All bags processed - ready for pickup'
-        });
-      } else {
-        // Show warning - bag already processed
-        const remainingBags = order.bags.filter(b => b.status === 'processing').length;
-        return res.json({
-          success: false,
-          warning: 'duplicate_scan',
-          message: `This bag has already been processed. ${remainingBags} bags still need processing.`,
-          bag: {
-            bagId: bag.bagId,
-            bagNumber: bag.bagNumber,
-            status: bag.status,
-            processedAt: bag.scannedAt.processed
-          },
-          remainingCount: remainingBags
-        });
-      }
+    res.json({ success: true, ...result, message: `Bag ${result.bag.bagNumber} marked as processed` });
+  } catch (err) {
+    if (err.isBagWorkflowError) {
+      return res.status(err.status).json({ success: false, error: err.message, ...err.details });
     }
-    
-    // Update bag to processed
-    bag.status = 'processed';
-    bag.scannedAt.processed = new Date();
-    bag.scannedBy.processed = operatorId;
-    
-    // Update order counts
-    order.bagsProcessed = order.bags.filter(b => b.status === 'processed' || b.status === 'completed').length;
-    
-    // Check if all bags are now processed
-    const allBagsProcessed = order.bags.every(b => b.status === 'processed' || b.status === 'completed');
-    
-    if (allBagsProcessed) {
-      // All bags processed, update order status
-      order.processedAt = new Date();
-      order.status = 'processed';
-      
-      // V2 Payment Flow: Check payment status before sending notifications
-      if (order.paymentStatus === 'verified' || order.paymentStatus === 'paid') {
-        // Payment received - send ready for pickup notification to affiliate ONLY
-        const emailService = require('../utils/emailService');
-        
-        // Notify affiliate that order is ready for pickup (NOT commission email)
-        if (order.affiliateId) {
-          const Affiliate = require('../models/Affiliate');
-          const affiliate = await Affiliate.findOne({ affiliateId: order.affiliateId });
-          
-          if (affiliate && affiliate.email) {
-            // Send ready for pickup notification (not commission email)
-            await emailService.sendOrderReadyNotification(affiliate.email, {
-              orderId: order.orderId,
-              customerName: `${order.customer.firstName} ${order.customer.lastName}`,
-              customerPhone: order.customer.phone,
-              numberOfBags: order.numberOfBags,
-              totalWeight: order.actualWeight,
-              finalTotal: order.actualTotal || order.estimatedTotal,
-              address: `${order.customer.address.street}, ${order.customer.address.city}, ${order.customer.address.state} ${order.customer.address.zip}`
-            });
-            
-            logger.info(`Ready for pickup notification sent to affiliate ${affiliate.email} for order ${order.orderId}`);
-          }
-        }
-        // Do NOT notify customer yet - wait until affiliate picks up
-      } else {
-        // Payment not received - send payment reminder
-        await pickupService.sendPaymentReminder(order);
-        
-        logger.info(`Order ${order.orderId} processed but awaiting payment. Reminder sent.`);
-      }
-    }
-    
-    await order.save();
-    
-    await logAuditEvent(AuditEvents.ORDER_STATUS_CHANGED, {
-      operatorId,
-      orderId: order.orderId,
-      action: 'bag_processed',
-      bagId: bagId,
-      bagNumber: bag.bagNumber,
-      bagsProcessed: order.bagsProcessed,
-      totalBags: order.bags.length,
-      allBagsProcessed: allBagsProcessed
-    }, req);
-    
-    // Return appropriate response
-    if (allBagsProcessed) {
-      return res.json({
-        success: true,
-        action: 'show_pickup_modal',
-        order: order,
-        allBagsProcessed: true,
-        message: 'All bags processed - ready for pickup'
-      });
-    } else {
-      return res.json({
-        success: true,
-        order: order,
-        bag: {
-          bagId: bag.bagId,
-          bagNumber: bag.bagNumber,
-          status: bag.status,
-          weight: bag.weight
-        },
-        orderProgress: {
-          totalBags: order.bags.length,
-          bagsWeighed: order.bags.length,
-          bagsProcessed: order.bagsProcessed,
-          bagsCompleted: order.bags.filter(b => b.status === 'completed').length
-        },
-        message: `Bag ${bag.bagNumber} marked as processed`
-      });
-    }
-    
-  } catch (error) {
-    logger.error('Error in scanProcessed:', error);
-    logger.error('Error scanning processed bag:', error);
-    res.status(500).json({ 
+    logger.error('Error in scanProcessed:', err);
+    res.status(500).json({
       success: false,
       error: 'Failed to scan processed bag',
-      message: error.message 
+      message: err.message
     });
   }
 };
+
 
 // Mark order as ready for pickup (deprecated - use scanProcessed instead)
 exports.markOrderReady = async (req, res) => {
