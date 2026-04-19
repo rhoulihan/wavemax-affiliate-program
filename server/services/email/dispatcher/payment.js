@@ -5,6 +5,7 @@ const { loadTemplate, fillTemplate } = require('../template-manager');
 const { sendEmail } = require('../transport');
 const fs = require('fs');
 const path = require('path');
+const logger = require('../../../utils/logger');
 const { promisify } = require('util');
 const readFile = promisify(fs.readFile);
 // ============================================
@@ -85,10 +86,10 @@ exports.sendV2PaymentRequest = async ({ customer, order, paymentAmount, paymentL
     const subject = `Payment Request - Order #${emailData.shortOrderId} - $${emailData.amount}`;
     
     await sendEmail(customer.email, subject, html);
-    console.log(`V2 payment request sent to ${customer.email} for order ${order.orderId}`);
+    logger.info(`V2 payment request sent to ${customer.email} for order ${order.orderId}`);
     return true;
   } catch (error) {
-    console.error('Error sending V2 payment request email:', error);
+    logger.error('Error sending V2 payment request email:', error);
     throw error;
   }
 };
@@ -184,10 +185,10 @@ exports.sendV2PaymentReminder = async ({ customer, order, reminderNumber, paymen
     const subject = `${urgencyPrefix}Payment Reminder - Order #${emailData.shortOrderId} - $${emailData.amount}`;
     
     await sendEmail(customer.email, subject, html);
-    console.log(`V2 payment reminder sent to ${customer.email} for order ${order.orderId}`);
+    logger.info(`V2 payment reminder sent to ${customer.email} for order ${order.orderId}`);
     return true;
   } catch (error) {
-    console.error('Error sending V2 payment reminder email:', error);
+    logger.error('Error sending V2 payment reminder email:', error);
     throw error;
   }
 };
@@ -236,10 +237,10 @@ exports.sendV2PaymentVerified = async (order, customer, paymentData) => {
     const subject = `Payment Verified - Order #${emailData.shortOrderId}`;
     
     await sendEmail(customer.email, subject, html);
-    console.log(`V2 payment verification sent to ${customer.email} for order ${order.orderId}`);
+    logger.info(`V2 payment verification sent to ${customer.email} for order ${order.orderId}`);
     return true;
   } catch (error) {
-    console.error('Error sending V2 payment verified email:', error);
+    logger.error('Error sending V2 payment verified email:', error);
     throw error;
   }
 };
@@ -293,10 +294,10 @@ exports.sendV2PaymentTimeoutEscalation = async (order, adminEmail, escalationDet
     `;
     
     await sendEmail(adminEmail, subject, html);
-    console.log(`Payment timeout escalation sent to ${adminEmail} for order ${escalationDetails.orderId}`);
+    logger.info(`Payment timeout escalation sent to ${adminEmail} for order ${escalationDetails.orderId}`);
     return true;
   } catch (error) {
-    console.error('Error sending payment timeout escalation:', error);
+    logger.error('Error sending payment timeout escalation:', error);
     throw error;
   }
 };
@@ -341,7 +342,7 @@ exports.sendV2PickupReadyNotification = async (order, customer, affiliate) => {
     `;
     
     await sendEmail(customer.email, subject, html);
-    console.log(`V2 pickup ready notification sent to ${customer.email} for order ${order.orderId}`);
+    logger.info(`V2 pickup ready notification sent to ${customer.email} for order ${order.orderId}`);
     
     // Also notify the affiliate
     const affiliateSubject = `Order Ready for Delivery - #${order.orderId}`;
@@ -372,7 +373,7 @@ exports.sendV2PickupReadyNotification = async (order, customer, affiliate) => {
     
     return true;
   } catch (error) {
-    console.error('Error sending V2 pickup ready notification:', error);
+    logger.error('Error sending V2 pickup ready notification:', error);
     throw error;
   }
 };

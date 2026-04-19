@@ -4,6 +4,7 @@ const router = express.Router();
 const { serveHTMLWithNonce } = require('../utils/cspHelper');
 const path = require('path');
 const fs = require('fs').promises;
+const logger = require('../utils/logger');
 
 // Middleware to serve documentation files with nonce injection
 const serveDocsWithNonce = async (req, res, next) => {
@@ -41,7 +42,7 @@ const serveDocsWithNonce = async (req, res, next) => {
     const html = await readHTMLWithNonce(fullPath, res.locals.cspNonce);
     res.type('html').send(html);
   } catch (error) {
-    console.error('Error serving documentation with nonce:', error);
+    logger.error('Error serving documentation with nonce:', error);
     next(error);
   }
 };

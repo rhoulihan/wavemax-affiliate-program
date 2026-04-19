@@ -1,3 +1,4 @@
+const logger = require('../../../utils/logger');
 // Affiliate-facing email dispatchers.
 // Extracted from utils/emailService.js in Phase 2.
 
@@ -195,7 +196,7 @@ exports.sendAffiliateWelcomeEmail = async (affiliate) => {
       html
     );
   } catch (error) {
-    console.error('Error sending affiliate welcome email:', error);
+    logger.error('Error sending affiliate welcome email:', error);
   }
 };
 
@@ -205,12 +206,12 @@ exports.sendAffiliateWelcomeEmail = async (affiliate) => {
 exports.sendAffiliateNewCustomerEmail = async (affiliate, customer, bagInfo = {}) => {
   try {
     // Debug logging
-    console.log('[sendAffiliateNewCustomerEmail] Affiliate:', affiliate ? { 
+    logger.info('[sendAffiliateNewCustomerEmail] Affiliate:', affiliate ? { 
       email: affiliate.email, 
       affiliateId: affiliate.affiliateId, 
       businessName: affiliate.businessName 
     } : 'undefined');
-    console.log('[sendAffiliateNewCustomerEmail] Customer:', customer ? { 
+    logger.info('[sendAffiliateNewCustomerEmail] Customer:', customer ? { 
       email: customer.email, 
       firstName: customer.firstName, 
       customerId: customer.customerId 
@@ -218,12 +219,12 @@ exports.sendAffiliateNewCustomerEmail = async (affiliate, customer, bagInfo = {}
     
     // Validate inputs
     if (!affiliate || !customer) {
-      console.error('Missing affiliate or customer data for new customer notification');
+      logger.error('Missing affiliate or customer data for new customer notification');
       return;
     }
     
     if (!affiliate.email) {
-      console.error('Affiliate email is missing or undefined');
+      logger.error('Affiliate email is missing or undefined');
       return;
     }
     const language = affiliate.languagePreference || 'en';
@@ -378,7 +379,7 @@ exports.sendAffiliateNewCustomerEmail = async (affiliate, customer, bagInfo = {}
       html
     );
   } catch (error) {
-    console.error('Error sending new customer notification email:', error);
+    logger.error('Error sending new customer notification email:', error);
   }
 };
 
@@ -516,7 +517,7 @@ exports.sendAffiliateNewOrderEmail = async (affiliate, customer, order) => {
       html
     );
   } catch (error) {
-    console.error('Error sending new order notification email:', error);
+    logger.error('Error sending new order notification email:', error);
   }
 };
 
@@ -701,9 +702,9 @@ exports.sendAffiliateUrgentPickupEmail = async (affiliate, customer, order) => {
       html
     );
 
-    console.log(`Urgent pickup email sent to affiliate ${affiliate.affiliateId} for order ${order.orderId}`);
+    logger.info(`Urgent pickup email sent to affiliate ${affiliate.affiliateId} for order ${order.orderId}`);
   } catch (error) {
-    console.error('Error sending urgent pickup notification email:', error);
+    logger.error('Error sending urgent pickup notification email:', error);
     throw error; // Re-throw to let caller handle
   }
 };
@@ -814,7 +815,7 @@ exports.sendAffiliateCommissionEmail = async (affiliate, order, customer) => {
       html
     );
   } catch (error) {
-    console.error('Error sending commission notification email:', error);
+    logger.error('Error sending commission notification email:', error);
   }
 };
 
@@ -930,7 +931,7 @@ exports.sendAffiliateOrderCancellationEmail = async (affiliate, order, customer)
       html
     );
   } catch (error) {
-    console.error('Error sending order cancellation email:', error);
+    logger.error('Error sending order cancellation email:', error);
   }
 };
 
@@ -957,7 +958,7 @@ exports.sendAffiliatePasswordResetEmail = async (affiliate, resetUrl) => {
       html
     );
   } catch (error) {
-    console.error('Error sending affiliate password reset email:', error);
+    logger.error('Error sending affiliate password reset email:', error);
   }
 };
 

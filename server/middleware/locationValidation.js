@@ -1,5 +1,6 @@
 const { body, validationResult } = require('express-validator');
 const serviceAreaService = require('../services/serviceAreaService');
+const logger = require('../utils/logger');
 
 // Custom validator for zip codes in service area
 const zipCodeInServiceArea = (value) => {
@@ -104,7 +105,7 @@ const profileAddressValidation = [
 const handleValidationErrors = (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    console.log('[Validation] Validation errors for', req.path, ':', JSON.stringify(errors.array(), null, 2));
+    logger.info('[Validation] Validation errors for', req.path, ':', JSON.stringify(errors.array(), null, 2));
     return res.status(400).json({
       success: false,
       message: 'Validation failed',

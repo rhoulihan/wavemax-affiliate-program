@@ -16,6 +16,7 @@ const SystemConfig = require('../models/SystemConfig');
 const encryptionUtil = require('../utils/encryption');
 const emailService = require('../utils/emailService');
 const Formatters = require('../utils/formatters');
+const logger = require('../utils/logger');
 
 /**
  * Error type used to communicate expected failures (duplicate email, invalid
@@ -66,7 +67,7 @@ async function registerCustomer(payload) {
   } = payload;
 
   if (paymentConfirmed) {
-    console.log(`Post-payment registration for email: ${email}, affiliate: ${affiliateId}`);
+    logger.info(`Post-payment registration for email: ${email}, affiliate: ${affiliateId}`);
   }
 
   const affiliate = await Affiliate.findOne({ affiliateId });
@@ -102,7 +103,7 @@ async function registerCustomer(payload) {
     if (!username) {
       finalUsername = email.split('@')[0] + '_' + Date.now().toString(36);
     }
-    console.log(`OAuth registration for email: ${email}, generated username: ${finalUsername}`);
+    logger.info(`OAuth registration for email: ${email}, generated username: ${finalUsername}`);
   } else {
     const { salt, hash } = encryptionUtil.hashPassword(password);
     passwordSalt = salt;
@@ -165,12 +166,12 @@ async function sendWelcomeEmails(customer, affiliate, bagInfo) {
   try {
     await emailService.sendCustomerWelcomeEmail(customer, affiliate, bagInfo);
   } catch (emailError) {
-    console.error('Failed to send welcome email:', emailError);
+    logger.error('Failed to send welcome email:', emailError);
   }
   try {
     await emailService.sendAffiliateNewCustomerEmail(affiliate, customer, bagInfo);
   } catch (emailError) {
-    console.error('Failed to send affiliate notification:', emailError);
+    logger.error('Failed to send affiliate notification:', emailError);
   }
 }
 

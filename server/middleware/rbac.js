@@ -1,3 +1,4 @@
+const logger = require('../utils/logger');
 // Role-Based Access Control Middleware for WaveMAX Laundry Affiliate Program
 
 // Define role hierarchy
@@ -180,7 +181,7 @@ exports.checkAdminPermission = (requiredPermissions) => {
       req.admin = admin;
       next();
     } catch (error) {
-      console.error('Permission check error:', error);
+      logger.error('Permission check error:', error);
       return res.status(500).json({
         success: false,
         message: 'Error checking permissions'
@@ -221,7 +222,7 @@ exports.checkOperatorStatus = () => {
       req.operator = operator;
       next();
     } catch (error) {
-      console.error('Operator status check error:', error);
+      logger.error('Operator status check error:', error);
       return res.status(500).json({
         success: false,
         message: 'Error checking operator status'

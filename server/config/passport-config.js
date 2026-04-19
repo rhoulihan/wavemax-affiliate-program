@@ -7,6 +7,7 @@ const FacebookStrategy = require('passport-facebook').Strategy;
 const LinkedInStrategy = require('passport-linkedin-oauth2').Strategy;
 const Affiliate = require('../models/Affiliate');
 const Customer = require('../models/Customer');
+const logger = require('../utils/logger');
 const { logAuditEvent, AuditEvents } = require('../utils/auditLogger');
 const { encryptField, decryptField } = require('../utils/encryption');
 
@@ -24,7 +25,7 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
     // Determine context from state parameter
       const isCustomerContext = req.query.state && req.query.state.startsWith('customer');
 
-      console.log('Google OAuth Strategy Context:', {
+      logger.info('Google OAuth Strategy Context:', {
         state: req.query.state,
         isCustomerContext: isCustomerContext,
         userEmail: profile.emails[0].value
@@ -32,7 +33,7 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
 
       if (isCustomerContext) {
       // Customer OAuth Logic
-        console.log('Processing customer OAuth for:', profile.emails[0].value);
+        logger.info('Processing customer OAuth for:', profile.emails[0].value);
 
         // Check if customer already exists with this Google ID
         let customer = await Customer.findOne({ 'socialAccounts.google.id': profile.id });
@@ -44,7 +45,7 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
           customer.lastLogin = new Date();
           await customer.save();
 
-          console.log('Found existing customer by Google ID:', customer.customerId);
+          logger.info('Found existing customer by Google ID:', customer.customerId);
           return done(null, customer);
         }
 
@@ -64,7 +65,7 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
           customer.lastLogin = new Date();
           await customer.save();
 
-          console.log('Linked Google account to existing customer:', customer.customerId);
+          logger.info('Linked Google account to existing customer:', customer.customerId);
           return done(null, customer);
         }
 
@@ -78,7 +79,7 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
 
         if (existingAffiliate) {
         // Same social account is already used by an affiliate
-          console.log('Found existing affiliate when trying customer OAuth:', existingAffiliate.affiliateId);
+          logger.info('Found existing affiliate when trying customer OAuth:', existingAffiliate.affiliateId);
           return done(null, {
             isExistingAffiliate: true,
             provider: 'google',
@@ -94,7 +95,7 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
         }
 
         // No existing customer found - return new user data for registration
-        console.log('New customer registration needed for:', profile.emails[0].value);
+        logger.info('New customer registration needed for:', profile.emails[0].value);
         return done(null, {
           isNewUser: true,
           userType: 'customer',
@@ -110,7 +111,7 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
 
       } else {
       // Affiliate OAuth Logic (default)
-        console.log('Processing affiliate OAuth for:', profile.emails[0].value);
+        logger.info('Processing affiliate OAuth for:', profile.emails[0].value);
 
         // Check if affiliate already exists with this Google ID
         let affiliate = await Affiliate.findOne({ 'socialAccounts.google.id': profile.id });
@@ -130,7 +131,7 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
           // Fetch the updated affiliate
           affiliate = await Affiliate.findById(affiliate._id);
 
-          console.log('Found existing affiliate by Google ID:', affiliate.affiliateId);
+          logger.info('Found existing affiliate by Google ID:', affiliate.affiliateId);
           return done(null, affiliate);
         }
 
@@ -158,7 +159,7 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
           // Fetch the updated affiliate
           affiliate = await Affiliate.findById(affiliate._id);
 
-          console.log('Linked Google account to existing affiliate:', affiliate.affiliateId);
+          logger.info('Linked Google account to existing affiliate:', affiliate.affiliateId);
           return done(null, affiliate);
         }
 
@@ -172,7 +173,7 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
 
         if (existingCustomer) {
         // Same social account is already used by a customer
-          console.log('Found existing customer when trying affiliate OAuth:', existingCustomer.customerId);
+          logger.info('Found existing customer when trying affiliate OAuth:', existingCustomer.customerId);
           return done(null, {
             isExistingCustomer: true,
             provider: 'google',
@@ -188,7 +189,7 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
         }
 
         // No existing affiliate found - return new user data for registration
-        console.log('New affiliate registration needed for:', profile.emails[0].value);
+        logger.info('New affiliate registration needed for:', profile.emails[0].value);
         return done(null, {
           isNewUser: true,
           userType: 'affiliate',
@@ -205,7 +206,7 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
 
     } catch (error) {
       const isCustomerContext = req.query.state && req.query.state.startsWith('customer');
-      console.error('Google OAuth error:', error);
+      logger.error('Google OAuth error:', error);
       logAuditEvent(AuditEvents.AUTH_ERROR, {
         provider: 'google',
         userType: isCustomerContext ? 'customer' : 'affiliate',
@@ -229,12 +230,12 @@ if (process.env.FACEBOOK_APP_ID && process.env.FACEBOOK_APP_SECRET) {
   }, async (req, accessToken, refreshToken, profile, done) => {
     try {
       const isCustomerContext = req.query.state && req.query.state.includes('customer');
-      console.log('Facebook OAuth context:', { isCustomerContext, state: req.query.state });
+      logger.info('Facebook OAuth context:', { isCustomerContext, state: req.query.state });
 
       // Extract email from profile
       const email = profile.emails && profile.emails[0] ? profile.emails[0].value : null;
       
-      console.log('Facebook OAuth Debug:', {
+      logger.info('Facebook OAuth Debug:', {
         profileId: profile.id,
         email: email,
         profileData: profile._json,
@@ -260,7 +261,7 @@ if (process.env.FACEBOOK_APP_ID && process.env.FACEBOOK_APP_SECRET) {
           // Fetch the updated customer
           customer = await Customer.findById(customer._id);
           
-          console.log('Found existing customer by Facebook ID:', customer.customerId);
+          logger.info('Found existing customer by Facebook ID:', customer.customerId);
           return done(null, customer);
         }
         
@@ -288,13 +289,13 @@ if (process.env.FACEBOOK_APP_ID && process.env.FACEBOOK_APP_SECRET) {
             // Fetch the updated customer
             customer = await Customer.findById(customer._id);
             
-            console.log('Linked Facebook account to existing customer:', customer.customerId);
+            logger.info('Linked Facebook account to existing customer:', customer.customerId);
             return done(null, customer);
           }
         }
         
         // Check if an affiliate exists with this social account or email
-        console.log('Checking for existing affiliate with Facebook ID:', profile.id, 'or email:', email);
+        logger.info('Checking for existing affiliate with Facebook ID:', profile.id, 'or email:', email);
         let existingAffiliate = await Affiliate.findOne({
           $or: [
             { 'socialAccounts.facebook.id': profile.id },
@@ -302,7 +303,7 @@ if (process.env.FACEBOOK_APP_ID && process.env.FACEBOOK_APP_SECRET) {
           ].filter(Boolean)
         });
         
-        console.log('Affiliate search result:', existingAffiliate ? {
+        logger.info('Affiliate search result:', existingAffiliate ? {
           affiliateId: existingAffiliate.affiliateId,
           email: existingAffiliate.email,
           facebookId: existingAffiliate.socialAccounts?.facebook?.id
@@ -310,7 +311,7 @@ if (process.env.FACEBOOK_APP_ID && process.env.FACEBOOK_APP_SECRET) {
         
         if (existingAffiliate) {
           // Same social account is already used by an affiliate
-          console.log('Found existing affiliate when trying customer OAuth:', existingAffiliate.affiliateId);
+          logger.info('Found existing affiliate when trying customer OAuth:', existingAffiliate.affiliateId);
           return done(null, {
             isExistingAffiliate: true,
             provider: 'facebook',
@@ -344,7 +345,7 @@ if (process.env.FACEBOOK_APP_ID && process.env.FACEBOOK_APP_SECRET) {
         }
         
         // No existing customer found - return new user data for registration
-        console.log('New customer registration needed for:', email);
+        logger.info('New customer registration needed for:', email);
         return done(null, {
           isNewUser: true,
           userType: 'customer',
@@ -411,7 +412,7 @@ if (process.env.FACEBOOK_APP_ID && process.env.FACEBOOK_APP_SECRET) {
       }
 
       // Log the profile structure for debugging
-      console.log('Facebook profile structure:', {
+      logger.info('Facebook profile structure:', {
         id: profile.id,
         displayName: profile.displayName,
         name: profile.name,
@@ -447,7 +448,7 @@ if (process.env.FACEBOOK_APP_ID && process.env.FACEBOOK_APP_SECRET) {
       
       if (existingCustomer) {
         // Same social account is already used by a customer
-        console.log('Found existing customer when trying affiliate OAuth:', existingCustomer.customerId);
+        logger.info('Found existing customer when trying affiliate OAuth:', existingCustomer.customerId);
         return done(null, {
           isExistingCustomer: true,
           provider: 'facebook',
@@ -479,7 +480,7 @@ if (process.env.FACEBOOK_APP_ID && process.env.FACEBOOK_APP_SECRET) {
 
     } catch (error) {
       const isCustomerContext = req.query.state && req.query.state.includes('customer');
-      console.error('Facebook OAuth error:', error);
+      logger.error('Facebook OAuth error:', error);
       logAuditEvent(AuditEvents.AUTH_ERROR, {
         provider: 'facebook',
         userType: isCustomerContext ? 'customer' : 'affiliate',
@@ -566,7 +567,7 @@ if (process.env.LINKEDIN_CLIENT_ID && process.env.LINKEDIN_CLIENT_SECRET) {
       });
 
     } catch (error) {
-      console.error('LinkedIn OAuth error:', error);
+      logger.error('LinkedIn OAuth error:', error);
       return done(error, null);
     }
   }));

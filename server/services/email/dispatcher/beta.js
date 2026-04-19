@@ -5,6 +5,7 @@ const { loadTemplate, fillTemplate } = require('../template-manager');
 const { sendEmail } = require('../transport');
 const fs = require('fs');
 const path = require('path');
+const logger = require('../../../utils/logger');
 const { promisify } = require('util');
 const readFile = promisify(fs.readFile);
 /**
@@ -57,10 +58,10 @@ exports.sendAdminNotification = async function(options) {
     
     await sendEmail(adminEmail, subject, fullHtml, headers);
     
-    console.log(`Admin notification sent: ${subject}`);
+    logger.info(`Admin notification sent: ${subject}`);
     return true;
   } catch (error) {
-    console.error('Error sending admin notification:', error);
+    logger.error('Error sending admin notification:', error);
     throw error;
   }
 };
@@ -154,9 +155,9 @@ exports.sendBetaRequestNotification = async (betaRequest) => {
     `;
     
     await sendEmail(adminEmail, subject, html);
-    console.log('Beta request notification sent to admin:', adminEmail);
+    logger.info('Beta request notification sent to admin:', adminEmail);
   } catch (error) {
-    console.error('Error sending beta request notification:', error);
+    logger.error('Error sending beta request notification:', error);
     // Don't throw - we don't want to fail the request if email fails
   }
 };
@@ -227,9 +228,9 @@ exports.sendBetaInvitationEmail = async (betaRequest, registrationUrl) => {
     `;
     
     await sendEmail(betaRequest.email, subject, html);
-    console.log('Beta invitation sent to:', betaRequest.email);
+    logger.info('Beta invitation sent to:', betaRequest.email);
   } catch (error) {
-    console.error('Error sending beta invitation:', error);
+    logger.error('Error sending beta invitation:', error);
     throw error;
   }
 };
@@ -304,9 +305,9 @@ exports.sendBetaWelcomeEmail = async (betaRequest) => {
     
     // Don't use attachments as they're blocked by the mail server policy
     await sendEmail(betaRequest.email, subject, html);
-    console.log('Beta welcome email sent to:', betaRequest.email);
+    logger.info('Beta welcome email sent to:', betaRequest.email);
   } catch (error) {
-    console.error('Error sending beta welcome email:', error);
+    logger.error('Error sending beta welcome email:', error);
     throw error;
   }
 };
@@ -456,9 +457,9 @@ exports.sendBetaReminderEmail = async (betaRequest) => {
     `;
     
     await sendEmail(betaRequest.email, subject, html);
-    console.log('Beta reminder email sent to:', betaRequest.email);
+    logger.info('Beta reminder email sent to:', betaRequest.email);
   } catch (error) {
-    console.error('Error sending beta reminder email:', error);
+    logger.error('Error sending beta reminder email:', error);
     throw error;
   }
 };
@@ -471,7 +472,7 @@ exports.sendBetaReminderEmail = async (betaRequest) => {
  */
 exports.sendMarketingEmail = async (recipientEmail, recipientName, templateType = 'healthcare-catering-outreach') => {
   try {
-    console.log(`[sendMarketingEmail] Sending ${templateType} email to:`, recipientEmail);
+    logger.info(`[sendMarketingEmail] Sending ${templateType} email to:`, recipientEmail);
 
     if (!recipientEmail) {
       throw new Error('Recipient email address is required');
@@ -488,7 +489,7 @@ exports.sendMarketingEmail = async (recipientEmail, recipientName, templateType 
     try {
       template = await fs.promises.readFile(templatePath, 'utf8');
     } catch (error) {
-      console.error(`Error loading marketing template ${templateType}:`, error);
+      logger.error(`Error loading marketing template ${templateType}:`, error);
       throw new Error(`Marketing template '${templateType}' not found`);
     }
 
@@ -509,14 +510,14 @@ exports.sendMarketingEmail = async (recipientEmail, recipientName, templateType 
     // Send the email
     await sendEmail(recipientEmail, subject, html);
 
-    console.log(`Marketing email (${templateType}) sent successfully to:`, recipientEmail);
+    logger.info(`Marketing email (${templateType}) sent successfully to:`, recipientEmail);
     return {
       success: true,
       recipient: recipientEmail,
       templateType: templateType
     };
   } catch (error) {
-    console.error('Error sending marketing email:', error);
+    logger.error('Error sending marketing email:', error);
     throw error;
   }
 };

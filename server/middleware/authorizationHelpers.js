@@ -7,6 +7,7 @@
 const Customer = require('../models/Customer');
 const Affiliate = require('../models/Affiliate');
 const Order = require('../models/Order');
+const logger = require('../utils/logger');
 
 class AuthorizationHelpers {
   /**
@@ -162,7 +163,7 @@ class AuthorizationHelpers {
       });
 
     } catch (error) {
-      console.error('Customer access check error:', error);
+      logger.error('Customer access check error:', error);
       return res.status(500).json({
         success: false,
         message: 'Authorization check failed'
@@ -219,7 +220,7 @@ class AuthorizationHelpers {
       next();
 
     } catch (error) {
-      console.error('Order access check error:', error);
+      logger.error('Order access check error:', error);
       return res.status(500).json({
         success: false,
         message: 'Authorization check failed'
@@ -273,7 +274,7 @@ class AuthorizationHelpers {
       });
 
     } catch (error) {
-      console.error('Affiliate access check error:', error);
+      logger.error('Affiliate access check error:', error);
       return res.status(500).json({
         success: false,
         message: 'Authorization check failed'

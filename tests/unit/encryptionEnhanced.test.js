@@ -2,6 +2,7 @@
 // Enhanced tests for encryption utility covering all error paths
 
 const crypto = require('crypto');
+const logger = require('../../server/utils/logger');
 const encryptionUtil = require('../../server/utils/encryption');
 
 describe('Encryption Utility - Enhanced Coverage', () => {
@@ -16,7 +17,7 @@ describe('Encryption Utility - Enhanced Coverage', () => {
     process.env.ENCRYPTION_KEY = crypto.randomBytes(32).toString('hex');
 
     // Spy on console.error
-    consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+    consoleErrorSpy = jest.spyOn(logger, 'error').mockImplementation();
   });
 
   afterEach(() => {

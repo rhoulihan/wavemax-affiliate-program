@@ -14,6 +14,7 @@ const { escapeRegex } = require('../utils/securityUtils');
 const ControllerHelpers = require('../utils/controllerHelpers');
 const AuthorizationHelpers = require('../middleware/authorizationHelpers');
 const Formatters = require('../utils/formatters');
+const logger = require('../utils/logger');
 const { calculateDeliveryFee } = require('../services/orderPricingService');
 
 // ============================================================================
@@ -63,11 +64,11 @@ exports.createOrder = ControllerHelpers.asyncWrapper(async (req, res) => {
   const { validationResult } = require('express-validator');
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    console.log('Validation errors:', errors.array());
+    logger.info('Validation errors:', errors.array());
     return ControllerHelpers.sendError(res, 'Validation failed', 400, errors.array());
   }
 
-  console.log('Creating order with data:', JSON.stringify(req.body, null, 2));
+  logger.info('Creating order with data:', JSON.stringify(req.body, null, 2));
 
   // Validate required fields using ControllerHelpers
   const requiredFields = ['customerId', 'affiliateId', 'pickupDate', 'pickupTime'];
@@ -88,17 +89,17 @@ exports.createOrder = ControllerHelpers.asyncWrapper(async (req, res) => {
     addOns
   } = req.body;
 
-  console.log('AddOns received:', addOns);
+  logger.info('AddOns received:', addOns);
 
   // Verify customer exists
-  console.log('Looking for customer with ID:', customerId);
+  logger.info('Looking for customer with ID:', customerId);
   const customer = await Customer.findOne({ customerId });
 
   if (!customer) {
-    console.log('Customer not found with ID:', customerId);
+    logger.info('Customer not found with ID:', customerId);
     return ControllerHelpers.sendError(res, 'Invalid customer ID', 400);
   }
-  console.log('Found customer:', customer.firstName, customer.lastName);
+  logger.info('Found customer:', customer.firstName, customer.lastName);
 
   // Check if customer already has an active order
   const activeOrder = await Order.findOne({
@@ -107,7 +108,7 @@ exports.createOrder = ControllerHelpers.asyncWrapper(async (req, res) => {
   });
 
   if (activeOrder) {
-    console.log('Customer already has an active order:', activeOrder.orderId);
+    logger.info('Customer already has an active order:', activeOrder.orderId);
     return ControllerHelpers.sendError(res, 
       'You already have an active order. Please wait for it to be completed before placing a new order.', 
       400, 
@@ -119,14 +120,14 @@ exports.createOrder = ControllerHelpers.asyncWrapper(async (req, res) => {
   }
 
   // Verify affiliate exists
-  console.log('Looking for affiliate with ID:', affiliateId);
+  logger.info('Looking for affiliate with ID:', affiliateId);
   const affiliate = await Affiliate.findOne({ affiliateId });
 
   if (!affiliate) {
-    console.log('Affiliate not found with ID:', affiliateId);
+    logger.info('Affiliate not found with ID:', affiliateId);
     return ControllerHelpers.sendError(res, 'Invalid affiliate ID', 400);
   }
-  console.log('Found affiliate:', affiliate.firstName, affiliate.lastName);
+  logger.info('Found affiliate:', affiliate.firstName, affiliate.lastName);
 
   // Validate affiliate availability for the requested pickup slot
   if (affiliate.availabilitySchedule && affiliate.isAvailable) {
@@ -134,7 +135,7 @@ exports.createOrder = ControllerHelpers.asyncWrapper(async (req, res) => {
     const isAvailable = affiliate.isAvailable(pickupDateObj, pickupTime);
 
     if (!isAvailable) {
-      console.log(`Affiliate ${affiliateId} is not available for ${pickupDate} during ${pickupTime}`);
+      logger.info(`Affiliate ${affiliateId} is not available for ${pickupDate} during ${pickupTime}`);
       const formattedDate = pickupDateObj.toLocaleDateString('en-US', {
         weekday: 'long',
         year: 'numeric',
@@ -150,7 +151,7 @@ exports.createOrder = ControllerHelpers.asyncWrapper(async (req, res) => {
         }
       });
     }
-    console.log(`Availability check passed: ${pickupDate} ${pickupTime}`);
+    logger.info(`Availability check passed: ${pickupDate} ${pickupTime}`);
   }
 
   // Check authorization using AuthorizationHelpers
@@ -171,7 +172,7 @@ exports.createOrder = ControllerHelpers.asyncWrapper(async (req, res) => {
     let wdfCreditToApply = 0;
     if (customer.wdfCredit && customer.wdfCredit !== 0) {
       wdfCreditToApply = customer.wdfCredit;
-      console.log(`Applying WDF credit of $${wdfCreditToApply} to order for customer ${customerId}`);
+      logger.info(`Applying WDF credit of $${wdfCreditToApply} to order for customer ${customerId}`);
     }
 
     // Create new order — post-weigh payment workflow
@@ -203,7 +204,7 @@ exports.createOrder = ControllerHelpers.asyncWrapper(async (req, res) => {
       paymentAmount: 0
     };
 
-    console.log('Creating order with data:', JSON.stringify(orderData, null, 2));
+    logger.info('Creating order with data:', JSON.stringify(orderData, null, 2));
     const newOrder = new Order(orderData);
     await newOrder.save();
 
@@ -212,14 +213,14 @@ exports.createOrder = ControllerHelpers.asyncWrapper(async (req, res) => {
       customer.wdfCredit = 0;
       customer.wdfCreditUpdatedAt = new Date();
       await customer.save();
-      console.log(`Reset WDF credit for customer ${customerId} after applying to order ${newOrder.orderId}`);
+      logger.info(`Reset WDF credit for customer ${customerId} after applying to order ${newOrder.orderId}`);
     }
 
     // Update customer isActive to true on first order
     if (!customer.isActive) {
       customer.isActive = true;
       await customer.save();
-      console.log('Updated customer isActive status to true for customer:', customer.customerId);
+      logger.info('Updated customer isActive status to true for customer:', customer.customerId);
     }
 
     // Send notification emails (don't let email failures stop the order)
@@ -227,7 +228,7 @@ exports.createOrder = ControllerHelpers.asyncWrapper(async (req, res) => {
       await emailService.sendCustomerOrderConfirmationEmail(customer, newOrder, affiliate);
       await emailService.sendAffiliateNewOrderEmail(affiliate, customer, newOrder);
     } catch (emailError) {
-      console.error('Failed to send notification emails:', emailError);
+      logger.error('Failed to send notification emails:', emailError);
       // Continue with the response even if emails fail
     }
 
@@ -407,7 +408,7 @@ exports.updateOrderStatus = async (req, res) => {
         order.paymentQRCodes = qrCodes;
         order.paymentRequestedAt = new Date();
         
-        console.log(`Generated V2 payment links for order ${order.orderId} - Amount: $${amount}`);
+        logger.info(`Generated V2 payment links for order ${order.orderId} - Amount: $${amount}`);
 
         // Send payment request email to customer
         try {
@@ -418,9 +419,9 @@ exports.updateOrderStatus = async (req, res) => {
             paymentLinks: links,
             qrCodes
           });
-          console.log(`V2 payment request email sent to ${customer.email} for order ${order.orderId}`);
+          logger.info(`V2 payment request email sent to ${customer.email} for order ${order.orderId}`);
         } catch (emailError) {
-          console.error('Error sending payment request email:', emailError);
+          logger.error('Error sending payment request email:', emailError);
         }
       }
     }
@@ -447,7 +448,7 @@ exports.updateOrderStatus = async (req, res) => {
       message: 'Order status updated successfully!'
     });
   } catch (error) {
-    console.error('Order status update error:', error);
+    logger.error('Order status update error:', error);
     res.status(500).json({
       success: false,
       message: 'An error occurred while updating the order status'
@@ -500,7 +501,7 @@ exports.cancelOrder = ControllerHelpers.asyncWrapper(async (req, res) => {
       await emailService.sendAffiliateOrderCancellationEmail(affiliate, order, customer);
     }
   } catch (emailError) {
-    console.error('Failed to send cancellation emails:', emailError);
+    logger.error('Failed to send cancellation emails:', emailError);
     // Continue with success response even if emails fail
   }
 
@@ -526,7 +527,7 @@ exports.bulkUpdateOrderStatus = async (req, res) => {
     res.status(200).json({ success: true, ...summary });
   } catch (err) {
     if (err.isBulkError) return res.status(err.status || 400).json({ success: false, message: err.message });
-    console.error('Bulk update order status error:', err);
+    logger.error('Bulk update order status error:', err);
     res.status(500).json({ success: false, message: 'An error occurred while updating orders' });
   }
 };
@@ -544,7 +545,7 @@ exports.bulkCancelOrders = async (req, res) => {
     res.status(200).json({ success: true, ...summary });
   } catch (err) {
     if (err.isBulkError) return res.status(err.status || 400).json({ success: false, message: err.message });
-    console.error('Bulk cancel orders error:', err);
+    logger.error('Bulk cancel orders error:', err);
     res.status(500).json({ success: false, message: 'An error occurred while cancelling orders' });
   }
 };
@@ -576,7 +577,7 @@ exports.exportOrders = async (req, res) => {
     }
   } catch (err) {
     if (err.isExportError) return res.status(err.status || 400).json({ success: false, message: err.message });
-    console.error('Export orders error:', err);
+    logger.error('Export orders error:', err);
     res.status(500).json({ success: false, message: 'An error occurred while exporting orders' });
   }
 };
@@ -671,7 +672,7 @@ exports.updatePaymentStatus = async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Update payment status error:', error);
+    logger.error('Update payment status error:', error);
     res.status(500).json({
       success: false,
       message: 'An error occurred while updating payment status'
@@ -853,7 +854,7 @@ exports.getOrderStatistics = async (req, res) => {
       statistics
     });
   } catch (error) {
-    console.error('Get order statistics error:', error);
+    logger.error('Get order statistics error:', error);
     res.status(500).json({
       success: false,
       message: 'An error occurred while retrieving statistics'
@@ -920,7 +921,7 @@ exports.confirmPayment = async (req, res) => {
     }
     
     // Log customer confirmation
-    console.log(`Customer confirmed payment for order ${order._id}:`, {
+    logger.info(`Customer confirmed payment for order ${order._id}:`, {
       paymentMethod,
       paymentDetails
     });
@@ -955,7 +956,7 @@ exports.confirmPayment = async (req, res) => {
     });
     
   } catch (error) {
-    console.error('Payment confirmation error:', error);
+    logger.error('Payment confirmation error:', error);
     res.status(500).json({
       success: false,
       message: 'An error occurred while processing your payment confirmation'
@@ -1000,7 +1001,7 @@ exports.verifyPaymentManually = async (req, res) => {
       const affiliate = await Affiliate.findOne({ affiliateId: order.affiliateId });
       
       // Send notifications
-      console.log(`Sending pickup notification after manual verification for order ${orderId}`);
+      logger.info(`Sending pickup notification after manual verification for order ${orderId}`);
       // await emailService.sendPickupReadyNotification(order, customer, affiliate);
     }
     
@@ -1015,7 +1016,7 @@ exports.verifyPaymentManually = async (req, res) => {
     });
     
   } catch (error) {
-    console.error('Manual payment verification error:', error);
+    logger.error('Manual payment verification error:', error);
     res.status(500).json({
       success: false,
       message: 'An error occurred while verifying payment'
@@ -1271,7 +1272,7 @@ exports.createImmediateOrder = ControllerHelpers.asyncWrapper(async (req, res) =
     // Send confirmation to customer
     await emailService.sendCustomerOrderConfirmationEmail(customer, newOrder, affiliate);
   } catch (emailError) {
-    console.error('Failed to send immediate pickup notification emails:', emailError);
+    logger.error('Failed to send immediate pickup notification emails:', emailError);
     // Continue even if emails fail
   }
 

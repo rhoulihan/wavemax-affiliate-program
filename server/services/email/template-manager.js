@@ -9,6 +9,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const logger = require('../../utils/logger');
 const { promisify } = require('util');
 
 const readFile = promisify(fs.readFile);
@@ -26,12 +27,12 @@ async function loadTemplate(templateName, language = 'en') {
     try {
       return await readFile(langPath, 'utf8');
     } catch (langError) {
-      console.log(`Language-specific template not found for ${language}/${templateName}, using default`);
+      logger.info(`Language-specific template not found for ${language}/${templateName}, using default`);
       const defaultPath = path.join(TEMPLATE_ROOT, `${templateName}.html`);
       return await readFile(defaultPath, 'utf8');
     }
   } catch (error) {
-    console.error(`Error loading email template ${templateName}:`, error);
+    logger.error(`Error loading email template ${templateName}:`, error);
     return FALLBACK_TEMPLATE;
   }
 }
@@ -49,7 +50,7 @@ function fillTemplate(template, data) {
     for (const key of candidates) {
       if (data[key] !== undefined) return data[key];
     }
-    console.warn(`Email template placeholder [${placeholder}] not found in data`);
+    logger.warn(`Email template placeholder [${placeholder}] not found in data`);
     return '';
   });
 }

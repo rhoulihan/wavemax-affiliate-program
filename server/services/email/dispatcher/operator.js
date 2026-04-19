@@ -1,3 +1,4 @@
+const logger = require('../../../utils/logger');
 // Operator email dispatchers.
 // Extracted from utils/emailService.js in Phase 2.
 
@@ -122,7 +123,7 @@ exports.sendOperatorWelcomeEmail = async (operator, temporaryPin) => {
       html
     );
   } catch (error) {
-    console.error('Error sending operator welcome email:', error);
+    logger.error('Error sending operator welcome email:', error);
   }
 };
 
@@ -238,7 +239,7 @@ exports.sendOperatorPinResetEmail = async (operator, newPin) => {
       html
     );
   } catch (error) {
-    console.error('Error sending operator PIN reset email:', error);
+    logger.error('Error sending operator PIN reset email:', error);
   }
 };
 
@@ -359,7 +360,7 @@ exports.sendOperatorShiftReminderEmail = async (operator) => {
       html
     );
   } catch (error) {
-    console.error('Error sending operator shift reminder email:', error);
+    logger.error('Error sending operator shift reminder email:', error);
   }
 };
 
@@ -369,7 +370,7 @@ exports.sendOperatorShiftReminderEmail = async (operator) => {
 exports.sendOperatorPasswordResetEmail = async (operator, resetUrl) => {
   // Operators don't have passwords, they use PINs
   // This method is here for interface compatibility but should not be called
-  console.error('Operators use PINs, not passwords. Use sendOperatorPinResetEmail instead.');
+  logger.error('Operators use PINs, not passwords. Use sendOperatorPinResetEmail instead.');
 };
 
 module.exports = exports;

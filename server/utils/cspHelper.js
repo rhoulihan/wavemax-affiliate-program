@@ -1,6 +1,7 @@
 // CSP Helper Utilities for WaveMAX Affiliate Program
 const fs = require('fs').promises;
 const path = require('path');
+const logger = require('./logger');
 
 /**
  * Injects CSP nonce into HTML content
@@ -53,7 +54,7 @@ const readHTMLWithNonce = async (filePath, nonce) => {
     const content = await fs.readFile(filePath, 'utf8');
     return injectNonce(content, nonce);
   } catch (error) {
-    console.error(`Error reading HTML file ${filePath}:`, error);
+    logger.error(`Error reading HTML file ${filePath}:`, error);
     throw error;
   }
 };
@@ -67,14 +68,14 @@ const serveHTMLWithNonce = (htmlPath) => {
   return async (req, res) => {
     try {
       const fullPath = path.join(__dirname, '../../public', htmlPath);
-      console.log(`[CSP] Serving HTML with nonce: ${htmlPath}, nonce: ${res.locals.cspNonce}`);
+      logger.info(`[CSP] Serving HTML with nonce: ${htmlPath}, nonce: ${res.locals.cspNonce}`);
       const html = await readHTMLWithNonce(fullPath, res.locals.cspNonce);
       res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
       res.setHeader('Pragma', 'no-cache');
       res.setHeader('Expires', '0');
       res.type('html').send(html);
     } catch (error) {
-      console.error('Error serving HTML with nonce:', error);
+      logger.error('Error serving HTML with nonce:', error);
       res.status(500).send('Internal Server Error');
     }
   };

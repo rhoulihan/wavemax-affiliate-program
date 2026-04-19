@@ -3,6 +3,7 @@
 const express = require('express');
 const router = express.Router();
 const customerController = require('../controllers/customerController');
+const logger = require('../utils/logger');
 const { authenticate, authorize } = require('../middleware/auth');
 const { checkRole } = require('../middleware/rbac');
 const { body } = require('express-validator');
@@ -14,7 +15,7 @@ const { registrationAddressValidation, profileAddressValidation, handleValidatio
 const conditionalRegistrationLimiter = (req, res, next) => {
   // Skip rate limiting if this is a post-payment registration
   if (req.body.paymentConfirmed === true) {
-    console.log('Skipping rate limit for post-payment registration');
+    logger.info('Skipping rate limit for post-payment registration');
     return next();
   }
   

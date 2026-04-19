@@ -46,6 +46,7 @@ jest.mock('fs', () => {
 });
 
 const fs = require('fs').promises;
+let logger;
 const path = require('path');
 
 describe('Email Service Integration', () => {
@@ -60,6 +61,7 @@ describe('Email Service Integration', () => {
   beforeEach(() => {
     // Clear module cache before each test
     jest.resetModules();
+    logger = require('../../server/utils/logger');
     
     // Set up test environment - these are already set in setup.js
     // but we ensure they're correct for our tests
@@ -71,6 +73,7 @@ describe('Email Service Integration', () => {
   afterEach(() => {
     process.env = originalEnv;
     jest.resetModules();
+    logger = require('../../server/utils/logger');
   });
 
   describe('Email Service Configuration', () => {
@@ -120,7 +123,7 @@ describe('Email Service Integration', () => {
     let consoleSpy;
 
     beforeEach(() => {
-      consoleSpy = jest.spyOn(console, 'log').mockImplementation();
+      consoleSpy = jest.spyOn(logger, 'info').mockImplementation();
       emailService = require('../../server/utils/emailService');
     });
 
@@ -270,7 +273,7 @@ describe('Email Service Integration', () => {
       };
 
       // Console provider doesn't throw on missing email, it just logs
-      const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
+      const consoleSpy = jest.spyOn(logger, 'error').mockImplementation();
       
       try {
         await emailService.sendAffiliateWelcomeEmail(invalidAffiliate);
@@ -295,7 +298,7 @@ describe('Email Service Integration', () => {
         lastName: 'Affiliate'
       };
 
-      const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
+      const consoleSpy = jest.spyOn(logger, 'info').mockImplementation();
       
       // Console provider will still "send" but to invalid address
       await emailService.sendCustomerWelcomeEmail(invalidCustomer, affiliate);
@@ -315,7 +318,7 @@ describe('Email Service Integration', () => {
     });
 
     it('should handle multiple email sends efficiently', async () => {
-      const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
+      const consoleSpy = jest.spyOn(logger, 'info').mockImplementation();
       
       const recipients = [
         { email: 'user1@example.com', firstName: 'User', lastName: 'One' },

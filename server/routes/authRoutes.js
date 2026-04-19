@@ -3,6 +3,7 @@
 const express = require('express');
 const router = express.Router();
 const authController = require('../controllers/authController');
+const logger = require('../utils/logger');
 const { authenticate } = require('../middleware/auth');
 const { authLimiter, passwordResetLimiter, registrationLimiter, adminLoginLimiter } = require('../middleware/rateLimiting');
 const { body, validationResult } = require('express-validator');
@@ -177,7 +178,7 @@ router.get('/oauth-session/:sessionId',
  * @access  Public
  */
 router.get('/test-oauth-callback', async (req, res) => {
-  console.log('[Test] OAuth callback test route hit');
+  logger.info('[Test] OAuth callback test route hit');
   res.send('OAuth callback test successful');
 });
 

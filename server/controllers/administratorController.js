@@ -18,6 +18,7 @@ const { escapeRegex } = require('../utils/securityUtils');
 const crypto = require('crypto');
 const mongoose = require('mongoose');
 const encryptionUtil = require('../utils/encryption');
+const logger = require('../utils/logger');
 
 // Administrator Management
 
@@ -72,7 +73,7 @@ exports.getAdministrators = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Error fetching administrators:', error);
+    logger.error('Error fetching administrators:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to fetch administrators'
@@ -110,7 +111,7 @@ exports.getAdministratorById = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Error fetching administrator:', error);
+    logger.error('Error fetching administrator:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to fetch administrator'
@@ -189,7 +190,7 @@ exports.createAdministrator = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Error creating administrator:', error);
+    logger.error('Error creating administrator:', error);
 
     // Handle validation errors from model pre-save hooks
     if (error.name === 'ValidationError') {
@@ -314,7 +315,7 @@ exports.updateAdministrator = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Error updating administrator:', error);
+    logger.error('Error updating administrator:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to update administrator'
@@ -386,7 +387,7 @@ exports.deleteAdministrator = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Error deleting administrator:', error);
+    logger.error('Error deleting administrator:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to delete administrator'
@@ -452,7 +453,7 @@ exports.resetAdministratorPassword = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Error resetting administrator password:', error);
+    logger.error('Error resetting administrator password:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to reset administrator password'
@@ -545,7 +546,7 @@ exports.changeAdministratorPassword = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Error changing administrator password:', error);
+    logger.error('Error changing administrator password:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to change password'
@@ -585,7 +586,7 @@ exports.getPermissions = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Error fetching permissions:', error);
+    logger.error('Error fetching permissions:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to fetch permissions'
@@ -673,7 +674,7 @@ exports.createOperator = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Error creating operator:', error);
+    logger.error('Error creating operator:', error);
 
     // Handle validation errors from model pre-save hooks
     if (error.name === 'ValidationError') {
@@ -785,7 +786,7 @@ exports.getOperators = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Error fetching operators:', error);
+    logger.error('Error fetching operators:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to fetch operators'
@@ -850,7 +851,7 @@ exports.getOperatorById = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Error fetching operator:', error);
+    logger.error('Error fetching operator:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to fetch operator details'
@@ -927,7 +928,7 @@ exports.updateOperator = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Error updating operator:', error);
+    logger.error('Error updating operator:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to update operator'
@@ -988,7 +989,7 @@ exports.deactivateOperator = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Error deactivating operator:', error);
+    logger.error('Error deactivating operator:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to deactivate operator'
@@ -1035,7 +1036,7 @@ exports.resetOperatorPassword = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Error resetting operator password:', error);
+    logger.error('Error resetting operator password:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to reset operator password'
@@ -1250,7 +1251,7 @@ exports.getDashboard = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Error fetching dashboard data:', error);
+    logger.error('Error fetching dashboard data:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to fetch dashboard data'
@@ -1382,7 +1383,7 @@ exports.getOrderAnalytics = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Error fetching order analytics:', error);
+    logger.error('Error fetching order analytics:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to fetch order analytics'
@@ -1511,7 +1512,7 @@ exports.getOperatorAnalytics = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Error fetching operator analytics:', error);
+    logger.error('Error fetching operator analytics:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to fetch operator analytics'
@@ -1614,7 +1615,7 @@ exports.getAffiliateAnalytics = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Error fetching affiliate analytics:', error);
+    logger.error('Error fetching affiliate analytics:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to fetch affiliate analytics'
@@ -1679,7 +1680,7 @@ exports.exportReport = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Error exporting report:', error);
+    logger.error('Error exporting report:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to export report'
@@ -1748,7 +1749,7 @@ exports.getAffiliatesList = async (req, res) => {
       }))
     });
   } catch (error) {
-    console.error('Error fetching affiliates list:', error);
+    logger.error('Error fetching affiliates list:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to fetch affiliates list',
@@ -1790,7 +1791,7 @@ exports.lockAffiliatePayments = async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Error locking affiliate payments:', error);
+    logger.error('Error locking affiliate payments:', error);
     res.status(500).json({ success: false, message: 'Failed to lock affiliate payments', error: error.message });
   }
 };
@@ -1841,7 +1842,7 @@ exports.unlockAffiliatePayments = async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Error unlocking affiliate payments:', error);
+    logger.error('Error unlocking affiliate payments:', error);
     res.status(500).json({ success: false, message: 'Failed to unlock affiliate payments', error: error.message });
   }
 };
@@ -1868,7 +1869,7 @@ exports.getSystemConfig = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Error fetching system config:', error);
+    logger.error('Error fetching system config:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to fetch system configuration'
@@ -1900,7 +1901,7 @@ exports.updateSystemConfig = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Error updating system config:', error);
+    logger.error('Error updating system config:', error);
     res.status(500).json({
       success: false,
       message: error.message || 'Failed to update system configuration'
@@ -1951,7 +1952,7 @@ exports.getSystemHealth = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Error checking system health:', error);
+    logger.error('Error checking system health:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to check system health',
@@ -2187,7 +2188,7 @@ exports.updateOperatorStats = async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Error updating operator stats:', error);
+    logger.error('Error updating operator stats:', error);
     res.status(500).json({
       success: false,
       message: 'An error occurred while updating operator statistics'
@@ -2216,7 +2217,7 @@ exports.getAvailableOperators = async (req, res) => {
       operators
     });
   } catch (error) {
-    console.error('Error getting available operators:', error);
+    logger.error('Error getting available operators:', error);
     res.status(500).json({
       success: false,
       message: 'An error occurred while fetching available operators'
@@ -2266,7 +2267,7 @@ exports.deleteOperator = async (req, res) => {
       message: 'Operator deleted successfully'
     });
   } catch (error) {
-    console.error('Error deleting operator:', error);
+    logger.error('Error deleting operator:', error);
     res.status(500).json({
       success: false,
       message: 'An error occurred while deleting the operator'
@@ -2314,7 +2315,7 @@ exports.resetOperatorPin = async (req, res) => {
       message: 'PIN reset successfully'
     });
   } catch (error) {
-    console.error('Error resetting operator PIN:', error);
+    logger.error('Error resetting operator PIN:', error);
     res.status(500).json({
       success: false,
       message: 'An error occurred while resetting the PIN'
@@ -2368,7 +2369,7 @@ exports.updateOperatorSelf = async (req, res) => {
       operator: responseData
     });
   } catch (error) {
-    console.error('Error updating operator profile:', error);
+    logger.error('Error updating operator profile:', error);
     res.status(500).json({
       success: false,
       message: 'An error occurred while updating the profile'
@@ -2400,7 +2401,7 @@ exports.getOperatorSelf = async (req, res) => {
       operator: responseData
     });
   } catch (error) {
-    console.error('Error getting operator profile:', error);
+    logger.error('Error getting operator profile:', error);
     res.status(500).json({
       success: false,
       message: 'An error occurred while fetching the profile'
@@ -2548,7 +2549,7 @@ exports.getEnvironmentVariables = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Error fetching environment variables:', error);
+    logger.error('Error fetching environment variables:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to fetch environment variables'
@@ -2565,7 +2566,7 @@ exports.resetRateLimits = async (req, res) => {
     const db = mongoose.connection.db;
     
     if (!db) {
-      console.error('Database connection not available');
+      logger.error('Database connection not available');
       return res.status(500).json({
         success: false,
         message: 'Database connection not available'
@@ -2607,7 +2608,7 @@ exports.resetRateLimits = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Error resetting rate limits:', error);
+    logger.error('Error resetting rate limits:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to reset rate limits',
@@ -2648,7 +2649,7 @@ exports.getBetaRequests = async (req, res) => {
       }))
     });
   } catch (error) {
-    console.error('Error fetching beta requests:', error);
+    logger.error('Error fetching beta requests:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to fetch beta requests'
@@ -2704,7 +2705,7 @@ exports.sendBetaWelcomeEmail = async (req, res) => {
       message: 'Welcome email sent successfully'
     });
   } catch (error) {
-    console.error('Error sending beta welcome email:', error);
+    logger.error('Error sending beta welcome email:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to send welcome email'
@@ -2734,7 +2735,7 @@ exports.checkAffiliateExists = async (req, res) => {
       registeredAt: affiliate?.createdAt || null
     });
   } catch (error) {
-    console.error('Error checking affiliate existence:', error);
+    logger.error('Error checking affiliate existence:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to check affiliate existence'
@@ -2814,7 +2815,7 @@ exports.sendBetaReminderEmail = async (req, res) => {
       message: 'Reminder email sent successfully'
     });
   } catch (error) {
-    console.error('Error sending beta reminder email:', error);
+    logger.error('Error sending beta reminder email:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to send reminder email'

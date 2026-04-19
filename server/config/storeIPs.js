@@ -1,3 +1,4 @@
+const logger = require('../utils/logger');
 // Store IP Configuration for WaveMAX Affiliate Program
 // These IP addresses are trusted store locations where operators work
 // Sessions from these IPs will be automatically renewed
@@ -91,7 +92,7 @@ module.exports = {
       // Check if IP is in range
       return (ipInt & mask) === (netInt & mask);
     } catch (error) {
-      console.error('Error checking IP range:', error);
+      logger.error('Error checking IP range:', error);
       return false;
     }
   }

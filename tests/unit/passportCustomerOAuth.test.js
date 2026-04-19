@@ -1,5 +1,6 @@
 // Tests for passport customer OAuth flow
 const passport = require('passport');
+let logger;
 
 describe('Passport Customer OAuth Flow', () => {
   let originalEnv;
@@ -20,9 +21,10 @@ describe('Passport Customer OAuth Flow', () => {
 
     // Clear module cache
     jest.resetModules();
+    logger = require('../../server/utils/logger');
 
     // Mock console
-    consoleLogSpy = jest.spyOn(console, 'log').mockImplementation();
+    consoleLogSpy = jest.spyOn(logger, 'info').mockImplementation();
     
     // Reset strategies
     strategies = {};

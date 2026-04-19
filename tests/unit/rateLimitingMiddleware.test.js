@@ -33,6 +33,7 @@ jest.mock('rate-limit-mongo', () => {
 });
 
 const request = require('supertest');
+let logger;
 const express = require('express');
 
 describe('Rate Limiting Middleware', () => {
@@ -52,6 +53,7 @@ describe('Rate Limiting Middleware', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     jest.resetModules();
+    logger = require('../../server/utils/logger');
   });
   
   describe('createMongoStore', () => {
@@ -99,12 +101,12 @@ describe('Rate Limiting Middleware', () => {
       process.env.NODE_ENV = 'production';
       process.env.MONGODB_URI = 'invalid-uri';
       
-      // Spy on console.error
-      const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
-      
-      // Clear module cache to ensure fresh require
+      // Clear module cache to ensure fresh require, then spy on the
+      // same cached logger the SUT will later resolve via require.
       jest.resetModules();
-      
+      logger = require('../../server/utils/logger');
+      const consoleErrorSpy = jest.spyOn(logger, 'error').mockImplementation();
+
       // Make MongoStore throw error
       jest.doMock('rate-limit-mongo', () => {
         return jest.fn().mockImplementation(() => {

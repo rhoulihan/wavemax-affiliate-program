@@ -1,3 +1,4 @@
+let logger;
 // tests/unit/passportConfigFixed.test.js
 // Tests for passport OAuth strategies configuration
 
@@ -20,10 +21,11 @@ describe('Passport Configuration Tests', () => {
 
     // Clear module cache
     jest.resetModules();
+    logger = require('../../server/utils/logger');
 
     // Mock console methods
-    consoleLogSpy = jest.spyOn(console, 'log').mockImplementation();
-    consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+    consoleLogSpy = jest.spyOn(logger, 'info').mockImplementation();
+    consoleErrorSpy = jest.spyOn(logger, 'error').mockImplementation();
 
     // Reset strategies
     strategies = {};

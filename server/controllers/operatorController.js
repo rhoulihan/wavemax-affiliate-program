@@ -78,7 +78,7 @@ async function generatePaymentURLs(order) {
   for (const [service, url] of Object.entries(qrUrls)) {
     try {
       // Log the URL being encoded in the QR code
-      console.log(`Generating ${service} QR code for URL:`, url);
+      logger.info(`Generating ${service} QR code for URL:`, url);
       
       // Generate QR code as base64 string
       qrCodes[service] = await QRCode.toDataURL(url, {
@@ -689,7 +689,7 @@ exports.scanCustomer = async (req, res) => {
     let { customerId, bagId } = req.body;
     const operatorId = req.user.id;
 
-    console.log('scanCustomer called with:', { customerId, bagId });
+    logger.info('scanCustomer called with:', { customerId, bagId });
 
     // Handle QR code format: cust-UUID-bagNumber or CUST-UUID-bagNumber
     let cleanCustomerId = customerId;
@@ -700,7 +700,7 @@ exports.scanCustomer = async (req, res) => {
     if (bagNumberMatch) {
       cleanCustomerId = bagNumberMatch[1];
       extractedBagNumber = parseInt(bagNumberMatch[2]);
-      console.log(`Extracted customer ID: ${cleanCustomerId}, bag number: ${extractedBagNumber}`);
+      logger.info(`Extracted customer ID: ${cleanCustomerId}, bag number: ${extractedBagNumber}`);
     }
     
     // Normalize the customer ID format (handle case differences)
@@ -708,7 +708,7 @@ exports.scanCustomer = async (req, res) => {
     cleanCustomerId = cleanCustomerId.replace(/^cust-/i, 'CUST-').toLowerCase();
     cleanCustomerId = cleanCustomerId.replace(/^cust-/, 'CUST-'); // Ensure CUST is uppercase
     
-    console.log(`Normalized customer ID: ${cleanCustomerId}`);
+    logger.info(`Normalized customer ID: ${cleanCustomerId}`);
 
     // Find customer (case-insensitive search as fallback)
     let customer = await Customer.findOne({ customerId: cleanCustomerId });
@@ -811,10 +811,10 @@ exports.scanCustomer = async (req, res) => {
         await currentOrder.save();
         bagRegistered = true;
         
-        console.log(`Bag ${bagId} registered for order ${currentOrder.orderId}. Total bags scanned: ${currentOrder.bags.length}/${currentOrder.numberOfBags}`);
+        logger.info(`Bag ${bagId} registered for order ${currentOrder.orderId}. Total bags scanned: ${currentOrder.bags.length}/${currentOrder.numberOfBags}`);
       } else {
         bagAlreadyExists = true;
-        console.log(`Bag ${bagId} already exists in order ${currentOrder.orderId}`);
+        logger.info(`Bag ${bagId} already exists in order ${currentOrder.orderId}`);
       }
     }
     
@@ -867,7 +867,7 @@ exports.scanCustomer = async (req, res) => {
 
     res.json(response);
   } catch (error) {
-    console.error('Error in scanCustomer:', error);
+    logger.error('Error in scanCustomer:', error);
     if (logger && logger.error) {
       logger.error('Error scanning customer card:', error);
     }
@@ -1225,7 +1225,7 @@ exports.scanProcessed = async (req, res) => {
     const { qrCode } = req.body;
     const operatorId = req.user.id;
     
-    console.log('scanProcessed called with:', { qrCode, operatorId });
+    logger.info('scanProcessed called with:', { qrCode, operatorId });
     
     // Parse QR code format: customerId#bagId
     if (!qrCode || !qrCode.includes('#')) {
@@ -1387,7 +1387,7 @@ exports.scanProcessed = async (req, res) => {
     }
     
   } catch (error) {
-    console.error('Error in scanProcessed:', error);
+    logger.error('Error in scanProcessed:', error);
     logger.error('Error scanning processed bag:', error);
     res.status(500).json({ 
       success: false,
@@ -1477,7 +1477,7 @@ exports.completePickup = async (req, res) => {
     const { bagIds, orderId } = req.body;
     const operatorId = req.user.id;
     
-    console.log('completePickup called with:', { bagIds, orderId, operatorId });
+    logger.info('completePickup called with:', { bagIds, orderId, operatorId });
 
     const order = await Order.findOne({ orderId });
 
@@ -1513,7 +1513,7 @@ exports.completePickup = async (req, res) => {
 
     // Update all bags to completed
     const now = new Date();
-    console.log('Updating bags to completed. Current bag statuses:', order.bags.map(b => ({ bagId: b.bagId, status: b.status })));
+    logger.info('Updating bags to completed. Current bag statuses:', order.bags.map(b => ({ bagId: b.bagId, status: b.status })));
     
     for (const bag of order.bags) {
       bag.status = 'completed';
@@ -1526,16 +1526,16 @@ exports.completePickup = async (req, res) => {
     order.completedAt = now;
     order.bagsPickedUp = order.bags.length;
     
-    console.log('Before save - Order status:', order.status);
-    console.log('Before save - Bag statuses:', order.bags.map(b => ({ bagId: b.bagId, status: b.status })));
+    logger.info('Before save - Order status:', order.status);
+    logger.info('Before save - Bag statuses:', order.bags.map(b => ({ bagId: b.bagId, status: b.status })));
 
     try {
       await order.save();
       
-      console.log('After save - Order status:', order.status);
-      console.log('After save - Bag statuses:', order.bags.map(b => ({ bagId: b.bagId, status: b.status })));
+      logger.info('After save - Order status:', order.status);
+      logger.info('After save - Bag statuses:', order.bags.map(b => ({ bagId: b.bagId, status: b.status })));
     } catch (saveError) {
-      console.error('Error saving order:', saveError);
+      logger.error('Error saving order:', saveError);
       return res.status(500).json({
         success: false,
         error: 'Failed to save order',
@@ -1570,7 +1570,7 @@ exports.completePickup = async (req, res) => {
             businessName: affiliate ? affiliate.businessName : null
           }
         );
-        console.log(`Delivery notification sent to customer ${customer.email}`);
+        logger.info(`Delivery notification sent to customer ${customer.email}`);
       }
       
       // 2. Send commission earned notification to affiliate
@@ -1582,11 +1582,11 @@ exports.completePickup = async (req, res) => {
             order,
             customer
           );
-          console.log(`Commission notification sent to affiliate ${affiliate.email}`);
+          logger.info(`Commission notification sent to affiliate ${affiliate.email}`);
         }
       }
     } catch (emailError) {
-      console.error('Error sending email notifications:', emailError);
+      logger.error('Error sending email notifications:', emailError);
       // Don't fail the whole operation if email fails
     }
 
@@ -1605,8 +1605,8 @@ exports.completePickup = async (req, res) => {
       order: order
     });
   } catch (error) {
-    console.error('Error in completePickup:', error);
-    console.error('Error stack:', error.stack);
+    logger.error('Error in completePickup:', error);
+    logger.error('Error stack:', error.stack);
     logger.error('Error completing pickup:', error);
     res.status(500).json({
       success: false,
@@ -1770,7 +1770,7 @@ exports.getNewCustomersCount = async (req, res) => {
       count 
     });
   } catch (error) {
-    console.error('Get new customers count error:', error);
+    logger.error('Get new customers count error:', error);
     res.status(500).json({ 
       success: false,
       message: 'Error fetching new customers count' 

@@ -1,4 +1,5 @@
 const orderController = require('../../server/controllers/orderController');
+const logger = require('../../server/utils/logger');
 const Order = require('../../server/models/Order');
 const Customer = require('../../server/models/Customer');
 const Affiliate = require('../../server/models/Affiliate');
@@ -245,7 +246,7 @@ describe('Order Controller - Additional Coverage', () => {
       const next = jest.fn();
       Order.find = createFindMock([]);
 
-      const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
+      const consoleSpy = jest.spyOn(logger, 'error').mockImplementation();
 
       const handler = extractHandler(orderController.exportOrders);
       await handler(req, res, next);

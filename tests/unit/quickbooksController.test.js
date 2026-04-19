@@ -1,4 +1,5 @@
 const quickbooksController = require('../../server/controllers/quickbooksController');
+const logger = require('../../server/utils/logger');
 const Affiliate = require('../../server/models/Affiliate');
 const Order = require('../../server/models/Order');
 const Customer = require('../../server/models/Customer');
@@ -197,7 +198,7 @@ describe('QuickBooks Controller', () => {
         select: jest.fn().mockRejectedValue(new Error('Database error'))
       });
 
-      const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+      const consoleErrorSpy = jest.spyOn(logger, 'error').mockImplementation();
 
       await quickbooksController.exportVendors(req, res);
 

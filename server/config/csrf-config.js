@@ -5,6 +5,7 @@
 
 const csrf = require('csurf');
 const auditLogger = require('../utils/auditLogger');
+const logger = require('../utils/logger');
 
 // CSRF token generation middleware
 const csrfProtection = csrf({
@@ -230,12 +231,12 @@ const conditionalCsrf = (req, res, next) => {
   // For authenticated requests without session cookies (iframe context),
   // skip CSRF check as we rely on bearer token authentication
   if (req.headers.authorization && !req.headers.cookie?.includes('wavemax.sid')) {
-    console.log('Skipping CSRF for authenticated request without session cookie');
+    logger.info('Skipping CSRF for authenticated request without session cookie');
     return next();
   }
 
   // Debug session state
-  console.log('CSRF check for:', req.path, {
+  logger.info('CSRF check for:', req.path, {
     sessionID: req.sessionID,
     hasSession: !!req.session,
     sessionCookie: req.headers.cookie,
@@ -250,7 +251,7 @@ const conditionalCsrf = (req, res, next) => {
   csrfProtection(req, res, (err) => {
     if (err && err.code === 'EBADCSRFTOKEN') {
       // Log CSRF violation with more details
-      console.error('CSRF validation failed:', {
+      logger.error('CSRF validation failed:', {
         error: err.message,
         sessionID: req.sessionID,
         hasSession: !!req.session,
@@ -284,7 +285,7 @@ const conditionalCsrf = (req, res, next) => {
 
     if (err) {
       // Other CSRF errors
-      console.error('CSRF middleware error:', err);
+      logger.error('CSRF middleware error:', err);
       return res.status(500).json({
         success: false,
         error: 'Security validation error',
@@ -306,7 +307,7 @@ const csrfTokenEndpoint = (req, res, next) => {
     });
   }
 
-  console.log('CSRF token generation:', {
+  logger.info('CSRF token generation:', {
     sessionID: req.sessionID,
     hasSession: !!req.session,
     hasCsrfSecret: !!req.session?.csrfSecret
@@ -315,7 +316,7 @@ const csrfTokenEndpoint = (req, res, next) => {
   // Apply CSRF protection to generate token
   csrfProtection(req, res, (err) => {
     if (err) {
-      console.error('CSRF token generation error:', err);
+      logger.error('CSRF token generation error:', err);
       return res.status(500).json({
         success: false,
         error: 'Failed to generate CSRF token'
@@ -323,11 +324,11 @@ const csrfTokenEndpoint = (req, res, next) => {
     }
 
     const token = req.csrfToken();
-    console.log('=== Generated CSRF token ===');
-    console.log('Token:', token);
-    console.log('Session ID:', req.sessionID);
-    console.log('CSRF Secret:', req.session?.csrfSecret?.substring(0, 10) + '...');
-    console.log('===========================');
+    logger.info('=== Generated CSRF token ===');
+    logger.info('Token:', token);
+    logger.info('Session ID:', req.sessionID);
+    logger.info('CSRF Secret:', req.session?.csrfSecret?.substring(0, 10) + '...');
+    logger.info('===========================');
 
     // Return token
     res.json({

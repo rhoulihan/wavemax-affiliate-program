@@ -1,5 +1,6 @@
 const { resetRateLimits } = require('../../server/controllers/administratorController');
 const mongoose = require('mongoose');
+const logger = require('../../server/utils/logger');
 
 describe('Administrator Controller - Reset Rate Limits', () => {
   let req, res, mockDb, mockCollection;
@@ -9,7 +10,7 @@ describe('Administrator Controller - Reset Rate Limits', () => {
     jest.clearAllMocks();
     
     // Mock console.error
-    consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+    consoleErrorSpy = jest.spyOn(logger, 'error').mockImplementation();
     
     // Mock request and response
     req = {

@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const serviceAreaService = require('../services/serviceAreaService');
 const addressValidationService = require('../services/addressValidationService');
+const logger = require('../utils/logger');
 const { apiLimiter } = require('../middleware/rateLimiting');
 
 /**
@@ -20,7 +21,7 @@ router.get('/config', (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Error getting service area config:', error);
+    logger.error('Error getting service area config:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to get service area configuration'
@@ -41,7 +42,7 @@ router.get('/autocomplete', (req, res) => {
       data: autocompleteData
     });
   } catch (error) {
-    console.error('Error getting autocomplete data:', error);
+    logger.error('Error getting autocomplete data:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to get autocomplete data'
@@ -62,7 +63,7 @@ router.get('/cities', (req, res) => {
       cities: cities
     });
   } catch (error) {
-    console.error('Error getting cities:', error);
+    logger.error('Error getting cities:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to get cities'
@@ -83,7 +84,7 @@ router.get('/zip-codes', (req, res) => {
       zipCodes: zipCodes
     });
   } catch (error) {
-    console.error('Error getting zip codes:', error);
+    logger.error('Error getting zip codes:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to get zip codes'
@@ -113,7 +114,7 @@ router.get('/city/:zipCode', (req, res) => {
       city: city
     });
   } catch (error) {
-    console.error('Error getting city for zip code:', error);
+    logger.error('Error getting city for zip code:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to get city'
@@ -143,7 +144,7 @@ router.get('/zip-codes/:city', (req, res) => {
       zipCodes: zipCodes
     });
   } catch (error) {
-    console.error('Error getting zip codes for city:', error);
+    logger.error('Error getting zip codes for city:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to get zip codes'
@@ -207,7 +208,7 @@ router.post('/validate', async (req, res) => {
       formattedAddress: geocodeResult.formattedAddress
     });
   } catch (error) {
-    console.error('Error validating address:', error);
+    logger.error('Error validating address:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to validate address'

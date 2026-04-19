@@ -5,6 +5,7 @@ const PaymentExport = require('../models/PaymentExport');
 const SystemConfig = require('../models/SystemConfig');
 const { formatCurrency } = require('../utils/helpers');
 const csv = require('csv-writer').createObjectCsvStringifier;
+const logger = require('../utils/logger');
 
 /**
  * QuickBooks Export Controller
@@ -90,7 +91,7 @@ exports.exportVendors = async (req, res) => {
       const csvContent = csvStringifier.getHeaderString() + csvStringifier.stringifyRecords(records);
 
       // Audit logging removed - using standard logger instead
-      console.log(`QuickBooks vendor export: CSV, ${affiliates.length} records, exportId: ${exportRecord.exportId}`);
+      logger.info(`QuickBooks vendor export: CSV, ${affiliates.length} records, exportId: ${exportRecord.exportId}`);
 
       res.setHeader('Content-Type', 'text/csv');
       res.setHeader('Content-Disposition', `attachment; filename="wavemax-vendors-${exportRecord.exportId}.csv"`);
@@ -98,7 +99,7 @@ exports.exportVendors = async (req, res) => {
     }
 
     // Audit logging removed - using standard logger instead
-    console.log(`QuickBooks vendor export: JSON, ${affiliates.length} records, exportId: ${exportRecord.exportId}`);
+    logger.info(`QuickBooks vendor export: JSON, ${affiliates.length} records, exportId: ${exportRecord.exportId}`);
 
     // Return JSON format
     res.json({
@@ -108,7 +109,7 @@ exports.exportVendors = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('QuickBooks vendor export error:', error);
+    logger.error('QuickBooks vendor export error:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to export vendors',
@@ -265,7 +266,7 @@ exports.exportPaymentSummary = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('QuickBooks payment export error:', error);
+    logger.error('QuickBooks payment export error:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to export payment summary',
@@ -404,7 +405,7 @@ exports.exportCommissionDetail = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('QuickBooks commission detail export error:', error);
+    logger.error('QuickBooks commission detail export error:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to export commission detail',
@@ -434,7 +435,7 @@ exports.getExportHistory = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Get export history error:', error);
+    logger.error('Get export history error:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to retrieve export history',

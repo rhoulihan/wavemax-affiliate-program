@@ -1,4 +1,5 @@
 const paymentVerificationJob = require('../../server/jobs/paymentVerificationJob');
+const logger = require('../../server/utils/logger');
 const Order = require('../../server/models/Order');
 const Customer = require('../../server/models/Customer');
 const Affiliate = require('../../server/models/Affiliate');
@@ -216,7 +217,7 @@ describe('PaymentVerificationJob', () => {
       });
 
       // Keep the customerId as is (string ID) for the Customer.findOne to work
-      const consoleSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
+      const consoleSpy = jest.spyOn(logger, 'info').mockImplementation(() => {});
       await paymentVerificationJob.sendPaymentReminder(testOrder);
 
       expect(consoleSpy).toHaveBeenCalledWith(
@@ -236,7 +237,7 @@ describe('PaymentVerificationJob', () => {
       // Populate the customer for the test
       testOrder.customerId = testCustomer;
       
-      const consoleSpy = jest.spyOn(console, 'log');
+      const consoleSpy = jest.spyOn(logger, 'info');
       await paymentVerificationJob.escalateToAdmin(testOrder);
 
       expect(consoleSpy).toHaveBeenCalledWith(
@@ -250,7 +251,7 @@ describe('PaymentVerificationJob', () => {
       // Populate the customer for the test
       testOrder.customerId = testCustomer;
       
-      const consoleSpy = jest.spyOn(console, 'log');
+      const consoleSpy = jest.spyOn(logger, 'info');
       await paymentVerificationJob.escalateToAdmin(testOrder);
 
       expect(consoleSpy).toHaveBeenCalledWith(

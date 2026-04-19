@@ -1,5 +1,6 @@
 const { authenticate, authorize, authLimiter, validateRequest } = require('../../server/middleware/auth');
 const jwt = require('jsonwebtoken');
+const logger = require('../../server/utils/logger');
 const TokenBlacklist = require('../../server/models/TokenBlacklist');
 const Joi = require('joi');
 
@@ -457,7 +458,7 @@ describe('Auth Middleware', () => {
     });
 
     it('should handle W9 endpoint logging', async () => {
-      const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
+      const consoleSpy = jest.spyOn(logger, 'info').mockImplementation();
       
       req.headers.authorization = 'Bearer validtoken';
       req.path = '/api/affiliates/w9/download';

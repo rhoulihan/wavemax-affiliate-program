@@ -1,6 +1,7 @@
 // Encryption Utility for WaveMAX Laundry Affiliate Program
 
 const crypto = require('crypto');
+const logger = require('./logger');
 
 /**
  * Encrypt data using AES-256-GCM
@@ -34,7 +35,7 @@ exports.encrypt = (text) => {
       authTag
     };
   } catch (error) {
-    console.error('Encryption error:', error);
+    logger.error('Encryption error:', error);
     throw new Error('Failed to encrypt data');
   }
 };
@@ -64,7 +65,7 @@ exports.decrypt = (encryptedObj) => {
 
     return decrypted;
   } catch (error) {
-    console.error('Decryption error:', error);
+    logger.error('Decryption error:', error);
     throw new Error('Failed to decrypt data');
   }
 };
@@ -93,7 +94,7 @@ exports.hashPassword = (password) => {
       hash
     };
   } catch (error) {
-    console.error('Password hashing error:', error);
+    logger.error('Password hashing error:', error);
     throw new Error('Failed to hash password');
   }
 };
@@ -119,7 +120,7 @@ exports.verifyPassword = (password, storedSalt, storedHash) => {
     // Compare the generated hash with the stored hash
     return hash === storedHash;
   } catch (error) {
-    console.error('Password verification error:', error);
+    logger.error('Password verification error:', error);
     throw new Error('Failed to verify password');
   }
 };
@@ -156,7 +157,7 @@ exports.encryptField = (value) => {
     const encrypted = exports.encrypt(value);
     return JSON.stringify(encrypted);
   } catch (error) {
-    console.error('Field encryption error:', error);
+    logger.error('Field encryption error:', error);
     return null;
   }
 };
@@ -172,7 +173,7 @@ exports.decryptField = (encryptedValue) => {
     const encrypted = JSON.parse(encryptedValue);
     return exports.decrypt(encrypted);
   } catch (error) {
-    console.error('Field decryption error:', error);
+    logger.error('Field decryption error:', error);
     return null;
   }
 };

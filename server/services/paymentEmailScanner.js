@@ -10,6 +10,7 @@ const Order = require('../models/Order');
 const Customer = require('../models/Customer');
 const emailService = require('../utils/emailService');
 const SystemConfig = require('../models/SystemConfig');
+const logger = require('../utils/logger');
 
 class PaymentEmailScanner {
   constructor() {
@@ -58,7 +59,7 @@ class PaymentEmailScanner {
       // Connect to IMAP
       const connected = await imapScanner.connect();
       if (!connected) {
-        console.log('Could not connect to IMAP server');
+        logger.info('Could not connect to IMAP server');
         return [];
       }
 
@@ -66,48 +67,48 @@ class PaymentEmailScanner {
       const emails = await imapScanner.getUnreadEmails();
       
       if (!emails || emails.length === 0) {
-        console.log('No new payment emails found');
+        logger.info('No new payment emails found');
         imapScanner.disconnect();
         return [];
       }
 
-      console.log(`Found ${emails.length} unread payment emails`);
+      logger.info(`Found ${emails.length} unread payment emails`);
       
       const verifiedPayments = [];
       
       for (const email of emails) {
         try {
-          console.log(`Processing email: From: ${email.from}, Subject: ${email.subject}`);
+          logger.info(`Processing email: From: ${email.from}, Subject: ${email.subject}`);
           const payment = await this.parsePaymentEmail(email);
           
           if (payment) {
-            console.log(`Parsed payment: Order ${payment.orderNumber}, Amount: $${payment.amount}, Provider: ${payment.provider}`);
+            logger.info(`Parsed payment: Order ${payment.orderNumber}, Amount: $${payment.amount}, Provider: ${payment.provider}`);
             // Verify and update order
             const verified = await this.verifyAndUpdateOrder(payment);
             
             if (verified) {
-              console.log(`Payment verified for order ${payment.orderNumber}`);
+              logger.info(`Payment verified for order ${payment.orderNumber}`);
               verifiedPayments.push(payment);
               // Mark email as read
               await imapScanner.markAsRead(email.uid);
               // Move to processed folder if needed
               // await imapScanner.moveToFolder(email.uid, 'Processed');
             } else {
-              console.log(`Payment could not be verified for order ${payment.orderNumber}`);
+              logger.info(`Payment could not be verified for order ${payment.orderNumber}`);
             }
           } else {
-            console.log('Email was not parsed as a valid payment');
+            logger.info('Email was not parsed as a valid payment');
           }
         } catch (error) {
-          console.error(`Error processing email ${email.uid}:`, error);
+          logger.error(`Error processing email ${email.uid}:`, error);
         }
       }
       
-      console.log(`Verified ${verifiedPayments.length} payments`);
+      logger.info(`Verified ${verifiedPayments.length} payments`);
       imapScanner.disconnect();
       return verifiedPayments;
     } catch (error) {
-      console.error('Error scanning for payments:', error);
+      logger.error('Error scanning for payments:', error);
       return [];
     }
   }
@@ -149,7 +150,7 @@ class PaymentEmailScanner {
       }
       
       if (!provider) {
-        console.log(`Not a payment email from known provider: ${from} (subject: ${subject})`);
+        logger.info(`Not a payment email from known provider: ${from} (subject: ${subject})`);
         return null;
       }
       
@@ -166,7 +167,7 @@ class PaymentEmailScanner {
       }
       
       if (!orderIdMatch) {
-        console.log('No order ID found in payment note');
+        logger.info('No order ID found in payment note');
         return null;
       }
       
@@ -208,7 +209,7 @@ class PaymentEmailScanner {
       const order = await this.findOrderById(orderId);
       
       if (!order) {
-        console.log(`No matching order found for ID: ${orderId}`);
+        logger.info(`No matching order found for ID: ${orderId}`);
         return null;
       }
       
@@ -225,7 +226,7 @@ class PaymentEmailScanner {
         verifiedAt: new Date()
       };
     } catch (error) {
-      console.error('Error parsing payment email:', error);
+      logger.error('Error parsing payment email:', error);
       return null;
     }
   }
@@ -284,7 +285,7 @@ class PaymentEmailScanner {
       
       return order;
     } catch (error) {
-      console.error('Error finding order by ID:', error);
+      logger.error('Error finding order by ID:', error);
       return null;
     }
   }
@@ -300,19 +301,19 @@ class PaymentEmailScanner {
       const order = await Order.findOne({ orderId: payment.orderId });
       
       if (!order) {
-        console.error('Order not found:', payment.orderId);
+        logger.error('Order not found:', payment.orderId);
         return false;
       }
       
       // Check if already verified - this would be a duplicate payment
       if (order.paymentStatus === 'verified') {
-        console.log('Order already verified - duplicate payment detected:', payment.orderId);
+        logger.info('Order already verified - duplicate payment detected:', payment.orderId);
         
         // Notify admin about duplicate payment
         try {
           await this.notifyAdminPaymentIssue(order, payment, order.paymentAmount || order.actualTotal, 'duplicate');
         } catch (error) {
-          console.error('Error notifying admin about duplicate payment:', error);
+          logger.error('Error notifying admin about duplicate payment:', error);
         }
         
         return true;
@@ -324,13 +325,13 @@ class PaymentEmailScanner {
       
       if (payment.amount < expectedAmount) {
         // Payment is less than required - notify admin but don't verify
-        console.warn(`Payment insufficient. Expected: $${expectedAmount}, Received: $${payment.amount}`);
+        logger.warn(`Payment insufficient. Expected: $${expectedAmount}, Received: $${payment.amount}`);
         
         // Notify admin about insufficient payment
         try {
           await this.notifyAdminPaymentIssue(order, payment, expectedAmount, 'underpayment');
         } catch (error) {
-          console.error('Error notifying admin about underpayment:', error);
+          logger.error('Error notifying admin about underpayment:', error);
         }
         
         return false; // Don't verify the payment
@@ -351,7 +352,7 @@ class PaymentEmailScanner {
         try {
           await this.notifyAdminPaymentIssue(order, payment, expectedAmount, 'overpayment');
         } catch (error) {
-          console.error('Error notifying admin about overpayment:', error);
+          logger.error('Error notifying admin about overpayment:', error);
         }
       } else {
         // Exact payment
@@ -360,7 +361,7 @@ class PaymentEmailScanner {
       
       await order.save();
       
-      console.log(`Payment verified for order ${payment.orderId}`);
+      logger.info(`Payment verified for order ${payment.orderId}`);
       
       // Send payment confirmation to customer
       await this.sendPaymentConfirmation(order);
@@ -372,7 +373,7 @@ class PaymentEmailScanner {
       
       return true;
     } catch (error) {
-      console.error('Error verifying and updating order:', error);
+      logger.error('Error verifying and updating order:', error);
       return false;
     }
   }
@@ -386,18 +387,18 @@ class PaymentEmailScanner {
       const customer = await Customer.findOne({ customerId: order.customerId });
       
       if (!customer) {
-        console.error('Customer not found for payment confirmation');
+        logger.error('Customer not found for payment confirmation');
         return;
       }
       
       // Use emailService to send confirmation
       // This would be implemented in emailService
-      console.log(`Sending payment confirmation to ${customer.email}`);
+      logger.info(`Sending payment confirmation to ${customer.email}`);
       
       // Placeholder for actual email sending
       // await emailService.sendV2PaymentConfirmation(order, customer);
     } catch (error) {
-      console.error('Error sending payment confirmation:', error);
+      logger.error('Error sending payment confirmation:', error);
     }
   }
 
@@ -407,12 +408,12 @@ class PaymentEmailScanner {
    */
   async sendPickupNotification(order) {
     try {
-      console.log(`Sending pickup notification for order ${order._id}`);
+      logger.info(`Sending pickup notification for order ${order._id}`);
       
       // This would trigger the existing pickup notification
       // await emailService.sendPickupReadyNotification(order);
     } catch (error) {
-      console.error('Error sending pickup notification:', error);
+      logger.error('Error sending pickup notification:', error);
     }
   }
 
@@ -447,7 +448,7 @@ class PaymentEmailScanner {
       
       return false;
     } catch (error) {
-      console.error('Error checking order payment:', error);
+      logger.error('Error checking order payment:', error);
       return false;
     }
   }
@@ -470,7 +471,7 @@ class PaymentEmailScanner {
         paymentStatus: 'awaiting'
       });
       
-      console.log(`Processing ${pendingOrders.length} pending orders`);
+      logger.info(`Processing ${pendingOrders.length} pending orders`);
       
       for (const order of pendingOrders) {
         try {
@@ -492,7 +493,7 @@ class PaymentEmailScanner {
       
       return results;
     } catch (error) {
-      console.error('Error processing pending payments:', error);
+      logger.error('Error processing pending payments:', error);
       throw error;
     }
   }
@@ -509,7 +510,7 @@ class PaymentEmailScanner {
       // Get customer details
       const customer = await Customer.findOne({ customerId: order.customerId });
       if (!customer) {
-        console.error('Customer not found for payment issue notification');
+        logger.error('Customer not found for payment issue notification');
         return;
       }
 
@@ -574,9 +575,9 @@ class PaymentEmailScanner {
         priority: issueType === 'underpayment' ? 'high' : 'normal'
       });
 
-      console.log(`Admin notified about ${issueType} for order ${order._id}`);
+      logger.info(`Admin notified about ${issueType} for order ${order._id}`);
     } catch (error) {
-      console.error(`Error sending admin notification for ${issueType}:`, error);
+      logger.error(`Error sending admin notification for ${issueType}:`, error);
       throw error;
     }
   }

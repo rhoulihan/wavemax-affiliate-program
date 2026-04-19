@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+const logger = require('../utils/logger');
 
 class ServiceAreaService {
   constructor() {
@@ -37,10 +38,10 @@ class ServiceAreaService {
         this.serviceAreaData.cityZipMap.get(cityLower).add(loc.zip);
       });
       
-      console.log(`Service area data loaded: ${this.serviceAreaData.locations.length} zip codes in ${this.serviceAreaData.summary.cities.length} cities`);
+      logger.info(`Service area data loaded: ${this.serviceAreaData.locations.length} zip codes in ${this.serviceAreaData.summary.cities.length} cities`);
       return this.serviceAreaData;
     } catch (error) {
-      console.error('Error loading service area data:', error);
+      logger.error('Error loading service area data:', error);
       throw new Error('Failed to load service area data');
     }
   }

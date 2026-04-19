@@ -1,3 +1,4 @@
+const logger = require('../../../utils/logger');
 // Administrator email dispatchers.
 // Extracted from utils/emailService.js in Phase 2.
 
@@ -121,7 +122,7 @@ exports.sendAdministratorWelcomeEmail = async (administrator) => {
       html
     );
   } catch (error) {
-    console.error('Error sending administrator welcome email:', error);
+    logger.error('Error sending administrator welcome email:', error);
   }
 };
 
@@ -148,7 +149,7 @@ exports.sendAdministratorPasswordResetEmail = async (administrator, resetUrl) =>
       html
     );
   } catch (error) {
-    console.error('Error sending administrator password reset email:', error);
+    logger.error('Error sending administrator password reset email:', error);
   }
 };
 

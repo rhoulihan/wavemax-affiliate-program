@@ -14,6 +14,7 @@ const { escapeRegex } = require('../utils/securityUtils');
 const ControllerHelpers = require('../utils/controllerHelpers');
 const AuthorizationHelpers = require('../middleware/authorizationHelpers');
 const Formatters = require('../utils/formatters');
+const logger = require('../utils/logger');
 
 /**
  * Submit a beta program request
@@ -74,7 +75,7 @@ exports.submitBetaRequest = async (req, res) => {
       message: 'Your beta request has been submitted successfully. We will contact you soon.'
     });
   } catch (error) {
-    console.error('Error submitting beta request:', error);
+    logger.error('Error submitting beta request:', error);
     res.status(500).json({
       success: false,
       message: 'An error occurred while submitting your request. Please try again.'
@@ -90,7 +91,7 @@ exports.registerAffiliate = async (req, res) => {
     // Check for validation errors
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      console.log('[Registration] Validation errors:', JSON.stringify(errors.array(), null, 2));
+      logger.info('[Registration] Validation errors:', JSON.stringify(errors.array(), null, 2));
       return res.status(400).json({
         success: false,
         errors: errors.array()
@@ -204,7 +205,7 @@ exports.registerAffiliate = async (req, res) => {
       await emailService.sendAffiliateWelcomeEmail(newAffiliate);
       // Email sent successfully - no need to check result
     } catch (emailError) {
-      console.warn('Welcome email could not be sent:', emailError);
+      logger.warn('Welcome email could not be sent:', emailError);
       // Continue with registration process even if email fails
     }
 
@@ -214,7 +215,7 @@ exports.registerAffiliate = async (req, res) => {
       message: 'Affiliate registered successfully!'
     });
   } catch (error) {
-    console.error('Affiliate registration error:', error);
+    logger.error('Affiliate registration error:', error);
     res.status(500).json({
       success: false,
       message: 'An error occurred during registration'
@@ -278,7 +279,7 @@ exports.getAffiliateProfile = ControllerHelpers.asyncWrapper(async (req, res) =>
         ? encryptionUtil.decrypt(affiliate.paypalEmail)
         : affiliate.paypalEmail;
     } catch (error) {
-      console.error('Error decrypting PayPal email:', error);
+      logger.error('Error decrypting PayPal email:', error);
       // Don't include if decryption fails
     }
   }
@@ -371,7 +372,7 @@ exports.updateAffiliateProfile = async (req, res) => {
       message: 'Affiliate profile updated successfully'
     });
   } catch (error) {
-    console.error('Update affiliate profile error:', error);
+    logger.error('Update affiliate profile error:', error);
     res.status(500).json({
       success: false,
       message: 'An error occurred while updating affiliate profile'
@@ -473,7 +474,7 @@ exports.getAffiliateEarnings = async (req, res) => {
       })
     });
   } catch (error) {
-    console.error('Affiliate earnings error:', error);
+    logger.error('Affiliate earnings error:', error);
     res.status(500).json({
       success: false,
       message: 'An error occurred while retrieving earnings information'
@@ -710,7 +711,7 @@ exports.getAffiliateOrders = async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Get affiliate orders error:', error);
+    logger.error('Get affiliate orders error:', error);
     res.status(500).json({
       success: false,
       message: 'An error occurred while retrieving orders'
@@ -786,7 +787,7 @@ exports.getAffiliateTransactions = async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Get affiliate transactions error:', error);
+    logger.error('Get affiliate transactions error:', error);
     res.status(500).json({
       success: false,
       message: 'An error occurred while retrieving transactions'
@@ -886,7 +887,7 @@ exports.getAffiliateDashboardStats = async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Get affiliate dashboard stats error:', error);
+    logger.error('Get affiliate dashboard stats error:', error);
     res.status(500).json({
       success: false,
       message: 'An error occurred while retrieving dashboard statistics'
@@ -962,7 +963,7 @@ exports.deleteAffiliateData = async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Delete affiliate data error:', error);
+    logger.error('Delete affiliate data error:', error);
     res.status(500).json({
       success: false,
       message: 'An error occurred while deleting data'
@@ -1004,7 +1005,7 @@ exports.getPublicAffiliateInfo = async (req, res) => {
       state: affiliate.state
     });
   } catch (error) {
-    console.error('Get public affiliate info error:', error);
+    logger.error('Get public affiliate info error:', error);
     res.status(500).json({
       success: false,
       message: 'An error occurred while retrieving affiliate information'
@@ -1046,7 +1047,7 @@ exports.getPublicAffiliateInfoById = async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Get public affiliate info by ID error:', error);
+    logger.error('Get public affiliate info by ID error:', error);
     res.status(500).json({
       success: false,
       message: 'An error occurred while retrieving affiliate information'

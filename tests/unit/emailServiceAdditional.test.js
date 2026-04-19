@@ -1,5 +1,13 @@
 // Test additional uncovered email service functions
-// Don't mock fs at the top level to avoid breaking test setup
+//
+// Uses a jest.doMock-based logger stub. Re-requiring the real logger after
+// resetModules would reinit winston against the jest.doMock'd `fs` below.
+const mockLogger = {
+  info: jest.fn(),
+  error: jest.fn(),
+  warn: jest.fn(),
+  debug: jest.fn()
+};
 
 describe('Email Service - Additional Coverage', () => {
   let mockTransporter;
@@ -11,11 +19,11 @@ describe('Email Service - Additional Coverage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     jest.resetModules();
-    
-    // Mock console to capture logs
-    consoleLogSpy = jest.spyOn(console, 'log').mockImplementation();
-    consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
-    consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation();
+    jest.doMock('../../server/utils/logger', () => mockLogger);
+
+    consoleLogSpy = jest.spyOn(mockLogger, 'info').mockImplementation();
+    consoleErrorSpy = jest.spyOn(mockLogger, 'error').mockImplementation();
+    consoleWarnSpy = jest.spyOn(mockLogger, 'warn').mockImplementation();
 
     // Mock transporter
     mockTransporter = {
@@ -278,6 +286,7 @@ describe('Email Service - Additional Coverage', () => {
     it('should handle template file read errors', async () => {
       // Reset modules and re-mock fs with error
       jest.resetModules();
+      jest.doMock('../../server/utils/logger', () => mockLogger);
       jest.doMock('fs', () => ({
         readFile: jest.fn((path, encoding, callback) => {
           if (typeof encoding === 'function') {
@@ -311,6 +320,7 @@ describe('Email Service - Additional Coverage', () => {
     // transport is exercised directly in emailServiceHelpers.test.js.
     it.skip('should log emails to console when using console provider', async () => {
       jest.resetModules();
+      jest.doMock('../../server/utils/logger', () => mockLogger);
       process.env.EMAIL_PROVIDER = 'console';
       
       // Re-mock fs for the new module instance

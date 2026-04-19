@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const administratorController = require('../controllers/administratorController');
+const logger = require('../utils/logger');
 const { authenticate } = require('../middleware/auth');
 const { checkRole, checkAdminPermission } = require('../middleware/rbac');
 const { body } = require('express-validator');
@@ -105,7 +106,7 @@ router.post('/reset-rate-limits', checkAdminPermission(['system.manage']), async
     });
     
   } catch (error) {
-    console.error('Error resetting rate limits:', error);
+    logger.error('Error resetting rate limits:', error);
     res.status(500).json({
       success: false,
       message: 'Error resetting rate limits'
