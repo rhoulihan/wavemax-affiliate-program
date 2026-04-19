@@ -13,7 +13,8 @@
 const crypto = require('crypto');
 const Operator = require('../models/Operator');
 const Order = require('../models/Order');
-const { fieldFilter, getFilteredData } = require('../utils/fieldFilter');
+const { fieldFilter } = require('../utils/fieldFilter');
+const fieldFilterModule = require('../utils/fieldFilter');
 const emailService = require('../utils/emailService');
 const { logAuditEvent, AuditEvents } = require('../utils/auditLogger');
 
@@ -370,14 +371,15 @@ async function updateOperatorSelf({ id, updates }) {
   Object.assign(operator, filtered);
   const updated = await operator.save();
 
-  return getFilteredData('operator', updated.toObject(), 'operator', { isSelf: true });
+  // Reference via module object so tests can stub getFilteredData at runtime.
+  return fieldFilterModule.getFilteredData('operator', updated.toObject(), 'operator', { isSelf: true });
 }
 
 async function getOperatorSelf({ id }) {
   const operator = await Operator.findById(id);
   if (!operator) throw new OperatorAdminError('not_found', 'Operator not found', 404);
 
-  return getFilteredData('operator', operator.toObject(), 'operator', { isSelf: true });
+  return fieldFilterModule.getFilteredData('operator', operator.toObject(), 'operator', { isSelf: true });
 }
 
 module.exports = {
