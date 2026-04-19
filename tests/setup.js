@@ -8,6 +8,12 @@ process.env.JWT_SECRET = 'test-jwt-secret';
 process.env.ENCRYPTION_KEY = '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef';
 process.env.SESSION_SECRET = 'test-session-secret';
 
+// Lock the test timezone to America/Chicago so immediate-pickup and other
+// CDT-sensitive integration tests produce deterministic `.getHours()` /
+// `.getDate()` values regardless of where the test host lives.
+// Affects new `Date` parsing and toLocaleString resolution.
+process.env.TZ = 'America/Chicago';
+
 // Configure to use console transport for tests to avoid sending real emails
 // but still test the email service functionality
 process.env.EMAIL_PROVIDER = 'console';

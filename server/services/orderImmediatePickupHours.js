@@ -26,6 +26,19 @@ function getCDTHour(date = new Date()) {
 }
 
 /**
+ * Current Chicago UTC-offset in hours at the given date (DST-aware).
+ * Returns -6 in standard time (CST), -5 during daylight saving (CDT).
+ */
+function getChicagoOffsetHours(date) {
+  const utcHour = date.getUTCHours();
+  const chicagoHour = getCDTHour(date);
+  let offset = chicagoHour - utcHour;
+  if (offset > 12) offset -= 24;   // crossed back over midnight
+  if (offset < -12) offset += 24;  // crossed forward over midnight
+  return offset;
+}
+
+/**
  * Returns a fresh `Date` representing "now". Wrapped so tests can mock it.
  */
 function getCurrentCDTTime() {
@@ -50,9 +63,9 @@ function calculatePickupDeadline(orderTime) {
   const deadline = new Date(orderTime);
 
   if (cdtHour >= IMMEDIATE_PICKUP_HOURS.AFTER_5PM) {
-    const cdtOffset = -6; // CDT is UTC-6; approximate — DST ignored
     deadline.setUTCDate(deadline.getUTCDate() + 1);
-    deadline.setUTCHours(IMMEDIATE_PICKUP_HOURS.NEXT_MORNING - cdtOffset, 0, 0, 0);
+    const offset = getChicagoOffsetHours(deadline);
+    deadline.setUTCHours(IMMEDIATE_PICKUP_HOURS.NEXT_MORNING - offset, 0, 0, 0);
   } else {
     deadline.setTime(deadline.getTime() + IMMEDIATE_PICKUP_HOURS.DEADLINE_HOURS * 60 * 60 * 1000);
   }
@@ -86,16 +99,43 @@ function isWithinOperatingHours(time) {
  */
 function calculateNextAvailableTime(time) {
   const cdtHour = getCDTHour(time);
-  const nextAvailable = new Date(time);
-  const cdtOffset = -6;
-
-  if (cdtHour < IMMEDIATE_PICKUP_HOURS.START) {
-    nextAvailable.setUTCHours(IMMEDIATE_PICKUP_HOURS.START - cdtOffset, 0, 0, 0);
-  } else if (cdtHour > IMMEDIATE_PICKUP_HOURS.END) {
-    nextAvailable.setUTCDate(nextAvailable.getUTCDate() + 1);
-    nextAvailable.setUTCHours(IMMEDIATE_PICKUP_HOURS.START - cdtOffset, 0, 0, 0);
+  if (cdtHour >= IMMEDIATE_PICKUP_HOURS.START && cdtHour <= IMMEDIATE_PICKUP_HOURS.END) {
+    return new Date(time);
   }
-  return nextAvailable;
+
+  // We want "7 AM Chicago on day X". Determine which Chicago calendar day
+  // that is (today if called before opening; tomorrow if called after closing),
+  // then construct the matching UTC instant using the DST-aware offset at
+  // the target time (DST-transition days can differ from `time`'s offset).
+  const parts = chicagoDateParts(time);
+  let { year, month, day } = parts;
+  if (cdtHour > IMMEDIATE_PICKUP_HOURS.END) {
+    // Advance one Chicago calendar day using a Date in any tz (UTC math
+    // is fine for "+1 day" when we stay at midnight-ish).
+    const d = new Date(Date.UTC(year, month - 1, day));
+    d.setUTCDate(d.getUTCDate() + 1);
+    year = d.getUTCFullYear();
+    month = d.getUTCMonth() + 1;
+    day = d.getUTCDate();
+  }
+
+  // Approximate the target instant, then refine the offset using that
+  // instant (handles spring-forward / fall-back days correctly).
+  const approx = new Date(Date.UTC(year, month - 1, day, IMMEDIATE_PICKUP_HOURS.START + 6, 0, 0));
+  const offset = getChicagoOffsetHours(approx);
+  return new Date(Date.UTC(year, month - 1, day, IMMEDIATE_PICKUP_HOURS.START - offset, 0, 0));
+}
+
+/**
+ * Extract the Chicago calendar-date components (year, month 1-12, day 1-31)
+ * of the given instant.
+ */
+function chicagoDateParts(date) {
+  return {
+    year: parseInt(date.toLocaleString('en-US', { timeZone: 'America/Chicago', year: 'numeric' })),
+    month: parseInt(date.toLocaleString('en-US', { timeZone: 'America/Chicago', month: '2-digit' })),
+    day: parseInt(date.toLocaleString('en-US', { timeZone: 'America/Chicago', day: '2-digit' }))
+  };
 }
 
 module.exports = {
