@@ -21,6 +21,7 @@ const encryptionUtil = require('../utils/encryption');
 const logger = require('../utils/logger');
 
 const betaRequestService = require('../services/betaRequestService');
+const affiliatePaymentLockService = require('../services/affiliatePaymentLockService');
 
 // Administrator Management
 
@@ -1695,61 +1696,8 @@ exports.exportReport = async (req, res) => {
  */
 exports.getAffiliatesList = async (req, res) => {
   try {
-    const { search, status, locked, limit = 100 } = req.query;
-
-    // Build query
-    const query = {};
-
-    if (search) {
-      const escapedSearch = escapeRegex(search);
-      query.$or = [
-        { businessName: { $regex: escapedSearch, $options: 'i' } },
-        { firstName: { $regex: escapedSearch, $options: 'i' } },
-        { lastName: { $regex: escapedSearch, $options: 'i' } },
-        { email: { $regex: escapedSearch, $options: 'i' } },
-        { affiliateId: { $regex: escapedSearch, $options: 'i' } }
-      ];
-    }
-
-    if (status === 'active') {
-      query.isActive = true;
-    } else if (status === 'inactive') {
-      query.isActive = false;
-    }
-
-    if (locked === 'true') {
-      query.paymentProcessingLocked = true;
-    } else if (locked === 'false') {
-      query.paymentProcessingLocked = { $ne: true };
-    }
-
-    const affiliates = await Affiliate.find(query)
-      .select('affiliateId firstName lastName businessName email isActive serviceArea ' +
-              'paymentProcessingLocked paymentLockedAt paymentLockReason ' +
-              'paymentUnlockedAt paymentUnlockNotes w9Status w9OnFileAt')
-      .limit(parseInt(limit))
-      .sort('businessName');
-
-    res.json({
-      success: true,
-      affiliates: affiliates.map(affiliate => ({
-        _id: affiliate._id,
-        affiliateId: affiliate.affiliateId,
-        businessName: affiliate.businessName,
-        firstName: affiliate.firstName,
-        lastName: affiliate.lastName,
-        email: affiliate.email,
-        isActive: affiliate.isActive,
-        serviceArea: affiliate.serviceArea,
-        paymentProcessingLocked: affiliate.paymentProcessingLocked || false,
-        paymentLockedAt: affiliate.paymentLockedAt,
-        paymentLockReason: affiliate.paymentLockReason,
-        paymentUnlockedAt: affiliate.paymentUnlockedAt,
-        paymentUnlockNotes: affiliate.paymentUnlockNotes,
-        w9Status: affiliate.w9Status,
-        w9OnFileAt: affiliate.w9OnFileAt
-      }))
-    });
+    const affiliates = await affiliatePaymentLockService.listAffiliates(req.query);
+    res.json({ success: true, affiliates });
   } catch (error) {
     logger.error('Error fetching affiliates list:', error);
     res.status(500).json({
@@ -1762,90 +1710,42 @@ exports.getAffiliatesList = async (req, res) => {
 
 /**
  * Lock commission payouts for an affiliate.
- * POST /api/v1/administrators/affiliates/:affiliateId/lock-payments
- * Body: { reason?: string, notes?: string }
  */
 exports.lockAffiliatePayments = async (req, res) => {
   try {
-    const { affiliateId } = req.params;
-    const { reason = 'admin_hold', notes } = req.body || {};
-
-    const affiliate = await Affiliate.findOne({ affiliateId });
-    if (!affiliate) {
-      return res.status(404).json({ success: false, message: 'Affiliate not found' });
-    }
-
-    affiliate.paymentProcessingLocked = true;
-    affiliate.paymentLockedAt = new Date();
-    affiliate.paymentLockReason = reason;
-    if (notes) affiliate.paymentUnlockNotes = notes;
-
-    await affiliate.save();
-
-    res.json({
-      success: true,
-      message: 'Commission payouts locked for affiliate',
-      affiliate: {
-        affiliateId: affiliate.affiliateId,
-        paymentProcessingLocked: true,
-        paymentLockedAt: affiliate.paymentLockedAt,
-        paymentLockReason: affiliate.paymentLockReason
-      }
+    const affiliate = await affiliatePaymentLockService.lockPayments({
+      affiliateId: req.params.affiliateId,
+      reason: (req.body || {}).reason,
+      notes: (req.body || {}).notes
     });
-  } catch (error) {
-    logger.error('Error locking affiliate payments:', error);
-    res.status(500).json({ success: false, message: 'Failed to lock affiliate payments', error: error.message });
+    res.json({ success: true, message: 'Commission payouts locked for affiliate', affiliate });
+  } catch (err) {
+    if (err.isPaymentLockError) {
+      return res.status(err.status).json({ success: false, message: err.message });
+    }
+    logger.error('Error locking affiliate payments:', err);
+    res.status(500).json({ success: false, message: 'Failed to lock affiliate payments', error: err.message });
   }
 };
 
 /**
  * Unlock commission payouts for an affiliate (typically after a W-9 is on file).
- * POST /api/v1/administrators/affiliates/:affiliateId/unlock-payments
- * Body: { notes: string (required), w9Received?: boolean }
  */
 exports.unlockAffiliatePayments = async (req, res) => {
   try {
-    const { affiliateId } = req.params;
-    const { notes, w9Received = true } = req.body || {};
-
-    if (!notes) {
-      return res.status(400).json({ success: false, message: 'Notes are required when unlocking payments' });
-    }
-
-    const affiliate = await Affiliate.findOne({ affiliateId });
-    if (!affiliate) {
-      return res.status(404).json({ success: false, message: 'Affiliate not found' });
-    }
-
-    const wasLockedForW9 = affiliate.paymentLockReason === 'w9_required';
-
-    affiliate.paymentProcessingLocked = false;
-    affiliate.paymentUnlockedAt = new Date();
-    affiliate.paymentUnlockedBy = req.user._id || req.user.id;
-    affiliate.paymentUnlockNotes = notes;
-
-    if (wasLockedForW9 && w9Received) {
-      affiliate.w9Status = 'on_file';
-      affiliate.w9OnFileAt = new Date();
-    }
-
-    await affiliate.save();
-
-    res.json({
-      success: true,
-      message: 'Commission payouts unlocked for affiliate',
-      affiliate: {
-        affiliateId: affiliate.affiliateId,
-        paymentProcessingLocked: false,
-        paymentUnlockedAt: affiliate.paymentUnlockedAt,
-        paymentUnlockNotes: affiliate.paymentUnlockNotes,
-        w9Status: affiliate.w9Status,
-        w9OnFileAt: affiliate.w9OnFileAt
-      }
+    const affiliate = await affiliatePaymentLockService.unlockPayments({
+      affiliateId: req.params.affiliateId,
+      notes: (req.body || {}).notes,
+      w9Received: (req.body || {}).w9Received,
+      adminId: req.user._id || req.user.id
     });
-  } catch (error) {
-    logger.error('Error unlocking affiliate payments:', error);
-    res.status(500).json({ success: false, message: 'Failed to unlock affiliate payments', error: error.message });
+    res.json({ success: true, message: 'Commission payouts unlocked for affiliate', affiliate });
+  } catch (err) {
+    if (err.isPaymentLockError) {
+      return res.status(err.status).json({ success: false, message: err.message });
+    }
+    logger.error('Error unlocking affiliate payments:', err);
+    res.status(500).json({ success: false, message: 'Failed to unlock affiliate payments', error: err.message });
   }
 };
 
