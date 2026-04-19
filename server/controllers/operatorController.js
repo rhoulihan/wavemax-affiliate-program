@@ -12,6 +12,7 @@ const AuthorizationHelpers = require('../middleware/authorizationHelpers');
 const Formatters = require('../utils/formatters');
 
 const orderQueueService = require('../services/operatorOrderQueueService');
+const shiftStatsService = require('../services/operatorShiftStatsService');
 
 // Helper function to send payment reminder
 async function sendPaymentReminder(order) {
@@ -299,68 +300,16 @@ exports.getWorkstationStatus = async (req, res) => {
 // Update shift status
 exports.updateShiftStatus = async (req, res) => {
   try {
-    const operatorId = req.user.id;
-    const { action, workstation } = req.body;
-
-    const operator = await Operator.findById(operatorId);
-    if (!operator) {
-      return res.status(404).json({ error: 'Operator not found' });
-    }
-
-    if (action === 'start') {
-      if (!workstation) {
-        return res.status(400).json({ error: 'Workstation required to start shift' });
-      }
-
-      // Check if workstation is available
-      const existing = await Operator.findOne({
-        workStation: workstation,
-        _id: { $ne: operatorId }
-      });
-
-      if (existing) {
-        return res.status(400).json({ error: 'Workstation already occupied' });
-      }
-
-      operator.workStation = workstation;
-      operator.updatedAt = new Date();
-    } else if (action === 'end') {
-      // Check for incomplete orders
-      const incompleteOrders = await Order.countDocuments({
-        assignedOperator: operatorId,
-        orderProcessingStatus: { $nin: ['completed', 'ready'] }
-      });
-
-      if (incompleteOrders > 0) {
-        return res.status(400).json({
-          error: `Cannot end shift with ${incompleteOrders} incomplete orders`
-        });
-      }
-
-      operator.workStation = null;
-      operator.updatedAt = new Date();
-    } else {
-      return res.status(400).json({ error: 'Invalid action' });
-    }
-
-    await operator.save();
-
-    await logAuditEvent(AuditEvents.ACCOUNT_UPDATED, {
-      operatorId,
-      action: `shift_${action}`,
-      workstation,
-      timestamp: new Date()
-    }, req);
-
-    res.json({
-      message: `Shift ${action}ed successfully`,
-      operator: {
-        workStation: operator.workStation,
-        updatedAt: operator.updatedAt
-      }
+    const operator = await shiftStatsService.updateShiftStatus({
+      operatorId: req.user.id,
+      action: req.body.action,
+      workstation: req.body.workstation,
+      req
     });
-  } catch (error) {
-    logger.error('Error updating shift status:', error);
+    res.json({ message: `Shift ${req.body.action}ed successfully`, operator });
+  } catch (err) {
+    if (err.isShiftError) return res.status(err.status).json({ error: err.message });
+    logger.error('Error updating shift status:', err);
     res.status(500).json({ error: 'Failed to update shift status' });
   }
 };
@@ -368,111 +317,14 @@ exports.updateShiftStatus = async (req, res) => {
 // Get performance stats
 exports.getPerformanceStats = async (req, res) => {
   try {
-    const operatorId = req.user.id;
-    const { period = 'week' } = req.query;
-
-    const operator = await Operator.findById(operatorId);
-    if (!operator) {
-      return res.status(404).json({ error: 'Operator not found' });
-    }
-
-    // Calculate date range
-    const endDate = new Date();
-    const startDate = new Date();
-    switch (period) {
-    case 'day':
-      startDate.setDate(startDate.getDate() - 1);
-      break;
-    case 'week':
-      startDate.setDate(startDate.getDate() - 7);
-      break;
-    case 'month':
-      startDate.setMonth(startDate.getMonth() - 1);
-      break;
-    }
-
-    // Get performance metrics
-    const stats = await Order.aggregate([
-      {
-        $match: {
-          assignedOperator: operator._id,
-          processingStarted: { $gte: startDate, $lte: endDate }
-        }
-      },
-      {
-        $group: {
-          _id: null,
-          totalOrders: { $sum: 1 },
-          completedOrders: {
-            $sum: { $cond: [{ $eq: ['$orderProcessingStatus', 'completed'] }, 1, 0] }
-          },
-          totalWeight: { $sum: '$weight' },
-          avgProcessingTime: { $avg: '$processingTimeMinutes' },
-          minProcessingTime: { $min: '$processingTimeMinutes' },
-          maxProcessingTime: { $max: '$processingTimeMinutes' },
-          qualityChecksPassed: {
-            $sum: { $cond: [{ $eq: ['$qualityCheckPassed', true] }, 1, 0] }
-          },
-          qualityChecksFailed: {
-            $sum: { $cond: [{ $eq: ['$qualityCheckPassed', false] }, 1, 0] }
-          }
-        }
-      }
-    ]);
-
-    // Get daily breakdown
-    const dailyStats = await Order.aggregate([
-      {
-        $match: {
-          assignedOperator: operator._id,
-          processingStarted: { $gte: startDate, $lte: endDate }
-        }
-      },
-      {
-        $group: {
-          _id: { $dateToString: { format: '%Y-%m-%d', date: '$processingStarted' } },
-          orders: { $sum: 1 },
-          weight: { $sum: '$weight' },
-          avgTime: { $avg: '$processingTimeMinutes' }
-        }
-      },
-      { $sort: { _id: 1 } }
-    ]);
-
-    res.json({
-      operator: {
-        name: `${operator.firstName} ${operator.lastName}`,
-        operatorId: operator.operatorId,
-        qualityScore: operator.qualityScore
-      },
-      period: {
-        start: startDate,
-        end: endDate,
-        days: Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24))
-      },
-      summary: stats[0] || {
-        totalOrders: 0,
-        completedOrders: 0,
-        totalWeight: 0,
-        avgProcessingTime: 0,
-        minProcessingTime: 0,
-        maxProcessingTime: 0,
-        qualityChecksPassed: 0,
-        qualityChecksFailed: 0
-      },
-      dailyBreakdown: dailyStats,
-      efficiency: {
-        ordersPerDay: stats[0] ?
-          (stats[0].totalOrders / Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24))) : 0,
-        weightPerDay: stats[0] ?
-          (stats[0].totalWeight / Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24))) : 0,
-        qualityRate: stats[0] && (stats[0].qualityChecksPassed + stats[0].qualityChecksFailed) > 0 ?
-          Math.round((stats[0].qualityChecksPassed /
-            (stats[0].qualityChecksPassed + stats[0].qualityChecksFailed)) * 100) : 100
-      }
+    const data = await shiftStatsService.getPerformanceStats({
+      operatorId: req.user.id,
+      period: req.query.period || 'week'
     });
-  } catch (error) {
-    logger.error('Error fetching performance stats:', error);
+    res.json(data);
+  } catch (err) {
+    if (err.isShiftError) return res.status(err.status).json({ error: err.message });
+    logger.error('Error fetching performance stats:', err);
     res.status(500).json({ error: 'Failed to fetch performance stats' });
   }
 };
@@ -1567,57 +1419,8 @@ exports.confirmPickup = async (req, res) => {
 // Get today's stats for scanner interface
 exports.getTodayStats = async (req, res) => {
   try {
-    const operatorId = req.user.id;
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const tomorrow = new Date(today);
-    tomorrow.setDate(tomorrow.getDate() + 1);
-
-    // Get orders that have been scanned/weighed today
-    // Include orders where:
-    // 1. Assigned to this operator OR
-    // 2. Have bags weighed today (updatedAt >= today and bagsWeighed > 0)
-    const ordersProcessed = await Order.countDocuments({
-      $or: [
-        {
-          assignedOperator: operatorId,
-          processingStarted: { $gte: today }
-        },
-        {
-          bagsWeighed: { $gt: 0 },
-          updatedAt: { $gte: today, $lt: tomorrow }
-        }
-      ]
-    });
-
-    // Get total bags scanned today
-    // Include all orders with bags weighed today, regardless of operator assignment
-    const todayOrders = await Order.find({
-      $or: [
-        {
-          assignedOperator: operatorId,
-          processingStarted: { $gte: today }
-        },
-        {
-          bagsWeighed: { $gt: 0 },
-          updatedAt: { $gte: today, $lt: tomorrow }
-        }
-      ]
-    });
-    
-    const bagsScanned = todayOrders.reduce((total, order) => total + (order.bagsWeighed || 0), 0);
-
-    // Get orders ready for pickup today (processed status means ready for pickup)
-    const ordersReady = await Order.countDocuments({
-      status: 'processed',
-      updatedAt: { $gte: today }
-    });
-
-    res.json({
-      ordersProcessed,
-      bagsScanned,
-      ordersReady
-    });
+    const stats = await shiftStatsService.getTodayStats({ operatorId: req.user.id });
+    res.json(stats);
   } catch (error) {
     logger.error('Error fetching today stats:', error);
     res.status(500).json({ error: 'Failed to fetch stats' });
@@ -1627,36 +1430,19 @@ exports.getTodayStats = async (req, res) => {
 // Get count of new customers without bag labels
 exports.getNewCustomersCount = async (req, res) => {
   try {
-    const count = await Customer.countDocuments({
-      bagLabelsGenerated: false
-      // Removed isActive check - customers may need labels printed before activation
-    });
-    
-    res.json({ 
-      success: true,
-      count 
-    });
+    const count = await shiftStatsService.getNewCustomersCount();
+    res.json({ success: true, count });
   } catch (error) {
     logger.error('Get new customers count error:', error);
-    res.status(500).json({ 
-      success: false,
-      message: 'Error fetching new customers count' 
-    });
+    res.status(500).json({ success: false, message: 'Error fetching new customers count' });
   }
 };
 
 // Print bag labels for new customers
 exports.printNewCustomerLabels = async (req, res) => {
   try {
-    const operatorId = req.user.id;
-    
-    // Get all customers without bag labels
-    const customers = await Customer.find({
-      bagLabelsGenerated: false
-      // Removed isActive check - customers may need labels printed before activation
-    }).select('customerId firstName lastName phone email numberOfBags affiliateId');
-    
-    if (customers.length === 0) {
+    const result = await shiftStatsService.printNewCustomerLabels();
+    if (result.customersProcessed === 0) {
       return res.json({
         success: true,
         message: 'No new customers found',
@@ -1664,89 +1450,33 @@ exports.printNewCustomerLabels = async (req, res) => {
         labelsGenerated: 0
       });
     }
-    
-    // Generate label data for each customer
-    const labelData = [];
-    let totalLabels = 0;
-    
-    for (const customer of customers) {
-      const bagCount = customer.numberOfBags || 1;
-      
-      // Generate label for each bag
-      for (let bagNumber = 1; bagNumber <= bagCount; bagNumber++) {
-        labelData.push({
-          customerId: customer.customerId,
-          customerName: `${customer.firstName} ${customer.lastName}`,
-          phone: customer.phone || '',
-          email: customer.email || '',
-          bagNumber: bagNumber,
-          totalBags: bagCount,
-          qrCode: `${customer.customerId}-${bagNumber}`,
-          affiliateId: customer.affiliateId
-        });
-        totalLabels++;
-      }
-    }
-    
-    // Don't update customers yet - wait for print confirmation
-    // Return the label data and customer IDs for later confirmation
-    const customerIds = customers.map(c => c._id);
-    
     res.json({
       success: true,
-      message: `Generated ${totalLabels} labels for ${customers.length} customers`,
-      customersProcessed: customers.length,
-      labelsGenerated: totalLabels,
-      labelData: labelData,
-      customerIds: customerIds // Send IDs for confirmation endpoint
+      message: `Generated ${result.labelsGenerated} labels for ${result.customersProcessed} customers`,
+      ...result
     });
-    
   } catch (error) {
     logger.error('Print new customer labels error:', error);
-    res.status(500).json({ 
-      success: false,
-      message: 'Error printing customer labels' 
-    });
+    res.status(500).json({ success: false, message: 'Error printing customer labels' });
   }
-};// Confirm that labels were printed successfully
+};
+
+// Confirm that labels were printed successfully
 exports.confirmLabelsPrinted = async (req, res) => {
-  const Customer = require('../models/Customer');
-  const logger = require('../utils/logger');
-  
   try {
-    const { customerIds } = req.body;
-    const operatorId = req.user.id;
-    
-    if (!customerIds || !Array.isArray(customerIds) || customerIds.length === 0) {
-      return res.status(400).json({
-        success: false,
-        message: 'No customer IDs provided'
-      });
-    }
-    
-    // Update customers to mark labels as generated
-    const result = await Customer.updateMany(
-      { _id: { $in: customerIds } },
-      {
-        $set: {
-          bagLabelsGenerated: true,
-          bagLabelsGeneratedAt: new Date(),
-          bagLabelsGeneratedBy: operatorId
-        }
-      }
-    );
-    
-    // Log the successful print
-    logger.info(`Operator ${operatorId} confirmed printing labels for ${result.modifiedCount} customers`);
-    
+    const { customersUpdated } = await shiftStatsService.confirmLabelsPrinted({
+      customerIds: req.body.customerIds,
+      operatorId: req.user.id
+    });
+    logger.info(`Operator ${req.user.id} confirmed printing labels for ${customersUpdated} customers`);
     res.json({
       success: true,
-      message: `Labels marked as printed for ${result.modifiedCount} customers`,
-      customersUpdated: result.modifiedCount
+      message: `Labels marked as printed for ${customersUpdated} customers`,
+      customersUpdated
     });
-    
-  } catch (error) {
-    logger.error('Confirm labels printed error:', error);
+  } catch (err) {
+    if (err.isShiftError) return res.status(err.status).json({ success: false, message: err.message });
+    logger.error('Confirm labels printed error:', err);
     res.status(500).json({
       success: false,
       message: 'Error confirming label printing'
