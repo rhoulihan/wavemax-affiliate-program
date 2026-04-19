@@ -29,6 +29,14 @@ router.post('/operators/:operatorId/reset-password', checkAdminPermission(['oper
 // Affiliates list (for dropdowns, filters, etc.)
 router.get('/affiliates', checkAdminPermission(['view_analytics']), administratorController.getAffiliatesList);
 
+// Commission payment lock/unlock (W-9 compliance)
+router.post('/affiliates/:affiliateId/lock-payments',
+  checkAdminPermission(['manage_affiliates']),
+  administratorController.lockAffiliatePayments);
+router.post('/affiliates/:affiliateId/unlock-payments',
+  checkAdminPermission(['manage_affiliates']),
+  administratorController.unlockAffiliatePayments);
+
 // Analytics (must come before /:id routes)
 router.get('/analytics/orders', checkAdminPermission(['view_analytics']), administratorController.getOrderAnalytics);
 router.get('/analytics/operators', checkAdminPermission(['view_analytics']), administratorController.getOperatorAnalytics);

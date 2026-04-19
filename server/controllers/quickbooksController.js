@@ -5,7 +5,6 @@ const PaymentExport = require('../models/PaymentExport');
 const SystemConfig = require('../models/SystemConfig');
 const { formatCurrency } = require('../utils/helpers');
 const csv = require('csv-writer').createObjectCsvStringifier;
-// W9AuditService removed - W9 management now handled by DocuSign
 
 /**
  * QuickBooks Export Controller
@@ -13,21 +12,21 @@ const csv = require('csv-writer').createObjectCsvStringifier;
  */
 
 /**
- * Export vendors (affiliates with verified W-9s) to QuickBooks format
+ * Export vendors (affiliates with an on-file W-9) to QuickBooks format
  */
 exports.exportVendors = async (req, res) => {
   try {
     const { format = 'csv' } = req.query;
 
-    // Get all affiliates with verified W-9s
+    // Get all affiliates with an on-file W-9
     const affiliates = await Affiliate.find({
-      'w9Information.status': 'verified'
-    }).select('affiliateId firstName lastName email w9Information createdAt');
+      w9Status: 'on_file'
+    }).select('affiliateId firstName lastName email businessName taxIdLast4 quickbooksVendorId quickbooksData createdAt');
 
     if (affiliates.length === 0) {
       return res.status(404).json({
         success: false,
-        message: 'No verified vendors found for export'
+        message: 'No vendors with W-9 on file found for export'
       });
     }
 
@@ -43,12 +42,12 @@ exports.exportVendors = async (req, res) => {
       exportData: {
         vendors: affiliates.map(affiliate => ({
           affiliateId: affiliate.affiliateId,
-          displayName: affiliate.w9Information.quickbooksData?.displayName ||
+          displayName: affiliate.quickbooksData?.displayName ||
                                 `${affiliate.firstName} ${affiliate.lastName}`,
-          taxIdLast4: affiliate.w9Information.taxIdLast4,
-          businessName: affiliate.w9Information.businessName,
+          taxIdLast4: affiliate.taxIdLast4,
+          businessName: affiliate.businessName,
           email: affiliate.email,
-          quickbooksVendorId: affiliate.w9Information.quickbooksVendorId
+          quickbooksVendorId: affiliate.quickbooksVendorId
         }))
       }
     };
@@ -75,15 +74,15 @@ exports.exportVendors = async (req, res) => {
 
       const records = affiliates.map(affiliate => ({
         vendorName: `${affiliate.firstName} ${affiliate.lastName}`,
-        companyName: affiliate.w9Information.businessName || '',
-        displayName: affiliate.w9Information.quickbooksData?.displayName ||
+        companyName: affiliate.businessName || '',
+        displayName: affiliate.quickbooksData?.displayName ||
                            `${affiliate.firstName} ${affiliate.lastName}`,
         firstName: affiliate.firstName,
         lastName: affiliate.lastName,
         email: affiliate.email,
-        taxId: `****${affiliate.w9Information.taxIdLast4}`,
-        vendorType: affiliate.w9Information.quickbooksData?.vendorType || '1099 Contractor',
-        terms: affiliate.w9Information.quickbooksData?.terms || 'Net 15',
+        taxId: affiliate.taxIdLast4 ? `****${affiliate.taxIdLast4}` : '',
+        vendorType: affiliate.quickbooksData?.vendorType || '1099 Contractor',
+        terms: affiliate.quickbooksData?.terms || 'Net 15',
         trackPayments: 'Yes',
         accountNumber: affiliate.affiliateId
       }));
@@ -155,10 +154,10 @@ exports.exportPaymentSummary = async (req, res) => {
       order.affiliateData = affiliateMap[order.affiliateId];
     });
 
-    // Filter out orders where affiliate doesn't have verified W-9
+    // Filter out orders where affiliate doesn't have an on-file W-9
     const validOrders = orders.filter(order =>
       order.affiliateData &&
-            order.affiliateData.w9Information?.status === 'verified'
+            order.affiliateData.w9Status === 'on_file'
     );
 
     if (validOrders.length === 0) {
@@ -231,7 +230,7 @@ exports.exportPaymentSummary = async (req, res) => {
 
       const records = [];
       Object.values(affiliatePayments).forEach(payment => {
-        const vendorName = payment.affiliate.w9Information.quickbooksData?.displayName ||
+        const vendorName = payment.affiliate.quickbooksData?.displayName ||
                                  `${payment.affiliate.firstName} ${payment.affiliate.lastName}`;
 
         records.push({
@@ -240,7 +239,7 @@ exports.exportPaymentSummary = async (req, res) => {
           accountNumber: payment.affiliate.affiliateId,
           description: `Commission payment for ${start.toLocaleDateString()} - ${end.toLocaleDateString()}`,
           amount: payment.totalCommission.toFixed(2),
-          account: payment.affiliate.w9Information.quickbooksData?.defaultExpenseAccount || 'Commission Expense',
+          account: payment.affiliate.quickbooksData?.defaultExpenseAccount || 'Commission Expense',
           memo: `${payment.orders.length} orders processed`
         });
       });
@@ -302,10 +301,10 @@ exports.exportCommissionDetail = async (req, res) => {
       });
     }
 
-    if (affiliate.w9Information?.status !== 'verified') {
+    if (affiliate.w9Status !== 'on_file') {
       return res.status(400).json({
         success: false,
-        message: 'Affiliate does not have a verified W-9 on file'
+        message: 'Affiliate does not have a W-9 on file'
       });
     }
 

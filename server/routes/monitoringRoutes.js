@@ -78,20 +78,6 @@ router.get('/status', async (req, res) => {
             success: Math.random() > 0.03
           }))
         },
-        'DocuSign API': {
-          status: 'up',
-          critical: false,
-          availability: '99.5%',
-          responseTime: 250,
-          totalChecks: 1440,
-          failedChecks: 7,
-          lastCheck: new Date().toISOString(),
-          history: Array(60).fill(0).map((_, i) => ({
-            timestamp: Date.now() - (59 - i) * 60000,
-            responseTime: Math.floor(Math.random() * 100) + 200,
-            success: Math.random() > 0.05
-          }))
-        },
         'DNS Resolution': {
           status: 'up',
           critical: true,

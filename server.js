@@ -26,7 +26,6 @@ const customerRoutes = require('./server/routes/customerRoutes');
 const orderRoutes = require('./server/routes/orderRoutes');
 const administratorRoutes = require('./server/routes/administratorRoutes');
 const operatorRoutes = require('./server/routes/operatorRoutes');
-const w9Routes = require('./server/routes/w9Routes');
 const monitoringRoutes = require('./server/routes/monitoringRoutes');
 const systemConfigRoutes = require('./server/routes/systemConfigRoutes');
 const paymentRoutes = require('./server/routes/paymentRoutes');
@@ -519,7 +518,6 @@ apiV1Router.use('/customers', customerRoutes);
 apiV1Router.use('/orders', orderRoutes);
 apiV1Router.use('/administrators', administratorRoutes);
 apiV1Router.use('/operators', operatorRoutes);
-apiV1Router.use('/w9', w9Routes);  // W-9 document management
 apiV1Router.use('/system/config', systemConfigRoutes);
 apiV1Router.use('/service-area', serviceAreaRoutes);  // Service area and location validation
 apiV1Router.use('/payments', paymentRoutes);
