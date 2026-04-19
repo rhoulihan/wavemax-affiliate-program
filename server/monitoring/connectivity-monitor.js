@@ -36,12 +36,6 @@ const SERVICES = [
     critical: true,
   },
   {
-    name: 'DocuSign API',
-    type: 'https',
-    url: 'https://account-d.docusign.com',
-    critical: false,
-  },
-  {
     name: 'QuickBooks API',
     type: 'https',
     url: 'https://sandbox-quickbooks.api.intuit.com',

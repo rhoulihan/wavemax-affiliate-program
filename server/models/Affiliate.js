@@ -148,36 +148,29 @@ const affiliateSchema = new mongoose.Schema({
     enum: ['en', 'es', 'pt', 'de'],
     default: 'en'
   },
-  // W-9 Tax Information
-  w9Information: {
-    status: {
-      type: String,
-      enum: ['not_submitted', 'pending_review', 'verified', 'rejected', 'expired'],
-      default: 'not_submitted'
-    },
-    submittedAt: Date,
-    verifiedAt: Date,
-    verifiedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'Administrator' },
-    rejectedAt: Date,
-    rejectedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'Administrator' },
-    rejectionReason: String,
-    expiryDate: Date,
-    documentId: String, // Reference to W9Document
-    taxIdType: { type: String, enum: ['SSN', 'EIN'] },
-    taxIdLast4: String, // Store only last 4 digits for display
-    businessName: String, // Legal business name from W-9
-    quickbooksVendorId: String,
-    quickbooksData: {
-      displayName: String,
-      vendorType: { type: String, default: '1099 Contractor' },
-      terms: { type: String, default: 'Net 15' },
-      defaultExpenseAccount: { type: String, default: 'Commission Expense' }
-    },
-    // DocuSign fields
-    docusignEnvelopeId: String,
-    docusignStatus: String,
-    docusignInitiatedAt: Date,
-    docusignCompletedAt: Date
+  // W-9 tax info (collected out-of-band; admin sets status here)
+  w9Status: {
+    type: String,
+    enum: ['not_required', 'required', 'on_file', 'rejected'],
+    default: 'not_required'
+  },
+  w9OnFileAt: Date,
+  taxIdLast4: String,                  // last 4 digits, for admin display only
+  // Payment processing lock (set automatically when YTD earnings cross the W-9
+  // reporting threshold; cleared manually by an admin after the W-9 is on file)
+  paymentProcessingLocked: { type: Boolean, default: false },
+  paymentLockedAt: Date,
+  paymentLockReason: String,           // e.g. 'w9_required', 'admin_hold', 'compliance_review'
+  paymentUnlockedAt: Date,
+  paymentUnlockedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'Administrator' },
+  paymentUnlockNotes: String,
+  // QuickBooks vendor linkage
+  quickbooksVendorId: String,
+  quickbooksData: {
+    displayName: String,
+    vendorType: { type: String, default: '1099 Contractor' },
+    terms: { type: String, default: 'Net 15' },
+    defaultExpenseAccount: { type: String, default: 'Commission Expense' }
   },
   // Availability schedule for pickup management
   availabilitySchedule: {
@@ -323,21 +316,9 @@ affiliateSchema.pre('save', function(next) {
 // Create 2dsphere index for location-based queries
 affiliateSchema.index({ serviceLocation: '2dsphere' });
 
-// Method to check if affiliate can receive payments
+// Method to check if affiliate can receive commission payouts
 affiliateSchema.methods.canReceivePayments = function() {
-  return this.w9Information.status === 'verified' && this.isActive;
-};
-
-// Method to get W-9 status display text
-affiliateSchema.methods.getW9StatusDisplay = function() {
-  const statusMap = {
-    'not_submitted': 'Waiting for Upload',
-    'pending_review': 'Awaiting Review',
-    'verified': 'Approved',
-    'rejected': 'Rejected',
-    'expired': 'Expired - Update Required'
-  };
-  return statusMap[this.w9Information.status] || 'Unknown Status';
+  return !this.paymentProcessingLocked && this.isActive;
 };
 
 // Update serviceLocation when lat/lng changes

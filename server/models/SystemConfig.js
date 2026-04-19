@@ -272,6 +272,16 @@ systemConfigSchema.statics.initializeDefaults = async function() {
       validation: { min: 0.00, max: 50.00 },
       isPublic: true
     },
+    {
+      key: 'w9_earnings_threshold',
+      value: 600.00,
+      defaultValue: 600.00,
+      description: 'YTD earnings (USD) at which an affiliate must have a W-9 on file before further commission payouts',
+      category: 'payment',
+      dataType: 'number',
+      validation: { min: 0.00, max: 10000.00 },
+      isPublic: false
+    },
     // System settings
     {
       key: 'maintenance_mode',

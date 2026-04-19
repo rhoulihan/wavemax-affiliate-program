@@ -51,7 +51,7 @@ describe('Affiliate Model Methods', () => {
   });
 
   describe('Payment Methods', () => {
-    it('should determine if affiliate can receive payments', async () => {
+    it('should determine if affiliate can receive commission payouts', async () => {
       const affiliate = new Affiliate(createAffiliateData({
         firstName: 'John',
         lastName: 'Doe',
@@ -64,75 +64,20 @@ describe('Affiliate Model Methods', () => {
         username: 'johndoe',
         password: 'StrongPassword123!',
         paymentMethod: 'check',
-        isActive: true,
-        w9Information: {
-          status: 'verified'
-        }
+        isActive: true
       }));
 
-      // Verified W9 and active - can receive payments
+      // Active and unlocked — can receive payouts
       expect(affiliate.canReceivePayments()).toBe(true);
 
-      // Pending W9 - cannot receive payments
-      affiliate.w9Information.status = 'pending_review';
+      // Locked — cannot receive payouts
+      affiliate.paymentProcessingLocked = true;
       expect(affiliate.canReceivePayments()).toBe(false);
 
-      // Not submitted W9 - cannot receive payments
-      affiliate.w9Information.status = 'not_submitted';
-      expect(affiliate.canReceivePayments()).toBe(false);
-
-      // Rejected W9 - cannot receive payments
-      affiliate.w9Information.status = 'rejected';
-      expect(affiliate.canReceivePayments()).toBe(false);
-
-      // Verified but inactive - cannot receive payments
-      affiliate.w9Information.status = 'verified';
+      // Unlocked but inactive — cannot receive payouts
+      affiliate.paymentProcessingLocked = false;
       affiliate.isActive = false;
       expect(affiliate.canReceivePayments()).toBe(false);
-    });
-  });
-
-  describe('W9 Status Display', () => {
-    it('should return correct W9 status display text', async () => {
-      const affiliate = new Affiliate(createAffiliateData({
-        firstName: 'John',
-        lastName: 'Doe',
-        email: 'john@example.com',
-        phone: '555-1234',
-        address: '123 Main St',
-        city: 'Anytown',
-        state: 'CA',
-        zipCode: '12345',
-        username: 'johndoe',
-        password: 'StrongPassword123!',
-        paymentMethod: 'check',
-        w9Information: {
-          status: 'not_submitted'
-        }
-      }));
-
-      // Test all W9 statuses
-      expect(affiliate.getW9StatusDisplay()).toBe('Waiting for Upload');
-
-      affiliate.w9Information.status = 'pending_review';
-      expect(affiliate.getW9StatusDisplay()).toBe('Awaiting Review');
-
-      affiliate.w9Information.status = 'verified';
-      expect(affiliate.getW9StatusDisplay()).toBe('Approved');
-
-      affiliate.w9Information.status = 'rejected';
-      expect(affiliate.getW9StatusDisplay()).toBe('Rejected');
-
-      affiliate.w9Information.status = 'expired';
-      expect(affiliate.getW9StatusDisplay()).toBe('Expired - Update Required');
-
-      // Test unknown status
-      affiliate.w9Information.status = 'unknown_status';
-      expect(affiliate.getW9StatusDisplay()).toBe('Unknown Status');
-
-      // Test undefined status
-      affiliate.w9Information.status = undefined;
-      expect(affiliate.getW9StatusDisplay()).toBe('Unknown Status');
     });
   });
 });

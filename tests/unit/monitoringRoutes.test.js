@@ -64,7 +64,6 @@ describe('Monitoring Routes', () => {
           'Database': expect.any(Object),
           'Payment Gateway': expect.any(Object),
           'Email Service': expect.any(Object),
-          'DocuSign API': expect.any(Object),
           'DNS Resolution': expect.any(Object)
         })
       });
@@ -159,7 +158,7 @@ describe('Monitoring Routes', () => {
       const response = await request(app)
         .get('/api/monitoring/status');
       
-      const nonCriticalServices = ['Email Service', 'DocuSign API'];
+      const nonCriticalServices = ['Email Service'];
       
       nonCriticalServices.forEach(serviceName => {
         const service = response.body.services[serviceName];

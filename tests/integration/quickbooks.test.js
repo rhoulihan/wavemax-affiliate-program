@@ -78,19 +78,15 @@ describe('QuickBooks Export Integration Tests', () => {
         serviceRadius: 10,
         minimumDeliveryFee: 25,
         perBagDeliveryFee: 5,
-        w9Information: {
-          status: 'verified',
-          taxIdType: 'SSN',
-          taxIdLast4: '1234',
-          businessName: 'John Doe LLC',
-          verifiedAt: new Date(),
-          quickbooksVendorId: 'QB-VENDOR-001',
-          quickbooksData: {
-            displayName: 'John Doe LLC',
-            vendorType: '1099 Contractor',
-            terms: 'Net 15',
-            defaultExpenseAccount: 'Commission Expense'
-          }
+        w9Status: 'on_file',
+        w9OnFileAt: new Date(),
+        taxIdLast4: '1234',
+        quickbooksVendorId: 'QB-VENDOR-001',
+        quickbooksData: {
+          displayName: 'John Doe LLC',
+          vendorType: '1099 Contractor',
+          terms: 'Net 15',
+          defaultExpenseAccount: 'Commission Expense'
         }
       }),
       // Verified affiliate 2
@@ -116,15 +112,11 @@ describe('QuickBooks Export Integration Tests', () => {
         serviceRadius: 15,
         minimumDeliveryFee: 30,
         perBagDeliveryFee: 6,
-        w9Information: {
-          status: 'verified',
-          taxIdType: 'EIN',
-          taxIdLast4: '5678',
-          businessName: 'Smith Enterprises',
-          verifiedAt: new Date(),
-          quickbooksData: {
-            displayName: 'Smith Enterprises'
-          }
+        w9Status: 'on_file',
+        w9OnFileAt: new Date(),
+        taxIdLast4: '5678',
+        quickbooksData: {
+          displayName: 'Smith Enterprises'
         }
       }),
       // Unverified affiliate (should not appear in exports)
@@ -149,9 +141,7 @@ describe('QuickBooks Export Integration Tests', () => {
         serviceRadius: 20,
         minimumDeliveryFee: 35,
         perBagDeliveryFee: 7,
-        w9Information: {
-          status: 'pending_review'
-        }
+        w9Status: 'required'
       })
     ]);
 
@@ -275,7 +265,7 @@ describe('QuickBooks Export Integration Tests', () => {
       const csvContent = response.text;
       expect(csvContent).toContain('Vendor,Company,Display Name as');
       expect(csvContent).toContain('John Doe,John Doe LLC,John Doe LLC');
-      expect(csvContent).toContain('Jane Smith,Smith Enterprises,Smith Enterprises');
+      expect(csvContent).toContain('Jane Smith,Smith Services LLC,Smith Enterprises');
       expect(csvContent).not.toContain('Bob Wilson'); // Unverified
 
       // Verify export was recorded
@@ -308,7 +298,7 @@ describe('QuickBooks Export Integration Tests', () => {
 
     it('should handle no verified vendors gracefully', async () => {
       // Remove all verified affiliates
-      await Affiliate.updateMany({}, { $set: { 'w9Information.status': 'pending_review' } });
+      await Affiliate.updateMany({}, { $set: { w9Status: 'required' } });
 
       const response = await request(app)
         .get('/api/v1/quickbooks/vendors')
@@ -317,7 +307,7 @@ describe('QuickBooks Export Integration Tests', () => {
 
       expect(response.body).toMatchObject({
         success: false,
-        message: 'No verified vendors found for export'
+        message: 'No vendors with W-9 on file found for export'
       });
     });
   });
@@ -466,7 +456,7 @@ describe('QuickBooks Export Integration Tests', () => {
         })
         .expect(400);
 
-      expect(response.body.message).toContain('Affiliate does not have a verified W-9 on file');
+      expect(response.body.message).toContain('Affiliate does not have a W-9 on file');
     });
 
     it('should handle non-existent affiliate', async () => {

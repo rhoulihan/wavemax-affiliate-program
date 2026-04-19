@@ -46,17 +46,15 @@ describe('QuickBooks Controller', () => {
         firstName: 'John',
         lastName: 'Doe',
         email: 'john@example.com',
-        w9Information: {
-          status: 'verified',
-          taxIdLast4: '1234',
-          businessName: 'John Doe LLC',
-          quickbooksVendorId: 'QB-001',
-          quickbooksData: {
-            displayName: 'John Doe LLC',
-            vendorType: '1099 Contractor',
-            terms: 'Net 15',
-            defaultExpenseAccount: 'Commission Expense'
-          }
+        w9Status: 'on_file',
+        taxIdLast4: '1234',
+        businessName: 'John Doe LLC',
+        quickbooksVendorId: 'QB-001',
+        quickbooksData: {
+          displayName: 'John Doe LLC',
+          vendorType: '1099 Contractor',
+          terms: 'Net 15',
+          defaultExpenseAccount: 'Commission Expense'
         }
       },
       {
@@ -64,13 +62,11 @@ describe('QuickBooks Controller', () => {
         firstName: 'Jane',
         lastName: 'Smith',
         email: 'jane@example.com',
-        w9Information: {
-          status: 'verified',
-          taxIdLast4: '5678',
-          businessName: null,
-          quickbooksVendorId: null,
-          quickbooksData: null
-        }
+        w9Status: 'on_file',
+        taxIdLast4: '5678',
+        businessName: null,
+        quickbooksVendorId: null,
+        quickbooksData: null
       }
     ];
 
@@ -92,7 +88,7 @@ describe('QuickBooks Controller', () => {
       await quickbooksController.exportVendors(req, res);
 
       expect(Affiliate.find).toHaveBeenCalledWith({
-        'w9Information.status': 'verified'
+        w9Status: 'on_file'
       });
 
       expect(PaymentExport.create).toHaveBeenCalledWith({
@@ -192,7 +188,7 @@ describe('QuickBooks Controller', () => {
       expect(res.status).toHaveBeenCalledWith(404);
       expect(res.json).toHaveBeenCalledWith({
         success: false,
-        message: 'No verified vendors found for export'
+        message: 'No vendors with W-9 on file found for export'
       });
     });
 
@@ -233,12 +229,10 @@ describe('QuickBooks Controller', () => {
             affiliateId: 'AFF-001',
             firstName: 'John',
             lastName: 'Doe',
-            w9Information: {
-              status: 'verified',
-              quickbooksData: {
-                displayName: 'John Doe LLC',
-                defaultExpenseAccount: 'Commission Expense'
-              }
+            w9Status: 'on_file',
+            quickbooksData: {
+              displayName: 'John Doe LLC',
+              defaultExpenseAccount: 'Commission Expense'
             }
           },
           commission: 10
@@ -254,9 +248,7 @@ describe('QuickBooks Controller', () => {
             affiliateId: 'AFF-001',
             firstName: 'John',
             lastName: 'Doe',
-            w9Information: {
-              status: 'verified'
-            }
+            w9Status: 'on_file'
           },
           commission: 20
         }
@@ -440,7 +432,7 @@ describe('QuickBooks Controller', () => {
           affiliate: {
             affiliateId: {
               affiliateId: 'AFF-002',
-              w9Information: { status: 'pending' }
+              w9Status: 'required'
             },
             commission: 15
           }
@@ -478,11 +470,10 @@ describe('QuickBooks Controller', () => {
       affiliateId: 'AFF-001',
       firstName: 'John',
       lastName: 'Doe',
-      w9Information: {
-        status: 'verified',
-        quickbooksData: {
-          displayName: 'John Doe LLC'
-        , save: jest.fn().mockResolvedValue(true)}
+      w9Status: 'on_file',
+      quickbooksData: {
+        displayName: 'John Doe LLC',
+        save: jest.fn().mockResolvedValue(true)
       }
     };
 
@@ -605,7 +596,7 @@ describe('QuickBooks Controller', () => {
 
       Affiliate.findOne.mockResolvedValue({
         ...mockAffiliate,
-        w9Information: { status: 'pending' }
+        w9Status: 'required'
       });
 
       await quickbooksController.exportCommissionDetail(req, res);
@@ -613,7 +604,7 @@ describe('QuickBooks Controller', () => {
       expect(res.status).toHaveBeenCalledWith(400);
       expect(res.json).toHaveBeenCalledWith({
         success: false,
-        message: 'Affiliate does not have a verified W-9 on file'
+        message: 'Affiliate does not have a W-9 on file'
       });
     });
   });
