@@ -23,6 +23,7 @@ const logger = require('../utils/logger');
 const betaRequestService = require('../services/betaRequestService');
 const affiliatePaymentLockService = require('../services/affiliatePaymentLockService');
 const systemConfigService = require('../services/systemConfigService');
+const systemHealthService = require('../services/systemHealthService');
 
 // Administrator Management
 
@@ -2250,149 +2251,16 @@ exports.getOperatorSelf = async (req, res) => {
 
 /**
  * Get environment variables (sanitized for display)
+/**
+ * Get environment variables (sanitized for display)
  */
 exports.getEnvironmentVariables = async (req, res) => {
   try {
-    // Define which environment variables to expose
-    const allowedVars = [
-      // Application
-      'NODE_ENV',
-      'PORT',
-      'BASE_URL',
-      'FRONTEND_URL',
-      'BACKEND_URL',
-      'CORS_ORIGIN',
-      'OAUTH_CALLBACK_URI',
-      'TRUST_PROXY',
-      'COOKIE_SECURE',
-      
-      // Database
-      'MONGODB_URI',
-      
-      // Security & Authentication
-      'JWT_SECRET',
-      'SESSION_SECRET',
-      'ENCRYPTION_KEY',
-      
-      // Email
-      'EMAIL_PROVIDER',
-      'EMAIL_FROM',
-      'EMAIL_HOST',
-      'EMAIL_PORT',
-      'EMAIL_USER',
-      'EMAIL_PASS',
-      'EMAIL_SECURE',
-
-      // Payment - Paygistix (deprecated - now in paygistix-forms.json)
-      
-      // AWS (Optional)
-      'AWS_S3_BUCKET',
-      'AWS_ACCESS_KEY_ID',
-      'AWS_SECRET_ACCESS_KEY',
-      'AWS_REGION',
-      
-      // Stripe (Deprecated but still in env)
-      'STRIPE_PUBLISHABLE_KEY',
-      'STRIPE_SECRET_KEY',
-      
-      // Features
-      'SHOW_DOCS',
-      'ENABLE_TEST_PAYMENT_FORM',
-      'ENABLE_DELETE_DATA_FEATURE',
-      'CSRF_PHASE',
-      'RELAX_RATE_LIMITING',
-      
-      // Rate Limiting
-      'RATE_LIMIT_WINDOW_MS',
-      'RATE_LIMIT_MAX_REQUESTS',
-      'AUTH_RATE_LIMIT_MAX',
-      
-      // Social Login
-      'GOOGLE_CLIENT_ID',
-      'GOOGLE_CLIENT_SECRET',
-      'FACEBOOK_APP_ID',
-      'FACEBOOK_APP_SECRET',
-      'LINKEDIN_CLIENT_ID',
-      'LINKEDIN_CLIENT_SECRET',
-      
-      // Logging
-      'LOG_LEVEL',
-      'LOG_DIR',
-      
-      // Business Configuration
-      'BAG_FEE',
-      
-      // Default Accounts
-      'DEFAULT_ADMIN_EMAIL'
-    ];
-
-    // Check if user is super-admin (has all permissions or specific super-admin flag)
-    const isSuperAdmin = req.user.permissions?.includes('*') || 
-                        req.user.isSuperAdmin || 
-                        req.user.email === process.env.DEFAULT_ADMIN_EMAIL;
-
-    // Collect environment variables
-    const variables = {};
-    const sensitiveValues = {};
-    
-    for (const varName of allowedVars) {
-      const value = process.env[varName] || '';
-      
-      // Check if this is a sensitive variable
-      const isSensitive = varName.includes('SECRET') || 
-                         varName.includes('PASSWORD') || 
-                         varName.includes('KEY') || 
-                         varName.includes('TOKEN');
-      
-      if (isSensitive && isSuperAdmin && value) {
-        // Store actual value for super-admins
-        sensitiveValues[varName] = value;
-        variables[varName] = '••••••••'; // Still mask in main object
-      } else {
-        variables[varName] = value;
-      }
-    }
-
-    // Add Paygistix configuration from JSON file
-    let paygistixConfig = {};
-    try {
-      const paygistixForms = require('../config/paygistix-forms.json');
-      paygistixConfig = {
-        'PAYGISTIX_MERCHANT_ID (from JSON)': paygistixForms.merchantId || 'Not configured',
-        'PAYGISTIX_FORM_ID (from JSON)': paygistixForms.form?.formId || 'Not configured',
-        'PAYGISTIX_FORM_HASH (from JSON)': isSuperAdmin ? (paygistixForms.form?.formHash || 'Not configured') : '••••••••',
-        'PAYGISTIX_CONFIG_SOURCE': 'paygistix-forms.json'
-      };
-    } catch (error) {
-      paygistixConfig = {
-        'PAYGISTIX_CONFIG_ERROR': 'Failed to load paygistix-forms.json'
-      };
-    }
-
-    // Log access for audit
-    await logAuditEvent(
-      AuditEvents.ADMIN_VIEW_ENV_VARS,
-      req.user,
-      { 
-        action: 'view_environment_variables',
-        viewedSensitive: isSuperAdmin && Object.keys(sensitiveValues).length > 0
-      },
-      req
-    );
-
-    res.json({
-      success: true,
-      variables: { ...variables, ...paygistixConfig },
-      sensitiveValues: isSuperAdmin ? sensitiveValues : {},
-      isSuperAdmin
-    });
-
-  } catch (error) {
-    logger.error('Error fetching environment variables:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to fetch environment variables'
-    });
+    const result = await systemHealthService.getEnvironmentVariables({ user: req.user, req });
+    res.json({ success: true, ...result });
+  } catch (err) {
+    logger.error('Error fetching environment variables:', err);
+    res.status(500).json({ success: false, message: 'Failed to fetch environment variables' });
   }
 };
 
@@ -2401,60 +2269,30 @@ exports.getEnvironmentVariables = async (req, res) => {
  */
 exports.resetRateLimits = async (req, res) => {
   try {
-    const { type, ip } = req.body;
-    const db = mongoose.connection.db;
-    
-    if (!db) {
-      logger.error('Database connection not available');
-      return res.status(500).json({
-        success: false,
-        message: 'Database connection not available'
-      });
-    }
-
-    // Build the filter based on provided criteria
-    let filter = {};
-    
-    if (ip) {
-      // Escape special regex characters in IP
-      const escapedIp = ip.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-      filter.key = new RegExp(escapedIp);
-    } else if (type) {
-      // Filter by type of rate limit
-      filter.key = new RegExp(`^${type}:`);
-    }
-
-    // Access the rate_limits collection directly
-    const collection = db.collection('rate_limits');
-    const result = await collection.deleteMany(filter);
-
-    // Log the action for audit
-    await logAuditEvent(
-      AuditEvents.ADMIN_RESET_RATE_LIMITS,
-      req.user,
-      { 
-        type,
-        ip,
-        deletedCount: result.deletedCount
-      },
+    const { deletedCount } = await systemHealthService.resetRateLimits({
+      type: req.body.type,
+      ip: req.body.ip,
+      user: req.user,
       req
-    );
-
+    });
     res.json({
       success: true,
-      message: `Reset ${result.deletedCount} rate limit entries`,
-      deletedCount: result.deletedCount
+      message: `Reset ${deletedCount} rate limit entries`,
+      deletedCount
     });
-
-  } catch (error) {
-    logger.error('Error resetting rate limits:', error);
+  } catch (err) {
+    if (err.isSystemHealthError) {
+      return res.status(err.status).json({ success: false, message: err.message });
+    }
+    logger.error('Error resetting rate limits:', err);
     res.status(500).json({
       success: false,
       message: 'Failed to reset rate limits',
-      error: error.message
+      error: err.message
     });
   }
 };
+
 
 /**
  * Get all beta requests
