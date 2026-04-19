@@ -22,6 +22,7 @@ const logger = require('../utils/logger');
 
 const betaRequestService = require('../services/betaRequestService');
 const affiliatePaymentLockService = require('../services/affiliatePaymentLockService');
+const systemConfigService = require('../services/systemConfigService');
 
 // Administrator Management
 
@@ -1756,26 +1757,11 @@ exports.unlockAffiliatePayments = async (req, res) => {
  */
 exports.getSystemConfig = async (req, res) => {
   try {
-    const { category } = req.query;
-
-    let configs;
-    if (category) {
-      configs = await SystemConfig.getByCategory(category);
-    } else {
-      configs = await SystemConfig.find().sort('category key');
-    }
-
-    res.json({
-      success: true,
-      configurations: configs
-    });
-
+    const configurations = await systemConfigService.listConfigurations(req.query);
+    res.json({ success: true, configurations });
   } catch (error) {
     logger.error('Error fetching system config:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to fetch system configuration'
-    });
+    res.status(500).json({ success: false, message: 'Failed to fetch system configuration' });
   }
 };
 
@@ -1784,24 +1770,13 @@ exports.getSystemConfig = async (req, res) => {
  */
 exports.updateSystemConfig = async (req, res) => {
   try {
-    const { key, value } = req.body;
-
-    const config = await SystemConfig.setValue(key, value, req.user.id);
-
-    // Log the action
-    logAuditEvent(AuditEvents.DATA_MODIFICATION, {
-      action: 'UPDATE_SYSTEM_CONFIG',
-      userId: req.user.id,
-      userType: 'administrator',
-      details: { key, oldValue: config.value, newValue: value }
-    }, req);
-
-    res.json({
-      success: true,
-      message: 'Configuration updated successfully',
-      configuration: config
+    const configuration = await systemConfigService.updateConfiguration({
+      key: req.body.key,
+      value: req.body.value,
+      adminId: req.user.id,
+      req
     });
-
+    res.json({ success: true, message: 'Configuration updated successfully', configuration });
   } catch (error) {
     logger.error('Error updating system config:', error);
     res.status(500).json({
@@ -1816,52 +1791,14 @@ exports.updateSystemConfig = async (req, res) => {
  */
 exports.getSystemHealth = async (req, res) => {
   try {
-    const health = {
-      status: 'healthy',
-      timestamp: new Date(),
-      components: {
-        database: 'healthy',
-        email: 'healthy',
-        storage: 'healthy'
-      },
-      metrics: {
-        uptime: process.uptime(),
-        memory: process.memoryUsage(),
-        cpu: process.cpuUsage()
-      }
-    };
-
-    // Check database connection
-    try {
-      await mongoose.connection.db.admin().ping();
-    } catch (dbError) {
-      health.components.database = 'unhealthy';
-      health.status = 'degraded';
-    }
-
-    // Check email service (mock check)
-    try {
-      // Would implement actual email service check
-      health.components.email = 'healthy';
-    } catch (emailError) {
-      health.components.email = 'unhealthy';
-      health.status = 'degraded';
-    }
-
-    res.json({
-      success: true,
-      health
-    });
-
+    const health = await systemConfigService.getSystemHealth();
+    res.json({ success: true, health });
   } catch (error) {
     logger.error('Error checking system health:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to check system health',
-      health: {
-        status: 'unhealthy',
-        error: error.message
-      }
+      health: { status: 'unhealthy', error: error.message }
     });
   }
 };
