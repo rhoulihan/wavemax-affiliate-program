@@ -11,6 +11,8 @@ const ControllerHelpers = require('../utils/controllerHelpers');
 const AuthorizationHelpers = require('../middleware/authorizationHelpers');
 const Formatters = require('../utils/formatters');
 
+const orderQueueService = require('../services/operatorOrderQueueService');
+
 // Helper function to send payment reminder
 async function sendPaymentReminder(order) {
   try {
@@ -101,180 +103,45 @@ async function generatePaymentURLs(order) {
 // Get order queue
 exports.getOrderQueue = ControllerHelpers.asyncWrapper(async (req, res) => {
   const { status = 'pending', priority, dateFrom, dateTo } = req.query;
-  
-  // Parse pagination parameters
   const pagination = ControllerHelpers.parsePagination(req.query, { limit: 20 });
 
-  const query = { orderProcessingStatus: status };
+  const result = await orderQueueService.getOrderQueue({
+    status, priority, dateFrom, dateTo, pagination
+  });
 
-  if (priority) {
-    query.priority = priority;
-  }
-
-  if (dateFrom || dateTo) {
-    query.scheduledPickup = {};
-    if (dateFrom) query.scheduledPickup.$gte = new Date(dateFrom);
-    if (dateTo) query.scheduledPickup.$lte = new Date(dateTo);
-  }
-
-  const [orders, total] = await Promise.all([
-    Order.find(query)
-      .populate('customer', 'firstName lastName email phone')
-      .populate('assignedOperator', 'firstName lastName operatorId')
-      .sort({ priority: -1, scheduledPickup: 1 })
-      .skip(pagination.skip)
-      .limit(pagination.limit),
-    Order.countDocuments(query)
-  ]);
-
-  // Format the orders data
-  const formattedOrders = orders.map(order => ({
-    ...order.toObject(),
-    customer: order.customer ? {
-      ...order.customer.toObject(),
-      name: Formatters.fullName(order.customer.firstName, order.customer.lastName),
-      phone: Formatters.phone(order.customer.phone)
-    } : null,
-    scheduledPickup: Formatters.datetime(order.scheduledPickup),
-    estimatedWeight: Formatters.weight(order.estimatedWeight),
-    actualWeight: Formatters.weight(order.actualWeight)
-  }));
-
-  const paginationMeta = ControllerHelpers.calculatePagination(total, pagination.page, pagination.limit);
-
-  ControllerHelpers.sendSuccess(res, {
-    orders: formattedOrders,
-    pagination: paginationMeta
-  }, 'Order queue retrieved successfully');
+  ControllerHelpers.sendSuccess(res, result, 'Order queue retrieved successfully');
 });
 
 // Claim an order
 exports.claimOrder = ControllerHelpers.asyncWrapper(async (req, res) => {
-  const { orderId } = req.params;
-  const operatorId = req.user.id;
-
-  const order = await Order.findById(orderId);
-  if (!order) {
-    return ControllerHelpers.sendError(res, 'Order not found', 404);
+  try {
+    const order = await orderQueueService.claimOrder({
+      orderId: req.params.orderId,
+      operatorId: req.user.id,
+      req
+    });
+    ControllerHelpers.sendSuccess(res, { order }, 'Order claimed successfully');
+  } catch (err) {
+    if (err.isQueueError) return ControllerHelpers.sendError(res, err.message, err.status);
+    throw err;
   }
-
-  if (order.assignedOperator) {
-    return ControllerHelpers.sendError(res, 'Order already assigned', 400);
-  }
-
-  // Check operator availability
-  const operator = await Operator.findById(operatorId);
-  const activeOrdersCount = await Order.countDocuments({
-    assignedOperator: operatorId,
-    orderProcessingStatus: { $in: ['assigned', 'washing', 'drying', 'folding'] }
-  });
-
-  if (activeOrdersCount >= 3) {
-    return ControllerHelpers.sendError(res, 'Maximum concurrent orders reached', 400);
-  }
-
-  // Assign order
-  order.assignedOperator = operatorId;
-  order.orderProcessingStatus = 'assigned';
-  order.processingStarted = new Date();
-  await order.save();
-
-  // Update operator stats
-  operator.updatedAt = new Date();
-  await operator.save();
-
-  await logAuditEvent(AuditEvents.ORDER_STATUS_CHANGED, {
-    operatorId,
-    orderId,
-    orderNumber: order.orderNumber,
-    action: 'order_claimed',
-    newStatus: 'assigned'
-  }, req);
-
-  // Populate and format the order for response
-  const populatedOrder = await order.populate('customer', 'firstName lastName email phone');
-  
-  const responseOrder = {
-    ...populatedOrder.toObject(),
-    customer: populatedOrder.customer ? {
-      ...populatedOrder.customer.toObject(),
-      name: Formatters.fullName(populatedOrder.customer.firstName, populatedOrder.customer.lastName),
-      phone: Formatters.phone(populatedOrder.customer.phone)
-    } : null,
-    processingStarted: Formatters.datetime(order.processingStarted)
-  };
-
-  ControllerHelpers.sendSuccess(res, {
-    order: responseOrder
-  }, 'Order claimed successfully');
 });
 
 // Update order status
 exports.updateOrderStatus = async (req, res) => {
   try {
-    const { orderId } = req.params;
-    const { status, notes, workstation } = req.body;
-    const operatorId = req.user.id;
-
-    const order = await Order.findById(orderId);
-    if (!order) {
-      return res.status(404).json({ error: 'Order not found' });
-    }
-
-    if (order.assignedOperator?.toString() !== operatorId) {
-      return res.status(403).json({ error: 'Not authorized to update this order' });
-    }
-
-    // Validate status transition
-    const validTransitions = {
-      'assigned': ['washing'],
-      'washing': ['drying'],
-      'drying': ['folding'],
-      'folding': ['quality_check'],
-      'quality_check': ['ready', 'washing'] // Can send back for reprocessing
-    };
-
-    if (!validTransitions[order.orderProcessingStatus]?.includes(status)) {
-      return res.status(400).json({
-        error: `Invalid status transition from ${order.orderProcessingStatus} to ${status}`
-      });
-    }
-
-    // Update order
-    order.orderProcessingStatus = status;
-    if (notes) order.operatorNotes = notes;
-
-    // Update workstation if changed
-    if (workstation && status === 'washing') {
-      const operator = await Operator.findById(operatorId);
-      operator.workStation = workstation;
-      await operator.save();
-    }
-
-    // Complete processing if ready
-    if (status === 'ready') {
-      order.processingCompleted = new Date();
-      order.processingTimeMinutes = Math.round(
-        (order.processingCompleted - order.processingStarted) / (1000 * 60)
-      );
-    }
-
-    await order.save();
-
-    await logAuditEvent(AuditEvents.ORDER_STATUS_CHANGED, {
-      operatorId,
-      orderId,
-      orderNumber: order.orderNumber,
-      oldStatus: order.orderProcessingStatus,
-      newStatus: status
-    }, req);
-
-    res.json({
-      message: 'Order status updated',
-      order: await order.populate('customer', 'firstName lastName email phone')
+    const order = await orderQueueService.updateOrderStatus({
+      orderId: req.params.orderId,
+      operatorId: req.user.id,
+      status: req.body.status,
+      notes: req.body.notes,
+      workstation: req.body.workstation,
+      req
     });
-  } catch (error) {
-    logger.error('Error updating order status:', error);
+    res.json({ message: 'Order status updated', order });
+  } catch (err) {
+    if (err.isQueueError) return res.status(err.status).json({ error: err.message });
+    logger.error('Error updating order status:', err);
     res.status(500).json({ error: 'Failed to update order status' });
   }
 };
