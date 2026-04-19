@@ -14,38 +14,7 @@ const { escapeRegex } = require('../utils/securityUtils');
 const ControllerHelpers = require('../utils/controllerHelpers');
 const AuthorizationHelpers = require('../middleware/authorizationHelpers');
 const Formatters = require('../utils/formatters');
-
-// ============================================================================
-// Helper Functions
-// ============================================================================
-
-/**
- * Calculate delivery fee based on number of bags and affiliate settings
- * @param {Number} numberOfBags - Number of bags for the order
- * @param {Object} affiliate - Affiliate object with fee overrides
- * @returns {Object} Fee calculation breakdown
- */
-async function calculateDeliveryFee(numberOfBags, affiliate = null) {
-  // Get system defaults
-  const systemMinimumFee = await SystemConfig.getValue('delivery_minimum_fee', 10.00);
-  const systemPerBagFee = await SystemConfig.getValue('delivery_per_bag_fee', 2.00);
-
-  // Use affiliate overrides if available, otherwise use system defaults
-  const minimumFee = affiliate?.minimumDeliveryFee ?? systemMinimumFee;
-  const perBagFee = affiliate?.perBagDeliveryFee ?? systemPerBagFee;
-
-  // Calculate fee based on bags
-  const calculatedFee = numberOfBags * perBagFee;
-  const totalFee = Math.max(minimumFee, calculatedFee);
-
-  return {
-    numberOfBags,
-    minimumFee,
-    perBagFee,
-    totalFee,
-    minimumApplied: totalFee === minimumFee
-  };
-}
+const { calculateDeliveryFee } = require('../services/orderPricingService');
 
 // ============================================================================
 // Order Controllers
@@ -1334,115 +1303,24 @@ function checkStatusTransition(currentStatus, newStatus) {
 // ============================================================================
 // Immediate Pickup ("Pickup Now!") Feature
 // ============================================================================
+//
+// Scheduling helpers (getCDTHour, getPickupTimeSlot, calculatePickupDeadline,
+// calculatePickupDate, isWithinOperatingHours, calculateNextAvailableTime)
+// now live in server/services/orderImmediatePickupHours.
 
-/**
- * Operating hours constants for immediate pickup (CDT timezone)
- */
-const IMMEDIATE_PICKUP_HOURS = {
-  START: 7,  // 7 AM
-  END: 19,   // 7 PM
-  AFTER_5PM: 17, // 5 PM threshold for next-day deadline
-  DEADLINE_HOURS: 4, // 4 hour pickup window
-  NEXT_MORNING: 9 // 9 AM next day deadline for after-5-PM orders
-};
+const {
+  IMMEDIATE_PICKUP_HOURS,
+  getCDTHour,
+  getCurrentCDTTime,
+  getPickupTimeSlot,
+  calculatePickupDeadline,
+  calculatePickupDate,
+  isWithinOperatingHours,
+  calculateNextAvailableTime
+} = require('../services/orderImmediatePickupHours');
 
-/**
- * Get the current hour in CDT timezone (0-23)
- */
-function getCDTHour(date = new Date()) {
-  return parseInt(date.toLocaleString('en-US', {
-    timeZone: 'America/Chicago',
-    hour: '2-digit',
-    hour12: false
-  }));
-}
-
-/**
- * Get current time - returns actual UTC Date object
- * Exported for testability - allows mocking in tests
- */
-function getCurrentCDTTime() {
-  return new Date();
-}
-// Export for testing purposes
+// Re-export for test code that still imports _getCurrentCDTTime from the controller.
 exports._getCurrentCDTTime = getCurrentCDTTime;
-
-/**
- * Determine pickup time slot based on CDT hour
- */
-function getPickupTimeSlot(cdtHour) {
-  if (cdtHour >= 7 && cdtHour < 12) return 'morning';
-  if (cdtHour >= 12 && cdtHour < 16) return 'afternoon';
-  if (cdtHour >= 16 && cdtHour <= 19) return 'evening';
-  return 'morning'; // Default
-}
-
-/**
- * Calculate pickup deadline based on order time
- * Uses CDT hour for business logic, but returns proper UTC date
- */
-function calculatePickupDeadline(orderTime) {
-  const cdtHour = getCDTHour(orderTime);
-  const deadline = new Date(orderTime);
-
-  if (cdtHour >= IMMEDIATE_PICKUP_HOURS.AFTER_5PM) {
-    // After 5 PM CDT: next day 9 AM CDT
-    // Calculate offset to get to 9 AM CDT tomorrow
-    const cdtOffset = -6; // CDT is UTC-6 (or -5 during DST, but we simplify)
-    deadline.setUTCDate(deadline.getUTCDate() + 1);
-    deadline.setUTCHours(IMMEDIATE_PICKUP_HOURS.NEXT_MORNING - cdtOffset, 0, 0, 0);
-  } else {
-    // Before 5 PM CDT: 4 hours from order time
-    deadline.setTime(deadline.getTime() + IMMEDIATE_PICKUP_HOURS.DEADLINE_HOURS * 60 * 60 * 1000);
-  }
-
-  return deadline;
-}
-
-/**
- * Calculate pickup date (today or tomorrow for after-5-PM orders)
- */
-function calculatePickupDate(orderTime) {
-  const cdtHour = getCDTHour(orderTime);
-  const pickupDate = new Date(orderTime);
-
-  if (cdtHour >= IMMEDIATE_PICKUP_HOURS.AFTER_5PM) {
-    // After 5 PM CDT: pickup is tomorrow
-    pickupDate.setDate(pickupDate.getDate() + 1);
-  }
-
-  // Set to midnight for consistent date comparison
-  pickupDate.setHours(0, 0, 0, 0);
-  return pickupDate;
-}
-
-/**
- * Check if current time is within operating hours (CDT)
- */
-function isWithinOperatingHours(time) {
-  const cdtHour = getCDTHour(time);
-  return cdtHour >= IMMEDIATE_PICKUP_HOURS.START && cdtHour <= IMMEDIATE_PICKUP_HOURS.END;
-}
-
-/**
- * Calculate next available time for immediate pickup
- */
-function calculateNextAvailableTime(time) {
-  const cdtHour = getCDTHour(time);
-  const nextAvailable = new Date(time);
-  const cdtOffset = -6; // CDT is UTC-6
-
-  if (cdtHour < IMMEDIATE_PICKUP_HOURS.START) {
-    // Before opening: today at 7 AM CDT
-    nextAvailable.setUTCHours(IMMEDIATE_PICKUP_HOURS.START - cdtOffset, 0, 0, 0);
-  } else if (cdtHour > IMMEDIATE_PICKUP_HOURS.END) {
-    // After closing: tomorrow at 7 AM CDT
-    nextAvailable.setUTCDate(nextAvailable.getUTCDate() + 1);
-    nextAvailable.setUTCHours(IMMEDIATE_PICKUP_HOURS.START - cdtOffset, 0, 0, 0);
-  }
-
-  return nextAvailable;
-}
 
 /**
  * Check immediate pickup availability
