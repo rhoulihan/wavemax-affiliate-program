@@ -26,65 +26,23 @@ const systemConfigService = require('../services/systemConfigService');
 const systemHealthService = require('../services/systemHealthService');
 const adminDashboardService = require('../services/adminDashboardService');
 const operatorAdminService = require('../services/operatorAdminService');
+const administratorAccountService = require('../services/administratorAccountService');
 
 // Administrator Management
 
 /**
  * Get all administrators
  */
+/**
+ * Get all administrators
+ */
 exports.getAdministrators = async (req, res) => {
   try {
-    const {
-      page = 1,
-      limit = 20,
-      active,
-      search,
-      sortBy = 'createdAt',
-      sortOrder = 'desc'
-    } = req.query;
-
-    // Build query
-    const query = {};
-
-    if (active !== undefined) {
-      query.isActive = active === 'true';
-    }
-
-    if (search) {
-      query.$or = [
-        { firstName: new RegExp(search, 'i') },
-        { lastName: new RegExp(search, 'i') },
-        { email: new RegExp(search, 'i') },
-        { adminId: new RegExp(search, 'i') }
-      ];
-    }
-
-    // Execute query with pagination
-    const administrators = await Administrator.find(query)
-      .select('-password')
-      .sort({ [sortBy]: sortOrder === 'asc' ? 1 : -1 })
-      .limit(limit * 1)
-      .skip((page - 1) * limit);
-
-    const total = await Administrator.countDocuments(query);
-
-    res.json({
-      success: true,
-      administrators: administrators.map(admin => fieldFilter(admin.toObject(), 'administrator')),
-      pagination: {
-        currentPage: parseInt(page),
-        totalPages: Math.ceil(total / limit),
-        totalItems: total,
-        itemsPerPage: parseInt(limit)
-      }
-    });
-
+    const result = await administratorAccountService.listAdministrators(req.query);
+    res.json({ success: true, ...result });
   } catch (error) {
     logger.error('Error fetching administrators:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to fetch administrators'
-    });
+    res.status(500).json({ success: false, message: 'Failed to fetch administrators' });
   }
 };
 
@@ -93,36 +51,19 @@ exports.getAdministrators = async (req, res) => {
  */
 exports.getAdministratorById = async (req, res) => {
   try {
-    const { id } = req.params;
-
-    // Validate ObjectId
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid administrator ID'
-      });
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ success: false, message: 'Invalid administrator ID' });
     }
-
-    const administrator = await Administrator.findById(id).select('-password');
-
-    if (!administrator) {
-      return res.status(404).json({
-        success: false,
-        message: 'Administrator not found'
-      });
+    const administrator = await administratorAccountService.getAdministratorById({
+      id: req.params.id
+    });
+    res.json({ success: true, administrator });
+  } catch (err) {
+    if (err.isAdministratorAccountError) {
+      return res.status(err.status).json({ success: false, message: err.message });
     }
-
-    res.json({
-      success: true,
-      administrator: fieldFilter(administrator.toObject(), 'administrator')
-    });
-
-  } catch (error) {
-    logger.error('Error fetching administrator:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to fetch administrator'
-    });
+    logger.error('Error fetching administrator:', err);
+    res.status(500).json({ success: false, message: 'Failed to fetch administrator' });
   }
 };
 
@@ -131,7 +72,6 @@ exports.getAdministratorById = async (req, res) => {
  */
 exports.createAdministrator = async (req, res) => {
   try {
-    // Check for validation errors
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       const errorMessages = errors.array().map(error => error.msg);
@@ -141,84 +81,28 @@ exports.createAdministrator = async (req, res) => {
         errors: errors.array()
       });
     }
-
-    const {
-      firstName,
-      lastName,
-      email,
-      password,
-      permissions = []
-    } = req.body;
-
-    // Check if email already exists
-    const existingAdmin = await Administrator.findOne({ email: email.toLowerCase() });
-    if (existingAdmin) {
-      return res.status(409).json({
-        success: false,
-        message: 'Email already exists'
-      });
-    }
-
-    // Generate admin ID
-    const adminCount = await Administrator.countDocuments();
-    const adminId = `ADM${String(adminCount + 1).padStart(3, '0')}`;
-
-    // Hash the password
-    const { salt, hash } = encryptionUtil.hashPassword(password);
-
-    // Create new administrator
-    const administrator = new Administrator({
-      adminId,
-      firstName,
-      lastName,
-      email: email.toLowerCase(),
-      passwordSalt: salt,
-      passwordHash: hash,
-      permissions,
-      createdAt: new Date()
+    const administrator = await administratorAccountService.createAdministrator({
+      payload: req.body,
+      adminId: req.user.id,
+      req
     });
-
-    await administrator.save();
-
-    // Log the action
-    logAuditEvent(AuditEvents.ACCOUNT_CREATED, {
-      action: 'CREATE_ADMINISTRATOR',
-      userId: req.user.id,
-      userType: 'administrator',
-      targetId: administrator._id,
-      targetType: 'administrator',
-      details: { adminId: administrator.adminId, email: administrator.email }
-    }, req);
-
     res.status(201).json({
       success: true,
       message: 'Administrator created successfully',
-      administrator: fieldFilter(administrator.toObject(), 'administrator')
+      administrator
     });
-
-  } catch (error) {
-    logger.error('Error creating administrator:', error);
-
-    // Handle validation errors from model pre-save hooks
-    if (error.name === 'ValidationError') {
-      return res.status(400).json({
-        success: false,
-        message: error.message
-      });
+  } catch (err) {
+    if (err.isAdministratorAccountError) {
+      return res.status(err.status).json({ success: false, message: err.message });
     }
-
-    // Handle duplicate key errors
-    if (error.code === 11000) {
-      return res.status(409).json({
-        success: false,
-        message: 'Email already exists'
-      });
+    if (err.name === 'ValidationError') {
+      return res.status(400).json({ success: false, message: err.message });
     }
-
-    res.status(500).json({
-      success: false,
-      message: 'Failed to create administrator'
-    });
+    if (err.code === 11000) {
+      return res.status(409).json({ success: false, message: 'Email already exists' });
+    }
+    logger.error('Error creating administrator:', err);
+    res.status(500).json({ success: false, message: 'Failed to create administrator' });
   }
 };
 
@@ -227,106 +111,26 @@ exports.createAdministrator = async (req, res) => {
  */
 exports.updateAdministrator = async (req, res) => {
   try {
-    const { id } = req.params;
-    const updates = req.body;
-
-    // Validate ObjectId
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid administrator ID'
-      });
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ success: false, message: 'Invalid administrator ID' });
     }
-
-    // Prevent updating certain fields
-    delete updates.adminId;
-    delete updates.role;
-    delete updates.createdAt;
-
-    // Check for self-deactivation
-    if (updates.isActive === false && id === req.user.id) {
-      return res.status(400).json({
-        success: false,
-        message: 'Cannot deactivate your own account'
-      });
-    }
-
-    // Check if trying to remove 'all' permission from last super admin
-    if (updates.permissions && id === req.user.id) {
-      const currentAdmin = await Administrator.findById(id);
-      if (currentAdmin && currentAdmin.permissions.includes('all') && !updates.permissions.includes('all')) {
-        // Check if this is the last super admin
-        const superAdminCount = await Administrator.countDocuments({ 
-          permissions: 'all',
-          isActive: true 
-        });
-        if (superAdminCount <= 1) {
-          return res.status(400).json({
-            success: false,
-            message: 'Cannot remove super admin permissions from the last active super administrator'
-          });
-        }
-      }
-    }
-
-    // Check email uniqueness if updating email
-    if (updates.email) {
-      const existingAdmin = await Administrator.findOne({
-        email: updates.email.toLowerCase(),
-        _id: { $ne: id }
-      });
-      if (existingAdmin) {
-        return res.status(409).json({
-          success: false,
-          message: 'Email already exists'
-        });
-      }
-      updates.email = updates.email.toLowerCase();
-    }
-
-    // Hash password if updating
-    if (updates.password) {
-      const { salt, hash } = encryptionUtil.hashPassword(updates.password);
-      updates.passwordSalt = salt;
-      updates.passwordHash = hash;
-      delete updates.password;
-    }
-
-    const administrator = await Administrator.findByIdAndUpdate(
-      id,
-      { $set: updates },
-      { new: true, runValidators: true }
-    ).select('-password');
-
-    if (!administrator) {
-      return res.status(404).json({
-        success: false,
-        message: 'Administrator not found'
-      });
-    }
-
-    // Log the action
-    logAuditEvent(AuditEvents.ACCOUNT_UPDATED, {
-      action: 'UPDATE_ADMINISTRATOR',
-      userId: req.user.id,
-      userType: 'administrator',
-      targetId: administrator._id,
-      targetType: 'administrator',
-      details: { updates }
-    }, req);
-
+    const administrator = await administratorAccountService.updateAdministrator({
+      id: req.params.id,
+      updates: req.body,
+      adminId: req.user.id,
+      req
+    });
     res.json({
       success: true,
       message: 'Administrator updated successfully',
-      administrator: fieldFilter(administrator.toObject(), 'administrator')
+      administrator
     });
-
-  } catch (error) {
-    logger.error('Error updating administrator:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to update administrator'
-    });
+  } catch (err) {
+    if (err.isAdministratorAccountError) {
+      return res.status(err.status).json({ success: false, message: err.message });
+    }
+    logger.error('Error updating administrator:', err);
+    res.status(500).json({ success: false, message: 'Failed to update administrator' });
   }
 };
 
@@ -335,70 +139,21 @@ exports.updateAdministrator = async (req, res) => {
  */
 exports.deleteAdministrator = async (req, res) => {
   try {
-    const { id } = req.params;
-
-    // Validate ObjectId
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid administrator ID'
-      });
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ success: false, message: 'Invalid administrator ID' });
     }
-
-    // Prevent self-deletion
-    if (id === req.user.id) {
-      return res.status(400).json({
-        success: false,
-        message: 'Cannot delete your own account'
-      });
-    }
-
-    // Check if this is the last administrator with 'all' permissions
-    const adminWithAllPerms = await Administrator.find({
-      permissions: 'all',
-      _id: { $ne: id }
+    await administratorAccountService.deleteAdministrator({
+      id: req.params.id,
+      adminId: req.user.id,
+      req
     });
-
-    if (adminWithAllPerms.length === 0) {
-      const targetAdmin = await Administrator.findById(id);
-      if (targetAdmin && targetAdmin.permissions.includes('all')) {
-        return res.status(400).json({
-          success: false,
-          message: 'Cannot delete the last administrator with full permissions'
-        });
-      }
+    res.json({ success: true, message: 'Administrator deleted successfully' });
+  } catch (err) {
+    if (err.isAdministratorAccountError) {
+      return res.status(err.status).json({ success: false, message: err.message });
     }
-
-    const administrator = await Administrator.findByIdAndDelete(id);
-
-    if (!administrator) {
-      return res.status(404).json({
-        success: false,
-        message: 'Administrator not found'
-      });
-    }
-
-    // Log the action
-    logAuditEvent(AuditEvents.ACCOUNT_DELETED, {
-      action: 'DELETE_ADMINISTRATOR',
-      userId: req.user.id,
-      userType: 'administrator',
-      targetId: id,
-      targetType: 'administrator',
-      details: { adminId: administrator.adminId, email: administrator.email }
-    }, req);
-
-    res.json({
-      success: true,
-      message: 'Administrator deleted successfully'
-    });
-
-  } catch (error) {
-    logger.error('Error deleting administrator:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to delete administrator'
-    });
+    logger.error('Error deleting administrator:', err);
+    res.status(500).json({ success: false, message: 'Failed to delete administrator' });
   }
 };
 
@@ -407,60 +162,25 @@ exports.deleteAdministrator = async (req, res) => {
  */
 exports.resetAdministratorPassword = async (req, res) => {
   try {
-    const { id } = req.params;
-    const { newPassword } = req.body;
-
-    // Validate ObjectId
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid administrator ID'
-      });
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ success: false, message: 'Invalid administrator ID' });
     }
-
-    // Validate password strength
-    const passwordValidation = validatePasswordStrength(newPassword, '', '');
-    if (!passwordValidation.success) {
-      return res.status(400).json({
-        success: false,
-        message: 'Password does not meet security requirements',
-        errors: passwordValidation.errors
-      });
-    }
-
-    const administrator = await Administrator.findById(id);
-    if (!administrator) {
-      return res.status(404).json({
-        success: false,
-        message: 'Administrator not found'
-      });
-    }
-
-    // Reset password
-    const { salt, hash } = encryptionUtil.hashPassword(newPassword);
-    administrator.passwordSalt = salt;
-    administrator.passwordHash = hash;
-    administrator.loginAttempts = 0;
-    administrator.lockUntil = undefined;
-    await administrator.save();
-
-    // Log the action
-    logAuditEvent(AuditEvents.PASSWORD_RESET_SUCCESS, {
-      action: 'RESET_ADMINISTRATOR_PASSWORD',
-      userId: req.user.id,
-      userType: 'administrator',
-      targetId: administrator._id,
-      targetType: 'administrator',
-      details: { adminId: administrator.adminId }
-    }, req);
-
-    res.json({
-      success: true,
-      message: 'Password reset successfully'
+    await administratorAccountService.resetAdministratorPassword({
+      id: req.params.id,
+      newPassword: req.body.newPassword,
+      adminId: req.user.id,
+      req
     });
-
-  } catch (error) {
-    logger.error('Error resetting administrator password:', error);
+    res.json({ success: true, message: 'Password reset successfully' });
+  } catch (err) {
+    if (err.isAdministratorAccountError) {
+      return res.status(err.status).json({
+        success: false,
+        message: err.message,
+        ...err.extras
+      });
+    }
+    logger.error('Error resetting administrator password:', err);
     res.status(500).json({
       success: false,
       message: 'Failed to reset administrator password'
@@ -473,91 +193,23 @@ exports.resetAdministratorPassword = async (req, res) => {
  */
 exports.changeAdministratorPassword = async (req, res) => {
   try {
-    const { currentPassword, newPassword } = req.body;
-    const administratorId = req.user.id;
-
-    // Validate input
-    if (!currentPassword || !newPassword) {
-      return res.status(400).json({
-        success: false,
-        message: 'Current password and new password are required'
-      });
-    }
-
-    // Find administrator with password field
-    const administrator = await Administrator.findById(administratorId).select('+password');
-
-    if (!administrator) {
-      return res.status(404).json({
-        success: false,
-        message: 'Administrator not found'
-      });
-    }
-
-    // Verify current password
-    const isPasswordValid = administrator.verifyPassword(currentPassword);
-
-    if (!isPasswordValid) {
-      logAuditEvent(AuditEvents.PASSWORD_CHANGE_FAILED, {
-        action: 'CHANGE_PASSWORD_FAILED',
-        userId: administratorId,
-        userType: 'administrator',
-        reason: 'Invalid current password'
-      }, req);
-
-      return res.status(401).json({
-        success: false,
-        message: 'Current password is incorrect'
-      });
-    }
-
-    // Check if new password is in history
-    if (administrator.isPasswordInHistory && administrator.isPasswordInHistory(newPassword)) {
-      return res.status(400).json({
-        success: false,
-        message: 'New password cannot be the same as any of your last 5 passwords'
-      });
-    }
-
-    // Validate new password strength
-    const { validatePasswordStrength } = require('../utils/passwordValidator');
-    const validation = validatePasswordStrength(newPassword, {
-      username: administrator.email.split('@')[0],
-      email: administrator.email
+    await administratorAccountService.changeAdministratorPassword({
+      administratorId: req.user.id,
+      currentPassword: req.body.currentPassword,
+      newPassword: req.body.newPassword,
+      req
     });
-
-    if (!validation.success) {
-      return res.status(400).json({
+    res.json({ success: true, message: 'Password changed successfully' });
+  } catch (err) {
+    if (err.isAdministratorAccountError) {
+      return res.status(err.status).json({
         success: false,
-        message: 'Password does not meet security requirements',
-        errors: validation.errors
+        message: err.message,
+        ...err.extras
       });
     }
-
-    // Update password using the setPassword method (handles hashing and history)
-    administrator.setPassword(newPassword);
-    administrator.requirePasswordChange = false; // Clear the flag after password change
-    await administrator.save();
-
-    // Log the action
-    logAuditEvent(AuditEvents.PASSWORD_CHANGE_SUCCESS, {
-      action: 'CHANGE_PASSWORD_SUCCESS',
-      userId: administratorId,
-      userType: 'administrator',
-      details: { adminId: administrator.adminId }
-    }, req);
-
-    res.json({
-      success: true,
-      message: 'Password changed successfully'
-    });
-
-  } catch (error) {
-    logger.error('Error changing administrator password:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to change password'
-    });
+    logger.error('Error changing administrator password:', err);
+    res.status(500).json({ success: false, message: 'Failed to change password' });
   }
 };
 
@@ -566,40 +218,14 @@ exports.changeAdministratorPassword = async (req, res) => {
  */
 exports.getPermissions = async (req, res) => {
   try {
-    const permissions = [
-      'all',
-      'administrators.read',
-      'administrators.create',
-      'administrators.update',
-      'administrators.delete',
-      'operators.manage',
-      'operators.read',
-      'customers.manage',
-      'customers.read',
-      'affiliates.manage',
-      'affiliates.read',
-      'orders.manage',
-      'orders.read',
-      'reports.view',
-      'system.configure',
-      'operator_management',
-      'view_analytics',
-      'system_config'
-    ];
-
-    res.json({
-      success: true,
-      permissions
-    });
-
+    const permissions = administratorAccountService.getPermissions();
+    res.json({ success: true, permissions });
   } catch (error) {
     logger.error('Error fetching permissions:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to fetch permissions'
-    });
+    res.status(500).json({ success: false, message: 'Failed to fetch permissions' });
   }
 };
+
 
 // Operator Management
 
