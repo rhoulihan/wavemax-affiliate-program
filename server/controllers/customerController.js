@@ -2,18 +2,16 @@
 // Customer Controller - Migrated to use utility modules
 // This reduces code duplication and improves maintainability
 
-const Affiliate = require('../models/Affiliate');
 const Customer = require('../models/Customer');
 const Order = require('../models/Order');
-const SystemConfig = require('../models/SystemConfig');
 const encryptionUtil = require('../utils/encryption');
-const emailService = require('../utils/emailService');
-const jwt = require('jsonwebtoken');
-const { v4: uuidv4 } = require('uuid');
 const { getFilteredData } = require('../utils/fieldFilter');
 const { validationResult } = require('express-validator');
 
-// Import new utility modules
+// Extracted services
+const customerRegistrationService = require('../services/customerRegistrationService');
+
+// Utility modules
 const ControllerHelpers = require('../utils/controllerHelpers');
 const AuthorizationHelpers = require('../middleware/authorizationHelpers');
 const Formatters = require('../utils/formatters');
@@ -27,208 +25,51 @@ const Formatters = require('../utils/formatters');
  * Refactored to use ControllerHelpers for error handling and response formatting
  */
 exports.registerCustomer = ControllerHelpers.asyncWrapper(async (req, res) => {
-  // Check for validation errors
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return ControllerHelpers.sendError(res, 'Validation failed', 400, errors.array());
   }
 
-  const {
-    affiliateId,
-    firstName,
-    lastName,
-    email,
-    phone,
-    address,
-    city,
-    state,
-    zipCode,
-    specialInstructions,
-    affiliateSpecialInstructions,
-    username,
-    password,
-    cardholderName,
-    cardNumber,
-    expiryDate,
-    cvv,
-    billingZip,
-    savePaymentInfo,
-    numberOfBags,
-    languagePreference,
-    paymentConfirmed,
-    socialToken,
-    socialProvider
-  } = req.body;
-
-  // Log if this is a post-payment registration
-  if (paymentConfirmed) {
-    console.log(`Post-payment registration for email: ${email}, affiliate: ${affiliateId}`);
-  }
-
-  // Verify affiliate exists
-  const affiliate = await Affiliate.findOne({ affiliateId });
-  if (!affiliate) {
-    return ControllerHelpers.sendError(res, 'Invalid affiliate ID', 400);
-  }
-
-  // Check if email or username already exists
-  const existingEmail = await Customer.findOne({ email });
-  const existingUsername = await Customer.findOne({ username });
-
-  if (existingEmail && existingUsername) {
-    return res.status(400).json({
-      success: false,
-      message: 'Both email and username are already in use',
-      errors: {
-        email: 'Email already registered',
-        username: 'Username already taken'
-      }
-    });
-  } else if (existingEmail) {
-    return res.status(400).json({
-      success: false,
-      message: 'Email already registered',
-      field: 'email'
-    });
-  } else if (existingUsername) {
-    return res.status(400).json({
-      success: false,
-      message: 'Username already taken',
-      field: 'username'
-    });
-  }
-
-  // For OAuth registrations, generate a username from email if not provided
-  let finalUsername = username;
-  let passwordSalt = null;
-  let passwordHash = null;
-  
-  if (socialToken) {
-    // OAuth registration - generate username from email if not provided
-    if (!username) {
-      finalUsername = email.split('@')[0] + '_' + Date.now().toString(36);
-    }
-    console.log(`OAuth registration for email: ${email}, generated username: ${finalUsername}`);
-  } else {
-    // Traditional registration - hash password
-    const { salt, hash } = encryptionUtil.hashPassword(password);
-    passwordSalt = salt;
-    passwordHash = hash;
-  }
-
-  // Post-weigh workflow: customer registers for free and pays after bags are weighed.
-  // The requested bag count is capped at the free-initial-bags SystemConfig value.
-  const freeInitialBags = await SystemConfig.getValue('free_initial_bags', 2);
-  const initialBagsRequested = Math.min(numberOfBags || 1, freeInitialBags);
-
-  // Create new customer with formatted data
-  const newCustomer = new Customer({
-    customerId: `CUST-${uuidv4()}`,
-    affiliateId,
-    firstName: Formatters.name(firstName),
-    lastName: Formatters.name(lastName),
-    email: email.toLowerCase(),
-    phone: Formatters.phone(phone, 'us'),
-    address,
-    city,
-    state: state.toUpperCase(),
-    zipCode,
-    specialInstructions,
-    affiliateSpecialInstructions,
-    username: finalUsername,
-    passwordSalt,
-    passwordHash,
-    languagePreference: languagePreference || 'en',
-    numberOfBags: initialBagsRequested,
-    registrationMethod: socialToken ? (socialProvider || 'social') : 'traditional'
-  });
-
-  // Encrypt payment info if provided
-  if (savePaymentInfo && cardNumber) {
-    const paymentData = {
-      cardholderName,
-      cardNumber,
-      expiryDate,
-      cvv,
-      billingZip: billingZip || zipCode
-    };
-    newCustomer.encryptedPaymentInfo = encryptionUtil.encrypt(paymentData);
-  }
-
-  await newCustomer.save();
-
-  // Generate JWT token
-  const token = jwt.sign(
-    { 
-      id: newCustomer._id, 
-      customerId: newCustomer.customerId,
-      role: 'customer'
-    },
-    process.env.JWT_SECRET,
-    { expiresIn: '24h' }
-  );
-
-  // Prepare bag info for emails (post-weigh workflow — no bag purchase at registration)
-  const bagInfo = {
-    numberOfBags: 0,
-    totalCredit: 0,
-    bagFee: 0
-  };
-
-  // Send welcome email to customer with proper error handling
   try {
-    await emailService.sendCustomerWelcomeEmail(
-      newCustomer,  // Pass the full customer object
-      affiliate,    // Pass the full affiliate object
-      bagInfo      // Pass bag information
-    );
-  } catch (emailError) {
-    console.error('Failed to send welcome email:', emailError);
-    // Don't fail registration if email fails
-  }
+    const { customer, affiliate, token } = await customerRegistrationService.registerCustomer(req.body);
 
-  // Send new customer notification to affiliate
-  try {
-    await emailService.sendAffiliateNewCustomerEmail(
-      affiliate,    // Pass the full affiliate object
-      newCustomer,  // Pass the full customer object
-      bagInfo      // Pass bag information
-    );
-  } catch (emailError) {
-    console.error('Failed to send affiliate notification:', emailError);
-    // Don't fail registration if notification fails
-  }
-
-  // Send success response with customer and affiliate data
-  return ControllerHelpers.sendSuccess(
-    res,
-    {
-      customerId: newCustomer.customerId,
-      token,
-      customerData: {
-        firstName: newCustomer.firstName,
-        lastName: newCustomer.lastName,
-        email: newCustomer.email,
-        phone: newCustomer.phone,
-        address: newCustomer.address,
-        city: newCustomer.city,
-        state: newCustomer.state,
-        zipCode: newCustomer.zipCode,
-        affiliateId: newCustomer.affiliateId,
-        numberOfBags: newCustomer.numberOfBags
+    return ControllerHelpers.sendSuccess(
+      res,
+      {
+        customerId: customer.customerId,
+        token,
+        customerData: {
+          firstName: customer.firstName,
+          lastName: customer.lastName,
+          email: customer.email,
+          phone: customer.phone,
+          address: customer.address,
+          city: customer.city,
+          state: customer.state,
+          zipCode: customer.zipCode,
+          affiliateId: customer.affiliateId,
+          numberOfBags: customer.numberOfBags
+        },
+        affiliateData: {
+          businessName: affiliate.businessName,
+          firstName: affiliate.firstName,
+          lastName: affiliate.lastName,
+          email: affiliate.email,
+          phone: affiliate.phone,
+          serviceArea: affiliate.serviceArea
+        }
       },
-      affiliateData: {
-        businessName: affiliate.businessName,
-        firstName: affiliate.firstName,
-        lastName: affiliate.lastName,
-        email: affiliate.email,
-        phone: affiliate.phone,
-        serviceArea: affiliate.serviceArea
-      }
-    },
-    'Customer registration successful',
-    201
-  );
+      'Customer registration successful',
+      201
+    );
+  } catch (err) {
+    if (err.isRegistrationError) {
+      // Match the old response shape so frontends and tests keep working.
+      const body = { success: false, message: err.message, ...err.extras };
+      return res.status(err.status || 400).json(body);
+    }
+    throw err;
+  }
 });
 
 /**
@@ -729,358 +570,52 @@ exports.getCustomersForAdmin = [
 ];
 
 // ============================================================================
-// V2 Payment Integration
+// Post-weigh payment endpoints
+// (implementation lives in server/services/customerPaymentService.js)
 // ============================================================================
 
-const paymentController = require('./paymentController');
-const logger = require('../utils/logger');
+const customerPaymentService = require('../services/customerPaymentService');
 
 /**
- * Build consolidated line items for Paygistix payment form
- * Uses WDF codes with add-on variants as expected by Paygistix
- * @param {Object} order - The V2 order document
- * @returns {Array} Consolidated line items for Paygistix
- */
-function buildPaygistixLineItems(order) {
-  const items = [];
-  
-  // Use actual weight from order (either from bags or actualWeight field)
-  let totalWeight = order.actualWeight || 0;
-  if (!totalWeight && order.bags && order.bags.length > 0) {
-    totalWeight = order.bags.reduce((sum, bag) => sum + (bag.weight || 0), 0);
-  }
-  
-  // Calculate laundry service cost using the order's baseRate from SystemConfig
-  const laundryServiceCost = totalWeight * (order.baseRate || 0);
-  
-  // Count active add-ons and use the order's calculated addOnTotal
-  let addOnCount = 0;
-  if (order.addOns) {
-    if (order.addOns.premiumDetergent) addOnCount++;
-    if (order.addOns.fabricSoftener) addOnCount++;
-    if (order.addOns.stainRemover) addOnCount++;
-  }
-  const addOnTotal = order.addOnTotal || 0;
-  
-  // For WDF services, we need to calculate the per-pound rate for Paygistix
-  // The form expects WDF items to be priced per pound with quantity being the weight
-  if (totalWeight > 0 && (laundryServiceCost > 0 || addOnTotal > 0)) {
-    // Calculate the effective per-pound rate including add-ons
-    const effectiveRate = (laundryServiceCost + addOnTotal) / totalWeight;
-    
-    // WDF for no add-ons, WDF1 for 1 add-on, WDF2 for 2, WDF3 for 3+
-    let wdfCode = 'WDF';
-    if (addOnCount > 0) {
-      wdfCode = `WDF${Math.min(addOnCount, 3)}`;
-    }
-    
-    // The Paygistix form expects: price = per-pound rate, quantity = weight in pounds
-    items.push({
-      code: wdfCode,
-      description: 'Wash Dry Fold Service',
-      price: effectiveRate,
-      quantity: Math.round(totalWeight) // Round weight to nearest pound for Paygistix
-    });
-  }
-  
-  // Delivery fees - MDF or PBF with specific price codes
-  if (order.feeBreakdown) {
-    if (order.feeBreakdown.minimumApplied && order.feeBreakdown.minimumFee > 0) {
-      // Map the minimum fee to the correct MDF code
-      const mdfFee = order.feeBreakdown.minimumFee;
-      let mdfCode = 'MDF10'; // Default
-      
-      // Map to specific MDF codes based on price
-      if (mdfFee === 10) mdfCode = 'MDF10';
-      else if (mdfFee === 15) mdfCode = 'MDF15';
-      else if (mdfFee === 20) mdfCode = 'MDF20';
-      else if (mdfFee === 25) mdfCode = 'MDF25';
-      else if (mdfFee === 30) mdfCode = 'MDF30';
-      else if (mdfFee === 35) mdfCode = 'MDF35';
-      else if (mdfFee === 40) mdfCode = 'MDF40';
-      else if (mdfFee === 45) mdfCode = 'MDF45';
-      else if (mdfFee === 50) mdfCode = 'MDF50';
-      else {
-        // Find the closest MDF code
-        const mdfOptions = [10, 15, 20, 25, 30, 35, 40, 45, 50];
-        const closest = mdfOptions.reduce((prev, curr) => 
-          Math.abs(curr - mdfFee) < Math.abs(prev - mdfFee) ? curr : prev
-        );
-        mdfCode = `MDF${closest}`;
-      }
-      
-      items.push({
-        code: mdfCode,
-        description: 'Minimum Delivery Fee',
-        price: mdfFee,
-        quantity: 1
-      });
-    } else if (order.feeBreakdown.perBagFee > 0 && order.feeBreakdown.numberOfBags > 0) {
-      // Map the per bag fee to the correct PBF code
-      const pbfFee = order.feeBreakdown.perBagFee;
-      let pbfCode = 'PBF5'; // Default
-      
-      // Map to specific PBF codes based on price
-      if (pbfFee === 5) pbfCode = 'PBF5';
-      else if (pbfFee === 10) pbfCode = 'PBF10';
-      else if (pbfFee === 15) pbfCode = 'PBF15';
-      else if (pbfFee === 20) pbfCode = 'PBF20';
-      else if (pbfFee === 25) pbfCode = 'PBF25';
-      else {
-        // Find the closest PBF code
-        const pbfOptions = [5, 10, 15, 20, 25];
-        const closest = pbfOptions.reduce((prev, curr) => 
-          Math.abs(curr - pbfFee) < Math.abs(prev - pbfFee) ? curr : prev
-        );
-        pbfCode = `PBF${closest}`;
-      }
-      
-      items.push({
-        code: pbfCode,
-        description: 'Per Bag Fee',
-        price: pbfFee,
-        quantity: order.feeBreakdown.numberOfBags
-      });
-    }
-  }
-  
-  // Credits reduce the total but aren't sent as line items to Paygistix
-  // The total amount will be adjusted when calculating
-  
-  console.log('[V2 Payment] Generated Paygistix line items:', JSON.stringify(items, null, 2));
-  
-  return items;
-}
-
-/**
- * Build detailed line items from V2 order for customer display
- * @param {Object} order - The V2 order document
- * @returns {Array} Detailed line items for display
- */
-function buildLineItemsFromOrder(order) {
-  const items = [];
-  
-  // Use actual weight from order (either from bags or actualWeight field)
-  let totalWeight = order.actualWeight || 0;
-  if (!totalWeight && order.bags && order.bags.length > 0) {
-    totalWeight = order.bags.reduce((sum, bag) => sum + (bag.weight || 0), 0);
-  }
-  
-  // Main laundry service using the order's baseRate from SystemConfig
-  const laundryServiceCost = totalWeight * (order.baseRate || 0);
-  
-  if (laundryServiceCost > 0) {
-    items.push({
-      code: 'LAUNDRY',
-      description: `Laundry Service (${totalWeight} lbs @ $${(order.baseRate || 0).toFixed(2)}/lb)`,
-      price: laundryServiceCost,
-      quantity: 1
-    });
-  }
-  
-  // Add-ons as separate line items - calculate individual add-on prices
-  // The Order model uses $0.10 per pound per add-on
-  const addOnPricePerLb = 0.10; // This matches the Order model calculation
-  if (order.addOns && totalWeight > 0) {
-    const addOnPrice = totalWeight * addOnPricePerLb;
-    
-    if (order.addOns.premiumDetergent) {
-      items.push({
-        code: 'ADDON_PD',
-        description: `Premium Detergent (${totalWeight} lbs @ $${addOnPricePerLb.toFixed(2)}/lb)`,
-        price: addOnPrice,
-        quantity: 1
-      });
-    }
-    if (order.addOns.fabricSoftener) {
-      items.push({
-        code: 'ADDON_FS',
-        description: `Fabric Softener (${totalWeight} lbs @ $${addOnPricePerLb.toFixed(2)}/lb)`,
-        price: addOnPrice,
-        quantity: 1
-      });
-    }
-    if (order.addOns.stainRemover) {
-      items.push({
-        code: 'ADDON_SR',
-        description: `Stain Remover (${totalWeight} lbs @ $${addOnPricePerLb.toFixed(2)}/lb)`,
-        price: addOnPrice,
-        quantity: 1
-      });
-    }
-  }
-  
-  // Delivery fees
-  if (order.feeBreakdown) {
-    // Either minimum fee or per bag fee is charged, not both
-    if (order.feeBreakdown.minimumApplied && order.feeBreakdown.minimumFee > 0) {
-      items.push({
-        code: 'MDF',
-        description: 'Minimum Delivery Fee',
-        price: order.feeBreakdown.minimumFee,
-        quantity: 1
-      });
-    } else if (order.feeBreakdown.perBagFee > 0 && order.feeBreakdown.numberOfBags > 0) {
-      items.push({
-        code: 'PBF',
-        description: `Per Bag Fee (${order.feeBreakdown.numberOfBags} bags)`,
-        price: order.feeBreakdown.perBagFee,
-        quantity: order.feeBreakdown.numberOfBags
-      });
-    }
-  }
-  
-  // Apply any credits
-  if (order.wdfCreditApplied && order.wdfCreditApplied > 0) {
-    items.push({
-      code: 'CREDIT',
-      description: 'WDF Credit Applied',
-      price: -order.wdfCreditApplied,
-      quantity: 1
-    });
-  }
-  
-  return items;
-}
-
-/**
- * Initiate V2 payment for an order
- * POST /api/v2/customers/initiate-payment
+ * POST /api/v1/customers/initiate-payment
  */
 exports.initiateV2Payment = ControllerHelpers.asyncWrapper(async (req, res) => {
-  const { orderId } = req.body;
-  const customerObjectId = req.user.id;
-  
-  // Get the customer's customerId (CUST-xxx format)
-  const customer = await Customer.findById(customerObjectId);
-  if (!customer) {
-    return ControllerHelpers.sendError(res, 'Customer not found', 404);
-  }
-  
-  const customerId = customer.customerId;
-  
-  console.log('[V2 Payment] Initiating payment for order:', orderId, 'Customer:', customerId);
-  
-  // Validate order exists and belongs to customer
-  const order = await Order.findOne({ 
-    orderId: orderId,
-    customerId: customerId,
-    paymentStatus: { $in: ['pending', 'awaiting'] }
-  });
-  
-  if (!order) {
-    // Debug: Check if order exists without payment status filter
-    const orderDebug = await Order.findOne({ orderId: orderId });
-    if (orderDebug) {
-      console.log('[V2 Payment] Order found but not eligible. customerId:', orderDebug.customerId, 'paymentStatus:', orderDebug.paymentStatus);
-      console.log('[V2 Payment] Expected customerId:', customerId);
-    } else {
-      console.log('[V2 Payment] Order not found with orderId:', orderId);
+  try {
+    await customerPaymentService.initiatePayment({
+      customerObjectId: req.user.id,
+      orderId: req.body.orderId,
+      realRes: res
+    });
+  } catch (err) {
+    if (err.isPaymentError) {
+      return ControllerHelpers.sendError(res, err.message, err.status || 400);
     }
-    return ControllerHelpers.sendError(res, 'Order not found or already paid', 404);
+    throw err;
   }
-  
-  // Build line items - detailed for display, consolidated for Paygistix
-  const displayLineItems = buildLineItemsFromOrder(order);
-  const paygistixLineItems = buildPaygistixLineItems(order);
-  
-  // Calculate total amount from display items (includes credits)
-  const totalAmount = displayLineItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-  
-  // Prepare payment data for Paygistix with consolidated WDF codes
-  const paymentData = {
-    customerData: {
-      customerId: customer.customerId,
-      email: customer.email,
-      firstName: customer.firstName,
-      lastName: customer.lastName,
-      phone: customer.phone,
-      orderId: order._id.toString(), // Store MongoDB ObjectId as string
-      orderNumber: order.orderId // Store the display order ID separately
-    },
-    paymentData: {
-      amount: totalAmount,
-      items: paygistixLineItems, // Use consolidated items for Paygistix
-      orderId: order.orderId
-    }
-  };
-  
-  // Create payment token using existing V1 infrastructure
-  const tokenReq = {
-    body: paymentData
-  };
-  
-  const tokenRes = {
-    json: (data) => {
-      // Return payment configuration to frontend
-      // The PaymentToken collection handles all status tracking
-      res.json({
-        success: data.success,
-        token: data.token,
-        formConfig: data.formConfig,
-        amount: totalAmount,
-        lineItems: displayLineItems, // Send detailed items for display
-        paygistixItems: paygistixLineItems, // Send Paygistix-formatted items for form submission
-        message: data.message || 'Payment initiated successfully'
-      });
-    },
-    status: (code) => ({
-      json: (data) => res.status(code).json(data)
-    })
-  };
-  
-  // Use existing payment token creation
-  // This creates a record in PaymentToken collection with all necessary data
-  await paymentController.createPaymentToken(tokenReq, tokenRes);
 });
 
 /**
- * Get V2 payment status for an order
- * GET /api/v2/customers/payment-status/:orderId
+ * GET /api/v1/customers/payment-status/:orderId
  */
 exports.getV2PaymentStatus = ControllerHelpers.asyncWrapper(async (req, res) => {
-  const { orderId } = req.params;
-  const customerId = req.user.id;
-  
-  // Get order with payment status
-  const order = await Order.findOne({
-    _id: orderId,
-    customerId: customerId
-  }).select('paymentStatus paymentMethod paymentTransactionId paymentVerifiedAt paymentNotes');
-
-  if (!order) {
-    return ControllerHelpers.sendError(res, 'Order not found', 404);
-  }
-
-  // Also check if there's an active payment token for real-time status
-  const PaymentToken = require('../models/PaymentToken');
-  const activeToken = await PaymentToken.findOne({
-    'customerData.orderId': orderId,
-    status: { $in: ['pending', 'processing'] }
-  }).sort('-createdAt');
-
-  // If there's an active payment token, return its status
-  if (activeToken) {
-    res.json({
-      success: true,
-      paymentStatus: activeToken.status,
-      token: activeToken.token,
-      transactionId: activeToken.transactionId,
-      paymentDate: activeToken.updatedAt,
-      error: activeToken.errorMessage,
-      isActive: true
+  try {
+    const status = await customerPaymentService.getPaymentStatus({
+      orderId: req.params.orderId,
+      customerId: req.user.id
     });
-  } else {
-    // Return order's stored payment status
-    res.json({
-      success: true,
-      paymentStatus: order.paymentStatus,
-      transactionId: order.paymentTransactionId,
-      paymentDate: order.paymentVerifiedAt,
-      error: null,
-      isActive: false
-    });
+    res.json({ success: true, ...status });
+  } catch (err) {
+    if (err.isPaymentError) {
+      return ControllerHelpers.sendError(res, err.message, err.status || 400);
+    }
+    throw err;
   }
 });
+
+// ---------------------------------------------------------------------------
+// Old inline implementation — now lives in customerPaymentService.
+// The rest of this section used to contain buildPaygistixLineItems,
+// buildLineItemsFromOrder, and the 200+ lines of initiate/status logic.
+// ---------------------------------------------------------------------------
 
 module.exports = exports;
