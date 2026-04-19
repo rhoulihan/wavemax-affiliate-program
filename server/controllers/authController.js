@@ -16,6 +16,7 @@ const { sanitizeInput } = require('../middleware/sanitization');
 
 const identityAvailabilityService = require('../services/identityAvailabilityService');
 const passwordResetService = require('../services/passwordResetService');
+const authTokenService = require('../services/authTokenService');
 
 // Wrapper for crypto.randomBytes to allow mocking in tests
 // This allows us to mock just this function without affecting the entire crypto module
@@ -30,50 +31,12 @@ const escapeRegex = (string) => {
   return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 };
 
-/**
- * Generate JWT token
- */
-const generateToken = (data, expiresIn = '1h') => {
-  return jwt.sign(
-    data,
-    process.env.JWT_SECRET,
-    {
-      expiresIn,
-      issuer: 'wavemax-api',
-      audience: 'wavemax-client'
-    }
-  );
-};
-
-const generateRefreshToken = async (userId, userType, ip, replaceToken = null) => {
-  // Create a refresh token that expires in 30 days
-  const expiryDate = new Date();
-  expiryDate.setDate(expiryDate.getDate() + 30);
-
-  // Generate a secure random token
-  const token = cryptoWrapper.randomBytes(40).toString('hex');
-
-  // If replacing a token, update it with the replacement token
-  if (replaceToken) {
-    await RefreshToken.findOneAndUpdate(
-      { token: replaceToken },
-      { replacedByToken: token }
-    );
-  }
-
-  // Save new token to database
-  const refreshToken = new RefreshToken({
-    token,
-    userId,
-    userType,
-    expiryDate,
-    createdByIp: ip
-  });
-
-  await refreshToken.save();
-
-  return token;
-};
+// JWT + refresh-token helpers live in authTokenService; these thin wrappers
+// preserve the original in-module signatures so the login flows below don't
+// have to change.
+const generateToken = authTokenService.generateToken;
+const generateRefreshToken = (userId, userType, ip, replaceToken = null) =>
+  authTokenService.generateRefreshToken({ userId, userType, ip, replaceToken, cryptoWrapper });
 
 /**
  * Affiliate login controller
@@ -154,86 +117,18 @@ exports.affiliateLogin = async (req, res) => {
 
 exports.refreshToken = async (req, res) => {
   try {
-    const { refreshToken } = req.body;
-
-    if (!refreshToken) {
-      return res.status(400).json({
-        success: false,
-        message: 'Refresh token is required'
-      });
-    }
-
-    // Find and immediately mark the token as used to prevent concurrent use
-    const storedToken = await RefreshToken.findOneAndUpdate(
-      {
-        token: refreshToken,
-        revoked: null,
-        expiryDate: { $gt: new Date() }
-      },
-      {
-        revoked: new Date(),
-        revokedByIp: req.ip
-      },
-      {
-        new: false // Return the original document
-      }
-    );
-
-    if (!storedToken) {
-      return res.status(401).json({
-        success: false,
-        message: 'Invalid or expired refresh token'
-      });
-    }
-
-    // Find the user based on the token
-    let user;
-    if (storedToken.userType === 'affiliate') {
-      user = await Affiliate.findById(storedToken.userId);
-    } else if (storedToken.userType === 'customer') {
-      user = await Customer.findById(storedToken.userId);
-    } else if (storedToken.userType === 'administrator') {
-      user = await Administrator.findById(storedToken.userId);
-    } else if (storedToken.userType === 'operator') {
-      user = await Operator.findById(storedToken.userId);
-    }
-
-    if (!user) {
-      return res.status(401).json({
-        success: false,
-        message: 'User not found'
-      });
-    }
-
-    // Generate new access token
-    const accessToken = generateToken({
-      id: user._id,
-      ...(storedToken.userType === 'affiliate' && { affiliateId: user.affiliateId }),
-      ...(storedToken.userType === 'customer' && { customerId: user.customerId }),
-      ...(storedToken.userType === 'administrator' && { adminId: user.adminId }),
-      ...(storedToken.userType === 'operator' && { employeeId: user.employeeId }),
-      role: storedToken.userType
+    const tokens = await authTokenService.refreshAccessToken({
+      refreshToken: req.body.refreshToken,
+      ip: req.ip,
+      cryptoWrapper
     });
-
-    // Generate new refresh token with proper token rotation
-    const newRefreshToken = await generateRefreshToken(
-      user._id,
-      storedToken.userType,
-      req.ip,
-      refreshToken // Pass the old token for proper rotation
-    );
-
-    res.status(200).json({
-      success: true,
-      token: accessToken,
-      refreshToken: newRefreshToken
-    });
-  } catch (error) {
-    logger.error('Refresh token error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'An error occurred during token refresh'
-    });
+    res.status(200).json({ success: true, ...tokens });
+  } catch (err) {
+    if (err.isAuthTokenError) {
+      return res.status(err.status).json({ success: false, message: err.message });
+    }
+    logger.error('Refresh token error:', err);
+    res.status(500).json({ success: false, message: 'An error occurred during token refresh' });
   }
 };
 
@@ -736,35 +631,13 @@ exports.resetPassword = async (req, res) => {
  */
 exports.verifyToken = async (req, res) => {
   try {
-    // The auth middleware has already validated the token
-    // and added the user data to req.user
-
-    // Return user data from token
-    if (!req.user || !req.user.id) {
-      throw new Error('User data not found in request');
+    const payload = authTokenService.describeVerifiedUser(req.user);
+    res.status(200).json({ success: true, ...payload });
+  } catch (err) {
+    if (err.isAuthTokenError) {
+      return res.status(err.status).json({ success: false, message: err.message });
     }
-
-    // Check if this is an administrator with password change required
-    let requirePasswordChange = false;
-    if (req.user.role === 'administrator' && req.user.permissions &&
-        req.user.permissions.length === 1 &&
-        req.user.permissions[0] === 'change_password_required') {
-      requirePasswordChange = true;
-    }
-
-    res.status(200).json({
-      success: true,
-      requirePasswordChange,
-      user: {
-        id: req.user.id,
-        role: req.user.role,
-        ...(req.user.affiliateId && { affiliateId: req.user.affiliateId }),
-        ...(req.user.customerId && { customerId: req.user.customerId }),
-        ...(req.user.adminId && { adminId: req.user.adminId })
-      }
-    });
-  } catch (error) {
-    logger.error('Token verification error:', error);
+    logger.error('Token verification error:', err);
     res.status(500).json({
       success: false,
       message: 'An error occurred during token verification'
@@ -777,68 +650,21 @@ exports.verifyToken = async (req, res) => {
  */
 exports.logout = async (req, res) => {
   try {
-    const { refreshToken } = req.body;
-
-    // Refresh token is optional for logout
-    // We'll still blacklist tokens if provided
-
-    // Get the access token from the authorization header
     const authHeader = req.headers.authorization || req.headers['x-auth-token'];
     let accessToken;
-
     if (authHeader) {
-      if (authHeader.startsWith('Bearer ')) {
-        accessToken = authHeader.substring(7);
-      } else {
-        accessToken = authHeader;
-      }
+      accessToken = authHeader.startsWith('Bearer ') ? authHeader.substring(7) : authHeader;
     }
 
-    // Note: In a production system, you might want to blacklist ALL active tokens
-    // for this user, not just the one used in the logout request.
-    // This would require tracking all issued tokens per user.
-
-    // Blacklist the access token if provided
-    if (accessToken && req.user) {
-      try {
-        // Decode token to get expiration time
-        const decoded = jwt.decode(accessToken);
-        if (decoded && decoded.exp) {
-          const expiresAt = new Date(decoded.exp * 1000);
-          await TokenBlacklist.blacklistToken(
-            accessToken,
-            req.user.id || req.user.userId || req.user.affiliateId || req.user.customerId || req.user.administratorId || req.user.operatorId,
-            req.user.role || req.user.userType,
-            expiresAt,
-            'logout'
-          );
-        }
-      } catch (blacklistError) {
-        logger.error('Error blacklisting token:', blacklistError);
-        // Continue with logout even if blacklisting fails
-      }
-    }
-
-    // Find and delete the refresh token if provided
-    if (refreshToken) {
-      try {
-        await RefreshToken.findOneAndDelete({ token: refreshToken });
-      } catch (error) {
-        logger.error('Error deleting refresh token:', error);
-        // Continue with logout even if deletion fails
-      }
-    }
-
-    res.status(200).json({
-      success: true,
-      message: 'Logged out successfully'
+    await authTokenService.logout({
+      refreshToken: req.body.refreshToken,
+      accessToken,
+      user: req.user
     });
+    res.status(200).json({ success: true, message: 'Logged out successfully' });
   } catch (error) {
     logger.error('Logout error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'An error occurred during logout'
-    });
+    res.status(500).json({ success: false, message: 'An error occurred during logout' });
   }
 };
 
