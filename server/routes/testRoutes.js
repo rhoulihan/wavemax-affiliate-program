@@ -69,7 +69,7 @@ router.get('/customer', async (req, res) => {
         
         res.json(customer);
     } catch (error) {
-        console.error('Error fetching test customer:', error);
+        logger.error('Error fetching test customer:', error);
         res.status(500).json({ error: 'Failed to fetch test customer' });
     }
 });
@@ -174,7 +174,7 @@ router.post('/customer', async (req, res) => {
         await customer.save();
         res.json(customer);
     } catch (error) {
-        console.error('Error creating test customer:', error);
+        logger.error('Error creating test customer:', error);
         res.status(500).json({ error: 'Failed to create test customer' });
     }
 });
@@ -275,7 +275,7 @@ router.post('/order', async (req, res) => {
         
         res.json(order);
     } catch (error) {
-        console.error('Error creating test order:', error);
+        logger.error('Error creating test order:', error);
         res.status(500).json({ error: 'Failed to create test order: ' + error.message });
     }
 });
@@ -296,7 +296,7 @@ router.get('/order/:orderId', async (req, res) => {
         
         res.json(order);
     } catch (error) {
-        console.error('Error fetching test order:', error);
+        logger.error('Error fetching test order:', error);
         res.status(500).json({ error: 'Failed to fetch test order' });
     }
 });
@@ -317,7 +317,7 @@ router.post('/send-payment-email', async (req, res) => {
         await emailService.sendEmail(to, subject, html);
         
         // Log the test email for debugging
-        console.log(`Test payment email sent to ${to} for order ${orderId}`);
+        logger.info(`Test payment email sent to ${to} for order ${orderId}`);
         
         res.json({ 
             success: true, 
@@ -325,7 +325,7 @@ router.post('/send-payment-email', async (req, res) => {
             orderId 
         });
     } catch (error) {
-        console.error('Error sending test payment email:', error);
+        logger.error('Error sending test payment email:', error);
         res.status(500).json({ error: 'Failed to send test payment email: ' + error.message });
     }
 });
@@ -347,7 +347,7 @@ router.post('/order/advance-stage', async (req, res) => {
             return res.status(404).json({ error: 'Order not found' });
         }
 
-        console.log(`Advancing order ${orderId} from ${currentStage} to ${nextStage}`);
+        logger.info(`Advancing order ${orderId} from ${currentStage} to ${nextStage}`);
 
         // Handle stage transitions
         switch (action) {
@@ -424,7 +424,7 @@ router.post('/order/advance-stage', async (req, res) => {
                             qrCodes: paymentURLs.qrCodes
                         });
 
-                        console.log(`V2 Payment request sent for test order ${order.orderId}, amount: $${paymentAmount}`);
+                        logger.info(`V2 Payment request sent for test order ${order.orderId}, amount: $${paymentAmount}`);
                     }
                 }
                 break;
@@ -468,11 +468,11 @@ router.post('/order/advance-stage', async (req, res) => {
         // Save the updated order
         await order.save();
 
-        console.log(`Order ${orderId} successfully advanced to ${order.status}`);
+        logger.info(`Order ${orderId} successfully advanced to ${order.status}`);
 
         res.json(order);
     } catch (error) {
-        console.error('Error advancing order stage:', error);
+        logger.error('Error advancing order stage:', error);
         res.status(500).json({ error: 'Failed to advance order stage: ' + error.message });
     }
 });
@@ -502,7 +502,7 @@ router.delete('/cleanup', async (req, res) => {
         
         res.json({ message: 'Test data cleaned up successfully' });
     } catch (error) {
-        console.error('Error cleaning up test data:', error);
+        logger.error('Error cleaning up test data:', error);
         res.status(500).json({ error: 'Failed to cleanup test data' });
     }
 });

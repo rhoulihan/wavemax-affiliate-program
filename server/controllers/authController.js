@@ -10,6 +10,7 @@ const encryptionUtil = require('../utils/encryption');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const emailService = require('../utils/emailService');
+const logger = require('../utils/logger');
 const { logLoginAttempt, logAuditEvent, AuditEvents } = require('../utils/auditLogger');
 const { sanitizeInput } = require('../middleware/sanitization');
 
@@ -140,7 +141,7 @@ exports.affiliateLogin = async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Affiliate login error:', error);
+    logger.error('Affiliate login error:', error);
     res.status(500).json({
       success: false,
       message: 'An error occurred during login'
@@ -225,7 +226,7 @@ exports.refreshToken = async (req, res) => {
       refreshToken: newRefreshToken
     });
   } catch (error) {
-    console.error('Refresh token error:', error);
+    logger.error('Refresh token error:', error);
     res.status(500).json({
       success: false,
       message: 'An error occurred during token refresh'
@@ -350,7 +351,7 @@ exports.administratorLogin = async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Administrator login error:', error);
+    logger.error('Administrator login error:', error);
     res.status(500).json({
       success: false,
       message: 'An error occurred during login'
@@ -379,15 +380,15 @@ exports.operatorAutoLogin = async (req, res) => {
     
     const cleanIp = clientIp.replace(/^::ffff:/, ''); // Remove IPv6 prefix if present
     
-    console.log('Auto-login attempt from IP:', cleanIp);
+    logger.info('Auto-login attempt from IP:', cleanIp);
     
     // Check if request is from store IP using storeIPs configuration
     const storeIPs = require('../config/storeIPs');
-    console.log('Whitelisted IPs:', storeIPs.whitelistedIPs);
-    console.log('Whitelisted Ranges:', storeIPs.whitelistedRanges);
+    logger.info('Whitelisted IPs:', storeIPs.whitelistedIPs);
+    logger.info('Whitelisted Ranges:', storeIPs.whitelistedRanges);
     
     if (!storeIPs.isWhitelisted(cleanIp)) {
-      console.log('Auto-login denied - IP not whitelisted:', cleanIp);
+      logger.info('Auto-login denied - IP not whitelisted:', cleanIp);
       return res.status(403).json({
         success: false,
         message: 'Auto-login not allowed from this location'
@@ -399,7 +400,7 @@ exports.operatorAutoLogin = async (req, res) => {
     const operator = await Operator.findOne({ operatorId: defaultOperatorId });
     
     if (!operator) {
-      console.error('Default operator not found:', defaultOperatorId);
+      logger.error('Default operator not found:', defaultOperatorId);
       return res.status(404).json({
         success: false,
         message: 'Default operator not configured'
@@ -458,7 +459,7 @@ exports.operatorAutoLogin = async (req, res) => {
     });
     
   } catch (error) {
-    console.error('Operator auto-login error:', error);
+    logger.error('Operator auto-login error:', error);
     res.status(500).json({
       success: false,
       message: 'Error during auto-login'
@@ -481,7 +482,7 @@ exports.operatorLogin = async (req, res) => {
     // Check if PIN matches the configured operator PIN
     const configuredPin = process.env.OPERATOR_PIN;
     if (!configuredPin) {
-      console.error('OPERATOR_PIN not configured in environment');
+      logger.error('OPERATOR_PIN not configured in environment');
       return res.status(500).json({
         success: false,
         message: 'System configuration error'
@@ -502,7 +503,7 @@ exports.operatorLogin = async (req, res) => {
     const operator = await Operator.findOne({ operatorId: defaultOperatorId });
 
     if (!operator) {
-      console.error('Default operator not found:', defaultOperatorId);
+      logger.error('Default operator not found:', defaultOperatorId);
       return res.status(404).json({
         success: false,
         message: 'Default operator not configured'
@@ -572,7 +573,7 @@ exports.operatorLogin = async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Operator login error:', error);
+    logger.error('Operator login error:', error);
     res.status(500).json({
       success: false,
       message: 'An error occurred during login'
@@ -633,9 +634,9 @@ exports.customerLogin = async (req, res) => {
 
     // Find affiliate
     const affiliate = await Affiliate.findOne({ affiliateId: customer.affiliateId });
-    console.log('Customer affiliateId:', customer.affiliateId);
-    console.log('Found affiliate:', affiliate ? affiliate.affiliateId : 'null');
-    console.log('Affiliate fees:', affiliate ? `min: ${affiliate.minimumDeliveryFee}, per-bag: ${affiliate.perBagDeliveryFee}` : 'null');
+    logger.info('Customer affiliateId:', customer.affiliateId);
+    logger.info('Found affiliate:', affiliate ? affiliate.affiliateId : 'null');
+    logger.info('Affiliate fees:', affiliate ? `min: ${affiliate.minimumDeliveryFee}, per-bag: ${affiliate.perBagDeliveryFee}` : 'null');
 
     // Generate token
     const token = generateToken({
@@ -670,10 +671,10 @@ exports.customerLogin = async (req, res) => {
       }
     };
 
-    console.log('Sending customer login response:', JSON.stringify(responseData.customer, null, 2));
+    logger.info('Sending customer login response:', JSON.stringify(responseData.customer, null, 2));
     res.status(200).json(responseData);
   } catch (error) {
-    console.error('Customer login error:', error);
+    logger.error('Customer login error:', error);
     res.status(500).json({
       success: false,
       message: 'An error occurred during login'
@@ -757,7 +758,7 @@ exports.forgotPassword = async (req, res) => {
       message: 'Password reset email sent'
     });
   } catch (error) {
-    console.error('Forgot password error:', error);
+    logger.error('Forgot password error:', error);
     res.status(500).json({
       success: false,
       message: 'An error occurred while processing your request'
@@ -849,7 +850,7 @@ exports.resetPassword = async (req, res) => {
       message: 'Password has been reset successfully'
     });
   } catch (error) {
-    console.error('Reset password error:', error);
+    logger.error('Reset password error:', error);
     res.status(500).json({
       success: false,
       message: 'An error occurred while resetting your password'
@@ -890,7 +891,7 @@ exports.verifyToken = async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Token verification error:', error);
+    logger.error('Token verification error:', error);
     res.status(500).json({
       success: false,
       message: 'An error occurred during token verification'
@@ -940,7 +941,7 @@ exports.logout = async (req, res) => {
           );
         }
       } catch (blacklistError) {
-        console.error('Error blacklisting token:', blacklistError);
+        logger.error('Error blacklisting token:', blacklistError);
         // Continue with logout even if blacklisting fails
       }
     }
@@ -950,7 +951,7 @@ exports.logout = async (req, res) => {
       try {
         await RefreshToken.findOneAndDelete({ token: refreshToken });
       } catch (error) {
-        console.error('Error deleting refresh token:', error);
+        logger.error('Error deleting refresh token:', error);
         // Continue with logout even if deletion fails
       }
     }
@@ -960,7 +961,7 @@ exports.logout = async (req, res) => {
       message: 'Logged out successfully'
     });
   } catch (error) {
-    console.error('Logout error:', error);
+    logger.error('Logout error:', error);
     res.status(500).json({
       success: false,
       message: 'An error occurred during logout'
@@ -972,7 +973,7 @@ exports.logout = async (req, res) => {
  * Handle social media OAuth callback
  */
 exports.handleSocialCallback = async (req, res) => {
-  console.log('[OAuth] handleSocialCallback called with:', {
+  logger.info('[OAuth] handleSocialCallback called with:', {
     user: req.user ? 'exists' : 'null',
     query: req.query,
     headers: req.headers,
@@ -985,7 +986,7 @@ exports.handleSocialCallback = async (req, res) => {
     // Check if this is a customer OAuth request (state starts with 'customer_')
     const isCustomerRequest = req.query.state && req.query.state.startsWith('customer');
 
-    console.log('[OAuth] Customer request check:', { 
+    logger.info('[OAuth] Customer request check:', { 
       state: req.query.state, 
       isCustomerRequest,
       willDelegate: isCustomerRequest 
@@ -993,7 +994,7 @@ exports.handleSocialCallback = async (req, res) => {
 
     if (isCustomerRequest) {
       // This is a customer OAuth request, delegate to customer handler
-      console.log('[OAuth] Delegating to handleCustomerSocialCallback');
+      logger.info('[OAuth] Delegating to handleCustomerSocialCallback');
       return exports.handleCustomerSocialCallback(req, res);
     }
 
@@ -1003,7 +1004,7 @@ exports.handleSocialCallback = async (req, res) => {
       ? req.query.state
       : null;
 
-    console.log('OAuth Callback State Parameter Debug:', {
+    logger.info('OAuth Callback State Parameter Debug:', {
       state: req.query.state,
       sessionId: sessionId,
       allParams: req.query
@@ -1029,7 +1030,7 @@ exports.handleSocialCallback = async (req, res) => {
             const OAuthSession = require('../models/OAuthSession');
             await OAuthSession.createSession(sessionId, message);
           } catch (dbError) {
-            console.error('Error storing OAuth session:', dbError);
+            logger.error('Error storing OAuth session:', dbError);
           }
         }
 
@@ -1048,7 +1049,7 @@ exports.handleSocialCallback = async (req, res) => {
                    req.headers.referer?.includes('facebook.com') ||
                    req.headers.referer?.includes('linkedin.com');
 
-    console.log('OAuth Callback Debug:', {
+    logger.info('OAuth Callback Debug:', {
       popup: req.query.popup,
       state: req.query.state,
       referer: req.headers.referer,
@@ -1096,7 +1097,7 @@ exports.handleSocialCallback = async (req, res) => {
             const OAuthSession = require('../models/OAuthSession');
             await OAuthSession.createSession(sessionId, message);
           } catch (dbError) {
-            console.error('Error storing OAuth session:', dbError);
+            logger.error('Error storing OAuth session:', dbError);
           }
         }
 
@@ -1130,7 +1131,7 @@ exports.handleSocialCallback = async (req, res) => {
             const OAuthSession = require('../models/OAuthSession');
             await OAuthSession.createSession(sessionId, message);
           } catch (dbError) {
-            console.error('Error storing OAuth session:', dbError);
+            logger.error('Error storing OAuth session:', dbError);
           }
         }
 
@@ -1168,7 +1169,7 @@ exports.handleSocialCallback = async (req, res) => {
           const OAuthSession = require('../models/OAuthSession');
           await OAuthSession.createSession(sessionId, message);
         } catch (dbError) {
-          console.error('Error storing OAuth session:', dbError);
+          logger.error('Error storing OAuth session:', dbError);
         }
       }
 
@@ -1218,30 +1219,30 @@ exports.handleSocialCallback = async (req, res) => {
             </p>
           </div>
           <script>
-            console.log('Popup script executing for social-auth-success');
+            logger.info('Popup script executing for social-auth-success');
             try {
               // Try multiple approaches to communicate with parent
               const message = ${JSON.stringify(message)};
               
-              console.log('Attempting to send message:', message);
-              console.log('window.opener:', window.opener);
-              console.log('window.parent:', window.parent);
+              logger.info('Attempting to send message:', message);
+              logger.info('window.opener:', window.opener);
+              logger.info('window.parent:', window.parent);
               
               if (window.opener && !window.opener.closed) {
-                console.log('Using window.opener.postMessage');
+                logger.info('Using window.opener.postMessage');
                 window.opener.postMessage(message, '*');
               } else if (window.parent && window.parent !== window) {
-                console.log('Using window.parent.postMessage');
+                logger.info('Using window.parent.postMessage');
                 window.parent.postMessage(message, '*');
               } else {
-                console.log('Using localStorage fallback');
+                logger.info('Using localStorage fallback');
                 // Store in localStorage as fallback
                 localStorage.setItem('socialAuthResult', JSON.stringify(message));
-                console.log('Stored in localStorage:', localStorage.getItem('socialAuthResult'));
+                logger.info('Stored in localStorage:', localStorage.getItem('socialAuthResult'));
               }
               
               // Try multiple methods to close the window
-              console.log('Attempting to close window...');
+              logger.info('Attempting to close window...');
               
               // Method 1: Direct close
               window.close();
@@ -1266,23 +1267,23 @@ exports.handleSocialCallback = async (req, res) => {
               
               // Method 6: Multiple timeout attempts
               setTimeout(() => {
-                console.log('First timeout close attempt');
+                logger.info('First timeout close attempt');
                 window.close();
               }, 100);
               
               setTimeout(() => {
-                console.log('Second timeout close attempt');
+                logger.info('Second timeout close attempt');
                 window.opener = null;
                 window.close();
               }, 300);
               
               setTimeout(() => {
-                console.log('Final timeout close attempt');
+                logger.info('Final timeout close attempt');
                 window.open('', '_self').close();
               }, 500);
               
             } catch (e) {
-              console.error('Error in popup communication:', e);
+              logger.error('Error in popup communication:', e);
               window.close();
             }
           </script>
@@ -1295,7 +1296,7 @@ exports.handleSocialCallback = async (req, res) => {
     res.redirect(`/affiliate-register-embed.html?socialToken=${socialToken}&provider=${user.provider}`);
 
   } catch (error) {
-    console.error('Social callback error:', error);
+    logger.error('Social callback error:', error);
 
     // Check if this is a popup request
     const isPopup = req.query.popup === 'true' ||
@@ -1342,7 +1343,7 @@ exports.handleSocialCallback = async (req, res) => {
               window.open('', '_self').close();
             }, 500);
           } catch (e) {
-            console.error('Error in popup communication:', e);
+            logger.error('Error in popup communication:', e);
             window.close();
           }
         </script>
@@ -1494,7 +1495,7 @@ exports.completeSocialRegistration = async (req, res) => {
     try {
       await emailService.sendAffiliateWelcomeEmail(affiliate);
     } catch (emailError) {
-      console.error('Welcome email error:', emailError);
+      logger.error('Welcome email error:', emailError);
       // Continue even if email fails
     }
 
@@ -1541,7 +1542,7 @@ exports.completeSocialRegistration = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Social registration error:', error);
+    logger.error('Social registration error:', error);
     res.status(500).json({
       success: false,
       message: 'Registration failed'
@@ -1553,7 +1554,7 @@ exports.completeSocialRegistration = async (req, res) => {
  * Poll for OAuth session result
  */
 exports.pollOAuthSession = async (req, res) => {
-  console.log('[OAuth] pollOAuthSession called for sessionId:', req.params.sessionId);
+  logger.info('[OAuth] pollOAuthSession called for sessionId:', req.params.sessionId);
   try {
     const { sessionId } = req.params;
 
@@ -1567,7 +1568,7 @@ exports.pollOAuthSession = async (req, res) => {
     const OAuthSession = require('../models/OAuthSession');
     const sessionResult = await OAuthSession.consumeSession(sessionId);
 
-    console.log('OAuth Session Polling Debug:', {
+    logger.info('OAuth Session Polling Debug:', {
       sessionId,
       sessionResult: sessionResult ? 'found' : 'not found',
       resultData: sessionResult
@@ -1586,11 +1587,11 @@ exports.pollOAuthSession = async (req, res) => {
       result: sessionResult
     };
 
-    console.log('Sending OAuth response:', response);
+    logger.info('Sending OAuth response:', response);
     res.json(response);
 
   } catch (error) {
-    console.error('OAuth session polling error:', error);
+    logger.error('OAuth session polling error:', error);
     res.status(500).json({
       success: false,
       message: 'An error occurred while polling OAuth session'
@@ -1602,7 +1603,7 @@ exports.pollOAuthSession = async (req, res) => {
  * Handle social media OAuth callback for customers
  */
 exports.handleCustomerSocialCallback = async (req, res) => {
-  console.log('[handleCustomerSocialCallback] Called with:', {
+  logger.info('[handleCustomerSocialCallback] Called with:', {
     user: req.user ? 'exists' : 'null',
     userType: req.user?.isExistingAffiliate ? 'existing-affiliate' : req.user?.isNewUser ? 'new-user' : 'existing-customer',
     query: req.query,
@@ -1636,14 +1637,14 @@ exports.handleCustomerSocialCallback = async (req, res) => {
       }
     }
 
-    console.log('Customer OAuth Callback State Parameter Debug:', {
+    logger.info('Customer OAuth Callback State Parameter Debug:', {
       state: req.query.state,
       sessionId: sessionId,
       allParams: req.query
     });
 
     if (!user) {
-      console.log('[handleCustomerSocialCallback] User is null, handling error case');
+      logger.info('[handleCustomerSocialCallback] User is null, handling error case');
       // Check if this is a popup request (for embedded contexts)
       const isPopup = req.query.popup === 'true' ||
                      sessionId !== null ||
@@ -1663,7 +1664,7 @@ exports.handleCustomerSocialCallback = async (req, res) => {
             const OAuthSession = require('../models/OAuthSession');
             await OAuthSession.createSession(sessionId, message);
           } catch (dbError) {
-            console.error('Error storing Customer OAuth session:', dbError);
+            logger.error('Error storing Customer OAuth session:', dbError);
           }
         }
 
@@ -1740,7 +1741,7 @@ exports.handleCustomerSocialCallback = async (req, res) => {
                 }
               }, 5000);
             } catch (e) {
-              console.error('Error in popup communication:', e);
+              logger.error('Error in popup communication:', e);
             }
           </script>
         </body>
@@ -1755,7 +1756,7 @@ exports.handleCustomerSocialCallback = async (req, res) => {
                    req.headers.referer?.includes('facebook.com') ||
                    req.headers.referer?.includes('linkedin.com');
 
-    console.log('Customer OAuth Callback Debug:', {
+    logger.info('Customer OAuth Callback Debug:', {
       popup: req.query.popup,
       state: req.query.state,
       referer: req.headers.referer,
@@ -1802,7 +1803,7 @@ exports.handleCustomerSocialCallback = async (req, res) => {
           const OAuthSession = require('../models/OAuthSession');
           await OAuthSession.createSession(sessionId, message);
         } catch (dbError) {
-          console.error('Error storing Customer OAuth session:', dbError);
+          logger.error('Error storing Customer OAuth session:', dbError);
         }
       }
 
@@ -1875,7 +1876,7 @@ exports.handleCustomerSocialCallback = async (req, res) => {
                 }
               }, 1500);
             } catch (e) {
-              console.error('Error in popup communication:', e);
+              logger.error('Error in popup communication:', e);
               document.body.innerHTML = '<p>Login successful! Please close this window.</p><button onclick="window.close()">Close Window</button>';
             }
           </script>
@@ -1885,13 +1886,13 @@ exports.handleCustomerSocialCallback = async (req, res) => {
     }
 
     // Handle case where social account already exists as an affiliate
-    console.log('[handleCustomerSocialCallback] Checking for existing affiliate:', {
+    logger.info('[handleCustomerSocialCallback] Checking for existing affiliate:', {
       isExistingAffiliate: user?.isExistingAffiliate,
       userObject: user
     });
     
     if (user && user.isExistingAffiliate) {
-      console.log('[handleCustomerSocialCallback] User is an existing affiliate, showing conflict message');
+      logger.info('[handleCustomerSocialCallback] User is an existing affiliate, showing conflict message');
       const message = {
         type: 'social-auth-account-conflict',
         message: 'This social media account is already associated with an affiliate account. Would you like to login as an affiliate instead?',
@@ -1911,13 +1912,13 @@ exports.handleCustomerSocialCallback = async (req, res) => {
           const OAuthSession = require('../models/OAuthSession');
           await OAuthSession.createSession(sessionId, message);
         } catch (dbError) {
-          console.error('Error storing Customer OAuth session:', dbError);
+          logger.error('Error storing Customer OAuth session:', dbError);
         }
       }
 
       // Always handle as popup to avoid redirect issues
       const nonce = res.locals.cspNonce || '';
-      console.log('[handleCustomerSocialCallback] Using nonce for affiliate conflict:', nonce);
+      logger.info('[handleCustomerSocialCallback] Using nonce for affiliate conflict:', nonce);
       
       // Set proper headers to avoid CSP issues
       res.setHeader('Content-Type', 'text/html; charset=utf-8');
@@ -2011,7 +2012,7 @@ exports.handleCustomerSocialCallback = async (req, res) => {
                 }
               }, 10000); // Longer delay to allow user to read message
             } catch (e) {
-              console.error('Error in popup communication:', e);
+              logger.error('Error in popup communication:', e);
             }
           </script>
         </body>
@@ -2053,35 +2054,35 @@ exports.handleCustomerSocialCallback = async (req, res) => {
           const OAuthSession = require('../models/OAuthSession');
           await OAuthSession.createSession(sessionId, message);
         } catch (dbError) {
-          console.error('Error storing Customer OAuth session:', dbError);
+          logger.error('Error storing Customer OAuth session:', dbError);
         }
       }
 
       return res.send(`
         <script>
-          console.log('Customer popup script executing for social-auth-success');
+          logger.info('Customer popup script executing for social-auth-success');
           try {
             const message = ${JSON.stringify(message)};
             
-            console.log('Attempting to send customer message:', message);
+            logger.info('Attempting to send customer message:', message);
             
             if (window.opener && !window.opener.closed) {
-              console.log('Using window.opener.postMessage for customer');
+              logger.info('Using window.opener.postMessage for customer');
               window.opener.postMessage(message, '*');
             } else if (window.parent && window.parent !== window) {
-              console.log('Using window.parent.postMessage for customer');
+              logger.info('Using window.parent.postMessage for customer');
               window.parent.postMessage(message, '*');
             } else {
-              console.log('Using localStorage fallback for customer');
+              logger.info('Using localStorage fallback for customer');
               localStorage.setItem('socialAuthResult', JSON.stringify(message));
             }
             
             setTimeout(() => {
-              console.log('Closing customer popup');
+              logger.info('Closing customer popup');
               window.close();
             }, 500);
           } catch (e) {
-            console.error('Error in customer popup communication:', e);
+            logger.error('Error in customer popup communication:', e);
             window.close();
           }
         </script>
@@ -2092,7 +2093,7 @@ exports.handleCustomerSocialCallback = async (req, res) => {
     res.redirect(`/customer-register-embed.html?socialToken=${socialToken}&provider=${user.provider}`);
 
   } catch (error) {
-    console.error('Customer social callback error:', error);
+    logger.error('Customer social callback error:', error);
 
     // Check if this is a popup request
     const isPopup = req.query.popup === 'true' ||
@@ -2120,7 +2121,7 @@ exports.handleCustomerSocialCallback = async (req, res) => {
             
             setTimeout(() => window.close(), 500);
           } catch (e) {
-            console.error('Error in popup communication:', e);
+            logger.error('Error in popup communication:', e);
             window.close();
           }
         </script>
@@ -2272,7 +2273,7 @@ exports.completeSocialCustomerRegistration = async (req, res) => {
     try {
       await emailService.sendCustomerWelcomeEmail(customer);
     } catch (emailError) {
-      console.error('Customer welcome email error:', emailError);
+      logger.error('Customer welcome email error:', emailError);
       // Continue even if email fails
     }
 
@@ -2321,7 +2322,7 @@ exports.completeSocialCustomerRegistration = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Customer social registration error:', error);
+    logger.error('Customer social registration error:', error);
     res.status(500).json({
       success: false,
       message: 'Customer registration failed'
@@ -2348,7 +2349,7 @@ exports.checkUsername = async (req, res) => {
 
     const trimmedUsername = username.trim();
 
-    console.log('Checking username availability for:', trimmedUsername);
+    logger.info('Checking username availability for:', trimmedUsername);
 
     // Check across all user types - using exact match with case-insensitive
     const [affiliate, customer, administrator, operator] = await Promise.all([
@@ -2358,7 +2359,7 @@ exports.checkUsername = async (req, res) => {
       Operator.findOne({ username: { $regex: `^${escapeRegex(trimmedUsername)}$`, $options: 'i' } })
     ]);
 
-    console.log('Username check results:', {
+    logger.info('Username check results:', {
       username: trimmedUsername,
       affiliateFound: !!affiliate,
       customerFound: !!customer,
@@ -2374,7 +2375,7 @@ exports.checkUsername = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Check username error:', error);
+    logger.error('Check username error:', error);
     res.status(500).json({
       success: false,
       message: 'Error checking username availability'
@@ -2401,7 +2402,7 @@ exports.checkEmail = async (req, res) => {
 
     const trimmedEmail = email.trim().toLowerCase();
 
-    console.log('Checking email availability for:', trimmedEmail);
+    logger.info('Checking email availability for:', trimmedEmail);
 
     // Check across all user types
     const [affiliate, customer, administrator, operator] = await Promise.all([
@@ -2411,7 +2412,7 @@ exports.checkEmail = async (req, res) => {
       Operator.findOne({ email: trimmedEmail })
     ]);
 
-    console.log('Email check results:', {
+    logger.info('Email check results:', {
       email: trimmedEmail,
       affiliateFound: !!affiliate,
       customerFound: !!customer,
@@ -2427,7 +2428,7 @@ exports.checkEmail = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Check email error:', error);
+    logger.error('Check email error:', error);
     res.status(500).json({
       success: false,
       message: 'Error checking email availability'

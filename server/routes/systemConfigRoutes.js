@@ -3,6 +3,7 @@
 const express = require('express');
 const router = express.Router();
 const SystemConfig = require('../models/SystemConfig');
+const logger = require('../utils/logger');
 const { authenticate } = require('../middleware/auth');
 const { checkRole, checkAdminPermission } = require('../middleware/rbac');
 
@@ -20,7 +21,7 @@ router.get('/public', async (req, res) => {
     }));
     res.json(formattedConfigs);
   } catch (error) {
-    console.error('Error fetching public configs:', error);
+    logger.error('Error fetching public configs:', error);
     res.status(500).json({ error: 'Failed to fetch public configurations' });
   }
 });
@@ -46,7 +47,7 @@ router.get('/public/:key', async (req, res) => {
       isPublic: config.isPublic
     });
   } catch (error) {
-    console.error('Error fetching config:', error);
+    logger.error('Error fetching config:', error);
     res.status(500).json({ error: 'Failed to fetch configuration' });
   }
 });
@@ -69,7 +70,7 @@ router.get('/', async (req, res) => {
 
     res.json(configs);
   } catch (error) {
-    console.error('Error fetching configs:', error);
+    logger.error('Error fetching configs:', error);
     res.status(500).json({ error: 'Failed to fetch configurations' });
   }
 });
@@ -91,7 +92,7 @@ router.put('/:key', checkAdminPermission('system_config'), async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Error updating config:', error);
+    logger.error('Error updating config:', error);
     res.status(400).json({ error: error.message });
   }
 });
@@ -102,7 +103,7 @@ router.post('/initialize', async (req, res) => {
     await SystemConfig.initializeDefaults();
     res.json({ message: 'Default configurations initialized' });
   } catch (error) {
-    console.error('Error initializing configs:', error);
+    logger.error('Error initializing configs:', error);
     res.status(500).json({ error: 'Failed to initialize configurations' });
   }
 });

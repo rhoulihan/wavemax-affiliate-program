@@ -5,6 +5,7 @@
 
 const QRCode = require('qrcode');
 const SystemConfig = require('../models/SystemConfig');
+const logger = require('../utils/logger');
 
 class PaymentLinkService {
   constructor() {
@@ -28,7 +29,7 @@ class PaymentLinkService {
       this.handles.cashapp = await SystemConfig.getValue('cashapp_handle', '$wavemax');
       this.initialized = true;
     } catch (error) {
-      console.error('Error initializing payment handles:', error);
+      logger.error('Error initializing payment handles:', error);
       throw new Error('Failed to initialize payment link service');
     }
   }
@@ -63,7 +64,7 @@ class PaymentLinkService {
       try {
         qrCodes[provider] = await this.generateQRCode(link);
       } catch (error) {
-        console.error(`Error generating QR code for ${provider}:`, error);
+        logger.error(`Error generating QR code for ${provider}:`, error);
         qrCodes[provider] = null;
       }
     }
@@ -123,7 +124,7 @@ class PaymentLinkService {
       });
       return qrCodeDataURL;
     } catch (error) {
-      console.error('QR code generation error:', error);
+      logger.error('QR code generation error:', error);
       throw error;
     }
   }

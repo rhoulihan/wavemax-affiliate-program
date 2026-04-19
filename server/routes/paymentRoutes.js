@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const paymentController = require('../controllers/paymentController');
+const logger = require('../utils/logger');
 
 // Payment configuration endpoint (public)
 router.get('/config', paymentController.getConfig);
@@ -40,10 +41,10 @@ if (process.env.NODE_ENV !== 'test') {
         paymentController.handleFormCallback(req, res, callbackPath)
       );
 
-      console.log(`Registered payment callback route: ${callbackPath}`);
+      logger.info(`Registered payment callback route: ${callbackPath}`);
     });
   } catch (error) {
-    console.error('Error loading callback routes:', error);
+    logger.error('Error loading callback routes:', error);
   }
 }
 

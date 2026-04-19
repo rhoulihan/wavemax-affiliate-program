@@ -4,6 +4,7 @@ const express = require('express');
 const router = express.Router();
 const passport = require('../config/passport-config');
 const authController = require('../controllers/authController');
+const logger = require('../utils/logger');
 const { body, validationResult } = require('express-validator');
 const { customPasswordValidator } = require('../utils/passwordValidator');
 
@@ -37,7 +38,7 @@ router.get('/google', (req, res, next) => {
  */
 router.get('/google/callback', (req, res, next) => {
   passport.authenticate('google', { session: false }, (err, user, info) => {
-    console.log('[OAuth] Google callback:', { 
+    logger.info('[OAuth] Google callback:', { 
       error: err ? err.message : null, 
       user: user ? 'exists' : 'null',
       userObject: user,
@@ -47,7 +48,7 @@ router.get('/google/callback', (req, res, next) => {
     
     // Handle errors
     if (err) {
-      console.error('[OAuth] Google authentication error:', err);
+      logger.error('[OAuth] Google authentication error:', err);
       req.user = null;
     } else {
       req.user = user;
@@ -288,7 +289,7 @@ router.get('/oauth/result/:sessionId', async (req, res) => {
   try {
     const { sessionId } = req.params;
 
-    console.log('[OAuth Result Poll] Checking for session:', sessionId);
+    logger.info('[OAuth Result Poll] Checking for session:', sessionId);
 
     // Get the OAuthSession model
     const OAuthSession = require('../models/OAuthSession');
@@ -297,7 +298,7 @@ router.get('/oauth/result/:sessionId', async (req, res) => {
     const session = await OAuthSession.consumeSession(sessionId);
 
     if (session) {
-      console.log('[OAuth Result Poll] Session found and consumed:', session);
+      logger.info('[OAuth Result Poll] Session found and consumed:', session);
 
       return res.json({
         completed: true,
@@ -311,7 +312,7 @@ router.get('/oauth/result/:sessionId', async (req, res) => {
       });
     }
   } catch (error) {
-    console.error('[OAuth Result Poll] Error:', error);
+    logger.error('[OAuth Result Poll] Error:', error);
     return res.status(500).json({
       completed: false,
       error: 'Internal server error'

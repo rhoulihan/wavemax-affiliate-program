@@ -38,6 +38,7 @@ jest.mock('dotenv', () => ({
 }));
 
 const mongoose = require('mongoose');
+const logger = require('../../server/utils/logger');
 const Administrator = require('../../server/models/Administrator');
 const emailService = require('../../server/utils/emailService');
 const readlineMock = require('readline');
@@ -78,8 +79,8 @@ describe('Create Admin Directly Script Unit Tests', () => {
 
     emailService.sendAdministratorWelcomeEmail = jest.fn().mockResolvedValue();
 
-    consoleLogSpy = jest.spyOn(console, 'log').mockImplementation();
-    consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+    consoleLogSpy = jest.spyOn(logger, 'info').mockImplementation();
+    consoleErrorSpy = jest.spyOn(logger, 'error').mockImplementation();
     processExitSpy = jest.spyOn(process, 'exit').mockImplementation();
   });
 

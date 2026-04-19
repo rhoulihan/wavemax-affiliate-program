@@ -1,3 +1,4 @@
+const logger = require('../../../utils/logger');
 // Customer-facing email dispatchers.
 // Extracted from utils/emailService.js in Phase 2.
 
@@ -13,24 +14,24 @@ const { sendEmail } = require('../transport');
 exports.sendCustomerWelcomeEmail = async (customer, affiliate, bagInfo = {}) => {
   try {
     // Debug logging
-    console.log('[sendCustomerWelcomeEmail] Customer:', customer ? { 
+    logger.info('[sendCustomerWelcomeEmail] Customer:', customer ? { 
       email: customer.email, 
       firstName: customer.firstName, 
       customerId: customer.customerId 
     } : 'undefined');
-    console.log('[sendCustomerWelcomeEmail] Affiliate:', affiliate ? { 
+    logger.info('[sendCustomerWelcomeEmail] Affiliate:', affiliate ? { 
       affiliateId: affiliate.affiliateId, 
       businessName: affiliate.businessName 
     } : 'undefined');
     
     // Validate inputs
     if (!customer || !affiliate) {
-      console.error('Missing customer or affiliate data for welcome email');
+      logger.error('Missing customer or affiliate data for welcome email');
       return;
     }
     
     if (!customer.email) {
-      console.error('Customer email is missing or undefined');
+      logger.error('Customer email is missing or undefined');
       return;
     }
 
@@ -285,9 +286,9 @@ exports.sendCustomerWelcomeEmail = async (customer, affiliate, bagInfo = {}) => 
       html
     );
 
-    console.log('Customer welcome email sent successfully to:', customer.email);
+    logger.info('Customer welcome email sent successfully to:', customer.email);
   } catch (error) {
-    console.error('Error sending customer welcome email:', error);
+    logger.error('Error sending customer welcome email:', error);
     throw error; // Re-throw to let the controller handle it
   }
 };
@@ -299,12 +300,12 @@ exports.sendCustomerBagsReadyEmail = async (customer, affiliate, bagInfo = {}) =
   try {
     // Validate inputs
     if (!customer || !affiliate) {
-      console.error('Missing customer or affiliate data for bags ready email');
+      logger.error('Missing customer or affiliate data for bags ready email');
       return;
     }
 
     if (!customer.email) {
-      console.error('Customer email is missing or undefined');
+      logger.error('Customer email is missing or undefined');
       return;
     }
 
@@ -445,9 +446,9 @@ exports.sendCustomerBagsReadyEmail = async (customer, affiliate, bagInfo = {}) =
       html
     );
 
-    console.log('Customer bags ready email sent successfully to:', customer.email);
+    logger.info('Customer bags ready email sent successfully to:', customer.email);
   } catch (error) {
-    console.error('Error sending customer bags ready email:', error);
+    logger.error('Error sending customer bags ready email:', error);
     throw error;
   }
 };
@@ -593,7 +594,7 @@ exports.sendCustomerOrderConfirmationEmail = async (customer, order, affiliate) 
       html
     );
   } catch (error) {
-    console.error('Error sending order confirmation email:', error);
+    logger.error('Error sending order confirmation email:', error);
   }
 };
 
@@ -755,7 +756,7 @@ exports.sendOrderStatusUpdateEmail = async (customer, order, status) => {
       html
     );
   } catch (error) {
-    console.error('Error sending order status update email:', error);
+    logger.error('Error sending order status update email:', error);
   }
 };
 
@@ -869,7 +870,7 @@ exports.sendOrderCancellationEmail = async (customer, order) => {
       html
     );
   } catch (error) {
-    console.error('Error sending order cancellation email:', error);
+    logger.error('Error sending order cancellation email:', error);
   }
 };
 
@@ -896,7 +897,7 @@ exports.sendCustomerPasswordResetEmail = async (customer, resetUrl) => {
       html
     );
   } catch (error) {
-    console.error('Error sending customer password reset email:', error);
+    logger.error('Error sending customer password reset email:', error);
   }
 };
 

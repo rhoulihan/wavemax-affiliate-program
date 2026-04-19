@@ -5,6 +5,7 @@ const Order = require('../models/Order');
 const Customer = require('../models/Customer');
 const emailService = require('../utils/emailService');
 const auditLogger = require('../utils/auditLogger');
+const logger = require('../utils/logger');
 
 /**
  * Handle Paygistix payment callback for both registration and orders
@@ -12,7 +13,7 @@ const auditLogger = require('../utils/auditLogger');
  */
 router.get('/', async (req, res) => {
   try {
-    console.log('Paygistix general callback received:', req.query);
+    logger.info('Paygistix general callback received:', req.query);
 
     // Extract callback parameters
     const {
@@ -35,7 +36,7 @@ router.get('/', async (req, res) => {
     return handleOrderPayment(req, res);
 
   } catch (error) {
-    console.error('Payment callback error:', error);
+    logger.error('Payment callback error:', error);
     res.redirect('/payment-error?message=An error occurred processing your payment');
   }
 });
@@ -60,7 +61,7 @@ async function handleOrderPayment(req, res) {
     // Find the order
     const order = await Order.findOne({ orderId: orderId });
     if (!order) {
-      console.error('Order not found for callback:', orderId);
+      logger.error('Order not found for callback:', orderId);
       return res.redirect('/payment-error?message=Order not found');
     }
 
@@ -104,7 +105,7 @@ async function handleOrderPayment(req, res) {
       if (customer && !customer.isActive) {
         customer.isActive = true;
         await customer.save();
-        console.log('Updated customer isActive status to true for customer:', customer.customerId);
+        logger.info('Updated customer isActive status to true for customer:', customer.customerId);
       }
 
       // Send confirmation email
@@ -112,7 +113,7 @@ async function handleOrderPayment(req, res) {
         try {
           await emailService.sendPaymentConfirmationEmail(customer, order, payment);
         } catch (emailError) {
-          console.error('Failed to send payment confirmation email:', emailError);
+          logger.error('Failed to send payment confirmation email:', emailError);
         }
       }
 
@@ -161,12 +162,12 @@ async function handleOrderPayment(req, res) {
 
     } else {
       // Unknown status
-      console.error('Unknown payment status:', status);
+      logger.error('Unknown payment status:', status);
       res.redirect(`/payment-error?orderId=${orderId}&message=Unknown payment status`);
     }
 
   } catch (error) {
-    console.error('Order payment callback error:', error);
+    logger.error('Order payment callback error:', error);
     res.redirect('/payment-error?message=An error occurred processing your payment');
   }
 }
@@ -176,12 +177,12 @@ async function handleOrderPayment(req, res) {
  */
 router.post('/', async (req, res) => {
   try {
-    console.log('Paygistix POST callback received:', req.body);
+    logger.info('Paygistix POST callback received:', req.body);
     // Post-weigh workflow: only order-payment callbacks. V1 registration-payment
     // POST branch was removed in the Phase 2 refactor.
     res.status(200).json({ received: true });
   } catch (error) {
-    console.error('Payment POST callback error:', error);
+    logger.error('Payment POST callback error:', error);
     res.status(500).json({ error: 'Callback processing failed' });
   }
 });

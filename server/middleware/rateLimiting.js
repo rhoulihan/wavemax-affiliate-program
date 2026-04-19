@@ -10,6 +10,7 @@
 
 const rateLimit = require('express-rate-limit');
 const MongoStore = require('rate-limit-mongo');
+const logger = require('../utils/logger');
 
 // Check if rate limiting should be relaxed
 const isRelaxed = process.env.RELAX_RATE_LIMITING === 'true';
@@ -26,10 +27,10 @@ const createMongoStore = (windowMs = 60 * 60 * 1000) => {
       uri: process.env.MONGODB_URI,
       collectionName: 'rate_limits',
       expireTimeMs: windowMs, // Match the window time
-      errorHandler: console.error.bind(null, 'Rate limit store error:')
+      errorHandler: logger.error.bind(null, 'Rate limit store error:')
     });
   } catch (error) {
-    console.error('Failed to create MongoDB rate limit store:', error);
+    logger.error('Failed to create MongoDB rate limit store:', error);
     return undefined; // Fall back to memory store
   }
 };

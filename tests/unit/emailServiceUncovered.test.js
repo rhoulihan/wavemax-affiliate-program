@@ -1,4 +1,16 @@
 // Test the uncovered email service functions
+//
+// Uses a jest.doMock-based logger stub rather than `spyOn` on the real logger:
+// re-requiring server/utils/logger after resetModules would reinit winston
+// against the jest.doMock'd `fs` below, which lacks the calls winston needs to
+// create the log directory.
+const mockLogger = {
+  info: jest.fn(),
+  error: jest.fn(),
+  warn: jest.fn(),
+  debug: jest.fn()
+};
+
 describe('Email Service - Uncovered Functions', () => {
   let emailService;
   let mockTransporter;
@@ -8,10 +20,10 @@ describe('Email Service - Uncovered Functions', () => {
   beforeEach(() => {
     jest.resetModules();
     jest.clearAllMocks();
-    
-    // Mock console
-    consoleLogSpy = jest.spyOn(console, 'log').mockImplementation();
-    consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+    jest.doMock('../../server/utils/logger', () => mockLogger);
+
+    consoleLogSpy = jest.spyOn(mockLogger, 'info').mockImplementation();
+    consoleErrorSpy = jest.spyOn(mockLogger, 'error').mockImplementation();
     
     // Mock nodemailer
     mockTransporter = {
@@ -171,6 +183,7 @@ describe('Email Service - Uncovered Functions', () => {
       
       // Re-require to pick up new env
       jest.resetModules();
+      jest.doMock('../../server/utils/logger', () => mockLogger);
       emailService = require('../../server/utils/emailService');
 
       const alertData = {
@@ -198,6 +211,7 @@ describe('Email Service - Uncovered Functions', () => {
     it.skip('should handle email sending errors gracefully', async () => {
       // Create a fresh mock that rejects
       jest.resetModules();
+      jest.doMock('../../server/utils/logger', () => mockLogger);
       const failingTransporter = {
         sendMail: jest.fn(() => Promise.reject(new Error('SMTP error')))
       };
@@ -297,6 +311,7 @@ const { createFindOneMock, createFindMock, createMockDocument, createAggregateMo
     it.skip('should handle email error and log it', async () => {
       // Create a fresh mock that rejects
       jest.resetModules();
+      jest.doMock('../../server/utils/logger', () => mockLogger);
       const failingTransporter = {
         sendMail: jest.fn(() => Promise.reject(new Error('Network error')))
       };
@@ -329,6 +344,7 @@ const { createFindOneMock, createFindMock, createMockDocument, createAggregateMo
   describe('Console Email Provider', () => {
     beforeEach(() => {
       jest.resetModules();
+      jest.doMock('../../server/utils/logger', () => mockLogger);
       process.env.EMAIL_PROVIDER = 'console';
       
       // Re-mock fs

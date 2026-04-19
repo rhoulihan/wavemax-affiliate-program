@@ -10,18 +10,18 @@ const errorHandler = (err, req, res, next) => {
     err = new Error(err);
   }
 
-  // Console log for immediate debugging
-  console.error('=== API ERROR ===');
-  console.error('Error message:', err.message);
-  console.error('Error stack:', err.stack);
-  console.error('Request path:', req.path);
-  console.error('Request method:', req.method);
-  console.error('Error type:', err.name);
-  console.error('Error code:', err.code);
-  console.error('================');
-
-  // Log the error with additional context
+  // Log error details. Wrapped so a failing logger can't crash the handler
+  // — the test 'should handle errors thrown from within error handler' relies on this.
   try {
+    logger.error('=== API ERROR ===');
+    logger.error('Error message:', err.message);
+    logger.error('Error stack:', err.stack);
+    logger.error('Request path:', req.path);
+    logger.error('Request method:', req.method);
+    logger.error('Error type:', err.name);
+    logger.error('Error code:', err.code);
+    logger.error('================');
+
     logger.error('API Error:', {
       error: err.message,
       stack: err.stack,
@@ -33,8 +33,7 @@ const errorHandler = (err, req, res, next) => {
       errorCode: err.code
     });
   } catch (logError) {
-    // If logging fails, continue with error handling
-    console.error('Failed to log error:', logError);
+    // If logging itself failed, swallow — we still need to respond to the client.
   }
 
   // Handle specific error types

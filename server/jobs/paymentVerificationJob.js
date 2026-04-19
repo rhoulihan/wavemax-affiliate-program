@@ -9,6 +9,7 @@ const Customer = require('../models/Customer');
 const SystemConfig = require('../models/SystemConfig');
 const paymentEmailScanner = require('../services/paymentEmailScanner');
 const emailService = require('../utils/emailService');
+const logger = require('../utils/logger');
 
 class PaymentVerificationJob {
   constructor() {
@@ -31,7 +32,7 @@ class PaymentVerificationJob {
       // Create cron pattern (run every N minutes)
       const cronPattern = `*/${this.checkInterval} * * * *`;
       
-      console.log(`Starting payment verification job - checking every ${this.checkInterval} minutes`);
+      logger.info(`Starting payment verification job - checking every ${this.checkInterval} minutes`);
       
       // Schedule the job
       this.job = cron.schedule(cronPattern, async () => {
@@ -41,9 +42,9 @@ class PaymentVerificationJob {
       // Run immediately on startup
       await this.runVerification();
       
-      console.log('Payment verification job started successfully');
+      logger.info('Payment verification job started successfully');
     } catch (error) {
-      console.error('Error starting payment verification job:', error);
+      logger.error('Error starting payment verification job:', error);
     }
   }
 
@@ -54,7 +55,7 @@ class PaymentVerificationJob {
     if (this.job) {
       this.job.stop();
       this.job = null;
-      console.log('Payment verification job stopped');
+      logger.info('Payment verification job stopped');
     }
   }
 
@@ -64,7 +65,7 @@ class PaymentVerificationJob {
   async runVerification() {
     // Prevent concurrent runs
     if (this.running) {
-      console.log('Payment verification already running, skipping...');
+      logger.info('Payment verification already running, skipping...');
       return;
     }
 
@@ -72,23 +73,23 @@ class PaymentVerificationJob {
     const startTime = Date.now();
     
     try {
-      console.log(`[${new Date().toISOString()}] Starting payment verification check`);
+      logger.info(`[${new Date().toISOString()}] Starting payment verification check`);
       
       // First, scan for new payment emails
       const scannedPayments = await paymentEmailScanner.scanForPayments();
       
       if (scannedPayments.length > 0) {
-        console.log(`Verified ${scannedPayments.length} payments from email scan`);
+        logger.info(`Verified ${scannedPayments.length} payments from email scan`);
       }
       
       // Then check pending orders
       await this.checkPendingPayments();
       
       const duration = Date.now() - startTime;
-      console.log(`Payment verification completed in ${duration}ms`);
+      logger.info(`Payment verification completed in ${duration}ms`);
       
     } catch (error) {
-      console.error('Error in payment verification job:', error);
+      logger.error('Error in payment verification job:', error);
     } finally {
       this.running = false;
     }
@@ -110,17 +111,17 @@ class PaymentVerificationJob {
         return;
       }
       
-      console.log(`Found ${pendingOrders.length} orders awaiting payment`);
+      logger.info(`Found ${pendingOrders.length} orders awaiting payment`);
       
       for (const order of pendingOrders) {
         try {
           await this.processOrder(order);
         } catch (error) {
-          console.error(`Error processing order ${order._id}:`, error);
+          logger.error(`Error processing order ${order._id}:`, error);
         }
       }
     } catch (error) {
-      console.error('Error checking pending payments:', error);
+      logger.error('Error checking pending payments:', error);
     }
   }
 
@@ -144,7 +145,7 @@ class PaymentVerificationJob {
       const verified = await paymentEmailScanner.checkOrderPayment(order._id);
       
       if (verified) {
-        console.log(`Payment verified for order ${order._id}`);
+        logger.info(`Payment verified for order ${order._id}`);
         
         // If order is ready (WDF complete), send pickup notification
         if (order.status === 'processed') {
@@ -164,7 +165,7 @@ class PaymentVerificationJob {
         order.paymentStatus = 'failed';
         await order.save();
         
-        console.log(`Payment timeout for order ${order._id} - escalating to admin`);
+        logger.info(`Payment timeout for order ${order._id} - escalating to admin`);
         await this.escalateToAdmin(order);
         
       } else {
@@ -179,7 +180,7 @@ class PaymentVerificationJob {
       }
       
     } catch (error) {
-      console.error(`Error processing order ${order._id}:`, error);
+      logger.error(`Error processing order ${order._id}:`, error);
     }
   }
 
@@ -210,7 +211,7 @@ class PaymentVerificationJob {
       const customer = await Customer.findOne({ customerId: order.customerId });
       
       if (!customer || !customer.email) {
-        console.error('Cannot send reminder - customer not found or email missing');
+        logger.error('Cannot send reminder - customer not found or email missing');
         return;
       }
       
@@ -219,7 +220,7 @@ class PaymentVerificationJob {
       const hoursRemaining = Math.max(0, 4 - hoursElapsed);
       const isUrgent = hoursRemaining <= 1;
       
-      console.log(`Sending payment reminder to ${customer.email} for order ${order._id} (${hoursElapsed} hours elapsed, ${hoursRemaining} hours remaining)`);
+      logger.info(`Sending payment reminder to ${customer.email} for order ${order._id} (${hoursElapsed} hours elapsed, ${hoursRemaining} hours remaining)`);
       
       // Generate fresh payment links (in case they expired or were lost)
       const paymentLinkService = require('../services/paymentLinkService');
@@ -247,7 +248,7 @@ class PaymentVerificationJob {
       });
       
     } catch (error) {
-      console.error('Error sending payment reminder:', error);
+      logger.error('Error sending payment reminder:', error);
     }
   }
 
@@ -285,9 +286,9 @@ class PaymentVerificationJob {
         qrCodes: order.paymentQRCodes
       });
       
-      console.log(`Payment reminder #${reminderNumber} sent to ${customer.email} for order ${order.orderId}`);
+      logger.info(`Payment reminder #${reminderNumber} sent to ${customer.email} for order ${order.orderId}`);
     } catch (error) {
-      console.error('Error sending reminder email:', error);
+      logger.error('Error sending reminder email:', error);
     }
   }
 
@@ -302,11 +303,11 @@ class PaymentVerificationJob {
       const customer = await Customer.findOne({ customerId: order.customerId });
       
       if (!affiliate || !affiliate.email) {
-        console.error('Cannot send pickup notification - affiliate not found or email missing');
+        logger.error('Cannot send pickup notification - affiliate not found or email missing');
         return;
       }
       
-      console.log(`Sending pickup notification to affiliate ${affiliate.email} for order ${order.orderId}`);
+      logger.info(`Sending pickup notification to affiliate ${affiliate.email} for order ${order.orderId}`);
       
       // Send notification to affiliate that order is ready
       await emailService.sendAffiliateCommissionEmail(
@@ -324,7 +325,7 @@ class PaymentVerificationJob {
         );
       }
     } catch (error) {
-      console.error('Error sending pickup notification:', error);
+      logger.error('Error sending pickup notification:', error);
     }
   }
 
@@ -333,7 +334,7 @@ class PaymentVerificationJob {
    */
   async escalateToAdmin(order) {
     try {
-      console.log(`Escalating payment timeout for order ${order._id} to admin`);
+      logger.info(`Escalating payment timeout for order ${order._id} to admin`);
       
       // Get customer and affiliate information
       const Affiliate = require('../models/Affiliate');
@@ -362,16 +363,16 @@ class PaymentVerificationJob {
       };
       
       // Log escalation details
-      console.log(`Admin escalation details:`, escalationDetails);
+      logger.info(`Admin escalation details:`, escalationDetails);
       
       // Send escalation email
       // await emailService.sendPaymentTimeoutEscalation(order, adminEmail, escalationDetails);
       
       // Log for now
-      console.log(`Admin escalation email would be sent to ${adminEmail} for order ${order._id}`);
+      logger.info(`Admin escalation email would be sent to ${adminEmail} for order ${order._id}`);
       
     } catch (error) {
-      console.error('Error escalating to admin:', error);
+      logger.error('Error escalating to admin:', error);
     }
   }
 
@@ -391,7 +392,7 @@ class PaymentVerificationJob {
    * Manually trigger verification (for testing)
    */
   async triggerManual() {
-    console.log('Manual payment verification triggered');
+    logger.info('Manual payment verification triggered');
     await this.runVerification();
   }
 }

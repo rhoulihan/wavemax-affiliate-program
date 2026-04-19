@@ -6,6 +6,7 @@
 const Imap = require('imap');
 const { simpleParser } = require('mailparser');
 const SystemConfig = require('../models/SystemConfig');
+const logger = require('../utils/logger');
 const { decrypt } = require('../utils/encryption');
 
 class IMAPEmailScanner {
@@ -27,7 +28,7 @@ class IMAPEmailScanner {
       // Get encrypted password
       const encryptedPassword = await SystemConfig.getValue('payment_email_password', '');
       if (!encryptedPassword) {
-        console.warn('Payment email password not configured');
+        logger.warn('Payment email password not configured');
         return false;
       }
       
@@ -46,30 +47,30 @@ class IMAPEmailScanner {
         },
         authTimeout: 10000,
         connTimeout: 10000
-        // debug: console.log // Uncomment for debugging
+        // debug: logger.info // Uncomment for debugging
       });
       
       return new Promise((resolve, reject) => {
         this.imap.once('ready', () => {
-          console.log('IMAP connection established');
+          logger.info('IMAP connection established');
           this.connected = true;
           resolve(true);
         });
         
         this.imap.once('error', (err) => {
-          console.error('IMAP connection error:', err.message);
+          logger.error('IMAP connection error:', err.message);
           reject(err);
         });
         
         this.imap.once('end', () => {
-          console.log('IMAP connection ended');
+          logger.info('IMAP connection ended');
           this.connected = false;
         });
         
         this.imap.connect();
       });
     } catch (error) {
-      console.error('Error connecting to IMAP:', error);
+      logger.error('Error connecting to IMAP:', error);
       return false;
     }
   }
@@ -88,7 +89,7 @@ class IMAPEmailScanner {
       
       this.imap.openBox('INBOX', false, (err, box) => {
         if (err) {
-          console.error('Error opening inbox:', err);
+          logger.error('Error opening inbox:', err);
           reject(err);
           return;
         }
@@ -96,18 +97,18 @@ class IMAPEmailScanner {
         // Search for unseen messages
         this.imap.search(['UNSEEN'], (err, results) => {
           if (err) {
-            console.error('Error searching emails:', err);
+            logger.error('Error searching emails:', err);
             reject(err);
             return;
           }
           
           if (!results || results.length === 0) {
-            console.log('No unread emails found');
+            logger.info('No unread emails found');
             resolve([]);
             return;
           }
           
-          console.log(`Found ${results.length} unread emails`);
+          logger.info(`Found ${results.length} unread emails`);
           
           // Track messages being processed
           let messagesExpected = results.length;
@@ -120,7 +121,7 @@ class IMAPEmailScanner {
           });
           
           fetch.on('message', (msg, seqno) => {
-            console.log(`Processing message ${seqno}`);
+            logger.info(`Processing message ${seqno}`);
             let emailData = {
               seqno: seqno,
               uid: null,
@@ -133,16 +134,16 @@ class IMAPEmailScanner {
             let messageEnded = false;
             
             msg.on('body', (stream, info) => {
-              console.log(`Parsing body for message ${seqno}`);
+              logger.info(`Parsing body for message ${seqno}`);
               simpleParser(stream, (err, parsed) => {
                 if (err) {
-                  console.error('Error parsing email:', err);
+                  logger.error('Error parsing email:', err);
                   bodyParsed = true;
                   messagesProcessed++;
                   return;
                 }
                 
-                console.log(`Parsed email - Subject: ${parsed.subject}, From: ${parsed.from?.text}`);
+                logger.info(`Parsed email - Subject: ${parsed.subject}, From: ${parsed.from?.text}`);
                 
                 emailData.from = parsed.from?.text || '';
                 emailData.subject = parsed.subject || '';
@@ -162,11 +163,11 @@ class IMAPEmailScanner {
                 if (messageEnded) {
                   emails.push(emailData);
                   messagesProcessed++;
-                  console.log(`Added email ${seqno} to array (delayed). Total: ${emails.length}`);
+                  logger.info(`Added email ${seqno} to array (delayed). Total: ${emails.length}`);
                   
                   // Check if all messages are processed
                   if (messagesProcessed === messagesExpected) {
-                    console.log(`All ${messagesExpected} messages processed. Resolving with ${emails.length} emails`);
+                    logger.info(`All ${messagesExpected} messages processed. Resolving with ${emails.length} emails`);
                     resolve(emails);
                   }
                 }
@@ -176,22 +177,22 @@ class IMAPEmailScanner {
             msg.once('attributes', (attrs) => {
               emailData.uid = attrs.uid;
               emailData.flags = attrs.flags;
-              console.log(`Got attributes for message ${seqno}: UID=${attrs.uid}`);
+              logger.info(`Got attributes for message ${seqno}: UID=${attrs.uid}`);
             });
             
             msg.once('end', () => {
-              console.log(`Message ${seqno} ended`);
+              logger.info(`Message ${seqno} ended`);
               messageEnded = true;
               
               // If body is already parsed, add to emails now
               if (bodyParsed) {
                 emails.push(emailData);
                 messagesProcessed++;
-                console.log(`Added email ${seqno} to array. Total: ${emails.length}`);
+                logger.info(`Added email ${seqno} to array. Total: ${emails.length}`);
                 
                 // Check if all messages are processed
                 if (messagesProcessed === messagesExpected) {
-                  console.log(`All ${messagesExpected} messages processed. Resolving with ${emails.length} emails`);
+                  logger.info(`All ${messagesExpected} messages processed. Resolving with ${emails.length} emails`);
                   resolve(emails);
                 }
               }
@@ -199,12 +200,12 @@ class IMAPEmailScanner {
           });
           
           fetch.once('error', (err) => {
-            console.error('Fetch error:', err);
+            logger.error('Fetch error:', err);
             reject(err);
           });
           
           fetch.once('end', () => {
-            console.log(`Fetch ended. Waiting for ${messagesExpected} messages to be processed...`);
+            logger.info(`Fetch ended. Waiting for ${messagesExpected} messages to be processed...`);
             
             // If no messages were expected, resolve immediately
             if (messagesExpected === 0) {
@@ -225,10 +226,10 @@ class IMAPEmailScanner {
     return new Promise((resolve, reject) => {
       this.imap.addFlags(uid, ['\\Seen'], (err) => {
         if (err) {
-          console.error('Error marking email as read:', err);
+          logger.error('Error marking email as read:', err);
           resolve(false);
         } else {
-          console.log(`Marked email ${uid} as read`);
+          logger.info(`Marked email ${uid} as read`);
           resolve(true);
         }
       });
@@ -245,7 +246,7 @@ class IMAPEmailScanner {
       // First copy to the target folder
       this.imap.copy(uid, folderName, (err) => {
         if (err) {
-          console.error(`Error copying email to ${folderName}:`, err);
+          logger.error(`Error copying email to ${folderName}:`, err);
           resolve(false);
           return;
         }
@@ -253,15 +254,15 @@ class IMAPEmailScanner {
         // Then mark as deleted in current folder
         this.imap.addFlags(uid, ['\\Deleted'], (err) => {
           if (err) {
-            console.error('Error marking email as deleted:', err);
+            logger.error('Error marking email as deleted:', err);
             resolve(false);
           } else {
             // Expunge to actually delete
             this.imap.expunge((err) => {
               if (err) {
-                console.error('Error expunging:', err);
+                logger.error('Error expunging:', err);
               }
-              console.log(`Moved email ${uid} to ${folderName}`);
+              logger.info(`Moved email ${uid} to ${folderName}`);
               resolve(true);
             });
           }

@@ -1,3 +1,4 @@
+const logger = require('./logger');
 /**
  * Controller Helper Utilities
  * Provides common error handling, response formatting, and async wrapper functions
@@ -14,7 +15,7 @@ class ControllerHelpers {
    */
   static handleError(res, error, operation, statusCode = 500) {
     // Log the error with context
-    console.error(`${operation} error:`, {
+    logger.error(`${operation} error:`, {
       message: error.message,
       stack: error.stack,
       timestamp: new Date().toISOString()

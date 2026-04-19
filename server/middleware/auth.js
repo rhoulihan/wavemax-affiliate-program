@@ -8,6 +8,7 @@ const Operator = require('../models/Operator');
 const TokenBlacklist = require('../models/TokenBlacklist');
 
 const storeIPConfig = require('../config/storeIPs');
+const logger = require('../utils/logger');
 
 // Import rate limiters from centralized configuration
 const { authLimiter } = require('./rateLimiting');
@@ -80,7 +81,7 @@ exports.authenticate = async (req, res, next) => {
 
     // Debug logging for W9 endpoint
     if (req.path.includes('/w9/')) {
-      console.log('Auth middleware - W9 endpoint accessed:', {
+      logger.info('Auth middleware - W9 endpoint accessed:', {
         path: req.path,
         userId: req.user.id,
         role: req.user.role,
@@ -116,7 +117,7 @@ exports.authenticate = async (req, res, next) => {
       });
     }
 
-    console.error('Authentication error:', error);
+    logger.error('Authentication error:', error);
 
     res.status(500).json({
       success: false,
@@ -135,7 +136,7 @@ exports.authorize = (...roles) => {
 
   return (req, res, next) => {
     if (!req.user) {
-      console.log('Authorization failed - No user object on request for path:', req.path);
+      logger.info('Authorization failed - No user object on request for path:', req.path);
       return res.status(403).json({
         success: false,
         message: 'Insufficient permissions'
@@ -143,7 +144,7 @@ exports.authorize = (...roles) => {
     }
 
     if (!req.user.role || !allowedRoles.includes(req.user.role)) {
-      console.log('Authorization failed for path:', req.path, '- User role:', req.user.role, 'Allowed roles:', allowedRoles);
+      logger.info('Authorization failed for path:', req.path, '- User role:', req.user.role, 'Allowed roles:', allowedRoles);
       return res.status(403).json({
         success: false,
         message: 'Insufficient permissions'

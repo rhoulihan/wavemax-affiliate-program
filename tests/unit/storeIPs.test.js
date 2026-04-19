@@ -1,3 +1,4 @@
+let logger;
 // Unit tests for storeIPs configuration
 
 describe('storeIPs configuration', () => {
@@ -10,6 +11,7 @@ describe('storeIPs configuration', () => {
     
     // Clear the module cache before each test
     jest.resetModules();
+    logger = require('../../server/utils/logger');
     
     // Set default environment variables
     process.env = {
@@ -224,7 +226,7 @@ describe('storeIPs configuration', () => {
     });
 
     it('should handle edge cases with console error', () => {
-      const consoleError = jest.spyOn(console, 'error').mockImplementation();
+      const consoleError = jest.spyOn(logger, 'error').mockImplementation();
       
       // Test with completely invalid input that might throw
       expect(storeIPs.isInRange(null, '192.168.1.0/24')).toBe(false);

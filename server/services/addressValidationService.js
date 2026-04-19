@@ -5,6 +5,7 @@
  */
 
 const axios = require('axios');
+const logger = require('../utils/logger');
 
 class AddressValidationService {
   constructor() {
@@ -21,7 +22,7 @@ class AddressValidationService {
   async validateAddress(addressData) {
     const { address, city, state, zipCode } = addressData;
     
-    console.log('[AddressValidationService] Validating address:', addressData);
+    logger.info('[AddressValidationService] Validating address:', addressData);
     
     // Step 1: Validate all required fields are present
     if (!address || !city || !state || !zipCode) {
@@ -52,7 +53,7 @@ class AddressValidationService {
     try {
       // Strategy 1: Try with full address including city
       const fullQuery = `${address}, ${city}, ${state} ${zipCode}, USA`;
-      console.log('[AddressValidationService] Trying full geocoding query:', fullQuery);
+      logger.info('[AddressValidationService] Trying full geocoding query:', fullQuery);
       
       let response = await axios.get(`${this.nominatimUrl}/search`, {
         params: {
@@ -73,7 +74,7 @@ class AddressValidationService {
       // This handles cases where Nominatim has different city boundaries
       if (!results || results.length === 0) {
         const simpleQuery = `${address} ${zipCode}`;
-        console.log('[AddressValidationService] Trying simplified query:', simpleQuery);
+        logger.info('[AddressValidationService] Trying simplified query:', simpleQuery);
         
         response = await axios.get(`${this.nominatimUrl}/search`, {
           params: {
@@ -103,7 +104,7 @@ class AddressValidationService {
       // Verify the result matches the provided zip code
       const resultZip = result.address?.postcode;
       if (resultZip && resultZip !== zipCode) {
-        console.log(`[AddressValidationService] ZIP code mismatch: expected ${zipCode}, got ${resultZip}`);
+        logger.info(`[AddressValidationService] ZIP code mismatch: expected ${zipCode}, got ${resultZip}`);
         
         // Check if both ZIP codes are in the same general area (first 3 digits)
         // This handles cases where addresses are on ZIP code boundaries or OpenStreetMap has slightly different data
@@ -118,14 +119,14 @@ class AddressValidationService {
         }
         
         // If ZIP codes are in the same general area, log a warning but allow it
-        console.log(`[AddressValidationService] ZIP codes are in same area (${inputZipPrefix}xxx), allowing validation`);
+        logger.info(`[AddressValidationService] ZIP codes are in same area (${inputZipPrefix}xxx), allowing validation`);
       }
       
       // Also verify the house number matches
       const resultHouseNumber = result.address?.house_number;
       const inputHouseNumber = address.match(/^(\d+[A-Za-z]?)/)?.[1];
       if (resultHouseNumber && inputHouseNumber && resultHouseNumber !== inputHouseNumber) {
-        console.log(`[AddressValidationService] House number mismatch: expected ${inputHouseNumber}, got ${resultHouseNumber}`);
+        logger.info(`[AddressValidationService] House number mismatch: expected ${inputHouseNumber}, got ${resultHouseNumber}`);
         return {
           valid: false,
           message: 'Unable to verify this exact address. Please check the house number.'
@@ -142,7 +143,7 @@ class AddressValidationService {
       };
 
     } catch (error) {
-      console.error('[AddressValidationService] Geocoding error:', error);
+      logger.error('[AddressValidationService] Geocoding error:', error);
       
       // Check if it's a rate limit error
       if (error.response && error.response.status === 429) {

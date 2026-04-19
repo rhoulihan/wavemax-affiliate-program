@@ -5,6 +5,7 @@
 
 const axios = require('axios');
 const SystemConfig = require('../models/SystemConfig');
+const logger = require('../utils/logger');
 const { decrypt } = require('../utils/encryption');
 
 class MailcowService {
@@ -30,7 +31,7 @@ class MailcowService {
       const encryptedKey = await SystemConfig.getValue('mailcow_api_key', '');
       
       if (!encryptedKey) {
-        console.warn('Mailcow API key not configured. Email scanning disabled.');
+        logger.warn('Mailcow API key not configured. Email scanning disabled.');
         return;
       }
       
@@ -52,9 +53,9 @@ class MailcowService {
       });
       
       this.initialized = true;
-      console.log('Mailcow service initialized successfully');
+      logger.info('Mailcow service initialized successfully');
     } catch (error) {
-      console.error('Error initializing Mailcow service:', error);
+      logger.error('Error initializing Mailcow service:', error);
       throw new Error('Failed to initialize Mailcow service');
     }
   }
@@ -68,7 +69,7 @@ class MailcowService {
     await this.initialize();
     
     if (!this.axios) {
-      console.warn('Mailcow service not properly initialized');
+      logger.warn('Mailcow service not properly initialized');
       return [];
     }
 
@@ -88,7 +89,7 @@ class MailcowService {
       
       return response.data.messages || [];
     } catch (error) {
-      console.error('Error fetching unread payment emails:', error.message);
+      logger.error('Error fetching unread payment emails:', error.message);
       
       // If API structure is different, try alternative approach
       if (error.response && error.response.status === 404) {
@@ -121,7 +122,7 @@ class MailcowService {
       
       return response.data || [];
     } catch (error) {
-      console.error('Alternative email fetch also failed:', error.message);
+      logger.error('Alternative email fetch also failed:', error.message);
       return [];
     }
   }
@@ -135,7 +136,7 @@ class MailcowService {
     await this.initialize();
     
     if (!this.axios) {
-      console.warn('Mailcow service not properly initialized');
+      logger.warn('Mailcow service not properly initialized');
       return false;
     }
 
@@ -149,7 +150,7 @@ class MailcowService {
       
       return true;
     } catch (error) {
-      console.error('Error marking email as processed:', error.message);
+      logger.error('Error marking email as processed:', error.message);
       
       // Try alternative approach
       return this.markEmailAsProcessedAlternative(messageId, folder);
@@ -169,7 +170,7 @@ class MailcowService {
       
       return true;
     } catch (error) {
-      console.error('Alternative mark as processed also failed:', error.message);
+      logger.error('Alternative mark as processed also failed:', error.message);
       return false;
     }
   }
@@ -201,7 +202,7 @@ class MailcowService {
       
       return response.data.messages || [];
     } catch (error) {
-      console.error('Error searching emails:', error.message);
+      logger.error('Error searching emails:', error.message);
       return [];
     }
   }
@@ -222,7 +223,7 @@ class MailcowService {
       const response = await this.axios.get(`/mail/message/${messageId}`);
       return response.data;
     } catch (error) {
-      console.error('Error fetching email by ID:', error.message);
+      logger.error('Error fetching email by ID:', error.message);
       return null;
     }
   }
@@ -247,7 +248,7 @@ class MailcowService {
       
       return true;
     } catch (error) {
-      console.error('Error moving email:', error.message);
+      logger.error('Error moving email:', error.message);
       return false;
     }
   }
@@ -277,7 +278,7 @@ class MailcowService {
         // Folder already exists
         return true;
       }
-      console.error('Error creating folder:', error.message);
+      logger.error('Error creating folder:', error.message);
       return false;
     }
   }
@@ -298,7 +299,7 @@ class MailcowService {
       const response = await this.axios.get('/');
       return response.status === 200;
     } catch (error) {
-      console.error('Mailcow connection test failed:', error.message);
+      logger.error('Mailcow connection test failed:', error.message);
       return false;
     }
   }

@@ -1,5 +1,6 @@
 // Monitoring Dashboard Routes
 const express = require('express');
+const logger = require('../utils/logger');
 const router = express.Router();
 const { serveHTMLWithNonce } = require('../utils/cspHelper');
 
@@ -97,7 +98,7 @@ router.get('/status', async (req, res) => {
 
     res.json(monitoringData);
   } catch (error) {
-    console.error('Error generating monitoring status:', error);
+    logger.error('Error generating monitoring status:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to retrieve monitoring status'

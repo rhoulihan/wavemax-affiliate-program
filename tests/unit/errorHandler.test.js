@@ -22,7 +22,7 @@ describe('Error Handler Middleware', () => {
     next = jest.fn();
 
     // Mock console.error to avoid test output clutter
-    consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    consoleErrorSpy = jest.spyOn(logger, 'error').mockImplementation(() => {});
     jest.clearAllMocks();
   });
 

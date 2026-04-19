@@ -4,6 +4,7 @@
 // Extracted from utils/emailService.js in Phase 2.
 
 const nodemailer = require('nodemailer');
+const logger = require('../../utils/logger');
 
 /**
  * Create the underlying mailer. Returns either a console-logging stub
@@ -13,12 +14,12 @@ function createTransport() {
   if (process.env.EMAIL_PROVIDER === 'console') {
     return {
       sendMail: async (mailOptions) => {
-        console.log('=== EMAIL CONSOLE LOG ===');
-        console.log('From:', mailOptions.from);
-        console.log('To:', mailOptions.to);
-        console.log('Subject:', mailOptions.subject);
-        console.log('HTML:', mailOptions.html);
-        console.log('=========================');
+        logger.info('=== EMAIL CONSOLE LOG ===');
+        logger.info('From:', mailOptions.from);
+        logger.info('To:', mailOptions.to);
+        logger.info('Subject:', mailOptions.subject);
+        logger.info('HTML:', mailOptions.html);
+        logger.info('=========================');
         return { messageId: 'console-message-id' };
       }
     };
@@ -55,7 +56,7 @@ async function sendEmail(to, subject, html) {
     throw new Error('No recipient email address provided');
   }
 
-  console.log('[sendEmail] Sending email to:', to);
+  logger.info('[sendEmail] Sending email to:', to);
   const transporter = createTransport();
 
   const from = `"WaveMAX Laundry" <${process.env.EMAIL_FROM || process.env.EMAIL_USER || 'noreply@wavemax.promo'}>`;
@@ -63,10 +64,10 @@ async function sendEmail(to, subject, html) {
 
   try {
     const info = await transporter.sendMail(mailOptions);
-    console.log(`Email sent: ${info.messageId}`);
+    logger.info(`Email sent: ${info.messageId}`);
     return info;
   } catch (error) {
-    console.error('Error sending email:', error);
+    logger.error('Error sending email:', error);
     throw error;
   }
 }
