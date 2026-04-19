@@ -25,6 +25,7 @@ const affiliatePaymentLockService = require('../services/affiliatePaymentLockSer
 const systemConfigService = require('../services/systemConfigService');
 const systemHealthService = require('../services/systemHealthService');
 const adminDashboardService = require('../services/adminDashboardService');
+const operatorAdminService = require('../services/operatorAdminService');
 
 // Administrator Management
 
@@ -605,9 +606,11 @@ exports.getPermissions = async (req, res) => {
 /**
  * Create a new operator
  */
+/**
+ * Create a new operator
+ */
 exports.createOperator = async (req, res) => {
   try {
-    // Check for validation errors
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       const errorMessages = errors.array().map(error => error.msg);
@@ -618,90 +621,28 @@ exports.createOperator = async (req, res) => {
       });
     }
 
-    const {
-      firstName,
-      lastName,
-      email,
-      username,
-      password,
-      shiftStart,
-      shiftEnd
-    } = req.body;
-
-    // Validate shift time format if provided
-    const timeRegex = /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/;
-    if ((shiftStart && !timeRegex.test(shiftStart)) || (shiftEnd && !timeRegex.test(shiftEnd))) {
-      return res.status(400).json({
-        success: false,
-        message: 'Valid time format (HH:MM) required for shift times'
-      });
-    }
-
-    // Check if operator already exists
-    const existingOperator = await Operator.findOne({ email: email.toLowerCase() });
-    if (existingOperator) {
-      return res.status(409).json({
-        success: false,
-        message: 'Email already exists'
-      });
-    }
-
-    // Create new operator
-    const operator = new Operator({
-      firstName,
-      lastName,
-      email: email.toLowerCase(),
-      username: username.toLowerCase(),
-      password,
-      shiftStart,
-      shiftEnd,
-      createdBy: req.user.id
+    const operator = await operatorAdminService.createOperator({
+      payload: req.body,
+      adminId: req.user.id,
+      req
     });
-
-    await operator.save();
-
-    // Send welcome email
-    await emailService.sendOperatorWelcomeEmail(operator, password);
-
-    // Log the action
-    logAuditEvent(AuditEvents.DATA_MODIFICATION, {
-      action: 'CREATE_OPERATOR',
-      userId: req.user.id,
-      userType: 'administrator',
-      targetId: operator._id,
-      targetType: 'operator',
-      details: { operatorId: operator.operatorId, email: operator.email }
-    }, req);
-
     res.status(201).json({
       success: true,
       message: 'Operator created successfully',
-      operator: fieldFilter(operator.toObject(), 'administrator')
+      operator
     });
-
-  } catch (error) {
-    logger.error('Error creating operator:', error);
-
-    // Handle validation errors from model pre-save hooks
-    if (error.name === 'ValidationError') {
-      return res.status(400).json({
-        success: false,
-        message: error.message
-      });
+  } catch (err) {
+    if (err.isOperatorAdminError) {
+      return res.status(err.status).json({ success: false, message: err.message });
     }
-
-    // Handle duplicate key errors
-    if (error.code === 11000) {
-      return res.status(409).json({
-        success: false,
-        message: 'Email already exists'
-      });
+    if (err.name === 'ValidationError') {
+      return res.status(400).json({ success: false, message: err.message });
     }
-
-    res.status(500).json({
-      success: false,
-      message: 'Failed to create operator'
-    });
+    if (err.code === 11000) {
+      return res.status(409).json({ success: false, message: 'Email already exists' });
+    }
+    logger.error('Error creating operator:', err);
+    res.status(500).json({ success: false, message: 'Failed to create operator' });
   }
 };
 
@@ -710,93 +651,11 @@ exports.createOperator = async (req, res) => {
  */
 exports.getOperators = async (req, res) => {
   try {
-    const {
-      page = 1,
-      limit = 20,
-      isActive,
-      active, // Support both 'active' and 'isActive' parameters
-      onShift,
-      search,
-      sortBy = 'createdAt',
-      sortOrder = 'desc'
-    } = req.query;
-
-    // Build query
-    const query = {};
-
-    // Handle both 'active' and 'isActive' parameter names
-    const activeParam = active !== undefined ? active : isActive;
-    if (activeParam !== undefined) {
-      query.isActive = activeParam === 'true';
-    }
-
-
-    if (search) {
-      query.$or = [
-        { firstName: new RegExp(search, 'i') },
-        { lastName: new RegExp(search, 'i') },
-        { email: new RegExp(search, 'i') },
-        { operatorId: new RegExp(search, 'i') }
-      ];
-    }
-
-    // If onShift filter is requested, we need to handle it specially since it's a virtual
-    if (onShift !== undefined) {
-      // Get all operators matching base query first
-      const allOperators = await Operator.find(query)
-        .sort({ [sortBy]: sortOrder === 'asc' ? 1 : -1 })
-        .populate('createdBy', 'firstName lastName');
-
-      // Filter by onShift status
-      const isOnShiftFilter = onShift === 'true';
-      const filteredOperators = allOperators.filter(op => op.isOnShift === isOnShiftFilter);
-
-      // Apply pagination to filtered results
-      const startIndex = (page - 1) * limit;
-      const endIndex = startIndex + parseInt(limit);
-      const operators = filteredOperators.slice(startIndex, endIndex);
-
-      const total = filteredOperators.length;
-
-      res.json({
-        success: true,
-        operators: operators.map(op => fieldFilter(op.toObject(), 'administrator')),
-        pagination: {
-          currentPage: parseInt(page),
-          totalPages: Math.ceil(total / limit),
-          totalItems: total,
-          itemsPerPage: parseInt(limit)
-        }
-      });
-      return;
-    }
-
-    // Regular query without onShift filtering
-    const operators = await Operator.find(query)
-      .sort({ [sortBy]: sortOrder === 'asc' ? 1 : -1 })
-      .limit(limit * 1)
-      .skip((page - 1) * limit)
-      .populate('createdBy', 'firstName lastName');
-
-    const total = await Operator.countDocuments(query);
-
-    res.json({
-      success: true,
-      operators: operators.map(op => fieldFilter(op.toObject(), 'administrator')),
-      pagination: {
-        currentPage: parseInt(page),
-        totalPages: Math.ceil(total / limit),
-        totalItems: total,
-        itemsPerPage: parseInt(limit)
-      }
-    });
-
+    const result = await operatorAdminService.listOperators(req.query);
+    res.json({ success: true, ...result });
   } catch (error) {
     logger.error('Error fetching operators:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to fetch operators'
-    });
+    res.status(500).json({ success: false, message: 'Failed to fetch operators' });
   }
 };
 
@@ -805,63 +664,16 @@ exports.getOperators = async (req, res) => {
  */
 exports.getOperatorById = async (req, res) => {
   try {
-    const { operatorId } = req.params;
-
-    const operator = await Operator.findById(operatorId)
-      .populate('createdBy', 'firstName lastName');
-
-    if (!operator) {
-      return res.status(404).json({
-        success: false,
-        message: 'Operator not found'
-      });
+    const result = await operatorAdminService.getOperatorById({
+      operatorId: req.params.operatorId
+    });
+    res.json({ success: true, ...result });
+  } catch (err) {
+    if (err.isOperatorAdminError) {
+      return res.status(err.status).json({ success: false, message: err.message });
     }
-
-    // Get operator statistics
-    const stats = await Order.aggregate([
-      {
-        $match: {
-          assignedOperator: operator._id
-        }
-      },
-      {
-        $group: {
-          _id: null,
-          totalOrders: { $sum: 1 },
-          completedOrders: {
-            $sum: { $cond: [{ $eq: ['$orderProcessingStatus', 'completed'] }, 1, 0] }
-          },
-          averageProcessingTime: { $avg: '$processingTimeMinutes' },
-          qualityChecksPassed: {
-            $sum: { $cond: [{ $eq: ['$qualityCheckPassed', true] }, 1, 0] }
-          },
-          qualityChecksTotal: {
-            $sum: { $cond: [{ $ne: ['$qualityCheckPassed', null] }, 1, 0] }
-          }
-        }
-      }
-    ]);
-
-    const operatorStats = stats[0] || {
-      totalOrders: 0,
-      completedOrders: 0,
-      averageProcessingTime: 0,
-      qualityChecksPassed: 0,
-      qualityChecksTotal: 0
-    };
-
-    res.json({
-      success: true,
-      operator: fieldFilter(operator.toObject(), 'administrator'),
-      statistics: operatorStats
-    });
-
-  } catch (error) {
-    logger.error('Error fetching operator:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to fetch operator details'
-    });
+    logger.error('Error fetching operator:', err);
+    res.status(500).json({ success: false, message: 'Failed to fetch operator details' });
   }
 };
 
@@ -870,75 +682,19 @@ exports.getOperatorById = async (req, res) => {
  */
 exports.updateOperator = async (req, res) => {
   try {
-    const { id } = req.params;
-    const updates = req.body;
-
-    // Check if operator exists
-    const existingOperator = await Operator.findById(id);
-    if (!existingOperator) {
-      return res.status(404).json({
-        success: false,
-        message: 'Operator not found'
-      });
-    }
-
-    // Check email uniqueness if email is being updated
-    if (updates.email && updates.email !== existingOperator.email) {
-      const emailExists = await Operator.findOne({
-        email: updates.email,
-        _id: { $ne: id }
-      });
-      if (emailExists) {
-        return res.status(409).json({
-          success: false,
-          message: 'Email already exists'
-        });
-      }
-    }
-
-    // Handle password update separately if provided
-    if (updates.password) {
-      const operator = await Operator.findById(id);
-      if (operator) {
-        operator.password = updates.password;
-        await operator.save();
-        delete updates.password;
-      }
-    }
-
-    // Prevent updating sensitive fields
-    delete updates.operatorId;
-    delete updates.role;
-    delete updates.createdBy;
-
-    const operator = await Operator.findByIdAndUpdate(
-      id,
-      { $set: updates },
-      { new: true, runValidators: true }
-    );
-
-    // Log the action
-    logAuditEvent(AuditEvents.DATA_MODIFICATION, {
-      action: 'UPDATE_OPERATOR',
-      userId: req.user.id,
-      userType: 'administrator',
-      targetId: operator._id,
-      targetType: 'operator',
-      details: { updates }
-    }, req);
-
-    res.json({
-      success: true,
-      message: 'Operator updated successfully',
-      operator: fieldFilter(operator.toObject(), 'administrator')
+    const operator = await operatorAdminService.updateOperator({
+      id: req.params.id,
+      updates: req.body,
+      adminId: req.user.id,
+      req
     });
-
-  } catch (error) {
-    logger.error('Error updating operator:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to update operator'
-    });
+    res.json({ success: true, message: 'Operator updated successfully', operator });
+  } catch (err) {
+    if (err.isOperatorAdminError) {
+      return res.status(err.status).json({ success: false, message: err.message });
+    }
+    logger.error('Error updating operator:', err);
+    res.status(500).json({ success: false, message: 'Failed to update operator' });
   }
 };
 
@@ -947,59 +703,18 @@ exports.updateOperator = async (req, res) => {
  */
 exports.deactivateOperator = async (req, res) => {
   try {
-    const { id } = req.params;
-
-    const operator = await Operator.findByIdAndUpdate(
-      id,
-      {
-        $set: {
-          isActive: false,
-          currentOrderCount: 0
-        }
-      },
-      { new: true }
-    );
-
-    if (!operator) {
-      return res.status(404).json({
-        success: false,
-        message: 'Operator not found'
-      });
+    await operatorAdminService.deactivateOperator({
+      id: req.params.id,
+      adminId: req.user.id,
+      req
+    });
+    res.json({ success: true, message: 'Operator deactivated successfully' });
+  } catch (err) {
+    if (err.isOperatorAdminError) {
+      return res.status(err.status).json({ success: false, message: err.message });
     }
-
-    // Unassign any active orders
-    await Order.updateMany(
-      {
-        assignedOperator: operator._id,
-        orderProcessingStatus: { $in: ['assigned', 'washing', 'drying', 'folding'] }
-      },
-      {
-        $unset: { assignedOperator: 1 },
-        $set: { orderProcessingStatus: 'pending' }
-      }
-    );
-
-    // Log the action
-    logAuditEvent(AuditEvents.DATA_MODIFICATION, {
-      action: 'DEACTIVATE_OPERATOR',
-      userId: req.user.id,
-      userType: 'administrator',
-      targetId: operator._id,
-      targetType: 'operator',
-      details: { operatorId: operator.operatorId }
-    }, req);
-
-    res.json({
-      success: true,
-      message: 'Operator deactivated successfully'
-    });
-
-  } catch (error) {
-    logger.error('Error deactivating operator:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to deactivate operator'
-    });
+    logger.error('Error deactivating operator:', err);
+    res.status(500).json({ success: false, message: 'Failed to deactivate operator' });
   }
 };
 
@@ -1008,47 +723,24 @@ exports.deactivateOperator = async (req, res) => {
  */
 exports.resetOperatorPassword = async (req, res) => {
   try {
-    const { id } = req.params;
-
-    const operator = await Operator.findById(id);
-    if (!operator) {
-      return res.status(404).json({
-        success: false,
-        message: 'Operator not found'
-      });
-    }
-
-    // Generate new password
-    const newPassword = crypto.randomBytes(8).toString('hex');
-    operator.password = newPassword;
-    await operator.save();
-
-    // Send password reset email
-    await emailService.sendPasswordResetEmail(operator, newPassword);
-
-    // Log the action
-    logAuditEvent(AuditEvents.DATA_MODIFICATION, {
-      action: 'RESET_OPERATOR_PASSWORD',
-      userId: req.user.id,
-      userType: 'administrator',
-      targetId: operator._id,
-      targetType: 'operator',
-      details: { operatorId: operator.operatorId }
-    }, req);
-
+    await operatorAdminService.resetOperatorPassword({
+      id: req.params.id,
+      adminId: req.user.id,
+      req
+    });
     res.json({
       success: true,
       message: 'Password reset successfully. New password sent to operator email.'
     });
-
-  } catch (error) {
-    logger.error('Error resetting operator password:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to reset operator password'
-    });
+  } catch (err) {
+    if (err.isOperatorAdminError) {
+      return res.status(err.status).json({ success: false, message: err.message });
+    }
+    logger.error('Error resetting operator password:', err);
+    res.status(500).json({ success: false, message: 'Failed to reset operator password' });
   }
 };
+
 
 // Analytics & Reporting
 
@@ -1247,84 +939,28 @@ exports.getSystemHealth = async (req, res) => {
  * @route   PATCH /api/v1/operators/:id/stats
  * @access  Private (Admin with operators.update permission)
  */
+/**
+ * Update operator performance statistics
+ */
 exports.updateOperatorStats = async (req, res) => {
   try {
-    const { id } = req.params;
-    const { processingTime, qualityScore, qualityPassed, totalOrdersProcessed } = req.body;
-
-    // Validate processingTime is positive
-    if (processingTime !== undefined && processingTime <= 0) {
-      return res.status(400).json({
-        success: false,
-        message: 'Processing time must be positive'
-      });
-    }
-
-    // Validate qualityScore is between 0 and 100
-    if (qualityScore !== undefined && (qualityScore < 0 || qualityScore > 100)) {
-      return res.status(400).json({
-        success: false,
-        message: 'Quality score must be between 0 and 100'
-      });
-    }
-
-    // Find and update operator
-    const operator = await Operator.findById(id);
-    if (!operator) {
-      return res.status(404).json({
-        success: false,
-        message: 'Operator not found'
-      });
-    }
-
-    // Handle processing time update (implies a completed order)
-    if (processingTime !== undefined) {
-      const currentTotal = operator.totalOrdersProcessed || 0;
-      const currentAvg = operator.averageProcessingTime || 0;
-
-      // Calculate new running average: (old_avg * old_count + new_time) / new_count
-      const newTotal = currentTotal + 1;
-      const newAverage = (currentAvg * currentTotal + processingTime) / newTotal;
-
-      operator.totalOrdersProcessed = newTotal;
-      operator.averageProcessingTime = newAverage;
-    }
-
-    // Handle quality score update
-    if (qualityPassed !== undefined) {
-      const currentScore = operator.qualityScore || 100;
-      // Apply weighted average: old_score * 0.9 + new_result * 0.1
-      const newResult = qualityPassed ? 100 : 0;
-      operator.qualityScore = currentScore * 0.9 + newResult * 0.1;
-    }
-
-    // Allow direct score setting if provided
-    if (qualityScore !== undefined) {
-      operator.qualityScore = qualityScore;
-    }
-
-    // Allow direct total setting if provided
-    if (totalOrdersProcessed !== undefined) {
-      operator.totalOrdersProcessed = totalOrdersProcessed;
-    }
-
-    await operator.save();
-
+    const operator = await operatorAdminService.updateOperatorStats({
+      id: req.params.id,
+      processingTime: req.body.processingTime,
+      qualityScore: req.body.qualityScore,
+      qualityPassed: req.body.qualityPassed,
+      totalOrdersProcessed: req.body.totalOrdersProcessed
+    });
     res.status(200).json({
       success: true,
       message: 'Operator statistics updated successfully',
-      operator: {
-        _id: operator._id,
-        operatorId: operator.operatorId,
-        firstName: operator.firstName,
-        lastName: operator.lastName,
-        averageProcessingTime: operator.averageProcessingTime,
-        qualityScore: operator.qualityScore,
-        totalOrdersProcessed: operator.totalOrdersProcessed
-      }
+      operator
     });
-  } catch (error) {
-    logger.error('Error updating operator stats:', error);
+  } catch (err) {
+    if (err.isOperatorAdminError) {
+      return res.status(err.status).json({ success: false, message: err.message });
+    }
+    logger.error('Error updating operator stats:', err);
     res.status(500).json({
       success: false,
       message: 'An error occurred while updating operator statistics'
@@ -1337,21 +973,8 @@ exports.updateOperatorStats = async (req, res) => {
  */
 exports.getAvailableOperators = async (req, res) => {
   try {
-    const { limit = 20 } = req.query;
-
-    // Get all active operators who are not too busy (less than 10 current orders)
-    const operators = await Operator.find({
-      isActive: true,
-      currentOrderCount: { $lt: 10 }
-    })
-      .sort({ currentOrderCount: 1 })
-      .limit(parseInt(limit))
-      .select('operatorId firstName lastName email currentOrderCount isActive isOnShift shiftStart shiftEnd');
-
-    res.json({
-      success: true,
-      operators
-    });
+    const operators = await operatorAdminService.getAvailableOperators(req.query);
+    res.json({ success: true, operators });
   } catch (error) {
     logger.error('Error getting available operators:', error);
     res.status(500).json({
@@ -1366,44 +989,13 @@ exports.getAvailableOperators = async (req, res) => {
  */
 exports.deleteOperator = async (req, res) => {
   try {
-    const { id } = req.params;
-
-    const operator = await Operator.findById(id);
-    if (!operator) {
-      return res.status(404).json({
-        success: false,
-        message: 'Operator not found'
-      });
+    await operatorAdminService.deleteOperator({ id: req.params.id, adminId: req.user.id });
+    res.json({ success: true, message: 'Operator deleted successfully' });
+  } catch (err) {
+    if (err.isOperatorAdminError) {
+      return res.status(err.status).json({ success: false, message: err.message });
     }
-
-    // Check if operator has active orders (either in DB or currentOrderCount field)
-    const activeOrdersCount = await Order.countDocuments({
-      assignedOperator: operator._id,
-      orderProcessingStatus: { $nin: ['completed', 'delivered', 'cancelled'] }
-    });
-
-    if (activeOrdersCount > 0 || operator.currentOrderCount > 0) {
-      return res.status(400).json({
-        success: false,
-        message: 'Cannot delete operator with active orders'
-      });
-    }
-
-    // Hard delete the operator
-    await Operator.findByIdAndDelete(id);
-
-    // Log audit event
-    await logAuditEvent(AuditEvents.ADMIN_DELETE_OPERATOR, req.user.id, {
-      operatorId: operator.operatorId,
-      operatorEmail: operator.email
-    });
-
-    res.json({
-      success: true,
-      message: 'Operator deleted successfully'
-    });
-  } catch (error) {
-    logger.error('Error deleting operator:', error);
+    logger.error('Error deleting operator:', err);
     res.status(500).json({
       success: false,
       message: 'An error occurred while deleting the operator'
@@ -1416,42 +1008,17 @@ exports.deleteOperator = async (req, res) => {
  */
 exports.resetOperatorPin = async (req, res) => {
   try {
-    const { id } = req.params;
-    const { newPassword } = req.body;
-
-    if (!newPassword) {
-      return res.status(400).json({
-        success: false,
-        message: 'New password is required'
-      });
-    }
-
-    const operator = await Operator.findById(id);
-    if (!operator) {
-      return res.status(404).json({
-        success: false,
-        message: 'Operator not found'
-      });
-    }
-
-    // Update password and clear login attempts using save() to trigger password hashing
-    operator.password = newPassword;
-    operator.loginAttempts = 0;
-    operator.lockUntil = undefined;
-    await operator.save();
-
-    // Log audit event
-    await logAuditEvent(AuditEvents.ADMIN_RESET_OPERATOR_PASSWORD, req.user.id, {
-      operatorId: operator.operatorId,
-      operatorEmail: operator.email
+    await operatorAdminService.resetOperatorPin({
+      id: req.params.id,
+      newPassword: req.body.newPassword,
+      adminId: req.user.id
     });
-
-    res.json({
-      success: true,
-      message: 'PIN reset successfully'
-    });
-  } catch (error) {
-    logger.error('Error resetting operator PIN:', error);
+    res.json({ success: true, message: 'PIN reset successfully' });
+  } catch (err) {
+    if (err.isOperatorAdminError) {
+      return res.status(err.status).json({ success: false, message: err.message });
+    }
+    logger.error('Error resetting operator PIN:', err);
     res.status(500).json({
       success: false,
       message: 'An error occurred while resetting the PIN'
@@ -1464,48 +1031,16 @@ exports.resetOperatorPin = async (req, res) => {
  */
 exports.updateOperatorSelf = async (req, res) => {
   try {
-    const { id } = req.params;
-    const updates = req.body;
-
-    const operator = await Operator.findById(id);
-    if (!operator) {
-      return res.status(404).json({
-        success: false,
-        message: 'Operator not found'
-      });
+    const operator = await operatorAdminService.updateOperatorSelf({
+      id: req.params.id,
+      updates: req.body
+    });
+    res.json({ success: true, message: 'Profile updated successfully', operator });
+  } catch (err) {
+    if (err.isOperatorAdminError) {
+      return res.status(err.status).json({ success: false, message: err.message });
     }
-
-    // Only allow specific fields to be updated by operators themselves
-    const allowedFields = ['firstName', 'lastName', 'password', 'phone'];
-    const filteredUpdates = {};
-
-    allowedFields.forEach(field => {
-      if (updates[field] !== undefined) {
-        filteredUpdates[field] = updates[field];
-      }
-    });
-
-    // Prevent operators from changing critical fields
-    delete filteredUpdates.operatorId;
-    delete filteredUpdates.email;
-    delete filteredUpdates.isActive;
-    delete filteredUpdates.permissions;
-
-    // Apply updates
-    Object.assign(operator, filteredUpdates);
-    const updatedOperator = await operator.save();
-
-    // Filter sensitive fields from response - operator viewing their own profile
-    const { getFilteredData } = require('../utils/fieldFilter');
-    const responseData = getFilteredData('operator', updatedOperator.toObject(), 'operator', { isSelf: true });
-
-    res.json({
-      success: true,
-      message: 'Profile updated successfully',
-      operator: responseData
-    });
-  } catch (error) {
-    logger.error('Error updating operator profile:', error);
+    logger.error('Error updating operator profile:', err);
     res.status(500).json({
       success: false,
       message: 'An error occurred while updating the profile'
@@ -1518,32 +1053,20 @@ exports.updateOperatorSelf = async (req, res) => {
  */
 exports.getOperatorSelf = async (req, res) => {
   try {
-    const { id } = req.params;
-
-    const operator = await Operator.findById(id);
-    if (!operator) {
-      return res.status(404).json({
-        success: false,
-        message: 'Operator not found'
-      });
+    const operator = await operatorAdminService.getOperatorSelf({ id: req.params.id });
+    res.json({ success: true, operator });
+  } catch (err) {
+    if (err.isOperatorAdminError) {
+      return res.status(err.status).json({ success: false, message: err.message });
     }
-
-    // Filter sensitive fields from response - operator viewing their own profile
-    const { getFilteredData } = require('../utils/fieldFilter');
-    const responseData = getFilteredData('operator', operator.toObject(), 'operator', { isSelf: true });
-
-    res.json({
-      success: true,
-      operator: responseData
-    });
-  } catch (error) {
-    logger.error('Error getting operator profile:', error);
+    logger.error('Error getting operator profile:', err);
     res.status(500).json({
       success: false,
       message: 'An error occurred while fetching the profile'
     });
   }
 };
+
 
 /**
  * Get environment variables (sanitized for display)
