@@ -14,6 +14,8 @@ const logger = require('../utils/logger');
 const { logLoginAttempt, logAuditEvent, AuditEvents } = require('../utils/auditLogger');
 const { sanitizeInput } = require('../middleware/sanitization');
 
+const identityAvailabilityService = require('../services/identityAvailabilityService');
+
 // Wrapper for crypto.randomBytes to allow mocking in tests
 // This allows us to mock just this function without affecting the entire crypto module
 const cryptoWrapper = {
@@ -2338,48 +2340,16 @@ exports.completeSocialCustomerRegistration = async (req, res) => {
  */
 exports.checkUsername = async (req, res) => {
   try {
-    const { username } = req.body;
-
-    if (!username || username.trim().length < 3) {
-      return res.status(400).json({
-        success: false,
-        message: 'Username must be at least 3 characters'
-      });
+    const available = await identityAvailabilityService.isUsernameAvailable({
+      username: req.body.username
+    });
+    res.json({ success: true, available });
+  } catch (err) {
+    if (err.isIdentityAvailabilityError) {
+      return res.status(err.status).json({ success: false, message: err.message });
     }
-
-    const trimmedUsername = username.trim();
-
-    logger.info('Checking username availability for:', trimmedUsername);
-
-    // Check across all user types - using exact match with case-insensitive
-    const [affiliate, customer, administrator, operator] = await Promise.all([
-      Affiliate.findOne({ username: { $regex: `^${escapeRegex(trimmedUsername)}$`, $options: 'i' } }),
-      Customer.findOne({ username: { $regex: `^${escapeRegex(trimmedUsername)}$`, $options: 'i' } }),
-      Administrator.findOne({ username: { $regex: `^${escapeRegex(trimmedUsername)}$`, $options: 'i' } }),
-      Operator.findOne({ username: { $regex: `^${escapeRegex(trimmedUsername)}$`, $options: 'i' } })
-    ]);
-
-    logger.info('Username check results:', {
-      username: trimmedUsername,
-      affiliateFound: !!affiliate,
-      customerFound: !!customer,
-      administratorFound: !!administrator,
-      operatorFound: !!operator
-    });
-
-    const isAvailable = !affiliate && !customer && !administrator && !operator;
-
-    res.json({
-      success: true,
-      available: isAvailable
-    });
-
-  } catch (error) {
-    logger.error('Check username error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Error checking username availability'
-    });
+    logger.error('Check username error:', err);
+    res.status(500).json({ success: false, message: 'Error checking username availability' });
   }
 };
 
@@ -2391,48 +2361,16 @@ exports.checkUsername = async (req, res) => {
  */
 exports.checkEmail = async (req, res) => {
   try {
-    const { email } = req.body;
-
-    if (!email || !email.trim()) {
-      return res.status(400).json({
-        success: false,
-        message: 'Email is required'
-      });
+    const available = await identityAvailabilityService.isEmailAvailable({
+      email: req.body.email
+    });
+    res.json({ success: true, available });
+  } catch (err) {
+    if (err.isIdentityAvailabilityError) {
+      return res.status(err.status).json({ success: false, message: err.message });
     }
-
-    const trimmedEmail = email.trim().toLowerCase();
-
-    logger.info('Checking email availability for:', trimmedEmail);
-
-    // Check across all user types
-    const [affiliate, customer, administrator, operator] = await Promise.all([
-      Affiliate.findOne({ email: trimmedEmail }),
-      Customer.findOne({ email: trimmedEmail }),
-      Administrator.findOne({ email: trimmedEmail }),
-      Operator.findOne({ email: trimmedEmail })
-    ]);
-
-    logger.info('Email check results:', {
-      email: trimmedEmail,
-      affiliateFound: !!affiliate,
-      customerFound: !!customer,
-      administratorFound: !!administrator,
-      operatorFound: !!operator
-    });
-
-    const isAvailable = !affiliate && !customer && !administrator && !operator;
-
-    res.json({
-      success: true,
-      available: isAvailable
-    });
-
-  } catch (error) {
-    logger.error('Check email error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Error checking email availability'
-    });
+    logger.error('Check email error:', err);
+    res.status(500).json({ success: false, message: 'Error checking email availability' });
   }
 };
 
