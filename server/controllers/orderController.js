@@ -515,104 +515,19 @@ exports.cancelOrder = ControllerHelpers.asyncWrapper(async (req, res) => {
  * Bulk update order status
  */
 exports.bulkUpdateOrderStatus = async (req, res) => {
+  const orderBulkService = require('../services/orderBulkService');
   try {
-    const { orderIds, status } = req.body;
-
-    // Validate input
-    if (!orderIds || !Array.isArray(orderIds) || orderIds.length === 0) {
-      return res.status(400).json({
-        success: false,
-        message: 'Order IDs must be provided as an array'
-      });
-    }
-
-    // Validate status
-    const validStatuses = ['pending', 'scheduled', 'processing', 'processed', 'complete', 'cancelled'];
-    if (!validStatuses.includes(status)) {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid status'
-      });
-    }
-
-    // Find all orders
-    const orders = await Order.find({ orderId: { $in: orderIds } });
-
-    if (orders.length === 0) {
-      return res.status(404).json({
-        success: false,
-        message: 'No orders found'
-      });
-    }
-
-    // Check authorization (admin or affiliated affiliate)
-    const isAuthorized = req.user.role === 'admin' ||
-      (req.user.role === 'affiliate' && orders.every(order => order.affiliateId === req.user.affiliateId));
-
-    if (!isAuthorized) {
-      return res.status(403).json({
-        success: false,
-        message: 'Unauthorized'
-      });
-    }
-
-    // Update orders
-    const results = [];
-    let updated = 0;
-    let failed = 0;
-
-    for (const order of orders) {
-      try {
-        // Check if status transition is valid
-        const currentStatus = order.status;
-        const canTransition = checkStatusTransition(currentStatus, status);
-
-        if (!canTransition) {
-          results.push({
-            orderId: order.orderId,
-            success: false,
-            message: `Cannot transition from ${currentStatus} to ${status}`
-          });
-          failed++;
-          continue;
-        }
-
-        // Update order
-        order.status = status;
-
-        // Update status timestamps (these are now handled in the model middleware)
-        // The model's pre-save hook will automatically set the appropriate timestamps
-
-        await order.save();
-
-        results.push({
-          orderId: order.orderId,
-          success: true,
-          message: 'Order updated successfully'
-        });
-        updated++;
-      } catch (error) {
-        results.push({
-          orderId: order.orderId,
-          success: false,
-          message: error.message
-        });
-        failed++;
-      }
-    }
-
-    res.status(200).json({
-      success: true,
-      updated,
-      failed,
-      results
+    const summary = await orderBulkService.bulkUpdateStatus({
+      orderIds: req.body.orderIds,
+      status: req.body.status,
+      user: req.user,
+      checkStatusTransition
     });
-  } catch (error) {
-    console.error('Bulk update order status error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'An error occurred while updating orders'
-    });
+    res.status(200).json({ success: true, ...summary });
+  } catch (err) {
+    if (err.isBulkError) return res.status(err.status || 400).json({ success: false, message: err.message });
+    console.error('Bulk update order status error:', err);
+    res.status(500).json({ success: false, message: 'An error occurred while updating orders' });
   }
 };
 
@@ -620,225 +535,49 @@ exports.bulkUpdateOrderStatus = async (req, res) => {
  * Bulk cancel orders
  */
 exports.bulkCancelOrders = async (req, res) => {
+  const orderBulkService = require('../services/orderBulkService');
   try {
-    const { orderIds } = req.body;
-
-    if (!orderIds || !Array.isArray(orderIds) || orderIds.length === 0) {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid order IDs provided'
-      });
-    }
-
-    // Check authorization (admin or affiliated affiliate)
-    const orders = await Order.find({ orderId: { $in: orderIds } });
-
-    if (orders.length === 0) {
-      return res.status(404).json({
-        success: false,
-        message: 'No orders found'
-      });
-    }
-
-    // Check if user is authorized for all orders
-    const unauthorized = orders.some(order => {
-      return req.user.role !== 'admin' &&
-        !(req.user.role === 'affiliate' && req.user.affiliateId === order.affiliateId);
+    const summary = await orderBulkService.bulkCancel({
+      orderIds: req.body.orderIds,
+      user: req.user
     });
-
-    if (unauthorized) {
-      return res.status(403).json({
-        success: false,
-        message: 'Unauthorized to cancel one or more orders'
-      });
-    }
-
-    let cancelled = 0;
-    let failed = 0;
-    const results = [];
-
-    for (const order of orders) {
-      // Check if order can be cancelled
-      if (['processing', 'processed', 'complete', 'cancelled'].includes(order.status)) {
-        results.push({
-          orderId: order.orderId,
-          success: false,
-          error: `Cannot cancel order with status: ${order.status}`
-        });
-        failed++;
-      } else {
-        order.status = 'cancelled';
-        order.cancelledAt = new Date();
-        order.cancelledBy = req.user.id;
-        order.cancelReason = 'Bulk cancellation';
-        await order.save();
-
-        results.push({
-          orderId: order.orderId,
-          success: true
-        });
-        cancelled++;
-      }
-    }
-
-    res.status(200).json({
-      success: true,
-      cancelled,
-      failed,
-      results
-    });
-  } catch (error) {
-    console.error('Bulk cancel orders error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'An error occurred while cancelling orders'
-    });
+    res.status(200).json({ success: true, ...summary });
+  } catch (err) {
+    if (err.isBulkError) return res.status(err.status || 400).json({ success: false, message: err.message });
+    console.error('Bulk cancel orders error:', err);
+    res.status(500).json({ success: false, message: 'An error occurred while cancelling orders' });
   }
 };
 
 /**
- * Export orders
+ * Export orders (CSV or JSON)
  */
 exports.exportOrders = async (req, res) => {
+  const orderExportService = require('../services/orderExportService');
+  const { format = 'csv', startDate, endDate, affiliateId, status } = req.query;
+  const filters = { startDate, endDate, affiliateId, status };
+
   try {
-    const { format = 'csv', startDate, endDate, affiliateId, status } = req.query;
-
-    // Build query
-    const query = {};
-
-    // Date range filter
-    if (startDate || endDate) {
-      query.createdAt = {};
-      if (startDate) query.createdAt.$gte = new Date(startDate);
-      if (endDate) query.createdAt.$lte = new Date(endDate);
-    }
-
-    // Affiliate filter
-    if (affiliateId) {
-      query.affiliateId = affiliateId;
-    }
-
-    // Status filter
-    if (status) {
-      query.status = status;
-    }
-
-    // Check authorization
-    if (req.user.role === 'affiliate') {
-      // Affiliates can only export their own orders
-      query.affiliateId = req.user.affiliateId;
-    } else if (req.user.role !== 'admin') {
-      return res.status(403).json({
-        success: false,
-        message: 'Insufficient permissions for this export'
-      });
-    }
-
-    // Get orders
-    const orders = await Order.find(query)
-      .sort({ createdAt: -1 });
-
-    // Get unique customer IDs
-    const customerIds = [...new Set(orders.map(order => order.customerId))];
-
-    // Fetch customer data
-    const customers = await Customer.find({ customerId: { $in: customerIds } });
-    const customerMap = {};
-    customers.forEach(customer => {
-      customerMap[customer.customerId] = customer;
+    const { orders, customerMap } = await orderExportService.collectExportData({
+      format,
+      filters,
+      user: req.user
     });
 
-    // Format based on requested format
     if (format === 'csv') {
-      // Generate CSV
-      const csvHeaders = [
-        'Order ID',
-        'Customer Name',
-        'Customer Email',
-        'Affiliate ID',
-        'Status',
-        'Estimated Weight',
-        'Actual Weight',
-        'Estimated Total',
-        'Actual Total',
-        'Commission',
-        'Pickup Date',
-        'Delivery Date',
-        'Created At'
-      ].join(',');
-
-      const csvRows = orders.map(order => {
-        const customer = customerMap[order.customerId];
-        return [
-          order.orderId,
-          customer ? `${customer.firstName} ${customer.lastName}` : '',
-          customer ? customer.email : '',
-          order.affiliateId,
-          order.status,
-          order.estimatedWeight || '',
-          order.actualWeight || '',
-          order.estimatedTotal || '',
-          order.actualTotal || '',
-          order.affiliateCommission || '',
-          order.pickupDate ? new Date(order.pickupDate).toISOString() : '',
-          order.deliveryDate ? new Date(order.deliveryDate).toISOString() : '',
-          new Date(order.createdAt).toISOString()
-        ].join(',');
-      });
-
-      const csv = [csvHeaders, ...csvRows].join('\n');
-
       res.setHeader('Content-Type', 'text/csv');
       res.setHeader('Content-Disposition', `attachment; filename=orders-export-${Date.now()}.csv`);
-      res.send(csv);
-    } else if (format === 'json') {
+      return res.send(orderExportService.formatCsv({ orders, customerMap }));
+    }
+    if (format === 'json') {
       res.setHeader('Content-Type', 'application/json');
       res.setHeader('Content-Disposition', `attachment; filename=orders-export-${Date.now()}.json`);
-      res.json({
-        success: true,
-        exportDate: new Date().toISOString(),
-        filters: { startDate, endDate, affiliateId, status },
-        totalOrders: orders.length,
-        orders: orders.map(order => {
-          const customer = customerMap[order.customerId];
-          return {
-            orderId: order.orderId,
-            customer: customer ? {
-              name: `${customer.firstName} ${customer.lastName}`,
-              email: customer.email
-            } : null,
-            affiliateId: order.affiliateId,
-            status: order.status,
-            estimatedWeight: order.estimatedWeight,
-            actualWeight: order.actualWeight,
-            estimatedTotal: order.estimatedTotal,
-            actualTotal: order.actualTotal,
-            commission: order.affiliateCommission,
-            pickupDate: order.pickupDate,
-            deliveryDate: order.deliveryDate,
-            createdAt: order.createdAt
-          };
-        })
-      });
-    } else if (format === 'excel') {
-      // For Excel format, we'll return JSON with a note
-      // In production, you'd use a library like exceljs
-      res.status(501).json({
-        success: false,
-        message: 'Excel export not yet implemented'
-      });
-    } else {
-      res.status(400).json({
-        success: false,
-        message: 'Invalid export format. Supported formats: csv, json'
-      });
+      return res.json(orderExportService.formatJson({ orders, customerMap, filters }));
     }
-  } catch (error) {
-    console.error('Export orders error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'An error occurred while exporting orders'
-    });
+  } catch (err) {
+    if (err.isExportError) return res.status(err.status || 400).json({ success: false, message: err.message });
+    console.error('Export orders error:', err);
+    res.status(500).json({ success: false, message: 'An error occurred while exporting orders' });
   }
 };
 
