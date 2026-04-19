@@ -24,6 +24,7 @@ const betaRequestService = require('../services/betaRequestService');
 const affiliatePaymentLockService = require('../services/affiliatePaymentLockService');
 const systemConfigService = require('../services/systemConfigService');
 const systemHealthService = require('../services/systemHealthService');
+const adminDashboardService = require('../services/adminDashboardService');
 
 // Administrator Management
 
@@ -1054,213 +1055,16 @@ exports.resetOperatorPassword = async (req, res) => {
 /**
  * Get administrator dashboard data
  */
+/**
+ * Get administrator dashboard data
+ */
 exports.getDashboard = async (req, res) => {
   try {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    const thisWeekStart = new Date(today);
-    thisWeekStart.setDate(today.getDate() - today.getDay());
-
-    const thisMonthStart = new Date(today.getFullYear(), today.getMonth(), 1);
-
-    // Aggregate order statistics
-    const orderStats = await Order.aggregate([
-      {
-        $facet: {
-          today: [
-            { $match: { createdAt: { $gte: today } } },
-            { $count: 'count' }
-          ],
-          thisWeek: [
-            { $match: { createdAt: { $gte: thisWeekStart } } },
-            { $count: 'count' }
-          ],
-          thisMonth: [
-            { $match: { createdAt: { $gte: thisMonthStart } } },
-            { $count: 'count' }
-          ],
-          statusDistribution: [
-            { $group: { _id: '$status', count: { $sum: 1 } } }
-          ],
-          processingStatusDistribution: [
-            { $group: { _id: '$orderProcessingStatus', count: { $sum: 1 } } }
-          ],
-          averageProcessingTime: [
-            { $match: {
-              status: 'complete',
-              processingStartedAt: { $exists: true },
-              completedAt: { $exists: true }
-            } },
-            { $project: {
-              processingTime: {
-                $divide: [
-                  { $subtract: ['$completedAt', '$processingStartedAt'] },
-                  1000 * 60 // Convert to minutes
-                ]
-              }
-            } },
-            { $group: { _id: null, avg: { $avg: '$processingTime' } } }
-          ]
-        }
-      }
-    ]);
-
-    // Get operator performance
-    const operatorPerformance = await Operator.aggregate([
-      {
-        $match: { isActive: true }
-      },
-      {
-        $lookup: {
-          from: 'orders',
-          localField: '_id',
-          foreignField: 'assignedOperator',
-          as: 'orders'
-        }
-      },
-      {
-        $project: {
-          operatorId: 1,
-          firstName: 1,
-          lastName: 1,
-          currentOrderCount: 1,
-          totalOrdersProcessed: 1,
-          averageProcessingTime: 1,
-          qualityScore: 1,
-          ordersToday: {
-            $size: {
-              $filter: {
-                input: '$orders',
-                cond: { $gte: ['$$this.createdAt', today] }
-              }
-            }
-          }
-        }
-      },
-      { $sort: { totalOrdersProcessed: -1 } },
-      { $limit: 10 }
-    ]);
-
-    // Get affiliate performance
-    const affiliatePerformance = await Affiliate.aggregate([
-      {
-        $match: { isActive: true }
-      },
-      {
-        $lookup: {
-          from: 'orders',
-          localField: 'affiliateId',
-          foreignField: 'affiliateId',
-          as: 'orders'
-        }
-      },
-      {
-        $lookup: {
-          from: 'customers',
-          localField: 'affiliateId',
-          foreignField: 'affiliateId',
-          as: 'customers'
-        }
-      },
-      {
-        $project: {
-          affiliateId: 1,
-          firstName: 1,
-          lastName: 1,
-          businessName: 1,
-          customerCount: { $size: '$customers' },
-          orderCount: { $size: '$orders' },
-          monthlyRevenue: {
-            $reduce: {
-              input: {
-                $filter: {
-                  input: '$orders',
-                  cond: { $gte: ['$$this.createdAt', thisMonthStart] }
-                }
-              },
-              initialValue: 0,
-              in: { $add: ['$$value', { $ifNull: ['$$this.actualTotal', 0] }] }
-            }
-          }
-        }
-      },
-      { $sort: { monthlyRevenue: -1 } },
-      { $limit: 10 }
-    ]);
-
-    // System health metrics
-    const systemHealth = {
-      activeOperators: await Operator.countDocuments({ isActive: true }),
-      onShiftOperators: await Operator.findOnShift().then(ops => ops.length),
-      activeAffiliates: await Affiliate.countDocuments({ isActive: true }),
-      totalCustomers: await Customer.countDocuments(),
-      ordersInProgress: await Order.countDocuments({
-        status: { $in: ['pending', 'scheduled', 'processing', 'processed'] }
-      }),
-      completedOrders: await Order.countDocuments({ status: 'complete' }),
-      processingDelays: await Order.countDocuments({
-        status: 'processing',
-        processingStartedAt: { $lte: new Date(Date.now() - 24 * 60 * 60 * 1000) } // 24 hours
-      })
-    };
-
-    // Get recent activity (last 10 activities)
-    const recentOrders = await Order.find({})
-      .sort({ updatedAt: -1 })
-      .limit(10)
-      .lean();
-
-    // Get unique affiliate IDs from recent orders
-    const affiliateIds = [...new Set(recentOrders.map(o => o.affiliateId).filter(id => id))];
-
-    let formattedActivity = [];
-
-    if (affiliateIds.length > 0) {
-      const affiliates = await Affiliate.find({ affiliateId: { $in: affiliateIds } })
-        .select('affiliateId firstName lastName businessName')
-        .lean();
-
-      // Create a map for quick lookup
-      const affiliateMap = new Map(affiliates.map(a => [a.affiliateId, a]));
-
-      formattedActivity = recentOrders.map(order => {
-        const affiliate = affiliateMap.get(order.affiliateId);
-        return {
-          timestamp: order.updatedAt,
-          type: 'Order',
-          userName: affiliate ?
-            `${affiliate.firstName} ${affiliate.lastName}` :
-            'Unknown',
-          action: `Order ${order.orderId} - Status: ${order.status}`
-        };
-      });
-    }
-
-    res.json({
-      success: true,
-      dashboard: {
-        orderStats: {
-          today: orderStats[0].today[0]?.count || 0,
-          thisWeek: orderStats[0].thisWeek[0]?.count || 0,
-          thisMonth: orderStats[0].thisMonth[0]?.count || 0,
-          statusDistribution: orderStats[0].statusDistribution,
-          processingStatusDistribution: orderStats[0].processingStatusDistribution,
-          averageProcessingTime: orderStats[0].averageProcessingTime[0]?.avg || 0
-        },
-        operatorPerformance,
-        affiliatePerformance,
-        systemHealth,
-        recentActivity: formattedActivity
-      }
-    });
-
+    const dashboard = await adminDashboardService.getDashboard();
+    res.json({ success: true, dashboard });
   } catch (error) {
     logger.error('Error fetching dashboard data:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to fetch dashboard data'
-    });
+    res.status(500).json({ success: false, message: 'Failed to fetch dashboard data' });
   }
 };
 
@@ -1269,130 +1073,11 @@ exports.getDashboard = async (req, res) => {
  */
 exports.getOrderAnalytics = async (req, res) => {
   try {
-    const {
-      startDate = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000), // 30 days ago
-      endDate = new Date(),
-      groupBy = 'day' // day, week, month
-    } = req.query;
-
-    const groupByFormat = {
-      day: '%Y-%m-%d',
-      week: '%Y-W%V',
-      month: '%Y-%m'
-    };
-
-    const analytics = await Order.aggregate([
-      {
-        $match: {
-          createdAt: {
-            $gte: new Date(startDate),
-            $lte: new Date(endDate)
-          }
-        }
-      },
-      {
-        $addFields: {
-          // Calculate completion time in minutes (from processing started to completed)
-          completionTimeMinutes: {
-            $cond: [
-              {
-                $and: [
-                  { $eq: ['$status', 'complete'] },
-                  { $ne: ['$processingStarted', null] },
-                  { $ne: ['$processingCompleted', null] }
-                ]
-              },
-              {
-                $divide: [
-                  { $subtract: ['$processingCompleted', '$processingStarted'] },
-                  60000 // Convert milliseconds to minutes
-                ]
-              },
-              null
-            ]
-          }
-        }
-      },
-      {
-        $group: {
-          _id: {
-            $dateToString: {
-              format: groupByFormat[groupBy] || groupByFormat.day,
-              date: '$createdAt' // Group by creation date to include all orders
-            }
-          },
-          totalOrders: { $sum: 1 },
-          completedOrders: {
-            $sum: { $cond: [{ $eq: ['$status', 'complete'] }, 1, 0] }
-          },
-          cancelledOrders: {
-            $sum: { $cond: [{ $eq: ['$status', 'cancelled'] }, 1, 0] }
-          },
-          totalRevenue: { $sum: '$actualTotal' },
-          averageOrderValue: { $avg: '$actualTotal' },
-          averageProcessingTime: {
-            $avg: {
-              $cond: [
-                { $eq: ['$status', 'complete'] },
-                '$completionTimeMinutes',
-                null
-              ]
-            }
-          },
-          totalWeight: { $sum: '$actualWeight' }
-        }
-      },
-      { $sort: { _id: 1 } }
-    ]);
-
-    // Processing time distribution
-    const processingTimeDistribution = await Order.aggregate([
-      {
-        $match: {
-          processingTimeMinutes: { $exists: true },
-          createdAt: {
-            $gte: new Date(startDate),
-            $lte: new Date(endDate)
-          }
-        }
-      },
-      {
-        $bucket: {
-          groupBy: '$processingTimeMinutes',
-          boundaries: [0, 30, 60, 90, 120, 180, 240, 300],
-          default: 'Other',
-          output: {
-            count: { $sum: 1 },
-            orders: { $push: '$orderId' }
-          }
-        }
-      }
-    ]);
-
-    res.json({
-      success: true,
-      analytics: {
-        timeline: analytics,
-        processingTimeDistribution,
-        summary: {
-          totalOrders: analytics.reduce((sum, item) => sum + item.totalOrders, 0),
-          completedOrders: analytics.reduce((sum, item) => sum + item.completedOrders, 0),
-          totalRevenue: analytics.reduce((sum, item) => sum + (item.totalRevenue || 0), 0),
-          averageOrderValue: analytics.reduce((sum, item) => sum + (item.averageOrderValue || 0), 0) / analytics.length,
-          averageProcessingTime: analytics.reduce((sum, item) => {
-            // Only include non-null processing times in the average
-            return sum + (item.averageProcessingTime || 0);
-          }, 0) / analytics.filter(item => item.averageProcessingTime > 0).length || 0
-        }
-      }
-    });
-
+    const analytics = await adminDashboardService.getOrderAnalytics(req.query);
+    res.json({ success: true, analytics });
   } catch (error) {
     logger.error('Error fetching order analytics:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to fetch order analytics'
-    });
+    res.status(500).json({ success: false, message: 'Failed to fetch order analytics' });
   }
 };
 
@@ -1401,127 +1086,11 @@ exports.getOrderAnalytics = async (req, res) => {
  */
 exports.getOperatorAnalytics = async (req, res) => {
   try {
-    const {
-      startDate = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
-      endDate = new Date()
-    } = req.query;
-
-    const operatorAnalytics = await Operator.aggregate([
-      {
-        $lookup: {
-          from: 'orders',
-          let: { operatorId: '$_id' },
-          pipeline: [
-            {
-              $match: {
-                $expr: {
-                  $and: [
-                    { $eq: ['$assignedOperator', '$$operatorId'] },
-                    { $gte: ['$createdAt', new Date(startDate)] },
-                    { $lte: ['$createdAt', new Date(endDate)] }
-                  ]
-                }
-              }
-            }
-          ],
-          as: 'periodOrders'
-        }
-      },
-      {
-        $project: {
-          operatorId: 1,
-          firstName: 1,
-          lastName: 1,
-          workStation: 1,
-          isActive: 1,
-          metrics: {
-            totalOrders: { $size: '$periodOrders' },
-            completedOrders: {
-              $size: {
-                $filter: {
-                  input: '$periodOrders',
-                  cond: { $eq: ['$$this.orderProcessingStatus', 'completed'] }
-                }
-              }
-            },
-            averageProcessingTime: { $avg: '$periodOrders.processingTimeMinutes' },
-            qualityChecksPassed: {
-              $size: {
-                $filter: {
-                  input: '$periodOrders',
-                  cond: { $eq: ['$$this.qualityCheckPassed', true] }
-                }
-              }
-            },
-            totalProcessingTime: { $sum: '$periodOrders.processingTimeMinutes' }
-          }
-        }
-      },
-      {
-        $addFields: {
-          'metrics.completionRate': {
-            $cond: [
-              { $eq: ['$metrics.totalOrders', 0] },
-              0,
-              { $divide: ['$metrics.completedOrders', '$metrics.totalOrders'] }
-            ]
-          },
-          'metrics.qualityPassRate': {
-            $cond: [
-              { $eq: ['$metrics.completedOrders', 0] },
-              0,
-              { $divide: ['$metrics.qualityChecksPassed', '$metrics.completedOrders'] }
-            ]
-          }
-        }
-      },
-      { $sort: { 'metrics.totalOrders': -1 } }
-    ]);
-
-    // Workstation performance
-    const workstationAnalytics = await Order.aggregate([
-      {
-        $match: {
-          assignedOperator: { $exists: true },
-          createdAt: {
-            $gte: new Date(startDate),
-            $lte: new Date(endDate)
-          }
-        }
-      },
-      {
-        $lookup: {
-          from: 'operators',
-          localField: 'assignedOperator',
-          foreignField: '_id',
-          as: 'operator'
-        }
-      },
-      { $unwind: '$operator' },
-      {
-        $group: {
-          _id: '$operator.workStation',
-          totalOrders: { $sum: 1 },
-          averageProcessingTime: { $avg: '$processingTimeMinutes' },
-          totalProcessingTime: { $sum: '$processingTimeMinutes' }
-        }
-      }
-    ]);
-
-    res.json({
-      success: true,
-      analytics: {
-        operators: operatorAnalytics,
-        workstations: workstationAnalytics
-      }
-    });
-
+    const analytics = await adminDashboardService.getOperatorAnalytics(req.query);
+    res.json({ success: true, analytics });
   } catch (error) {
     logger.error('Error fetching operator analytics:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to fetch operator analytics'
-    });
+    res.status(500).json({ success: false, message: 'Failed to fetch operator analytics' });
   }
 };
 
@@ -1530,101 +1099,11 @@ exports.getOperatorAnalytics = async (req, res) => {
  */
 exports.getAffiliateAnalytics = async (req, res) => {
   try {
-    const {
-      startDate = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
-      endDate = new Date()
-    } = req.query;
-
-    const affiliateAnalytics = await Affiliate.aggregate([
-      {
-        $lookup: {
-          from: 'orders',
-          let: { affiliateId: '$affiliateId' },
-          pipeline: [
-            {
-              $match: {
-                $expr: {
-                  $and: [
-                    { $eq: ['$affiliateId', '$$affiliateId'] },
-                    { $gte: ['$createdAt', new Date(startDate)] },
-                    { $lte: ['$createdAt', new Date(endDate)] }
-                  ]
-                }
-              }
-            }
-          ],
-          as: 'periodOrders'
-        }
-      },
-      {
-        $lookup: {
-          from: 'customers',
-          localField: 'affiliateId',
-          foreignField: 'affiliateId',
-          as: 'customers'
-        }
-      },
-      {
-        $project: {
-          affiliateId: 1,
-          firstName: 1,
-          lastName: 1,
-          businessName: 1,
-          serviceLatitude: 1,
-          serviceLongitude: 1,
-          serviceRadius: 1,
-          w9Status: 1,
-          paymentProcessingLocked: 1,
-          email: 1,
-          metrics: {
-            totalCustomers: { $size: '$customers' },
-            activeCustomers: {
-              $size: {
-                $filter: {
-                  input: '$customers',
-                  cond: { $eq: ['$$this.isActive', true] }
-                }
-              }
-            },
-            totalOrders: { $size: '$periodOrders' },
-            totalRevenue: { $sum: '$periodOrders.actualTotal' },
-            totalCommission: { $sum: '$periodOrders.affiliateCommission' },
-            averageOrderValue: { $avg: '$periodOrders.actualTotal' }
-          }
-        }
-      },
-      { $sort: { 'metrics.totalRevenue': -1 } }
-    ]);
-
-    // Geographic distribution (by city)
-    const geographicDistribution = await Affiliate.aggregate([
-      {
-        $group: {
-          _id: '$city',
-          affiliateCount: { $sum: 1 },
-          activeAffiliates: {
-            $sum: { $cond: ['$isActive', 1, 0] }
-          },
-          avgServiceRadius: { $avg: '$serviceRadius' }
-        }
-      },
-      { $sort: { affiliateCount: -1 } }
-    ]);
-
-    res.json({
-      success: true,
-      analytics: {
-        affiliates: affiliateAnalytics,
-        geographicDistribution
-      }
-    });
-
+    const analytics = await adminDashboardService.getAffiliateAnalytics(req.query);
+    res.json({ success: true, analytics });
   } catch (error) {
     logger.error('Error fetching affiliate analytics:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to fetch affiliate analytics'
-    });
+    res.status(500).json({ success: false, message: 'Failed to fetch affiliate analytics' });
   }
 };
 
@@ -1633,65 +1112,24 @@ exports.getAffiliateAnalytics = async (req, res) => {
  */
 exports.exportReport = async (req, res) => {
   try {
-    const {
-      reportType = 'orders', // orders, operators, affiliates, comprehensive
-      format = 'csv', // csv, excel
-      startDate,
-      endDate
-    } = req.query;
-
-    // Implementation would generate CSV/Excel files
-    // For now, returning JSON data that can be converted client-side
-
-    let reportData;
-
-    switch (reportType) {
-    case 'orders':
-      reportData = await generateOrdersReport(startDate, endDate);
-      break;
-    case 'operators':
-      reportData = await generateOperatorsReport(startDate, endDate);
-      break;
-    case 'affiliates':
-      reportData = await generateAffiliatesReport(startDate, endDate);
-      break;
-    case 'comprehensive':
-      reportData = await generateComprehensiveReport(startDate, endDate);
-      break;
-    default:
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid report type'
-      });
+    const result = await adminDashboardService.exportReport({
+      reportType: req.query.reportType,
+      format: req.query.format,
+      startDate: req.query.startDate,
+      endDate: req.query.endDate,
+      user: req.user,
+      req
+    });
+    res.json({ success: true, ...result });
+  } catch (err) {
+    if (err.isReportError) {
+      return res.status(err.status).json({ success: false, message: err.message });
     }
-
-    // Log the action
-    logAuditEvent(AuditEvents.DATA_MODIFICATION, {
-      action: 'EXPORT_REPORT',
-      userId: req.user.id,
-      userType: 'administrator',
-      details: { reportType, format, startDate, endDate }
-    }, req);
-
-    res.json({
-      success: true,
-      report: reportData,
-      metadata: {
-        reportType,
-        generatedAt: new Date(),
-        startDate,
-        endDate
-      }
-    });
-
-  } catch (error) {
-    logger.error('Error exporting report:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to export report'
-    });
+    logger.error('Error exporting report:', err);
+    res.status(500).json({ success: false, message: 'Failed to export report' });
   }
 };
+
 
 /**
  * Get list of affiliates for dropdowns and filters
@@ -1803,148 +1241,6 @@ exports.getSystemHealth = async (req, res) => {
     });
   }
 };
-
-// Helper functions for report generation
-
-async function generateOrdersReport(startDate, endDate) {
-  const orders = await Order.find({
-    createdAt: {
-      $gte: new Date(startDate || Date.now() - 30 * 24 * 60 * 60 * 1000),
-      $lte: new Date(endDate || Date.now())
-    }
-  })
-    .populate('assignedOperator', 'firstName lastName operatorId')
-    .populate('affiliateId', 'firstName lastName businessName')
-    .lean();
-
-  return orders.map(order => ({
-    orderId: order.orderId,
-    customerID: order.customerId,
-    affiliateName: order.affiliateId ?
-      `${order.affiliateId.firstName} ${order.affiliateId.lastName}` : 'N/A',
-    status: order.status,
-    processingStatus: order.orderProcessingStatus,
-    operator: order.assignedOperator ?
-      `${order.assignedOperator.firstName} ${order.assignedOperator.lastName}` : 'Unassigned',
-    processingTime: order.processingTimeMinutes || 0,
-    actualWeight: order.actualWeight || 0,
-    actualTotal: order.actualTotal || 0,
-    createdAt: order.createdAt
-  }));
-}
-
-async function generateOperatorsReport(startDate, endDate) {
-  const operators = await Operator.find().lean();
-
-  const operatorReports = [];
-
-  for (const operator of operators) {
-    const orderStats = await Order.aggregate([
-      {
-        $match: {
-          assignedOperator: operator._id,
-          createdAt: {
-            $gte: new Date(startDate || Date.now() - 30 * 24 * 60 * 60 * 1000),
-            $lte: new Date(endDate || Date.now())
-          }
-        }
-      },
-      {
-        $group: {
-          _id: null,
-          totalOrders: { $sum: 1 },
-          completedOrders: {
-            $sum: { $cond: [{ $eq: ['$orderProcessingStatus', 'completed'] }, 1, 0] }
-          },
-          averageProcessingTime: { $avg: '$processingTimeMinutes' },
-          totalProcessingTime: { $sum: '$processingTimeMinutes' }
-        }
-      }
-    ]);
-
-    operatorReports.push({
-      operatorId: operator.operatorId,
-      name: `${operator.firstName} ${operator.lastName}`,
-      workStation: operator.workStation,
-      isActive: operator.isActive,
-      totalOrders: orderStats[0]?.totalOrders || 0,
-      completedOrders: orderStats[0]?.completedOrders || 0,
-      averageProcessingTime: orderStats[0]?.averageProcessingTime || 0,
-      totalProcessingTime: orderStats[0]?.totalProcessingTime || 0,
-      qualityScore: operator.qualityScore
-    });
-  }
-
-  return operatorReports;
-}
-
-async function generateAffiliatesReport(startDate, endDate) {
-  const affiliates = await Affiliate.find().lean();
-
-  const affiliateReports = [];
-
-  for (const affiliate of affiliates) {
-    const stats = await Order.aggregate([
-      {
-        $match: {
-          affiliateId: affiliate.affiliateId,
-          createdAt: {
-            $gte: new Date(startDate || Date.now() - 30 * 24 * 60 * 60 * 1000),
-            $lte: new Date(endDate || Date.now())
-          }
-        }
-      },
-      {
-        $group: {
-          _id: null,
-          totalOrders: { $sum: 1 },
-          totalRevenue: { $sum: '$actualTotal' },
-          totalCommission: { $sum: '$affiliateCommission' }
-        }
-      }
-    ]);
-
-    const customerCount = await Customer.countDocuments({ affiliateId: affiliate.affiliateId });
-
-    affiliateReports.push({
-      affiliateId: affiliate.affiliateId,
-      name: `${affiliate.firstName} ${affiliate.lastName}`,
-      businessName: affiliate.businessName,
-      serviceLocation: {
-        latitude: affiliate.serviceLatitude,
-        longitude: affiliate.serviceLongitude,
-        radius: affiliate.serviceRadius
-      },
-      customerCount,
-      totalOrders: stats[0]?.totalOrders || 0,
-      totalRevenue: stats[0]?.totalRevenue || 0,
-      totalCommission: stats[0]?.totalCommission || 0,
-      isActive: affiliate.isActive
-    });
-  }
-
-  return affiliateReports;
-}
-
-async function generateComprehensiveReport(startDate, endDate) {
-  const [orders, operators, affiliates] = await Promise.all([
-    generateOrdersReport(startDate, endDate),
-    generateOperatorsReport(startDate, endDate),
-    generateAffiliatesReport(startDate, endDate)
-  ]);
-
-  return {
-    orders,
-    operators,
-    affiliates,
-    summary: {
-      totalOrders: orders.length,
-      totalRevenue: orders.reduce((sum, order) => sum + order.actualTotal, 0),
-      activeOperators: operators.filter(op => op.isActive).length,
-      activeAffiliates: affiliates.filter(aff => aff.isActive).length
-    }
-  };
-}
 
 /**
  * @desc    Update operator performance statistics
