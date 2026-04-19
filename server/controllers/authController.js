@@ -15,6 +15,7 @@ const { logLoginAttempt, logAuditEvent, AuditEvents } = require('../utils/auditL
 const { sanitizeInput } = require('../middleware/sanitization');
 
 const identityAvailabilityService = require('../services/identityAvailabilityService');
+const passwordResetService = require('../services/passwordResetService');
 
 // Wrapper for crypto.randomBytes to allow mocking in tests
 // This allows us to mock just this function without affecting the entire crypto module
@@ -689,78 +690,17 @@ exports.customerLogin = async (req, res) => {
  */
 exports.forgotPassword = async (req, res) => {
   try {
-    const { email, userType } = req.body;
-
-    if (!email || !userType) {
-      return res.status(400).json({
-        success: false,
-        message: 'Email and user type are required'
-      });
-    }
-
-    // Find user based on user type
-    let user;
-    if (userType === 'affiliate') {
-      user = await Affiliate.findOne({ email });
-    } else if (userType === 'customer') {
-      user = await Customer.findOne({ email });
-    } else if (userType === 'administrator') {
-      user = await Administrator.findOne({ email });
-    } else if (userType === 'operator') {
-      user = await Operator.findOne({ email });
-    } else {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid user type'
-      });
-    }
-
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: 'No account found with that email address'
-      });
-    }
-
-    // Generate reset token
-    const resetToken = cryptoWrapper.randomBytes(32).toString('hex');
-    const resetTokenExpiry = Date.now() + 3600000; // 1 hour
-
-    // Hash the token before storing it
-    const hashedResetToken = crypto
-      .createHash('sha256')
-      .update(resetToken)
-      .digest('hex');
-
-    // Store hashed token and expiry
-    user.resetToken = hashedResetToken;
-    user.resetTokenExpiry = resetTokenExpiry;
-    await user.save();
-
-    // Send password reset email
-    const resetUrl = `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}&type=${userType}`;
-
-    // Use the emailService to send the reset email
-    if (userType === 'affiliate') {
-      // Send affiliate password reset email
-      await emailService.sendAffiliatePasswordResetEmail(user, resetUrl);
-    } else if (userType === 'customer') {
-      // Send customer password reset email
-      await emailService.sendCustomerPasswordResetEmail(user, resetUrl);
-    } else if (userType === 'administrator') {
-      // Send administrator password reset email
-      await emailService.sendAdministratorPasswordResetEmail(user, resetUrl);
-    } else if (userType === 'operator') {
-      // Send operator password reset email
-      await emailService.sendOperatorPasswordResetEmail(user, resetUrl);
-    }
-
-    res.status(200).json({
-      success: true,
-      message: 'Password reset email sent'
+    await passwordResetService.forgotPassword({
+      email: req.body.email,
+      userType: req.body.userType,
+      cryptoWrapper
     });
-  } catch (error) {
-    logger.error('Forgot password error:', error);
+    res.status(200).json({ success: true, message: 'Password reset email sent' });
+  } catch (err) {
+    if (err.isPasswordResetError) {
+      return res.status(err.status).json({ success: false, message: err.message });
+    }
+    logger.error('Forgot password error:', err);
     res.status(500).json({
       success: false,
       message: 'An error occurred while processing your request'
@@ -773,86 +713,17 @@ exports.forgotPassword = async (req, res) => {
  */
 exports.resetPassword = async (req, res) => {
   try {
-    const { token, userType, password } = req.body;
-
-    if (!token || !userType || !password) {
-      return res.status(400).json({
-        success: false,
-        message: 'Token, user type, and new password are required'
-      });
-    }
-
-    // Hash the incoming token to compare with stored hash
-    const hashedToken = crypto
-      .createHash('sha256')
-      .update(token)
-      .digest('hex');
-
-    // Find user based on reset token
-    let user;
-    if (userType === 'affiliate') {
-      user = await Affiliate.findOne({
-        resetToken: hashedToken,
-        resetTokenExpiry: { $gt: Date.now() }
-      });
-    } else if (userType === 'customer') {
-      user = await Customer.findOne({
-        resetToken: hashedToken,
-        resetTokenExpiry: { $gt: Date.now() }
-      });
-    } else if (userType === 'administrator') {
-      user = await Administrator.findOne({
-        resetToken: hashedToken,
-        resetTokenExpiry: { $gt: Date.now() }
-      });
-    } else if (userType === 'operator') {
-      user = await Operator.findOne({
-        resetToken: hashedToken,
-        resetTokenExpiry: { $gt: Date.now() }
-      });
-    } else {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid user type'
-      });
-    }
-
-    if (!user) {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid or expired token'
-      });
-    }
-
-    // Update password based on user type
-    if (userType === 'administrator') {
-      // Administrators use bcrypt
-      user.password = password; // Will be hashed by pre-save hook
-    } else if (userType === 'operator') {
-      // Operators have PINs, not passwords - this should not happen
-      return res.status(400).json({
-        success: false,
-        message: 'Operators cannot reset passwords. Please contact your supervisor to reset your PIN.'
-      });
-    } else {
-      // Affiliates and customers use PBKDF2
-      const { salt, hash } = encryptionUtil.hashPassword(password);
-      user.passwordSalt = salt;
-      user.passwordHash = hash;
-    }
-
-    // Clear reset token fields
-    user.resetToken = undefined;
-    user.resetTokenExpiry = undefined;
-
-    await user.save();
-
-    res.status(200).json({
-      success: true,
-      message: 'Password has been reset successfully'
+    await passwordResetService.resetPassword({
+      token: req.body.token,
+      userType: req.body.userType,
+      password: req.body.password
     });
-  } catch (error) {
-    logger.error('Reset password error:', error);
+    res.status(200).json({ success: true, message: 'Password has been reset successfully' });
+  } catch (err) {
+    if (err.isPasswordResetError) {
+      return res.status(err.status).json({ success: false, message: err.message });
+    }
+    logger.error('Reset password error:', err);
     res.status(500).json({
       success: false,
       message: 'An error occurred while resetting your password'
