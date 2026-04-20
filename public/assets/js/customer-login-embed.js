@@ -64,7 +64,7 @@
         // Send login status to parent
         sendMessageToParent('form-submit', { form: 'customer-login' });
 
-        console.log('Making API request to:', 'https://wavemax.promo/api/v1/auth/customer/login');
+        console.log('Making API request to:', window.location.origin + '/api/v1/auth/customer/login');
         console.log('Request body:', { emailOrUsername, password: '***' });
 
         // API call with full URL

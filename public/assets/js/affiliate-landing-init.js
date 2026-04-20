@@ -74,7 +74,7 @@
 
     // Fetch affiliate information
     // Use the actual API server URL instead of iframe origin
-    const apiUrl = 'https://wavemax.promo';
+    const apiUrl = window.location.origin;
     const fetchUrl = `${apiUrl}/api/v1/affiliates/public/${affiliateCode}`;
     console.log('Fetching affiliate data from:', fetchUrl);
 

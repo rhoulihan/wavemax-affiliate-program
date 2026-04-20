@@ -51,7 +51,7 @@ function formatDashboardAddress(displayName) {
 // Affiliate dashboard functionality for embedded environment
 function initializeAffiliateDashboard() {
   const isEmbedded = window.EMBED_CONFIG?.isEmbedded || false;
-  const baseUrl = window.EMBED_CONFIG?.baseUrl || 'https://wavemax.promo';
+  const baseUrl = window.EMBED_CONFIG?.baseUrl || window.location.origin;
 
   // Initialize ApiClient CSRF token
   if (window.ApiClient) {
@@ -1351,7 +1351,7 @@ async function changePassword(affiliateId) {
 // Check and show delete section if enabled
 function checkAndShowDeleteSection() {
   console.log('Checking environment for delete section visibility...');
-  const baseUrl = window.EMBED_CONFIG?.baseUrl || 'https://wavemax.promo';
+  const baseUrl = window.EMBED_CONFIG?.baseUrl || window.location.origin;
   console.log('Fetching environment from:', `${baseUrl}/api/v1/environment`);
 
   ApiClient.get('/api/v1/environment', { showError: false })
@@ -1476,7 +1476,7 @@ async function checkW9NotificationRequired(affiliateData) {
 
 async function getYearToDateRevenue(affiliateId) {
   try {
-    const baseUrl = window.EMBED_CONFIG?.baseUrl || 'https://wavemax.promo';
+    const baseUrl = window.EMBED_CONFIG?.baseUrl || window.location.origin;
     const currentYear = new Date().getFullYear();
     
     const token = localStorage.getItem('affiliateToken');
@@ -1571,7 +1571,7 @@ function showW9NotificationModal(status, affiliateData, ytdRevenue) {
 // Fetch admin support email on page load
 async function fetchAdminSupportEmail() {
   try {
-    const baseUrl = window.EMBED_CONFIG?.baseUrl || 'https://wavemax.promo';
+    const baseUrl = window.EMBED_CONFIG?.baseUrl || window.location.origin;
     // Try to get the primary administrator's email
     const data = await ApiClient.get('/api/v1/administrators', {
       showError: false,
@@ -1586,8 +1586,7 @@ async function fetchAdminSupportEmail() {
       localStorage.setItem('adminSupportEmail', adminEmail);
     }
   } catch (error) {
-    console.error('Error fetching admin support email:', error);
-    // Use default fallback email
+    // Affiliates can't list administrators (403) — expected. Fall back silently.
     localStorage.setItem('adminSupportEmail', 'support@wavemaxlaundry.com');
   }
 }

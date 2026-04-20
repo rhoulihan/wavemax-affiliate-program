@@ -16,7 +16,7 @@
 
   // Get config from parent window or use defaults
   const config = window.EMBED_CONFIG || {
-    baseUrl: 'https://wavemax.promo',
+    baseUrl: window.location.origin,
     theme: 'light'
   };
 
@@ -289,7 +289,7 @@
         strengthElement.innerHTML = '';
       } else if (validation.isValid && requirements.match) {
         const strongText = window.i18n ? window.i18n.t('administrator.login.passwordStrong') : 'Strong password';
-        strengthElement.innerHTML = `<span style="color: #22c55e; font-weight: 500;">✅ ${strongText}</span>`;
+        strengthElement.innerHTML = `<span class="pwc-strength-ok">✅ ${strongText}</span>`;
       } else {
         // Don't show missing items since they're already shown in the requirements list
         strengthElement.innerHTML = '';
@@ -306,9 +306,9 @@
 
     const formHtml = `
             <form id="passwordChangeForm" class="password-change-form">
-                <div style="text-align: center; margin-bottom: 25px;">
-                    <h2 style="font-size: 24px; font-weight: 600; color: #333; margin-bottom: 8px;" data-i18n="administrator.login.passwordChangeRequired">Password Change Required</h2>
-                    <p style="font-size: 14px; color: #666;" data-i18n="administrator.login.passwordChangeSubtitle">You must change your password before continuing.</p>
+                <div class="pwc-header">
+                    <h2 data-i18n="administrator.login.passwordChangeRequired">Password Change Required</h2>
+                    <p data-i18n="administrator.login.passwordChangeSubtitle">You must change your password before continuing.</p>
                 </div>
                 
                 <div class="form-group">
@@ -364,7 +364,7 @@
                     <div id="passwordStrength"></div>
                 </div>
 
-                <div style="margin-top: 20px;">
+                <div class="pwc-actions">
                     <button type="submit" id="changePasswordBtn" class="btn">
                         <span id="changePasswordText" data-i18n="administrator.login.changePassword">Change Password</span>
                     </button>

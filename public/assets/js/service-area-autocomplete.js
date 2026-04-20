@@ -17,7 +17,7 @@
     console.log('Initializing service area autocomplete...');
     try {
       // Get base URL from embed config or default
-      const baseUrl = window.EMBED_CONFIG?.baseUrl || 'https://wavemax.promo';
+      const baseUrl = window.EMBED_CONFIG?.baseUrl || window.location.origin;
       console.log('Using base URL:', baseUrl);
       
       // Fetch service area config
@@ -214,7 +214,7 @@
   // Auto-populate city based on zip code
   async function autoPopulateCity(zipCode) {
     try {
-      const baseUrl = window.EMBED_CONFIG?.baseUrl || 'https://wavemax.promo';
+      const baseUrl = window.EMBED_CONFIG?.baseUrl || window.location.origin;
       const response = await fetch(`${baseUrl}/api/v1/service-area/city/${zipCode}`);
       const data = await response.json();
       
@@ -233,7 +233,7 @@
   // Auto-populate zip if city has only one zip code
   async function autoPopulateZip(city) {
     try {
-      const baseUrl = window.EMBED_CONFIG?.baseUrl || 'https://wavemax.promo';
+      const baseUrl = window.EMBED_CONFIG?.baseUrl || window.location.origin;
       const response = await fetch(`${baseUrl}/api/v1/service-area/zip-codes/${encodeURIComponent(city)}`);
       const data = await response.json();
       

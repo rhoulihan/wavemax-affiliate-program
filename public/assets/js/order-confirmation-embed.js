@@ -56,7 +56,7 @@
             console.warn('No customer token found, attempting to load order anyway');
         }
         
-        fetch(`https://wavemax.promo/api/v1/orders/${orderId}`, {
+        fetch(`${window.location.origin}/api/v1/orders/${orderId}`, {
             headers: token ? {
                 'Authorization': `Bearer ${token}`
             } : {},
@@ -102,7 +102,7 @@
                     document.getElementById('wdfRateDisplay').textContent = `$${order.baseRate.toFixed(2)} per pound`;
                 } else {
                     // Fetch and display WDF rate
-                    fetch('https://wavemax.promo/api/v1/system/config/public')
+                    fetch(window.location.origin + '/api/v1/system/config/public')
                         .then(response => response.json())
                         .then(configs => {
                             const wdfConfig = configs.find(c => c.key === 'wdf_base_rate_per_pound');
@@ -179,7 +179,7 @@
 
     // Load affiliate information
     function loadAffiliateInfo(affiliateId) {
-        fetch(`https://wavemax.promo/api/v1/affiliates/${affiliateId}/public`, {
+        fetch(`${window.location.origin}/api/v1/affiliates/${affiliateId}/public`, {
             credentials: 'include'
         })
         .then(response => response.json())

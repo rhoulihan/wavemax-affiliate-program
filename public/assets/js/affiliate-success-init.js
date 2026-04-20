@@ -1,7 +1,7 @@
 // Affiliate success page functionality for embedded environment
 function initializeAffiliateSuccess() {
   const isEmbedded = window.EMBED_CONFIG?.isEmbedded || false;
-  const baseUrl = window.EMBED_CONFIG?.baseUrl || 'https://wavemax.promo';
+  const baseUrl = window.EMBED_CONFIG?.baseUrl || window.location.origin;
 
   // PostMessage communication with parent window
   function sendMessageToParent(type, data) {
@@ -140,7 +140,7 @@ function initializeAffiliateSuccess() {
         }
 
         // Generate registration link with wavemax.promo format
-        const registrationLink = `https://wavemax.promo/embed-app-v2.html?route=/customer-login&affid=${affiliateData.affiliateId}`;
+        const registrationLink = `${window.location.origin}/embed-app-v2.html?route=/customer-login&affid=${affiliateData.affiliateId}`;
         document.getElementById('registrationLink').value = registrationLink;
 
         // Update dashboard link to go to login
