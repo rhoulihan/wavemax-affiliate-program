@@ -555,9 +555,8 @@ async function saveProfile() {
       return;
     }
 
-    // Validate email format
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(updatedData.email)) {
+    // Validate email via the shared helper in form-validation.js.
+    if (!(window.FormValidation && window.FormValidation.isValidEmail(updatedData.email))) {
       alert('Please enter a valid email address.');
       return;
     }

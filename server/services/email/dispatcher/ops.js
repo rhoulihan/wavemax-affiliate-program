@@ -9,7 +9,7 @@ const { sendEmail } = require('../transport');
 exports.sendServiceDownAlert = async function({ serviceName, error, timestamp, serviceData }) {
   const mailOptions = {
     from: `"WaveMAX Monitoring" <${process.env.EMAIL_FROM || 'no-reply@wavemax.promo'}>`,
-    to: process.env.ALERT_EMAIL || process.env.DEFAULT_ADMIN_EMAIL || 'admin@wavemax.com',
+    to: process.env.ALERT_EMAIL || process.env.DEFAULT_ADMIN_EMAIL || 'admin@wavemax.promo',
     subject: `⚠️ CRITICAL: ${serviceName} Service Down - ${new Date().toISOString()}`,
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">

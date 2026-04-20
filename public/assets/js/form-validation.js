@@ -454,7 +454,15 @@
     validateForm: validateForm,
     validateField: UIFeedback.validateField,
     ValidationUtils: ValidationUtils,
+    ValidationRules: ValidationRules,
     UIFeedback: UIFeedback,
+    // Convenience boolean shortcuts so callers don't have to destructure
+    // .isValid from the full result — useful in quick "disable/enable"
+    // checks. All inline email regexes in the codebase should route here.
+    isValidEmail: (email) => ValidationUtils.validateEmail(email).isValid,
+    isValidPhone: (phone) => ValidationUtils.validatePhone(phone).isValid,
+    isValidZipCode: (zip) => ValidationUtils.validateZipCode(zip).isValid,
+    isValidState: (state) => ValidationUtils.validateState(state).isValid,
     // Add debug function to manually trigger initialization
     debugInit: function() {
       console.log('[Form Validation] Manual debug initialization triggered');

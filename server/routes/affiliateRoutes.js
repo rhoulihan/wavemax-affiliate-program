@@ -116,6 +116,13 @@ router.get('/:affiliateId/transactions', authenticate, paginationMiddleware, aff
 router.get('/:affiliateId/dashboard', authenticate, affiliateController.getAffiliateDashboardStats);
 
 /**
+ * @route   GET /api/affiliates/:affiliateId/stats/ytd
+ * @desc    Year-to-date earnings + revenue for this affiliate
+ * @access  Private (self or admin)
+ */
+router.get('/:affiliateId/stats/ytd', authenticate, affiliateController.getAffiliateYtdStats);
+
+/**
  * @route   DELETE /api/affiliates/:affiliateId/delete-all-data
  * @desc    Delete all data for an affiliate (development/test only)
  * @access  Private (self only, development/test environments)

@@ -144,10 +144,10 @@
                     }
                 }
 
-                // Validate email format
+                // Validate email format via the shared helper — single source
+                // of truth lives in form-validation.js.
                 const email = document.getElementById('email');
-                const emailRegex = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/;
-                if (!emailRegex.test(email.value.trim())) {
+                if (!(window.FormValidation && window.FormValidation.isValidEmail(email.value.trim()))) {
                     if (window.ModalSystem) {
                         window.ModalSystem.error('Please enter a valid email address.', 'Invalid Email');
                     } else {

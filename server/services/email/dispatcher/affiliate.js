@@ -52,7 +52,7 @@ exports.sendAffiliateWelcomeEmail = async (affiliate) => {
         W9_STEP_3: 'An administrator will verify your W-9 and re-enable commission payouts',
         W9_STEP_4: 'Responding promptly keeps your commissions flowing without interruption',
         W9_IRS_NOTE: 'Note: Commission payouts pause automatically at the $600 annual earnings threshold until your W-9 is on file.',
-        W9_SUPPORT_MESSAGE: 'For questions about the W-9 process, contact support@wavemax.com'
+        W9_SUPPORT_MESSAGE: 'For questions about the W-9 process, contact support@wavemax.promo'
       },
       es: {
         EMAIL_TITLE: 'Bienvenido al Programa de Afiliados de WaveMAX Laundry',
@@ -86,7 +86,7 @@ exports.sendAffiliateWelcomeEmail = async (affiliate) => {
         W9_STEP_3: 'Un administrador verificará su W-9 y reactivará los pagos de comisiones',
         W9_STEP_4: 'Responder rápidamente mantiene sus comisiones fluyendo sin interrupciones',
         W9_IRS_NOTE: 'Nota: Los pagos de comisiones se pausan automáticamente al alcanzar el umbral de ganancias anuales de $600 hasta que su W-9 esté archivado.',
-        W9_SUPPORT_MESSAGE: 'Para preguntas sobre el proceso W-9, contacte a support@wavemax.com'
+        W9_SUPPORT_MESSAGE: 'Para preguntas sobre el proceso W-9, contacte a support@wavemax.promo'
       },
       pt: {
         EMAIL_TITLE: 'Bem-vindo ao Programa de Afiliados WaveMAX Laundry',
@@ -120,7 +120,7 @@ exports.sendAffiliateWelcomeEmail = async (affiliate) => {
         W9_STEP_3: 'Um administrador verificará seu W-9 e reativará os pagamentos de comissão',
         W9_STEP_4: 'Responder rapidamente mantém suas comissões fluindo sem interrupções',
         W9_IRS_NOTE: 'Nota: Os pagamentos de comissão são pausados automaticamente ao atingir o limite de ganhos anuais de $600 até que seu W-9 esteja arquivado.',
-        W9_SUPPORT_MESSAGE: 'Para perguntas sobre o processo W-9, entre em contato com support@wavemax.com'
+        W9_SUPPORT_MESSAGE: 'Para perguntas sobre o processo W-9, entre em contato com support@wavemax.promo'
       },
       de: {
         EMAIL_TITLE: 'Willkommen beim WaveMAX Laundry Affiliate-Programm',
@@ -154,7 +154,7 @@ exports.sendAffiliateWelcomeEmail = async (affiliate) => {
         W9_STEP_3: 'Ein Administrator prüft Ihr W-9 und aktiviert die Provisionszahlungen wieder',
         W9_STEP_4: 'Eine prompte Antwort hält Ihre Provisionen ohne Unterbrechung in Bewegung',
         W9_IRS_NOTE: 'Hinweis: Provisionszahlungen werden automatisch pausiert, sobald die jährliche Einnahmenschwelle von $600 erreicht wird, bis Ihr W-9 vorliegt.',
-        W9_SUPPORT_MESSAGE: 'Bei Fragen zum W-9-Prozess wenden Sie sich an support@wavemax.com'
+        W9_SUPPORT_MESSAGE: 'Bei Fragen zum W-9-Prozess wenden Sie sich an support@wavemax.promo'
       }
     };
 
