@@ -23,9 +23,11 @@
     return urlParams.get(name);
   }
 
-  // Configuration for embedded environment
+  // Configuration for embedded environment.
+  // baseUrl tracks the iframe's own origin so local dev and prod both work
+  // without per-environment hardcoding.
   window.EMBED_CONFIG = {
-    baseUrl: 'https://wavemax.promo',
+    baseUrl: window.location.origin,
     isEmbedded: true
   };
 

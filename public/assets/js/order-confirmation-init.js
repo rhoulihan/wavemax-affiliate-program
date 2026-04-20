@@ -99,7 +99,7 @@
             }
             
             // Fetch order details from API
-            const baseUrl = window.EMBED_CONFIG?.baseUrl || 'https://wavemax.promo';
+            const baseUrl = window.EMBED_CONFIG?.baseUrl || window.location.origin;
             const response = await fetch(`${baseUrl}/api/orders/${orderId}`, {
                 method: 'GET',
                 headers: {

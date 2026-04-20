@@ -7,7 +7,7 @@
 
   // Configuration
   const config = window.EMBED_CONFIG || {
-    baseUrl: 'https://wavemax.promo'
+    baseUrl: window.location.origin
   };
   const BASE_URL = config.baseUrl;
 

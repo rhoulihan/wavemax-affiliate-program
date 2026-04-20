@@ -114,7 +114,7 @@
         const originalLoadData = window.loadDashboardData;
         window.loadDashboardData = function() {
             // Update API base URL
-            window.API_BASE_URL = 'https://wavemax.promo/api/v1';
+            window.API_BASE_URL = window.location.origin + '/api/v1';
             originalLoadData();
         };
     }

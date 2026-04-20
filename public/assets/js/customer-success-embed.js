@@ -54,7 +54,7 @@
 
   function loadAffiliateInfo(affiliateId) {
     console.log('Loading affiliate info for ID:', affiliateId);
-    const baseUrl = window.EMBED_CONFIG?.baseUrl || 'https://wavemax.promo';
+    const baseUrl = window.EMBED_CONFIG?.baseUrl || window.location.origin;
     const url = `${baseUrl}/api/v1/affiliates/${affiliateId}/public`;
     console.log('Fetching from URL:', url);
 
@@ -159,7 +159,7 @@
         bagsPurchasedEl.textContent = bagCount;
         
         // Fetch bag fee from system config to calculate credit (only for v1)
-        const baseUrl = window.EMBED_CONFIG?.baseUrl || 'https://wavemax.promo';
+        const baseUrl = window.EMBED_CONFIG?.baseUrl || window.location.origin;
         fetch(`${baseUrl}/api/v1/system/config/public`, {
           credentials: 'include'
         })

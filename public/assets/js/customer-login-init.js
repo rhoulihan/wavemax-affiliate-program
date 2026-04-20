@@ -5,7 +5,7 @@
     console.log('[CustomerLogin] Initializing customer login page');
 
     // Configuration
-    const baseUrl = window.EMBED_CONFIG?.baseUrl || 'https://wavemax.promo';
+    const baseUrl = window.EMBED_CONFIG?.baseUrl || window.location.origin;
     const isEmbedded = window.EMBED_CONFIG?.isEmbedded || false;
 
     // CSRF-aware fetch

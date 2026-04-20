@@ -14,7 +14,7 @@
       fallbackLanguage: 'en',
       translationsPath: window.location.hostname === 'localhost' || window.location.hostname.includes('wavemax.promo')
         ? '/locales'
-        : 'https://wavemax.promo/locales',
+        : window.location.origin + '/locales',
       storageKey: 'wavemax-language',
       debugMode: false
     },

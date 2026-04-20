@@ -5,7 +5,7 @@
   'use strict';
 
   // Configuration
-  const BASE_URL = 'https://wavemax.promo';
+  const BASE_URL = window.location.origin;
   const EMBED_SUFFIX = '';
 
   // Navigation function for embedded context

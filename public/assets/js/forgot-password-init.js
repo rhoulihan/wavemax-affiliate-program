@@ -5,7 +5,7 @@
     console.log('[ForgotPassword] Initializing forgot password page');
 
     // Configuration
-    const baseUrl = window.EMBED_CONFIG?.baseUrl || 'https://wavemax.promo';
+    const baseUrl = window.EMBED_CONFIG?.baseUrl || window.location.origin;
     const isEmbedded = window.EMBED_CONFIG?.isEmbedded || false;
 
     // CSRF-aware fetch
@@ -26,10 +26,10 @@
         const formContainer = form.closest('.bg-white');
         const successMessage = document.getElementById('successMessage');
 
-        // Validation functions
+        // Validation functions — delegates to the shared helper in
+        // form-validation.js so the regex lives in exactly one place.
         function validateEmail(email) {
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            return emailRegex.test(email);
+            return !!(window.FormValidation && window.FormValidation.isValidEmail(email));
         }
 
         function showFieldError(field, show = true) {
