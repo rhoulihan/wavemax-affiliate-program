@@ -58,10 +58,14 @@ app.use((req, res, next) => {
 
 // Define MongoDB connection options
 const mongoOptions = {
-  // Use the modern tls option instead of ssl
-  tls: true,
-  // Only allow invalid certificates in non-production environments
-  tlsAllowInvalidCertificates: process.env.NODE_ENV !== 'production'
+  // TLS enforced everywhere except local dev. Set MONGODB_TLS=false to
+  // disable (e.g. plain local mongod that doesn't speak TLS).
+  ...(process.env.MONGODB_TLS === 'false'
+    ? {}
+    : {
+      tls: true,
+      tlsAllowInvalidCertificates: process.env.NODE_ENV !== 'production'
+    })
 };
 
 // Connect to MongoDB with consistent options (skip in test environment)

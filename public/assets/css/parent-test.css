@@ -1,0 +1,93 @@
+/* Local dev test harness for the parent-iframe bridge.
+ * Simulates a WordPress parent page wrapping the iframe. */
+
+* { box-sizing: border-box; }
+body { margin: 0; font-family: -apple-system, Segoe UI, Roboto, sans-serif; color: #222; }
+
+/* Mock WordPress chrome so we can see hide-chrome / show-chrome take effect */
+header.site-header {
+  background: #1e3a8a;
+  color: #fff;
+  padding: 12px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+header.site-header h1 { margin: 0; font-size: 1.2rem; }
+header.site-header a { color: #fff; text-decoration: none; }
+
+nav.site-nav {
+  background: #f3f4f6;
+  padding: 10px 20px;
+  border-bottom: 1px solid #e5e7eb;
+  display: flex;
+  gap: 16px;
+  font-size: 0.9rem;
+}
+nav.site-nav a { color: #374151; text-decoration: none; }
+
+section.page-header.page-header-modern.bg-color-light-scale-1.page-header-sm {
+  background: #e0e7ff;
+  padding: 24px 20px;
+  border-bottom: 1px solid #c7d2fe;
+}
+section.page-header h2 { margin: 0; color: #3730a3; }
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+.container.content { padding: 20px 0; }
+
+footer.site-footer {
+  background: #111827;
+  color: #9ca3af;
+  padding: 24px 20px;
+  text-align: center;
+  font-size: 0.875rem;
+}
+
+/* Dev-only control bar; not present in production */
+.bridge-controls {
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  z-index: 10000;
+  background: #fff;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  padding: 8px 10px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  font-size: 0.85rem;
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.bridge-controls button {
+  padding: 4px 8px;
+  border: 1px solid #3b82f6;
+  background: #3b82f6;
+  color: #fff;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.8rem;
+}
+.bridge-controls button.secondary {
+  background: #fff;
+  color: #3b82f6;
+}
+.bridge-controls .viewport {
+  padding: 4px 8px;
+  background: #f3f4f6;
+  border-radius: 4px;
+  color: #374151;
+}
+
+iframe#wavemax-iframe {
+  display: block;
+  width: 100%;
+  border: 0;
+  min-height: 800px;
+}

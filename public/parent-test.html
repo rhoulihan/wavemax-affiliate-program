@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WaveMAX Parent-Iframe Bridge — Local Test Harness</title>
+  <link rel="stylesheet" href="/assets/css/parent-test.css" />
+</head>
+<body>
+
+  <!-- Mock WordPress chrome -->
+  <header class="site-header">
+    <h1>WaveMAX Laundry — Austin (mock WordPress parent)</h1>
+    <a href="#">Sign in</a>
+  </header>
+
+  <nav class="site-nav">
+    <a href="#">Home</a>
+    <a href="#">Services</a>
+    <a href="#">Affiliate Program</a>
+    <a href="#">Contact</a>
+  </nav>
+
+  <section class="page-header page-header-modern bg-color-light-scale-1 page-header-sm">
+    <div class="container">
+      <h2>Wavemax Austin Affiliate Program</h2>
+      <p>This banner is auto-hidden by the bridge script on load.</p>
+    </div>
+  </section>
+
+  <div class="container content">
+    <iframe
+      id="wavemax-iframe"
+      src="about:blank"
+      allow="clipboard-write"
+      title="WaveMAX Embedded App"></iframe>
+  </div>
+
+  <footer class="site-footer">
+    &copy; 2026 Mock WordPress Parent Page — WaveMAX Austin Affiliate Program
+  </footer>
+
+  <!-- Local-dev control bar: flip chrome / inspect viewport. Not on prod. -->
+  <div class="bridge-controls">
+    <span class="viewport" id="vp">viewport: —</span>
+    <button type="button" id="btn-hide-chrome">Hide chrome</button>
+    <button type="button" id="btn-show-chrome" class="secondary">Show chrome</button>
+    <button type="button" id="btn-send-viewport" class="secondary">Resend viewport</button>
+  </div>
+
+  <script src="/assets/js/parent-test.js"></script>
+</body>
+</html>

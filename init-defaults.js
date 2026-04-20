@@ -21,11 +21,13 @@ async function initializeDefaultAdmin() {
       firstName: 'System',
       lastName: 'Administrator',
       email: adminEmail,
-      password: 'WaveMAX!2024',
       permissions: ['all'], // Super admin with all permissions
       isActive: true,
       requirePasswordChange: true // Force password change on first login
     });
+    // Administrator model doesn't hash `password` in a pre-save hook — it
+    // stores passwordSalt/passwordHash directly. setPassword fills both.
+    defaultAdmin.setPassword('WaveMAX!2024');
 
     await defaultAdmin.save();
 
@@ -40,7 +42,7 @@ async function initializeDefaultAdmin() {
   }
 }
 
-async function initializeDefaultOperator() {
+async function initializeDefaultOperator(createdBy) {
   try {
     // Check if any operator exists
     const existingOperatorCount = await Operator.countDocuments();
@@ -48,6 +50,17 @@ async function initializeDefaultOperator() {
     if (existingOperatorCount > 0) {
       logger.info('Operator accounts already exist, skipping default operator creation');
       return;
+    }
+
+    // Operator.createdBy is required — fall back to any active admin if a
+    // reference wasn't passed in explicitly.
+    let creator = createdBy;
+    if (!creator) {
+      const admin = await Administrator.findOne({ isActive: true });
+      if (!admin) {
+        throw new Error('No administrator available to set as operator.createdBy');
+      }
+      creator = admin._id;
     }
 
     // Create default operator account with 24-hour shift
@@ -64,7 +77,8 @@ async function initializeDefaultOperator() {
       isActive: true,
       totalOrdersProcessed: 0,
       averageProcessingTime: 0,
-      qualityScore: 100     // Start with perfect quality score
+      qualityScore: 100,    // Start with perfect quality score
+      createdBy: creator
     });
 
     await defaultOperator.save();
@@ -86,10 +100,11 @@ async function initializeDefaultOperator() {
 async function initializeDefaults() {
   try {
     // Initialize default administrator
-    await initializeDefaultAdmin();
-    
-    // Initialize default operator
-    await initializeDefaultOperator();
+    const admin = await initializeDefaultAdmin();
+
+    // Initialize default operator; pass the admin's _id as createdBy when
+    // we just created one, otherwise initializeDefaultOperator finds any.
+    await initializeDefaultOperator(admin ? admin._id : null);
     
     logger.info('Default accounts initialization complete');
   } catch (error) {
