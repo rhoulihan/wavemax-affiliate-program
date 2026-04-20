@@ -1,9 +1,8 @@
-# WaveMAX Affiliate Program - Claude AI Development Guide
+# WaveMAX Affiliate Program — Architecture Handbook
 
-> **Last Updated**: 2025-01-16
-> **Version**: 2.0
+> Reference documentation for the codebase. Operational rules live in root `CLAUDE.md`; session startup in `init.prompt`. This file is the architecture source of truth — models, API surface, business logic, security model, integrations.
 
-This document provides a comprehensive overview of the WaveMAX Affiliate Program architecture, key components, and coding guidelines for the `/init` command.
+> **Note:** project is mid-refactor (see `docs/refactor/REFACTORING_PLAN.md`). V1 payment code (Paygistix, `Payment` model, `CallbackPool`, `PaymentToken`, v1 registration) is being **deleted** in Phase 2, not migrated. Sections below marked *V1 (legacy, being removed)* describe dead code being cleaned up.
 
 ---
 
@@ -19,178 +18,101 @@ This document provides a comprehensive overview of the WaveMAX Affiliate Program
 8. [Business Logic](#business-logic)
 9. [Integration Points](#integration-points)
 10. [Coding Standards](#coding-standards)
-11. [Testing Patterns](#testing-patterns)
+11. [Testing](#testing)
 12. [Deployment & Operations](#deployment--operations)
-13. [Common Pitfalls](#common-pitfalls)
-14. [Quick Reference](#quick-reference)
+13. [Quick Reference](#quick-reference)
 
 ---
 
 ## Project Overview
 
-The **WaveMAX Affiliate Program** is a sophisticated Node.js/Express application that manages a laundry service affiliate network. The system enables affiliates (independent service providers) to register customers, manage pickup/delivery logistics, track orders through a three-stage bag scanning workflow, and earn commissions.
+Node.js/Express application managing a laundry service affiliate network. Affiliates (independent service providers) register customers, manage pickup/delivery logistics, track orders through a three-stage bag scanning workflow, and earn commissions.
 
 ### Key Features
 
-- **Multi-Role System**: Administrators, Affiliates, Customers, and Operators
-- **OAuth Integration**: Google, Facebook, LinkedIn social authentication
-- **Dual Payment Systems**:
-  - V1: Upfront payment with Paygistix
-  - V2: Post-weigh payment via Venmo/PayPal/CashApp
-- **Geospatial Service Areas**: Location-based affiliate matching
-- **QR Code Bag Tracking**: Three-stage workflow (weighing → processing → pickup)
-- **Commission System**: 10% WDF + 100% delivery fee
-- **W-9 Tax Compliance**: DocuSign integration for tax forms
-- **Multi-Language Support**: English, Spanish, Portuguese, German
-- **CSP v2 Compliant**: Strict Content Security Policy for iframe embedding
-- **Comprehensive Testing**: 86.16% code coverage
+- **Multi-role**: Administrators, Affiliates, Customers, Operators
+- **OAuth**: Google, Facebook, LinkedIn social auth
+- **Payment** (post-refactor): Post-weigh payment via Venmo/PayPal/CashApp (V2 flow; V1 Paygistix being removed in Phase 2)
+- **Geospatial service areas**: Location-based affiliate matching
+- **QR code bag tracking**: Three-stage workflow (weighing → processing → pickup)
+- **Commission system**: 10% WDF + 100% delivery fee
+- **W-9 tax compliance**: DocuSign integration
+- **i18n**: English, Spanish, Portuguese, German
+- **CSP v2 compliant**: Strict Content Security Policy for iframe embedding
 
 ### Project Structure
 
 ```
-/var/www/wavemax/wavemax-affiliate-program/
-├── server/                    # Server-side Node.js/Express code
-│   ├── config/               # Configuration (CSRF, Passport OAuth, Paygistix)
-│   ├── controllers/          # API endpoint controllers (10 files)
-│   ├── middleware/           # Express middleware (auth, RBAC, security)
-│   ├── models/               # Mongoose data models (17 models)
-│   ├── routes/               # Express route definitions (22 files)
-│   ├── services/             # Business logic (email, payments, validation)
-│   ├── utils/                # Utilities (encryption, logging, helpers)
-│   ├── jobs/                 # Background jobs (payment verification)
+wavemax-affiliate-program/
+├── server/                    # Node.js/Express backend
+│   ├── config/               # CSRF, Passport OAuth, Paygistix (legacy)
+│   ├── controllers/          # API endpoint controllers
+│   ├── middleware/           # auth, RBAC, security, rate limiting
+│   ├── models/               # Mongoose data models
+│   ├── routes/               # Express route definitions
+│   ├── services/             # Business logic (email, payments, docusign)
+│   ├── utils/                # Encryption, logging, helpers
+│   ├── jobs/                 # Background jobs
 │   └── templates/            # Email templates (multi-language)
 ├── public/                    # Frontend static files
-│   ├── assets/
-│   │   ├── js/              # Client-side JavaScript (60+ files)
-│   │   ├── css/             # Stylesheets (CSP-compliant)
-│   │   └── images/          # Static images
-│   ├── locales/             # i18n translation files (en, es, pt, de)
-│   └── *.html               # Embedded HTML pages (25+ pages)
-├── tests/                     # Comprehensive test suite
-│   ├── unit/                # Unit tests (130+ test suites)
-│   ├── integration/         # API integration tests
-│   └── helpers/             # Test utilities
-├── docs/                      # Documentation
-├── scripts/                   # Utility scripts (migrations, setup)
-└── server.js                  # Main application entry point
+│   ├── assets/js/            # Client-side JavaScript
+│   ├── assets/css/           # CSP-compliant stylesheets
+│   ├── locales/              # i18n translations (en, es, pt, de)
+│   └── *.html                # Embedded HTML pages
+├── tests/                     # Unit + integration tests
+├── docs/                      # Documentation (refactor plan, guides, pitfalls)
+├── scripts/                   # Migration/setup scripts
+└── server.js                  # Entry point
 ```
+
+File counts change with the active refactor; trust `ls` / `git ls-files` over documentation.
 
 ---
 
 ## Technology Stack
 
-### Backend
+**Backend:** Node.js 20+ · Express 4.x · MongoDB 7.0+ (Mongoose) · JWT + Passport.js · Winston logging · PM2 cluster mode
 
-- **Runtime**: Node.js v20+
-- **Framework**: Express.js 4.x
-- **Database**: MongoDB 7.0+ with Mongoose ODM
-- **Authentication**: JWT tokens + Passport.js (OAuth)
-- **Logging**: Winston
-- **Process Management**: PM2 (cluster mode)
+**Security:** Helmet.js · csurf (CSRF) · express-rate-limit (MongoDB-backed) · AES-256-GCM encryption · express-mongo-sanitize · XSS escaping
 
-### Security
+**Frontend:** Vanilla JS (ES6+) · Bootstrap 5.3.0 · Font Awesome 6.4.0 · Single-page iframe application · Strict CSP v2 (nonce-based, no unsafe-inline)
 
-- **Headers**: Helmet.js
-- **CSRF Protection**: csurf
-- **Rate Limiting**: express-rate-limit with MongoDB store
-- **Encryption**: AES-256-GCM
-- **Sanitization**: express-mongo-sanitize, XSS prevention
+**Testing:** Jest 29.7.0 · Supertest · MongoDB Memory Server
 
-### Frontend
-
-- **JavaScript**: Vanilla JS (ES6+)
-- **UI Framework**: Bootstrap 5.3.0
-- **Icons**: Font Awesome 6.4.0
-- **Architecture**: Single-page iframe application
-- **CSP Level**: Strict CSP v2 (no unsafe-inline)
-
-### Testing
-
-- **Framework**: Jest 29.7.0
-- **API Testing**: Supertest
-- **Database**: MongoDB Memory Server
-- **Coverage**: 86.16%
-
-### External Services
-
-- **Payment Gateway**: Paygistix (PCI-compliant hosted forms)
-- **OAuth Providers**: Google, Facebook, LinkedIn
-- **Document Signing**: DocuSign
-- **Email**: Mailcow SMTP / Brevo / MS Exchange
-- **Geocoding**: OpenStreetMap Nominatim
+**External:** Paygistix *(V1, legacy)* · OAuth (Google/Facebook/LinkedIn) · DocuSign · Mailcow SMTP / Brevo · OpenStreetMap Nominatim
 
 ---
 
 ## Architecture Overview
 
-### High-Level Architecture
+Request path: **WordPress parent site** (www.wavemaxlaundry.com) → embeds **iframe** → **Nginx** reverse proxy (→ `localhost:3000`) → **Node.js/Express** (PM2 cluster) → **MongoDB Atlas**.
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                    WordPress Parent Site                     │
-│              (www.wavemaxlaundry.com)                       │
-└───────────────────────┬─────────────────────────────────────┘
-                        │
-                        │ Embeds iframe
-                        ▼
-┌─────────────────────────────────────────────────────────────┐
-│              Nginx Reverse Proxy                             │
-│         (Proxy to Node.js on port 3000)                     │
-└───────────────────────┬─────────────────────────────────────┘
-                        │
-                        ▼
-┌─────────────────────────────────────────────────────────────┐
-│          Node.js/Express Application (PM2)                   │
-│                                                              │
-│  ┌──────────────┐    ┌──────────────┐    ┌──────────────┐ │
-│  │  Controllers  │◄──►│  Services    │◄──►│   Models     │ │
-│  └──────────────┘    └──────────────┘    └──────────────┘ │
-│          ▲                   ▲                    ▲         │
-│          │                   │                    │         │
-│  ┌──────────────┐    ┌──────────────┐    ┌──────────────┐ │
-│  │  Middleware   │    │  Routes      │    │   Utils      │ │
-│  └──────────────┘    └──────────────┘    └──────────────┘ │
-└───────────────────────┬─────────────────────────────────────┘
-                        │
-                        ▼
-┌─────────────────────────────────────────────────────────────┐
-│              MongoDB Atlas (Database)                        │
-└─────────────────────────────────────────────────────────────┘
-```
+Within Express: Routes → Middleware (auth/CSRF/rate limit/sanitize) → Controllers → Services → Models. Utilities (encryption, logging, helpers) cross-cut.
 
 ### Request Flow
 
-```
-1. User → WordPress Page → Iframe loads /embed-app-v2.html
-2. embed-app-v2.html → Routes based on ?route= parameter
-3. Dynamic page loading → Fetches HTML content
-4. Script loading → Injects page-specific JS files
-5. API calls → JWT authentication → Controller → Service → Model
-6. Response → JSON format → Client updates UI
-```
+1. Browser loads `/embed-app-v2.html?route=/page-name` in iframe
+2. SPA router fetches page HTML, injects page-specific scripts
+3. Client hits `/api/v1/...` with JWT in Authorization header
+4. Controller → Service → Mongoose model → MongoDB
+5. JSON response updates UI; PostMessage sends height to parent frame
 
 ### Embedded Iframe System
 
-The application uses a **single-page architecture** within an iframe:
+Single-page architecture within an iframe on the WordPress parent site.
 
-- **Entry Point**: `/embed-app-v2.html`
-- **Router**: `embed-app-v2.js` with route mapping
-- **Navigation**: URL parameter `?route=/page-name`
-- **Communication**: PostMessage API for height updates
-- **CSP Compliance**: All scripts external, nonce-based CSP
-
-**Key Files**:
-- `public/embed-app-v2.html` - Main entry point
-- `public/assets/js/embed-app-v2.js` - Router and loader
-- `public/assets/js/session-manager.js` - Auth state management
+- **Entry:** `public/embed-app-v2.html`
+- **Router:** `public/assets/js/embed-app-v2.js` (URL param `?route=/page-name`)
+- **Session state:** `public/assets/js/session-manager.js`
+- **Iframe → parent:** PostMessage API (height updates)
 
 ---
 
 ## Database Schema
 
-### Core Models
+Mongoose models live in `server/models/`. Encrypted fields use AES-256-GCM via `server/utils/encryption.js`. IDs follow the `{PREFIX}-{uuid}` pattern (`AFF-…`, `CUST-…`, `ORD-…`).
 
-#### Affiliate Model
+### Affiliate Model
 **File**: `server/models/Affiliate.js`
 
 ```javascript
@@ -239,11 +161,11 @@ The application uses a **single-page architecture** within an iframe:
 }
 ```
 
-**Key Methods**:
-- `canReceivePayments()`: Returns true if W-9 verified and active
-- Pre-save middleware: Hash password, encrypt payment data
+**Key methods / hooks:**
+- `canReceivePayments()` — true when W-9 verified + active
+- Pre-save: hash password, encrypt payment data
 
-#### Customer Model
+### Customer Model
 **File**: `server/models/Customer.js`
 
 ```javascript
@@ -263,8 +185,8 @@ The application uses a **single-page architecture** within an iframe:
   registrationMethod: Enum,
 
   // Bag system
-  numberOfBags: Number,             // Initial bags purchased
-  bagCredit: Number,                // Credit from initial purchase
+  numberOfBags: Number,
+  bagCredit: Number,                // Credit from initial purchase (V1 only)
   bagCreditApplied: Boolean,
 
   // WDF Credit tracking
@@ -272,7 +194,7 @@ The application uses a **single-page architecture** within an iframe:
   wdfCreditUpdatedAt: Date,
   wdfCreditFromOrderId: String,
 
-  // V2 Payment system
+  // Payment system version (V1 field being removed in Phase 2)
   registrationVersion: Enum,        // 'v1' (upfront) or 'v2' (post-weigh)
   initialBagsRequested: Number,     // 1 or 2
 
@@ -281,14 +203,14 @@ The application uses a **single-page architecture** within an iframe:
 }
 ```
 
-#### Order Model
+### Order Model
 **File**: `server/models/Order.js`
 
 ```javascript
 {
   orderId: String,                  // "ORD-uuid" (unique, indexed)
-  customerId: String,               // References Customer
-  affiliateId: String,              // References Affiliate
+  customerId: String,
+  affiliateId: String,
 
   // Pickup scheduling
   pickupDate: Date,
@@ -300,30 +222,20 @@ The application uses a **single-page architecture** within an iframe:
   status: Enum,                     // 'pending', 'processing', 'processed', 'complete', 'cancelled'
   createdAt, processingStartedAt, processedAt, completedAt, cancelledAt,
 
-  // NEW: Bag tracking system (QR codes)
+  // Bag tracking system (QR codes)
   numberOfBags: Number,
   bags: [{
     bagId: String,                  // Unique bag identifier (indexed)
-    bagNumber: Number,              // 1, 2, 3, etc.
+    bagNumber: Number,
     status: Enum,                   // 'processing', 'processed', 'completed'
     weight: Number,                 // Actual weight in pounds
-    scannedAt: {
-      processing: Date,             // When weighed
-      processed: Date,              // After WDF
-      completed: Date               // When picked up
-    },
-    scannedBy: {
-      processing: ObjectId,         // Operator who weighed
-      processed: ObjectId,          // Operator who processed
-      completed: ObjectId           // Operator who completed
-    }
+    scannedAt: { processing: Date, processed: Date, completed: Date },
+    scannedBy: { processing: ObjectId, processed: ObjectId, completed: ObjectId }
   }],
 
   // Pricing breakdown
   baseRate: Number,                 // WDF rate from SystemConfig
-  feeBreakdown: {
-    numberOfBags, minimumFee, perBagFee, totalFee, minimumApplied
-  },
+  feeBreakdown: { numberOfBags, minimumFee, perBagFee, totalFee, minimumApplied },
   estimatedTotal, actualTotal,
   bagCreditApplied: Number,
   wdfCreditApplied: Number,
@@ -331,20 +243,18 @@ The application uses a **single-page architecture** within an iframe:
   weightDifference: Number,
   affiliateCommission: Number,
 
-  // V1 Payment (Paygistix)
+  // V1 Payment (Paygistix — being removed in Phase 2)
   paymentStatus: Enum,              // 'pending', 'processing', 'completed', 'failed'
   paymentMethod: Enum,
   isPaid: Boolean,
 
-  // V2 Payment (Post-weigh)
+  // V2 Payment (Post-weigh — will be renamed to paymentStatus/paymentMethod post-Phase 2)
   v2PaymentStatus: Enum,            // 'pending', 'awaiting', 'confirming', 'verified', 'failed'
   v2PaymentMethod: Enum,            // 'venmo', 'paypal', 'cashapp', 'credit_card'
   v2PaymentAmount: Number,
   v2PaymentLinks: { venmo, paypal, cashapp },
   v2PaymentQRCodes: { venmo, paypal, cashapp },  // Base64 encoded
-  v2PaymentReminders: [{
-    sentAt, reminderNumber, sentBy, method
-  }],
+  v2PaymentReminders: [{ sentAt, reminderNumber, sentBy, method }],
 
   // Add-ons
   addOns: { premiumDetergent, fabricSoftener, stainRemover },
@@ -356,72 +266,59 @@ The application uses a **single-page architecture** within an iframe:
 }
 ```
 
-**Pre-save Middleware**:
+**Pre-save middleware:**
 - Fetches current WDF rate from SystemConfig
-- Calculates pricing based on weights and add-ons
-- Auto-updates `isPaid` when v2PaymentStatus becomes 'verified'
+- Recalculates pricing from weights + add-ons
+- Flips `isPaid` when `v2PaymentStatus === 'verified'`
 
-#### SystemConfig Model
-**File**: `server/models/SystemConfig.js`
-
-**Purpose**: Dynamic configuration without code changes
+### SystemConfig Model
+**File**: `server/models/SystemConfig.js` — runtime business config, avoids redeploys for rate changes.
 
 ```javascript
 {
-  key: String,                      // Unique identifier (indexed)
-  value: Mixed,                     // Actual configuration value
-  description: String,
-  category: Enum,                   // 'operator', 'payment', 'system', etc.
-  dataType: Enum,                   // 'string', 'number', 'boolean', 'array', 'object'
-  defaultValue: Mixed,
+  key: String,                      // Unique (indexed)
+  value: Mixed,
+  description, category, dataType,
+  defaultValue,
   isEditable: Boolean,
-  isPublic: Boolean,                // Can be accessed without auth
+  isPublic: Boolean,                // Accessible without auth
   validation: { min, max, regex, allowedValues },
-  updatedBy: ObjectId               // References Administrator
+  updatedBy: ObjectId               // → Administrator
 }
 ```
 
-**Key Configurations**:
-- `wdf_base_rate_per_pound`: 1.25 (public, min: 0.50, max: 10.00)
-- `laundry_bag_fee`: 10.00 (public)
-- `delivery_minimum_fee`: 10.00 (public)
-- `delivery_per_bag_fee`: 2.00 (public)
-- `payment_version`: 'v1' | 'v2' (public)
-- `max_operators_per_shift`: 10
-- `order_processing_timeout_minutes`: 120
+**Key configurations (public):**
+- `wdf_base_rate_per_pound` (default 1.25, range 0.50–10.00)
+- `laundry_bag_fee` (10.00)
+- `delivery_minimum_fee` (10.00)
+- `delivery_per_bag_fee` (2.00)
+- `payment_version` ('v1' | 'v2')
+- `max_operators_per_shift` (10)
+- `order_processing_timeout_minutes` (120)
 
-**Usage Pattern**:
-```javascript
-// Always use SystemConfig instead of hardcoding
-const wdfRate = await SystemConfig.getValue('wdf_base_rate_per_pound', 1.25);
-const bagFee = await SystemConfig.getValue('laundry_bag_fee', 10.00);
+**Usage:** always go through `SystemConfig.getValue(key, default)`; never hardcode rates, fees, or limits. Admin mutations use `SystemConfig.setValue(key, value, adminId)`.
 
-// Update config (admin only)
-await SystemConfig.setValue('wdf_base_rate_per_pound', 1.50, adminId);
-```
+### Other Models
 
-#### Other Models
-- **Administrator**: System managers with role-based permissions
-- **Operator**: Facility staff with PIN-based auth
-- **Payment**: Payment transaction records (Paygistix)
-- **CallbackPool**: Payment callback URL management
-- **RefreshToken**: JWT refresh token tracking
-- **TokenBlacklist**: Logged-out token blacklist
-- **OAuthSession**: Temporary OAuth session storage
-- **DataDeletionRequest**: GDPR compliance tracking
+- **Administrator** — system managers, role-based permissions
+- **Operator** — facility staff, PIN-based auth
+- **RefreshToken** — JWT refresh token tracking
+- **TokenBlacklist** — logout blacklist
+- **OAuthSession** — temporary OAuth session storage
+- **DataDeletionRequest** — GDPR compliance
+- *V1 (legacy, being removed):* **Payment**, **CallbackPool**, **PaymentToken**
 
 ---
 
 ## API Structure
 
-### Route Versioning
+### Versioning
 
-- **v1 API**: `/api/v1/` (current stable)
-- **v2 API**: `/api/v2/` (new customer registration)
-- **Legacy**: `/api/` redirects to v1
+- `/api/v1/` — current stable
+- `/api/v2/` — new customer registration (post-weigh payment flow)
+- `/api/` — redirects to v1
 
-### Authentication Routes
-**File**: `server/routes/authRoutes.js`
+### Authentication (`server/routes/authRoutes.js`)
 
 ```
 POST   /api/v1/auth/affiliate/login
@@ -435,23 +332,17 @@ GET    /api/v1/auth/verify
 POST   /api/v1/auth/logout
 ```
 
-### Social Auth Routes
-**File**: `server/routes/socialAuthRoutes.js`
+### Social Auth (`server/routes/socialAuthRoutes.js`)
 
 ```
-GET    /api/v1/auth/google
-GET    /api/v1/auth/google/callback
-GET    /api/v1/auth/facebook
-GET    /api/v1/auth/facebook/callback
-GET    /api/v1/auth/linkedin
-GET    /api/v1/auth/linkedin/callback
+GET    /api/v1/auth/{google|facebook|linkedin}
+GET    /api/v1/auth/{google|facebook|linkedin}/callback
 POST   /api/v1/auth/social/register
 POST   /api/v1/auth/customer/social/register
 POST   /api/v1/auth/social/link
 ```
 
-### Affiliate Routes
-**File**: `server/routes/affiliateRoutes.js`
+### Affiliate (`server/routes/affiliateRoutes.js`)
 
 ```
 POST   /api/v1/affiliates/register
@@ -465,12 +356,11 @@ POST   /api/v1/affiliates/:affiliateId/change-password
 DELETE /api/v1/affiliates/:affiliateId/delete-all-data
 ```
 
-### Customer Routes
-**File**: `server/routes/customerRoutes.js`
+### Customer (`server/routes/customerRoutes.js`)
 
 ```
-POST   /api/v1/customers/register         # V1 registration (upfront payment)
-POST   /api/v2/customers/register         # V2 registration (no payment)
+POST   /api/v1/customers/register         # V1 — legacy, being removed
+POST   /api/v2/customers/register         # V2 — post-weigh payment
 GET    /api/v1/customers/:customerId
 PUT    /api/v1/customers/:customerId
 GET    /api/v1/customers/:customerId/orders
@@ -478,8 +368,7 @@ POST   /api/v1/customers/:customerId/change-password
 DELETE /api/v1/customers/:customerId/delete-all-data
 ```
 
-### Order Routes
-**File**: `server/routes/orderRoutes.js`
+### Order (`server/routes/orderRoutes.js`)
 
 ```
 POST   /api/v1/orders
@@ -490,19 +379,17 @@ PUT    /api/v1/orders/:orderId/status
 GET    /api/v1/orders
 ```
 
-### Operator Routes
-**File**: `server/routes/operatorRoutes.js`
+### Operator (`server/routes/operatorRoutes.js`)
 
 ```
 POST   /api/v1/operators/login
-POST   /api/v1/operators/scan-bag         # QR code scanning
+POST   /api/v1/operators/scan-bag          # QR code scanning
 GET    /api/v1/operators/dashboard
 GET    /api/v1/operators/orders
 POST   /api/v1/operators/orders/:orderId/status
 ```
 
-### Administrator Routes
-**File**: `server/routes/administratorRoutes.js`
+### Administrator (`server/routes/administratorRoutes.js`)
 
 ```
 POST   /api/v1/administrators/operators
@@ -510,15 +397,14 @@ GET    /api/v1/administrators/operators
 PUT    /api/v1/administrators/operators/:operatorId
 DELETE /api/v1/administrators/operators/:operatorId
 GET    /api/v1/administrators/dashboard
-GET    /api/v1/administrators/config      # SystemConfig management
+GET    /api/v1/administrators/config       # SystemConfig management
 PUT    /api/v1/administrators/config
 ```
 
-### W-9 Routes
-**File**: `server/routes/w9Routes.js`
+### W-9 (`server/routes/w9Routes.js`)
 
 ```
-POST   /api/v1/w9/initiate-signing        # DocuSign integration
+POST   /api/v1/w9/initiate-signing         # DocuSign
 POST   /api/v1/w9/webhook/docusign
 POST   /api/v1/w9/upload
 GET    /api/v1/w9/status
@@ -528,268 +414,100 @@ POST   /api/v1/w9/admin/:affiliateId/verify
 POST   /api/v1/w9/admin/:affiliateId/reject
 ```
 
-### API Response Format
+### Response Format
 
-**Success Response**:
-```javascript
-{
-  success: true,
-  message: "Operation completed successfully",
-  data: { ... },
-  // Optional pagination
-  pagination: {
-    page: 1,
-    limit: 10,
-    totalPages: 5,
-    totalItems: 48
-  }
-}
-```
-
-**Error Response**:
-```javascript
-{
-  success: false,
-  message: "Error description",
-  // Development only
-  error: {
-    details: "Detailed error message",
-    type: "ValidationError"
-  }
-}
-```
+Success: `{ success: true, message, data, pagination? }`
+Error:   `{ success: false, message, error?: { details, type } }` — `error` field only in development.
 
 ---
 
 ## Security Implementation
 
-### Authentication Methods
+### Authentication
 
-#### 1. Traditional (Username/Password)
+**Passwords** — PBKDF2-SHA512, 100,000 iterations, 16-byte random salt, 64-byte hash. Implementation: `server/utils/passwordUtils.js` (`hashPassword`, `verifyPassword`). Constant-time comparison.
 
-**Password Hashing**: PBKDF2 with SHA-512
-- **Iterations**: 100,000
-- **Hash length**: 64 bytes (512 bits)
-- **Salt**: 16 random bytes per password
+**JWT** — two tokens:
+- **Access** (1h): `{ id, role, affiliateId?, iat, exp }` — `role` is one of `affiliate | customer | administrator | operator`
+- **Refresh** (30d): `{ id, tokenId, iat, exp }` — tracked in `RefreshToken` model; rotated on use; blacklisted on logout (`TokenBlacklist`)
+- Signed with `JWT_SECRET`; stored in httpOnly cookies in production
 
-**Implementation**:
-```javascript
-// server/utils/passwordUtils.js
-hashPassword(password) {
-  const salt = crypto.randomBytes(16).toString('hex');
-  const hash = crypto.pbkdf2Sync(password, salt, 100000, 64, 'sha512').toString('hex');
-  return { salt, hash };
-}
-
-verifyPassword(password, storedSalt, storedHash) {
-  const hash = crypto.pbkdf2Sync(password, storedSalt, 100000, 64, 'sha512').toString('hex');
-  return hash === storedHash;  // Constant-time comparison
-}
-```
-
-#### 2. JWT Tokens
-
-**Access Token** (1 hour expiry):
-```javascript
-{
-  id: userId,
-  role: 'affiliate' | 'customer' | 'administrator' | 'operator',
-  affiliateId: "AFF-123",  // Role-specific ID
-  iat: issuedAt,
-  exp: expiresAt
-}
-```
-
-**Refresh Token** (30 days expiry):
-```javascript
-{
-  id: userId,
-  tokenId: refreshTokenId,
-  iat: issuedAt,
-  exp: expiresAt
-}
-```
-
-**Token Security**:
-- Signed with `JWT_SECRET` environment variable
-- Blacklist on logout (`TokenBlacklist` model)
-- Refresh token rotation
-- Stored in httpOnly cookies (production)
-
-#### 3. OAuth (Social Login)
-
-**Supported Providers**:
-- Google OAuth 2.0
-- Facebook OAuth
-- LinkedIn OAuth 2.0
-
-**OAuth Flow**:
-```
-1. User clicks "Login with Google"
-2. Redirect to OAuth provider
-3. User authorizes on provider
-4. Callback receives authorization code
-5. Exchange code for access token
-6. Fetch user profile from provider
-7. Check for existing account (by social ID or email)
-8. Create new user or link account
-9. Encrypt and store OAuth tokens (AES-256-GCM)
-10. Generate JWT tokens
-11. Return to client with JWT
-```
-
-**Configuration**: `server/config/passport-config.js`
-
-**OAuth Token Storage**:
-- Encrypted with AES-256-GCM
-- Stored in `user.socialAccounts.{provider}`
-- Refresh token rotation for Google/LinkedIn
+**OAuth** — Google, Facebook, LinkedIn. Flow: provider redirect → callback code → exchange for access token → fetch profile → match by social ID or email → link/create → encrypt and store tokens in `user.socialAccounts.{provider}` → issue JWT. Config: `server/config/passport-config.js`. Google + LinkedIn refresh tokens rotate.
 
 ### CSRF Protection
 
-**Implementation**: `server/config/csrf-config.js`
+`server/config/csrf-config.js` — conditional enforcement:
 
-**Conditional Enforcement**:
-- **PUBLIC_ENDPOINTS**: No CSRF (health checks, OAuth, webhooks)
-- **AUTH_ENDPOINTS**: Rate limiting instead of CSRF
-- **REGISTRATION_ENDPOINTS**: CAPTCHA instead of CSRF
-- **CRITICAL_ENDPOINTS**: Always enforce CSRF (W-9, payments, deletions)
-- **READ_ONLY_ENDPOINTS**: No CSRF for GET requests
+| Endpoint class | CSRF |
+|:---|:---|
+| Public (health, OAuth, webhooks) | No |
+| Auth | No (rate-limited instead) |
+| Registration | No (CAPTCHA instead) |
+| Critical (W-9, payments, deletions) | **Yes, always** |
+| Read-only (GET) | No |
 
-**Usage**:
-```javascript
-// 1. Get CSRF token
-GET /api/csrf-token
-
-// 2. Include in requests
-POST /api/v1/affiliates/register
-Headers: {
-  'x-csrf-token': token
-}
-```
+Client: `GET /api/csrf-token` then send header `x-csrf-token` on mutations.
 
 ### Rate Limiting
 
-**Implementation**: `server/middleware/rateLimiting.js`
+`server/middleware/rateLimiting.js` — MongoDB-backed for distributed enforcement:
 
-**MongoDB-backed distributed rate limiting**:
-```javascript
-authLimiter: 5 req/15min (strict), 50 req/15min (relaxed)
-passwordResetLimiter: 3 req/hour (strict), 10 req/hour (relaxed)
-registrationLimiter: 10 reg/hour (strict), 50 reg/hour (relaxed)
-apiLimiter: 100 req/15min (strict), 500 req/15min (relaxed)
-sensitiveOperationLimiter: 10 ops/hour
-```
+| Limiter | Strict | Relaxed |
+|:---|:---:|:---:|
+| `authLimiter` | 5/15min | 50/15min |
+| `passwordResetLimiter` | 3/hour | 10/hour |
+| `registrationLimiter` | 10/hour | 50/hour |
+| `apiLimiter` | 100/15min | 500/15min |
+| `sensitiveOperationLimiter` | 10/hour | — |
 
-**Bypass for testing**:
-```javascript
-RELAX_RATE_LIMITING=true  // Increases all limits 10x
-NODE_ENV=test             // Disables rate limiting
-```
+Test bypass: `RELAX_RATE_LIMITING=true` multiplies limits 10×; `NODE_ENV=test` disables entirely.
 
 ### Input Validation & Sanitization
 
-**Sanitization Middleware**: `server/middleware/sanitization.js`
-
-```javascript
-// NoSQL injection prevention
-mongoSanitize()  // Removes $ and . from user input
-
-// XSS prevention
-sanitizeRequest  // Escapes HTML entities
-```
-
-**Validation Libraries**:
-- **Express Validator**: Email, phone, ZIP code validation
-- **Joi**: Schema validation for complex objects
-
-**Example**:
-```javascript
-const schema = Joi.object({
-  firstName: Joi.string().min(2).max(50).required(),
-  email: Joi.string().email().required(),
-  password: Joi.string().min(8).pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/).required(),
-  serviceRadius: Joi.number().min(1).max(50).required()
-});
-```
+`server/middleware/sanitization.js` — `mongoSanitize()` strips `$` / `.` to prevent NoSQL injection; `sanitizeRequest` escapes HTML for XSS. Validation via Express Validator (simple fields) and Joi (complex schemas).
 
 ### Data Encryption
 
-**AES-256-GCM Encryption**: `server/utils/encryption.js`
+`server/utils/encryption.js` — AES-256-GCM with random 16-byte IV per value; `{ iv, encryptedData, authTag }` stored as the field value. Encrypted fields:
 
-**Encrypted Fields**:
-- `Affiliate.paypalEmail`
-- `Affiliate.venmoHandle`
-- OAuth access tokens
+- `Affiliate.paypalEmail`, `Affiliate.venmoHandle`
+- OAuth access tokens in `user.socialAccounts.{provider}.accessToken`
 - W-9 documents
 
-**Implementation**:
-```javascript
-encrypt(text) {
-  const iv = crypto.randomBytes(16);
-  const cipher = crypto.createCipheriv('aes-256-gcm', ENCRYPTION_KEY, iv);
-  const encrypted = cipher.update(text, 'utf8', 'hex') + cipher.final('hex');
-  const authTag = cipher.getAuthTag().toString('hex');
-
-  return { iv: iv.toString('hex'), encryptedData: encrypted, authTag };
-}
-
-decrypt(encryptedObj) {
-  const decipher = crypto.createDecipheriv('aes-256-gcm', ENCRYPTION_KEY,
-                                           Buffer.from(encryptedObj.iv, 'hex'));
-  decipher.setAuthTag(Buffer.from(encryptedObj.authTag, 'hex'));
-
-  return decipher.update(encryptedObj.encryptedData, 'hex', 'utf8')
-       + decipher.final('utf8');
-}
-```
+Key source: `ENCRYPTION_KEY` env var (64-char hex).
 
 ### Security Headers
 
-**Helmet.js Configuration**: `server.js`
+Helmet.js in `server.js`:
+- **CSP:** `default-src 'self'`; `script-src 'self' https://cdn.jsdelivr.net 'nonce-{nonce}'`; `style-src` same; `frame-src 'self' https://safepay.paymentlogistics.net` *(Paygistix, legacy)*; `frame-ancestors 'self' https://www.wavemaxlaundry.com`
+- **HSTS:** 1 year, `includeSubDomains`, `preload`
+- **Referrer-Policy:** `strict-origin-when-cross-origin`
 
-```javascript
-app.use(helmet({
-  contentSecurityPolicy: {
-    directives: {
-      defaultSrc: ["'self'"],
-      scriptSrc: ["'self'", "https://cdn.jsdelivr.net", "'nonce-{nonce}'"],
-      styleSrc: ["'self'", "https://cdn.jsdelivr.net", "'nonce-{nonce}'"],
-      frameSrc: ["'self'", "https://safepay.paymentlogistics.net"],
-      frameAncestors: ["'self'", "https://www.wavemaxlaundry.com"]
-    }
-  },
-  hsts: { maxAge: 31536000, includeSubDomains: true, preload: true },
-  referrerPolicy: { policy: 'strict-origin-when-cross-origin' }
-}));
-```
+Per-request nonce is generated in middleware and made available as `res.locals.cspNonce`; client reads it from `<meta name="csp-nonce">`.
 
 ---
 
 ## Frontend Architecture
 
-### Embedded Iframe System
+### Embedded SPA
 
-**Single-Page Application within Iframe**
-
-**Architecture**:
 ```
 WordPress Page
   └── <iframe src="https://wavemax.promo/embed-app-v2.html?route=/affiliate-dashboard">
         └── embed-app-v2.html (SPA router)
               ├── Dynamic page loading (fetch HTML)
-              ├── Script injection (sequential loading)
-              └── PostMessage communication (height updates)
+              ├── Script injection (sequential)
+              └── PostMessage (height updates)
 ```
 
-**Key Files**:
-- **Entry Point**: `public/embed-app-v2.html`
-- **Router**: `public/assets/js/embed-app-v2.js`
-- **Session Manager**: `public/assets/js/session-manager.js`
+**Key files:**
+- `public/embed-app-v2.html` — entry
+- `public/assets/js/embed-app-v2.js` — router
+- `public/assets/js/session-manager.js` — multi-role auth state
 
 ### Route Mapping
 
-**Configuration**: `public/assets/js/embed-app-v2.js`
+`EMBED_PAGES` in `embed-app-v2.js`:
 
 ```javascript
 const EMBED_PAGES = {
@@ -813,139 +531,36 @@ const EMBED_PAGES = {
 
 ### Page-Specific Scripts
 
-**IMPORTANT**: Scripts must be registered in `pageScripts` mapping
-
-```javascript
-const pageScripts = {
-  '/affiliate-register': [
-    '/assets/js/i18n.js',
-    '/assets/js/language-switcher.js',
-    '/assets/js/modal-utils.js',
-    '/assets/js/errorHandler.js',
-    '/assets/js/csrf-utils.js',
-    '/assets/js/swirl-spinner.js',
-    '/assets/js/form-validation.js',
-    '/assets/js/affiliate-register-init.js'
-  ],
-  '/affiliate-dashboard': [
-    '/assets/js/i18n.js',
-    '/assets/js/dashboard-utils.js',
-    '/assets/js/chart.min.js',
-    '/assets/js/affiliate-dashboard-init.js'
-  ]
-};
-```
-
-**Best Practice**: Always add scripts to BOTH:
-1. HTML file (for direct access)
-2. `pageScripts` mapping (for embedded access)
+Scripts must be registered in the `pageScripts` map in `embed-app-v2.js` **and** referenced from the page HTML. If you skip one, the page works via one access path but breaks via the other (see `docs/development/PITFALLS.md` #3).
 
 ### CSP Compliance
 
-**Strict CSP v2**: No inline scripts or styles
+Strict CSP v2 — **no inline scripts or styles**. Per-request nonce, external handlers only. For dynamic script injection, set `script.nonce = window.CSP_NONCE` (read from `<meta name="csp-nonce">`).
 
-**Nonce-based CSP**:
-```javascript
-// Server generates nonce per request
-res.locals.cspNonce = crypto.randomBytes(16).toString('base64');
+### Auto-Resize (iframe → parent)
 
-// Client accesses nonce
-window.CSP_NONCE = document.querySelector('meta[name="csp-nonce"]')?.getAttribute('content');
+`ResizeObserver` + `MutationObserver` watch content size; on change, `window.parent.postMessage({ type: 'resize', height: document.body.scrollHeight }, '*')`. The WordPress parent listens and adjusts iframe height.
 
-// Dynamic script loading
-const script = document.createElement('script');
-script.src = '/assets/js/file.js';
-script.nonce = window.CSP_NONCE;
-document.body.appendChild(script);
-```
+### Session Management (`public/assets/js/session-manager.js`)
 
-**Event Handlers**:
-```html
-<!-- Bad: Inline event handler -->
-<button onclick="doSomething()">Click</button>
-
-<!-- Good: External event listener -->
-<button id="myButton">Click</button>
-<script src="/assets/js/handlers.js"></script>
-```
-
-### Auto-Resize Mechanism
-
-**Height Tracking**:
-```javascript
-// ResizeObserver monitors content height
-const resizeObserver = new ResizeObserver(() => {
-  updateHeight();
-});
-
-// MutationObserver detects DOM changes
-const mutationObserver = new MutationObserver(() => {
-  updateHeight();
-});
-
-// PostMessage sends height to parent
-function updateHeight() {
-  const height = document.body.scrollHeight;
-  window.parent.postMessage({
-    type: 'resize',
-    height: height
-  }, '*');
-}
-```
-
-### Session Management
-
-**Client-Side**: `public/assets/js/session-manager.js`
-
-**Features**:
-- Multi-role support (affiliate, customer, administrator, operator)
+- Multi-role (affiliate, customer, administrator, operator)
 - 10-minute inactivity timeout
-- Activity tracking via localStorage
-- Auto-logout on timeout
-- Route adjustment based on auth state
+- Activity tracked in localStorage
+- Auto-logout on timeout; route adjusts to login page based on auth state
 
-**Usage**:
-```javascript
-// Check authentication
-if (window.SessionManager.isAuthenticated('affiliate')) {
-  // User is logged in as affiliate
-}
+API: `SessionManager.isAuthenticated(role)`, `.updateActivity(role)`, `.checkInactivity(role)`.
 
-// Update activity (called on user interactions)
-window.SessionManager.updateActivity('affiliate');
+### Internationalization
 
-// Auto-logout check (runs every minute)
-window.SessionManager.checkInactivity('affiliate');
-```
+Languages: `en`, `es`, `pt`, `de`. Translation files: `public/locales/{lang}/common.json`. Client: `public/assets/js/i18n.js` — `await window.i18n.init()`, `window.i18n.setLanguage(lang)`, `window.i18n.translate(key)`.
 
-### Internationalization (i18n)
-
-**Supported Languages**:
-- English (en)
-- Spanish (es)
-- Portuguese (pt)
-- German (de)
-
-**Translation Files**: `public/locales/{lang}/common.json`
-
-**Client-Side i18n**: `public/assets/js/i18n.js`
-
-```javascript
-// Initialize
-await window.i18n.init();
-
-// Change language
-await window.i18n.setLanguage('es');
-
-// Translate
-const text = window.i18n.translate('landing.title');
-
-// Auto-translate page
+Auto-translation markers in HTML:
+```html
 <p data-i18n="landing.title">Fallback text</p>
 <input data-i18n-placeholder="register.firstName">
 ```
 
-**Best Practice**: Always maintain translations for all 4 languages
+Always maintain all 4 languages when adding user-facing copy. See `docs/guides/i18n-best-practices.md`.
 
 ---
 
@@ -953,676 +568,231 @@ const text = window.i18n.translate('landing.title');
 
 ### Commission Calculation
 
-**Formula**: `(WDF amount × 10%) + delivery fee`
+Formula: `(WDF amount × 10%) + delivery fee`
 
 ```javascript
 const wdfAmount = actualWeight * baseRate;
 const wdfCommission = wdfAmount * 0.1;
 const affiliateCommission = wdfCommission + totalDeliveryFee;
 
-// Example:
-// 15 lbs at $1.25/lb = $18.75 WDF
-// Delivery fee (3 bags): max($25 minimum, 3 × $5) = $25
-// Commission: ($18.75 × 0.1) + $25 = $1.88 + $25 = $26.88
+// Example: 15 lbs @ $1.25/lb = $18.75 WDF
+// Delivery (3 bags): max($25 min, 3 × $5) = $25
+// Commission: ($18.75 × 0.1) + $25 = $26.88
 ```
 
-**Note**: Add-ons and credits are NOT included in commission
+Add-ons and credits are **not** included in commission.
 
-### Delivery Fee Calculation
+### Delivery Fee
 
-**Structure**:
+Per-affiliate config: `minimumDeliveryFee` (0–100) and `perBagDeliveryFee` (0–50).
+
 ```javascript
-// Configured per affiliate
-minimumDeliveryFee: 25  // Range: 0-100
-perBagDeliveryFee: 5    // Range: 0-50
-
-// Calculation
 totalFee = Math.max(minimumDeliveryFee, numberOfBags * perBagDeliveryFee);
 
-// Examples:
-// 1 bag: max($25, 1 × $5) = $25 (minimum applied)
-// 3 bags: max($25, 3 × $5) = $25 (minimum applied)
-// 6 bags: max($25, 6 × $5) = $30 (per-bag fee)
+// 1 bag:  max($25, $5)  = $25 (min applied)
+// 3 bags: max($25, $15) = $25 (min applied)
+// 6 bags: max($25, $30) = $30 (per-bag)
 ```
 
 ### WDF Credit System
 
-**Mechanism**:
+Weight variance between estimate and actual generates a credit or debit on the customer account, applied to the next order.
+
 ```javascript
 weightDifference = actualWeight - estimatedWeight;
 wdfCreditGenerated = weightDifference * baseRate;
 
-// Positive difference (actual > estimated)
-// Customer charged less → earns credit
-// Example: Estimated 20 lbs, actual 15 lbs
-// Credit: (15 - 20) × $1.25 = -$6.25 → +$6.25 credit
-
-// Negative difference (actual < estimated)
-// Customer charged more → owes debit
-// Example: Estimated 10 lbs, actual 15 lbs
-// Debit: (15 - 10) × $1.25 = $6.25 → -$6.25 debit
+// Estimated 20 lbs, actual 15 lbs → customer overcharged → +$6.25 credit
+// Estimated 10 lbs, actual 15 lbs → customer undercharged → -$6.25 debit
 ```
 
-**Application**:
+Application on next order:
 ```javascript
-// On next order
 order.wdfCreditApplied = customer.wdfCredit;
-order.actualTotal = subtotal - wdfCreditApplied;
-
-// Update customer
+order.actualTotal = subtotal - order.wdfCreditApplied;
 customer.wdfCredit = 0;
 customer.wdfCreditUpdatedAt = Date.now();
 ```
 
 ### Bag Tracking Workflow
 
-**QR Code Format**: `customerId#bagId`
-**Example**: `CUST-12345#BAG001`
+**QR code format:** `customerId#bagId` (e.g. `CUST-12345#BAG001`).
 
-**Three-Stage Process**:
+Three-stage state machine per bag:
 
-```
-Stage 1: Weighing (processing)
-  ├── Operator scans bag QR code
-  ├── Enter weight
-  ├── Bag status → 'processing'
-  └── Order status → 'pending' → 'processing' (first bag)
+| Stage | Trigger | Bag status | Order status transition | Side effect |
+|:---|:---|:---|:---|:---|
+| 1. Weighing | Operator scans + enters weight | `processing` | `pending` → `processing` (first bag) | — |
+| 2. After WDF | Operator scans | `processed` | `processing` → `processed` (when all bags) | Email affiliate |
+| 3. Pickup | Operator scans | `completed` | `processed` → `complete` (when all bags) | Email customer |
 
-Stage 2: After WDF (processed)
-  ├── Operator scans bag QR code
-  ├── Bag status → 'processed'
-  ├── Order status → 'processing' → 'processed' (all bags)
-  └── Email notification to affiliate
+### Payment Flow (V2 — current)
 
-Stage 3: Pickup (completed)
-  ├── Operator scans bag QR code
-  ├── Bag status → 'completed'
-  ├── Order status → 'processed' → 'complete' (all bags)
-  └── Email notification to customer
-```
+1. Customer registers (OAuth or traditional). No upfront payment.
+2. Customer schedules pickup → order created, `v2PaymentStatus = 'pending'`
+3. Affiliate picks up and weighs
+4. System calculates actual price
+5. Email sent with payment links (Venmo / PayPal / CashApp) → `v2PaymentStatus = 'awaiting'`
+6. Customer pays via link
+7. Email scanner detects payment → `v2PaymentStatus = 'verified'`, `isPaid = true`
+8. Order proceeds to WDF processing
+9. Automated reminders at 24h / 72h / 7d if still unpaid
 
-**Bag Data Structure**:
-```javascript
-bags: [{
-  bagId: 'BAG001',
-  bagNumber: 1,
-  status: 'processing' → 'processed' → 'completed',
-  weight: 5.2,
-  scannedAt: {
-    processing: Date,
-    processed: Date,
-    completed: Date
-  },
-  scannedBy: {
-    processing: OperatorId,
-    processed: OperatorId,
-    completed: OperatorId
-  }
-}]
-```
-
-### Payment Systems
-
-#### V1 Payment Flow (Upfront)
-
-```
-1. Customer registers → Paygistix payment form
-2. Payment processed → Customer created with bagCredit
-3. Customer schedules pickup
-4. Order created with estimated pricing
-5. Affiliate picks up and weighs
-6. Final price calculated
-7. WDF credit/debit applied to customer account
-8. Order marked complete
-```
-
-#### V2 Payment Flow (Post-Weigh)
-
-```
-1. Customer registers (OAuth or traditional)
-2. No payment required (bagCredit = 0)
-3. Customer schedules pickup
-4. Order created with v2PaymentStatus = 'pending'
-5. Affiliate picks up and weighs
-6. System calculates actual price
-7. Email sent with payment links (Venmo/PayPal/CashApp)
-8. v2PaymentStatus = 'awaiting'
-9. Customer pays via link
-10. Email scanner detects payment
-11. v2PaymentStatus = 'verified'
-12. Order proceeds to WDF processing
-13. Automatic reminders (24h, 72h, 7d)
-```
+*V1 flow (upfront Paygistix payment at registration) is being deleted in Phase 2.*
 
 ---
 
 ## Integration Points
 
-### Paygistix (Payment Gateway)
+| Service | Config | Entry point |
+|:---|:---|:---|
+| **OAuth Google** | `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET`; callback `/api/v1/auth/google/callback`; scopes `email, profile` | `server/config/passport-config.js` |
+| **OAuth Facebook** | `FACEBOOK_APP_ID` / `FACEBOOK_APP_SECRET`; callback `/api/v1/auth/facebook/callback`; perms `email, public_profile` | `server/config/passport-config.js` |
+| **OAuth LinkedIn** | `LINKEDIN_CLIENT_ID` / `LINKEDIN_CLIENT_SECRET`; callback `/api/v1/auth/linkedin/callback`; scopes `r_emailaddress, r_liteprofile` | `server/config/passport-config.js` |
+| **DocuSign (W-9)** | `DOCUSIGN_INTEGRATION_KEY`, `DOCUSIGN_USER_ID`, `DOCUSIGN_ACCOUNT_ID`, `DOCUSIGN_BASE_URL`, `DOCUSIGN_W9_TEMPLATE_ID` | `server/services/docusignService.js` |
+| **Email (Mailcow SMTP)** | `EMAIL_PROVIDER=smtp`, `EMAIL_HOST=mail.wavemax.promo`, `EMAIL_PORT=587`, `EMAIL_FROM` | `server/services/emailService.js` |
+| **Email (Brevo alt.)** | `EMAIL_PROVIDER=brevo`, `BREVO_API_KEY`, `BREVO_FROM_EMAIL` | `server/services/emailService.js` |
+| **Geocoding (Nominatim)** | `https://nominatim.openstreetmap.org`, 1 req/sec, UA `WaveMAX-Affiliate-Program` | `server/middleware/locationValidation.js` |
+| *V1* **Paygistix** | `PAYGISTIX_MERCHANT_ID`, `PAYGISTIX_FORM_ACTION_URL`, pool of 10 callback URLs | `server/services/paygistixService.js` — *being removed in Phase 2* |
 
-**Configuration**:
+All env variable names are in `.env.example`. Email templates live under `server/templates/emails/{lang}/`.
+
+### DocuSign W-9 Workflow
+
+1. `POST /api/v1/w9/initiate-signing` → creates envelope with pre-filled W-9 → returns signing URL
+2. `POST /api/v1/w9/webhook/docusign` (DocuSign callback) → updates `w9Information.docusignStatus` → notifies admin
+3. Admin verifies/rejects via `POST /api/v1/w9/admin/:affiliateId/verify|reject` → sets `w9Information.status`
+
+### Geocoding Usage
+
+Validate customer address falls within the affiliate's service radius:
 ```javascript
-PAYGISTIX_MERCHANT_ID: 'wmaxaustWEB'
-PAYGISTIX_FORM_ACTION_URL: 'https://safepay.paymentlogistics.net/transaction.asp'
-PAYGISTIX_ENVIRONMENT: 'production'
+const coords = await geocodeAddress(address, city, state, zipCode);
+const distance = calculateDistance(affiliateLocation, coords);
+if (distance > serviceRadius) throw new Error('Address outside service area');
 ```
-
-**Callback URL Pool System**:
-- Pool of 10 callback URLs
-- Single Paygistix form ID
-- Dynamic callback assignment
-- Automatic pool recycling
-
-**Integration**: `server/services/paygistixService.js`
-
-### OAuth Providers
-
-**Google OAuth 2.0**:
-```javascript
-GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID
-GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET
-Callback: /api/v1/auth/google/callback
-Scopes: email, profile
-```
-
-**Facebook OAuth**:
-```javascript
-FACEBOOK_APP_ID: process.env.FACEBOOK_APP_ID
-FACEBOOK_APP_SECRET: process.env.FACEBOOK_APP_SECRET
-Callback: /api/v1/auth/facebook/callback
-Permissions: email, public_profile
-```
-
-**LinkedIn OAuth 2.0**:
-```javascript
-LINKEDIN_CLIENT_ID: process.env.LINKEDIN_CLIENT_ID
-LINKEDIN_CLIENT_SECRET: process.env.LINKEDIN_CLIENT_SECRET
-Callback: /api/v1/auth/linkedin/callback
-Scopes: r_emailaddress, r_liteprofile
-```
-
-**Configuration**: `server/config/passport-config.js`
-
-### DocuSign (W-9 Signing)
-
-**Configuration**:
-```javascript
-DOCUSIGN_INTEGRATION_KEY: process.env.DOCUSIGN_INTEGRATION_KEY
-DOCUSIGN_USER_ID: process.env.DOCUSIGN_USER_ID
-DOCUSIGN_ACCOUNT_ID: process.env.DOCUSIGN_ACCOUNT_ID
-DOCUSIGN_BASE_URL: 'https://demo.docusign.net/restapi'
-DOCUSIGN_W9_TEMPLATE_ID: process.env.DOCUSIGN_W9_TEMPLATE_ID
-```
-
-**Workflow**:
-```
-1. POST /api/v1/w9/initiate-signing
-   ├── Create envelope with pre-filled W-9
-   └── Return signing URL
-
-2. POST /api/v1/w9/webhook/docusign (callback)
-   ├── Update w9Information.docusignStatus
-   └── Trigger admin notification
-
-3. Administrator verifies/rejects
-   ├── POST /api/v1/w9/admin/:affiliateId/verify
-   └── Affiliate.w9Information.status = 'verified'
-```
-
-**Integration**: `server/services/docusignService.js`
-
-### Email Services
-
-**Mailcow SMTP** (current):
-```javascript
-EMAIL_PROVIDER: 'smtp'
-EMAIL_HOST: 'mail.wavemax.promo'
-EMAIL_PORT: 587
-EMAIL_SECURE: false  // STARTTLS
-EMAIL_FROM: 'no-reply@wavemax.promo'
-```
-
-**Brevo (SendInBlue)** (alternative):
-```javascript
-EMAIL_PROVIDER: 'brevo'
-BREVO_API_KEY: process.env.BREVO_API_KEY
-BREVO_FROM_EMAIL: process.env.BREVO_FROM_EMAIL
-```
-
-**Multi-Language Templates**: `server/templates/emails/{language}/`
-
-**Integration**: `server/services/emailService.js`
-
-### OpenStreetMap Nominatim (Geocoding)
-
-**Purpose**: Address validation and service area checks
-
-**Configuration**:
-```javascript
-Base URL: 'https://nominatim.openstreetmap.org'
-Rate Limit: 1 request per second
-User-Agent: 'WaveMAX-Affiliate-Program'
-```
-
-**Usage**:
-```javascript
-// Validate address within service area
-const coordinates = await geocodeAddress(address, city, state, zipCode);
-const distance = calculateDistance(affiliateLocation, coordinates);
-if (distance > serviceRadius) {
-  throw new Error('Address outside service area');
-}
-```
-
-**Integration**: `server/middleware/locationValidation.js`
 
 ---
 
 ## Coding Standards
 
-### File Naming Conventions
+### File Naming
 
-- **Models**: PascalCase (`Affiliate.js`, `Order.js`)
-- **Routes**: camelCase (`affiliateRoutes.js`, `orderRoutes.js`)
-- **Controllers**: camelCase (`affiliateController.js`)
-- **Middleware**: camelCase (`auth.js`, `rateLimiting.js`)
-- **HTML**: kebab-case (`affiliate-register-embed.html`)
-- **API Routes**: kebab-case (`/api/v1/affiliates`)
+- **Models:** PascalCase (`Affiliate.js`)
+- **Routes, controllers, middleware:** camelCase (`affiliateRoutes.js`, `affiliateController.js`, `rateLimiting.js`)
+- **HTML, API paths:** kebab-case (`affiliate-register-embed.html`, `/api/v1/affiliates`)
 
-### Code Organization Patterns
+### Controller Pattern
 
-**Controller Pattern**:
+Use `asyncWrapper` from `server/utils/controllerHelpers.js` to catch errors; respond via `ControllerHelpers.sendSuccess` / `sendError`.
+
 ```javascript
-// Using asyncWrapper for automatic error handling
-const { asyncWrapper } = require('../utils/controllerHelpers');
-
 exports.getAffiliate = asyncWrapper(async (req, res) => {
-  const affiliate = await Affiliate.findOne({
-    affiliateId: req.params.affiliateId
-  });
-
-  if (!affiliate) {
-    return ControllerHelpers.sendError(res, 'Affiliate not found', 404);
-  }
-
+  const affiliate = await Affiliate.findOne({ affiliateId: req.params.affiliateId });
+  if (!affiliate) return ControllerHelpers.sendError(res, 'Affiliate not found', 404);
   ControllerHelpers.sendSuccess(res, { affiliate }, 'Affiliate retrieved');
 });
 ```
 
-**Service Pattern**:
-```javascript
-// Separate business logic from controllers
-class EmailService {
-  async sendAffiliateWelcome(affiliate) {
-    const template = this.getTemplate('affiliate-welcome', affiliate.languagePreference);
-    return this.send({
-      to: affiliate.email,
-      subject: template.subject,
-      html: template.html
-    });
-  }
-}
-```
-
-**Utility Pattern**:
-```javascript
-// Reusable helper functions
-module.exports = {
-  generateUniqueId: (prefix) => `${prefix}-${uuidv4()}`,
-  calculateDistance: (lat1, lon1, lat2, lon2) => { /* ... */ },
-  formatCurrency: (amount) => `$${amount.toFixed(2)}`
-};
-```
-
 ### Error Handling
 
-**Controller Errors**:
-```javascript
-// Validation error
-if (!email) {
-  return ControllerHelpers.sendError(res, 'Email is required', 400);
-}
+Use `sendError(res, message, status)` for expected errors (validation/not-found/permission). Throw for unexpected failures — the error middleware catches and formats. For domain errors needing a status code, use `AppError`:
 
-// Not found
-if (!resource) {
-  return ControllerHelpers.sendError(res, 'Resource not found', 404);
-}
-
-// Permission denied
-if (user.role !== 'admin') {
-  return ControllerHelpers.sendError(res, 'Insufficient permissions', 403);
-}
-
-// Internal error
-throw new Error('Something went wrong');  // Caught by errorHandler middleware
-```
-
-**Custom Error Classes**:
 ```javascript
 class AppError extends Error {
   constructor(message, statusCode) {
     super(message);
     this.statusCode = statusCode;
-    this.name = this.constructor.name;
     Error.captureStackTrace(this, this.constructor);
   }
 }
 
-// Usage
 throw new AppError('W-9 not verified', 403);
 ```
 
-### Async/Await Best Practices
+### Environment & Config
 
-```javascript
-// Always use try-catch or asyncWrapper
-async function createOrder(req, res) {
-  try {
-    const order = await Order.create(req.body);
-    res.json({ success: true, order });
-  } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
-  }
-}
-
-// Or use asyncWrapper
-exports.createOrder = asyncWrapper(async (req, res) => {
-  const order = await Order.create(req.body);
-  ControllerHelpers.sendSuccess(res, { order }, 'Order created', 201);
-});
-```
-
-### Environment Variables
-
-**Never hardcode sensitive values**:
-```javascript
-// Bad
-const jwtSecret = 'my-secret-key-123';
-
-// Good
-const jwtSecret = process.env.JWT_SECRET;
-```
-
-**Use SystemConfig for business values**:
-```javascript
-// Bad
-const wdfRate = 1.25;
-
-// Good
-const wdfRate = await SystemConfig.getValue('wdf_base_rate_per_pound', 1.25);
-```
+- **Secrets:** always `process.env.*`, never hardcode
+- **Business values:** always `await SystemConfig.getValue(key, default)`, never hardcode rates/fees/limits
 
 ### Logging
 
-**Winston Logger**: `server/utils/logger.js`
+Winston logger (`server/utils/logger.js`) — use `logger.info/warn/error/debug`. `console.*` is ESLint-blocked in `server/`.
 
 ```javascript
-const logger = require('../utils/logger');
-
-// Info logging
-logger.info('Order created', { orderId: order.orderId, customerId: customer.customerId });
-
-// Error logging
-logger.error('Payment failed', {
-  error: error.message,
-  orderId: order.orderId,
-  stack: error.stack
-});
-
-// Debug logging (only in development)
-logger.debug('Processing order', { orderData });
+logger.info('Order created', { orderId, customerId });
+logger.error('Payment failed', { error: err.message, orderId, stack: err.stack });
 ```
 
-**Audit Logger**: `server/utils/auditLogger.js`
-
+Audit events (`server/utils/auditLogger.js`) — use for security-relevant actions:
 ```javascript
-const { logAuditEvent, AuditEvents } = require('../utils/auditLogger');
-
-// Security events
 logAuditEvent(AuditEvents.AUTH_SUCCESS, { userId, role }, req);
-logAuditEvent(AuditEvents.PASSWORD_CHANGED, { userId }, req);
 logAuditEvent(AuditEvents.W9_VERIFIED, { affiliateId }, req);
 ```
 
 ### Documentation
 
-**JSDoc Comments**:
-```javascript
-/**
- * Calculate delivery fee for an order
- * @param {number} numberOfBags - Number of bags in order
- * @param {Object} affiliate - Affiliate model instance
- * @returns {Object} Fee breakdown with totalFee, minimumFee, perBagFee
- */
-function calculateDeliveryFee(numberOfBags, affiliate) {
-  // Implementation
-}
-```
-
-**README Updates**:
-- Add new features to `README.md`
-- Update API documentation
-- Document configuration changes
+Non-trivial functions get a JSDoc header documenting parameters, return shape, and any side effects. Reserve comments for *why*, not *what* — well-named identifiers explain what.
 
 ---
 
-## Testing Patterns
+## Testing
 
-### Test Structure
+Strict TDD — see root `CLAUDE.md` for the project testing rules. Layout and conventions live in [`tests/README.md`](../tests/README.md).
 
-**File Organization**:
-```
-tests/
-├── unit/                      # Unit tests
-│   ├── models/               # Model methods and validations
-│   ├── utils/                # Utility function tests
-│   └── services/             # Service logic tests
-├── integration/               # Integration tests
-│   ├── auth.test.js          # Authentication flows
-│   ├── affiliates.test.js    # Affiliate endpoints
-│   ├── customers.test.js     # Customer endpoints
-│   └── orders.test.js        # Order endpoints
-└── helpers/                   # Test utilities
-    ├── testUtils.js          # Helper functions
-    └── csrf.js               # CSRF token helpers
-```
+Quick reference:
 
-### Test Patterns
+- **Unit tests:** `tests/unit/` — models, utils, services
+- **Integration tests:** `tests/integration/` — API endpoints via Supertest
+- **Helpers:** `tests/helpers/` — `testUtils.js` (factories), `csrf.js` (CSRF helper)
 
-**Setup and Teardown**:
-```javascript
-describe('Affiliate Controller', () => {
-  let mongoServer;
+### Essentials
 
-  beforeAll(async () => {
-    mongoServer = await MongoMemoryServer.create();
-    await mongoose.connect(mongoServer.getUri());
-  });
+**Database:** MongoDB Memory Server. Setup/teardown in `beforeAll`/`afterAll`; clean collections in `beforeEach`. `SystemConfig.initializeDefaults()` must run in `tests/setup.js` — tests depending on config fail silently without it.
 
-  afterAll(async () => {
-    await mongoose.disconnect();
-    await mongoServer.stop();
-  });
-
-  beforeEach(async () => {
-    await Affiliate.deleteMany({});
-    await SystemConfig.initializeDefaults();
-  });
-
-  // Tests...
-});
-```
-
-**API Testing with Supertest**:
-```javascript
-const request = require('supertest');
-const app = require('../server');
-
-describe('POST /api/v1/affiliates/register', () => {
-  it('should register a new affiliate', async () => {
-    const response = await request(app)
-      .post('/api/v1/affiliates/register')
-      .send({
-        firstName: 'John',
-        lastName: 'Doe',
-        email: 'john@example.com',
-        password: 'SecurePass123!'
-      })
-      .expect(201);
-
-    expect(response.body.success).toBe(true);
-    expect(response.body.affiliate).toHaveProperty('affiliateId');
-  });
-
-  it('should reject duplicate email', async () => {
-    await Affiliate.create({ email: 'john@example.com', /* ... */ });
-
-    const response = await request(app)
-      .post('/api/v1/affiliates/register')
-      .send({ email: 'john@example.com', /* ... */ })
-      .expect(400);
-
-    expect(response.body.success).toBe(false);
-    expect(response.body.message).toContain('already exists');
-  });
-});
-```
-
-**CSRF Token Testing**:
+**CSRF in tests:**
 ```javascript
 const { getCsrfToken } = require('./helpers/csrf');
 
-it('should require CSRF token for state-changing operations', async () => {
-  const agent = request.agent(app);
-  const csrfToken = await getCsrfToken(agent);
-
-  const response = await agent
-    .post('/api/v1/affiliates/:id/change-password')
-    .set('x-csrf-token', csrfToken)
-    .send({ newPassword: 'NewPass123!' })
-    .expect(200);
-});
+const agent = request.agent(app);
+const csrfToken = await getCsrfToken(agent);
+await agent.post('/api/v1/...').set('x-csrf-token', csrfToken).send(body);
 ```
 
-**Mocking External Services**:
-```javascript
-jest.mock('../services/emailService');
-const emailService = require('../services/emailService');
+**Mocking external services:** `jest.mock('../services/emailService')` before the `require`; assert with `expect(fn).toHaveBeenCalledWith(...)`.
 
-beforeEach(() => {
-  emailService.sendAffiliateWelcome.mockResolvedValue(true);
-});
+**Floating-point:** use `toBeCloseTo(value, 2)`, never `toBe` for computed money amounts.
 
-it('should send welcome email after registration', async () => {
-  await createAffiliate({ email: 'test@example.com' });
+**Commands:** `npm test`, `npm run test:coverage`, `npm test -- tests/integration/affiliates.test.js`, `npm test -- --watch`, `npm test -- --detectOpenHandles`.
 
-  expect(emailService.sendAffiliateWelcome).toHaveBeenCalledWith(
-    expect.objectContaining({ email: 'test@example.com' })
-  );
-});
-```
-
-**Test Factories**:
-```javascript
-// tests/helpers/testUtils.js
-const createTestAffiliate = async (overrides = {}) => {
-  return await Affiliate.create({
-    firstName: 'Test',
-    lastName: 'Affiliate',
-    email: faker.internet.email(),
-    username: faker.internet.userName(),
-    passwordSalt: 'salt',
-    passwordHash: 'hash',
-    serviceRadius: 10,
-    ...overrides
-  });
-};
-
-const createTestCustomer = async (affiliateId, overrides = {}) => {
-  return await Customer.create({
-    customerId: `CUST-${uuidv4()}`,
-    affiliateId,
-    firstName: 'Test',
-    lastName: 'Customer',
-    email: faker.internet.email(),
-    ...overrides
-  });
-};
-```
-
-### Running Tests
-
-```bash
-# Run all tests
-npm test
-
-# Run with coverage
-npm run test:coverage
-
-# Run specific test file
-npm test -- tests/integration/affiliates.test.js
-
-# Run in watch mode
-npm test -- --watch
-
-# Detect open handles
-npm test -- --detectOpenHandles
-```
-
-**Current Coverage**: 86.16%
+Tests must run clean without `--forceExit` after Phase 1.
 
 ---
 
 ## Deployment & Operations
 
-### PM2 Process Management
+### PM2
 
-**Ecosystem Configuration**: `ecosystem.config.js`
-
+`ecosystem.config.js`:
 ```javascript
 module.exports = {
   apps: [{
     name: 'wavemax',
     script: 'server.js',
-    instances: 'max',           // Cluster mode (all CPU cores)
+    instances: 'max',
     exec_mode: 'cluster',
     autorestart: true,
     watch: false,
     max_memory_restart: '1G',
-    env: {
-      NODE_ENV: 'production'
-    }
+    env: { NODE_ENV: 'production' }
   }]
 };
 ```
 
-**PM2 Commands**:
-```bash
-# Start application
-pm2 start ecosystem.config.js
+Common operations: `pm2 start ecosystem.config.js`, `pm2 restart wavemax`, `pm2 logs wavemax --lines 50`, `pm2 status`, `pm2 monit`. After env changes: `pm2 restart wavemax --update-env`.
 
-# Restart application
-pm2 restart wavemax
+### Required Environment Variables
 
-# Stop application
-pm2 stop wavemax
-
-# View logs
-pm2 logs wavemax --lines 50
-
-# View status
-pm2 status
-
-# Monitor resources
-pm2 monit
-
-# Update environment variables
-pm2 restart wavemax --update-env
-```
-
-### Environment Variables
-
-**Required**:
 ```bash
 # Core
 NODE_ENV=production
@@ -1631,70 +801,62 @@ PORT=3000
 # Database
 MONGODB_URI=mongodb+srv://...
 
-# Security
-JWT_SECRET=<64-char-random-string>
-ENCRYPTION_KEY=<64-char-hex-string>
-SESSION_SECRET=<64-char-random-string>
-CSRF_SECRET=<64-char-random-string>
+# Security — each a 64-char random/hex string
+JWT_SECRET=...
+ENCRYPTION_KEY=...        # 64-char hex
+SESSION_SECRET=...
+CSRF_SECRET=...
 
 # OAuth
 GOOGLE_CLIENT_ID=...
 GOOGLE_CLIENT_SECRET=...
 FACEBOOK_APP_ID=...
 FACEBOOK_APP_SECRET=...
+LINKEDIN_CLIENT_ID=...
+LINKEDIN_CLIENT_SECRET=...
 
-# Email
+# Email (Mailcow SMTP)
 EMAIL_PROVIDER=smtp
 EMAIL_HOST=mail.wavemax.promo
 EMAIL_PORT=587
 EMAIL_USER=no-reply@wavemax.promo
 EMAIL_PASS=...
 
-# Payment
-PAYGISTIX_MERCHANT_ID=wmaxaustWEB
-
 # DocuSign
 DOCUSIGN_INTEGRATION_KEY=...
 DOCUSIGN_USER_ID=...
 DOCUSIGN_ACCOUNT_ID=...
+
+# Payment (V1, legacy — being removed in Phase 2)
+PAYGISTIX_MERCHANT_ID=wmaxaustWEB
 ```
 
-### Logging
+See `.env.example` for the full set.
 
-**Log Locations**:
-- Application logs: `logs/combined.log`
-- Error logs: `logs/error.log`
-- Audit logs: `logs/audit.log`
-- PM2 logs: `/root/.pm2/logs/wavemax-*.log`
+### Logs
 
-**Log Levels**:
+- Application: `logs/combined.log`
+- Errors: `logs/error.log`
+- Audit: `logs/audit.log`
+- PM2: `/root/.pm2/logs/wavemax-*.log`
+
+Log level via `LOG_LEVEL` env (`debug` / `info` / `warn`).
+
+### First-Time Database Setup
+
 ```bash
-LOG_LEVEL=debug     # Development
-LOG_LEVEL=info      # Staging
-LOG_LEVEL=warn      # Production
+npm run init-config       # Initialize SystemConfig defaults
+npm run create-admin      # Create default admin account
 ```
 
-### Database Initialization
-
-**First-Time Setup**:
-```bash
-# Initialize SystemConfig defaults
-npm run init-config
-
-# Create default admin account
-npm run create-admin
-```
-
-**Manual Initialization**:
+Manual alternative in a Node script:
 ```javascript
-// In MongoDB shell or Node.js script
 await SystemConfig.initializeDefaults();
-await callbackPoolManager.initializePool();
+await callbackPoolManager.initializePool();   // V1 only — legacy
 ```
 
-### Nginx Configuration
+### Nginx Reverse Proxy
 
-**Reverse Proxy**:
 ```nginx
 location /austin-tx/wavemax-austin-affiliate {
     proxy_pass http://localhost:3000;
@@ -1709,280 +871,69 @@ location /austin-tx/wavemax-austin-affiliate {
 }
 ```
 
-### Monitoring
+### Health Check
 
-**Health Check Endpoint**:
-```bash
-GET /api/health
-
-Response:
-{
-  status: 'ok',
-  timestamp: '2025-01-16T10:30:00Z',
-  uptime: 3600,
-  database: 'connected'
-}
-```
-
-**PM2 Monitoring**:
-```bash
-# Real-time monitoring
-pm2 monit
-
-# CPU and memory usage
-pm2 list
-
-# Process details
-pm2 describe wavemax
-```
-
----
-
-## Common Pitfalls
-
-### 1. Hardcoding Business Values
-
-❌ **Bad**:
-```javascript
-const wdfRate = 1.25;
-const deliveryFee = 25;
-```
-
-✅ **Good**:
-```javascript
-const wdfRate = await SystemConfig.getValue('wdf_base_rate_per_pound', 1.25);
-const deliveryFee = affiliate.minimumDeliveryFee;
-```
-
-### 2. Inline Scripts in HTML
-
-❌ **Bad**:
-```html
-<script>
-  function handleClick() { /* ... */ }
-</script>
-<button onclick="handleClick()">Click</button>
-```
-
-✅ **Good**:
-```html
-<button id="myButton">Click</button>
-<script src="/assets/js/handlers.js"></script>
-```
-
-### 3. Forgetting pageScripts Mapping
-
-❌ **Bad**:
-```html
-<!-- Only in HTML file -->
-<script src="/assets/js/my-feature.js"></script>
-```
-
-✅ **Good**:
-```javascript
-// In embed-app-v2.js
-const pageScripts = {
-  '/my-page': [
-    '/assets/js/my-feature.js'
-  ]
-};
-```
-
-### 4. Not Testing in Embedded Context
-
-❌ **Bad**: Only testing direct access (`/page.html`)
-
-✅ **Good**: Test both:
-- Direct: `https://wavemax.promo/page.html`
-- Embedded: `https://wavemax.promo/embed-app-v2.html?route=/page`
-
-### 5. Exposing Sensitive Data
-
-❌ **Bad**:
-```javascript
-res.json({ user: affiliateDoc });  // Includes passwordHash
-```
-
-✅ **Good**:
-```javascript
-const { passwordHash, passwordSalt, ...safeData } = affiliateDoc.toObject();
-res.json({ user: safeData });
-```
-
-### 6. Missing CSRF Tokens
-
-❌ **Bad**:
-```javascript
-await fetch('/api/v1/affiliates/register', {
-  method: 'POST',
-  body: JSON.stringify(data)
-});
-```
-
-✅ **Good**:
-```javascript
-const csrfToken = await getCsrfToken();
-await fetch('/api/v1/affiliates/register', {
-  method: 'POST',
-  headers: { 'x-csrf-token': csrfToken },
-  body: JSON.stringify(data)
-});
-```
-
-### 7. Forgetting Language Translations
-
-❌ **Bad**: Only updating English translations
-
-✅ **Good**: Update all 4 languages:
-```json
-// en/common.json
-"new.feature": "New Feature"
-
-// es/common.json
-"new.feature": "Nueva Función"
-
-// pt/common.json
-"new.feature": "Novo Recurso"
-
-// de/common.json
-"new.feature": "Neue Funktion"
-```
-
-### 8. Not Handling Floating-Point Precision
-
-❌ **Bad**:
-```javascript
-expect(commission).toBe(281.25);  // Might be 281.2500000000001
-```
-
-✅ **Good**:
-```javascript
-expect(commission).toBeCloseTo(281.25, 2);
-```
-
-### 9. Missing Test Cleanup
-
-❌ **Bad**:
-```javascript
-describe('Tests', () => {
-  it('test 1', async () => {
-    await Affiliate.create({ email: 'test@example.com' });
-  });
-
-  it('test 2', async () => {
-    await Affiliate.create({ email: 'test@example.com' });  // Duplicate key error!
-  });
-});
-```
-
-✅ **Good**:
-```javascript
-describe('Tests', () => {
-  beforeEach(async () => {
-    await Affiliate.deleteMany({});
-  });
-
-  it('test 1', async () => { /* ... */ });
-  it('test 2', async () => { /* ... */ });
-});
-```
-
-### 10. Using Wrong Copyright Notice
-
-❌ **Bad**: `© 2025 WaveMAX`
-
-✅ **Good**: `© 2025 CRHS Enterprises, LLC. All rights reserved.`
+`GET /api/health` → `{ status, timestamp, uptime, database }`
 
 ---
 
 ## Quick Reference
 
-### Project Commands
-
-```bash
-# Install dependencies
-npm install
-
-# Start development server
-npm run dev
-
-# Start production server
-npm start
-
-# Run tests
-npm test
-
-# Run tests with coverage
-npm run test:coverage
-
-# Run tests with memory optimization
-npm run test:memory
-
-# Initialize database
-npm run init-config
-
-# PM2 commands
-pm2 start ecosystem.config.js
-pm2 restart wavemax
-pm2 logs wavemax
-pm2 status
-```
-
 ### Key File Paths
 
 ```
 Server:
-  Entry point:          server.js
-  Models:               server/models/
-  Controllers:          server/controllers/
-  Routes:               server/routes/
-  Middleware:           server/middleware/
-  Services:             server/services/
-  Utils:                server/utils/
+  Entry point:       server.js
+  Models:            server/models/
+  Controllers:       server/controllers/
+  Routes:            server/routes/
+  Middleware:        server/middleware/
+  Services:          server/services/
+  Utils:             server/utils/
 
 Frontend:
-  Entry point:          public/embed-app-v2.html
-  Router:               public/assets/js/embed-app-v2.js
-  Session manager:      public/assets/js/session-manager.js
-  i18n:                 public/assets/js/i18n.js
-  Translations:         public/locales/{lang}/common.json
+  Entry point:       public/embed-app-v2.html
+  Router:            public/assets/js/embed-app-v2.js
+  Session manager:   public/assets/js/session-manager.js
+  i18n:              public/assets/js/i18n.js
+  Translations:      public/locales/{lang}/common.json
 
 Configuration:
-  Environment:          .env
-  PM2:                  ecosystem.config.js
-  Passport OAuth:       server/config/passport-config.js
-  CSRF:                 server/config/csrf-config.js
+  Environment:       .env (.env.example is the reference)
+  PM2:               ecosystem.config.js
+  Passport OAuth:    server/config/passport-config.js
+  CSRF:              server/config/csrf-config.js
 
 Documentation:
-  Init prompt:          init.prompt
-  Best practices:       docs/development/OPERATING_BEST_PRACTICES.md
-  i18n guide:           docs/guides/i18n-best-practices.md
-  This file:            .claude/claude.md
+  Refactor plan:     docs/refactor/REFACTORING_PLAN.md
+  Best practices:    docs/development/OPERATING_BEST_PRACTICES.md
+  Pitfalls guide:    docs/development/PITFALLS.md
+  i18n guide:        docs/guides/i18n-best-practices.md
+  Tests layout:      tests/README.md
 ```
 
 ### Important URLs
 
 ```
 Production:
-  Main site:            https://www.wavemaxlaundry.com
-  Affiliate app:        https://wavemax.promo
-  Embedded iframe:      /austin-tx/wavemax-austin-affiliate
+  Main site:         https://www.wavemaxlaundry.com
+  Affiliate app:     https://wavemax.promo
+  Embedded iframe:   /austin-tx/wavemax-austin-affiliate
 
-API Endpoints:
-  Base URL:             https://wavemax.promo/api/v1
-  Health check:         /api/health
-  CSRF token:           /api/csrf-token
+API:
+  Base URL:          https://wavemax.promo/api/v1
+  Health check:      /api/health
+  CSRF token:        /api/csrf-token
 
-Payment:
-  Paygistix:            https://safepay.paymentlogistics.net/transaction.asp
+OAuth callbacks:
+  Google:            /api/v1/auth/google/callback
+  Facebook:          /api/v1/auth/facebook/callback
+  LinkedIn:          /api/v1/auth/linkedin/callback
 
-OAuth Callbacks:
-  Google:               /api/v1/auth/google/callback
-  Facebook:             /api/v1/auth/facebook/callback
-  LinkedIn:             /api/v1/auth/linkedin/callback
+DocuSign webhook:    /api/v1/w9/webhook/docusign
 
-DocuSign:
-  Webhook:              /api/v1/w9/webhook/docusign
+V1 Paygistix (legacy):
+  Gateway URL:       https://safepay.paymentlogistics.net/transaction.asp
 ```
 
 ### Role Hierarchy
@@ -1997,54 +948,20 @@ admin (super admin)
 
 ### Workflow Cheat Sheet
 
-**Affiliate Registration**:
-```
-1. Register → 2. W-9 submission → 3. Admin verification → 4. Active
-```
+- **Affiliate registration:** Register → W-9 submission → Admin verification → Active
+- **Customer registration (V2, current):** Register (no payment) → Active
+- **Order lifecycle:** `pending → processing → processed → complete`
+- **Bag workflow:** `processing (weighed) → processed (WDF done) → completed (picked up)`
+- **Payment (V2) flow:** `pending → awaiting → confirming → verified`
 
-**Customer Registration V1**:
-```
-1. Register → 2. Paygistix payment → 3. Active with bagCredit
-```
+### Common Pitfalls
 
-**Customer Registration V2**:
-```
-1. Register (no payment) → 2. Active with no bagCredit
-```
+See [`docs/development/PITFALLS.md`](../docs/development/PITFALLS.md) — 10 traps with fixes (hardcoding, inline scripts, missing `pageScripts`, iframe-context testing, leaky JSON responses, missing CSRF, i18n drift, float precision, test cleanup, copyright).
 
-**Order Lifecycle**:
-```
-pending → processing → processed → complete
-```
+### Copyright Notice
 
-**Bag Workflow**:
-```
-processing (weighed) → processed (WDF done) → completed (picked up)
-```
-
-**Payment V2 Flow**:
-```
-pending → awaiting → confirming → verified
-```
+`© 2025 CRHS Enterprises, LLC. All rights reserved.`
 
 ---
 
-## Session Startup Checklist
-
-When starting a new development session:
-
-- [ ] Review `init.prompt` for persona and expertise
-- [ ] Review this file (`.claude/claude.md`)
-- [ ] Check `git status` for uncommitted changes
-- [ ] Review `docs/development/OPERATING_BEST_PRACTICES.md` for known issues
-- [ ] Check for in-progress tasks in project logs
-- [ ] Verify PM2 status: `pm2 status`
-- [ ] Check recent logs: `tail -n 50 /root/.pm2/logs/wavemax-error.log`
-
----
-
-**Ready to build, debug, and improve the WaveMAX codebase together!**
-
----
-
-*Last updated: 2025-01-16 | Version: 2.0*
+*Operational rules and session startup live in the root `CLAUDE.md` and `~/.claude/CLAUDE.md`. This handbook is architectural reference only.*
