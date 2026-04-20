@@ -58,7 +58,7 @@
     }
 
     // Configuration for embedded environment
-    const baseUrl = window.EMBED_CONFIG?.baseUrl || 'https://wavemax.promo';
+    const baseUrl = window.EMBED_CONFIG?.baseUrl || window.location.origin;
     const isEmbedded = window.EMBED_CONFIG?.isEmbedded || false;
 
     // Set language preference based on browser language
@@ -974,9 +974,9 @@
         emailField.parentElement.appendChild(emailHelp);
       }
 
-      // Basic email format validation
-      const emailRegex = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/;
-      if (!emailRegex.test(email)) {
+      // Delegate to the shared FormValidation helper — single source of truth
+      // for the email regex. Supports any TLD ≥ 2 chars and catches typos.
+      if (!(window.FormValidation && window.FormValidation.isValidEmail(email))) {
         emailField.classList.remove('border-green-500');
         emailField.classList.add('border-red-500');
         emailHelp.textContent = '❌ Invalid email format';

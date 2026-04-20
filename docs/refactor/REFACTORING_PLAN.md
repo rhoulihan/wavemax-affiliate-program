@@ -396,7 +396,11 @@ Route files split correspondingly. Keep URLs stable (pre-cutover production clie
 
 ### 4.6 Consolidate RBAC middleware
 
-Merge `authorizationHelpers.js` (413) + `rbac.js` (316) into `middleware/authorization.js`. Target ≤ 500 lines combined.
+_Revised 2026-04-19:_ kept as two files rather than merging.
+- `rbac.js` (316 lines) — role hierarchy + `checkRole` middleware. One concern: role-based access.
+- `authorizationHelpers.js` (413 lines) — entity-level checks (`canAccessCustomer`, `canAccessAffiliate`, `canAccessOrder`) + wrapper middlewares. Separate concern: instance-level authorization.
+
+Both are already under the 800-line file cap and each has a single clear responsibility. A combined file would be 729 lines and would mix two distinct authorization layers — the underlying "one concern per file" goal is better served by the current split.
 
 ### 4.7 Standardize logging
 

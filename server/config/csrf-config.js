@@ -99,6 +99,8 @@ const CSRF_CONFIG = {
     '/api/customers/register',
     '/api/v1/affiliates/register',
     '/api/v1/customers/register',
+    '/api/v1/affiliates/beta-request',
+    '/api/affiliates/beta-request',
     '/api/v1/auth/social/register',
     '/api/v1/auth/customer/social/register',
     // Payment token creation for registration (part of registration flow)

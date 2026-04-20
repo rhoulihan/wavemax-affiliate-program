@@ -71,7 +71,7 @@ exports.sendAdminNotification = async function(options) {
  */
 exports.sendBetaRequestNotification = async (betaRequest) => {
   try {
-    const adminEmail = process.env.ADMIN_EMAIL || 'admin@wavemax.com';
+    const adminEmail = process.env.ADMIN_EMAIL || process.env.DEFAULT_ADMIN_EMAIL || 'admin@wavemax.promo';
     
     const subject = 'New Affiliate Beta Request Received';
     

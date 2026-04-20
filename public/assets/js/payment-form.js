@@ -238,9 +238,8 @@
         }
       }
 
-      // Validate email format
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(this.formData.billingEmail)) {
+      // Validate billing email via the shared helper in form-validation.js.
+      if (!(window.FormValidation && window.FormValidation.isValidEmail(this.formData.billingEmail))) {
         return false;
       }
 

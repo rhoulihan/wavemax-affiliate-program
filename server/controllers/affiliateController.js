@@ -798,6 +798,55 @@ exports.getAffiliateTransactions = async (req, res) => {
 /**
  * Get affiliate dashboard stats
  */
+/**
+ * Year-to-date earnings for an affiliate.
+ * Sums affiliateCommission + actualTotal for orders completed since Jan 1
+ * of the current year. Used by the dashboard YTD card.
+ */
+exports.getAffiliateYtdStats = async (req, res) => {
+  try {
+    const { affiliateId } = req.params;
+
+    if (req.user.role !== 'admin' && req.user.role !== 'administrator' && req.user.affiliateId !== affiliateId) {
+      return res.status(403).json({ success: false, message: 'Unauthorized' });
+    }
+
+    const yearStart = new Date(new Date().getFullYear(), 0, 1);
+
+    // Order schema uses `completedAt` for final pickup + `status: 'complete'`
+    // (see Order.js). `deliveredAt` isn't a real field — dashboard stats above
+    // filter on it anyway and silently get zero. Use completedAt as the
+    // ground truth for YTD.
+    const orders = await Order.find({
+      affiliateId,
+      status: 'complete',
+      completedAt: { $gte: yearStart }
+    }).select('affiliateCommission actualTotal completedAt');
+
+    let totalEarnings = 0;
+    let totalRevenue = 0;
+    for (const order of orders) {
+      totalEarnings += order.affiliateCommission || 0;
+      totalRevenue += order.actualTotal || 0;
+    }
+
+    res.status(200).json({
+      success: true,
+      totalEarnings,
+      totalRevenue,
+      orderCount: orders.length,
+      yearStart,
+      asOf: new Date()
+    });
+  } catch (error) {
+    logger.error('Get affiliate YTD stats error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'An error occurred while retrieving year-to-date statistics'
+    });
+  }
+};
+
 exports.getAffiliateDashboardStats = async (req, res) => {
   try {
     const { affiliateId } = req.params;
