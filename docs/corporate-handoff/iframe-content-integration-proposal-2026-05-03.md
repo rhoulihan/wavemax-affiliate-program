@@ -169,23 +169,19 @@ reference build at `https://wavemax.promo/dev/austin-host-mock.html`.
 
 ### 3.1. Parent-Page Chrome (the host envelope)
 
-The chrome is a faithful recreation of the existing MHR template, but
-with every defect identified in the prior audits closed:
+The chrome is a faithful recreation of the existing MHR template,
+with the defects identified in the audits closed. Rather than
+itemize every fix here, the changes group into four themes:
 
-| Element                | Existing `/austin-tx`                | Reference build                                            |
-|------------------------|--------------------------------------|------------------------------------------------------------|
-| **Top phone number**   | Two phone numbers hardcoded into the markup: a tracking-vendor number and the local number, in different places (E2 audit defect — when one stops getting populated by its source, the page silently falls back to the other) | Every visible phone number is bound from a single source — `LOCATION_DATA.contact.phone` — so there is one place to update and no fallback drift |
-| **Phone `tel:` links** | Hardcoded into individual elements; some elements drift out of sync with each other (E3 defect — different formats and different numbers across the same page) | Every `tel:` anchor on the page is populated from the same single source (`LOCATION_DATA.contact.phoneTel`); changing the source updates every anchor |
-| **Address**            | Hardcoded "825 E Rundberg Ln F1" — but with Jacksonville address visible in some footer paths (F2 defect) | Bound to `LOCATION_DATA.contact.address` everywhere; no other-location bleed |
-| **Get-Directions URLs**| Several broken: missing `?destination=`, raw `&` not encoded, point at corporate locations page instead (D1 defect) | All point at `https://www.google.com/maps/dir/?api=1&destination=825+E+Rundberg+Ln+F1+Austin+TX+78753` |
-| **Footer "Local Links"** | 6 anchors but only 2 navigated (4 had `href="#"` — F1 defect) | All 6 anchors navigate; no `href="#"` placeholders anywhere |
-| **Hours display**      | "Open 7am-10pm" but rendered without space, breaks at narrow widths | Bound to `LOCATION_DATA.hours.display`; mobile-tested at 6 viewports |
-| **Last-wash time**     | Static "9pm" inline, not bound | `LOCATION_DATA.hours.lastWash`; can be edited per-franchisee in one place |
-| **Locations modal**    | TranslatePress switcher in this slot — confusing UX, didn't actually translate | Native modal that lists franchisee locations and routes to them |
-| **Language switcher**  | TranslatePress widget, en/es only | Native flag-based switcher, en/es/pt/de, with localStorage persistence and PostMessage broadcast to iframe |
-| **Mobile breakpoints** | Hero phone link broke at 375px; nav stacked behind logo at 414px | Tested clean at 375 / 414 / 768 / 901 / 1280 / 1920 |
-| **Map preview (footer)** | Static image of Jacksonville office (J1 defect) | Procedurally drawn map with Austin pin + interactive Get Directions / All Locations buttons |
-| **Embed-page bridge**  | None — chrome is one HTML doc | PostMessage protocol with strict origin validation, language sync, location-data sync, content-height auto-resize |
+| Theme | What's different in the reference build |
+|---|---|
+| **Single-source data binding** | Phone, address, hours, last-wash, map link — every location-specific value reads from one `LOCATION_DATA` object. No values hardcoded in markup; no fallback drift between elements. |
+| **Working links throughout** | All `tel:`, Get-Directions, and footer-nav anchors are populated and tested. No `href="#"` placeholders, no malformed `?destination=` strings, no broken footer links. |
+| **No other-location bleed** | The Jacksonville-address residue and the Jacksonville office map preview are gone; everything Austin-specific. |
+| **Multilingual + mobile-tested** | Native flag-based language switcher covering en/es/pt/de (with localStorage + cross-frame sync via PostMessage); chrome tested clean at six viewports from 375px to 1920px. |
+
+Full per-element side-by-side is available on request if MHR wants
+the line-item view.
 
 ### 3.2. Landing-Page Content (what fills the iframe)
 
