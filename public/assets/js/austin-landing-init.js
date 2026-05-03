@@ -430,26 +430,49 @@
     container.appendChild(empty);
   }
 
-  /* ---------- Hero image rotator ---------- */
+  /* ---------- Hero image rotator ----------
+   * Switched from setInterval(step, ms) to a self-recursive setTimeout
+   * chain after the deployed page was observed never advancing past
+   * image 0. Likely cause: the bridge's per-second updateHeight() poll
+   * (iframe-bridge-v2.js, line ~400) was racing with our setInterval
+   * in a way that left our timer dangling on prod-only timing. The
+   * setTimeout chain re-arms after each step, so a single missed tick
+   * can't permanently disable rotation.
+   *
+   * Hover pause uses a paused flag instead of clear/re-set since the
+   * recursive chain self-suspends naturally — easier to reason about.
+   */
   function initHeroRotator() {
     const imgs = document.querySelectorAll('.wm-hero-rotator-img');
     if (imgs.length < 2) return;
-    let active = 0;
+    let active = Array.from(imgs).findIndex(i => i.classList.contains('is-active'));
+    if (active < 0) { active = 0; imgs[0].classList.add('is-active'); }
     const ROTATE_MS = 5500;
+    let paused = false;
+    let scheduled = null;
 
     function step() {
-      imgs[active].classList.remove('is-active');
-      active = (active + 1) % imgs.length;
-      imgs[active].classList.add('is-active');
+      try {
+        imgs[active].classList.remove('is-active');
+        active = (active + 1) % imgs.length;
+        imgs[active].classList.add('is-active');
+      } catch (e) {
+        // Don't let one bad tick kill the chain
+      }
+      schedule();
+    }
+    function schedule() {
+      if (paused) return;
+      if (scheduled) clearTimeout(scheduled);
+      scheduled = setTimeout(step, ROTATE_MS);
     }
 
-    let timer = setInterval(step, ROTATE_MS);
-    const rotator = document.getElementById('wm-hero-rotator');
+    schedule();
 
-    // Pause on hover so users can read the caption clearly
+    const rotator = document.getElementById('wm-hero-rotator');
     if (rotator) {
-      rotator.addEventListener('mouseenter', () => clearInterval(timer));
-      rotator.addEventListener('mouseleave', () => { timer = setInterval(step, ROTATE_MS); });
+      rotator.addEventListener('mouseenter', () => { paused = true; if (scheduled) { clearTimeout(scheduled); scheduled = null; } });
+      rotator.addEventListener('mouseleave', () => { paused = false; schedule(); });
     }
   }
 

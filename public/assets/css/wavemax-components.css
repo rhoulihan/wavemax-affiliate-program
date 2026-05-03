@@ -612,6 +612,9 @@
   display: flex;
   flex-wrap: wrap;
   gap: var(--wm-sp-1);
+  /* Center the tab buttons under the section heading. flex-wrap keeps
+     wrapped rows centered too on narrow viewports. */
+  justify-content: center;
   border-bottom: 2px solid var(--wm-border);
   margin-bottom: var(--wm-sp-6);
 }
