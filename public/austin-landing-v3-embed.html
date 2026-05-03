@@ -25,12 +25,26 @@
     /* Hero is the single biggest height consumer — keep it tight.
        Override the global 60vh (which is 540px on a 900px viewport). */
     .wm-hero { min-height: 360px; padding: var(--wm-sp-5) 0; }
-    .wm-hero-title { font-size: var(--wm-fs-5xl); margin-bottom: var(--wm-sp-3); }
+    .wm-hero-title { font-size: var(--wm-fs-4xl); margin-bottom: var(--wm-sp-3); }
     .wm-hero-subtitle { font-size: var(--wm-fs-base); margin-bottom: var(--wm-sp-4); max-width: 56ch; }
     .wm-hero-eyebrow { margin-bottom: var(--wm-sp-3); }
     @media (max-width: 768px) {
       .wm-hero { min-height: 280px; }
       .wm-hero-title { font-size: var(--wm-fs-3xl); }
+    }
+
+    /* Hero brand-logo image — replaces the small text pill eyebrow.
+       Same logo MHR uses on the existing wavemaxlaundry.com nav. */
+    .wm-hero-brand-logo {
+      display: block;
+      max-width: 220px;
+      width: auto;
+      height: auto;
+      margin: 0 0 var(--wm-sp-4);
+      filter: drop-shadow(0 6px 16px rgba(0, 0, 0, 0.25));
+    }
+    @media (max-width: 768px) {
+      .wm-hero-brand-logo { max-width: 180px; }
     }
 
     /* Tighter stat cards */
@@ -232,7 +246,11 @@
       <div class="wm-hero-grid">
 
         <div class="wm-hero-content">
-          <span class="wm-hero-eyebrow"><span class="wm-pin"></span><span data-i18n="landing.eyebrow">North Austin · Open daily 7am–10pm</span></span>
+          <img class="wm-hero-brand-logo"
+               src="https://wavemaxlaundry.com/wp-content/uploads/2026/03/logo-wavemax.png"
+               alt="WaveMAX Laundry"
+               referrerpolicy="no-referrer"
+               loading="eager">
           <h1 class="wm-hero-title" data-i18n="landing.title">Austin's Cleanest Laundromat</h1>
           <p class="wm-hero-subtitle" data-i18n="landing.subtitle">Hospital-grade UV-sanitized 450G washers, fast dryers, free WiFi, free parking. Drop off your wash-dry-fold or use our self-serve floor — open every day.</p>
           <div class="wm-hero-actions">
