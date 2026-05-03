@@ -27,12 +27,13 @@
     .wm-hero { min-height: 690px; padding: var(--wm-sp-6) 0; display: flex; align-items: center; }
 
     /* Wider horizontal margins inside the hero — pulls the content inboard
-       so the watermark backdrop has visible breathing room on both sides
-       and the composition reads as more deliberate / less edge-to-edge. */
+       so the watermark backdrop has visible breathing room on both sides.
+       Margins narrowed ~10% from the prior pass: max-width 960→1056,
+       padding 64→58 each side. */
     .wm-hero .wm-hero-inner {
-      max-width: var(--wm-content-narrow);  /* 960px instead of 1200px */
-      padding-left: var(--wm-sp-8);          /* 64px each side */
-      padding-right: var(--wm-sp-8);
+      max-width: 1056px;                /* was 960 (--wm-content-narrow) */
+      padding-left: 58px;               /* was 64 (--wm-sp-8) */
+      padding-right: 58px;
     }
     @media (max-width: 880px) {
       .wm-hero .wm-hero-inner { max-width: var(--wm-content-max); padding-left: var(--wm-sp-5); padding-right: var(--wm-sp-5); }
