@@ -493,9 +493,9 @@ Plus `public/assets/js/embed-app-v2.js` route map updates so the new pages are r
 - [ ] One-time: call Find Place From Text for `"WaveMAX Laundry Austin 825 E Rundberg"`; persist `placeId` + `profileUrl` + `reviewsUrl` into the `LOCATION_DATA` constant
 - [ ] `googleReviewsService.js` — Places API client, 24h cache, stale-while-revalidate, rating filter
 - [ ] `locationController.js` + `locationRoutes.js` — `GET /api/v1/location/:slug/reviews`
-- [ ] `contactController.js` + `contactRoutes.js` — `POST /api/v1/contact/:slug` with rate limit + CSRF
-- [ ] `contactNotificationService.js` — SMTP fan-out via existing `emailService.js` to franchisee inbox
-- [ ] Tests: `googleReviewsService.test.js` (mock Google), `location-reviews.test.js` (cache behavior, 5★ filter, fallback paths), `contact-submit.test.js` (validation, rate limit, email dispatch)
+- [x] `contactController.js` + `contactRoutes.js` — `POST /api/v1/contact/:slug` with rate limit + CSRF (Phase 0d, 2026-05-03)
+- [x] `contactNotificationService.js` — SMTP fan-out via existing `emailService.js` to franchisee inbox (Phase 0d, 2026-05-03)
+- [x] Tests: `googleReviewsService.test.js` (mock Google), `location-reviews.test.js` (cache behavior, 5★ filter, fallback paths), `contact-submit.test.js` (validation, rate limit, email dispatch) — all green (16 contact + 9 reviews + 15 service = 40 tests)
 - [ ] Verify endpoints from `curl` before any iframe page consumes them
 
 ### Phase 1 — foundation (~25% of effort)
