@@ -23,6 +23,14 @@
 
     .wm-iframe-shell { width: 100%; background: #ffffff; }
     .wm-iframe-shell iframe { width: 100%; border: 0; display: block; min-height: 850px; }
+
+    /* wm-bc — match MHR exactly: white bg, breadcrumb on top of iframe */
+    .wm-bc-host { background: #ffffff; border-bottom: 1px solid #e5e9f0; }
+    .wm-bc-host-inner { max-width: 1200px; margin: 0 auto; padding: 10px 40px; font-family: 'Poppins', sans-serif; font-size: 13px; color: #666; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+    .wm-bc-host-inner a { color: #1e72ba; text-decoration: none; }
+    .wm-bc-host-inner a:hover { text-decoration: underline; }
+    .wm-bc-host-sep { color: #bbb; margin: 0 2px; }
+    .wm-bc-host-current { color: #333; font-weight: 600; }
   </style>
 
   <script>
@@ -253,6 +261,20 @@
     <a href="?route=/contact" data-route="/contact" data-i18n="chrome.nav.contact">Contact</a>
   </nav>
 </header>
+
+<!--
+  ════════════════════════════════════════════════════════════════════
+  WM-BC — breadcrumb (E12 fix: Home href is location landing, not /)
+  Updated by host JS based on the active route.
+  ════════════════════════════════════════════════════════════════════
+-->
+<div id="wm-bc" class="wm-bc-host">
+  <div class="wm-bc-host-inner">
+    <a href="?route=/" data-i18n="chrome.bc.home">Home</a>
+    <span class="wm-bc-host-sep" aria-hidden="true">›</span>
+    <strong class="wm-bc-host-current" id="wm-bc-current" data-i18n="chrome.bc.locationName">WaveMAX Austin, TX</strong>
+  </div>
+</div>
 
 <!-- IFRAME SLOT — embedded route content -->
 <main class="wm-iframe-shell" role="main">

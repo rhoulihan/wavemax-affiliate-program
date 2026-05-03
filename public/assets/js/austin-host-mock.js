@@ -519,7 +519,19 @@
       drop.classList.toggle('wmlnav-on', isActiveChild);
     });
 
-    // Breadcrumb removed — no per-route label update needed.
+    // Update breadcrumb current label.
+    // Landing route ('/') uses chrome.bc.locationName via data-i18n; deep
+    // routes use the route label from ROUTE_BREADCRUMBS.
+    const bcCurrent = document.getElementById('wm-bc-current');
+    if (bcCurrent) {
+      const label = ROUTE_BREADCRUMBS[route];
+      if (route === '/' || !label) {
+        bcCurrent.setAttribute('data-i18n', 'chrome.bc.locationName');
+      } else {
+        bcCurrent.removeAttribute('data-i18n');
+        bcCurrent.textContent = label;
+      }
+    }
   }
 
   function loadIframeRoute(route) {
