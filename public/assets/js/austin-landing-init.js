@@ -445,27 +445,39 @@
    * recursive chain self-suspends naturally — easier to reason about.
    */
   function initHeroRotator() {
-    const imgs = document.querySelectorAll('.wm-hero-rotator-img');
-    // Identity sentinel: stamp the document so we can detect whether the
-    // rotator is operating on the same doc the user sees, or on a stale
-    // detached doc orphaned by an iframe reload race. The id is the
-    // session start time (ms) — easy to spot in logs.
-    const docId = Date.now();
-    window.__rotatorDocId = docId;
-    console.log('[austin-landing] initHeroRotator — imgs:', imgs.length, 'docId:', docId, 'href:', document.location.href);
-    if (imgs.length < 2) return;
-    let active = Array.from(imgs).findIndex(i => i.classList.contains('is-active'));
-    if (active < 0) { active = 0; imgs[0].classList.add('is-active'); }
-    const ROTATE_MS = 4000;  // 4s feels alive without being busy
+    // Re-query elements on each tick rather than caching the NodeList
+    // at init. The cached NodeList was operating on a phantom set of
+    // elements that wasn't the live rotator's children — verified via
+    // MutationObserver on the live #wm-hero-rotator showing zero class
+    // mutations even when step() logs claimed they were happening.
+    // Likely cause: the iframe document is loaded twice during initial
+    // init (visible as two "Iframe Bridge V2 Initializing..." logs);
+    // init #1's NodeList is captured before doc gets replaced; init #2
+    // runs but its closure references somehow get crossed with #1's
+    // dead elements. Querying fresh sidesteps the whole mess.
+    const initial = document.querySelectorAll('.wm-hero-rotator-img');
+    if (initial.length < 2) return;
+    let active = Array.from(initial).findIndex(i => i.classList.contains('is-active'));
+    if (active < 0) { active = 0; initial[0].classList.add('is-active'); }
+
+    const ROTATE_MS = 4000;
     let paused = false;
     let scheduled = null;
 
     function step() {
-      const liveDocId = window.__rotatorDocId;
-      const before = imgs[active]?.getAttribute('src')?.split('/').pop();
+      // Re-query on every tick. document.querySelectorAll returns a
+      // STATIC NodeList of the CURRENT live elements — no closure
+      // capture, no phantom references.
+      const imgs = document.querySelectorAll('.wm-hero-rotator-img');
+      if (imgs.length < 2) { schedule(); return; }
+      // Re-derive active from the live DOM in case external code
+      // (e.g. a manual class toggle) shifted it.
+      const live = Array.from(imgs).findIndex(i => i.classList.contains('is-active'));
+      if (live >= 0) active = live;
       const next = (active + 1) % imgs.length;
-      const after = imgs[next]?.getAttribute('src')?.split('/').pop();
-      console.log('[austin-landing] rotator tick — docId:', docId, 'live:', liveDocId, 'sameDoc:', docId === liveDocId, 'changing:', before, '→', after);
+      const before = imgs[active]?.getAttribute('src')?.split('/').pop();
+      const after  = imgs[next]?.getAttribute('src')?.split('/').pop();
+      console.log('[austin-landing] rotator tick →', before, '→', after);
       try {
         imgs[active].classList.remove('is-active');
         active = next;
