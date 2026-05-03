@@ -445,8 +445,14 @@
   <!-- Demo-only host page styles (external for CSP compliance) -->
   <link rel="stylesheet" href="/assets/css/austin-host-mock.css">
 
-  <!-- Page data (external for CSP compliance) — sets window.GOOGLE_PLACES_API_KEY,
-       window.LOCATION_PLACE_ID, and window.LOCATION_DATA before the bridge loads -->
+  <!-- Server-rendered config (reads GOOGLE_PLACES_API_KEY + LOCATION_PLACE_ID
+       from server env). Loads BEFORE the static data file so the env values
+       win the OR-fallback in austin-host-mock-data.js. -->
+  <script src="/assets/js/austin-host-mock-config.js"></script>
+
+  <!-- Page data (external for CSP compliance) — sets window.LOCATION_DATA
+       before the bridge loads. The OR-fallback for GOOGLE_PLACES_API_KEY +
+       LOCATION_PLACE_ID is preserved as a safety net for local-only dev. -->
   <script src="/assets/js/austin-host-mock-data.js"></script>
 </head>
 <body>
