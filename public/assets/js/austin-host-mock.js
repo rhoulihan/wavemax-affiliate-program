@@ -519,21 +519,7 @@
       drop.classList.toggle('wmlnav-on', isActiveChild);
     });
 
-    // Update breadcrumb current label.
-    // For the location landing route ('/') the breadcrumb terminal is the
-    // location name (translated key chrome.bc.locationName, kept in sync
-    // with the data-i18n on the element). For deep routes the terminal
-    // is the route label from ROUTE_BREADCRUMBS.
-    const bcCurrent = document.getElementById('wm-bc-current');
-    if (bcCurrent) {
-      const label = ROUTE_BREADCRUMBS[route];
-      if (route === '/' || !label) {
-        bcCurrent.setAttribute('data-i18n', 'chrome.bc.locationName');
-      } else {
-        bcCurrent.removeAttribute('data-i18n');
-        bcCurrent.textContent = label;
-      }
-    }
+    // Breadcrumb removed — no per-route label update needed.
   }
 
   function loadIframeRoute(route) {
