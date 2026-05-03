@@ -166,7 +166,8 @@ test.describe('Austin host-mock — foundation', () => {
       const iframe = document.getElementById('wavemax-iframe');
       return iframe.contentDocument?.querySelector('.wm-hero-title')?.textContent?.trim();
     });
-    expect(iframeHeroTitle).toBe('Verificación del protocolo del puente');
+    // Route / loads austin-landing-v3-embed.html → Spanish hero title
+    expect(iframeHeroTitle).toBe('La lavandería más limpia de Austin');
 
     // Reset to English
     await page.evaluate(() => {
