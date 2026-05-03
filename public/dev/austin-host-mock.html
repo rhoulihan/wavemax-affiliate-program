@@ -4,11 +4,438 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="csp-nonce" content="">
-  <meta name="robots" content="noindex,nofollow">
-  <title>WaveMAX Austin · Local-dev Host Mock</title>
-  <meta name="description" content="Reference host page demonstrating the parent-iframe bridge contract for the WaveMAX Austin franchisee.">
+
+  <!-- ════════════════════════════════════════════════════════════════════
+       PRIMARY SEO META — modeled on https://wavemaxlaundry.com/austin-tx/
+       and extended with structured data + multilingual hreflangs to match
+       the four locales we ship (en / es / pt / de). When MHR / corporate
+       adopt this template, only the canonical URL needs to change.
+       ════════════════════════════════════════════════════════════════════ -->
+  <title>Laundromat in North Austin, TX | Self-Service &amp; Wash-Dry-Fold | WaveMAX Austin</title>
+  <meta name="description" content="Top-rated laundromat in North Austin, TX. 42 Electrolux CompassPro 450G washers, 42 fast dryers, hospital-grade UV-sanitized water, free WiFi, free parking. Self-service or wash-dry-fold drop-off. Open daily 7am–10pm at 825 E Rundberg Ln F1.">
+  <meta name="keywords" content="laundromat Austin TX, laundromat near me, self service laundry Austin, wash dry fold Austin, drop off laundry Austin, coin laundry Austin, North Austin laundromat, Rundberg laundromat, commercial laundry Austin, WaveMAX Austin">
+  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+  <meta name="author" content="WaveMAX Laundry Austin">
+  <meta name="revisit-after" content="7 days">
+
+  <!-- Geo signals (Bing/Yandex still consume these; Google uses them as
+       weak hints to confirm GBP / sitelinks search). -->
+  <meta name="geo.region" content="US-TX">
+  <meta name="geo.placename" content="Austin, Texas">
+  <meta name="geo.position" content="30.3564789;-97.6858016">
+  <meta name="ICBM" content="30.3564789, -97.6858016">
+
+  <!-- Open Graph — Facebook / LinkedIn / iMessage / Slack rich previews. -->
+  <meta property="og:type" content="business.business">
+  <meta property="og:title" content="Laundromat in North Austin, TX | WaveMAX Austin">
+  <meta property="og:description" content="Top-rated laundromat in North Austin. 42 UV-sanitized washers, 42 dryers, free WiFi, free parking. Self-service or wash-dry-fold. Open daily 7am–10pm.">
+  <meta property="og:url" content="https://wavemax.promo/dev/austin-host-mock.html">
+  <meta property="og:site_name" content="WaveMAX Austin TX">
+  <meta property="og:image" content="https://wavemaxlaundry.com/wp-content/uploads/locations/austin-tx/hero-3.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="WaveMAX Laundry Austin TX — interior with rows of front-load washers">
+  <meta property="og:locale" content="en_US">
+  <meta property="og:locale:alternate" content="es_MX">
+  <meta property="og:locale:alternate" content="pt_BR">
+  <meta property="og:locale:alternate" content="de_DE">
+
+  <!-- Open Graph business properties — surfaces in Facebook business cards. -->
+  <meta property="business:contact_data:street_address" content="825 E Rundberg Ln F1">
+  <meta property="business:contact_data:locality" content="Austin">
+  <meta property="business:contact_data:region" content="TX">
+  <meta property="business:contact_data:postal_code" content="78753">
+  <meta property="business:contact_data:country_name" content="United States">
+  <meta property="business:contact_data:phone_number" content="+1-512-553-1674">
+  <meta property="business:contact_data:website" content="https://wavemax.promo/dev/austin-host-mock.html">
+  <meta property="place:location:latitude" content="30.3564789">
+  <meta property="place:location:longitude" content="-97.6858016">
+
+  <!-- Twitter card — large image preview for X/Twitter. -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Laundromat in North Austin, TX | WaveMAX Austin">
+  <meta name="twitter:description" content="42 UV-sanitized washers + 42 dryers, free WiFi, free parking, open daily 7am–10pm at 825 E Rundberg Ln F1.">
+  <meta name="twitter:image" content="https://wavemaxlaundry.com/wp-content/uploads/locations/austin-tx/hero-3.jpg">
+  <meta name="twitter:image:alt" content="WaveMAX Laundry Austin TX — interior with rows of front-load washers">
+
+  <!-- Canonical + multilingual alternates. The canonical points at the
+       host page (the indexable URL); the iframe content is a separate URL
+       carrying noindex so we don't fight ourselves on duplicate content. -->
+  <link rel="canonical" href="https://wavemax.promo/dev/austin-host-mock.html">
+  <link rel="alternate" hreflang="en-US" href="https://wavemax.promo/dev/austin-host-mock.html">
+  <link rel="alternate" hreflang="es"    href="https://wavemax.promo/dev/austin-host-mock.html?lang=es">
+  <link rel="alternate" hreflang="pt"    href="https://wavemax.promo/dev/austin-host-mock.html?lang=pt">
+  <link rel="alternate" hreflang="de"    href="https://wavemax.promo/dev/austin-host-mock.html?lang=de">
+  <link rel="alternate" hreflang="x-default" href="https://wavemax.promo/dev/austin-host-mock.html">
+
+  <!-- Favicons. Mirrors the icon set used by the WordPress parent so
+       browser tabs / bookmark UI stay visually consistent across hosts. -->
+  <link rel="icon" type="image/png" sizes="32x32"  href="https://wavemaxlaundry.com/wp-content/uploads/2026/03/cropped-favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="https://wavemaxlaundry.com/wp-content/uploads/2026/03/cropped-favicon-192x192.png">
+  <link rel="apple-touch-icon" href="https://wavemaxlaundry.com/wp-content/uploads/2026/03/cropped-favicon-180x180.png">
+  <meta name="msapplication-TileImage" content="https://wavemaxlaundry.com/wp-content/uploads/2026/03/cropped-favicon-270x270.png">
+  <meta name="theme-color" content="#1a3f7a">
+
+  <!-- ════════════════════════════════════════════════════════════════════
+       STRUCTURED DATA — JSON-LD
+       Three nested schemas to maximize Knowledge Graph eligibility:
+         1. LocalBusiness/Laundry — opens Google's local pack + GBP linkage
+         2. WebSite + SearchAction — sitelinks search box
+         3. BreadcrumbList — breadcrumb rich result
+       Hours, geo, address, phone, services match LOCATION_DATA exactly so
+       there is one source of truth and no schema drift.
+       ════════════════════════════════════════════════════════════════════ -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "LaundryOrDryCleaner",
+    "name": "WaveMAX Laundry Austin",
+    "alternateName": "WaveMAX Austin",
+    "description": "Self-service laundromat and wash-dry-fold drop-off serving North Austin. 42 Electrolux CompassPro 450G washers, 42 high-velocity dryers, hospital-grade UV-sanitized water, free WiFi, free parking, fully attended.",
+    "url": "https://wavemax.promo/dev/austin-host-mock.html",
+    "telephone": "+1-512-553-1674",
+    "email": "john@austinwavemax.com",
+    "image": [
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/austin-tx/hero-3.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/austin-tx/interior-1.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/austin-tx/interior-2.jpg"
+    ],
+    "logo": "https://wavemaxlaundry.com/wp-content/uploads/2026/03/logo-wavemax.png",
+    "priceRange": "$$",
+    "currenciesAccepted": "USD",
+    "paymentAccepted": "Credit Card, Debit Card, Cash",
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": "825 E Rundberg Ln F1",
+      "addressLocality": "Austin",
+      "addressRegion": "TX",
+      "postalCode": "78753",
+      "addressCountry": "US"
+    },
+    "geo": {
+      "@type": "GeoCoordinates",
+      "latitude": 30.3564789,
+      "longitude": -97.6858016
+    },
+    "openingHoursSpecification": [
+      {
+        "@type": "OpeningHoursSpecification",
+        "dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"],
+        "opens": "07:00",
+        "closes": "22:00"
+      }
+    ],
+    "areaServed": [
+      { "@type": "City", "name": "Austin" },
+      { "@type": "City", "name": "Round Rock" },
+      { "@type": "City", "name": "Cedar Park" },
+      { "@type": "City", "name": "Pflugerville" },
+      { "@type": "City", "name": "Georgetown" },
+      { "@type": "City", "name": "Leander" }
+    ],
+    "hasMap": "https://www.google.com/maps/dir/?api=1&destination=825+E+Rundberg+Ln+F1+Austin+TX+78753",
+    "amenityFeature": [
+      { "@type": "LocationFeatureSpecification", "name": "Free WiFi", "value": true },
+      { "@type": "LocationFeatureSpecification", "name": "Free Parking", "value": true },
+      { "@type": "LocationFeatureSpecification", "name": "Wheelchair Accessible", "value": true },
+      { "@type": "LocationFeatureSpecification", "name": "Hospital-Grade UV Water Sanitization", "value": true },
+      { "@type": "LocationFeatureSpecification", "name": "Attended", "value": true }
+    ],
+    "makesOffer": [
+      {
+        "@type": "Offer",
+        "name": "Wash-Dry-Fold (drop-off)",
+        "description": "Drop-off laundry service: we wash, dry, and fold for you. 10 lb minimum.",
+        "price": "1.20",
+        "priceCurrency": "USD",
+        "priceSpecification": {
+          "@type": "UnitPriceSpecification",
+          "price": "1.20",
+          "priceCurrency": "USD",
+          "unitText": "per pound"
+        }
+      },
+      {
+        "@type": "Offer",
+        "name": "Self-Service Laundry",
+        "description": "Self-serve wash + dry on Electrolux CompassPro 450G machines.",
+        "priceSpecification": {
+          "@type": "PriceSpecification",
+          "minPrice": "2.75",
+          "maxPrice": "10.50",
+          "priceCurrency": "USD"
+        }
+      },
+      {
+        "@type": "Offer",
+        "name": "Commercial Laundry",
+        "description": "Recurring commercial accounts for restaurants, gyms, salons, and small hospitality."
+      }
+    ],
+    "sameAs": [
+      "https://www.wavemaxlaundry.com/austin-tx/"
+    ]
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "WaveMAX Austin TX",
+    "url": "https://wavemax.promo/dev/austin-host-mock.html",
+    "inLanguage": ["en", "es", "pt", "de"],
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": "https://www.wavemaxlaundry.com/?s={search_term_string}",
+      "query-input": "required name=search_term_string"
+    }
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "Home",      "item": "https://www.wavemaxlaundry.com/" },
+      { "@type": "ListItem", "position": 2, "name": "Locations", "item": "https://www.wavemaxlaundry.com/locations/" },
+      { "@type": "ListItem", "position": 3, "name": "Austin TX", "item": "https://wavemax.promo/dev/austin-host-mock.html" }
+    ]
+  }
+  </script>
+
+  <!-- Organization graph — links the location to the franchise parent so
+       Google can resolve the brand → location relationship and surface
+       sitelinks under the parent's Knowledge Panel. -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "@id": "https://www.wavemaxlaundry.com/#organization",
+    "name": "WaveMAX Laundry",
+    "url": "https://www.wavemaxlaundry.com/",
+    "logo": "https://wavemaxlaundry.com/wp-content/uploads/2026/03/logo-wavemax.png",
+    "slogan": "Your friendly neighborhood laundry service.",
+    "description": "WaveMAX Laundry is a network of premium self-service laundromats and wash-dry-fold drop-off centers across the United States.",
+    "founder": { "@type": "Person", "name": "Mike Hagan" },
+    "subOrganization": {
+      "@type": "LaundryOrDryCleaner",
+      "name": "WaveMAX Laundry Austin",
+      "url": "https://wavemax.promo/dev/austin-host-mock.html",
+      "telephone": "+1-512-553-1674"
+    }
+  }
+  </script>
+
+  <!-- Service schema — each offering as a discrete Service entity so Google
+       can render Service rich results and properly weight intent queries
+       like "wash dry fold near me" vs "self-service laundromat". -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Service",
+    "@id": "https://wavemax.promo/dev/austin-host-mock.html#wash-dry-fold",
+    "name": "Wash-Dry-Fold Drop-Off Laundry",
+    "serviceType": "Laundry Service",
+    "category": "Wash and Fold",
+    "description": "Drop off laundry, pick it up clean and folded. Hospital-grade UV-sanitized water, eco-friendly hypoallergenic detergent, 10 lb minimum. Pickup-and-delivery available within service area.",
+    "provider": {
+      "@type": "LaundryOrDryCleaner",
+      "name": "WaveMAX Laundry Austin",
+      "telephone": "+1-512-553-1674",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "825 E Rundberg Ln F1",
+        "addressLocality": "Austin",
+        "addressRegion": "TX",
+        "postalCode": "78753"
+      }
+    },
+    "areaServed": [
+      { "@type": "City", "name": "Austin", "containedInPlace": { "@type": "State", "name": "Texas" } },
+      { "@type": "City", "name": "Round Rock", "containedInPlace": { "@type": "State", "name": "Texas" } },
+      { "@type": "City", "name": "Cedar Park", "containedInPlace": { "@type": "State", "name": "Texas" } },
+      { "@type": "City", "name": "Pflugerville", "containedInPlace": { "@type": "State", "name": "Texas" } },
+      { "@type": "City", "name": "Georgetown", "containedInPlace": { "@type": "State", "name": "Texas" } },
+      { "@type": "City", "name": "Leander", "containedInPlace": { "@type": "State", "name": "Texas" } }
+    ],
+    "offers": {
+      "@type": "Offer",
+      "price": "1.20",
+      "priceCurrency": "USD",
+      "priceSpecification": {
+        "@type": "UnitPriceSpecification",
+        "price": "1.20",
+        "priceCurrency": "USD",
+        "unitText": "per pound",
+        "minPrice": "12.00"
+      }
+    }
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Service",
+    "@id": "https://wavemax.promo/dev/austin-host-mock.html#self-service",
+    "name": "Self-Service Laundromat",
+    "serviceType": "Self-Service Laundry",
+    "category": "Coin Laundry",
+    "description": "Open daily 7am to 10pm. 42 Electrolux CompassPro 450G commercial washers (20 lb to 80 lb capacity), 42 high-velocity dryers, hospital-grade UV-sanitized water, free WiFi, free parking, fully attended.",
+    "provider": {
+      "@type": "LaundryOrDryCleaner",
+      "name": "WaveMAX Laundry Austin",
+      "telephone": "+1-512-553-1674"
+    },
+    "offers": {
+      "@type": "Offer",
+      "priceSpecification": {
+        "@type": "PriceSpecification",
+        "minPrice": "2.75",
+        "maxPrice": "10.50",
+        "priceCurrency": "USD"
+      }
+    }
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Service",
+    "@id": "https://wavemax.promo/dev/austin-host-mock.html#commercial",
+    "name": "Commercial Laundry Service",
+    "serviceType": "Commercial Laundry",
+    "description": "Recurring commercial laundry contracts for restaurants, salons, gyms, spas, short-term rentals, and small hospitality. Volume pricing on weekly or daily pickup-and-delivery.",
+    "provider": {
+      "@type": "LaundryOrDryCleaner",
+      "name": "WaveMAX Laundry Austin",
+      "telephone": "+1-512-553-1674"
+    }
+  }
+  </script>
+
+  <!-- FAQ schema — eligible for "People Also Ask" and Q&A rich results.
+       Curated to Austin-specific questions; Google flags generic FAQ as
+       low-quality, so each answer references local details (hours,
+       address, equipment) that can't be copy-pasted across locations. -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "What are the hours of WaveMAX Austin?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "WaveMAX Austin is open every day, 365 days a year, from 7am to 10pm. The last wash starts at 9pm so every cycle finishes before close."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Where is WaveMAX Austin located?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "WaveMAX Austin is at 825 E Rundberg Ln F1, Austin, TX 78753 — North Austin, just east of I-35 between the Rundberg and Braker exits. Free on-site parking."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How much does wash-dry-fold cost in Austin?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Wash-dry-fold is $1.20 per pound with a 10 pound minimum. Drop off any time during open hours; we wash, dry, and fold and you pick up the same day for orders placed before 11am."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How much does self-service laundry cost?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Self-service loads run from $2.75 (smallest washer) to $10.50 (largest 80 lb capacity washer). All wash cycles run about 20 minutes; high-velocity dryers run about 20 minutes. Pay by credit, debit, or laundry card."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Does WaveMAX Austin have free WiFi?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes — free WiFi is available throughout the store, along with free parking, comfortable seating, and a fully attended floor."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Do you sanitize the water?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. Every washer at WaveMAX Austin runs through an Omni LUX hospital-grade UV water sanitization system. The same UV technology used in hospital laundries kills bacteria and viruses in the wash water before it touches your clothes."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Can I drop off laundry and come back later?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Absolutely — that's our wash-dry-fold drop-off service. Drop off your laundry with the attendant; we'll wash, dry, and fold it. Same-day turnaround for orders placed before 11am, otherwise 24-hour."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Do you offer commercial laundry accounts?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. We service restaurants, salons, gyms, spas, short-term rentals, and small hospitality with weekly or daily pickup-and-delivery. Call (512) 553-1674 to set up a commercial account."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Do you accept credit cards?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes — we accept all major credit cards, debit cards, and laundry cards. No cash needed for any service."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Is the laundromat wheelchair accessible?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. Our Austin store is fully wheelchair accessible — entrance, restroom, machines, and folding tables. Accessible parking is available immediately in front of the entry."
+        }
+      }
+    ]
+  }
+  </script>
+
+  <!-- ParkingFacility — surfaces "free parking" attribute in Google Maps
+       cards, especially for "near me" searches that filter by amenity. -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "ParkingFacility",
+    "name": "WaveMAX Austin Customer Parking",
+    "description": "Free on-site parking for WaveMAX Austin customers, directly in front of the entrance. Wheelchair-accessible spaces available.",
+    "isAccessibleForFree": true,
+    "openingHours": "Mo-Su 07:00-22:00",
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": "825 E Rundberg Ln F1",
+      "addressLocality": "Austin",
+      "addressRegion": "TX",
+      "postalCode": "78753"
+    }
+  }
+  </script>
+
+  <!-- Performance: pre-resolve DNS + open TCP/TLS to the hosts we hit on
+       first paint (fonts, images, Hibu loader, store photos). Saves
+       150-300ms on a cold connection. -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://wavemaxlaundry.com">
+  <link rel="preconnect" href="https://upload.wikimedia.org">
+  <link rel="dns-prefetch" href="https://reports.hibu.com">
+  <link rel="dns-prefetch" href="https://places.googleapis.com">
+
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@500;600;700;800&display=swap" rel="stylesheet">
 
   <!-- MHR-faithful chrome stylesheets -->
@@ -365,5 +792,19 @@
 <!-- Bridge + chrome wiring (CSP-clean external scripts) -->
 <script src="/assets/js/parent-iframe-bridge-v3.js"></script>
 <script src="/assets/js/austin-host-mock.js"></script>
+
+<!--
+  ════════════════════════════════════════════════════════════════════
+  HIBU DYNAMIC PHONE INSERTION — mirrors the inline tracking on the
+  live https://wavemaxlaundry.com/austin-tx page so the reference build
+  demonstrates the same call-tracking behavior corporate's vendor
+  expects. Loader pulls 1×<script> from reports.hibu.com (whitelisted
+  in CSP script-src), and our local init seeds the source-indexed
+  number map. Both files are external so no inline-script CSP exception
+  is required.
+  ════════════════════════════════════════════════════════════════════
+-->
+<script src="https://reports.hibu.com/analytics/js/ybDynamicPhoneInsertion.js"></script>
+<script src="/assets/js/austin-hibu-phone-swap.js"></script>
 </body>
 </html>
