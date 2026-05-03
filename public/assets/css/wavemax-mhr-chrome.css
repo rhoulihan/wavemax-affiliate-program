@@ -482,58 +482,7 @@
 #wm-links ul li a:hover .arr { color: #1a3f7a !important; }
 
 /* ============================================================
-   4. CTA BAND — "Visit WaveMAX in Austin, TX Today" blue band
-   ============================================================ */
-
-.wm-cta-band {
-  background: #1e72ba;
-  padding: 80px 24px;
-  text-align: center;
-  color: #ffffff;
-}
-.wm-cta-band-inner { max-width: 720px; margin: 0 auto; }
-.wm-cta-band h2 {
-  font-family: 'Poppins', sans-serif;
-  font-size: 2.2rem;
-  font-weight: 800;
-  color: #ffffff;
-  line-height: 1.15;
-  margin: 0 0 16px;
-  letter-spacing: -0.01em;
-}
-.wm-cta-band p {
-  font-family: 'Barlow', sans-serif;
-  font-size: 1.05rem;
-  color: rgba(255,255,255,0.92);
-  line-height: 1.5;
-  margin: 0 0 32px;
-}
-.wm-cta-band-btn {
-  display: inline-block;
-  padding: 14px 36px;
-  background: #ffffff;
-  color: #1e72ba;
-  font-family: 'Poppins', sans-serif;
-  font-size: 14px;
-  font-weight: 700;
-  text-decoration: none;
-  border-radius: 6px;
-  letter-spacing: 0.04em;
-  transition: all 0.2s ease;
-}
-.wm-cta-band-btn:hover {
-  background: #f0f6fc;
-  transform: translateY(-1px);
-  box-shadow: 0 6px 18px rgba(0,0,0,0.12);
-  text-decoration: none;
-}
-@media (max-width: 768px) {
-  .wm-cta-band { padding: 56px 20px; }
-  .wm-cta-band h2 { font-size: 1.7rem; }
-}
-
-/* ============================================================
-   5. PAGE FOOTER — 3 columns + bottom strip (matches MHR layout)
+   4. PAGE FOOTER — 3 columns + bottom strip (matches MHR layout)
    ============================================================ */
 
 .wm-pgfooter {
@@ -689,7 +638,7 @@
 .wm-pgfooter-bottom-links { display: flex; gap: 24px; flex-wrap: wrap; }
 
 /* ============================================================
-   6. wm-map widget — CSS-only "map preview" with pin + location badge
+   5. wm-map widget — CSS-only "map preview" with pin + location badge
    Lifted verbatim from MHR (rendered DOM).
    ============================================================ */
 
