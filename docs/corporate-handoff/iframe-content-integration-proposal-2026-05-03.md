@@ -174,8 +174,8 @@ with every defect identified in the prior audits closed:
 
 | Element                | Existing `/austin-tx`                | Reference build                                            |
 |------------------------|--------------------------------------|------------------------------------------------------------|
-| **Top phone number**   | Hibu tracking number `(512) 309-0430` hardcoded *and* `(512) 553-1674` hardcoded as fallback (E2 audit defect — Hibu fails open to wrong number)  | Single source of truth — `LOCATION_DATA.contact.phone`; Hibu swaps cleanly with no hardcoded fallback |
-| **Phone `tel:` links** | Mixed: some use `tel:5125531674`, some `tel:+15125531674`, some missing the `+1` prefix (E3 defect) | Every `tel:` anchor uses `tel:+15125531674` consistently   |
+| **Top phone number**   | Two phone numbers hardcoded into the markup: a tracking-vendor number and the local number, in different places (E2 audit defect — when one stops getting populated by its source, the page silently falls back to the other) | Every visible phone number is bound from a single source — `LOCATION_DATA.contact.phone` — so there is one place to update and no fallback drift |
+| **Phone `tel:` links** | Hardcoded into individual elements; some elements drift out of sync with each other (E3 defect — different formats and different numbers across the same page) | Every `tel:` anchor on the page is populated from the same single source (`LOCATION_DATA.contact.phoneTel`); changing the source updates every anchor |
 | **Address**            | Hardcoded "825 E Rundberg Ln F1" — but with Jacksonville address visible in some footer paths (F2 defect) | Bound to `LOCATION_DATA.contact.address` everywhere; no other-location bleed |
 | **Get-Directions URLs**| Several broken: missing `?destination=`, raw `&` not encoded, point at corporate locations page instead (D1 defect) | All point at `https://www.google.com/maps/dir/?api=1&destination=825+E+Rundberg+Ln+F1+Austin+TX+78753` |
 | **Footer "Local Links"** | 6 anchors but only 2 navigated (4 had `href="#"` — F1 defect) | All 6 anchors navigate; no `href="#"` placeholders anywhere |
@@ -249,7 +249,7 @@ can see them on first parse:
 - Favicon set: 32 / 192 / 180 / 270 + `msapplication-TileImage` +
   `theme-color`
 - Performance hints: `preconnect` / `dns-prefetch` for fonts, store-photo
-  CDN, Wikimedia, Hibu, Google Places (saves ~150–300ms on cold visits)
+  CDN, Wikimedia, Google Places (saves ~150–300ms on cold visits)
 
 #### Structured data (JSON-LD)
 
@@ -325,36 +325,7 @@ The displayed rating is computed from `userRatingCount` and `rating`
 on the Places response and updates without a redeploy as new reviews
 land. **Today: 4.8 ★, 48 reviews.**
 
-### 3.6. Hibu Dynamic Phone Insertion (call tracking)
-
-Hibu's source-indexed phone-swap script — the same one already on
-`www.wavemaxlaundry.com/austin-tx` — is integrated, with two
-improvements over the existing setup:
-
-1. **CSP-compliant.** The existing page emits Hibu's init logic
-   inline, which makes the page incompatible with strict
-   Content-Security-Policy. The reference build extracts the init to
-   `/assets/js/austin-hibu-phone-swap.js` (loaded with the per-request
-   nonce) so the same call-tracking behavior ships behind a strict CSP.
-2. **Loaded in both host AND iframe.** Hibu's loader scans the
-   document it runs in, so the iframe content (where most of the
-   tel: anchors live: hero CTA, CTA strip, in-tab buttons) needed its
-   own copy. The existing page only loads Hibu on the chrome, so
-   in-content tel: anchors get the local number, not the tracking
-   number — meaning Hibu attribution undercounts inbound calls today.
-
-Source-indexed map matches the existing production exactly:
-
-| Source channel | Tracking number    |
-|----------------|--------------------|
-| Organic search | `(512) 309-1004`   |
-| Paid search    | `(512) 309-1415`   |
-| Google Business Profile | `(512) 359-7929` |
-| Direct         | `(512) 360-8337`   |
-| Referral       | `(512) 360-8339`   |
-| Fallback (no source match) | `(512) 309-0430` |
-
-### 3.7. Security Baseline
+### 3.6. Security Baseline
 
 Before recommending the URL for corporate review, we engaged an
 independent security audit of the deployed app (the audit report is
@@ -386,7 +357,7 @@ The deployed page ships with:
 - TLS 1.2+ enforced via Cloudflare in front
 - 36 automated end-to-end Playwright tests at 6 responsive viewports
 
-### 3.8. Performance & Operations
+### 3.7. Performance & Operations
 
 - **Cloudflare proxy** in front for static-asset edge caching, TLS
   termination, DDoS protection
@@ -423,7 +394,7 @@ The deployed page ships with:
                 │   │  │ │ Franchisee landing page    │ │  │    │
                 │   │  │ │  · Hero / stat / tabs      │ │  │    │
                 │   │  │ │  · Live Google reviews     │ │  │    │
-                │   │  │ │  · CTAs with Hibu numbers  │ │  │    │
+                │   │  │ │  · CTAs with bound phone   │ │  │    │
                 │   │  │ └────────────────────────────┘ │  │    │
                 │   │  └────────────────────────────────┘  │    │
                 │   └──────────────────────────────────────┘    │
@@ -497,8 +468,8 @@ URL: **[https://wavemax.promo/dev/austin-host-mock.html](https://wavemax.promo/d
 3. **Scroll the iframe content.** Verify hero / stat rail / service
    tabs / reviews / CTA strip render.
 4. **Click any "Call (512) ..." button.** Your phone should offer to
-   dial; the number should be a Hibu tracking number (`309-`,
-   `359-`, or `360-` prefix), not the local `553-1674`.
+   dial; the number should match `LOCATION_DATA.contact.phone` —
+   `(512) 553-1674`.
 5. **Click any "Get Directions" link.** Should open Google Maps with
    "825 E Rundberg Ln F1" as the destination.
 6. **Resize the browser** down to mobile width (375px) and back to
@@ -646,8 +617,8 @@ This is a win-win, not a concession:
       versioned JSON dictionaries, `data-i18n` / `data-bind`
       attribute pattern, language switcher with cross-frame sync
     * **Parent-page chrome fixes** — every defect from the audits
-      Austin produced (Hibu phone consistency, address bleed-
-      through, broken footer anchors, mobile breakpoints, etc.)
+      Austin produced (single-source phone binding, address
+      bleed-through, broken footer anchors, mobile breakpoints, etc.)
       written up with patches that drop into the WordPress
       template
 
@@ -691,7 +662,7 @@ build is theirs to take.
 | Google de-prioritizes iframed content for SEO      | Low        | The corporate parent is the indexable canonical; iframe is `noindex` + canonical → host. Google's documented position is that iframed content from same-/sister-origin is fine for ranking. We've also tested this pattern at scale on past projects. |
 | PostMessage bridge breaks if iframe origin changes | Medium     | Strict origin whitelist on the parent side; bridge auto-resolves on late-mounted iframes; CI tests cover the bridge protocol. |
 | Franchisee infra outage                            | Medium     | Iframe content is decoupled from corporate. If wavemax.promo goes down, the chrome continues to render; iframe shows an empty area. Cloudflare uptime + monitoring + automated failover (planned) keeps this <10min/yr. |
-| Hibu / Places API quota / billing                  | Low        | Browser-side caching keeps Places calls minimal; Hibu billing is unchanged from existing setup. Quota alarms are configured. |
+| Places API quota / billing                         | Low        | Browser-side caching keeps Places calls minimal; quota alarms are configured. |
 | MHR doesn't like ceding the page slot              | Medium     | This is the conversation. The reference build is the artifact for that conversation. |
 
 ---

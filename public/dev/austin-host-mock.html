@@ -427,13 +427,12 @@
   </script>
 
   <!-- Performance: pre-resolve DNS + open TCP/TLS to the hosts we hit on
-       first paint (fonts, images, Hibu loader, store photos). Saves
-       150-300ms on a cold connection. -->
+       first paint (fonts, images, store photos). Saves 150-300ms on
+       a cold connection. -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preconnect" href="https://wavemaxlaundry.com">
   <link rel="preconnect" href="https://upload.wikimedia.org">
-  <link rel="dns-prefetch" href="https://reports.hibu.com">
   <link rel="dns-prefetch" href="https://places.googleapis.com">
 
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@500;600;700;800&display=swap" rel="stylesheet">
@@ -463,8 +462,8 @@
   ════════════════════════════════════════════════════════════════════
   WMLNAV-WRAP — three-bar location nav (lifted from MHR's live HTML).
   Modifications applied vs MHR source:
-    - Phone fields bound to LOCATION_DATA.contact.phone (NOT Hibu 309-0430,
-      which they hardcoded). Single source of truth — U2 fix baked in.
+    - Phone fields bound to LOCATION_DATA.contact.phone — every tel: anchor
+      reads from the same single source of truth.
     - Address bound to LOCATION_DATA.contact.address + mapsUrl
     - Local nav hrefs rewritten from `/austin-tx/...` to `?route=...` so
       they navigate this host page instead of the live franchisor site.
@@ -796,19 +795,5 @@
 <!-- Bridge + chrome wiring (CSP-clean external scripts) -->
 <script src="/assets/js/parent-iframe-bridge-v3.js"></script>
 <script src="/assets/js/austin-host-mock.js"></script>
-
-<!--
-  ════════════════════════════════════════════════════════════════════
-  HIBU DYNAMIC PHONE INSERTION — mirrors the inline tracking on the
-  live https://wavemaxlaundry.com/austin-tx page so the reference build
-  demonstrates the same call-tracking behavior corporate's vendor
-  expects. Loader pulls 1×<script> from reports.hibu.com (whitelisted
-  in CSP script-src), and our local init seeds the source-indexed
-  number map. Both files are external so no inline-script CSP exception
-  is required.
-  ════════════════════════════════════════════════════════════════════
--->
-<script src="https://reports.hibu.com/analytics/js/ybDynamicPhoneInsertion.js"></script>
-<script src="/assets/js/austin-hibu-phone-swap.js"></script>
 </body>
 </html>
