@@ -201,3 +201,23 @@ coverage-analysis/
 .idea/
 
 /test-results/
+
+# ─── Audit / legal / sensitive documentation — never commit ───────
+# These are internal working documents (security audits we ran against
+# our own build, defect checklists for the corporate parent site,
+# legal-consultation notes, draft notice letters, post-cutover write-
+# ups). They contain data we don't want public — defects we found,
+# legal posture, and our internal vulnerability counts. The corporate
+# handoff PROPOSAL is intentionally excluded from the gitignore so it
+# stays in the repo.
+docs/security/external-domain-audit-*
+docs/security/post-cutover-report-*
+docs/security/wavemaxlaundry-site-audit-*
+docs/security/wavemax-promo-prelaunch-audit-*
+docs/security/parent-site-fix-checklist.*
+docs/security/parent-site-footer-defects-checklist.*
+docs/security/parent-site-user-testing-checklist.*
+docs/security/draft-23-20-notice-letter.*
+docs/security/lawyer-consultation-*
+docs/security/lawyer-intake-form-*
+docs/corporate-handoff/code-quality-comparison-*
