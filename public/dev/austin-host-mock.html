@@ -107,7 +107,7 @@
         </span>
         <span class="wm-last-wash-item">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 12 15 10 12 12 15 14"></polyline></svg>
-          Last wash <span data-bind="hours.lastWash">9pm</span>
+          <span data-i18n="chrome.lastWashShort">Last wash</span> <span data-bind="hours.lastWash">9pm</span>
         </span>
         <a id="wmlnav-address" data-bind="contact.mapsUrl" data-bind-attr="href" target="_blank" rel="noopener" href="#">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
@@ -119,18 +119,19 @@
         </a>
       </div>
       <div class="wmlnav-b1-right">
-        <a id="wmlnav-phone-icon" data-bind="contact.phoneTel" data-bind-attr="href" href="#" aria-label="Call">
+        <a id="wmlnav-phone-icon" data-bind="contact.phoneTel" data-bind-attr="href" href="#" aria-label="Call" data-i18n-attr='{"aria-label":"chrome.callShort"}'>
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 1.27h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.91a16 16 0 0 0 6 6l.91-.91a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 21.73 16.92z"></path></svg>
         </a>
 
-        <!-- Native i18n switcher — drives the bridge protocol -->
-        <div class="wm-lang-switcher" id="wm-lang" aria-expanded="false" style="position: relative;">
-          <button type="button" class="wm-lang-btn" aria-haspopup="true" aria-label="Choose language" style="background: transparent; border: 1px solid rgba(255,255,255,0.3); border-radius: 999px; padding: 4px 12px; color: #fff; font-size: 12px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
-            <span class="wm-lang-current-flag" aria-hidden="true">🇺🇸</span>
+        <!-- Native i18n switcher — drives the bridge protocol.
+             Styling lives in wavemax-mhr-chrome.css (#wm-lang.wm-lang-switcher) -->
+        <div class="wm-lang-switcher" id="wm-lang" aria-expanded="false">
+          <button type="button" class="wm-lang-btn" aria-haspopup="true" aria-label="Choose language">
+            <span class="wm-lang-flag wm-flag-en" aria-hidden="true"></span>
             <span class="wm-lang-current-label">EN</span>
-            <svg width="9" height="6" viewBox="0 0 9 6" aria-hidden="true"><path d="M0.5 1L4.5 5L8.5 1" stroke="currentColor" stroke-width="1.2" fill="none" stroke-linecap="round"/></svg>
+            <svg class="wm-lang-arrow" viewBox="0 0 9 6" aria-hidden="true"><path d="M0.5 1L4.5 5L8.5 1" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </button>
-          <div class="wm-lang-menu" role="menu" style="position: absolute; top: calc(100% + 6px); right: 0; min-width: 140px; background: #0f3254; border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; box-shadow: 0 8px 24px rgba(0,0,0,0.35); display: none; z-index: 99999;"></div>
+          <div class="wm-lang-menu" role="menu"></div>
         </div>
       </div>
     </div>
@@ -144,8 +145,8 @@
         </a>
       </div>
       <div class="wmlnav-b2-right">
-        <a href="https://www.wavemaxlaundry.com/franchise" target="_blank" rel="noopener" class="wmlnav-btn-out">Franchise</a>
-        <button type="button" class="wmlnav-btn-sol" data-locmodal-open style="font: inherit; cursor: pointer;">Locations</button>
+        <a href="https://www.wavemaxlaundry.com/franchise" target="_blank" rel="noopener" class="wmlnav-btn-out" data-i18n="chrome.franchise">Franchise</a>
+        <button type="button" class="wmlnav-btn-sol" data-locmodal-open style="font: inherit; cursor: pointer;" data-i18n="chrome.locations">Locations</button>
       </div>
     </div>
   </div>
@@ -153,26 +154,26 @@
   <div class="wmlnav-b3">
     <div class="wmlnav-b3-inner">
       <nav id="wmlnav-nav" aria-label="Austin location navigation">
-        <a href="?route=/" data-route="/">Home</a>
-        <a href="?route=/self-serve-laundry" data-route="/self-serve-laundry">Self-Service Laundry</a>
-        <a href="?route=/wash-dry-fold" data-route="/wash-dry-fold">Wash-Dry-Fold</a>
+        <a href="?route=/" data-route="/" data-i18n="chrome.nav.home">Home</a>
+        <a href="?route=/self-serve-laundry" data-route="/self-serve-laundry" data-i18n="chrome.nav.selfserve">Self-Service Laundry</a>
+        <a href="?route=/wash-dry-fold" data-route="/wash-dry-fold" data-i18n="chrome.nav.wdf">Wash-Dry-Fold</a>
         <div class="wmlnav-drop">
-          <a href="?route=/commercial" data-route="/commercial">Commercial<span class="wmlnav-arrow"></span></a>
+          <a href="?route=/commercial" data-route="/commercial"><span data-i18n="chrome.nav.commercial">Commercial</span><span class="wmlnav-arrow"></span></a>
           <div class="wmlnav-drop-menu">
-            <a href="?route=/commercial">Commercial Laundry</a>
-            <a href="?route=/commercial/medical-offices">Medical Offices Laundry in Austin, TX</a>
-            <a href="?route=/commercial/health-clubs">Health Clubs Laundry in Austin, TX</a>
-            <a href="?route=/commercial/airbnb-rentals">Airbnb &amp; Rentals Laundry in Austin, TX</a>
+            <a href="?route=/commercial" data-i18n="chrome.subnav.commercialAll">Commercial Laundry</a>
+            <a href="?route=/commercial/medical-offices" data-i18n="chrome.subnav.medicalOffices">Medical Offices Laundry in Austin, TX</a>
+            <a href="?route=/commercial/health-clubs" data-i18n="chrome.subnav.healthClubs">Health Clubs Laundry in Austin, TX</a>
+            <a href="?route=/commercial/airbnb-rentals" data-i18n="chrome.subnav.airbnbRentals">Airbnb &amp; Rentals Laundry in Austin, TX</a>
           </div>
         </div>
         <div class="wmlnav-drop">
-          <a href="?route=/about-us" data-route="/about-us">About Us<span class="wmlnav-arrow"></span></a>
+          <a href="?route=/about-us" data-route="/about-us"><span data-i18n="chrome.nav.about">About Us</span><span class="wmlnav-arrow"></span></a>
           <div class="wmlnav-drop-menu">
-            <a href="?route=/about-us">About Us</a>
-            <a href="?route=/contact">Contact</a>
+            <a href="?route=/about-us" data-i18n="chrome.subnav.aboutUs">About Us</a>
+            <a href="?route=/contact" data-i18n="chrome.subnav.contact">Contact</a>
           </div>
         </div>
-        <a href="?route=/contact" data-route="/contact">Contact</a>
+        <a href="?route=/contact" data-route="/contact" data-i18n="chrome.nav.contact">Contact</a>
       </nav>
     </div>
   </div>
@@ -190,7 +191,7 @@
       <div class="wmv3-info-icon">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 1.27h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.91a16 16 0 0 0 6 6l.91-.91a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 21.73 16.92z"></path></svg>
       </div>
-      <div class="wmv3-info-label">CALL US</div>
+      <div class="wmv3-info-label" data-i18n="chrome.callUs">CALL US</div>
       <div class="wmv3-info-value" data-bind="contact.phone">(512) 553-1674</div>
     </a>
     <div class="wmv3-divider" aria-hidden="true"></div>
@@ -206,7 +207,7 @@
       <div class="wmv3-info-icon">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
       </div>
-      <div class="wmv3-info-label">LAST WASH</div>
+      <div class="wmv3-info-label" data-i18n="chrome.lastWash">LAST WASH</div>
       <div class="wmv3-info-value" data-bind="hours.lastWash">9pm</div>
     </div>
   </div>
@@ -218,18 +219,18 @@
   </div>
 
   <div class="wmv3-actions">
-    <a href="https://www.wavemaxlaundry.com/franchise" target="_blank" rel="noopener" class="wmv3-btn wmv3-btn-out">Franchise</a>
-    <button type="button" class="wmv3-btn wmv3-btn-sol" data-locmodal-open style="font: inherit; cursor: pointer;">Locations</button>
-    <button type="button" class="wmv3-burger" id="wmv3-burger" aria-label="Open menu" aria-expanded="false"><span></span><span></span><span></span></button>
+    <a href="https://www.wavemaxlaundry.com/franchise" target="_blank" rel="noopener" class="wmv3-btn wmv3-btn-out" data-i18n="chrome.franchise">Franchise</a>
+    <button type="button" class="wmv3-btn wmv3-btn-sol" data-locmodal-open style="font: inherit; cursor: pointer;" data-i18n="chrome.locations">Locations</button>
+    <button type="button" class="wmv3-burger" id="wmv3-burger" aria-label="Open menu" aria-expanded="false" data-i18n-attr='{"aria-label":"chrome.menu"}'><span></span><span></span><span></span></button>
   </div>
 
   <nav class="wmv3-drawer" id="wmv3-drawer" aria-label="Mobile menu">
-    <a href="?route=/" data-route="/">Home</a>
-    <a href="?route=/self-serve-laundry" data-route="/self-serve-laundry">Self-Service Laundry</a>
-    <a href="?route=/wash-dry-fold" data-route="/wash-dry-fold">Wash-Dry-Fold</a>
-    <a href="?route=/commercial" data-route="/commercial">Commercial</a>
-    <a href="?route=/about-us" data-route="/about-us">About Us</a>
-    <a href="?route=/contact" data-route="/contact">Contact</a>
+    <a href="?route=/" data-route="/" data-i18n="chrome.nav.home">Home</a>
+    <a href="?route=/self-serve-laundry" data-route="/self-serve-laundry" data-i18n="chrome.nav.selfserve">Self-Service Laundry</a>
+    <a href="?route=/wash-dry-fold" data-route="/wash-dry-fold" data-i18n="chrome.nav.wdf">Wash-Dry-Fold</a>
+    <a href="?route=/commercial" data-route="/commercial" data-i18n="chrome.nav.commercial">Commercial</a>
+    <a href="?route=/about-us" data-route="/about-us" data-i18n="chrome.nav.about">About Us</a>
+    <a href="?route=/contact" data-route="/contact" data-i18n="chrome.nav.contact">Contact</a>
   </nav>
 </header>
 
@@ -241,9 +242,9 @@
 -->
 <div id="wm-bc" class="wm-bc-host">
   <div class="wm-bc-host-inner">
-    <a href="?route=/">Home</a>
+    <a href="?route=/" data-i18n="chrome.bc.home">Home</a>
     <span class="wm-bc-host-sep" aria-hidden="true">›</span>
-    <strong class="wm-bc-host-current" id="wm-bc-current">WaveMAX Austin, TX</strong>
+    <strong class="wm-bc-host-current" id="wm-bc-current" data-i18n="chrome.bc.locationName">WaveMAX Austin, TX</strong>
   </div>
 </div>
 
@@ -282,29 +283,29 @@
 
     <!-- Col 0: Contact Us card -->
     <div class="wm-pgfooter-contact">
-      <h2>Contact Us</h2>
-      <p>We're here to help — choose how you'd like to connect.</p>
+      <h2 data-i18n="chrome.footer.contactUs">Contact Us</h2>
+      <p data-i18n="chrome.footer.contactBlurb">We're here to help — choose how you'd like to connect.</p>
 
-      <div class="wm-pgfooter-alert wm-pgfooter-alert--ok" id="wm-pgfooter-alert-ok" role="status">Thanks — your message has been sent. We'll be in touch shortly.</div>
-      <div class="wm-pgfooter-alert wm-pgfooter-alert--error" id="wm-pgfooter-alert-error" role="alert">Sorry, that didn't go through. Please try again or call us directly.</div>
+      <div class="wm-pgfooter-alert wm-pgfooter-alert--ok" id="wm-pgfooter-alert-ok" role="status" data-i18n="chrome.footer.alertOk">Thanks — your message has been sent. We'll be in touch shortly.</div>
+      <div class="wm-pgfooter-alert wm-pgfooter-alert--error" id="wm-pgfooter-alert-error" role="alert" data-i18n="chrome.footer.alertErr">Sorry, that didn't go through. Please try again or call us directly.</div>
 
       <form id="wm-pgfooter-form" novalidate>
-        <span class="wm-pgfooter-form-label">I'M LOOKING FOR...</span>
+        <span class="wm-pgfooter-form-label" data-i18n="chrome.footer.lookingFor">I'M LOOKING FOR…</span>
         <select id="wm-pgfooter-route" name="route" aria-label="What can we help with?">
-          <option value="">— Please select —</option>
-          <option value="laundry-service" selected>Laundry Service</option>
-          <option value="franchise" disabled>Franchise Information (use franchise site)</option>
+          <option value=""               data-i18n="chrome.footer.routeSelect">— Please select —</option>
+          <option value="laundry-service" selected data-i18n="chrome.footer.routeLaundry">Laundry Service</option>
+          <option value="franchise" disabled data-i18n="chrome.footer.routeFranchise">Franchise Information (use franchise site)</option>
         </select>
 
         <div class="wm-pgfooter-fieldrow">
-          <input type="text" name="firstName" placeholder="First name" autocomplete="given-name" required maxlength="50">
-          <input type="text" name="lastName"  placeholder="Last name"  autocomplete="family-name" required maxlength="50">
+          <input type="text" name="firstName" placeholder="First name" autocomplete="given-name" required maxlength="50" data-i18n-attr='{"placeholder":"chrome.footer.fnPlaceholder"}'>
+          <input type="text" name="lastName"  placeholder="Last name"  autocomplete="family-name" required maxlength="50" data-i18n-attr='{"placeholder":"chrome.footer.lnPlaceholder"}'>
         </div>
-        <input type="tel"   name="phone" placeholder="Your phone number" autocomplete="tel"   maxlength="30">
-        <input type="email" name="email" placeholder="Your email"        autocomplete="email" required maxlength="100">
-        <textarea name="message" placeholder="How can we help you?" required minlength="5" maxlength="2000"></textarea>
+        <input type="tel"   name="phone" placeholder="Your phone number" autocomplete="tel"   maxlength="30"  data-i18n-attr='{"placeholder":"chrome.footer.phonePlaceholder"}'>
+        <input type="email" name="email" placeholder="Your email"        autocomplete="email" required maxlength="100" data-i18n-attr='{"placeholder":"chrome.footer.emailPlaceholder"}'>
+        <textarea name="message" placeholder="How can we help you?" required minlength="5" maxlength="2000" data-i18n-attr='{"placeholder":"chrome.footer.msgPlaceholder"}'></textarea>
 
-        <button type="submit" class="wm-pgfooter-submit" id="wm-pgfooter-submit">SUBMIT →</button>
+        <button type="submit" class="wm-pgfooter-submit" id="wm-pgfooter-submit" data-i18n="chrome.footer.submit">SUBMIT →</button>
       </form>
     </div>
 
@@ -313,15 +314,15 @@
       <div id="wm-links">
         <div class="wm-header">
           <span class="wm-bar"></span>
-          <h2>Local Links</h2>
+          <h2 data-i18n="chrome.footer.localLinks">Local Links</h2>
         </div>
         <ul>
-          <li class="wm-local-link"><a href="?route=/" data-route="/">Home<span class="arr">›</span></a></li>
-          <li class="wm-local-link"><a href="?route=/self-serve-laundry" data-route="/self-serve-laundry">Self-Serve Laundry<span class="arr">›</span></a></li>
-          <li class="wm-local-link"><a href="?route=/wash-dry-fold" data-route="/wash-dry-fold">Wash-Dry-Fold<span class="arr">›</span></a></li>
-          <li class="wm-local-link"><a href="?route=/commercial" data-route="/commercial">Commercial<span class="arr">›</span></a></li>
-          <li class="wm-local-link"><a href="?route=/about-us" data-route="/about-us">About Us<span class="arr">›</span></a></li>
-          <li class="wm-local-link"><a href="?route=/contact" data-route="/contact">Contact<span class="arr">›</span></a></li>
+          <li class="wm-local-link"><a href="?route=/" data-route="/"><span data-i18n="chrome.nav.home">Home</span><span class="arr">›</span></a></li>
+          <li class="wm-local-link"><a href="?route=/self-serve-laundry" data-route="/self-serve-laundry"><span data-i18n="chrome.nav.selfserve">Self-Serve Laundry</span><span class="arr">›</span></a></li>
+          <li class="wm-local-link"><a href="?route=/wash-dry-fold" data-route="/wash-dry-fold"><span data-i18n="chrome.nav.wdf">Wash-Dry-Fold</span><span class="arr">›</span></a></li>
+          <li class="wm-local-link"><a href="?route=/commercial" data-route="/commercial"><span data-i18n="chrome.nav.commercial">Commercial</span><span class="arr">›</span></a></li>
+          <li class="wm-local-link"><a href="?route=/about-us" data-route="/about-us"><span data-i18n="chrome.nav.about">About Us</span><span class="arr">›</span></a></li>
+          <li class="wm-local-link"><a href="?route=/contact" data-route="/contact"><span data-i18n="chrome.nav.contact">Contact</span><span class="arr">›</span></a></li>
         </ul>
       </div>
     </div>
@@ -358,8 +359,8 @@
           </div>
         </div>
         <div class="wm-mapfooter">
-          <a class="wm-btn-primary" data-bind="contact.mapsUrl" data-bind-attr="href" target="_blank" rel="noopener" href="#">Get Directions</a>
-          <a class="wm-btn-secondary" href="https://www.wavemaxlaundry.com/locations/" target="_blank" rel="noopener">All Locations</a>
+          <a class="wm-btn-primary" data-bind="contact.mapsUrl" data-bind-attr="href" target="_blank" rel="noopener" href="#" data-i18n="chrome.footer.getDirections">Get Directions</a>
+          <a class="wm-btn-secondary" href="https://www.wavemaxlaundry.com/locations/" target="_blank" rel="noopener" data-i18n="chrome.footer.allLocations">All Locations</a>
         </div>
       </div>
     </div>
@@ -369,11 +370,11 @@
   <!-- Bottom strip — Jacksonville hardcode (E1) removed -->
   <div class="wm-pgfooter-bottom">
     <div class="wm-pgfooter-bottom-inner">
-      <span>© 2026 CRHS Enterprises, LLC. All rights reserved.</span>
+      <span data-i18n="chrome.footer.copyright">© 2026 CRHS Enterprises, LLC. All rights reserved.</span>
       <div class="wm-pgfooter-bottom-links">
-        <a href="https://www.wavemaxlaundry.com/privacy-policy/" target="_blank" rel="noopener">Privacy Policy</a>
-        <a href="https://www.wavemaxlaundry.com/terms-of-service/" target="_blank" rel="noopener">Terms &amp; Conditions</a>
-        <span style="opacity:0.65;">Local-dev reference build (noindex)</span>
+        <a href="https://www.wavemaxlaundry.com/privacy-policy/" target="_blank" rel="noopener" data-i18n="chrome.footer.privacy">Privacy Policy</a>
+        <a href="https://www.wavemaxlaundry.com/terms-of-service/" target="_blank" rel="noopener" data-i18n="chrome.footer.terms">Terms &amp; Conditions</a>
+        <span style="opacity:0.65;" data-i18n="chrome.footer.refBuild">Local-dev reference build (noindex)</span>
       </div>
     </div>
   </div>
@@ -391,17 +392,17 @@
   <div class="modal-box" role="document">
     <div class="modal-header">
       <div class="modal-header-text">
-        <h3 id="locModalTitle">Find a Location</h3>
-        <p id="modalSubtitle">Choose your store, or search by city / state / zip.</p>
+        <h3 id="locModalTitle" data-i18n="chrome.modal.title">Find a Location</h3>
+        <p id="modalSubtitle" data-i18n="chrome.modal.subtitle">Choose your store, or search by city / state / zip.</p>
       </div>
-      <button class="modal-close" aria-label="Close" data-locmodal-close>✕</button>
+      <button class="modal-close" aria-label="Close" data-locmodal-close data-i18n-attr='{"aria-label":"chrome.modal.close"}'>✕</button>
     </div>
     <div class="modal-search">
-      <input type="text" id="locSearch" placeholder="🔍  Search by city, state or zip…" aria-label="Search locations">
+      <input type="text" id="locSearch" placeholder="🔍  Search by city, state or zip…" aria-label="Search locations" data-i18n-attr='{"placeholder":"chrome.modal.searchPh"}'>
     </div>
     <div class="modal-status" id="modalStatus" hidden>
       <div class="spinner"></div>
-      <span id="modalStatusText">Finding locations near you…</span>
+      <span id="modalStatusText" data-i18n="chrome.modal.detecting">Finding locations near you…</span>
     </div>
     <div class="modal-list" id="locList">
       <div class="loc-section-header">Austin, TX</div>
@@ -411,7 +412,7 @@
           <div class="loc-addr" data-bind="contact.address">825 E Rundberg Ln F1</div>
           <div class="loc-addr" data-bind="contact.addressLine2">Austin, TX 78753</div>
           <div class="loc-meta">
-            <span class="loc-dist">Selected</span>
+            <span class="loc-dist" data-i18n="chrome.modal.selected">Selected</span>
             <span class="loc-phone" data-bind="contact.phone">(512) 553-1674</span>
           </div>
         </div>
