@@ -621,17 +621,42 @@ This is a win-win, not a concession:
   Austin drops to roughly zero — no ticket queue for routine Austin
   content updates, no defect cycles, no chase-the-data problems
   from sources MHR doesn't own.
-- **A reference implementation MHR can learn from — and potentially
-  resell.** Austin will package the reference build, bridge
-  contract, integration walkthrough, and source for each iframe
-  page *specifically for MHR consumption and redistribution.* If
-  MHR sees value, MHR can offer the same pattern as a paid service
-  to other franchisees who ask for it. That's a new revenue line
-  for MHR, not a competing one. **WaveMAX Austin will not build
-  this for anyone else** — we don't have the bandwidth to operate
-  a network-wide platform team. If the model gets reused, MHR is
-  the natural party to package and resell it, and Austin is happy
-  to make the redistribution package as polished as MHR needs.
+- **A library of resellable improvements MHR can offer to other
+  franchisees.** Be candid about which parts of this work travel
+  well: the iframe-embed *architecture* is Austin-specific and
+  needs an engineering-capable franchisee on the other end, so it
+  is not the natural resellable artifact. But the things we built
+  on top of it absolutely are — and they apply to any franchisee's
+  WordPress page without that franchisee needing a dev team:
+    * **SEO scaffolding** — JSON-LD bundle (LaundryOrDryCleaner,
+      Organization, 3× Service, FAQPage, ParkingFacility,
+      BreadcrumbList, WebSite/SearchAction), canonical / hreflang
+      done right, geo + Open Graph + Twitter card metas,
+      preconnect / dns-prefetch performance hints
+    * **Google Places integration** — live 5★ reviews block, real
+      rating + count, browser-direct call with referrer-locked
+      key, server-rendered config endpoint
+    * **Internationalization** — en/es/pt/de coverage with
+      versioned JSON dictionaries, `data-i18n` / `data-bind`
+      attribute pattern, language switcher with cross-frame sync
+    * **Parent-page chrome fixes** — every defect from the audits
+      Austin produced (Hibu phone consistency, address bleed-
+      through, broken footer anchors, mobile breakpoints, etc.)
+      written up with patches that drop into the WordPress
+      template
+  Austin will **package each of those as a standalone module
+  specifically for MHR consumption and redistribution** — readable
+  source, copy-paste-ready snippets, integration walkthroughs.
+  MHR can apply them to any franchisee's existing WordPress page,
+  charge for the work, and keep the customer relationship. That's
+  a new revenue line for MHR built on inventory we'd otherwise
+  just leave on Austin's page.
+  **WaveMAX Austin will not build or maintain these for other
+  franchisees directly** — we don't have the bandwidth. If the
+  modules get reused, MHR is the natural party to deliver and
+  support them, and Austin is happy to make the redistribution
+  package as polished as MHR needs. The iframe restoration is the
+  Austin ask; the resellable modules are the MHR upside.
 - **Better outcomes on the Austin page** — richer structured data,
   location-specific FAQs, proper canonical / hreflang, live Google
   reviews, business hours bound to a source of truth, source-indexed
