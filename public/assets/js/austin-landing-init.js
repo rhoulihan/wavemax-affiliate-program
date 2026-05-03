@@ -447,31 +447,22 @@
     if (imgs.length < 2) return;
     let active = Array.from(imgs).findIndex(i => i.classList.contains('is-active'));
     if (active < 0) { active = 0; imgs[0].classList.add('is-active'); }
-    const ROTATE_MS = 5500;
+    const ROTATE_MS = 4000;  // 4s feels alive without being busy
     let paused = false;
     let scheduled = null;
 
-    let stepCount = 0;
     function step() {
-      stepCount++;
-      console.log('[austin-landing] rotator step', stepCount, 'active', active);
       try {
         imgs[active].classList.remove('is-active');
         active = (active + 1) % imgs.length;
         imgs[active].classList.add('is-active');
-      } catch (e) {
-        console.error('[austin-landing] rotator step exception', e);
-      }
+      } catch (_) { /* one bad tick can't kill the chain */ }
       schedule();
     }
     function schedule() {
-      if (paused) {
-        console.log('[austin-landing] rotator paused, not scheduling');
-        return;
-      }
+      if (paused) return;
       if (scheduled) clearTimeout(scheduled);
       scheduled = setTimeout(step, ROTATE_MS);
-      console.log('[austin-landing] rotator scheduled tick in', ROTATE_MS, 'ms (id=', scheduled, ')');
     }
 
     schedule();
@@ -530,17 +521,11 @@
    * Each step is wrapped in safeRun so a single broken init step
    * (e.g. an exception in setStoreWatermark when window.parent access
    * is cross-origin in an unexpected env) doesn't break the rest of
-   * the chain. Every step also logs its outcome so a regression is
-   * obvious from the browser console — useful since the iframe is
-   * developed in isolation but only fully exercised on prod.
+   * the chain. Errors still surface to console; success is silent.
    */
   function safeRun(label, fn) {
-    try {
-      fn();
-      console.log('[austin-landing] init step OK:', label);
-    } catch (e) {
-      console.error('[austin-landing] init step FAILED:', label, e);
-    }
+    try { fn(); }
+    catch (e) { console.error('[austin-landing] init step FAILED:', label, e); }
   }
   function init() {
     if (!window.IframeBridge) {
