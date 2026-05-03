@@ -257,7 +257,7 @@ app.use((req, res, next) => {
     'font-src': ["'self'", 'https://cdnjs.cloudflare.com', 'https://cdn.jsdelivr.net', 'https://fonts.gstatic.com'],
     'object-src': ["'none'"],
     'media-src': ["'self'"],
-    'frame-src': process.env.ENABLE_IFRAME_DEMO === 'true' ? ["'self'"] : ["'none'"],
+    'frame-src': ["'self'"],
     'form-action': ["'self'", 'https://safepay.paymentlogistics.net'],
     'frame-ancestors': ["'self'", 'https://www.wavemaxlaundry.com', 'https://wavemaxlaundry.com'],
     'base-uri': ["'self'"],
