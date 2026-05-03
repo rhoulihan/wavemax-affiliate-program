@@ -25,6 +25,8 @@
     let currentLanguage = 'en';
     let parentReady = false;
     let seoConfig = null;
+    let locationData = null;
+    const locationDataListeners = [];
 
     // Global actions - These run for ALL pages
     const globalActions = {
@@ -150,6 +152,16 @@
             case 'current-language':
                 if (data && data.language) {
                     setLanguage(data.language);
+                }
+                break;
+
+            case 'location-data':
+                if (data) {
+                    locationData = data;
+                    applyLocationDataBindings();
+                    locationDataListeners.forEach(fn => {
+                        try { fn(data); } catch (e) { console.error('[Iframe Bridge V2] location-data listener threw:', e); }
+                    });
                 }
                 break;
 
@@ -279,6 +291,52 @@
         }
     }
 
+    /* ---------- Location data (v3 addition) ----------
+     * Parent page broadcasts a single canonical LOCATION_DATA object on
+     * iframe-ready and on demand via request-location-data. The iframe page
+     * uses it via [data-bind="contact.phone"] declarative binding, plus
+     * onLocationData() listeners for imperative work.
+     */
+
+    function applyLocationDataBindings(root) {
+        if (!locationData) return;
+        const scope = root || document;
+        scope.querySelectorAll('[data-bind]').forEach(el => {
+            const path = el.getAttribute('data-bind');
+            const value = resolvePath(locationData, path);
+            if (value === undefined || value === null) return;
+            const attr = el.getAttribute('data-bind-attr');
+            if (attr) {
+                el.setAttribute(attr, String(value));
+            } else if (el.tagName === 'A' && /^(tel|mailto|http|\/)/.test(String(value))) {
+                el.setAttribute('href', String(value));
+                if (!el.textContent.trim()) el.textContent = String(value);
+            } else {
+                el.textContent = String(value);
+            }
+        });
+    }
+
+    function resolvePath(obj, path) {
+        return path.split('.').reduce((acc, key) => (acc == null ? acc : acc[key]), obj);
+    }
+
+    function requestLocationData() {
+        sendToParent({ type: 'request-location-data' });
+    }
+
+    function onLocationData(fn) {
+        if (typeof fn !== 'function') return;
+        locationDataListeners.push(fn);
+        if (locationData) {
+            try { fn(locationData); } catch (e) { console.error('[Iframe Bridge V2] location-data listener threw:', e); }
+        }
+    }
+
+    function navigateParent(href) {
+        sendToParent({ type: 'navigate', data: { href } });
+    }
+
     function loadSEOConfig(seoData) {
         if (seoData) {
             seoConfig = seoData;
@@ -340,6 +398,11 @@
         updateHeight: updateHeight,
         loadTranslations: loadTranslations,
         loadSEOConfig: loadSEOConfig,
+        getLocationData: () => locationData,
+        onLocationData: onLocationData,
+        requestLocationData: requestLocationData,
+        applyLocationDataBindings: applyLocationDataBindings,
+        navigateParent: navigateParent,
 
         // Register page-specific action
         registerPageAction: function(pageId, actionName, actionFn) {
