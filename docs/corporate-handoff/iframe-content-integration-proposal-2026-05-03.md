@@ -621,13 +621,19 @@ This is a win-win, not a concession:
   Austin drops to roughly zero — no ticket queue for routine Austin
   content updates, no defect cycles, no chase-the-data problems
   from sources MHR doesn't own.
-- **A library of resellable improvements MHR can offer to other
-  franchisees.** Be candid about which parts of this work travel
-  well: the iframe-embed *architecture* is Austin-specific and
-  needs an engineering-capable franchisee on the other end, so it
-  is not the natural resellable artifact. But the things we built
-  on top of it absolutely are — and they apply to any franchisee's
-  WordPress page without that franchisee needing a dev team:
+- **A standing offer to MHR on anything we build.** The
+  iframe-embed *architecture* itself is Austin-specific — it needs
+  an engineering-capable franchisee on the other end — so it isn't
+  a natural resellable artifact. But everything we *build on top of
+  it* is. The proposal here is open-ended:
+
+  > **Any improvement we ship for the Austin pages that MHR finds
+  > valuable, we will provide whatever documentation, instrumentation,
+  > or componentry MHR's team needs to redistribute or resell it to
+  > other franchisees.**
+
+  As a starting illustration, the work shipped so far that MHR
+  could plausibly turn into product:
     * **SEO scaffolding** — JSON-LD bundle (LaundryOrDryCleaner,
       Organization, 3× Service, FAQPage, ParkingFacility,
       BreadcrumbList, WebSite/SearchAction), canonical / hreflang
@@ -644,19 +650,24 @@ This is a win-win, not a concession:
       through, broken footer anchors, mobile breakpoints, etc.)
       written up with patches that drop into the WordPress
       template
-  Austin will **package each of those as a standalone module
-  specifically for MHR consumption and redistribution** — readable
-  source, copy-paste-ready snippets, integration walkthroughs.
-  MHR can apply them to any franchisee's existing WordPress page,
-  charge for the work, and keep the customer relationship. That's
-  a new revenue line for MHR built on inventory we'd otherwise
-  just leave on Austin's page.
+
+  Each of those — and anything we build later that MHR wants —
+  Austin is happy to package up to whatever level of polish MHR's
+  team needs to redistribute: readable source, copy-paste snippets,
+  integration walkthroughs, screencast walk-throughs, even a
+  packaged module if MHR has a preferred shape. MHR picks which
+  pieces are interesting and what form is most useful; Austin
+  delivers the documentation / instrumentation / componentry.
+
+  MHR can then apply the modules to any franchisee's existing
+  WordPress page, charge for the work, and keep the customer
+  relationship. That's a new revenue line for MHR built on
+  inventory we'd otherwise just leave on Austin's page.
   **WaveMAX Austin will not build or maintain these for other
   franchisees directly** — we don't have the bandwidth. If the
   modules get reused, MHR is the natural party to deliver and
-  support them, and Austin is happy to make the redistribution
-  package as polished as MHR needs. The iframe restoration is the
-  Austin ask; the resellable modules are the MHR upside.
+  support them. The iframe restoration is the Austin ask; the
+  resellable modules are the MHR upside.
 - **Better outcomes on the Austin page** — richer structured data,
   location-specific FAQs, proper canonical / hreflang, live Google
   reviews, business hours bound to a source of truth, source-indexed
