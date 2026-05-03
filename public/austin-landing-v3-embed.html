@@ -47,10 +47,52 @@
       .wm-hero-brand-logo { max-width: 280px; }
     }
 
-    /* Tighter stat cards */
-    .wm-stats-inner { padding: var(--wm-sp-4) var(--wm-sp-5); }
-    .wm-stat-card { padding: var(--wm-sp-4) var(--wm-sp-3); }
-    .wm-stat-number { font-size: var(--wm-fs-4xl); }
+    /* Stat row — matches MHR's existing /austin-tx/ stat band exactly:
+       navy #154f82 background, 5 columns, 22px Poppins-800 numbers in
+       white + 11px Poppins-500 labels in white-65%, uppercase 1px
+       letter-spacing. Pure visual match to their et_pb_row_5col band. */
+    .wm-stats {
+      background: #154f82;
+      border-bottom: none;
+    }
+    .wm-stats-inner {
+      max-width: var(--wm-content-max);
+      margin: 0 auto;
+      padding: var(--wm-sp-5) var(--wm-sp-5);
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 0;
+      text-align: center;
+    }
+    .wm-stat-card {
+      background: transparent;
+      border-top: 0;
+      padding: 0 24px;
+      border-radius: 0;
+      border-right: 1px solid rgba(255,255,255,0.12);
+    }
+    .wm-stat-card:last-child { border-right: 0; }
+    .wm-stat-number {
+      font-family: 'Poppins', sans-serif;
+      font-size: 22px;
+      font-weight: 800;
+      color: #ffffff;
+      line-height: 1.2;
+      margin-bottom: 4px;
+    }
+    .wm-stat-label {
+      font-family: 'Poppins', sans-serif;
+      font-size: 11px;
+      font-weight: 500;
+      color: rgba(255,255,255,0.65);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      line-height: 1.4;
+    }
+    @media (max-width: 768px) {
+      .wm-stats-inner { grid-template-columns: repeat(2, 1fr); gap: var(--wm-sp-4); padding: var(--wm-sp-4); }
+      .wm-stat-card { border-right: 0; padding: var(--wm-sp-2); }
+    }
 
     /* Tighter section header */
     .wm-section-header { margin-bottom: var(--wm-sp-5); }
@@ -326,24 +368,30 @@
     </div>
   </section>
 
-  <!-- STAT RAIL ======================================================= -->
+  <!-- STAT RAIL — same 5 tiles MHR's existing /austin-tx/ landing uses
+       in their navy band right below the hero slider. Exact content +
+       styling lifted from their et_pb_row_5col stat band. ============== -->
   <section class="wm-stats" data-section="stats">
     <div class="wm-stats-inner">
       <div class="wm-stat-card">
-        <div class="wm-stat-number" data-bind="equipment.washers">20</div>
-        <div class="wm-stat-label" data-i18n="landing.stats.washers">Washers</div>
-      </div>
-      <div class="wm-stat-card">
-        <div class="wm-stat-number" data-bind="equipment.dryers">20</div>
-        <div class="wm-stat-label" data-i18n="landing.stats.dryers">Dryers</div>
+        <div class="wm-stat-number">4.8 ★</div>
+        <div class="wm-stat-label" data-i18n="landing.stats.googleRating">Google Rating</div>
       </div>
       <div class="wm-stat-card">
         <div class="wm-stat-number" data-bind="hours.display">7am-10pm</div>
-        <div class="wm-stat-label" data-i18n="landing.stats.hours">Open Daily</div>
+        <div class="wm-stat-label" data-i18n="landing.stats.openDaily">Open Daily</div>
+      </div>
+      <div class="wm-stat-card">
+        <div class="wm-stat-number">&lt;45min</div>
+        <div class="wm-stat-label" data-i18n="landing.stats.fullLoad">Full Load Done</div>
       </div>
       <div class="wm-stat-card">
         <div class="wm-stat-number" data-bind="pricing.wdf.display">$1.20/lb</div>
-        <div class="wm-stat-label" data-i18n="landing.stats.wdf">WDF Pricing</div>
+        <div class="wm-stat-label" data-i18n="landing.stats.wdf">Wash-Dry-Fold</div>
+      </div>
+      <div class="wm-stat-card">
+        <div class="wm-stat-number">24hr</div>
+        <div class="wm-stat-label" data-i18n="landing.stats.dropoff">Drop-Off Turnaround</div>
       </div>
     </div>
   </section>
