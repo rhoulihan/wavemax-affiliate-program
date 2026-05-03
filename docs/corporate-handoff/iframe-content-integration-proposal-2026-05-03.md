@@ -34,13 +34,17 @@ This document is the package we'd like reviewed:
   improvements over the existing `/austin-tx` page)
 - **Section 4** — architecture diagram and how corporate adopts it
 - **Section 5** — how to evaluate the demo
-- **Section 6** — proposed next steps for the broader franchise network
+- **Section 6** — proposed next steps to restore Austin's
+  iframe-embedded content
 
-If the pattern works for WaveMAX, the Austin reference can be re-skinned
-per location in a few days each. The technical work (PostMessage bridge,
-i18n machinery, SEO scaffolding, Google Places integration, Hibu
-tracking, security baseline) is template-able and would not need to be
-repeated.
+This proposal is **about WaveMAX Austin specifically.** It restores
+functionality the Austin franchise was actively using under Walibu,
+ships the page that was queued to go live when the cutover
+happened, and completes the extension we'd been building toward.
+If the work has spillover value for corporate, MHR, or other
+franchisees who want to look at it later, that's a fine outcome —
+but it's not what we're asking for. The ask is restoration for
+Austin.
 
 ---
 
@@ -122,23 +126,25 @@ Restore the integration model we were already using under Walibu:
 1. **Corporate** continues to own the parent page chrome on
    `www.wavemaxlaundry.com` — header, footer, brand styling. Same
    WordPress + Divi stack, no platform change required.
-2. **Franchisee** owns an iframe-mounted content area pointing to a
-   franchisee-controlled origin (`wavemax.promo` for Austin).
+2. **Austin** serves an iframe-mounted content area at an
+   Austin-controlled origin (`wavemax.promo`).
 3. A small **PostMessage bridge** carries language preference, location
    data, breadcrumbs, and content-height up to the corporate parent;
    carries chrome events (language switches, modal triggers) down to
    the iframe. Same iframe-embed contract Austin's existing
    Self-Serve and WDF pages used inside Walibu, now updated to a
    versioned protocol for forward compatibility.
-4. Each iframe page can be developed, tested, deployed by the
-   franchisee — without involving MHR — and corporate retains brand
-   control over the visible chrome around it.
+4. Each iframe page can be developed, tested, deployed by Austin
+   — without involving MHR — and corporate retains brand control
+   over the visible chrome around it.
 
-This pattern decouples release cadences, lets each franchisee tune
-their content for local search intent, and keeps the corporate chrome
-consistent across the network. It also gives corporate a clean
-re-platform path later: when the parent site moves off WordPress, the
-iframe contracts don't have to change.
+This decouples Austin's release cadence from corporate / MHR's,
+lets us tune the content for our local search intent, and keeps
+corporate's chrome unchanged. As a side effect it also gives
+corporate a clean re-platform path later — if the parent site
+moves off WordPress, the iframe contract does not have to
+change — but that is a downstream consequence, not the reason
+we are proposing this.
 
 ### What this is **not**
 
@@ -528,42 +534,55 @@ URL: **[https://wavemax.promo/dev/austin-host-mock.html](https://wavemax.promo/d
 
 ## 6. Proposed Next Steps
 
-Phasing assumes corporate / MHR sign-off on the iframe pattern. If
-that's not where the conversation lands, sub-steps can be re-scoped.
+Phasing assumes corporate / MHR sign-off so Austin can re-embed.
+All work below is done by Austin.
 
-| Phase | Scope                                                        | Owner         | Estimate    |
-|------:|--------------------------------------------------------------|---------------|-------------|
-| **Decision** | Corporate / MHR review demo and confirm pattern is acceptable | Corporate     | 1–2 weeks   |
-| **2c**  | Build `contact-embed.html` (form + map + hours)              | Franchisee    | 3 days      |
-| **2d**  | Refresh `wash-dry-fold-embed.html` to match v3 standard      | Franchisee    | 2 days      |
-| **2e**  | Refresh `self-serve-laundry-embed.html` to v3 standard       | Franchisee    | 2 days      |
-| **3**   | Commercial cluster (4 sub-pages: hospitality, restaurant, salon, gym) | Franchisee | 1 week      |
-| **4**   | About-us page, additional locales (per franchisor data), end-to-end QA | Franchisee | 1 week  |
-| **5**   | Handoff package for MHR — bridge contract spec, integration guide, per-location config template | Franchisee | 1 week  |
-| **Pilot** | Migrate 1 second franchisee location to the same pattern    | Both          | 2 weeks     |
-| **Roll-out** | Migrate remaining locations (template-able)              | Per location  | 1–3 days each |
+| Phase | Scope                                                        | Owner       | Estimate  |
+|------:|--------------------------------------------------------------|-------------|-----------|
+| **Decision** | Corporate / MHR review demo and confirm the iframe-embed restoration | Corporate   | 1–2 weeks |
+| **2c**  | Build `contact-embed.html` (form + map + hours)              | Austin      | 3 days    |
+| **2d**  | Refresh `wash-dry-fold-embed.html` (the page that was queued) | Austin      | 2 days    |
+| **2e**  | Refresh `self-serve-laundry-embed.html`                       | Austin      | 2 days    |
+| **3**   | Commercial cluster (4 sub-pages: hospitality, restaurant, salon, gym) | Austin    | 1 week    |
+| **4**   | About-us page, additional locales, end-to-end QA              | Austin      | 1 week    |
+| **5**   | Integration package handed to MHR (snippet + bridge spec + walkthrough); WordPress template change deployed | MHR + Austin | ~1 week round-trip |
+| **Live** | Austin's iframes back in production on `/austin-tx`         | —           | —         |
+
+> **Note on broader use.** If, after seeing the Austin restoration
+> work, corporate or MHR want to look at applying any of it
+> elsewhere — to the wider site, to other locations who ask for
+> it, or to MHR's own template-build process — we are happy to
+> share what we've built and answer questions. That is **not what
+> we are proposing here.** Austin is more technically equipped
+> than the typical franchisee, and what works for us doesn't
+> automatically work for everyone. The phasing above stops at
+> Austin live; anything beyond that is corporate's call, on
+> corporate's timeline.
 
 ### What we'd need from corporate / MHR
 
 WaveMAX Austin handles the build, hosting, content, and ongoing
-maintenance for the iframe pages. The ask on corporate / MHR is
-narrow and one-time per location:
+maintenance for the Austin iframe pages. The ask on corporate /
+MHR is narrow and one-time:
 
-1. **Sign-off** on the iframe pattern as the integration model.
-2. **Content slot** identified on the corporate location-page template
-   — i.e. confirmation of where the iframe goes (currently mocked as
-   "between the chrome and the footer; full width").
-3. **Bridge contract version lock** — corporate commits to a specific
-   bridge protocol version per page; we publish breaking changes
-   under a new version with a deprecation window.
+1. **Sign-off** on restoring Austin's iframe-embedded pages.
+2. **Content slot** identified on the `/austin-tx` page template
+   — i.e. confirmation of where the iframe goes (currently mocked
+   as "between the chrome and the footer; full width").
+3. **Bridge contract version lock** — corporate commits to a
+   specific bridge protocol version for the Austin pages; Austin
+   publishes breaking changes under a new version with a
+   deprecation window.
 4. **Allowed-origins list** confirmed — which domains corporate
-   wants to permit in the `frame-ancestors` policy. Currently we have
-   `wavemaxlaundry.com` and `*.wavemaxlaundry.com`; corporate may
-   want to lock that down further.
-5. **WordPress template change** to add the iframe + a small bridge
-   include to the location-page template. Austin will provide the
-   exact snippet, bridge protocol spec, and integration walkthrough
-   so MHR can drop it in without writing it from scratch.
+   wants to permit in the `frame-ancestors` policy for the iframe
+   on `/austin-tx`. Currently we have `wavemaxlaundry.com` and
+   `*.wavemaxlaundry.com`; corporate may want to lock that down
+   further.
+5. **WordPress template change** to add the iframe + a small
+   bridge include to the `/austin-tx` page template. Austin will
+   provide the exact snippet, bridge protocol spec, and
+   integration walkthrough so MHR can drop it in without writing
+   it from scratch.
 
 ### Integration package Austin will deliver to MHR
 
@@ -590,20 +609,42 @@ WordPress change, confirm the page renders. No net-new development.
 
 ### What corporate / MHR get out of this
 
-- Faster content iteration on franchise pages without MHR
-  round-trips
-- Better SEO performance (richer structured data, location-specific
-  FAQs, proper canonical / hreflang setup)
-- Live business-data integrations the existing pages can't match
-  (real Google reviews, live business hours, source-indexed call
-  tracking)
-- Multi-language support beyond en/es with no per-language
-  WordPress / plugin overhead
-- Strict CSP + security baseline that the parent site can also
-  inherit later, when they're ready to upgrade
-- Less marketing-vendor coordination overhead
-- A clean re-platform path off WordPress later — iframe contracts
-  don't change
+This is a win-win, not a concession:
+
+- **MHR keeps the Austin subscription.** The Austin location stays
+  on the corporate WordPress page; MHR's revenue from Austin doesn't
+  go anywhere. The iframe is a content slot inside the page MHR
+  already manages.
+- **Minimal ongoing maintenance for MHR.** The Austin iframe assets
+  are versioned, tested, and maintained by Austin's engineering
+  team. Once the iframe is in place, MHR's day-to-day workload on
+  Austin drops to roughly zero — no ticket queue for routine Austin
+  content updates, no defect cycles, no chase-the-data problems
+  from sources MHR doesn't own.
+- **A reference implementation MHR can learn from — and potentially
+  resell.** Austin will package the reference build, bridge
+  contract, integration walkthrough, and source for each iframe
+  page *specifically for MHR consumption and redistribution.* If
+  MHR sees value, MHR can offer the same pattern as a paid service
+  to other franchisees who ask for it. That's a new revenue line
+  for MHR, not a competing one. **WaveMAX Austin will not build
+  this for anyone else** — we don't have the bandwidth to operate
+  a network-wide platform team. If the model gets reused, MHR is
+  the natural party to package and resell it, and Austin is happy
+  to make the redistribution package as polished as MHR needs.
+- **Better outcomes on the Austin page** — richer structured data,
+  location-specific FAQs, proper canonical / hreflang, live Google
+  reviews, business hours bound to a source of truth, source-indexed
+  call tracking, en/es/pt/de coverage with no WordPress plugin
+  overhead. All accrue to the Austin page that's already on
+  corporate's domain, so the corporate site benefits too.
+- **A clean re-platform path off WordPress later** if/when corporate
+  wants one — the iframe contract is platform-agnostic.
+
+The proposal is structured so corporate retains brand control, MHR
+retains the customer relationship, Austin gets its iframe pages
+back, and any cross-network upside MHR can capture from what we
+build is theirs to take.
 
 ---
 
