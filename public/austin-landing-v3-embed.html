@@ -25,26 +25,26 @@
     /* Hero is the single biggest height consumer — keep it tight.
        Override the global 60vh (which is 540px on a 900px viewport). */
     .wm-hero { min-height: 360px; padding: var(--wm-sp-5) 0; }
-    .wm-hero-title { font-size: var(--wm-fs-4xl); margin-bottom: var(--wm-sp-3); }
+    .wm-hero-title { font-size: var(--wm-fs-2xl); margin-bottom: var(--wm-sp-3); font-weight: 700; }
     .wm-hero-subtitle { font-size: var(--wm-fs-base); margin-bottom: var(--wm-sp-4); max-width: 56ch; }
     .wm-hero-eyebrow { margin-bottom: var(--wm-sp-3); }
     @media (max-width: 768px) {
       .wm-hero { min-height: 280px; }
-      .wm-hero-title { font-size: var(--wm-fs-3xl); }
+      .wm-hero-title { font-size: var(--wm-fs-xl); }
     }
 
     /* Hero brand-logo image — replaces the small text pill eyebrow.
        Same logo MHR uses on the existing wavemaxlaundry.com nav. */
     .wm-hero-brand-logo {
       display: block;
-      max-width: 220px;
-      width: auto;
+      max-width: 380px;
+      width: 100%;
       height: auto;
       margin: 0 0 var(--wm-sp-4);
-      filter: drop-shadow(0 6px 16px rgba(0, 0, 0, 0.25));
+      filter: drop-shadow(0 6px 18px rgba(0, 0, 0, 0.32));
     }
     @media (max-width: 768px) {
-      .wm-hero-brand-logo { max-width: 180px; }
+      .wm-hero-brand-logo { max-width: 280px; }
     }
 
     /* Tighter stat cards */
