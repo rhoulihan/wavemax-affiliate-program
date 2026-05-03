@@ -259,21 +259,22 @@
     });
   }
 
-  /* ---------- Tabs ---------- */
+  /* ---------- Tabs ----------
+   * Document-level event delegation so handlers survive iframe-doc
+   * reloads and are immune to the cached-NodeList bug that took down
+   * the closure-bound version. Single delegated listener routes via
+   * `e.target.closest('.wm-tab')`. Panels query fresh on each click.
+   */
   function initTabs() {
-    const tabs = document.querySelectorAll('.wm-tab');
-    const panels = document.querySelectorAll('.wm-tab-panel');
-    console.log('[austin-landing] initTabs — tabs:', tabs.length, 'panels:', panels.length);
-    tabs.forEach(tab => {
-      tab.addEventListener('click', () => {
-        console.log('[austin-landing] tab click', tab.getAttribute('data-tab'));
-        const target = tab.getAttribute('data-tab');
-        tabs.forEach(t => t.setAttribute('aria-selected', t === tab ? 'true' : 'false'));
-        panels.forEach(p => {
-          p.setAttribute('aria-hidden', p.getAttribute('data-panel') === target ? 'false' : 'true');
-        });
-        if (window.IframeBridge?.updateHeight) window.IframeBridge.updateHeight();
-      });
+    document.addEventListener('click', (e) => {
+      const tab = e.target.closest('.wm-tab');
+      if (!tab) return;
+      const target = tab.getAttribute('data-tab');
+      document.querySelectorAll('.wm-tab').forEach(t =>
+        t.setAttribute('aria-selected', t === tab ? 'true' : 'false'));
+      document.querySelectorAll('.wm-tab-panel').forEach(p =>
+        p.setAttribute('aria-hidden', p.getAttribute('data-panel') === target ? 'false' : 'true'));
+      if (window.IframeBridge?.updateHeight) window.IframeBridge.updateHeight();
     });
   }
 
@@ -445,52 +446,38 @@
    * recursive chain self-suspends naturally — easier to reason about.
    */
   function initHeroRotator() {
-    // Re-query elements on each tick rather than caching the NodeList
-    // at init. The cached NodeList was operating on a phantom set of
-    // elements that wasn't the live rotator's children — verified via
-    // MutationObserver on the live #wm-hero-rotator showing zero class
-    // mutations even when step() logs claimed they were happening.
-    // Likely cause: the iframe document is loaded twice during initial
-    // init (visible as two "Iframe Bridge V2 Initializing..." logs);
-    // init #1's NodeList is captured before doc gets replaced; init #2
-    // runs but its closure references somehow get crossed with #1's
-    // dead elements. Querying fresh sidesteps the whole mess.
-    const initial = document.querySelectorAll('.wm-hero-rotator-img');
-    if (initial.length < 2) return;
-    let active = Array.from(initial).findIndex(i => i.classList.contains('is-active'));
-    if (active < 0) { active = 0; initial[0].classList.add('is-active'); }
-
-    const ROTATE_MS = 4000;
-    let paused = false;
-    let scheduled = null;
-
+    // Use rotator container's live children list — getElementById +
+    // .children is the freshest possible reference and never stales.
+    // The previous closure-cached NodeList AND the per-tick
+    // querySelectorAll both failed to update visible state — likely
+    // because the iframe doc reloads once during init and we end up
+    // mutating elements that the user's render no longer references.
     function step() {
-      // Re-query on every tick. document.querySelectorAll returns a
-      // STATIC NodeList of the CURRENT live elements — no closure
-      // capture, no phantom references.
-      const imgs = document.querySelectorAll('.wm-hero-rotator-img');
+      const rotator = document.getElementById('wm-hero-rotator');
+      if (!rotator) { schedule(); return; }
+      const imgs = rotator.children;
       if (imgs.length < 2) { schedule(); return; }
-      // Re-derive active from the live DOM in case external code
-      // (e.g. a manual class toggle) shifted it.
-      const live = Array.from(imgs).findIndex(i => i.classList.contains('is-active'));
-      if (live >= 0) active = live;
-      const next = (active + 1) % imgs.length;
-      const before = imgs[active]?.getAttribute('src')?.split('/').pop();
-      const after  = imgs[next]?.getAttribute('src')?.split('/').pop();
-      console.log('[austin-landing] rotator tick →', before, '→', after);
-      try {
-        imgs[active].classList.remove('is-active');
-        active = next;
-        imgs[active].classList.add('is-active');
-      } catch (e) { console.error('[austin-landing] rotator step exception', e); }
+      let activeIdx = -1;
+      for (let i = 0; i < imgs.length; i++) {
+        if (imgs[i].classList?.contains('is-active')) { activeIdx = i; break; }
+      }
+      if (activeIdx < 0) activeIdx = 0;
+      const nextIdx = (activeIdx + 1) % imgs.length;
+      const before = imgs[activeIdx].getAttribute?.('src')?.split('/').pop()?.slice(0, 30);
+      const after  = imgs[nextIdx].getAttribute?.('src')?.split('/').pop()?.slice(0, 30);
+      console.log('[austin-landing] rotator step', activeIdx, '→', nextIdx, '|', before, '→', after);
+      imgs[activeIdx].classList.remove('is-active');
+      imgs[nextIdx].classList.add('is-active');
       schedule();
     }
+    let scheduled = null;
     function schedule() {
-      if (paused) return;
       if (scheduled) clearTimeout(scheduled);
-      scheduled = setTimeout(step, ROTATE_MS);
+      scheduled = setTimeout(step, 4000);
     }
-
+    // Sanity ping on init
+    const r0 = document.getElementById('wm-hero-rotator');
+    console.log('[austin-landing] initHeroRotator — rotator children:', r0?.children?.length);
     schedule();
 
     const rotator = document.getElementById('wm-hero-rotator');
