@@ -86,18 +86,19 @@ test.describe('Austin landing page — structure', () => {
     expect(phoneText).toContain('(512) 553-1674');
   });
 
-  test('stat rail has 3-4 stat cards with bound values', async ({ page }) => {
+  test('stat rail has 5 cards matching MHR existing landing', async ({ page }) => {
     const frame = inIframe(page);
-    const stats = frame.locator('.wm-stats .wm-stat-card, .wm-stat-card');
-    const count = await stats.count();
-    expect(count).toBeGreaterThanOrEqual(3);
-    expect(count).toBeLessThanOrEqual(4);
+    const stats = frame.locator('.wm-stats .wm-stat-card');
+    await expect(stats).toHaveCount(5);
 
-    const statTexts = await stats.allTextContents();
-    const all = statTexts.join(' ');
-    // At least one number and one of the bound LOCATION_DATA values
-    expect(all).toMatch(/\d+/);
-    expect(all).toMatch(/(7am|10pm|7am-10pm|\$1\.20|20)/);
+    const all = (await stats.allTextContents()).join(' ');
+    // Bound LOCATION_DATA values must show up
+    expect(all).toMatch(/7am-10pm/);
+    expect(all).toMatch(/\$1\.20/);
+    // Static MHR-spec content
+    expect(all).toMatch(/4\.8/);
+    expect(all).toMatch(/45 ?min/i);
+    expect(all).toMatch(/24 ?hr/i);
   });
 
   test('service tab-block has 3 tabs (WDF / Self-Serve / Commercial)', async ({ page }) => {
