@@ -262,10 +262,11 @@
   <div class="eyebrow">Proposal &amp; Reference Build</div>
   <h1>Iframe Content Integration<br>for the WaveMAX Franchise Network</h1>
   <p style="font-size:17px; line-height:1.55; max-width:680px; margin:0; color:rgba(255,255,255,0.92);">
-    Extending the franchisee-owned iframe-embed pattern — the same
-    pattern Austin's Self-Serve and Wash-Dry-Fold pages already used
-    inside Walibu — to cover the rest of the location content, on
-    infrastructure WaveMAX owns and controls.
+    Restoring the franchisee-owned iframe embeds Austin had live
+    under Walibu — Self-Serve Laundry and the Affiliate Program —
+    shipping the Wash-Dry-Fold page that was queued to go live,
+    and completing the agreed extension to the rest of the
+    location content.
   </p>
   <dl class="cover-meta">
     <dt>Prepared by</dt><dd>WaveMAX Austin · Colin Houlihan (Owner) &amp; Rick Houlihan (Engineering)</dd>
@@ -299,19 +300,24 @@
 <!-- ============================================================ -->
 
 <p>
-The corporate <code>/austin-tx</code> page on
-<code>www.wavemaxlaundry.com</code> came up on the WordPress + Divi
-stack on <strong>April 30, 2026</strong>, replacing the Walibu-hosted
-location pages that had served the franchise network to that point.
-In the 3 days since, audits have documented ~38 distinct defects on
-the new corporate version. Rather than chase the fix-list, we
-recommend a different approach: <strong>embed franchisee-owned
-content as an iframe inside the corporate page</strong> — the same
-way Austin's two franchisee-owned pages (Self-Serve Laundry and
-Wash-Dry-Fold) were already embedded into Walibu, now extended to
-cover the location's full content. The reference build at the URL
-above demonstrates the pattern end-to-end with the WaveMAX Austin
-location, and is ready for WaveMAX corporate / MHR Marketing review.
+Until recently, Austin had two franchisee-owned pages live and
+embedded as iframes inside Walibu's location page: the
+<strong>Self-Serve Laundry</strong> information page and the
+<strong>Affiliate Program</strong> sign-up flow. A third —
+<strong>Wash-Dry-Fold</strong> — was implemented, tested, and queued
+to go live when the cutover from Walibu to corporate's WordPress +
+Divi stack interrupted the rollout. The long-running plan was to
+extend the same iframe-embed pattern to cover the rest of the
+location content (landing, contact, commercial, about) so the
+franchisee owned the full surface inside corporate's chrome. The
+cutover removed the two live embeds and stranded the third. This
+proposal <strong>restores that capability, ships the WDF page that
+was about to go live, and completes the planned extension</strong>
+— re-embedding the franchisee-owned iframes into the corporate
+location page so we get back the functionality we relied on under
+Walibu. The reference build at the URL above demonstrates the
+pattern end-to-end with the WaveMAX Austin location, and is ready
+for WaveMAX corporate / MHR Marketing review.
 </p>
 
 <p>This document is the package we'd like reviewed:</p>
@@ -342,43 +348,81 @@ would not need to be repeated.
 <h2 id="why-iframe">2. Why Iframe-Embedded Content</h2>
 <!-- ============================================================ -->
 
-<h3>Background</h3>
+<h3>What we had</h3>
 <p>
-The corporate <code>/austin-tx</code> page came up on
-<code>www.wavemaxlaundry.com</code> (WordPress + Divi) on
-<strong>April 30, 2026</strong>, replacing the Walibu-hosted
-location pages that previously fronted the network. Three checklists
-produced in the days since (parent-site-fix-checklist, parent-site-
-user-testing-checklist, footer-defects-checklist) documented ~38
-distinct defects on the new corporate version — broken phone
-numbers, hardcoded city names from a different franchisee
-(Jacksonville bleed-through), missing mobile breakpoints, broken
-footer anchors, untranslated copy, stale business data, SEO gaps,
-and several smaller issues. Many of these are routine content
-errors that get introduced when the franchisee's data is being
-maintained by a third party (MHR Marketing) who doesn't own the
-data and can't iterate against it directly.
+Austin's location presence on Walibu included two franchisee-owned
+pages embedded via iframe and a third about to go live:
+</p>
+<ul>
+  <li><strong>Self-Serve Laundry</strong> <em>(live)</em> — hours,
+    equipment specs, pricing, attendant info</li>
+  <li><strong>Affiliate Program</strong> <em>(live)</em> — sign-up
+    flow, terms, commission schedule, dashboard link</li>
+  <li><strong>Wash-Dry-Fold</strong> <em>(queued)</em> — drop-off
+    process, turnaround, pricing, policies. Implemented, tested, and
+    ready to go live when the cutover happened.</li>
+</ul>
+<p>
+We owned all three. We iterated on the live ones directly — copy,
+hours, pricing, photos, SEO meta — without round-tripping through a
+marketing vendor. The pattern was clean: corporate's chrome wrapped
+the page; the iframe carried our content; a small bridge handled
+language, location-data, and content-height between the two.
 </p>
 
+<h3>What was planned</h3>
 <p>
-This is the same problem the <strong>iframe-embed pattern</strong>
-solved for Austin under Walibu. While Walibu ran the bulk of each
-location's content, Austin specifically hosted two
-franchisee-owned pages — <strong>Self-Serve Laundry</strong> and
-<strong>Wash-Dry-Fold</strong> — and embedded them into Walibu's
-location page via iframe, the same way we're proposing to embed
-into corporate's WordPress page now. That arrangement let the
-franchisee iterate hours, pricing, copy, photos, and SEO meta
-directly without round-tripping through Walibu's content team.
-With Walibu retired and corporate now owning the full location
-page, this proposal extends the <em>same iframe-embed pattern</em>
-to cover the rest of the location content (landing hero, contact,
-commercial, about) on infrastructure we own.
+The two embeds were the proof point. The plan, agreed at the time
+the Walibu integration was provisioned, was to extend the
+iframe-embed pattern to cover the rest of the Austin location
+content over time — landing hero, contact, commercial, about — so
+the full location page would be franchisee-owned content inside
+corporate-owned chrome, with one consistent integration contract.
 </p>
+
+<h3>What changed</h3>
+<p>
+The Walibu → corporate WordPress cutover replaced the entire
+location page (including our two embeds) with content that
+corporate's marketing vendor (MHR Marketing) maintains directly.
+Three checklists subsequently documented ~38 distinct defects on
+the new corporate version — broken phone numbers, hardcoded
+Jacksonville address bleed-through into the Austin footer, missing
+mobile breakpoints, broken footer anchors, untranslated copy,
+stale business data, SEO gaps, and other content-migration issues.
+Many of these are routine errors that get introduced when the
+franchisee's data is maintained by a third party that doesn't own
+the data.
+</p>
+
+<h3>What this proposal does</h3>
+<p>
+Restore the iframe-embedded pages we had live on Walibu, ship the
+Wash-Dry-Fold page that was queued to go live, and complete the
+already-agreed extension to the rest of the location content. Same
+integration model, same ownership boundary corporate and franchisee
+already accepted under Walibu.
+</p>
+
+<div class="callout success">
+  <div class="callout-title">Turn-key for corporate &amp; MHR</div>
+  <p>
+    <strong>WaveMAX Austin will do all the required work.</strong>
+    The reference build is already running; the remaining pages
+    (contact, refreshed WDF, refreshed Self-Serve, commercial, about)
+    will be delivered by Austin without consuming MHR engineering
+    time. We will also provide MHR with <strong>detailed
+    integration guidance</strong> — the iframe embed snippet, the
+    bridge protocol contract, frame-ancestors policy, allowed-origins
+    list, and any WordPress-side configuration MHR needs to put the
+    iframe in the right slot on the location-page template. The ask
+    on corporate / MHR is review, sign-off, and a small WordPress
+    template change — not net-new development work.
+  </p>
+</div>
 
 <h3>Proposal</h3>
-<p>Restore the same separation of concerns, on infrastructure we
-control:</p>
+<p>Restore the integration model we were already using under Walibu:</p>
 
 <ol>
   <li><strong>Corporate</strong> continues to own the parent page
