@@ -15,99 +15,12 @@
   <link rel="stylesheet" href="/assets/css/wavemax-mhr-chrome.css">
   <link rel="stylesheet" href="/assets/css/wavemax-mhr-modal.css">
 
-  <!-- Demo-only host page styles (page wrapper, iframe shell, breadcrumb) -->
-  <style>
-    *, *::before, *::after { box-sizing: border-box; }
-    html, body { margin: 0; padding: 0; }
-    body { font-family: 'Barlow', sans-serif; background: #ffffff; color: #1e293b; line-height: 1.5; }
+  <!-- Demo-only host page styles (external for CSP compliance) -->
+  <link rel="stylesheet" href="/assets/css/austin-host-mock.css">
 
-    .wm-iframe-shell { width: 100%; background: #ffffff; }
-    .wm-iframe-shell iframe { width: 100%; border: 0; display: block; min-height: 850px; }
-
-    /* wm-bc — match MHR exactly: white bg, breadcrumb on top of iframe */
-    .wm-bc-host { background: #ffffff; border-bottom: 1px solid #e5e9f0; }
-    .wm-bc-host-inner { max-width: 1200px; margin: 0 auto; padding: 10px 40px; font-family: 'Poppins', sans-serif; font-size: 13px; color: #666; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
-    .wm-bc-host-inner a { color: #1e72ba; text-decoration: none; }
-    .wm-bc-host-inner a:hover { text-decoration: underline; }
-    .wm-bc-host-sep { color: #bbb; margin: 0 2px; }
-    .wm-bc-host-current { color: #333; font-weight: 600; }
-  </style>
-
-  <script>
-    // ───────────────────────────────────────────────────────────────────────
-    // Live Google Reviews configuration (direct browser → Places API).
-    //
-    // Set GOOGLE_PLACES_API_KEY to a key that:
-    //   1. Has Places API (New) enabled in Google Cloud Console
-    //   2. Is restricted by HTTP referrer to your domain(s) — e.g.
-    //      *.wavemax.promo/*, http://localhost:*, http://127.0.0.1:*
-    // Set LOCATION_PLACE_ID to the Google Place ID for the franchisee store
-    // (find via Places API "Find Place From Text" for "WaveMAX Austin
-    //  825 E Rundberg Ln" or via https://developers.google.com/maps/documentation/places/web-service/place-id).
-    //
-    // When both are set, the landing page's reviews block renders live
-    // 5★ reviews directly from Google. When EITHER is left blank, the
-    // page gracefully renders the "Visit our Google profile →" empty state.
-    // ───────────────────────────────────────────────────────────────────────
-    // OR-fallback pattern so external init scripts (tests, dev tools) can
-    // pre-set these globals without being overwritten by the host page.
-    window.GOOGLE_PLACES_API_KEY = window.GOOGLE_PLACES_API_KEY || '';   // <-- paste your restricted Places-API-only key here
-    window.LOCATION_PLACE_ID     = window.LOCATION_PLACE_ID     || '';   // <-- paste the WaveMAX Austin Place ID here
-
-    // Single source of truth for the entire chrome. Future: replace with
-    // fetch('/api/v1/location/austin-tx') — same shape, fed at runtime.
-    window.LOCATION_DATA = {
-      slug: "austin-tx",
-      brand: { name: "WaveMAX Laundry Austin", parent: "WaveMAX Laundry" },
-      contact: {
-        phone:        "(512) 553-1674",
-        phoneTel:     "tel:+15125531674",
-        phoneTelRaw:  "+15125531674",
-        email:        "john@austinwavemax.com",
-        emailMailto:  "mailto:john@austinwavemax.com",
-        address:      "825 E Rundberg Ln F1",
-        city:         "Austin",
-        state:        "TX",
-        zip:          "78753",
-        country:      "US",
-        addressLine2: "Austin, TX 78753",
-        geo:          { lat: 30.3564789, lng: -97.6858016 },
-        mapsUrl:      "https://www.google.com/maps/dir/?api=1&destination=825+E+Rundberg+Ln+F1+Austin+TX+78753",
-        placeId:      ""
-      },
-      hours: {
-        open:     "07:00",
-        close:    "22:00",
-        display:  "7am-10pm",
-        lastWash: "9pm",
-        days:     "Every day, 365 days a year"
-      },
-      owner: {
-        name: "Colin Houlihan",
-        role: "Owner / Operator",
-        bio: "North Austin local. Running the busiest WaveMAX in Texas, focused on a clean store, fast machines, and friendly staff.",
-        neighborhood: "North Austin"
-      },
-      pricing: {
-        wdf:       { rate: 1.20, minLb: 10, currency: "USD", display: "$1.20/lb" },
-        selfServe: {
-          minLoad: 2.75,           // smallest washer load — $/cycle
-          maxLoad: 10.50,          // largest washer load — $/cycle
-          minLoadDisplay: "$2.75",
-          maxLoadDisplay: "$10.50",
-          washMin: 20,
-          dryMin: 20,
-          rangeDisplay: "$2.75 – $10.50"
-        }
-      },
-      equipment: { washers: 42, dryers: 42, capacityLb: 80 },
-      amenities: ["Free WiFi", "Hospital-Grade UV Sanitization", "Free Parking", "Wheelchair Accessible"],
-      serviceArea: ["Austin", "Round Rock", "Cedar Park", "Pflugerville", "Georgetown", "Leander"],
-      social: { facebook: "", instagram: "" },
-      google: { placeId: "", profileUrl: "", reviewsUrl: "" },
-      i18n: { languagesAvailable: ["en", "es", "pt", "de"] }
-    };
-  </script>
+  <!-- Page data (external for CSP compliance) — sets window.GOOGLE_PLACES_API_KEY,
+       window.LOCATION_PLACE_ID, and window.LOCATION_DATA before the bridge loads -->
+  <script src="/assets/js/austin-host-mock-data.js"></script>
 </head>
 <body>
 
@@ -125,7 +38,7 @@
     - `wmlnav-on` active-tab class applied dynamically by host JS.
   ════════════════════════════════════════════════════════════════════
 -->
-<div id="wmlnav-wrap" style="display: block; width: 100%; font-family: Poppins, sans-serif;">
+<div id="wmlnav-wrap">
   <div class="wmlnav-b1">
     <div class="wmlnav-inner">
       <div class="wmlnav-b1-left">
@@ -174,7 +87,7 @@
       </div>
       <div class="wmlnav-b2-right">
         <a href="https://www.wavemaxlaundry.com/franchise" target="_blank" rel="noopener" class="wmlnav-btn-out" data-i18n="chrome.franchise">Franchise</a>
-        <button type="button" class="wmlnav-btn-sol" data-locmodal-open style="font: inherit; cursor: pointer;" data-i18n="chrome.locations">Locations</button>
+        <button type="button" class="wmlnav-btn-sol" data-locmodal-open data-i18n="chrome.locations">Locations</button>
       </div>
     </div>
   </div>
@@ -248,7 +161,7 @@
 
   <div class="wmv3-actions">
     <a href="https://www.wavemaxlaundry.com/franchise" target="_blank" rel="noopener" class="wmv3-btn wmv3-btn-out" data-i18n="chrome.franchise">Franchise</a>
-    <button type="button" class="wmv3-btn wmv3-btn-sol" data-locmodal-open style="font: inherit; cursor: pointer;" data-i18n="chrome.locations">Locations</button>
+    <button type="button" class="wmv3-btn wmv3-btn-sol" data-locmodal-open data-i18n="chrome.locations">Locations</button>
     <button type="button" class="wmv3-burger" id="wmv3-burger" aria-label="Open menu" aria-expanded="false" data-i18n-attr='{"aria-label":"chrome.menu"}'><span></span><span></span><span></span></button>
   </div>
 
@@ -363,14 +276,14 @@
           <div class="wm-road-v"></div>
           <div class="wm-road-h2"></div>
           <div class="wm-road-v2"></div>
-          <div class="wm-block" style="top:8%;left:4%;width:35%;height:18%;"></div>
-          <div class="wm-block" style="top:8%;left:46%;width:18%;height:18%;"></div>
-          <div class="wm-block" style="top:8%;left:70%;width:26%;height:18%;"></div>
-          <div class="wm-block" style="top:37%;left:4%;width:35%;height:10%;"></div>
-          <div class="wm-block" style="top:37%;left:70%;width:26%;height:10%;"></div>
-          <div class="wm-block" style="top:60%;left:4%;width:35%;height:30%;"></div>
-          <div class="wm-block" style="top:60%;left:46%;width:18%;height:30%;"></div>
-          <div class="wm-block" style="top:60%;left:70%;width:26%;height:30%;"></div>
+          <div class="wm-block wm-block-a"></div>
+          <div class="wm-block wm-block-b"></div>
+          <div class="wm-block wm-block-c"></div>
+          <div class="wm-block wm-block-d"></div>
+          <div class="wm-block wm-block-e"></div>
+          <div class="wm-block wm-block-f"></div>
+          <div class="wm-block wm-block-g"></div>
+          <div class="wm-block wm-block-h"></div>
           <div class="wm-overlay"></div>
           <div class="wm-pin">
             <svg width="28" height="36" viewBox="0 0 24 32" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -402,7 +315,7 @@
       <div class="wm-pgfooter-bottom-links">
         <a href="https://www.wavemaxlaundry.com/privacy-policy/" target="_blank" rel="noopener" data-i18n="chrome.footer.privacy">Privacy Policy</a>
         <a href="https://www.wavemaxlaundry.com/terms-of-service/" target="_blank" rel="noopener" data-i18n="chrome.footer.terms">Terms &amp; Conditions</a>
-        <span style="opacity:0.65;" data-i18n="chrome.footer.refBuild">Local-dev reference build (noindex)</span>
+        <span class="wm-footer-muted" data-i18n="chrome.footer.refBuild">Local-dev reference build (noindex)</span>
       </div>
     </div>
   </div>
