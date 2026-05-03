@@ -242,11 +242,15 @@
   #wmlnav-wrap .wmlnav-btn-sol { padding:6px 12px !important; font-size:11px !important; }
 }
 
-/* Z-index belt-and-suspenders so dropdowns clear page content */
+/* Z-index belt-and-suspenders so dropdowns clear page content + each other.
+ * The language menu drops out of wmlnav-b1 INTO the visual area of wmlnav-b2,
+ * so b1 must stack ABOVE b2 (b1 = 100010, b2 = 100000, b3 = 100000). */
 #wmlnav-wrap,
 #wmlnav-wrap .wmlnav-inner,
-#wmlnav-wrap #wmlnav-nav,
-#wmlnav-wrap .wmlnav-b3 { overflow: visible !important; position:relative !important; z-index:100000 !important; }
+#wmlnav-wrap #wmlnav-nav { overflow: visible !important; position:relative !important; z-index:100000 !important; }
+#wmlnav-wrap .wmlnav-b1 { position:relative !important; z-index:100010 !important; overflow: visible !important; }
+#wmlnav-wrap .wmlnav-b2 { position:relative !important; z-index:100005 !important; overflow: visible !important; }
+#wmlnav-wrap .wmlnav-b3 { position:relative !important; z-index:100000 !important; overflow: visible !important; }
 #wmlnav-wrap .wmlnav-drop { z-index:100001 !important; }
 #wmlnav-wrap .wmlnav-drop-menu { z-index:100002 !important; }
 #wmlnav-wrap .wmlnav-drop::after {
@@ -259,6 +263,118 @@
   background: transparent;
   pointer-events: auto;
   z-index: 100001;
+}
+
+/* ============================================================
+   1b. WM-LANG-SWITCHER — native bridge-driven en/es/pt/de
+   Inside wmlnav-b1-right. Menu drops down into wmlnav-b2 visual area;
+   z-index escalation handled in §1's stacking-context block above.
+   ============================================================ */
+
+#wm-lang.wm-lang-switcher {
+  position: relative !important;
+  z-index: 100020 !important;
+}
+
+#wm-lang .wm-lang-btn {
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.32);
+  border-radius: 999px;
+  padding: 4px 12px;
+  color: #ffffff;
+  font-family: 'Poppins', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  white-space: nowrap;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+#wm-lang .wm-lang-btn:hover { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.55); }
+
+#wm-lang .wm-lang-flag {
+  display: inline-block;
+  width: 20px;
+  height: 14px;
+  border-radius: 2px;
+  background-size: cover !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
+  flex-shrink: 0;
+  box-shadow: 0 0 0 1px rgba(0,0,0,0.15);
+}
+
+/* US flag — 50 stars on blue canton + red/white stripes */
+.wm-flag-en { background-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 7410 3900'%3E%3Crect width='7410' height='3900' fill='%23b22234'/%3E%3Cpath d='M0,450H7410M0,1050H7410M0,1650H7410M0,2250H7410M0,2850H7410M0,3450H7410' stroke='%23ffffff' stroke-width='300'/%3E%3Crect width='2964' height='2100' fill='%233c3b6e'/%3E%3C/svg%3E"); }
+/* Mexico flag — green/white/red vertical */
+.wm-flag-es { background-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 7 4'%3E%3Crect width='7' height='4' fill='%23ce1126'/%3E%3Crect width='4.667' height='4' fill='%23ffffff'/%3E%3Crect width='2.333' height='4' fill='%23006847'/%3E%3C/svg%3E"); }
+/* Brazil flag — green field, yellow rhombus, blue circle */
+.wm-flag-pt { background-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 10'%3E%3Crect width='14' height='10' fill='%23009b3a'/%3E%3Cpath d='M7 1.2 12.5 5 7 8.8 1.5 5z' fill='%23fedf00'/%3E%3Ccircle cx='7' cy='5' r='2.1' fill='%23002776'/%3E%3C/svg%3E"); }
+/* Germany flag — black/red/yellow horizontal */
+.wm-flag-de { background-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 5 3'%3E%3Crect width='5' height='1' y='0' fill='%23000000'/%3E%3Crect width='5' height='1' y='1' fill='%23dd0000'/%3E%3Crect width='5' height='1' y='2' fill='%23ffce00'/%3E%3C/svg%3E"); }
+
+#wm-lang .wm-lang-arrow {
+  width: 9px;
+  height: 6px;
+  flex-shrink: 0;
+  transition: transform 0.18s ease;
+}
+#wm-lang[aria-expanded="true"] .wm-lang-arrow { transform: rotate(180deg); }
+
+#wm-lang .wm-lang-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  min-width: 180px;
+  background: #0f3254;
+  border: 1px solid rgba(255,255,255,0.18);
+  border-radius: 8px;
+  box-shadow: 0 10px 28px rgba(0,0,0,0.45);
+  display: none;
+  z-index: 100030;
+  overflow: hidden;
+  padding: 4px 0;
+}
+#wm-lang[aria-expanded="true"] .wm-lang-menu { display: block; }
+
+#wm-lang .wm-lang-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 14px;
+  background: transparent;
+  border: 0;
+  text-align: left;
+  cursor: pointer;
+  color: rgba(255,255,255,0.86);
+  font-family: 'Poppins', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  transition: background 0.15s ease, color 0.15s ease;
+}
+#wm-lang .wm-lang-item:last-child { border-bottom: 0; }
+#wm-lang .wm-lang-item:hover {
+  background: rgba(255,255,255,0.08);
+  color: #ffffff;
+}
+#wm-lang .wm-lang-item[disabled],
+#wm-lang .wm-lang-item--unavailable {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+#wm-lang .wm-lang-item[disabled]:hover,
+#wm-lang .wm-lang-item--unavailable:hover {
+  background: transparent;
+  color: rgba(255,255,255,0.86);
+}
+#wm-lang .wm-lang-item[aria-selected="true"] {
+  background: rgba(255,255,255,0.06);
+  color: #ffffff;
+  font-weight: 600;
 }
 
 /* ============================================================
