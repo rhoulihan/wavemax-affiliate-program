@@ -263,8 +263,10 @@
   function initTabs() {
     const tabs = document.querySelectorAll('.wm-tab');
     const panels = document.querySelectorAll('.wm-tab-panel');
+    console.log('[austin-landing] initTabs — tabs:', tabs.length, 'panels:', panels.length);
     tabs.forEach(tab => {
       tab.addEventListener('click', () => {
+        console.log('[austin-landing] tab click', tab.getAttribute('data-tab'));
         const target = tab.getAttribute('data-tab');
         tabs.forEach(t => t.setAttribute('aria-selected', t === tab ? 'true' : 'false'));
         panels.forEach(p => {
@@ -444,6 +446,7 @@
    */
   function initHeroRotator() {
     const imgs = document.querySelectorAll('.wm-hero-rotator-img');
+    console.log('[austin-landing] initHeroRotator — imgs:', imgs.length);
     if (imgs.length < 2) return;
     let active = Array.from(imgs).findIndex(i => i.classList.contains('is-active'));
     if (active < 0) { active = 0; imgs[0].classList.add('is-active'); }
@@ -452,6 +455,7 @@
     let scheduled = null;
 
     function step() {
+      console.log('[austin-landing] rotator tick, active was', active);
       try {
         imgs[active].classList.remove('is-active');
         active = (active + 1) % imgs.length;
@@ -463,6 +467,7 @@
       if (paused) return;
       if (scheduled) clearTimeout(scheduled);
       scheduled = setTimeout(step, ROTATE_MS);
+      console.log('[austin-landing] rotator schedule, id=', scheduled);
     }
 
     schedule();
