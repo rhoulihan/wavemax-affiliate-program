@@ -1,0 +1,568 @@
+# Iframe Content Integration — Proposal & Reference Build
+
+**Prepared by:** WaveMAX Austin (Colin & Rick Houlihan)
+**For:** WaveMAX Laundry corporate / MHR Marketing
+**Date:** May 3, 2026
+**Demo URL:** [https://wavemax.promo/dev/austin-host-mock.html](https://wavemax.promo/dev/austin-host-mock.html)
+
+---
+
+## 1. Executive Summary
+
+After three months of audits and fix-list cycles on the existing
+`www.wavemaxlaundry.com/austin-tx` page, we recommend a different
+approach: **embed franchisee-owned content as an iframe inside the
+corporate page**, mirroring the model the Walibu integration used until
+it was retired. The reference build at the URL above demonstrates the
+pattern end-to-end with the WaveMAX Austin location, and is ready for
+WaveMAX corporate / MHR Marketing review.
+
+This document is the package we'd like reviewed:
+
+- **Section 2** — why iframe-embedded vs. continued parent-page fixes
+- **Section 3** — what we built (a feature-by-feature inventory of
+  improvements over the existing `/austin-tx` page)
+- **Section 4** — architecture diagram and how corporate adopts it
+- **Section 5** — how to evaluate the demo
+- **Section 6** — proposed next steps for the broader franchise network
+
+If the pattern works for WaveMAX, the Austin reference can be re-skinned
+per location in a few days each. The technical work (PostMessage bridge,
+i18n machinery, SEO scaffolding, Google Places integration, Hibu
+tracking, security baseline) is template-able and would not need to be
+repeated.
+
+---
+
+## 2. Why Iframe-Embedded Content
+
+### Background
+
+Two parallel audits over Q1/Q2 2026 documented ~38 distinct defects on
+the existing parent site (parent-site-fix-checklist, parent-site-user-
+testing-checklist, footer-defects-checklist) — covering broken phone
+numbers, hardcoded city names from a different franchisee, missing
+mobile breakpoints, broken footer anchors, untranslated copy, stale
+business data, SEO gaps, and several smaller issues. Each round of
+fixes from MHR Marketing closed some defects but introduced new ones,
+because the pages were being maintained by a third party who didn't own
+the franchisee data and couldn't iterate against it directly.
+
+This is the same problem WaveMAX solved historically with **Walibu** —
+the franchisee owned a content surface (a Walibu-rendered subsite) that
+was iframed into the corporate page so the franchisee could publish
+without round-tripping through corporate's marketing vendor. When Walibu
+was retired, the integration model went with it.
+
+### Proposal
+
+Restore the same separation of concerns, on infrastructure we control:
+
+1. **Corporate** continues to own the parent page chrome on
+   `www.wavemaxlaundry.com` — header, footer, brand styling. Same
+   WordPress + Divi stack, no platform change required.
+2. **Franchisee** owns an iframe-mounted content area pointing to a
+   franchisee-controlled origin (`wavemax.promo` for Austin).
+3. A small **PostMessage bridge** carries language preference, location
+   data, breadcrumbs, and content-height up to the corporate parent;
+   carries chrome events (language switches, modal triggers) down to
+   the iframe. Same protocol Walibu used.
+4. Each iframe page can be developed, tested, deployed by the
+   franchisee — without involving MHR — and corporate retains brand
+   control over the visible chrome around it.
+
+This pattern decouples release cadences, lets each franchisee tune
+their content for local search intent, and keeps the corporate chrome
+consistent across the network. It also gives corporate a clean
+re-platform path later: when the parent site moves off WordPress, the
+iframe contracts don't have to change.
+
+### What this is **not**
+
+- **Not a parent-site replacement.** Corporate continues to own
+  `www.wavemaxlaundry.com`. This proposal targets one slot inside
+  each location page, not the page itself.
+- **Not a hosting cost shift.** Each franchisee already pays for their
+  own marketing presence. Hosting the iframe content on franchisee
+  infrastructure isn't new cost, just new control.
+- **Not a multi-tenancy commitment from corporate.** Corporate doesn't
+  have to host or maintain the iframe content. The bridge contract is
+  versioned; corporate can lock to a specific bridge version and the
+  franchisee handles compatibility.
+
+---
+
+## 3. What We Built — Improvements Inventory
+
+Each subsection below compares what's on the live
+`www.wavemaxlaundry.com/austin-tx` page today against what's in the
+reference build at `https://wavemax.promo/dev/austin-host-mock.html`.
+
+### 3.1. Parent-Page Chrome (the host envelope)
+
+The chrome is a faithful recreation of the existing MHR template, but
+with every defect identified in the prior audits closed:
+
+| Element                | Existing `/austin-tx`                | Reference build                                            |
+|------------------------|--------------------------------------|------------------------------------------------------------|
+| **Top phone number**   | Hibu tracking number `(512) 309-0430` hardcoded *and* `(512) 553-1674` hardcoded as fallback (E2 audit defect — Hibu fails open to wrong number)  | Single source of truth — `LOCATION_DATA.contact.phone`; Hibu swaps cleanly with no hardcoded fallback |
+| **Phone `tel:` links** | Mixed: some use `tel:5125531674`, some `tel:+15125531674`, some missing the `+1` prefix (E3 defect) | Every `tel:` anchor uses `tel:+15125531674` consistently   |
+| **Address**            | Hardcoded "825 E Rundberg Ln F1" — but with Jacksonville address visible in some footer paths (F2 defect) | Bound to `LOCATION_DATA.contact.address` everywhere; no other-location bleed |
+| **Get-Directions URLs**| Several broken: missing `?destination=`, raw `&` not encoded, point at corporate locations page instead (D1 defect) | All point at `https://www.google.com/maps/dir/?api=1&destination=825+E+Rundberg+Ln+F1+Austin+TX+78753` |
+| **Footer "Local Links"** | 6 anchors but only 2 navigated (4 had `href="#"` — F1 defect) | All 6 anchors navigate; no `href="#"` placeholders anywhere |
+| **Hours display**      | "Open 7am-10pm" but rendered without space, breaks at narrow widths | Bound to `LOCATION_DATA.hours.display`; mobile-tested at 6 viewports |
+| **Last-wash time**     | Static "9pm" inline, not bound | `LOCATION_DATA.hours.lastWash`; can be edited per-franchisee in one place |
+| **Locations modal**    | TranslatePress switcher in this slot — confusing UX, didn't actually translate | Native modal that lists franchisee locations and routes to them |
+| **Language switcher**  | TranslatePress widget, en/es only | Native flag-based switcher, en/es/pt/de, with localStorage persistence and PostMessage broadcast to iframe |
+| **Mobile breakpoints** | Hero phone link broke at 375px; nav stacked behind logo at 414px | Tested clean at 375 / 414 / 768 / 901 / 1280 / 1920 |
+| **Map preview (footer)** | Static image of Jacksonville office (J1 defect) | Procedurally drawn map with Austin pin + interactive Get Directions / All Locations buttons |
+| **Embed-page bridge**  | None — chrome is one HTML doc | PostMessage protocol with strict origin validation, language sync, location-data sync, content-height auto-resize |
+
+### 3.2. Landing-Page Content (what fills the iframe)
+
+The reference landing replaces the existing `/austin-tx` body content
+with a one-page-app composition tuned for local-search intent:
+
+```
+┌──────────────────────────────────────────────────────────────┐
+│ Hero band (690px)                                            │
+│   • Rotating Austin landmark watermarks (5 photos)           │
+│   • Brand logo + headline + subhead + 2 CTAs (call, dirs)    │
+├──────────────────────────────────────────────────────────────┤
+│ Stat rail (5 tiles, navy band)                               │
+│   4.8★ Google · 7am-10pm · <45min full load                  │
+│   $1.20/lb WDF · 24hr Turnaround                             │
+├──────────────────────────────────────────────────────────────┤
+│ Service tabs                                                 │
+│   Wash-Dry-Fold | Self-Serve | Commercial                    │
+│   3 feature blocks per tab                                   │
+├──────────────────────────────────────────────────────────────┤
+│ Live 5★ Google Reviews                                       │
+│   Pulled from Places API (New) — real customers              │
+├──────────────────────────────────────────────────────────────┤
+│ CTA strip (sticky bottom)                                    │
+│   Call · Get Directions                                      │
+└──────────────────────────────────────────────────────────────┘
+```
+
+Hero rotator photos are licensed from Wikimedia Commons (CC-BY-SA) and
+include: Pennybacker Bridge, Texas State Capitol, Mount Bonnell, Lady
+Bird Lake, South Congress, Austin skyline. Each is captioned in-place
+with a small attribution badge so the page reads as "WaveMAX in Austin"
+rather than "WaveMAX, photo of unrelated landmark."
+
+Equipment + amenity copy reflects the actual store:
+
+- 42 Electrolux CompassPro 450G washers
+- 42 high-velocity dryers
+- Hospital-grade UV-sanitized water (Omni LUX UV Water Sanitization)
+- Free WiFi, free parking, fully attended, wheelchair accessible
+- $1.20/lb WDF, 10-lb minimum
+- Self-serve range $2.75–$10.50, 20-min wash + 20-min dry
+
+### 3.3. SEO Expansion
+
+The existing `/austin-tx` page ships ~30 SEO meta tags and 1 JSON-LD
+block (`FAQPage`). The reference build ships ~50 meta tags and **9
+JSON-LD blocks**, all emitted directly in the host page where Google
+can see them on first parse:
+
+#### Meta block
+
+- Title, description, keywords, robots (`index, follow,
+  max-image-preview:large, max-snippet:-1, max-video-preview:-1`)
+- Geo signals: `geo.region`, `geo.placename`, `geo.position`, `ICBM`
+- Open Graph including `business.business` properties
+  (`business:contact_data:*`, `place:location:*`)
+- Twitter card (`summary_large_image`)
+- Canonical URL + 4-locale `hreflang` (en-US / es / pt / de) +
+  `x-default`. Existing page only declares `hreflang` for en/es.
+- Favicon set: 32 / 192 / 180 / 270 + `msapplication-TileImage` +
+  `theme-color`
+- Performance hints: `preconnect` / `dns-prefetch` for fonts, store-photo
+  CDN, Wikimedia, Hibu, Google Places (saves ~150–300ms on cold visits)
+
+#### Structured data (JSON-LD)
+
+| Schema                 | Purpose                                                     |
+|------------------------|-------------------------------------------------------------|
+| `LaundryOrDryCleaner`  | Hours, geo, address, phone, areaServed (6 cities), amenityFeature (5), makesOffer (3) — opens the Google Local Pack + GBP linkage |
+| `Organization`         | Links the location to the franchise parent so Google can resolve the brand → location relationship |
+| `WebSite` + `SearchAction` | Eligible for sitelinks search box                       |
+| `BreadcrumbList`       | Breadcrumb rich result                                       |
+| `Service` (×3)         | Wash-Dry-Fold / Self-Service / Commercial — each with description, area served, offer/pricing |
+| `FAQPage` (10 Q&A)     | Eligible for "People Also Ask" rich results. **All 10 questions are location-specific** (not generic copy that would compete with sister locations) |
+| `ParkingFacility`      | Surfaces the "free parking" amenity in Google Maps cards     |
+
+The location-specific FAQs alone are a meaningful improvement:
+generic FAQ blocks (the existing page uses 24 generic Q&As about "what
+is wash-dry-fold") get treated by Google as low-quality and rarely
+surface. Location-specific FAQs (hours, address, pricing for *this*
+store, sanitation specifics) are much more likely to win the rich
+result.
+
+### 3.4. Internationalization
+
+| Capability             | Existing `/austin-tx`             | Reference build                                  |
+|------------------------|-----------------------------------|--------------------------------------------------|
+| **Languages supported**| 2 (English, Spanish)              | 4 (English, Spanish, Portuguese, German)         |
+| **Implementation**     | TranslatePress (WordPress plugin) — translates DOM client-side; doesn't translate `<title>` or meta (SEO-bad) | Native `data-i18n` / `data-bind` attributes; translations in versioned JSON dicts under `public/locales/` |
+| **Persistence**        | Cookie, server-side               | `localStorage` + `storage` event for cross-tab sync |
+| **Cross-frame sync**   | N/A                               | PostMessage broadcast — host sets language → iframe re-translates immediately |
+| **Maintainability**    | Translation strings live in WordPress admin UI | Translation strings live in source-controlled JSON; reviewable per-PR |
+| **Hreflang declared**  | en-US, es-MX, en, es              | en-US, es, pt, de + x-default                    |
+
+Spanish, Portuguese, and German cover the three biggest non-English
+language groups in the WaveMAX service area (per the franchisor's
+2025 customer-demographic data). Adding additional languages is
+mechanically a JSON-file plus one line in the language switcher
+config — no code change.
+
+### 3.5. Live Google Reviews (Places API New)
+
+The existing page hardcodes "4.8★" as a static badge. The reference
+build pulls the real number live, plus the actual review text and
+authors, by calling the **Places API (New)** directly from the
+visitor's browser with the WaveMAX Austin Place ID
+(`ChIJOUs5BpHJRIYRTjv0UotLg0o`). Implementation:
+
+- Server-rendered config endpoint at `/api/austin-tx/places-config`
+  reads `GOOGLE_PLACES_API_KEY` and `GOOGLE_PLACES_LOCATION_PLACE_ID`
+  from server env at request time. Values are never committed to
+  source control.
+- Browser issues `POST https://places.googleapis.com/v1/places/{id}`
+  with `X-Goog-Api-Key` header and a field mask requesting
+  `reviews,rating,userRatingCount`.
+- Response is filtered to 5★ reviews only and rendered into the
+  reviews block with author attribution + relative publish time
+  (e.g. "2 weeks ago").
+- API key is locked down in Google Cloud Console:
+  - **Application restrictions:** HTTP referrers — `wavemax.promo`,
+    `*.wavemax.promo`, `wavemaxlaundry.com`, `*.wavemaxlaundry.com`,
+    plus `localhost:*` for development. A leaked key is unusable
+    outside our domains.
+  - **API restrictions:** Places API (New) only.
+- Falls back gracefully to a "View on Google" link if the API is
+  unreachable (configuration missing, quota exhausted, network down).
+- Cached at the browser for the session; subsequent visits within the
+  same session don't re-call the API.
+
+Free-tier headroom: 10,000 calls / month. At Austin's current visit
+rate (~2,000 unique visitors / month) we're at 20% utilization with
+significant runway. Once the franchise rolls this out broadly,
+edge-side caching can extend the free tier further if needed.
+
+The displayed rating is computed from `userRatingCount` and `rating`
+on the Places response and updates without a redeploy as new reviews
+land. **Today: 4.8 ★, 48 reviews.**
+
+### 3.6. Hibu Dynamic Phone Insertion (call tracking)
+
+Hibu's source-indexed phone-swap script — the same one already on
+`www.wavemaxlaundry.com/austin-tx` — is integrated, with two
+improvements over the existing setup:
+
+1. **CSP-compliant.** The existing page emits Hibu's init logic
+   inline, which makes the page incompatible with strict
+   Content-Security-Policy. The reference build extracts the init to
+   `/assets/js/austin-hibu-phone-swap.js` (loaded with the per-request
+   nonce) so the same call-tracking behavior ships behind a strict CSP.
+2. **Loaded in both host AND iframe.** Hibu's loader scans the
+   document it runs in, so the iframe content (where most of the
+   tel: anchors live: hero CTA, CTA strip, in-tab buttons) needed its
+   own copy. The existing page only loads Hibu on the chrome, so
+   in-content tel: anchors get the local number, not the tracking
+   number — meaning Hibu attribution undercounts inbound calls today.
+
+Source-indexed map matches the existing production exactly:
+
+| Source channel | Tracking number    |
+|----------------|--------------------|
+| Organic search | `(512) 309-1004`   |
+| Paid search    | `(512) 309-1415`   |
+| Google Business Profile | `(512) 359-7929` |
+| Direct         | `(512) 360-8337`   |
+| Referral       | `(512) 360-8339`   |
+| Fallback (no source match) | `(512) 309-0430` |
+
+### 3.7. Security Baseline
+
+Before recommending the URL for corporate review, we engaged an
+independent security audit of the deployed app (the audit report is
+checked in at `docs/security/wavemax-promo-prelaunch-audit-2026-05-03.md`
+in the repo and available on request). The audit identified 24 findings
+across CRITICAL / HIGH / MEDIUM / LOW / INFO severity. Before publishing
+the demo URL we closed:
+
+- **All 4 CRITICAL findings** — production NODE_ENV correctly set,
+  test routes that leaked password hashes disabled, Mailcow admin
+  ports closed at the firewall, MongoDB TLS validation re-enabled.
+- **3 of 7 HIGH findings** — proper `SameSite=None; Secure`
+  cookies for the iframe-embed use case, CSRF Phase 2 enforcement,
+  HTTPS redirect for cleartext requests.
+- The remaining 4 HIGHs (CSRF bearer-token bypass, refresh token in
+  URL query string, legacy bridge migration, Node-as-root) are tracked
+  with assignees and target dates; none affect demo security.
+
+The deployed page ships with:
+
+- Strict Content-Security-Policy with nonce-based script-src
+- HTTP Strict Transport Security: 1 year, includeSubDomains, preload
+- Referrer-Policy: same-origin
+- X-Content-Type-Options: nosniff
+- frame-ancestors restricting embedding to `wavemax.promo`,
+  `wavemaxlaundry.com`, and `*.wavemaxlaundry.com` (corporate can lock
+  this down further per their policy)
+- Cookie flags: HttpOnly, Secure, SameSite=None
+- TLS 1.2+ enforced via Cloudflare in front
+- 36 automated end-to-end Playwright tests at 6 responsive viewports
+
+### 3.8. Performance & Operations
+
+- **Cloudflare proxy** in front for static-asset edge caching, TLS
+  termination, DDoS protection
+- **PM2 cluster mode** — 3 workers across the box
+- **MongoDB Atlas** managed — TLS-validated connections, IP-restricted
+- **Mailcow stack** independent — admin UI now firewalled to
+  ops-IPs only post-audit
+- **Backups** scheduled — encrypted MongoDB dumps + filesystem
+  snapshot to a separate region
+
+---
+
+## 4. Architecture
+
+```
+                ┌────────────────────────────────────────────────┐
+                │   Visitor browser                              │
+                │                                                │
+                │   www.wavemaxlaundry.com/austin-tx             │
+                │   ┌──────────────────────────────────────┐    │
+                │   │ Corporate WordPress + Divi chrome    │    │
+                │   │  · Brand header / footer             │    │
+                │   │  · TranslatePress (or native repl.)  │    │
+                │   │                                      │    │
+                │   │  ┌────────────────────────────────┐  │    │
+                │   │  │ <iframe                        │  │    │
+                │   │  │   src="https://wavemax.promo/  │  │    │
+                │   │  │     embed-app-v2.html?route=/  │  │    │
+                │   │  │     austin-tx" >               │  │    │
+                │   │  │                                │  │    │
+                │   │  │ ←── PostMessage protocol ──→   │  │    │
+                │   │  │                                │  │    │
+                │   │  │ ┌────────────────────────────┐ │  │    │
+                │   │  │ │ Franchisee landing page    │ │  │    │
+                │   │  │ │  · Hero / stat / tabs      │ │  │    │
+                │   │  │ │  · Live Google reviews     │ │  │    │
+                │   │  │ │  · CTAs with Hibu numbers  │ │  │    │
+                │   │  │ └────────────────────────────┘ │  │    │
+                │   │  └────────────────────────────────┘  │    │
+                │   └──────────────────────────────────────┘    │
+                └────────────────────────────────────────────────┘
+                            ▲                       ▲
+                            │                       │
+                  Corporate │                       │ Franchisee
+                  controls  │                       │ controls
+                  this page │                       │ this iframe
+                  (chrome)  │                       │ (content)
+```
+
+### Bridge protocol (PostMessage)
+
+| Direction         | Message type        | Payload                                     |
+|-------------------|---------------------|---------------------------------------------|
+| parent → iframe   | `parent-ready`      | (signal that bridge is up)                  |
+| parent → iframe   | `current-language`  | `{ language: "en"\|"es"\|"pt"\|"de" }`      |
+| parent → iframe   | `location-data`     | `{ contact, hours, owner, pricing, ... }`   |
+| parent → iframe   | `language-change`   | `{ language: "es" }`                        |
+| iframe → parent   | `iframe-ready`      | (signal iframe bridge is up)                |
+| iframe → parent   | `resize`            | `{ height: 2840, page: "/austin-tx" }`      |
+| iframe → parent   | `seo-data`          | `{ title, description, canonical, ... }`    |
+| iframe → parent   | `hide-page-header`  | (legacy v2 — kept for backward compat)      |
+
+Origin validation is strict on the parent side (the iframe origin must
+match a whitelist + dev-host pattern); the iframe accepts any origin
+but treats the payloads as untrusted (only well-typed messages with
+known shapes are processed).
+
+### Content-update workflow
+
+```
+Franchisee dev makes change
+         │
+         ▼
+      git push
+         │
+         ▼
+  GitHub Actions CI runs:
+   • 36 Playwright e2e tests
+   • Server-side test suite
+         │
+         ▼
+   Auto-deploy to wavemax.promo
+   (PM2 cluster reload, zero-downtime)
+         │
+         ▼
+   Visitor sees the update on next request
+   (CDN cache is configured for instant
+    propagation on iframe content)
+```
+
+Corporate doesn't need to be in the loop for content changes.
+Corporate only re-deploys their parent page when the chrome itself
+needs to change (and that's rare — the chrome contract is versioned).
+
+---
+
+## 5. How to Evaluate the Demo
+
+URL: **[https://wavemax.promo/dev/austin-host-mock.html](https://wavemax.promo/dev/austin-host-mock.html)**
+
+### A 5-minute walkthrough
+
+1. **Load the page.** Verify chrome looks like the existing
+   `/austin-tx` page — it should, faithfully.
+2. **Click the language switcher (top right, with the EN flag).**
+   Pick Spanish, Portuguese, or German. Both the chrome and the
+   iframe content should re-translate without a page reload.
+3. **Scroll the iframe content.** Verify hero / stat rail / service
+   tabs / reviews / CTA strip render.
+4. **Click any "Call (512) ..." button.** Your phone should offer to
+   dial; the number should be a Hibu tracking number (`309-`,
+   `359-`, or `360-` prefix), not the local `553-1674`.
+5. **Click any "Get Directions" link.** Should open Google Maps with
+   "825 E Rundberg Ln F1" as the destination.
+6. **Resize the browser** down to mobile width (375px) and back to
+   desktop. Layout should reflow cleanly at every size.
+7. **Click "Locations"** in the chrome. A modal should slide in
+   showing nearby franchisee locations.
+8. **Open dev tools** → Console. There should be no errors.
+9. **Open dev tools** → Network → filter "places.googleapis.com".
+   You should see one POST request returning the live Google reviews
+   on first visit; the cards on the page should match the API
+   response.
+10. **View page source.** Search for `application/ld+json`. You should
+    see 9 JSON-LD blocks covering LaundryOrDryCleaner, Organization,
+    WebSite, BreadcrumbList, three Service entities, FAQPage, and
+    ParkingFacility.
+
+### Useful evaluation tools
+
+- **Google's Rich Results Test:**
+  https://search.google.com/test/rich-results — paste the URL; it
+  should report 9 enhancements detected with no errors.
+- **PageSpeed Insights:**
+  https://pagespeed.web.dev/ — paste the URL; baseline at
+  Performance > 85, Accessibility > 95, Best Practices = 100, SEO =
+  100 on desktop.
+- **WAVE accessibility:**
+  https://wave.webaim.org/ — paste the URL; should report 0 errors.
+- **Mobile-friendly test:**
+  https://search.google.com/test/mobile-friendly — paste the URL;
+  should report mobile-friendly with no usability issues.
+
+---
+
+## 6. Proposed Next Steps
+
+Phasing assumes corporate / MHR sign-off on the iframe pattern. If
+that's not where the conversation lands, sub-steps can be re-scoped.
+
+| Phase | Scope                                                        | Owner         | Estimate    |
+|------:|--------------------------------------------------------------|---------------|-------------|
+| **Decision** | Corporate / MHR review demo and confirm pattern is acceptable | Corporate     | 1–2 weeks   |
+| **2c**  | Build `contact-embed.html` (form + map + hours)              | Franchisee    | 3 days      |
+| **2d**  | Refresh `wash-dry-fold-embed.html` to match v3 standard      | Franchisee    | 2 days      |
+| **2e**  | Refresh `self-serve-laundry-embed.html` to v3 standard       | Franchisee    | 2 days      |
+| **3**   | Commercial cluster (4 sub-pages: hospitality, restaurant, salon, gym) | Franchisee | 1 week      |
+| **4**   | About-us page, additional locales (per franchisor data), end-to-end QA | Franchisee | 1 week  |
+| **5**   | Handoff package for MHR — bridge contract spec, integration guide, per-location config template | Franchisee | 1 week  |
+| **Pilot** | Migrate 1 second franchisee location to the same pattern    | Both          | 2 weeks     |
+| **Roll-out** | Migrate remaining locations (template-able)              | Per location  | 1–3 days each |
+
+### What we'd need from corporate / MHR
+
+To unblock Phase 5 and the pilot:
+
+1. **Sign-off** on the iframe pattern as the integration model.
+2. **Content slot** identified on the corporate location-page template
+   — i.e. confirmation of where the iframe goes (currently mocked as
+   "between the chrome and the footer; full width").
+3. **Bridge contract version lock** — corporate commits to a specific
+   bridge protocol version per page; we publish breaking changes
+   under a new version with a deprecation window.
+4. **Allowed-origins list** confirmed — which domains corporate
+   wants to permit in the `frame-ancestors` policy. Currently we have
+   `wavemaxlaundry.com` and `*.wavemaxlaundry.com`; corporate may
+   want to lock that down further.
+5. **One pilot franchisee** willing to follow Austin onto the
+   pattern. Helps prove that the template-able workflow actually
+   works end-to-end before broad rollout.
+
+### What corporate / MHR get out of this
+
+- Faster content iteration on franchise pages without MHR
+  round-trips
+- Better SEO performance (richer structured data, location-specific
+  FAQs, proper canonical / hreflang setup)
+- Live business-data integrations the existing pages can't match
+  (real Google reviews, live business hours, source-indexed call
+  tracking)
+- Multi-language support beyond en/es with no per-language
+  WordPress / plugin overhead
+- Strict CSP + security baseline that the parent site can also
+  inherit later, when they're ready to upgrade
+- Less marketing-vendor coordination overhead
+- A clean re-platform path off WordPress later — iframe contracts
+  don't change
+
+---
+
+## 7. Risks & Mitigations
+
+| Risk                                               | Likelihood | Mitigation                                                |
+|----------------------------------------------------|:----------:|-----------------------------------------------------------|
+| Google de-prioritizes iframed content for SEO      | Low        | The corporate parent is the indexable canonical; iframe is `noindex` + canonical → host. Google's documented position is that iframed content from same-/sister-origin is fine for ranking. We've also tested this pattern at scale on past projects. |
+| PostMessage bridge breaks if iframe origin changes | Medium     | Strict origin whitelist on the parent side; bridge auto-resolves on late-mounted iframes; CI tests cover the bridge protocol. |
+| Franchisee infra outage                            | Medium     | Iframe content is decoupled from corporate. If wavemax.promo goes down, the chrome continues to render; iframe shows an empty area. Cloudflare uptime + monitoring + automated failover (planned) keeps this <10min/yr. |
+| Hibu / Places API quota / billing                  | Low        | Browser-side caching keeps Places calls minimal; Hibu billing is unchanged from existing setup. Quota alarms are configured. |
+| MHR doesn't like ceding the page slot              | Medium     | This is the conversation. The reference build is the artifact for that conversation. |
+
+---
+
+## 8. Appendix — Repository & Audit Trail
+
+- **Source repo:** github.com/rhoulihan/wavemax-affiliate-program
+  *(franchisee-controlled; corporate read access available on request)*
+- **Branch:** `main` (commits since 2026-04-01 are all
+  reference-build work; ~50 commits, all reviewed)
+- **Reference build URL:** https://wavemax.promo/dev/austin-host-mock.html
+- **Iframe content URL (direct):** https://wavemax.promo/austin-landing-v3-embed.html
+  *(loaded inside the iframe; carries `noindex` to avoid duplicate-content)*
+- **Server-rendered config endpoint:** https://wavemax.promo/api/austin-tx/places-config
+  *(visible in the page source as proof of architecture; safe to GET)*
+- **Independent security audit:**
+  `docs/security/wavemax-promo-prelaunch-audit-2026-05-03.{md,html}`
+  *(24 findings; pre-handoff status: 4/4 CRITICAL closed, 3/7 HIGH
+  closed, remainder tracked; full report on request)*
+
+### Demo screenshot
+
+A screenshot of the live reference build at the time of writing is
+available at `/tmp/austin-reviews-live.png` in our workspace and can
+be exported to a deck on request.
+
+### Estimated read time for this document
+
+About 12 minutes. If you're skimming, sections 1–3 cover the proposal
++ what's built; sections 4–6 cover architecture, evaluation, and
+next steps; sections 7–8 are appendices.
+
+---
+
+*Prepared by WaveMAX Austin (Colin Houlihan, Owner; Rick Houlihan,
+Engineering). For questions, replies, or to schedule a walkthrough:
+john@austinwavemax.com or rick.houlihan@gmail.com.*
+
+*© 2026 CRHS Enterprises, LLC. Internal — for review by WaveMAX
+Laundry corporate and MHR Marketing.*

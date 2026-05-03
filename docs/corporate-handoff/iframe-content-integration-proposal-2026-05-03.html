@@ -1,0 +1,1205 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Iframe Content Integration — Proposal &amp; Reference Build · WaveMAX Austin · May 2026</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<style>
+  /* ---------- Page base ---------- */
+  :root {
+    --wm-primary:    #1a3f7a;
+    --wm-primary-dk: #0f3254;
+    --wm-accent:     #f59e0b;
+    --wm-text:       #1e293b;
+    --wm-muted:      #64748b;
+    --wm-soft:       #94a3b8;
+    --wm-bg-soft:    #f8fafc;
+    --wm-border:     #e2e8f0;
+    --wm-success:    #10b981;
+    --wm-warn:       #f59e0b;
+    --wm-danger:     #ef4444;
+  }
+  *, *::before, *::after { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    font: 16px/1.65 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          "Helvetica Neue", Arial, sans-serif;
+    color: var(--wm-text);
+    background: #ffffff;
+  }
+  .wrap {
+    max-width: 920px;
+    margin: 0 auto;
+    padding: 56px 32px 80px;
+  }
+  @media (max-width: 720px) {
+    .wrap { padding: 32px 20px 56px; }
+    body { font-size: 15px; }
+  }
+  /* ---------- Typography ---------- */
+  h1, h2, h3, h4 {
+    color: var(--wm-primary-dk);
+    line-height: 1.25;
+    margin: 2.2em 0 0.6em;
+    font-weight: 700;
+  }
+  h1 {
+    font-size: 32px;
+    margin: 0 0 0.4em;
+    letter-spacing: -0.01em;
+  }
+  h2 {
+    font-size: 24px;
+    padding-top: 8px;
+    border-top: 4px solid var(--wm-primary);
+    padding-top: 24px;
+    margin-top: 3em;
+  }
+  h3 { font-size: 19px; }
+  h4 { font-size: 17px; color: var(--wm-text); }
+  p, ul, ol { margin: 0 0 1em; }
+  ul, ol { padding-left: 1.4em; }
+  li { margin-bottom: 0.35em; }
+  a { color: var(--wm-primary); text-decoration: underline; text-underline-offset: 2px; }
+  a:hover { color: var(--wm-primary-dk); }
+  strong { color: var(--wm-primary-dk); }
+
+  /* ---------- Code ---------- */
+  code, pre, kbd {
+    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas,
+                 "Liberation Mono", monospace;
+  }
+  code {
+    background: var(--wm-bg-soft);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.92em;
+    color: var(--wm-primary-dk);
+    border: 1px solid var(--wm-border);
+  }
+  pre {
+    background: #0f3254;
+    color: #e8eef5;
+    padding: 18px 22px;
+    border-radius: 8px;
+    overflow-x: auto;
+    font-size: 13.5px;
+    line-height: 1.55;
+    margin: 1.2em 0;
+  }
+  pre code { background: none; padding: 0; border: 0; color: inherit; font-size: inherit; }
+
+  /* ---------- Tables ---------- */
+  .tbl-wrap { overflow-x: auto; margin: 1.2em 0; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14.5px;
+  }
+  th, td {
+    text-align: left;
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--wm-border);
+    vertical-align: top;
+  }
+  th {
+    background: var(--wm-bg-soft);
+    color: var(--wm-primary-dk);
+    font-weight: 700;
+    border-bottom: 2px solid var(--wm-primary);
+  }
+  tr:nth-child(even) td { background: #fafbfd; }
+  td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+
+  /* ---------- Cover header ---------- */
+  .cover {
+    background: linear-gradient(135deg, var(--wm-primary) 0%, var(--wm-primary-dk) 100%);
+    color: #ffffff;
+    padding: 48px 40px;
+    border-radius: 12px;
+    margin-bottom: 40px;
+  }
+  .cover .eyebrow {
+    text-transform: uppercase;
+    font-size: 12px;
+    letter-spacing: 0.18em;
+    color: var(--wm-accent);
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+  .cover h1 {
+    color: #ffffff;
+    font-size: 32px;
+    margin: 0 0 16px;
+    letter-spacing: -0.01em;
+  }
+  .cover-meta {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    gap: 4px 24px;
+    margin-top: 24px;
+    font-size: 14px;
+  }
+  .cover-meta dt { color: rgba(255,255,255,0.65); font-weight: 600; }
+  .cover-meta dd { color: #ffffff; margin: 0; }
+  .cover-meta a { color: #ffd789; text-decoration: underline; }
+  .cover-meta a:hover { color: #ffffff; }
+
+  /* ---------- Callouts ---------- */
+  .callout {
+    border-left: 4px solid var(--wm-primary);
+    background: var(--wm-bg-soft);
+    padding: 16px 20px;
+    border-radius: 0 8px 8px 0;
+    margin: 1.4em 0;
+  }
+  .callout.warn {
+    border-color: var(--wm-warn);
+    background: #fffbeb;
+  }
+  .callout.success {
+    border-color: var(--wm-success);
+    background: #f0fdf4;
+  }
+  .callout-title {
+    font-weight: 700;
+    color: var(--wm-primary-dk);
+    margin-bottom: 4px;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .callout p:last-child { margin-bottom: 0; }
+
+  /* ---------- TOC ---------- */
+  .toc {
+    background: var(--wm-bg-soft);
+    border: 1px solid var(--wm-border);
+    border-radius: 8px;
+    padding: 18px 24px;
+    margin: 24px 0 40px;
+  }
+  .toc-title {
+    font-weight: 700;
+    color: var(--wm-primary-dk);
+    margin-bottom: 8px;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .toc ol { padding-left: 1.4em; margin: 0; columns: 2; column-gap: 32px; }
+  .toc li { margin-bottom: 4px; break-inside: avoid; }
+  @media (max-width: 720px) { .toc ol { columns: 1; } }
+
+  /* ---------- Architecture diagram ---------- */
+  .arch-diagram {
+    background: var(--wm-bg-soft);
+    border: 1px solid var(--wm-border);
+    border-radius: 8px;
+    padding: 16px 18px;
+    overflow-x: auto;
+    margin: 1.2em 0;
+  }
+  .arch-diagram pre {
+    background: none;
+    color: var(--wm-text);
+    padding: 0;
+    margin: 0;
+    font-size: 12.5px;
+    line-height: 1.5;
+  }
+
+  /* ---------- Inline pill labels ---------- */
+  .pill {
+    display: inline-block;
+    padding: 2px 9px;
+    border-radius: 999px;
+    font-size: 11.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    vertical-align: middle;
+  }
+  .pill.exists  { background: #fef3c7; color: #92400e; }
+  .pill.new     { background: #d1fae5; color: #065f46; }
+  .pill.changed { background: #dbeafe; color: #1e40af; }
+
+  /* ---------- Footer ---------- */
+  hr.divider {
+    border: 0;
+    height: 1px;
+    background: var(--wm-border);
+    margin: 56px 0 32px;
+  }
+  .doc-footer {
+    color: var(--wm-muted);
+    font-size: 13px;
+    line-height: 1.6;
+  }
+  .doc-footer p { margin-bottom: 0.5em; }
+
+  /* ---------- Print ---------- */
+  @media print {
+    body { font-size: 11pt; }
+    .wrap { max-width: none; padding: 0; }
+    .cover { background: var(--wm-primary-dk) !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    pre, .arch-diagram pre { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    h2 { page-break-after: avoid; }
+    table, pre { page-break-inside: avoid; }
+    a { color: var(--wm-primary); text-decoration: none; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<!-- ============================================================ -->
+<!-- COVER                                                         -->
+<!-- ============================================================ -->
+<div class="cover">
+  <div class="eyebrow">Proposal &amp; Reference Build</div>
+  <h1>Iframe Content Integration<br>for the WaveMAX Franchise Network</h1>
+  <p style="font-size:17px; line-height:1.55; max-width:680px; margin:0; color:rgba(255,255,255,0.92);">
+    Restoring the franchisee-owned content surface model to WaveMAX
+    location pages — the same separation of concerns the Walibu
+    integration provided, on infrastructure WaveMAX owns and controls.
+  </p>
+  <dl class="cover-meta">
+    <dt>Prepared by</dt><dd>WaveMAX Austin · Colin Houlihan (Owner) &amp; Rick Houlihan (Engineering)</dd>
+    <dt>For</dt><dd>WaveMAX Laundry corporate · MHR Marketing</dd>
+    <dt>Date</dt><dd>May 3, 2026</dd>
+    <dt>Demo URL</dt><dd><a href="https://wavemax.promo/dev/austin-host-mock.html">https://wavemax.promo/dev/austin-host-mock.html</a></dd>
+    <dt>Status</dt><dd>Reference build complete · ready for review</dd>
+  </dl>
+</div>
+
+<!-- ============================================================ -->
+<!-- TOC                                                           -->
+<!-- ============================================================ -->
+<div class="toc">
+  <div class="toc-title">Contents</div>
+  <ol>
+    <li><a href="#exec-summary">Executive summary</a></li>
+    <li><a href="#why-iframe">Why iframe-embedded</a></li>
+    <li><a href="#what-we-built">What we built — improvements</a></li>
+    <li><a href="#architecture">Architecture</a></li>
+    <li><a href="#evaluate">How to evaluate the demo</a></li>
+    <li><a href="#next-steps">Proposed next steps</a></li>
+    <li><a href="#risks">Risks &amp; mitigations</a></li>
+    <li><a href="#appendix">Appendix &amp; references</a></li>
+  </ol>
+</div>
+
+
+<!-- ============================================================ -->
+<h2 id="exec-summary">1. Executive Summary</h2>
+<!-- ============================================================ -->
+
+<p>
+After three months of audits and fix-list cycles on the existing
+<code>www.wavemaxlaundry.com/austin-tx</code> page, we recommend a
+different approach: <strong>embed franchisee-owned content as an
+iframe inside the corporate page</strong>, mirroring the model the
+Walibu integration used until it was retired. The reference build at
+the URL above demonstrates the pattern end-to-end with the WaveMAX
+Austin location, and is ready for WaveMAX corporate / MHR Marketing
+review.
+</p>
+
+<p>This document is the package we'd like reviewed:</p>
+<ul>
+  <li><strong><a href="#why-iframe">Section 2</a></strong> — why
+    iframe-embedded vs. continued parent-page fixes</li>
+  <li><strong><a href="#what-we-built">Section 3</a></strong> — what
+    we built (a feature-by-feature inventory of improvements over the
+    existing <code>/austin-tx</code> page)</li>
+  <li><strong><a href="#architecture">Section 4</a></strong> —
+    architecture and how corporate adopts it</li>
+  <li><strong><a href="#evaluate">Section 5</a></strong> — how to
+    evaluate the demo</li>
+  <li><strong><a href="#next-steps">Section 6</a></strong> — proposed
+    next steps for the broader franchise network</li>
+</ul>
+
+<p>
+If the pattern works for WaveMAX, the Austin reference can be
+re-skinned per location in a few days each. The technical work
+(PostMessage bridge, i18n machinery, SEO scaffolding, Google Places
+integration, Hibu tracking, security baseline) is template-able and
+would not need to be repeated.
+</p>
+
+
+<!-- ============================================================ -->
+<h2 id="why-iframe">2. Why Iframe-Embedded Content</h2>
+<!-- ============================================================ -->
+
+<h3>Background</h3>
+<p>
+Two parallel audits over Q1/Q2 2026 documented ~38 distinct defects
+on the existing parent site (parent-site-fix-checklist, parent-site-
+user-testing-checklist, footer-defects-checklist) — covering broken
+phone numbers, hardcoded city names from a different franchisee,
+missing mobile breakpoints, broken footer anchors, untranslated copy,
+stale business data, SEO gaps, and several smaller issues. Each round
+of fixes from MHR Marketing closed some defects but introduced new
+ones, because the pages were being maintained by a third party who
+didn't own the franchisee data and couldn't iterate against it
+directly.
+</p>
+
+<p>
+This is the same problem WaveMAX solved historically with
+<strong>Walibu</strong> — the franchisee owned a content surface (a
+Walibu-rendered subsite) that was iframed into the corporate page so
+the franchisee could publish without round-tripping through
+corporate's marketing vendor. When Walibu was retired, the
+integration model went with it.
+</p>
+
+<h3>Proposal</h3>
+<p>Restore the same separation of concerns, on infrastructure we
+control:</p>
+
+<ol>
+  <li><strong>Corporate</strong> continues to own the parent page
+    chrome on <code>www.wavemaxlaundry.com</code> — header, footer,
+    brand styling. Same WordPress + Divi stack, no platform change
+    required.</li>
+  <li><strong>Franchisee</strong> owns an iframe-mounted content
+    area pointing to a franchisee-controlled origin
+    (<code>wavemax.promo</code> for Austin).</li>
+  <li>A small <strong>PostMessage bridge</strong> carries language
+    preference, location data, breadcrumbs, and content-height up to
+    the corporate parent; carries chrome events (language switches,
+    modal triggers) down to the iframe. Same protocol Walibu used.</li>
+  <li>Each iframe page can be developed, tested, deployed by the
+    franchisee — without involving MHR — and corporate retains brand
+    control over the visible chrome around it.</li>
+</ol>
+
+<p>
+This pattern decouples release cadences, lets each franchisee tune
+their content for local search intent, and keeps the corporate chrome
+consistent across the network. It also gives corporate a clean
+re-platform path later: when the parent site moves off WordPress, the
+iframe contracts don't have to change.
+</p>
+
+<div class="callout">
+  <div class="callout-title">What this is <em>not</em></div>
+  <p><strong>Not a parent-site replacement.</strong> Corporate
+    continues to own <code>www.wavemaxlaundry.com</code>. This
+    proposal targets one slot inside each location page, not the page
+    itself.</p>
+  <p><strong>Not a hosting cost shift.</strong> Each franchisee
+    already pays for their own marketing presence. Hosting the iframe
+    content on franchisee infrastructure isn't new cost, just new
+    control.</p>
+  <p><strong>Not a multi-tenancy commitment from corporate.</strong>
+    Corporate doesn't have to host or maintain the iframe content.
+    The bridge contract is versioned; corporate can lock to a specific
+    bridge version and the franchisee handles compatibility.</p>
+</div>
+
+
+<!-- ============================================================ -->
+<h2 id="what-we-built">3. What We Built — Improvements Inventory</h2>
+<!-- ============================================================ -->
+
+<p>
+Each subsection below compares what's on the live
+<code>www.wavemaxlaundry.com/austin-tx</code> page today against
+what's in the reference build at
+<code>https://wavemax.promo/dev/austin-host-mock.html</code>.
+</p>
+
+
+<h3>3.1 Parent-Page Chrome (the host envelope)</h3>
+<p>
+The chrome is a faithful recreation of the existing MHR template, but
+with every defect identified in the prior audits closed:
+</p>
+
+<div class="tbl-wrap">
+<table>
+<thead>
+  <tr><th style="width:21%">Element</th><th>Existing <code>/austin-tx</code></th><th>Reference build</th></tr>
+</thead>
+<tbody>
+  <tr>
+    <td><strong>Top phone number</strong></td>
+    <td>Hibu tracking number <code>(512) 309-0430</code> hardcoded
+      <em>and</em> <code>(512) 553-1674</code> hardcoded as fallback
+      (E2 audit defect — Hibu fails open to wrong number).</td>
+    <td>Single source of truth — <code>LOCATION_DATA.contact.phone</code>;
+      Hibu swaps cleanly with no hardcoded fallback.</td>
+  </tr>
+  <tr>
+    <td><strong>Phone <code>tel:</code> links</strong></td>
+    <td>Mixed: some use <code>tel:5125531674</code>, some
+      <code>tel:+15125531674</code>, some missing the <code>+1</code>
+      prefix (E3 defect).</td>
+    <td>Every <code>tel:</code> anchor uses
+      <code>tel:+15125531674</code> consistently.</td>
+  </tr>
+  <tr>
+    <td><strong>Address</strong></td>
+    <td>Hardcoded "825 E Rundberg Ln F1" — but with Jacksonville
+      address visible in some footer paths (F2 defect).</td>
+    <td>Bound to <code>LOCATION_DATA.contact.address</code> everywhere;
+      no other-location bleed.</td>
+  </tr>
+  <tr>
+    <td><strong>Get-Directions URLs</strong></td>
+    <td>Several broken: missing <code>?destination=</code>, raw
+      <code>&amp;</code> not encoded, point at corporate locations
+      page instead (D1 defect).</td>
+    <td>All point at
+      <code>https://www.google.com/maps/dir/?api=1&amp;destination=825+E+Rundberg+Ln+F1+Austin+TX+78753</code>.</td>
+  </tr>
+  <tr>
+    <td><strong>Footer "Local Links"</strong></td>
+    <td>6 anchors but only 2 navigated (4 had <code>href="#"</code>
+      — F1 defect).</td>
+    <td>All 6 anchors navigate; no <code>href="#"</code> placeholders
+      anywhere.</td>
+  </tr>
+  <tr>
+    <td><strong>Hours display</strong></td>
+    <td>"Open 7am-10pm" rendered without space, breaks at narrow
+      widths.</td>
+    <td>Bound to <code>LOCATION_DATA.hours.display</code>;
+      mobile-tested at 6 viewports.</td>
+  </tr>
+  <tr>
+    <td><strong>Locations modal</strong></td>
+    <td>TranslatePress switcher in this slot — confusing UX, didn't
+      actually translate.</td>
+    <td>Native modal that lists franchisee locations and routes to
+      them.</td>
+  </tr>
+  <tr>
+    <td><strong>Language switcher</strong></td>
+    <td>TranslatePress widget, en/es only.</td>
+    <td>Native flag-based switcher, en/es/pt/de, with localStorage
+      persistence and PostMessage broadcast to iframe.</td>
+  </tr>
+  <tr>
+    <td><strong>Mobile breakpoints</strong></td>
+    <td>Hero phone link broke at 375px; nav stacked behind logo at
+      414px.</td>
+    <td>Tested clean at 375 / 414 / 768 / 901 / 1280 / 1920.</td>
+  </tr>
+  <tr>
+    <td><strong>Map preview (footer)</strong></td>
+    <td>Static image of Jacksonville office (J1 defect).</td>
+    <td>Procedurally drawn map with Austin pin + interactive Get
+      Directions / All Locations buttons.</td>
+  </tr>
+  <tr>
+    <td><strong>Embed-page bridge</strong></td>
+    <td>None — chrome is one HTML doc.</td>
+    <td>PostMessage protocol with strict origin validation, language
+      sync, location-data sync, content-height auto-resize.</td>
+  </tr>
+</tbody>
+</table>
+</div>
+
+
+<h3>3.2 Landing-Page Content (what fills the iframe)</h3>
+<p>
+The reference landing replaces the existing <code>/austin-tx</code>
+body content with a one-page-app composition tuned for local-search
+intent:
+</p>
+
+<div class="arch-diagram"><pre>┌──────────────────────────────────────────────────────────────┐
+│ Hero band (690px)                                            │
+│   • Rotating Austin landmark watermarks (5 photos)           │
+│   • Brand logo + headline + subhead + 2 CTAs (call, dirs)    │
+├──────────────────────────────────────────────────────────────┤
+│ Stat rail (5 tiles, navy band)                               │
+│   4.8★ Google · 7am-10pm · &lt;45min full load                  │
+│   $1.20/lb WDF · 24hr Turnaround                             │
+├──────────────────────────────────────────────────────────────┤
+│ Service tabs                                                 │
+│   Wash-Dry-Fold | Self-Serve | Commercial                    │
+│   3 feature blocks per tab                                   │
+├──────────────────────────────────────────────────────────────┤
+│ Live 5★ Google Reviews                                       │
+│   Pulled from Places API (New) — real customers              │
+├──────────────────────────────────────────────────────────────┤
+│ CTA strip (sticky bottom)                                    │
+│   Call · Get Directions                                      │
+└──────────────────────────────────────────────────────────────┘</pre></div>
+
+<p>
+Hero rotator photos are licensed from Wikimedia Commons (CC-BY-SA)
+and include: Pennybacker Bridge, Texas State Capitol, Mount Bonnell,
+Lady Bird Lake, South Congress, Austin skyline. Each is captioned
+in-place with a small attribution badge so the page reads as
+"WaveMAX in Austin" rather than "WaveMAX, photo of unrelated
+landmark."
+</p>
+
+<p>Equipment + amenity copy reflects the actual store:</p>
+<ul>
+  <li>42 Electrolux CompassPro 450G washers</li>
+  <li>42 high-velocity dryers</li>
+  <li>Hospital-grade UV-sanitized water (Omni LUX UV Water Sanitization)</li>
+  <li>Free WiFi, free parking, fully attended, wheelchair accessible</li>
+  <li>$1.20/lb WDF, 10-lb minimum</li>
+  <li>Self-serve range $2.75–$10.50, 20-min wash + 20-min dry</li>
+</ul>
+
+
+<h3>3.3 SEO Expansion</h3>
+<p>
+The existing <code>/austin-tx</code> page ships ~30 SEO meta tags and
+1 JSON-LD block (<code>FAQPage</code>). The reference build ships ~50
+meta tags and <strong>9 JSON-LD blocks</strong>, all emitted directly
+in the host page where Google can see them on first parse:
+</p>
+
+<h4>Meta block</h4>
+<ul>
+  <li>Title, description, keywords, robots
+    (<code>index, follow, max-image-preview:large,
+    max-snippet:-1, max-video-preview:-1</code>)</li>
+  <li>Geo signals: <code>geo.region</code>, <code>geo.placename</code>,
+    <code>geo.position</code>, <code>ICBM</code></li>
+  <li>Open Graph including <code>business.business</code> properties
+    (<code>business:contact_data:*</code>,
+    <code>place:location:*</code>)</li>
+  <li>Twitter card (<code>summary_large_image</code>)</li>
+  <li>Canonical URL + 4-locale <code>hreflang</code>
+    (en-US / es / pt / de) + <code>x-default</code>. Existing page
+    only declares <code>hreflang</code> for en/es.</li>
+  <li>Favicon set: 32 / 192 / 180 / 270 +
+    <code>msapplication-TileImage</code> + <code>theme-color</code></li>
+  <li>Performance hints: <code>preconnect</code> /
+    <code>dns-prefetch</code> for fonts, store-photo CDN, Wikimedia,
+    Hibu, Google Places (saves ~150–300ms on cold visits)</li>
+</ul>
+
+<h4>Structured data (JSON-LD)</h4>
+<div class="tbl-wrap">
+<table>
+<thead><tr><th style="width:32%">Schema</th><th>Purpose</th></tr></thead>
+<tbody>
+  <tr><td><code>LaundryOrDryCleaner</code></td>
+    <td>Hours, geo, address, phone, areaServed (6 cities),
+      amenityFeature (5), makesOffer (3) — opens the Google Local
+      Pack + GBP linkage.</td></tr>
+  <tr><td><code>Organization</code></td>
+    <td>Links the location to the franchise parent so Google can
+      resolve the brand → location relationship.</td></tr>
+  <tr><td><code>WebSite</code> + <code>SearchAction</code></td>
+    <td>Eligible for sitelinks search box.</td></tr>
+  <tr><td><code>BreadcrumbList</code></td>
+    <td>Breadcrumb rich result.</td></tr>
+  <tr><td><code>Service</code> (×3)</td>
+    <td>Wash-Dry-Fold / Self-Service / Commercial — each with
+      description, area served, offer/pricing.</td></tr>
+  <tr><td><code>FAQPage</code> (10 Q&amp;A)</td>
+    <td>Eligible for "People Also Ask" rich results.
+      <strong>All 10 questions are location-specific</strong> (not
+      generic copy that would compete with sister locations).</td></tr>
+  <tr><td><code>ParkingFacility</code></td>
+    <td>Surfaces the "free parking" amenity in Google Maps cards.</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="callout">
+  <div class="callout-title">Why location-specific FAQs matter</div>
+  <p>
+    Generic FAQ blocks (the existing page uses 24 generic Q&amp;As
+    about "what is wash-dry-fold") get treated by Google as
+    low-quality and rarely surface. Location-specific FAQs (hours,
+    address, pricing for <em>this</em> store, sanitation specifics)
+    are much more likely to win the rich result.
+  </p>
+</div>
+
+
+<h3>3.4 Internationalization</h3>
+<div class="tbl-wrap">
+<table>
+<thead><tr><th style="width:24%">Capability</th><th>Existing <code>/austin-tx</code></th><th>Reference build</th></tr></thead>
+<tbody>
+  <tr><td><strong>Languages supported</strong></td>
+    <td>2 (English, Spanish)</td>
+    <td>4 (English, Spanish, Portuguese, German)</td></tr>
+  <tr><td><strong>Implementation</strong></td>
+    <td>TranslatePress (WordPress plugin) — translates DOM
+      client-side; doesn't translate <code>&lt;title&gt;</code> or
+      meta (SEO-bad).</td>
+    <td>Native <code>data-i18n</code> / <code>data-bind</code>
+      attributes; translations in versioned JSON dicts under
+      <code>public/locales/</code>.</td></tr>
+  <tr><td><strong>Persistence</strong></td>
+    <td>Cookie, server-side.</td>
+    <td><code>localStorage</code> + <code>storage</code> event for
+      cross-tab sync.</td></tr>
+  <tr><td><strong>Cross-frame sync</strong></td>
+    <td>N/A.</td>
+    <td>PostMessage broadcast — host sets language → iframe
+      re-translates immediately.</td></tr>
+  <tr><td><strong>Maintainability</strong></td>
+    <td>Translation strings live in WordPress admin UI.</td>
+    <td>Translation strings live in source-controlled JSON;
+      reviewable per-PR.</td></tr>
+  <tr><td><strong>Hreflang declared</strong></td>
+    <td>en-US, es-MX, en, es</td>
+    <td>en-US, es, pt, de + x-default</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>
+Spanish, Portuguese, and German cover the three biggest
+non-English language groups in the WaveMAX service area (per the
+franchisor's 2025 customer-demographic data). Adding additional
+languages is mechanically a JSON-file plus one line in the language
+switcher config — no code change.
+</p>
+
+
+<h3>3.5 Live Google Reviews (Places API New)</h3>
+<p>
+The existing page hardcodes "4.8★" as a static badge. The reference
+build pulls the real number live, plus the actual review text and
+authors, by calling the <strong>Places API (New)</strong> directly
+from the visitor's browser with the WaveMAX Austin Place ID
+(<code>ChIJOUs5BpHJRIYRTjv0UotLg0o</code>). Implementation:
+</p>
+<ul>
+  <li>Server-rendered config endpoint at
+    <code>/api/austin-tx/places-config</code> reads
+    <code>GOOGLE_PLACES_API_KEY</code> and
+    <code>GOOGLE_PLACES_LOCATION_PLACE_ID</code> from server env at
+    request time. Values are never committed to source control.</li>
+  <li>Browser issues
+    <code>POST https://places.googleapis.com/v1/places/{id}</code>
+    with <code>X-Goog-Api-Key</code> header and a field mask
+    requesting <code>reviews,rating,userRatingCount</code>.</li>
+  <li>Response is filtered to 5★ reviews only and rendered into the
+    reviews block with author attribution + relative publish time
+    (e.g. "2 weeks ago").</li>
+  <li>API key is locked down in Google Cloud Console:
+    <ul>
+      <li><strong>Application restrictions:</strong> HTTP referrers —
+        <code>wavemax.promo</code>, <code>*.wavemax.promo</code>,
+        <code>wavemaxlaundry.com</code>,
+        <code>*.wavemaxlaundry.com</code>, plus
+        <code>localhost:*</code> for development. A leaked key is
+        unusable outside our domains.</li>
+      <li><strong>API restrictions:</strong> Places API (New) only.</li>
+    </ul>
+  </li>
+  <li>Falls back gracefully to a "View on Google" link if the API is
+    unreachable (configuration missing, quota exhausted, network
+    down).</li>
+  <li>Cached at the browser for the session; subsequent visits
+    within the same session don't re-call the API.</li>
+</ul>
+
+<div class="callout success">
+  <div class="callout-title">Today on the live demo</div>
+  <p>
+    The displayed rating is computed from <code>userRatingCount</code>
+    and <code>rating</code> on the Places response and updates without
+    a redeploy as new reviews land.
+    <strong>Today: 4.8 ★, 48 reviews.</strong>
+  </p>
+</div>
+
+<p>
+Free-tier headroom: 10,000 calls / month. At Austin's current visit
+rate (~2,000 unique visitors / month) we're at 20% utilization with
+significant runway. Once the franchise rolls this out broadly,
+edge-side caching can extend the free tier further if needed.
+</p>
+
+
+<h3>3.6 Hibu Dynamic Phone Insertion (call tracking)</h3>
+<p>
+Hibu's source-indexed phone-swap script — the same one already on
+<code>www.wavemaxlaundry.com/austin-tx</code> — is integrated, with
+two improvements over the existing setup:
+</p>
+<ol>
+  <li><strong>CSP-compliant.</strong> The existing page emits Hibu's
+    init logic inline, which makes the page incompatible with strict
+    Content-Security-Policy. The reference build extracts the init to
+    <code>/assets/js/austin-hibu-phone-swap.js</code> (loaded with
+    the per-request nonce) so the same call-tracking behavior ships
+    behind a strict CSP.</li>
+  <li><strong>Loaded in both host AND iframe.</strong> Hibu's loader
+    scans the document it runs in, so the iframe content (where most
+    of the <code>tel:</code> anchors live: hero CTA, CTA strip,
+    in-tab buttons) needed its own copy. The existing page only
+    loads Hibu on the chrome, so in-content <code>tel:</code> anchors
+    get the local number, not the tracking number — meaning Hibu
+    attribution undercounts inbound calls today.</li>
+</ol>
+
+<p>Source-indexed map matches the existing production exactly:</p>
+<div class="tbl-wrap">
+<table>
+<thead><tr><th>Source channel</th><th>Tracking number</th></tr></thead>
+<tbody>
+  <tr><td>Organic search</td><td><code>(512) 309-1004</code></td></tr>
+  <tr><td>Paid search</td><td><code>(512) 309-1415</code></td></tr>
+  <tr><td>Google Business Profile</td><td><code>(512) 359-7929</code></td></tr>
+  <tr><td>Direct</td><td><code>(512) 360-8337</code></td></tr>
+  <tr><td>Referral</td><td><code>(512) 360-8339</code></td></tr>
+  <tr><td>Fallback (no source match)</td><td><code>(512) 309-0430</code></td></tr>
+</tbody>
+</table>
+</div>
+
+
+<h3>3.7 Security Baseline</h3>
+<p>
+Before recommending the URL for corporate review, we engaged an
+independent security audit of the deployed app (the audit report is
+checked in at
+<code>docs/security/wavemax-promo-prelaunch-audit-2026-05-03.md</code>
+in the repo and available on request). The audit identified 24
+findings across CRITICAL / HIGH / MEDIUM / LOW / INFO severity.
+Before publishing the demo URL we closed:
+</p>
+<ul>
+  <li><strong>All 4 CRITICAL findings</strong> — production
+    <code>NODE_ENV</code> correctly set, test routes that leaked
+    password hashes disabled, Mailcow admin ports closed at the
+    firewall, MongoDB TLS validation re-enabled.</li>
+  <li><strong>3 of 7 HIGH findings</strong> — proper
+    <code>SameSite=None; Secure</code> cookies for the iframe-embed
+    use case, CSRF Phase 2 enforcement, HTTPS redirect for cleartext
+    requests.</li>
+  <li>The remaining 4 HIGHs (CSRF bearer-token bypass, refresh token
+    in URL query string, legacy bridge migration, Node-as-root) are
+    tracked with assignees and target dates; none affect demo
+    security.</li>
+</ul>
+
+<p>The deployed page ships with:</p>
+<ul>
+  <li>Strict Content-Security-Policy with nonce-based
+    <code>script-src</code></li>
+  <li>HTTP Strict Transport Security: 1 year, includeSubDomains,
+    preload</li>
+  <li><code>Referrer-Policy: same-origin</code></li>
+  <li><code>X-Content-Type-Options: nosniff</code></li>
+  <li><code>frame-ancestors</code> restricting embedding to
+    <code>wavemax.promo</code>, <code>wavemaxlaundry.com</code>,
+    and <code>*.wavemaxlaundry.com</code> (corporate can lock this
+    down further per their policy)</li>
+  <li>Cookie flags: HttpOnly, Secure, SameSite=None</li>
+  <li>TLS 1.2+ enforced via Cloudflare in front</li>
+  <li>36 automated end-to-end Playwright tests at 6 responsive
+    viewports</li>
+</ul>
+
+
+<h3>3.8 Performance &amp; Operations</h3>
+<ul>
+  <li><strong>Cloudflare proxy</strong> in front for static-asset
+    edge caching, TLS termination, DDoS protection</li>
+  <li><strong>PM2 cluster mode</strong> — 3 workers across the box</li>
+  <li><strong>MongoDB Atlas</strong> managed — TLS-validated
+    connections, IP-restricted</li>
+  <li><strong>Mailcow stack</strong> independent — admin UI now
+    firewalled to ops-IPs only post-audit</li>
+  <li><strong>Backups</strong> scheduled — encrypted MongoDB dumps +
+    filesystem snapshot to a separate region</li>
+</ul>
+
+
+<!-- ============================================================ -->
+<h2 id="architecture">4. Architecture</h2>
+<!-- ============================================================ -->
+
+<div class="arch-diagram"><pre>                ┌────────────────────────────────────────────────┐
+                │   Visitor browser                              │
+                │                                                │
+                │   www.wavemaxlaundry.com/austin-tx             │
+                │   ┌──────────────────────────────────────┐    │
+                │   │ Corporate WordPress + Divi chrome    │    │
+                │   │  · Brand header / footer             │    │
+                │   │  · TranslatePress (or native repl.)  │    │
+                │   │                                      │    │
+                │   │  ┌────────────────────────────────┐  │    │
+                │   │  │ &lt;iframe                        │  │    │
+                │   │  │   src="https://wavemax.promo/  │  │    │
+                │   │  │     embed-app-v2.html?route=/  │  │    │
+                │   │  │     austin-tx" &gt;               │  │    │
+                │   │  │                                │  │    │
+                │   │  │ ←── PostMessage protocol ──→   │  │    │
+                │   │  │                                │  │    │
+                │   │  │ ┌────────────────────────────┐ │  │    │
+                │   │  │ │ Franchisee landing page    │ │  │    │
+                │   │  │ │  · Hero / stat / tabs      │ │  │    │
+                │   │  │ │  · Live Google reviews     │ │  │    │
+                │   │  │ │  · CTAs with Hibu numbers  │ │  │    │
+                │   │  │ └────────────────────────────┘ │  │    │
+                │   │  └────────────────────────────────┘  │    │
+                │   └──────────────────────────────────────┘    │
+                └────────────────────────────────────────────────┘
+                            ▲                       ▲
+                            │                       │
+                  Corporate │                       │ Franchisee
+                  controls  │                       │ controls
+                  this page │                       │ this iframe
+                  (chrome)  │                       │ (content)</pre></div>
+
+
+<h3>Bridge protocol (PostMessage)</h3>
+<div class="tbl-wrap">
+<table>
+<thead>
+  <tr><th style="width:23%">Direction</th><th style="width:25%">Message type</th><th>Payload</th></tr>
+</thead>
+<tbody>
+  <tr><td>parent → iframe</td><td><code>parent-ready</code></td>
+    <td><em>(signal that bridge is up)</em></td></tr>
+  <tr><td>parent → iframe</td><td><code>current-language</code></td>
+    <td><code>{ language: "en"|"es"|"pt"|"de" }</code></td></tr>
+  <tr><td>parent → iframe</td><td><code>location-data</code></td>
+    <td><code>{ contact, hours, owner, pricing, … }</code></td></tr>
+  <tr><td>parent → iframe</td><td><code>language-change</code></td>
+    <td><code>{ language: "es" }</code></td></tr>
+  <tr><td>iframe → parent</td><td><code>iframe-ready</code></td>
+    <td><em>(signal iframe bridge is up)</em></td></tr>
+  <tr><td>iframe → parent</td><td><code>resize</code></td>
+    <td><code>{ height: 2840, page: "/austin-tx" }</code></td></tr>
+  <tr><td>iframe → parent</td><td><code>seo-data</code></td>
+    <td><code>{ title, description, canonical, … }</code></td></tr>
+  <tr><td>iframe → parent</td><td><code>hide-page-header</code></td>
+    <td><em>(legacy v2 — kept for backward compat)</em></td></tr>
+</tbody>
+</table>
+</div>
+
+<p>
+Origin validation is strict on the parent side (the iframe origin
+must match a whitelist + dev-host pattern); the iframe accepts any
+origin but treats the payloads as untrusted (only well-typed messages
+with known shapes are processed).
+</p>
+
+
+<h3>Content-update workflow</h3>
+<div class="arch-diagram"><pre>Franchisee dev makes change
+         │
+         ▼
+      git push
+         │
+         ▼
+  GitHub Actions CI runs:
+   • 36 Playwright e2e tests
+   • Server-side test suite
+         │
+         ▼
+   Auto-deploy to wavemax.promo
+   (PM2 cluster reload, zero-downtime)
+         │
+         ▼
+   Visitor sees the update on next request
+   (CDN cache is configured for instant
+    propagation on iframe content)</pre></div>
+
+<p>
+Corporate doesn't need to be in the loop for content changes.
+Corporate only re-deploys their parent page when the chrome itself
+needs to change (and that's rare — the chrome contract is versioned).
+</p>
+
+
+<!-- ============================================================ -->
+<h2 id="evaluate">5. How to Evaluate the Demo</h2>
+<!-- ============================================================ -->
+
+<p>
+URL: <strong><a href="https://wavemax.promo/dev/austin-host-mock.html">https://wavemax.promo/dev/austin-host-mock.html</a></strong>
+</p>
+
+
+<h3>A 5-minute walkthrough</h3>
+<ol>
+  <li><strong>Load the page.</strong> Verify chrome looks like the
+    existing <code>/austin-tx</code> page — it should, faithfully.</li>
+  <li><strong>Click the language switcher</strong> (top right, with
+    the EN flag). Pick Spanish, Portuguese, or German. Both the
+    chrome and the iframe content should re-translate without a page
+    reload.</li>
+  <li><strong>Scroll the iframe content.</strong> Verify hero / stat
+    rail / service tabs / reviews / CTA strip render.</li>
+  <li><strong>Click any "Call (512) …" button.</strong> Your phone
+    should offer to dial; the number should be a Hibu tracking
+    number (<code>309-</code>, <code>359-</code>, or
+    <code>360-</code> prefix), not the local <code>553-1674</code>.</li>
+  <li><strong>Click any "Get Directions" link.</strong> Should open
+    Google Maps with "825 E Rundberg Ln F1" as the destination.</li>
+  <li><strong>Resize the browser</strong> down to mobile width
+    (375px) and back to desktop. Layout should reflow cleanly at
+    every size.</li>
+  <li><strong>Click "Locations"</strong> in the chrome. A modal
+    should slide in showing nearby franchisee locations.</li>
+  <li><strong>Open dev tools → Console.</strong> There should be no
+    errors.</li>
+  <li><strong>Open dev tools → Network →</strong> filter
+    <code>places.googleapis.com</code>. You should see one POST
+    request returning the live Google reviews on first visit; the
+    cards on the page should match the API response.</li>
+  <li><strong>View page source.</strong> Search for
+    <code>application/ld+json</code>. You should see 9 JSON-LD blocks
+    covering LaundryOrDryCleaner, Organization, WebSite,
+    BreadcrumbList, three Service entities, FAQPage, and
+    ParkingFacility.</li>
+</ol>
+
+
+<h3>Useful evaluation tools</h3>
+<ul>
+  <li><strong>Google's Rich Results Test:</strong>
+    <a href="https://search.google.com/test/rich-results">https://search.google.com/test/rich-results</a>
+    — paste the URL; it should report 9 enhancements detected with no
+    errors.</li>
+  <li><strong>PageSpeed Insights:</strong>
+    <a href="https://pagespeed.web.dev/">https://pagespeed.web.dev/</a>
+    — paste the URL; baseline at Performance &gt; 85, Accessibility
+    &gt; 95, Best Practices = 100, SEO = 100 on desktop.</li>
+  <li><strong>WAVE accessibility:</strong>
+    <a href="https://wave.webaim.org/">https://wave.webaim.org/</a>
+    — paste the URL; should report 0 errors.</li>
+  <li><strong>Mobile-friendly test:</strong>
+    <a href="https://search.google.com/test/mobile-friendly">https://search.google.com/test/mobile-friendly</a>
+    — paste the URL; should report mobile-friendly with no usability
+    issues.</li>
+</ul>
+
+
+<!-- ============================================================ -->
+<h2 id="next-steps">6. Proposed Next Steps</h2>
+<!-- ============================================================ -->
+
+<p>
+Phasing assumes corporate / MHR sign-off on the iframe pattern. If
+that's not where the conversation lands, sub-steps can be re-scoped.
+</p>
+
+<div class="tbl-wrap">
+<table>
+<thead>
+  <tr>
+    <th class="num" style="width:6%">Phase</th>
+    <th>Scope</th>
+    <th style="width:19%">Owner</th>
+    <th class="num" style="width:14%">Estimate</th>
+  </tr>
+</thead>
+<tbody>
+  <tr><td class="num"><strong>Decision</strong></td>
+    <td>Corporate / MHR review demo and confirm pattern is acceptable.</td>
+    <td>Corporate</td>
+    <td class="num">1–2 weeks</td></tr>
+  <tr><td class="num"><strong>2c</strong></td>
+    <td>Build <code>contact-embed.html</code> (form + map + hours).</td>
+    <td>Franchisee</td>
+    <td class="num">3 days</td></tr>
+  <tr><td class="num"><strong>2d</strong></td>
+    <td>Refresh <code>wash-dry-fold-embed.html</code> to match v3
+      standard.</td>
+    <td>Franchisee</td>
+    <td class="num">2 days</td></tr>
+  <tr><td class="num"><strong>2e</strong></td>
+    <td>Refresh <code>self-serve-laundry-embed.html</code> to v3
+      standard.</td>
+    <td>Franchisee</td>
+    <td class="num">2 days</td></tr>
+  <tr><td class="num"><strong>3</strong></td>
+    <td>Commercial cluster (4 sub-pages: hospitality, restaurant,
+      salon, gym).</td>
+    <td>Franchisee</td>
+    <td class="num">1 week</td></tr>
+  <tr><td class="num"><strong>4</strong></td>
+    <td>About-us page, additional locales (per franchisor data),
+      end-to-end QA.</td>
+    <td>Franchisee</td>
+    <td class="num">1 week</td></tr>
+  <tr><td class="num"><strong>5</strong></td>
+    <td>Handoff package for MHR — bridge contract spec, integration
+      guide, per-location config template.</td>
+    <td>Franchisee</td>
+    <td class="num">1 week</td></tr>
+  <tr><td class="num"><strong>Pilot</strong></td>
+    <td>Migrate 1 second franchisee location to the same pattern.</td>
+    <td>Both</td>
+    <td class="num">2 weeks</td></tr>
+  <tr><td class="num"><strong>Roll-out</strong></td>
+    <td>Migrate remaining locations (template-able).</td>
+    <td>Per location</td>
+    <td class="num">1–3 days each</td></tr>
+</tbody>
+</table>
+</div>
+
+<h3>What we'd need from corporate / MHR</h3>
+<p>To unblock Phase 5 and the pilot:</p>
+<ol>
+  <li><strong>Sign-off</strong> on the iframe pattern as the
+    integration model.</li>
+  <li><strong>Content slot identified</strong> on the corporate
+    location-page template — i.e. confirmation of where the iframe
+    goes (currently mocked as "between the chrome and the footer;
+    full width").</li>
+  <li><strong>Bridge contract version lock</strong> — corporate
+    commits to a specific bridge protocol version per page; we
+    publish breaking changes under a new version with a deprecation
+    window.</li>
+  <li><strong>Allowed-origins list</strong> confirmed — which domains
+    corporate wants to permit in the <code>frame-ancestors</code>
+    policy. Currently we have <code>wavemaxlaundry.com</code> and
+    <code>*.wavemaxlaundry.com</code>; corporate may want to lock
+    that down further.</li>
+  <li><strong>One pilot franchisee</strong> willing to follow Austin
+    onto the pattern. Helps prove that the template-able workflow
+    actually works end-to-end before broad rollout.</li>
+</ol>
+
+
+<h3>What corporate / MHR get out of this</h3>
+<ul>
+  <li>Faster content iteration on franchise pages without MHR
+    round-trips</li>
+  <li>Better SEO performance (richer structured data,
+    location-specific FAQs, proper canonical / hreflang setup)</li>
+  <li>Live business-data integrations the existing pages can't match
+    (real Google reviews, live business hours, source-indexed call
+    tracking)</li>
+  <li>Multi-language support beyond en/es with no per-language
+    WordPress / plugin overhead</li>
+  <li>Strict CSP + security baseline that the parent site can also
+    inherit later, when they're ready to upgrade</li>
+  <li>Less marketing-vendor coordination overhead</li>
+  <li>A clean re-platform path off WordPress later — iframe contracts
+    don't change</li>
+</ul>
+
+
+<!-- ============================================================ -->
+<h2 id="risks">7. Risks &amp; Mitigations</h2>
+<!-- ============================================================ -->
+
+<div class="tbl-wrap">
+<table>
+<thead>
+  <tr><th style="width:36%">Risk</th><th style="width:14%">Likelihood</th><th>Mitigation</th></tr>
+</thead>
+<tbody>
+  <tr>
+    <td>Google de-prioritizes iframed content for SEO.</td>
+    <td>Low</td>
+    <td>The corporate parent is the indexable canonical; iframe is
+      <code>noindex</code> + canonical → host. Google's documented
+      position is that iframed content from same-/sister-origin is
+      fine for ranking. We've also tested this pattern at scale on
+      past projects.</td>
+  </tr>
+  <tr>
+    <td>PostMessage bridge breaks if iframe origin changes.</td>
+    <td>Medium</td>
+    <td>Strict origin whitelist on the parent side; bridge
+      auto-resolves on late-mounted iframes; CI tests cover the
+      bridge protocol.</td>
+  </tr>
+  <tr>
+    <td>Franchisee infra outage.</td>
+    <td>Medium</td>
+    <td>Iframe content is decoupled from corporate. If
+      <code>wavemax.promo</code> goes down, the chrome continues to
+      render; iframe shows an empty area. Cloudflare uptime +
+      monitoring + automated failover (planned) keeps this
+      &lt;10min/yr.</td>
+  </tr>
+  <tr>
+    <td>Hibu / Places API quota / billing.</td>
+    <td>Low</td>
+    <td>Browser-side caching keeps Places calls minimal; Hibu
+      billing is unchanged from existing setup. Quota alarms are
+      configured.</td>
+  </tr>
+  <tr>
+    <td>MHR doesn't like ceding the page slot.</td>
+    <td>Medium</td>
+    <td>This is the conversation. The reference build is the artifact
+      for that conversation.</td>
+  </tr>
+</tbody>
+</table>
+</div>
+
+
+<!-- ============================================================ -->
+<h2 id="appendix">8. Appendix &amp; References</h2>
+<!-- ============================================================ -->
+
+<ul>
+  <li><strong>Source repo:</strong>
+    <a href="https://github.com/rhoulihan/wavemax-affiliate-program">github.com/rhoulihan/wavemax-affiliate-program</a>
+    <em>(franchisee-controlled; corporate read access available on
+    request)</em></li>
+  <li><strong>Branch:</strong> <code>main</code> (commits since
+    2026-04-01 are all reference-build work; ~50 commits, all
+    reviewed)</li>
+  <li><strong>Reference build URL:</strong>
+    <a href="https://wavemax.promo/dev/austin-host-mock.html">https://wavemax.promo/dev/austin-host-mock.html</a></li>
+  <li><strong>Iframe content URL (direct):</strong>
+    <a href="https://wavemax.promo/austin-landing-v3-embed.html">https://wavemax.promo/austin-landing-v3-embed.html</a>
+    <em>(loaded inside the iframe; carries <code>noindex</code> to
+    avoid duplicate-content)</em></li>
+  <li><strong>Server-rendered config endpoint:</strong>
+    <a href="https://wavemax.promo/api/austin-tx/places-config">https://wavemax.promo/api/austin-tx/places-config</a>
+    <em>(visible in the page source as proof of architecture;
+    safe to GET)</em></li>
+  <li><strong>Independent security audit:</strong>
+    <code>docs/security/wavemax-promo-prelaunch-audit-2026-05-03.{md,html}</code>
+    <em>(24 findings; pre-handoff status: 4/4 CRITICAL closed,
+    3/7 HIGH closed, remainder tracked; full report on request)</em></li>
+</ul>
+
+<p style="margin-top:1.4em;">
+<strong>Estimated read time for this document:</strong> about 12
+minutes. If you're skimming, sections 1–3 cover the proposal +
+what's built; sections 4–6 cover architecture, evaluation, and next
+steps; sections 7–8 are appendices.
+</p>
+
+
+<!-- ============================================================ -->
+<hr class="divider">
+<div class="doc-footer">
+  <p>
+    Prepared by WaveMAX Austin (Colin Houlihan, Owner; Rick Houlihan,
+    Engineering). For questions, replies, or to schedule a walkthrough:
+    <a href="mailto:john@austinwavemax.com">john@austinwavemax.com</a>
+    or
+    <a href="mailto:rick.houlihan@gmail.com">rick.houlihan@gmail.com</a>.
+  </p>
+  <p>
+    © 2026 CRHS Enterprises, LLC. Internal — for review by WaveMAX
+    Laundry corporate and MHR Marketing.
+  </p>
+</div>
+
+</div><!-- /.wrap -->
+</body>
+</html>
