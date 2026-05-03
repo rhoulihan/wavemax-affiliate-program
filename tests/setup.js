@@ -28,6 +28,28 @@ const testUri = baseUri.includes('?')
 
 // Global connection promise to prevent multiple connections
 let connectionPromise = null;
+let memoryServer = null;
+
+async function connectWithFallback() {
+  try {
+    return await mongoose.connect(testUri, {
+      serverSelectionTimeoutMS: 3000,
+      socketTimeoutMS: 45000,
+      connectTimeoutMS: 3000,
+      maxPoolSize: 10,
+      minPoolSize: 5
+    });
+  } catch (realMongoErr) {
+    const { MongoMemoryServer } = require('mongodb-memory-server');
+    memoryServer = await MongoMemoryServer.create();
+    const memoryUri = memoryServer.getUri('wavemax_test');
+    console.log('Real Mongo unreachable, using mongodb-memory-server fallback');
+    return mongoose.connect(memoryUri, {
+      serverSelectionTimeoutMS: 30000,
+      socketTimeoutMS: 45000
+    });
+  }
+}
 
 // Set up MongoDB connection before tests
 beforeAll(async () => {
@@ -35,13 +57,7 @@ beforeAll(async () => {
     // Only connect if not already connected or connecting
     if (mongoose.connection.readyState === 0) {
       if (!connectionPromise) {
-        connectionPromise = mongoose.connect(testUri, {
-          serverSelectionTimeoutMS: 30000, // 30 second timeout
-          socketTimeoutMS: 45000,
-          connectTimeoutMS: 30000,
-          maxPoolSize: 10,
-          minPoolSize: 5
-        });
+        connectionPromise = connectWithFallback();
       }
       await connectionPromise;
       console.log('Connected to test database:', testUri.replace(/\/\/[^:]+:[^@]+@/, '//***:***@'));
@@ -84,6 +100,11 @@ afterAll(async () => {
     // Only disconnect if still connected
     if (mongoose.connection.readyState !== 0) {
       await mongoose.disconnect();
+    }
+
+    if (memoryServer) {
+      await memoryServer.stop();
+      memoryServer = null;
     }
   } catch (error) {
     // Ignore connection errors during teardown
