@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="csp-nonce" content="">
+  <meta name="robots" content="noindex,nofollow">
+  <title>WaveMAX Austin · Local-dev Host Mock</title>
+  <meta name="description" content="Reference host page demonstrating the parent-iframe bridge contract for the WaveMAX Austin franchisee.">
+
+  <!-- Theme + components -->
+  <link rel="stylesheet" href="/assets/css/wavemax-theme.css">
+  <link rel="stylesheet" href="/assets/css/wavemax-components.css">
+
+  <!-- Single source of truth for the entire chrome.
+       Future: replace with `fetch('/api/v1/location/austin-tx')` for runtime data.
+       For the reference build it's inlined so MHR can see the shape clearly. -->
+  <script>
+    window.LOCATION_DATA = {
+      slug: "austin-tx",
+      brand: { name: "WaveMAX Laundry Austin", parent: "WaveMAX Laundry" },
+      contact: {
+        phone:        "(512) 553-1674",
+        phoneTel:     "tel:+15125531674",
+        phoneTelRaw:  "+15125531674",
+        email:        "john@austinwavemax.com",
+        emailMailto:  "mailto:john@austinwavemax.com",
+        address:      "825 E Rundberg Ln F1",
+        city:         "Austin",
+        state:        "TX",
+        zip:          "78753",
+        country:      "US",
+        addressLine2: "Austin, TX 78753",
+        geo:          { lat: 30.3564789, lng: -97.6858016 },
+        mapsUrl:      "https://www.google.com/maps/dir/?api=1&destination=825+E+Rundberg+Ln+F1+Austin+TX+78753",
+        placeId:      ""
+      },
+      hours: {
+        open:     "07:00",
+        close:    "22:00",
+        display:  "7am – 10pm",
+        lastWash: "9pm",
+        days:     "Every day, 365 days a year"
+      },
+      owner: {
+        name:        "Colin Houlihan",
+        role:        "Owner / Operator",
+        bio:         "North Austin local. Running the busiest WaveMAX in Texas, focused on a clean store, fast machines, and friendly staff.",
+        neighborhood:"North Austin"
+      },
+      pricing: {
+        wdf:       { rate: 1.20, minLb: 10, currency: "USD", display: "$1.20/lb" },
+        selfServe: { minLoad: 2.50, maxLoad: 4.00 }
+      },
+      equipment: { washers: 20, dryers: 20, capacityLb: 80 },
+      amenities: ["Free WiFi", "UV Sanitization", "Touchless Payment", "Free Parking", "Wheelchair Accessible"],
+      serviceArea: ["Austin", "Round Rock", "Cedar Park", "Pflugerville", "Georgetown", "Leander"],
+      social: { facebook: "", instagram: "" },
+      google: { placeId: "", profileUrl: "", reviewsUrl: "" },
+      i18n: { languagesAvailable: ["en", "es", "pt", "de"] }
+    };
+  </script>
+</head>
+<body>
+
+  <!-- ============================================================
+       HEADER STRIPE STACK
+       ============================================================ -->
+  <header class="wmv3-header" role="banner">
+
+    <!-- Info row: business-card style data, single source of truth -->
+    <div class="wmv3-info">
+      <div class="wmv3-info-inner">
+
+        <div class="wmv3-info-col">
+          <span class="wmv3-info-icon" aria-hidden="true">📞</span>
+          <div>
+            <span class="wmv3-info-label" data-i18n="chrome.callUs">CALL US</span>
+            <span class="wmv3-info-value">
+              <a data-bind="contact.phoneTel" data-bind-attr="href" href="#">
+                <span data-bind="contact.phone">(512) 553-1674</span>
+              </a>
+            </span>
+          </div>
+        </div>
+
+        <div class="wmv3-divider" aria-hidden="true"></div>
+
+        <div class="wmv3-info-col">
+          <span class="wmv3-info-icon" aria-hidden="true">🕒</span>
+          <div>
+            <span class="wmv3-info-label" data-i18n="chrome.openHours">OPEN</span>
+            <span class="wmv3-info-value" data-bind="hours.display">7am – 10pm</span>
+          </div>
+        </div>
+
+        <div class="wmv3-divider" aria-hidden="true"></div>
+
+        <div class="wmv3-info-col">
+          <span class="wmv3-info-icon" aria-hidden="true">📍</span>
+          <div>
+            <span class="wmv3-info-label" data-i18n="chrome.address">VISIT US</span>
+            <span class="wmv3-info-value">
+              <a data-bind="contact.mapsUrl" data-bind-attr="href" target="_blank" rel="noopener" href="#">
+                <span data-bind="contact.address">825 E Rundberg Ln F1</span>
+              </a>
+            </span>
+          </div>
+        </div>
+
+        <div class="wmv3-actions-spacer"></div>
+
+        <!-- Language switcher -->
+        <div class="wmv3-lang" aria-expanded="false">
+          <button type="button" class="wmv3-lang-btn" aria-haspopup="true" aria-label="Choose language">
+            <span class="wmv3-lang-flag" aria-hidden="true">🇺🇸</span>
+            <span>EN</span>
+            <svg class="wmv3-lang-arrow" viewBox="0 0 12 12" aria-hidden="true">
+              <path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+            </svg>
+          </button>
+          <div class="wmv3-lang-menu" role="menu"></div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Actions row: logo + CTAs -->
+    <div class="wmv3-actions">
+      <div class="wmv3-actions-inner">
+        <a class="wmv3-logo" href="/dev/austin-host-mock.html" aria-label="WaveMAX Austin home">
+          <span class="wmv3-logo-mark" aria-hidden="true">W</span>
+          <span>WaveMAX Austin</span>
+        </a>
+
+        <div class="wmv3-actions-spacer"></div>
+
+        <button type="button" class="wm-btn wm-btn-secondary" data-locmodal-open data-i18n="chrome.findLocation">
+          Find a location
+        </button>
+
+        <a class="wm-btn wm-btn-cta" data-bind="contact.phoneTel" data-bind-attr="href" href="#">
+          <span aria-hidden="true">📞</span>
+          <span data-bind="contact.phone">(512) 553-1674</span>
+        </a>
+
+        <button type="button" class="wmv3-burger" aria-label="Open menu">☰</button>
+      </div>
+    </div>
+
+  </header>
+
+  <!-- ============================================================
+       LOCATION-AWARE NAVBAR
+       ============================================================ -->
+  <nav class="wmlnav" role="navigation" aria-label="Austin location navigation">
+    <div class="wmlnav-inner">
+      <a class="wmlnav-tab" data-route="/" href="/dev/austin-host-mock.html?route=/" data-i18n="chrome.nav.home">Home</a>
+      <a class="wmlnav-tab" data-route="/wash-dry-fold" href="/dev/austin-host-mock.html?route=/wash-dry-fold" data-i18n="chrome.nav.wdf">Wash · Dry · Fold</a>
+      <a class="wmlnav-tab" data-route="/self-serve-laundry" href="/dev/austin-host-mock.html?route=/self-serve-laundry" data-i18n="chrome.nav.selfserve">Self-Serve Laundry</a>
+      <a class="wmlnav-tab" data-route="/commercial" href="/dev/austin-host-mock.html?route=/commercial" data-i18n="chrome.nav.commercial">Commercial</a>
+      <a class="wmlnav-tab" data-route="/about-us" href="/dev/austin-host-mock.html?route=/about-us" data-i18n="chrome.nav.about">About Us</a>
+      <a class="wmlnav-tab" data-route="/contact" href="/dev/austin-host-mock.html?route=/contact" data-i18n="chrome.nav.contact">Contact</a>
+    </div>
+  </nav>
+
+  <!-- ============================================================
+       BREADCRUMBS
+       ============================================================ -->
+  <div class="wm-bc">
+    <div class="wm-bc-inner">
+      <a href="/dev/austin-host-mock.html" data-i18n="chrome.bc.home">Home</a>
+      <span class="wm-bc-sep" aria-hidden="true">›</span>
+      <span class="wm-bc-current" data-bind="brand.name">WaveMAX Laundry Austin</span>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       IFRAME CONTENT SLOT
+       ============================================================ -->
+  <main class="wm-iframe-shell" role="main">
+    <iframe
+      id="wavemax-iframe"
+      data-wm-bridge="1"
+      title="WaveMAX Austin"
+      allow="clipboard-write"
+      src="about:blank"></iframe>
+  </main>
+
+  <!-- ============================================================
+       FOOTER (3-panel)
+       ============================================================ -->
+  <footer class="wm-footer" role="contentinfo">
+    <div class="wm-footer-inner">
+      <div class="wm-footer-grid">
+
+        <!-- Local Links panel — F1 fix: every anchor wired -->
+        <div>
+          <h3 class="wm-footer-panel-title" data-i18n="chrome.footer.localLinks">Local Links</h3>
+          <ul class="wm-footer-list">
+            <li><a href="/dev/austin-host-mock.html?route=/">Home</a></li>
+            <li><a href="/dev/austin-host-mock.html?route=/wash-dry-fold">Wash · Dry · Fold</a></li>
+            <li><a href="/dev/austin-host-mock.html?route=/self-serve-laundry">Self-Serve Laundry</a></li>
+            <li><a href="/dev/austin-host-mock.html?route=/commercial">Commercial</a></li>
+            <li><a href="/dev/austin-host-mock.html?route=/about-us">About Us</a></li>
+            <li><a href="/dev/austin-host-mock.html?route=/contact">Contact</a></li>
+          </ul>
+        </div>
+
+        <!-- Contact panel — bound to LOCATION_DATA, no Jacksonville hardcode (E1 fix) -->
+        <div>
+          <h3 class="wm-footer-panel-title" data-i18n="chrome.footer.contact">Contact</h3>
+          <div class="wm-footer-contact">
+            <div class="wm-footer-contact-line">
+              <span class="wm-footer-contact-icon" aria-hidden="true">📞</span>
+              <a data-bind="contact.phoneTel" data-bind-attr="href" href="#">
+                <span data-bind="contact.phone">(512) 553-1674</span>
+              </a>
+            </div>
+            <div class="wm-footer-contact-line">
+              <span class="wm-footer-contact-icon" aria-hidden="true">📍</span>
+              <a data-bind="contact.mapsUrl" data-bind-attr="href" target="_blank" rel="noopener" href="#">
+                <span data-bind="contact.address">825 E Rundberg Ln F1</span><br>
+                <span data-bind="contact.addressLine2">Austin, TX 78753</span>
+              </a>
+            </div>
+            <div class="wm-footer-contact-line">
+              <span class="wm-footer-contact-icon" aria-hidden="true">✉️</span>
+              <a data-bind="contact.emailMailto" data-bind-attr="href" href="#">
+                <span data-bind="contact.email">john@austinwavemax.com</span>
+              </a>
+            </div>
+            <div class="wm-footer-contact-line">
+              <span class="wm-footer-contact-icon" aria-hidden="true">🕒</span>
+              <span><span data-bind="hours.display">7am – 10pm</span> · <span data-bind="hours.days">Every day</span></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- All Locations panel -->
+        <div>
+          <h3 class="wm-footer-panel-title" data-i18n="chrome.footer.allLocations">All Locations</h3>
+          <ul class="wm-footer-list">
+            <li><a href="https://www.wavemaxlaundry.com/locations/" target="_blank" rel="noopener">Find a WaveMAX near you →</a></li>
+          </ul>
+          <h3 class="wm-footer-panel-title" style="margin-top:1.5rem">Service area</h3>
+          <div class="wm-chips">
+            <span class="wm-chip">Austin</span>
+            <span class="wm-chip">Round Rock</span>
+            <span class="wm-chip">Cedar Park</span>
+            <span class="wm-chip">Pflugerville</span>
+            <span class="wm-chip">Georgetown</span>
+            <span class="wm-chip">Leander</span>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="wm-footer-bottom">
+        <span data-i18n="chrome.footer.copy">© 2026 CRHS Enterprises, LLC. All rights reserved.</span>
+        <span>Local-dev reference build — austin-host-mock.html</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ============================================================
+       LOCATION-FINDER MODAL
+       ============================================================ -->
+  <div class="wm-modal-overlay" id="locModal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="locModalTitle">
+    <div class="wm-modal" role="document">
+      <div class="wm-modal-header">
+        <h2 class="wm-modal-title" id="locModalTitle">Find a WaveMAX near you</h2>
+        <button type="button" class="wm-modal-close" aria-label="Close">×</button>
+      </div>
+      <div class="wm-modal-body">
+        <div class="wm-modal-search">
+          <p style="margin:0;color:var(--wm-text-soft)">
+            For the reference build only the Austin location is wired. The full location-finder list (with
+            <code>navigator.geolocation</code> primary + <code>ipapi.co</code> fallback + ZIP entry) is the F2 fix —
+            implemented in the production drop-in described in the integration guide.
+          </p>
+        </div>
+
+        <div class="loc-section-header">Austin, TX</div>
+
+        <button type="button" class="loc-card" aria-selected="true">
+          <div class="loc-info">
+            <span class="loc-name" data-bind="brand.name">WaveMAX Laundry Austin</span>
+            <span class="loc-addr" data-bind="contact.address">825 E Rundberg Ln F1</span>
+            <span class="loc-addr" data-bind="contact.addressLine2">Austin, TX 78753</span>
+            <span class="loc-phone" data-bind="contact.phone">(512) 553-1674</span>
+            <div class="loc-meta">
+              <span class="loc-dist">Selected</span>
+            </div>
+          </div>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bridge + chrome wiring (CSP-clean: external, no inline) -->
+  <script src="/assets/js/parent-iframe-bridge-v3.js"></script>
+  <script src="/assets/js/austin-host-mock.js"></script>
+</body>
+</html>
