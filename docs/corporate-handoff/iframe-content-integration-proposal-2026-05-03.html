@@ -492,99 +492,50 @@ what's in the reference build at
 
 <h3>3.1 Parent-Page Chrome (the host envelope)</h3>
 <p>
-The chrome is a faithful recreation of the existing MHR template, but
-with every defect identified in the prior audits closed:
+The chrome is a faithful recreation of the existing MHR template,
+with the defects identified in the audits closed. Rather than
+itemize every fix here, the changes group into four themes:
 </p>
 
 <div class="tbl-wrap">
 <table>
 <thead>
-  <tr><th style="width:21%">Element</th><th>Existing <code>/austin-tx</code></th><th>Reference build</th></tr>
+  <tr><th style="width:32%">Theme</th><th>What's different in the reference build</th></tr>
 </thead>
 <tbody>
   <tr>
-    <td><strong>Top phone number</strong></td>
-    <td>Two phone numbers hardcoded into the markup: a tracking-vendor
-      number and the local number, in different places (E2 audit
-      defect — when one stops getting populated by its source, the
-      page silently falls back to the other).</td>
-    <td>Every visible phone number is bound from a single source —
-      <code>LOCATION_DATA.contact.phone</code> — so there is one
-      place to update and no fallback drift.</td>
+    <td><strong>Single-source data binding</strong></td>
+    <td>Phone, address, hours, last-wash, map link — every
+      location-specific value reads from one
+      <code>LOCATION_DATA</code> object. No values hardcoded in
+      markup; no fallback drift between elements.</td>
   </tr>
   <tr>
-    <td><strong>Phone <code>tel:</code> links</strong></td>
-    <td>Hardcoded into individual elements; some elements drift out
-      of sync with each other (E3 defect — different formats and
-      different numbers across the same page).</td>
-    <td>Every <code>tel:</code> anchor on the page is populated from
-      the same single source
-      (<code>LOCATION_DATA.contact.phoneTel</code>); changing the
-      source updates every anchor.</td>
+    <td><strong>Working links throughout</strong></td>
+    <td>All <code>tel:</code>, Get-Directions, and footer-nav
+      anchors are populated and tested. No <code>href="#"</code>
+      placeholders, no malformed <code>?destination=</code>
+      strings, no broken footer links.</td>
   </tr>
   <tr>
-    <td><strong>Address</strong></td>
-    <td>Hardcoded "825 E Rundberg Ln F1" — but with Jacksonville
-      address visible in some footer paths (F2 defect).</td>
-    <td>Bound to <code>LOCATION_DATA.contact.address</code> everywhere;
-      no other-location bleed.</td>
+    <td><strong>No other-location bleed</strong></td>
+    <td>The Jacksonville-address residue and the Jacksonville
+      office map preview are gone; everything Austin-specific.</td>
   </tr>
   <tr>
-    <td><strong>Get-Directions URLs</strong></td>
-    <td>Several broken: missing <code>?destination=</code>, raw
-      <code>&amp;</code> not encoded, point at corporate locations
-      page instead (D1 defect).</td>
-    <td>All point at
-      <code>https://www.google.com/maps/dir/?api=1&amp;destination=825+E+Rundberg+Ln+F1+Austin+TX+78753</code>.</td>
-  </tr>
-  <tr>
-    <td><strong>Footer "Local Links"</strong></td>
-    <td>6 anchors but only 2 navigated (4 had <code>href="#"</code>
-      — F1 defect).</td>
-    <td>All 6 anchors navigate; no <code>href="#"</code> placeholders
-      anywhere.</td>
-  </tr>
-  <tr>
-    <td><strong>Hours display</strong></td>
-    <td>"Open 7am-10pm" rendered without space, breaks at narrow
-      widths.</td>
-    <td>Bound to <code>LOCATION_DATA.hours.display</code>;
-      mobile-tested at 6 viewports.</td>
-  </tr>
-  <tr>
-    <td><strong>Locations modal</strong></td>
-    <td>TranslatePress switcher in this slot — confusing UX, didn't
-      actually translate.</td>
-    <td>Native modal that lists franchisee locations and routes to
-      them.</td>
-  </tr>
-  <tr>
-    <td><strong>Language switcher</strong></td>
-    <td>TranslatePress widget, en/es only.</td>
-    <td>Native flag-based switcher, en/es/pt/de, with localStorage
-      persistence and PostMessage broadcast to iframe.</td>
-  </tr>
-  <tr>
-    <td><strong>Mobile breakpoints</strong></td>
-    <td>Hero phone link broke at 375px; nav stacked behind logo at
-      414px.</td>
-    <td>Tested clean at 375 / 414 / 768 / 901 / 1280 / 1920.</td>
-  </tr>
-  <tr>
-    <td><strong>Map preview (footer)</strong></td>
-    <td>Static image of Jacksonville office (J1 defect).</td>
-    <td>Procedurally drawn map with Austin pin + interactive Get
-      Directions / All Locations buttons.</td>
-  </tr>
-  <tr>
-    <td><strong>Embed-page bridge</strong></td>
-    <td>None — chrome is one HTML doc.</td>
-    <td>PostMessage protocol with strict origin validation, language
-      sync, location-data sync, content-height auto-resize.</td>
+    <td><strong>Multilingual + mobile-tested</strong></td>
+    <td>Native flag-based language switcher covering en/es/pt/de
+      (with localStorage + cross-frame sync via PostMessage);
+      chrome tested clean at six viewports from 375px to 1920px.</td>
   </tr>
 </tbody>
 </table>
 </div>
+
+<p style="font-size:14px; color:var(--wm-muted); margin-top:0.6em">
+Full per-element side-by-side is available on request if MHR
+wants the line-item view.
+</p>
 
 
 <h3>3.2 Landing-Page Content (what fills the iframe)</h3>
