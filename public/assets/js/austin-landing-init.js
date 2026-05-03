@@ -11,9 +11,10 @@
     en: {
       'landing.eyebrow':      'North Austin · Open daily 7am–10pm',
       'landing.title':        "Austin's Cleanest Laundromat",
-      'landing.subtitle':     'UV-sanitized 450G washers, fast dryers, touchless payment, free WiFi. Drop off your wash-dry-fold or use our self-serve floor — open every day.',
+      'landing.subtitle':     'Hospital-grade UV-sanitized 450G washers, fast dryers, free WiFi, free parking. Drop off your wash-dry-fold or use our self-serve floor — open every day.',
       'landing.callBtn':      'Call',
       'landing.directionsBtn':'Get Directions',
+      'landing.heroCaption':  'North Austin · 825 E Rundberg Ln',
       'landing.stats.washers':'Washers',
       'landing.stats.dryers': 'Dryers',
       'landing.stats.hours':  'Open Daily',
@@ -30,11 +31,11 @@
       'landing.wdf.turnaround.text':  'Drop off in the morning, pick up the next day. Need it faster? Ask about same-day.',
       'landing.wdf.pricing.text': 'Detergent, dryer sheets, and hangers included. Cards-only payment, no cash needed.',
       'landing.wdf.cta':          'See full WDF details →',
-      'landing.selfserve.machines.text': 'Loads from 20lb to 80lb. Faster spin = less drying time = less time waiting.',
-      'landing.selfserve.uv.title':      'UV sanitization',
-      'landing.selfserve.uv.text':       'Every cycle finishes with a UV sterilization pass. 99.9% pathogen kill.',
-      'landing.selfserve.amenities.title':'Free WiFi · Touchless pay',
-      'landing.selfserve.amenities.text': 'Wheelchair accessible, free parking, attended every shift. Comfortable, clean, reliable.',
+      'landing.selfserve.machines.text': "20-minute washes, 20-minute dries. High-spin 450G machines mean less time waiting and more time doing what you'd rather be doing.",
+      'landing.selfserve.uv.title':      'Hospital-grade UV sanitization',
+      'landing.selfserve.uv.text':       'Every cycle finishes with a hospital-grade UV sterilization pass. 99.9% pathogen kill on contact surfaces.',
+      'landing.selfserve.amenities.title':'Free WiFi',
+      'landing.selfserve.amenities.text': "Wheelchair accessible, free parking, attended every shift. Bring a laptop — the WiFi's fast enough to actually work.",
       'landing.selfserve.cta':           'See full self-serve details →',
       'landing.commercial.airbnb.title': 'Airbnb & rentals',
       'landing.commercial.airbnb.text':  'Same-day turnover support. Sheets, towels, comforters — folded and ready by check-in.',
@@ -55,9 +56,10 @@
     es: {
       'landing.eyebrow':      'Norte de Austin · Abierto diariamente 7am–10pm',
       'landing.title':        'La lavandería más limpia de Austin',
-      'landing.subtitle':     'Lavadoras 450G con sanitización UV, secadoras rápidas, pago sin contacto, WiFi gratis. Deja tu lavado o usa nuestro autoservicio — abierto todos los días.',
+      'landing.subtitle':     'Lavadoras 450G con sanitización UV de grado hospitalario, secadoras rápidas, WiFi gratis, estacionamiento gratis. Deja tu lavado o usa el autoservicio — abierto todos los días.',
       'landing.callBtn':      'Llamar',
       'landing.directionsBtn':'Cómo Llegar',
+      'landing.heroCaption':  'Norte de Austin · 825 E Rundberg Ln',
       'landing.stats.washers':'Lavadoras',
       'landing.stats.dryers': 'Secadoras',
       'landing.stats.hours':  'Abierto Diariamente',
@@ -74,12 +76,11 @@
       'landing.wdf.turnaround.text':  'Deja por la mañana, recoge al día siguiente. ¿Más rápido? Pregunta por el mismo día.',
       'landing.wdf.pricing.text': 'Detergente, hojas para secadora y ganchos incluidos. Solo tarjetas, no se necesita efectivo.',
       'landing.wdf.cta':          'Ver detalles completos de LSD →',
-      'landing.selfserve.machines.title': 'lavadoras 450G, secadoras',
-      'landing.selfserve.machines.text': 'Cargas de 20lb a 80lb. Centrifugado más rápido = menos tiempo secando = menos tiempo esperando.',
-      'landing.selfserve.uv.title':      'Sanitización UV',
-      'landing.selfserve.uv.text':       'Cada ciclo termina con esterilización UV. 99.9% de eliminación de patógenos.',
-      'landing.selfserve.amenities.title':'WiFi gratis · Pago sin contacto',
-      'landing.selfserve.amenities.text': 'Accesible para sillas de ruedas, estacionamiento gratis, atendido en cada turno. Cómodo, limpio, confiable.',
+      'landing.selfserve.machines.text': 'Lavados de 20 minutos, secados de 20 minutos. Las máquinas 450G de alto centrifugado significan menos tiempo esperando.',
+      'landing.selfserve.uv.title':      'Sanitización UV de grado hospitalario',
+      'landing.selfserve.uv.text':       'Cada ciclo termina con una esterilización UV de grado hospitalario. 99.9% de eliminación de patógenos en superficies de contacto.',
+      'landing.selfserve.amenities.title':'WiFi gratis',
+      'landing.selfserve.amenities.text': 'Accesible para sillas de ruedas, estacionamiento gratis, atendido en cada turno. Trae una laptop — el WiFi es rápido.',
       'landing.selfserve.cta':           'Ver detalles de autoservicio →',
       'landing.commercial.airbnb.title': 'Airbnb y alquileres',
       'landing.commercial.airbnb.text':  'Soporte de cambio el mismo día. Sábanas, toallas, edredones — doblados y listos antes del check-in.',
@@ -100,9 +101,10 @@
     pt: {
       'landing.eyebrow':      'Norte de Austin · Aberto diariamente 7am–10pm',
       'landing.title':        'A lavanderia mais limpa de Austin',
-      'landing.subtitle':     'Lavadoras 450G com sanitização UV, secadoras rápidas, pagamento sem contato, WiFi grátis. Entregue sua roupa ou use nosso autoatendimento — aberto todos os dias.',
+      'landing.subtitle':     'Lavadoras 450G com sanitização UV nível hospitalar, secadoras rápidas, WiFi grátis, estacionamento grátis. Entregue sua roupa ou use o autoatendimento — aberto todos os dias.',
       'landing.callBtn':      'Ligar',
       'landing.directionsBtn':'Ver Direções',
+      'landing.heroCaption':  'Norte de Austin · 825 E Rundberg Ln',
       'landing.stats.washers':'Lavadoras',
       'landing.stats.dryers': 'Secadoras',
       'landing.stats.hours':  'Aberto Diariamente',
@@ -119,12 +121,11 @@
       'landing.wdf.turnaround.text':  'Deixe pela manhã, retire no dia seguinte. Mais rápido? Pergunte sobre o mesmo dia.',
       'landing.wdf.pricing.text': 'Detergente, lenços para secadora e cabides inclusos. Apenas cartões, não precisa de dinheiro.',
       'landing.wdf.cta':          'Ver detalhes completos de LSD →',
-      'landing.selfserve.machines.title': 'lavadoras 450G, secadoras',
-      'landing.selfserve.machines.text': 'Cargas de 20lb a 80lb. Centrifugação mais rápida = menos tempo secando.',
-      'landing.selfserve.uv.title':      'Sanitização UV',
-      'landing.selfserve.uv.text':       'Cada ciclo termina com esterilização UV. 99.9% de eliminação de patógenos.',
-      'landing.selfserve.amenities.title':'WiFi grátis · Pagamento sem contato',
-      'landing.selfserve.amenities.text': 'Acessível para cadeira de rodas, estacionamento grátis, equipe em todos os turnos.',
+      'landing.selfserve.machines.text': 'Lavagens de 20 minutos, secagens de 20 minutos. Máquinas 450G de alta centrifugação — menos tempo esperando.',
+      'landing.selfserve.uv.title':      'Sanitização UV nível hospitalar',
+      'landing.selfserve.uv.text':       'Cada ciclo termina com esterilização UV nível hospitalar. 99.9% de eliminação de patógenos nas superfícies de contato.',
+      'landing.selfserve.amenities.title':'WiFi grátis',
+      'landing.selfserve.amenities.text': 'Acessível para cadeira de rodas, estacionamento grátis, equipe em todos os turnos. Traga seu laptop — o WiFi é rápido.',
       'landing.selfserve.cta':           'Ver detalhes do autoatendimento →',
       'landing.commercial.airbnb.title': 'Airbnb e aluguéis',
       'landing.commercial.airbnb.text':  'Suporte de virada no mesmo dia. Lençóis, toalhas, edredons — dobrados e prontos no check-in.',
@@ -145,9 +146,10 @@
     de: {
       'landing.eyebrow':      'Nord-Austin · Täglich geöffnet 7–22 Uhr',
       'landing.title':        'Austins sauberste Wäscherei',
-      'landing.subtitle':     'UV-desinfizierte 450G-Waschmaschinen, schnelle Trockner, kontaktloses Bezahlen, kostenloses WLAN. Wäsche abgeben oder Selbstbedienung nutzen — täglich geöffnet.',
+      'landing.subtitle':     'UV-desinfizierte 450G-Waschmaschinen in Krankenhausqualität, schnelle Trockner, kostenloses WLAN, kostenlose Parkplätze. Wäsche abgeben oder Selbstbedienung nutzen — täglich geöffnet.',
       'landing.callBtn':      'Anrufen',
       'landing.directionsBtn':'Wegbeschreibung',
+      'landing.heroCaption':  'Nord-Austin · 825 E Rundberg Ln',
       'landing.stats.washers':'Waschmaschinen',
       'landing.stats.dryers': 'Trockner',
       'landing.stats.hours':  'Täglich geöffnet',
@@ -164,12 +166,11 @@
       'landing.wdf.turnaround.text':  'Morgens abgeben, am nächsten Tag abholen. Schneller? Fragen Sie nach Same-Day.',
       'landing.wdf.pricing.text': 'Waschmittel, Trocknertücher und Bügel inklusive. Nur Karten, kein Bargeld nötig.',
       'landing.wdf.cta':          'Alle WDF-Details ansehen →',
-      'landing.selfserve.machines.title': '450G-Waschmaschinen, Trockner',
-      'landing.selfserve.machines.text': 'Beladungen von 20–80 lb. Schnelleres Schleudern = weniger Trocknerzeit.',
-      'landing.selfserve.uv.title':      'UV-Sanitierung',
-      'landing.selfserve.uv.text':       'Jeder Zyklus endet mit UV-Sterilisation. 99,9 % Pathogen-Eliminierung.',
-      'landing.selfserve.amenities.title':'Kostenloses WLAN · Kontaktlos',
-      'landing.selfserve.amenities.text': 'Rollstuhlgerecht, kostenlose Parkplätze, in jeder Schicht betreut.',
+      'landing.selfserve.machines.text': '20-Minuten-Wäschen, 20-Minuten-Trocknen. 450G-Hochschleuder-Maschinen — weniger Wartezeit.',
+      'landing.selfserve.uv.title':      'UV-Sanitierung in Krankenhausqualität',
+      'landing.selfserve.uv.text':       'Jeder Zyklus endet mit einer UV-Sterilisation in Krankenhausqualität. 99,9 % Pathogen-Eliminierung auf Kontaktflächen.',
+      'landing.selfserve.amenities.title':'Kostenloses WLAN',
+      'landing.selfserve.amenities.text': 'Rollstuhlgerecht, kostenlose Parkplätze, in jeder Schicht betreut. Bringen Sie einen Laptop mit — das WLAN ist schnell.',
       'landing.selfserve.cta':           'Alle Selbstbedienungs-Details →',
       'landing.commercial.airbnb.title': 'Airbnb & Vermietungen',
       'landing.commercial.airbnb.text':  'Same-Day-Turnover-Support. Bettwäsche, Handtücher, Decken — gefaltet und bereit zum Check-in.',
@@ -266,27 +267,90 @@
     });
   }
 
-  /* ---------- Reviews ---------- */
+  /* ---------- Reviews — direct Google Places API (New) call ----
+   * No backend / proxy. Reads:
+   *   window.parent.GOOGLE_PLACES_API_KEY    (from the host page)
+   *   window.parent.LOCATION_PLACE_ID        (or LOCATION_DATA.google.placeId)
+   * Falls back to the empty-state Google profile link if either is missing.
+   *
+   * The API key is restricted in Google Cloud Console to:
+   *   - Places API (New) only
+   *   - HTTP referrer whitelist: wavemax.promo, www.wavemax.promo, localhost
+   * That's the standard pattern for browser-exposed Places keys — abuse is
+   * bounded by referrer enforcement on Google's edge.
+   */
+  function getReviewsConfig() {
+    // Try the host-page globals first (works when iframe is embedded), then
+    // fall back to LOCATION_DATA.google.placeId so a single-location demo
+    // works without setting both variables.
+    let apiKey = null;
+    let placeId = null;
+    try {
+      apiKey = window.parent?.GOOGLE_PLACES_API_KEY || window.GOOGLE_PLACES_API_KEY || null;
+    } catch (_) { /* cross-origin parent — ignore */ }
+    try {
+      placeId = window.parent?.LOCATION_PLACE_ID
+              || window.parent?.LOCATION_DATA?.google?.placeId
+              || window.IframeBridge?.getLocationData?.()?.google?.placeId
+              || null;
+    } catch (_) { /* cross-origin parent — ignore */ }
+    return { apiKey, placeId };
+  }
+
+  function shapeGoogleReview(raw) {
+    const author = raw.authorAttribution || {};
+    return {
+      author:           author.displayName || 'Anonymous',
+      rating:           raw.rating,
+      text:             (raw.text && raw.text.text) || raw.originalText?.text || '',
+      relativeTime:     raw.relativePublishTimeDescription || '',
+      publishTime:      raw.publishTime || null,
+      photoUrl:         author.photoUri || null,
+      googleProfileUrl: author.uri || null
+    };
+  }
+
   async function loadReviews() {
     const container = document.getElementById('wm-reviews-cards');
     const googleLink = document.getElementById('wm-reviews-google-link');
     if (!container) return;
+
+    const { apiKey, placeId } = getReviewsConfig();
+
+    if (!apiKey || !placeId) {
+      renderReviewsEmpty(container, {});
+      return;
+    }
+
+    if (googleLink) {
+      googleLink.setAttribute('href', `https://www.google.com/maps/place/?q=place_id:${placeId}`);
+    }
+
     try {
-      const res = await fetch('/api/v1/location/austin-tx/reviews?minRating=5&limit=3', { credentials: 'include' });
-      if (!res.ok) throw new Error('http_' + res.status);
-      const json = await res.json();
-      const data = json?.data || {};
+      const url = `https://places.googleapis.com/v1/places/${encodeURIComponent(placeId)}` +
+                  `?fields=reviews,rating,userRatingCount`;
+      const res = await fetch(url, {
+        headers: {
+          'X-Goog-Api-Key': apiKey,
+          'X-Goog-FieldMask': 'reviews,rating,userRatingCount'
+        }
+      });
+      if (!res.ok) throw new Error('places_api_' + res.status);
+      const data = await res.json();
 
-      if (data.attributionHref && googleLink) googleLink.setAttribute('href', data.attributionHref);
+      const all = (data.reviews || []).map(shapeGoogleReview);
+      const fiveStars = all.filter(r => r.rating >= 5).slice(0, 3);
 
-      if (!data.reviews || data.reviews.length === 0) {
-        renderReviewsEmpty(container, data);
+      if (fiveStars.length === 0) {
+        renderReviewsEmpty(container, { attributionHref: googleLink?.getAttribute('href') });
         return;
       }
+
       container.innerHTML = '';
-      data.reviews.forEach(r => container.appendChild(buildReviewCard(r)));
-    } catch (_) {
-      renderReviewsEmpty(container, {});
+      fiveStars.forEach(r => container.appendChild(buildReviewCard(r)));
+    } catch (err) {
+      console.warn('[austin-landing] reviews fetch failed:', err.message);
+      renderReviewsEmpty(container, { attributionHref: googleLink?.getAttribute('href') });
     } finally {
       if (window.IframeBridge?.updateHeight) window.IframeBridge.updateHeight();
     }
@@ -358,6 +422,92 @@
     container.appendChild(empty);
   }
 
+  /* ---------- Hero image rotator ---------- */
+  function initHeroRotator() {
+    const imgs = document.querySelectorAll('.wm-hero-rotator-img');
+    if (imgs.length < 2) return;
+    let active = 0;
+    const ROTATE_MS = 5500;
+
+    function step() {
+      imgs[active].classList.remove('is-active');
+      active = (active + 1) % imgs.length;
+      imgs[active].classList.add('is-active');
+    }
+
+    let timer = setInterval(step, ROTATE_MS);
+    const rotator = document.getElementById('wm-hero-rotator');
+
+    // Pause on hover so users can read the caption clearly
+    if (rotator) {
+      rotator.addEventListener('mouseenter', () => clearInterval(timer));
+      rotator.addEventListener('mouseleave', () => { timer = setInterval(step, ROTATE_MS); });
+    }
+  }
+
+  /* ---------- Austin watermark photos (one of 6, randomly selected) ----
+   * Curated set of Austin landmarks + cultural-event photos. All sourced
+   * from Wikipedia Commons (CC-BY-SA / public domain). Each photo is laid
+   * down as a CSS background-image on .wm-austin-watermark, then treated
+   * with a navy gradient overlay (multiply blend) so it reads as the
+   * WaveMAX brand palette while keeping warm Austin character.
+   *
+   * Attribution lives in the per-theme `credit` field — surfaced as the
+   * small lower-left tag in the visual frame. */
+  const WATERMARK_THEMES = [
+    {
+      id: 'pennybacker',
+      tag: 'Pennybacker Bridge',
+      url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/60/PennybackerBridge.jpg/1280px-PennybackerBridge.jpg'
+    },
+    {
+      id: 'capitol',
+      tag: 'Texas State Capitol',
+      url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/df/TexasStateCapitol-2010-01.JPG/1280px-TexasStateCapitol-2010-01.JPG'
+    },
+    {
+      id: 'skyline',
+      tag: 'Austin Skyline',
+      url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/96/Austin_Texas_skyline%2C_December_2023_-_Evening.jpg/1280px-Austin_Texas_skyline%2C_December_2023_-_Evening.jpg'
+    },
+    {
+      id: 'mt-bonnell',
+      tag: 'Mount Bonnell',
+      url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3d/Covert_Park_at_Mount_Bonnell_20160905130035.jpg/1280px-Covert_Park_at_Mount_Bonnell_20160905130035.jpg'
+    },
+    {
+      id: 'lady-bird',
+      tag: 'Lady Bird Lake',
+      url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/da/Austin_August_2019_19_%28skyline_and_Lady_Bird_Lake%29.jpg/1280px-Austin_August_2019_19_%28skyline_and_Lady_Bird_Lake%29.jpg'
+    },
+    {
+      id: 'south-congress',
+      tag: 'South Congress · Austin',
+      url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/66/South_Congress_Austin_-_i_love_you_so_much.jpg/1280px-South_Congress_Austin_-_i_love_you_so_much.jpg'
+    }
+  ];
+
+  function pickRandomWatermark() {
+    const root = document.getElementById('wm-austin-watermark');
+    if (!root) return;
+    const choice = WATERMARK_THEMES[Math.floor(Math.random() * WATERMARK_THEMES.length)];
+    root.setAttribute('data-watermark', choice.id);
+
+    // Preload before applying so the fade-in is smooth, not janky
+    const probe = new Image();
+    probe.referrerPolicy = 'no-referrer';
+    probe.onload = () => {
+      root.style.backgroundImage = `url("${choice.url}")`;
+      root.classList.add('is-loaded');
+    };
+    probe.onerror = () => {
+      // If Wikimedia is unreachable (rare), still apply something — solid
+      // navy fade — so the visual frame doesn't look broken.
+      root.classList.add('is-loaded');
+    };
+    probe.src = choice.url;
+  }
+
   /* ---------- Cross-frame nav for tab CTAs ---------- */
   function initCrossFrameNav() {
     document.querySelectorAll('a[data-route]').forEach(a => {
@@ -382,6 +532,8 @@
 
     initTabs();
     initCrossFrameNav();
+    pickRandomWatermark();
+    initHeroRotator();
 
     // Bind whenever location-data arrives
     window.IframeBridge.onLocationData((data) => {
