@@ -25,6 +25,18 @@
     /* Hero height matches MHR's existing /austin-tx/ slider exactly (690px)
        so our reference page reads as a 1:1 replacement of their hero band. */
     .wm-hero { min-height: 690px; padding: var(--wm-sp-6) 0; display: flex; align-items: center; }
+
+    /* Wider horizontal margins inside the hero — pulls the content inboard
+       so the watermark backdrop has visible breathing room on both sides
+       and the composition reads as more deliberate / less edge-to-edge. */
+    .wm-hero .wm-hero-inner {
+      max-width: var(--wm-content-narrow);  /* 960px instead of 1200px */
+      padding-left: var(--wm-sp-8);          /* 64px each side */
+      padding-right: var(--wm-sp-8);
+    }
+    @media (max-width: 880px) {
+      .wm-hero .wm-hero-inner { max-width: var(--wm-content-max); padding-left: var(--wm-sp-5); padding-right: var(--wm-sp-5); }
+    }
     .wm-hero-title { font-size: var(--wm-fs-2xl); margin-bottom: var(--wm-sp-3); font-weight: 700; }
     .wm-hero-subtitle { font-size: var(--wm-fs-base); margin-bottom: var(--wm-sp-4); max-width: 56ch; }
     .wm-hero-eyebrow { margin-bottom: var(--wm-sp-3); }
