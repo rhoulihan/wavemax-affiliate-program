@@ -113,6 +113,7 @@ exports.sensitiveOperationLimiter = rateLimit({
   },
   standardHeaders: true,
   legacyHeaders: false,
+  skip: skipInTest,
   keyGenerator: (req) => {
     // Rate limit by user ID if authenticated, otherwise by IP
     return req.user ? `user_${req.user.id}` : req.ip;

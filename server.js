@@ -525,6 +525,7 @@ apiV1Router.use('/operators', operatorRoutes);
 apiV1Router.use('/system/config', systemConfigRoutes);
 apiV1Router.use('/service-area', serviceAreaRoutes);  // Service area and location validation
 apiV1Router.use('/location', require('./server/routes/locationRoutes'));  // Per-location reads (reviews, etc.)
+apiV1Router.use('/contact', require('./server/routes/contactRoutes'));  // Per-location contact-form submissions
 apiV1Router.use('/payments', paymentRoutes);
 
 // Test routes (development only)
