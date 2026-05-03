@@ -517,31 +517,16 @@
     });
   }
 
-  /* ---------- Init ----------
-   * Each step is wrapped in safeRun so a single broken init step
-   * (e.g. an exception in setStoreWatermark when window.parent access
-   * is cross-origin in an unexpected env) doesn't break the rest of
-   * the chain. Errors still surface to console; success is silent.
-   */
-  function safeRun(label, fn) {
-    try { fn(); }
-    catch (e) { console.error('[austin-landing] init step FAILED:', label, e); }
-  }
+  /* ---------- Init ---------- */
   function init() {
     if (!window.IframeBridge) {
       console.error('[austin-landing] IframeBridge missing — bridge script must load first');
       return;
     }
-    safeRun('loadTranslations', () => window.IframeBridge.loadTranslations(TRANSLATIONS));
-    safeRun('IframeBridge.init', () => window.IframeBridge.init({ pageIdentifier: 'austin-landing', enableTranslation: true, enableAutoResize: true }));
-    safeRun('loadSEOConfig',     () => window.IframeBridge.loadSEOConfig(SEO));
-    safeRun('initTabs',          () => initTabs());
-    safeRun('initCrossFrameNav', () => initCrossFrameNav());
-    safeRun('setStoreWatermark', () => setStoreWatermark());
-    safeRun('initHeroRotator',   () => initHeroRotator());
-    return; // skip the original linear path below
-  }
-  function _initOldUnreachable() {
+    window.IframeBridge.loadTranslations(TRANSLATIONS);
+    window.IframeBridge.init({ pageIdentifier: 'austin-landing', enableTranslation: true, enableAutoResize: true });
+    window.IframeBridge.loadSEOConfig(SEO);
+
     initTabs();
     initCrossFrameNav();
     setStoreWatermark();
