@@ -463,9 +463,6 @@
       }
       if (activeIdx < 0) activeIdx = 0;
       const nextIdx = (activeIdx + 1) % imgs.length;
-      const before = imgs[activeIdx].getAttribute?.('src')?.split('/').pop()?.slice(0, 30);
-      const after  = imgs[nextIdx].getAttribute?.('src')?.split('/').pop()?.slice(0, 30);
-      console.log('[austin-landing] rotator step', activeIdx, '→', nextIdx, '|', before, '→', after);
       imgs[activeIdx].classList.remove('is-active');
       imgs[nextIdx].classList.add('is-active');
       schedule();
@@ -475,9 +472,6 @@
       if (scheduled) clearTimeout(scheduled);
       scheduled = setTimeout(step, 4000);
     }
-    // Sanity ping on init
-    const r0 = document.getElementById('wm-hero-rotator');
-    console.log('[austin-landing] initHeroRotator — rotator children:', r0?.children?.length);
     schedule();
 
     const rotator = document.getElementById('wm-hero-rotator');
