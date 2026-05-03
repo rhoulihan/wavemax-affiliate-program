@@ -34,6 +34,26 @@
   </style>
 
   <script>
+    // ───────────────────────────────────────────────────────────────────────
+    // Live Google Reviews configuration (direct browser → Places API).
+    //
+    // Set GOOGLE_PLACES_API_KEY to a key that:
+    //   1. Has Places API (New) enabled in Google Cloud Console
+    //   2. Is restricted by HTTP referrer to your domain(s) — e.g.
+    //      *.wavemax.promo/*, http://localhost:*, http://127.0.0.1:*
+    // Set LOCATION_PLACE_ID to the Google Place ID for the franchisee store
+    // (find via Places API "Find Place From Text" for "WaveMAX Austin
+    //  825 E Rundberg Ln" or via https://developers.google.com/maps/documentation/places/web-service/place-id).
+    //
+    // When both are set, the landing page's reviews block renders live
+    // 5★ reviews directly from Google. When EITHER is left blank, the
+    // page gracefully renders the "Visit our Google profile →" empty state.
+    // ───────────────────────────────────────────────────────────────────────
+    // OR-fallback pattern so external init scripts (tests, dev tools) can
+    // pre-set these globals without being overwritten by the host page.
+    window.GOOGLE_PLACES_API_KEY = window.GOOGLE_PLACES_API_KEY || '';   // <-- paste your restricted Places-API-only key here
+    window.LOCATION_PLACE_ID     = window.LOCATION_PLACE_ID     || '';   // <-- paste the WaveMAX Austin Place ID here
+
     // Single source of truth for the entire chrome. Future: replace with
     // fetch('/api/v1/location/austin-tx') — same shape, fed at runtime.
     window.LOCATION_DATA = {
@@ -70,10 +90,18 @@
       },
       pricing: {
         wdf:       { rate: 1.20, minLb: 10, currency: "USD", display: "$1.20/lb" },
-        selfServe: { minLoad: 2.50, maxLoad: 4.00 }
+        selfServe: {
+          minLoad: 2.75,           // smallest washer load — $/cycle
+          maxLoad: 10.50,          // largest washer load — $/cycle
+          minLoadDisplay: "$2.75",
+          maxLoadDisplay: "$10.50",
+          washMin: 20,
+          dryMin: 20,
+          rangeDisplay: "$2.75 – $10.50"
+        }
       },
-      equipment: { washers: 20, dryers: 20, capacityLb: 80 },
-      amenities: ["Free WiFi", "UV Sanitization", "Touchless Payment", "Free Parking", "Wheelchair Accessible"],
+      equipment: { washers: 42, dryers: 42, capacityLb: 80 },
+      amenities: ["Free WiFi", "Hospital-Grade UV Sanitization", "Free Parking", "Wheelchair Accessible"],
       serviceArea: ["Austin", "Round Rock", "Cedar Park", "Pflugerville", "Georgetown", "Leander"],
       social: { facebook: "", instagram: "" },
       google: { placeId: "", profileUrl: "", reviewsUrl: "" },

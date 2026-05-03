@@ -43,6 +43,105 @@
     .wm-section-title { font-size: var(--wm-fs-3xl); margin-bottom: var(--wm-sp-2); }
     .wm-section-subtitle { font-size: var(--wm-fs-base); }
 
+    /* ---- Hero 2-column grid (text + visual) ---- */
+    .wm-hero-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr);
+      gap: var(--wm-sp-7);
+      align-items: center;
+    }
+    @media (max-width: 880px) {
+      .wm-hero-grid { grid-template-columns: 1fr; gap: var(--wm-sp-5); }
+    }
+
+    /* ---- Hero visual: clean store-photo card floating on the watermark.
+       The watermark covers the full hero now, so the visual frame is just
+       a transparent container holding a polished image card. The card
+       itself uses a paper-like white frame + soft drop shadow for clear
+       separation from the Austin landmark backdrop behind it. ---- */
+    .wm-hero-visual {
+      position: relative;
+      aspect-ratio: 5 / 4;
+      width: 100%;
+      max-width: 460px;
+      margin-left: auto;
+      background: transparent;
+    }
+    @media (max-width: 880px) {
+      .wm-hero-visual { margin: 0 auto; aspect-ratio: 16 / 11; max-width: 100%; }
+    }
+
+    /* Watermark is an Austin landmark / cultural-event photo that fills
+       the ENTIRE hero band (full width, full height) as a backdrop. Layered
+       with a navy gradient + amber tint so the white hero text remains
+       readable while Austin-warm character peeks through. */
+    .wm-austin-watermark {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      filter: saturate(0.95) brightness(0.85);
+      opacity: 0;
+      transition: opacity 1.0s var(--wm-ease);
+    }
+    .wm-austin-watermark.is-loaded { opacity: 1; }
+    .wm-austin-watermark::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(135deg, rgba(15, 32, 53, 0.78) 0%, rgba(20, 54, 90, 0.55) 50%, rgba(15, 32, 53, 0.85) 100%),
+        radial-gradient(ellipse at 70% 50%, rgba(245, 166, 35, 0.10) 0%, transparent 60%);
+      mix-blend-mode: multiply;
+    }
+    /* Hero inner content above the watermark */
+    .wm-hero-inner { position: relative; z-index: 1; }
+    /* Store-photo card — clean polaroid/print look with paper-white frame.
+       Two-layer treatment so the photo is clearly separated from the dark
+       Austin watermark behind it:
+         1. Outer white "paper" frame (10px) — modern photo-print feel
+         2. Soft outer drop-shadow lifts it off the watermark
+         3. Inner crop has its own subtle inner border (1px navy hint)
+       No vignette, no dark backdrop showing through. */
+    .wm-hero-rotator {
+      position: absolute;
+      inset: 5% 5% 5% 5%;
+      background: #ffffff;
+      padding: 10px;
+      border-radius: 14px;
+      overflow: hidden;
+      z-index: 2;
+      box-shadow:
+        0 28px 64px -12px rgba(0, 0, 0, 0.55),
+        0 12px 24px -8px rgba(0, 0, 0, 0.35),
+        0 0 0 1px rgba(255, 255, 255, 0.18);
+    }
+    .wm-hero-rotator-img {
+      position: absolute;
+      top: 10px; right: 10px; bottom: 10px; left: 10px;
+      width: calc(100% - 20px);
+      height: calc(100% - 20px);
+      object-fit: cover;
+      border-radius: 6px;
+      opacity: 0;
+      transform: scale(1.04);
+      transition: opacity 1s var(--wm-ease), transform 5s linear;
+    }
+    .wm-hero-rotator-img.is-active {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    /* When the visual is present, hero text gets a hair more breathing room
+       on the right so the gap reads as intentional, not empty. */
+    .wm-hero-grid .wm-hero-eyebrow,
+    .wm-hero-grid .wm-hero-title,
+    .wm-hero-grid .wm-hero-subtitle { max-width: 28ch; }
+    .wm-hero-grid .wm-hero-subtitle { max-width: 48ch; }
+
     .wm-hero-eyebrow .wm-pin {
       display: inline-block;
       width: 8px; height: 8px;
@@ -117,21 +216,48 @@
 </head>
 <body>
 
-  <!-- HERO ============================================================ -->
+  <!-- HERO ============================================================
+       Full-bleed Austin watermark photo as the hero background, with a
+       two-column composition on top: text on the left, framed store-photo
+       rotator on the right. The watermark covers the entire hero band so
+       the page reads as "WaveMAX in Austin" — landmark behind, store in
+       front. The watermark tag (lower-right) names the landmark.
+       ============================================================ -->
   <section class="wm-hero" data-section="hero">
+    <div class="wm-austin-watermark" id="wm-austin-watermark" aria-hidden="true">
+      <!-- background-image set by austin-landing-init.js -->
+    </div>
+
     <div class="wm-hero-inner">
-      <span class="wm-hero-eyebrow"><span class="wm-pin"></span><span data-i18n="landing.eyebrow">North Austin · Open daily 7am–10pm</span></span>
-      <h1 class="wm-hero-title" data-i18n="landing.title">Austin's Cleanest Laundromat</h1>
-      <p class="wm-hero-subtitle" data-i18n="landing.subtitle">UV-sanitized 450G washers, fast dryers, touchless payment, free WiFi. Drop off your wash-dry-fold or use our self-serve floor — open every day.</p>
-      <div class="wm-hero-actions">
-        <a class="wm-btn wm-btn-cta" data-bind="contact.phoneTel" data-bind-attr="href" href="#">
-          <span aria-hidden="true">📞</span>
-          <span><span data-i18n="landing.callBtn">Call</span> <span data-bind="contact.phone">(512) 553-1674</span></span>
-        </a>
-        <a class="wm-btn wm-btn-secondary" data-bind="contact.mapsUrl" data-bind-attr="href" target="_blank" rel="noopener" href="#" style="color:#fff;border-color:rgba(255,255,255,0.6)">
-          <span aria-hidden="true">📍</span>
-          <span data-i18n="landing.directionsBtn">Get Directions</span>
-        </a>
+      <div class="wm-hero-grid">
+
+        <div class="wm-hero-content">
+          <span class="wm-hero-eyebrow"><span class="wm-pin"></span><span data-i18n="landing.eyebrow">North Austin · Open daily 7am–10pm</span></span>
+          <h1 class="wm-hero-title" data-i18n="landing.title">Austin's Cleanest Laundromat</h1>
+          <p class="wm-hero-subtitle" data-i18n="landing.subtitle">Hospital-grade UV-sanitized 450G washers, fast dryers, free WiFi, free parking. Drop off your wash-dry-fold or use our self-serve floor — open every day.</p>
+          <div class="wm-hero-actions">
+            <a class="wm-btn wm-btn-cta" data-bind="contact.phoneTel" data-bind-attr="href" href="#">
+              <span aria-hidden="true">📞</span>
+              <span><span data-i18n="landing.callBtn">Call</span> <span data-bind="contact.phone">(512) 553-1674</span></span>
+            </a>
+            <a class="wm-btn wm-btn-secondary" data-bind="contact.mapsUrl" data-bind-attr="href" target="_blank" rel="noopener" href="#" style="color:#fff;border-color:rgba(255,255,255,0.6)">
+              <span aria-hidden="true">📍</span>
+              <span data-i18n="landing.directionsBtn">Get Directions</span>
+            </a>
+          </div>
+        </div>
+
+        <div class="wm-hero-visual" data-section="hero-visual">
+          <div class="wm-hero-rotator" id="wm-hero-rotator" aria-label="WaveMAX Austin store photos and Austin landmarks">
+            <img class="wm-hero-rotator-img is-active" src="https://wavemaxlaundry.com/wp-content/uploads/locations/austin-tx/interior-1.jpg" alt="WaveMAX Austin laundromat interior — clean machines, bright space" loading="eager" referrerpolicy="no-referrer">
+            <img class="wm-hero-rotator-img" src="https://wavemaxlaundry.com/wp-content/uploads/locations/austin-tx/interior-2.jpg" alt="High-capacity 450G washers" loading="lazy" referrerpolicy="no-referrer">
+            <img class="wm-hero-rotator-img" src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/60/PennybackerBridge.jpg/1280px-PennybackerBridge.jpg" alt="Pennybacker Bridge — North Austin landmark on Loop 360" loading="lazy" referrerpolicy="no-referrer">
+            <img class="wm-hero-rotator-img" src="https://wavemaxlaundry.com/wp-content/uploads/locations/austin-tx/interior-3.jpg" alt="Spacious folding area at WaveMAX Austin" loading="lazy" referrerpolicy="no-referrer">
+            <img class="wm-hero-rotator-img" src="https://wavemaxlaundry.com/wp-content/uploads/locations/austin-tx/interior-4.jpg" alt="Folded laundry at WaveMAX Austin" loading="lazy" referrerpolicy="no-referrer">
+            <img class="wm-hero-rotator-img" src="https://wavemaxlaundry.com/wp-content/uploads/locations/austin-tx/interior-5.jpg" alt="Modern UV-sanitized dryers" loading="lazy" referrerpolicy="no-referrer">
+          </div>
+        </div>
+
       </div>
     </div>
   </section>
@@ -205,18 +331,18 @@
           <div class="wm-grid">
             <div class="wm-card">
               <div class="wm-card-icon" aria-hidden="true">🌀</div>
-              <h3 class="wm-card-title" data-i18n="landing.selfserve.machines.title"><span data-bind="equipment.washers">20</span> 450G washers, <span data-bind="equipment.dryers">20</span> dryers</h3>
-              <p class="wm-card-text" data-i18n="landing.selfserve.machines.text">Loads from 20lb to 80lb. Faster spin = less drying time = less time waiting.</p>
+              <h3 class="wm-card-title"><span data-bind="equipment.washers">42</span> 450G washers, <span data-bind="equipment.dryers">42</span> dryers</h3>
+              <p class="wm-card-text" data-i18n="landing.selfserve.machines.text">20-minute washes, 20-minute dries. High-spin 450G machines mean less time waiting and more time doing what you'd rather be doing.</p>
             </div>
             <div class="wm-card">
               <div class="wm-card-icon" aria-hidden="true">🛡️</div>
-              <h3 class="wm-card-title" data-i18n="landing.selfserve.uv.title">UV sanitization</h3>
-              <p class="wm-card-text" data-i18n="landing.selfserve.uv.text">Every cycle finishes with a UV sterilization pass. 99.9% pathogen kill.</p>
+              <h3 class="wm-card-title" data-i18n="landing.selfserve.uv.title">Hospital-grade UV sanitization</h3>
+              <p class="wm-card-text" data-i18n="landing.selfserve.uv.text">Every cycle finishes with a hospital-grade UV sterilization pass. 99.9% pathogen kill on contact surfaces.</p>
             </div>
             <div class="wm-card">
               <div class="wm-card-icon" aria-hidden="true">📶</div>
-              <h3 class="wm-card-title" data-i18n="landing.selfserve.amenities.title">Free WiFi · Touchless pay</h3>
-              <p class="wm-card-text" data-i18n="landing.selfserve.amenities.text">Wheelchair accessible, free parking, attended every shift. Comfortable, clean, reliable.</p>
+              <h3 class="wm-card-title" data-i18n="landing.selfserve.amenities.title">Free WiFi</h3>
+              <p class="wm-card-text" data-i18n="landing.selfserve.amenities.text">Wheelchair accessible, free parking, attended every shift. Bring a laptop — the WiFi's fast enough to actually work.</p>
             </div>
           </div>
           <p style="text-align:center; margin-top:var(--wm-sp-5);"><a class="wm-btn wm-btn-secondary" data-route="/self-serve-laundry" href="?route=/self-serve-laundry" data-i18n="landing.selfserve.cta">See full self-serve details →</a></p>
