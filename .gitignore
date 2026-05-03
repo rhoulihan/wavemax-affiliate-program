@@ -200,3 +200,4 @@ coverage-analysis/
 .vscode/
 .idea/
 
+/test-results/

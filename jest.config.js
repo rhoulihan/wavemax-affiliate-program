@@ -13,6 +13,10 @@ module.exports = {
   testMatch: [
     '**/tests/**/*.test.js'
   ],
+  testPathIgnorePatterns: [
+    '/node_modules/',
+    '/tests/e2e/'
+  ],
   setupFilesAfterEnv: ['<rootDir>/tests/setup.js'],
   testTimeout: 300000, // 5 minutes
   verbose: true,
