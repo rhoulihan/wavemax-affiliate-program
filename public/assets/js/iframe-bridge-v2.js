@@ -6,9 +6,21 @@
     console.log('[Iframe Bridge V2] Initializing...');
 
     // Configuration
+    // Origin whitelist for INCOMING messages (parent → iframe). Outgoing
+    // messages use targetOrigin '*' — we don't send anything sensitive that
+    // would warrant a fixed targetOrigin, and the parent-side bridge does
+    // its own origin check on receipt. This lets the iframe work under any
+    // approved parent (production wavemaxlaundry.com, the wavemax.promo
+    // staging origin, AND local dev hosts) without per-environment config.
+    const DEV_HOST_PATTERN = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/;
+
     const config = {
-        parentOrigin: 'https://www.wavemaxlaundry.com',
-        allowedOrigins: ['https://www.wavemaxlaundry.com', 'https://wavemaxlaundry.com'],
+        allowedOrigins: [
+            'https://www.wavemaxlaundry.com',
+            'https://wavemaxlaundry.com',
+            'https://wavemax.promo',
+            'https://affiliate.wavemax.promo'
+        ],
         pageIdentifier: null,
         enableTranslation: true,
         enableAutoResize: true
@@ -127,10 +139,16 @@
         });
     }
 
+    function isAllowedOrigin(origin) {
+        if (!origin) return false;
+        if (config.allowedOrigins.some(allowed => origin === allowed)) return true;
+        if (DEV_HOST_PATTERN.test(origin)) return true;
+        return false;
+    }
+
     // Handle messages from parent
     function handleParentMessage(event) {
-        // Verify origin
-        if (!config.allowedOrigins.some(origin => event.origin.includes(origin.replace(/^https?:\/\//, '')))) {
+        if (!isAllowedOrigin(event.origin)) {
             console.warn('[Iframe Bridge V2] Message from unauthorized origin:', event.origin);
             return;
         }
@@ -173,10 +191,17 @@
         }
     }
 
-    // Send message to parent
+    // Send message to parent.
+    // targetOrigin '*' is intentional: outgoing messages contain only public
+    // data (resize height, SEO metadata destined for OG/Twitter/JSON-LD,
+    // navigation requests against same-origin). The parent-side bridge
+    // applies its own allowedOrigins check on receipt before acting on the
+    // message. Using a fixed targetOrigin would force per-environment config
+    // (prod / staging / localhost) and break embedding under any not-yet-
+    // approved host the franchisor decides to use later.
     function sendToParent(message) {
         if (window.parent && window.parent !== window) {
-            window.parent.postMessage(message, config.parentOrigin);
+            window.parent.postMessage(message, '*');
         }
     }
 
@@ -254,28 +279,30 @@
         setTimeout(updateHeight, 100);
     }
 
-    function getTranslation(key) {
-        const keys = key.split('.');
-        let value = translations[currentLanguage];
-
-        for (const k of keys) {
-            if (value && value[k]) {
-                value = value[k];
+    // Lookup supports both dictionary shapes:
+    //   nested:  translations.es.stub.title
+    //   flat:    translations.es["stub.title"]
+    // Existing public/locales/<lang>/common.json uses nested; the per-page
+    // init scripts use flat for compactness. Either works.
+    function lookupInDict(dict, key) {
+        if (!dict) return null;
+        if (typeof dict[key] === 'string') return dict[key];
+        const parts = key.split('.');
+        let cursor = dict;
+        for (const p of parts) {
+            if (cursor && typeof cursor === 'object' && p in cursor) {
+                cursor = cursor[p];
             } else {
-                // Fallback to English
-                value = translations['en'];
-                for (const k of keys) {
-                    if (value && value[k]) {
-                        value = value[k];
-                    } else {
-                        return null;
-                    }
-                }
-                break;
+                return null;
             }
         }
+        return typeof cursor === 'string' ? cursor : null;
+    }
 
-        return typeof value === 'string' ? value : null;
+    function getTranslation(key) {
+        return lookupInDict(translations[currentLanguage], key)
+            || lookupInDict(translations['en'], key)
+            || null;
     }
 
     function loadTranslations(translationData) {
