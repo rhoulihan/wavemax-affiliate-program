@@ -109,8 +109,12 @@
       menu.appendChild(item);
     });
 
-    function openMenu()  { root.setAttribute('aria-expanded', 'true');  menu.style.display = 'block'; }
-    function closeMenu() { root.setAttribute('aria-expanded', 'false'); menu.style.display = 'none'; }
+    // Class-based open/close so we don't need 'unsafe-inline' on style-src;
+    // setting `menu.style.display = 'block'` is silently dropped under
+    // strict CSP (nonce nullifies unsafe-inline). The .wm-lang-menu--open
+    // class is defined in wavemax-mhr-chrome.css.
+    function openMenu()  { root.setAttribute('aria-expanded', 'true');  menu.classList.add('wm-lang-menu--open'); }
+    function closeMenu() { root.setAttribute('aria-expanded', 'false'); menu.classList.remove('wm-lang-menu--open'); }
     function toggle()    { root.getAttribute('aria-expanded') === 'true' ? closeMenu() : openMenu(); }
 
     btn.addEventListener('click', toggle);
