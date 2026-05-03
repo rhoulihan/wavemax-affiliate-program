@@ -6,7 +6,7 @@ html, body { margin: 0; padding: 0; }
 body { font-family: 'Barlow', sans-serif; background: #ffffff; color: #1e293b; line-height: 1.5; }
 
 .wm-iframe-shell { width: 100%; background: #ffffff; }
-.wm-iframe-shell iframe { width: 100%; border: 0; display: block; min-height: 850px; }
+.wm-iframe-shell iframe { width: 100%; border: 0; display: block; min-height: 1150px; }
 
 /* wm-bc — match MHR exactly: white bg, breadcrumb on top of iframe */
 .wm-bc-host { background: #ffffff; border-bottom: 1px solid #e5e9f0; }
