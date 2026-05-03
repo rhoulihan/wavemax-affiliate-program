@@ -9,7 +9,7 @@
 
 ## 1. Executive Summary
 
-Until recently, Austin had two franchisee-owned pages live and
+Until recently, Austin had two franchisee-maintained pages live and
 embedded as iframes inside Walibu's location page: the
 **Self-Serve Laundry** information page and the **Affiliate Program**
 sign-up flow. A third — **Wash-Dry-Fold** — was implemented, tested,
@@ -21,7 +21,7 @@ the franchisee owned the full surface inside corporate's chrome.
 The cutover removed the two live embeds and stranded the third.
 This proposal **restores that capability, ships the WDF page that
 was about to go live, and completes the planned extension** —
-re-embedding the franchisee-owned iframes into the corporate
+re-embedding the franchisee-maintained iframes into the corporate
 location page so we get back the functionality we relied on under
 Walibu. The reference build at the URL above demonstrates the
 pattern end-to-end with the WaveMAX Austin location, and is ready for
@@ -50,7 +50,7 @@ repeated.
 
 ### What we had
 
-Austin's location presence on Walibu included two franchisee-owned
+Austin's location presence on Walibu included two franchisee-maintained
 pages embedded via iframe and a third about to go live:
 
 - **Self-Serve Laundry** (live) — hours, equipment specs, pricing,
@@ -61,11 +61,13 @@ pages embedded via iframe and a third about to go live:
   pricing, policies. Implemented, tested, and ready to go live when
   the cutover happened.
 
-We owned all three. We iterated on the live ones directly — copy,
-hours, pricing, photos, SEO meta — without round-tripping through a
-marketing vendor. The pattern was clean: corporate's chrome wrapped
-the page; the iframe carried our content; a small bridge handled
-language, location-data, and content-height between the two.
+We maintained all three ourselves — copy, hours, pricing, photos,
+SEO meta — and we did it securely (versioned source control, code
+review, no plaintext secrets, the usual hygiene), iterating directly
+without round-tripping through a marketing vendor. The pattern was
+clean: corporate's chrome wrapped the page; the iframe carried our
+content; a small bridge handled language, location-data, and
+content-height between the two.
 
 ### What was planned
 
@@ -76,7 +78,7 @@ through with our **WaveMAX area representative** at the time.
 Neither raised concerns, and the plan stayed on the record as we
 built toward the Wash-Dry-Fold page going live. The end state we
 were working toward: the full location page rendered as
-franchisee-owned content inside corporate-owned chrome, with one
+franchisee-maintained content inside corporate's chrome, with one
 consistent integration contract.
 
 ### What changed
@@ -90,16 +92,16 @@ Jacksonville address bleed-through into the Austin footer, missing
 mobile breakpoints, broken footer anchors, untranslated copy,
 stale business data, SEO gaps, and other content-migration issues.
 Many of these are routine errors that get introduced when the
-franchisee's data is maintained by a third party that doesn't own
-the data.
+franchisee's location data flows through a third party that
+isn't the source of truth for it.
 
 ### What this proposal does
 
 Restore the iframe-embedded pages we had live on Walibu, ship the
 Wash-Dry-Fold page that was queued to go live, and complete the
 already-agreed extension to the rest of the location content. Same
-integration model, same ownership boundary corporate and franchisee
-already accepted under Walibu.
+integration model, same separation of responsibilities corporate
+and franchisee already operated under during the Walibu period.
 
 > **Turn-key for corporate &amp; MHR.** WaveMAX Austin will do all
 > the required work. The reference build is already running; the
