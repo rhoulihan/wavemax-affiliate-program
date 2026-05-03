@@ -519,16 +519,37 @@
     });
   }
 
-  /* ---------- Init ---------- */
+  /* ---------- Init ----------
+   * Each step is wrapped in safeRun so a single broken init step
+   * (e.g. an exception in setStoreWatermark when window.parent access
+   * is cross-origin in an unexpected env) doesn't break the rest of
+   * the chain. Every step also logs its outcome so a regression is
+   * obvious from the browser console — useful since the iframe is
+   * developed in isolation but only fully exercised on prod.
+   */
+  function safeRun(label, fn) {
+    try {
+      fn();
+      console.log('[austin-landing] init step OK:', label);
+    } catch (e) {
+      console.error('[austin-landing] init step FAILED:', label, e);
+    }
+  }
   function init() {
     if (!window.IframeBridge) {
       console.error('[austin-landing] IframeBridge missing — bridge script must load first');
       return;
     }
-    window.IframeBridge.loadTranslations(TRANSLATIONS);
-    window.IframeBridge.init({ pageIdentifier: 'austin-landing', enableTranslation: true, enableAutoResize: true });
-    window.IframeBridge.loadSEOConfig(SEO);
-
+    safeRun('loadTranslations', () => window.IframeBridge.loadTranslations(TRANSLATIONS));
+    safeRun('IframeBridge.init', () => window.IframeBridge.init({ pageIdentifier: 'austin-landing', enableTranslation: true, enableAutoResize: true }));
+    safeRun('loadSEOConfig',     () => window.IframeBridge.loadSEOConfig(SEO));
+    safeRun('initTabs',          () => initTabs());
+    safeRun('initCrossFrameNav', () => initCrossFrameNav());
+    safeRun('setStoreWatermark', () => setStoreWatermark());
+    safeRun('initHeroRotator',   () => initHeroRotator());
+    return; // skip the original linear path below
+  }
+  function _initOldUnreachable() {
     initTabs();
     initCrossFrameNav();
     setStoreWatermark();
