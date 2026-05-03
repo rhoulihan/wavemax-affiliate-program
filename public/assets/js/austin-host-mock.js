@@ -74,6 +74,14 @@
 
   /* ---------- Language switcher ---------- */
 
+  // Module-level helpers used by both initLanguageSwitcher() and the
+  // delegated document-level click handler below. Pulling them out of the
+  // function closure means a delegated click works even if the inner
+  // initLanguageSwitcher call had a problem attaching its own listener.
+  function _langOpen()  { const r = document.getElementById('wm-lang'); const m = r?.querySelector('.wm-lang-menu'); if (!r || !m) return; r.setAttribute('aria-expanded', 'true');  m.classList.add('wm-lang-menu--open'); }
+  function _langClose() { const r = document.getElementById('wm-lang'); const m = r?.querySelector('.wm-lang-menu'); if (!r || !m) return; r.setAttribute('aria-expanded', 'false'); m.classList.remove('wm-lang-menu--open'); }
+  function _langToggle() { const r = document.getElementById('wm-lang'); if (!r) return; r.getAttribute('aria-expanded') === 'true' ? _langClose() : _langOpen(); }
+
   function initLanguageSwitcher() {
     const root = document.getElementById('wm-lang');
     if (!root) return;
@@ -101,28 +109,42 @@
         item.disabled = true;
         item.title = 'Available on iframe-wrapped pages only';
       }
-      item.addEventListener('click', () => {
-        if (item.disabled) return;
-        setLanguage(lang.code);
-        closeMenu();
-      });
       menu.appendChild(item);
     });
 
-    // Class-based open/close so we don't need 'unsafe-inline' on style-src;
-    // setting `menu.style.display = 'block'` is silently dropped under
-    // strict CSP (nonce nullifies unsafe-inline). The .wm-lang-menu--open
-    // class is defined in wavemax-mhr-chrome.css.
-    function openMenu()  { root.setAttribute('aria-expanded', 'true');  menu.classList.add('wm-lang-menu--open'); }
-    function closeMenu() { root.setAttribute('aria-expanded', 'false'); menu.classList.remove('wm-lang-menu--open'); }
-    function toggle()    { root.getAttribute('aria-expanded') === 'true' ? closeMenu() : openMenu(); }
-
-    btn.addEventListener('click', toggle);
-    document.addEventListener('click', (e) => { if (!root.contains(e.target)) closeMenu(); });
-    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeMenu(); });
-
     refreshActiveLanguage();
   }
+
+  // Document-level event delegation for the language switcher. This
+  // pattern is immune to DOM replacement / re-render of the chrome
+  // because the listener is attached to document, not to the button —
+  // every click is routed through here regardless of whether the button
+  // was re-mounted after init. Two reasons we hit this path on prod:
+  //   1. An earlier closure-based listener attached to btn was being
+  //      orphaned (suspected DOM re-mount inside data-binding pass).
+  //   2. Hardens against any future re-render that swaps chrome nodes.
+  document.addEventListener('click', (e) => {
+    const root = document.getElementById('wm-lang');
+    if (!root) return;
+
+    // Click inside the toggle button → flip menu open state.
+    if (e.target.closest('.wm-lang-btn')) {
+      _langToggle();
+      return;
+    }
+    // Click on a menu item → set language and close.
+    const item = e.target.closest('.wm-lang-item');
+    if (item && root.contains(item)) {
+      if (item.disabled) return;
+      const code = item.getAttribute('data-lang');
+      if (code) setLanguage(code);
+      _langClose();
+      return;
+    }
+    // Click outside the switcher → close menu.
+    if (!root.contains(e.target)) _langClose();
+  });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') _langClose(); });
 
   function setLanguage(lang) {
     if (window.WaveMaxBridgeV3?.setLanguage) {
