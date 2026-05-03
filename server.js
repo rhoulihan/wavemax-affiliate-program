@@ -244,7 +244,8 @@ app.use((req, res, next) => {
       'https://safepay.paymentlogistics.net',
       'https://code.jquery.com',
       'https://www.local-marketing-reports.com',
-      'https://reports.hibu.com'
+      'https://reports.hibu.com',
+      'https://static.cloudflareinsights.com'
     ],
     'style-src': [
       "'self'",
@@ -267,12 +268,20 @@ app.use((req, res, next) => {
     'manifest-src': ["'self'"]
   };
   
-  // Add nonces only if not skipping
+  // CSP3 quirk: when a nonce is present in a directive, `'unsafe-inline'`
+  // is silently ignored for that directive — even for JS-driven inline
+  // style mutations like `el.style.display = 'block'`. This breaks both
+  // (a) the language-switcher dropdown (toggles inline display) and
+  // (b) Hibu's `ybDynamicPhoneInsertion.js` (wraps swapped numbers in
+  // an inline `style="..."` span). For non-strict pages we therefore
+  // skip the style-src nonce so the unsafe-inline fallback actually
+  // takes effect. Strict pages keep the nonce because they have no
+  // third-party inline-style emitters and we want them locked down.
   if (!skipNonce && nonce) {
     directives['script-src'].push(`'nonce-${nonce}'`);
-    directives['style-src'].push(`'nonce-${nonce}'`);
+    if (useStrictCSP) directives['style-src'].push(`'nonce-${nonce}'`);
   }
-  
+
   // Add unsafe-inline for non-migrated pages
   if (!useStrictCSP) {
     directives['script-src'].push("'unsafe-inline'");
