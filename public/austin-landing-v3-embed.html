@@ -299,17 +299,5 @@
 
   <script src="/assets/js/iframe-bridge-v2.js"></script>
   <script src="/assets/js/austin-landing-init.js"></script>
-
-  <!-- ════════════════════════════════════════════════════════════════════
-       Hibu Dynamic Phone Insertion (iframe scope) — same loader and
-       seed config as the host page. Hibu's loader scans only the
-       document it runs in, so the iframe needs its own copy to swap
-       the hero "Call (512) 553-1674" CTA + the bottom CTA-strip
-       phone link with the source-indexed tracking number. Ad-blockers
-       commonly block reports.hibu.com; the init script no-ops
-       gracefully when the loader is absent.
-       ════════════════════════════════════════════════════════════════════ -->
-  <script src="https://reports.hibu.com/analytics/js/ybDynamicPhoneInsertion.js"></script>
-  <script src="/assets/js/austin-hibu-phone-swap.js"></script>
 </body>
 </html>
