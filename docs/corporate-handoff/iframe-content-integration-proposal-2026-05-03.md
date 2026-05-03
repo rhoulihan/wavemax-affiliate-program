@@ -69,17 +69,15 @@ language, location-data, and content-height between the two.
 
 ### What was planned
 
-The two embeds were the proof point. The extension plan — to bring
-the rest of Austin's location content (landing, contact, commercial,
-about) under the same iframe-embed pattern — was set up through
-**Walibu**, WaveMAX's marketing partner who provisioned the
-integration on our behalf, and was also walked through with our
-**WaveMAX area representative** at the time. Neither raised
-concerns, and the plan stayed on the record as we built toward the
-Wash-Dry-Fold page going live. The end state we were working
-toward: the full location page rendered as franchisee-owned content
-inside corporate-owned chrome, with one consistent integration
-contract.
+The two embeds were the proof point. The extensions were
+facilitated by **Walibu**, WaveMAX's marketing partner who
+provisioned the integration on our behalf, and were also walked
+through with our **WaveMAX area representative** at the time.
+Neither raised concerns, and the plan stayed on the record as we
+built toward the Wash-Dry-Fold page going live. The end state we
+were working toward: the full location page rendered as
+franchisee-owned content inside corporate-owned chrome, with one
+consistent integration contract.
 
 ### What changed
 
