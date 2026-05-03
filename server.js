@@ -468,9 +468,11 @@ app.get('/assets/js/austin-host-mock-config.js', (req, res) => {
   const apiKey  = (process.env.GOOGLE_PLACES_API_KEY  || '').replace(/['"\\\n\r]/g, '');
   const placeId = (process.env.GOOGLE_PLACES_LOCATION_PLACE_ID || '').replace(/['"\\\n\r]/g, '');
   res.set('Content-Type', 'application/javascript; charset=utf-8');
-  // Short cache — values change rarely but rotation should propagate
-  // within minutes, so 5-minute cache is the right floor.
-  res.set('Cache-Control', 'public, max-age=300');
+  // `private` keeps Cloudflare/edge caches from holding this so a key
+  // rotation propagates immediately. Browser cache OK for 60s — plenty
+  // for the page session, short enough that rotation reaches all
+  // clients within a minute.
+  res.set('Cache-Control', 'private, max-age=60');
   res.send(
     "/* Server-rendered. Reads from process.env at request time. */\n" +
     "(function () {\n" +
