@@ -449,67 +449,35 @@
     }
   }
 
-  /* ---------- Austin watermark photos (one of 6, randomly selected) ----
-   * Curated set of Austin landmarks + cultural-event photos. All sourced
-   * from Wikipedia Commons (CC-BY-SA / public domain). Each photo is laid
-   * down as a CSS background-image on .wm-austin-watermark, then treated
-   * with a navy gradient overlay (multiply blend) so it reads as the
-   * WaveMAX brand palette while keeping warm Austin character.
+  /* ---------- Hero watermark — fixed store-image backdrop ----
+   * Watermark is the same primary store photo MHR's existing landing
+   * uses (hero-1.jpg). Treated with a navy gradient + amber tint
+   * multiply blend so the white hero text reads while the store
+   * interior peeks through.
    *
-   * Attribution lives in the per-theme `credit` field — surfaced as the
-   * small lower-left tag in the visual frame. */
-  const WATERMARK_THEMES = [
-    {
-      id: 'pennybacker',
-      tag: 'Pennybacker Bridge',
-      url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/60/PennybackerBridge.jpg/1280px-PennybackerBridge.jpg'
-    },
-    {
-      id: 'capitol',
-      tag: 'Texas State Capitol',
-      url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/df/TexasStateCapitol-2010-01.JPG/1280px-TexasStateCapitol-2010-01.JPG'
-    },
-    {
-      id: 'skyline',
-      tag: 'Austin Skyline',
-      url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/96/Austin_Texas_skyline%2C_December_2023_-_Evening.jpg/1280px-Austin_Texas_skyline%2C_December_2023_-_Evening.jpg'
-    },
-    {
-      id: 'mt-bonnell',
-      tag: 'Mount Bonnell',
-      url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3d/Covert_Park_at_Mount_Bonnell_20160905130035.jpg/1280px-Covert_Park_at_Mount_Bonnell_20160905130035.jpg'
-    },
-    {
-      id: 'lady-bird',
-      tag: 'Lady Bird Lake',
-      url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/da/Austin_August_2019_19_%28skyline_and_Lady_Bird_Lake%29.jpg/1280px-Austin_August_2019_19_%28skyline_and_Lady_Bird_Lake%29.jpg'
-    },
-    {
-      id: 'south-congress',
-      tag: 'South Congress · Austin',
-      url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/66/South_Congress_Austin_-_i_love_you_so_much.jpg/1280px-South_Congress_Austin_-_i_love_you_so_much.jpg'
-    }
-  ];
+   * The Austin landmark photos (Pennybacker / Capitol / Skyline /
+   * Mt Bonnell / Lady Bird / South Congress) live in the right-side
+   * rotator now — they're declared in the HTML alongside the store
+   * photos, so the rotator cycles store-and-landmark together. */
+  const WATERMARK_URL = 'https://wavemaxlaundry.com/wp-content/uploads/locations/austin-tx/hero-1.jpg';
 
-  function pickRandomWatermark() {
+  function setStoreWatermark() {
     const root = document.getElementById('wm-austin-watermark');
     if (!root) return;
-    const choice = WATERMARK_THEMES[Math.floor(Math.random() * WATERMARK_THEMES.length)];
-    root.setAttribute('data-watermark', choice.id);
+    root.setAttribute('data-watermark', 'store');
 
-    // Preload before applying so the fade-in is smooth, not janky
     const probe = new Image();
     probe.referrerPolicy = 'no-referrer';
     probe.onload = () => {
-      root.style.backgroundImage = `url("${choice.url}")`;
+      root.style.backgroundImage = `url("${WATERMARK_URL}")`;
       root.classList.add('is-loaded');
     };
     probe.onerror = () => {
-      // If Wikimedia is unreachable (rare), still apply something — solid
-      // navy fade — so the visual frame doesn't look broken.
+      // If the photo is unreachable (rare), still mark loaded so the
+      // navy gradient fallback in the ::after overlay shows.
       root.classList.add('is-loaded');
     };
-    probe.src = choice.url;
+    probe.src = WATERMARK_URL;
   }
 
   /* ---------- Cross-frame nav for tab CTAs ---------- */
@@ -536,7 +504,7 @@
 
     initTabs();
     initCrossFrameNav();
-    pickRandomWatermark();
+    setStoreWatermark();
     initHeroRotator();
 
     // Bind whenever location-data arrives
