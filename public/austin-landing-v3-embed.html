@@ -29,11 +29,14 @@
     /* Wider horizontal margins inside the hero — pulls the content inboard
        so the watermark backdrop has visible breathing room on both sides.
        Margins narrowed ~10% from the prior pass: max-width 960→1056,
-       padding 64→58 each side. */
+       padding 64→58 each side. Vertical: nudge content 5px down from the
+       flex-centered position so it sits a hair below the watermark's
+       optical center. */
     .wm-hero .wm-hero-inner {
       max-width: 1056px;                /* was 960 (--wm-content-narrow) */
       padding-left: 58px;               /* was 64 (--wm-sp-8) */
       padding-right: 58px;
+      transform: translateY(5px);
     }
     @media (max-width: 880px) {
       .wm-hero .wm-hero-inner { max-width: var(--wm-content-max); padding-left: var(--wm-sp-5); padding-right: var(--wm-sp-5); }
