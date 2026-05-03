@@ -22,14 +22,14 @@
     .landing-section { padding: var(--wm-sp-6) 0; }
     .landing-section--tight { padding: var(--wm-sp-5) 0; }
 
-    /* Hero is the single biggest height consumer — keep it tight.
-       Override the global 60vh (which is 540px on a 900px viewport). */
-    .wm-hero { min-height: 360px; padding: var(--wm-sp-5) 0; }
+    /* Hero height matches MHR's existing /austin-tx/ slider exactly (690px)
+       so our reference page reads as a 1:1 replacement of their hero band. */
+    .wm-hero { min-height: 690px; padding: var(--wm-sp-6) 0; display: flex; align-items: center; }
     .wm-hero-title { font-size: var(--wm-fs-2xl); margin-bottom: var(--wm-sp-3); font-weight: 700; }
     .wm-hero-subtitle { font-size: var(--wm-fs-base); margin-bottom: var(--wm-sp-4); max-width: 56ch; }
     .wm-hero-eyebrow { margin-bottom: var(--wm-sp-3); }
     @media (max-width: 768px) {
-      .wm-hero { min-height: 280px; }
+      .wm-hero { min-height: 540px; }
       .wm-hero-title { font-size: var(--wm-fs-xl); }
     }
 
