@@ -23,11 +23,17 @@
   'use strict';
 
   const LANGUAGE_KEY = 'wavemax-language';
+  // Origin whitelist for INCOMING messages from the iframe.
+  // Outgoing parent→iframe sends use targetOrigin '*' (defensible: payloads
+  // are public chrome data; the iframe's own bridge applies an origin check
+  // on receipt). Incoming traffic IS validated here. Production hosts are
+  // explicit; any localhost / 127.0.0.1 port is also allowed for dev (test
+  // server on 3101, dev server on 3001, app server on 3000, etc.) so we
+  // don't need per-environment config.
+  const DEV_HOST_PATTERN = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/;
   const ALLOWED_ORIGINS = [
     'https://wavemax.promo',
-    'https://affiliate.wavemax.promo',
-    'http://localhost:3000',
-    'http://localhost:3001'
+    'https://affiliate.wavemax.promo'
   ];
 
   let iframe = null;
@@ -60,10 +66,10 @@
   }
 
   function isAllowedOrigin(origin) {
-    return ALLOWED_ORIGINS.some(allowed =>
-      origin === allowed ||
-      origin.replace(/^https?:\/\//, '') === allowed.replace(/^https?:\/\//, '')
-    );
+    if (!origin) return false;
+    if (ALLOWED_ORIGINS.some(allowed => origin === allowed)) return true;
+    if (DEV_HOST_PATTERN.test(origin)) return true;
+    return false;
   }
 
   function handleMessage(event) {
