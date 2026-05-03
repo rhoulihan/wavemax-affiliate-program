@@ -446,7 +446,13 @@
    */
   function initHeroRotator() {
     const imgs = document.querySelectorAll('.wm-hero-rotator-img');
-    console.log('[austin-landing] initHeroRotator — imgs:', imgs.length);
+    // Identity sentinel: stamp the document so we can detect whether the
+    // rotator is operating on the same doc the user sees, or on a stale
+    // detached doc orphaned by an iframe reload race. The id is the
+    // session start time (ms) — easy to spot in logs.
+    const docId = Date.now();
+    window.__rotatorDocId = docId;
+    console.log('[austin-landing] initHeroRotator — imgs:', imgs.length, 'docId:', docId, 'href:', document.location.href);
     if (imgs.length < 2) return;
     let active = Array.from(imgs).findIndex(i => i.classList.contains('is-active'));
     if (active < 0) { active = 0; imgs[0].classList.add('is-active'); }
@@ -455,19 +461,22 @@
     let scheduled = null;
 
     function step() {
-      console.log('[austin-landing] rotator tick, active was', active);
+      const liveDocId = window.__rotatorDocId;
+      const before = imgs[active]?.getAttribute('src')?.split('/').pop();
+      const next = (active + 1) % imgs.length;
+      const after = imgs[next]?.getAttribute('src')?.split('/').pop();
+      console.log('[austin-landing] rotator tick — docId:', docId, 'live:', liveDocId, 'sameDoc:', docId === liveDocId, 'changing:', before, '→', after);
       try {
         imgs[active].classList.remove('is-active');
-        active = (active + 1) % imgs.length;
+        active = next;
         imgs[active].classList.add('is-active');
-      } catch (_) { /* one bad tick can't kill the chain */ }
+      } catch (e) { console.error('[austin-landing] rotator step exception', e); }
       schedule();
     }
     function schedule() {
       if (paused) return;
       if (scheduled) clearTimeout(scheduled);
       scheduled = setTimeout(step, ROTATE_MS);
-      console.log('[austin-landing] rotator schedule, id=', scheduled);
     }
 
     schedule();
