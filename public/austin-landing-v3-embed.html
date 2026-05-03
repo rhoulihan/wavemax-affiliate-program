@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WaveMAX Austin · Laundromat in North Austin</title>
+  <meta name="description" content="Austin's cleanest, fastest laundromat. Self-serve laundry · wash-dry-fold drop-off · commercial accounts. Open daily 7am–10pm at 825 E Rundberg Ln F1, North Austin.">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@500;600;700;800&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="/assets/css/wavemax-theme.css">
+  <link rel="stylesheet" href="/assets/css/wavemax-components.css">
+
+  <style>
+    /* Page-local layout: tight one-page-app discipline.
+       Hero → Stats → Tabs → Reviews → CTA — minimal scroll, dense info. */
+    body { background: var(--wm-bg); }
+
+    /* Tighter sections than the global default (80px → 48px) */
+    .landing-section { padding: var(--wm-sp-6) 0; }
+    .landing-section--tight { padding: var(--wm-sp-5) 0; }
+
+    /* Hero is the single biggest height consumer — keep it tight.
+       Override the global 60vh (which is 540px on a 900px viewport). */
+    .wm-hero { min-height: 360px; padding: var(--wm-sp-5) 0; }
+    .wm-hero-title { font-size: var(--wm-fs-5xl); margin-bottom: var(--wm-sp-3); }
+    .wm-hero-subtitle { font-size: var(--wm-fs-base); margin-bottom: var(--wm-sp-4); max-width: 56ch; }
+    .wm-hero-eyebrow { margin-bottom: var(--wm-sp-3); }
+    @media (max-width: 768px) {
+      .wm-hero { min-height: 280px; }
+      .wm-hero-title { font-size: var(--wm-fs-3xl); }
+    }
+
+    /* Tighter stat cards */
+    .wm-stats-inner { padding: var(--wm-sp-4) var(--wm-sp-5); }
+    .wm-stat-card { padding: var(--wm-sp-4) var(--wm-sp-3); }
+    .wm-stat-number { font-size: var(--wm-fs-4xl); }
+
+    /* Tighter section header */
+    .wm-section-header { margin-bottom: var(--wm-sp-5); }
+    .wm-section-title { font-size: var(--wm-fs-3xl); margin-bottom: var(--wm-sp-2); }
+    .wm-section-subtitle { font-size: var(--wm-fs-base); }
+
+    .wm-hero-eyebrow .wm-pin {
+      display: inline-block;
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--austin-sun);
+      margin-right: var(--wm-sp-2);
+    }
+
+    /* Reviews block */
+    .wm-reviews { background: var(--wm-bg-soft); }
+    .wm-reviews-inner { max-width: var(--wm-content-max); margin: 0 auto; padding: 0 var(--wm-sp-5); }
+    .wm-reviews-header { text-align: center; margin-bottom: var(--wm-sp-6); }
+    .wm-reviews-eyebrow {
+      font-size: var(--wm-fs-sm);
+      font-weight: 600;
+      letter-spacing: var(--wm-tracking-widest);
+      text-transform: uppercase;
+      color: var(--wm-primary);
+      display: block;
+      margin-bottom: var(--wm-sp-2);
+    }
+    .wm-reviews-title { font-size: var(--wm-fs-3xl); margin-bottom: var(--wm-sp-2); }
+    .wm-reviews-attribution {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--wm-sp-2);
+      color: var(--wm-text-muted);
+      font-size: var(--wm-fs-sm);
+    }
+    .wm-reviews-attribution a { color: var(--wm-primary); font-weight: 600; }
+
+    .wm-reviews-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: var(--wm-sp-4);
+      max-width: var(--wm-content-max);
+      margin: 0 auto;
+    }
+    .wm-review-card {
+      background: var(--wm-bg);
+      border: 1px solid var(--wm-border);
+      border-radius: var(--wm-radius-lg);
+      padding: var(--wm-sp-5);
+      display: flex;
+      flex-direction: column;
+      gap: var(--wm-sp-3);
+    }
+    .wm-review-stars { color: #f5b301; font-size: var(--wm-fs-lg); letter-spacing: 1px; }
+    .wm-review-text { color: var(--wm-text); font-size: var(--wm-fs-sm); line-height: var(--wm-lh-base); }
+    .wm-review-author { display: flex; align-items: center; gap: var(--wm-sp-3); margin-top: auto; }
+    .wm-review-author-photo {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      background: var(--wm-bg-tint);
+      display: flex; align-items: center; justify-content: center;
+      color: var(--wm-primary); font-weight: 700;
+      flex-shrink: 0;
+    }
+    .wm-review-author-meta { display: flex; flex-direction: column; }
+    .wm-review-author-name { font-weight: 600; font-size: var(--wm-fs-sm); color: var(--wm-text); }
+    .wm-review-author-time { font-size: var(--wm-fs-xs); color: var(--wm-text-muted); }
+    .wm-reviews-empty {
+      text-align: center;
+      padding: var(--wm-sp-6);
+      background: var(--wm-bg);
+      border-radius: var(--wm-radius-lg);
+      border: 1px dashed var(--wm-border);
+      color: var(--wm-text-soft);
+    }
+    .wm-reviews-empty a { color: var(--wm-primary); font-weight: 600; }
+  </style>
+</head>
+<body>
+
+  <!-- HERO ============================================================ -->
+  <section class="wm-hero" data-section="hero">
+    <div class="wm-hero-inner">
+      <span class="wm-hero-eyebrow"><span class="wm-pin"></span><span data-i18n="landing.eyebrow">North Austin · Open daily 7am–10pm</span></span>
+      <h1 class="wm-hero-title" data-i18n="landing.title">Austin's Cleanest Laundromat</h1>
+      <p class="wm-hero-subtitle" data-i18n="landing.subtitle">UV-sanitized 450G washers, fast dryers, touchless payment, free WiFi. Drop off your wash-dry-fold or use our self-serve floor — open every day.</p>
+      <div class="wm-hero-actions">
+        <a class="wm-btn wm-btn-cta" data-bind="contact.phoneTel" data-bind-attr="href" href="#">
+          <span aria-hidden="true">📞</span>
+          <span><span data-i18n="landing.callBtn">Call</span> <span data-bind="contact.phone">(512) 553-1674</span></span>
+        </a>
+        <a class="wm-btn wm-btn-secondary" data-bind="contact.mapsUrl" data-bind-attr="href" target="_blank" rel="noopener" href="#" style="color:#fff;border-color:rgba(255,255,255,0.6)">
+          <span aria-hidden="true">📍</span>
+          <span data-i18n="landing.directionsBtn">Get Directions</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- STAT RAIL ======================================================= -->
+  <section class="wm-stats" data-section="stats">
+    <div class="wm-stats-inner">
+      <div class="wm-stat-card">
+        <div class="wm-stat-number" data-bind="equipment.washers">20</div>
+        <div class="wm-stat-label" data-i18n="landing.stats.washers">Washers</div>
+      </div>
+      <div class="wm-stat-card">
+        <div class="wm-stat-number" data-bind="equipment.dryers">20</div>
+        <div class="wm-stat-label" data-i18n="landing.stats.dryers">Dryers</div>
+      </div>
+      <div class="wm-stat-card">
+        <div class="wm-stat-number" data-bind="hours.display">7am-10pm</div>
+        <div class="wm-stat-label" data-i18n="landing.stats.hours">Open Daily</div>
+      </div>
+      <div class="wm-stat-card">
+        <div class="wm-stat-number" data-bind="pricing.wdf.display">$1.20/lb</div>
+        <div class="wm-stat-label" data-i18n="landing.stats.wdf">WDF Pricing</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SERVICE TAB BLOCK =============================================== -->
+  <section class="landing-section" data-section="services">
+    <div class="wm-container">
+      <div class="wm-section-header">
+        <span class="wm-section-eyebrow" data-i18n="landing.services.eyebrow">OUR SERVICES</span>
+        <h2 class="wm-section-title" data-i18n="landing.services.title">Three ways to get clean laundry</h2>
+        <p class="wm-section-subtitle" data-i18n="landing.services.subtitle">Whether you prefer to do it yourself or drop it off, we've got you covered.</p>
+      </div>
+
+      <div class="wm-tabs" role="tablist" aria-label="Our services">
+        <div class="wm-tab-strip">
+          <button type="button" class="wm-tab" role="tab" aria-selected="true"  data-tab="wdf">
+            <span aria-hidden="true">🧺</span><span data-i18n="landing.tab.wdf">Wash-Dry-Fold</span>
+          </button>
+          <button type="button" class="wm-tab" role="tab" aria-selected="false" data-tab="selfserve">
+            <span aria-hidden="true">🌀</span><span data-i18n="landing.tab.selfserve">Self-Serve Laundry</span>
+          </button>
+          <button type="button" class="wm-tab" role="tab" aria-selected="false" data-tab="commercial">
+            <span aria-hidden="true">🏢</span><span data-i18n="landing.tab.commercial">Commercial</span>
+          </button>
+        </div>
+
+        <div class="wm-tab-panel" role="tabpanel" data-panel="wdf" aria-hidden="false">
+          <div class="wm-grid">
+            <div class="wm-card">
+              <div class="wm-card-icon" aria-hidden="true">🧺</div>
+              <h3 class="wm-card-title" data-i18n="landing.wdf.dropoff.title">Drop off, walk out</h3>
+              <p class="wm-card-text" data-i18n="landing.wdf.dropoff.text">2-minute drop-off. We weigh, wash, dry, and fold with hospital-grade UV sanitization.</p>
+            </div>
+            <div class="wm-card">
+              <div class="wm-card-icon" aria-hidden="true">⚡</div>
+              <h3 class="wm-card-title" data-i18n="landing.wdf.turnaround.title">24-hour turnaround</h3>
+              <p class="wm-card-text" data-i18n="landing.wdf.turnaround.text">Drop off in the morning, pick up the next day. Need it faster? Ask about same-day.</p>
+            </div>
+            <div class="wm-card">
+              <div class="wm-card-icon" aria-hidden="true">💰</div>
+              <h3 class="wm-card-title" data-i18n="landing.wdf.pricing.title"><span data-bind="pricing.wdf.display">$1.20/lb</span> · 10lb minimum</h3>
+              <p class="wm-card-text" data-i18n="landing.wdf.pricing.text">Detergent, dryer sheets, and hangers included. Cards-only payment, no cash needed.</p>
+            </div>
+          </div>
+          <p style="text-align:center; margin-top:var(--wm-sp-5);"><a class="wm-btn wm-btn-secondary" data-route="/wash-dry-fold" href="?route=/wash-dry-fold" data-i18n="landing.wdf.cta">See full WDF details →</a></p>
+        </div>
+
+        <div class="wm-tab-panel" role="tabpanel" data-panel="selfserve" aria-hidden="true">
+          <div class="wm-grid">
+            <div class="wm-card">
+              <div class="wm-card-icon" aria-hidden="true">🌀</div>
+              <h3 class="wm-card-title" data-i18n="landing.selfserve.machines.title"><span data-bind="equipment.washers">20</span> 450G washers, <span data-bind="equipment.dryers">20</span> dryers</h3>
+              <p class="wm-card-text" data-i18n="landing.selfserve.machines.text">Loads from 20lb to 80lb. Faster spin = less drying time = less time waiting.</p>
+            </div>
+            <div class="wm-card">
+              <div class="wm-card-icon" aria-hidden="true">🛡️</div>
+              <h3 class="wm-card-title" data-i18n="landing.selfserve.uv.title">UV sanitization</h3>
+              <p class="wm-card-text" data-i18n="landing.selfserve.uv.text">Every cycle finishes with a UV sterilization pass. 99.9% pathogen kill.</p>
+            </div>
+            <div class="wm-card">
+              <div class="wm-card-icon" aria-hidden="true">📶</div>
+              <h3 class="wm-card-title" data-i18n="landing.selfserve.amenities.title">Free WiFi · Touchless pay</h3>
+              <p class="wm-card-text" data-i18n="landing.selfserve.amenities.text">Wheelchair accessible, free parking, attended every shift. Comfortable, clean, reliable.</p>
+            </div>
+          </div>
+          <p style="text-align:center; margin-top:var(--wm-sp-5);"><a class="wm-btn wm-btn-secondary" data-route="/self-serve-laundry" href="?route=/self-serve-laundry" data-i18n="landing.selfserve.cta">See full self-serve details →</a></p>
+        </div>
+
+        <div class="wm-tab-panel" role="tabpanel" data-panel="commercial" aria-hidden="true">
+          <div class="wm-grid">
+            <div class="wm-card">
+              <div class="wm-card-icon" aria-hidden="true">🏨</div>
+              <h3 class="wm-card-title" data-i18n="landing.commercial.airbnb.title">Airbnb &amp; rentals</h3>
+              <p class="wm-card-text" data-i18n="landing.commercial.airbnb.text">Same-day turnover support. Sheets, towels, comforters — folded and ready by check-in.</p>
+            </div>
+            <div class="wm-card">
+              <div class="wm-card-icon" aria-hidden="true">🏥</div>
+              <h3 class="wm-card-title" data-i18n="landing.commercial.medical.title">Medical &amp; clinical</h3>
+              <p class="wm-card-text" data-i18n="landing.commercial.medical.text">Scrubs, lab coats, exam linens. UV-sanitized + temperature-validated wash cycles.</p>
+            </div>
+            <div class="wm-card">
+              <div class="wm-card-icon" aria-hidden="true">🏋️</div>
+              <h3 class="wm-card-title" data-i18n="landing.commercial.fitness.title">Health clubs &amp; spas</h3>
+              <p class="wm-card-text" data-i18n="landing.commercial.fitness.text">Daily towel programs. Volume pricing, scheduled pickup, no contracts required.</p>
+            </div>
+          </div>
+          <p style="text-align:center; margin-top:var(--wm-sp-5);"><a class="wm-btn wm-btn-secondary" data-route="/commercial" href="?route=/commercial" data-i18n="landing.commercial.cta">See commercial pricing →</a></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- LIVE 5★ GOOGLE REVIEWS ========================================== -->
+  <section class="wm-reviews landing-section" data-section="reviews">
+    <div class="wm-reviews-inner">
+      <div class="wm-reviews-header">
+        <span class="wm-reviews-eyebrow" data-i18n="landing.reviews.eyebrow">FIVE-STAR REVIEWS</span>
+        <h2 class="wm-reviews-title" data-i18n="landing.reviews.title">What our customers say</h2>
+        <span class="wm-reviews-attribution">
+          <span data-i18n="landing.reviews.attribution">Five-star reviews from</span>
+          <a href="https://www.google.com/maps/place/?q=place_id:" id="wm-reviews-google-link" target="_blank" rel="noopener">Google</a>
+        </span>
+      </div>
+      <div class="wm-reviews-cards" id="wm-reviews-cards" role="list">
+        <!-- Filled by JS on load -->
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA STRIP ======================================================= -->
+  <div class="wm-cta-strip">
+    <div class="wm-cta-strip-inner">
+      <p class="wm-cta-strip-text" data-i18n="landing.cta.text">Ready to do laundry the easy way?</p>
+      <div class="wm-cta-strip-actions">
+        <a class="wm-btn wm-btn-primary" data-bind="contact.phoneTel" data-bind-attr="href" href="#">
+          <span aria-hidden="true">📞</span>
+          <span data-i18n="landing.cta.call">Call us</span>
+        </a>
+        <a class="wm-btn wm-btn-secondary" data-bind="contact.mapsUrl" data-bind-attr="href" target="_blank" rel="noopener" href="#">
+          <span data-i18n="landing.cta.directions">Get directions</span>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <script src="/assets/js/iframe-bridge-v2.js"></script>
+  <script src="/assets/js/austin-landing-init.js"></script>
+</body>
+</html>

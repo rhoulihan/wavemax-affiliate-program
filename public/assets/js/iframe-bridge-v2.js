@@ -408,10 +408,14 @@
             document.documentElement.offsetHeight
         );
 
+        // Send under `data` envelope to match the v3 parent-bridge protocol
+        // (parent does `const { type, data } = event.data` and reads
+        // `data.height`). The legacy v2 parent did not require this — both
+        // shapes worked there — but v3 enforces it for protocol consistency
+        // with seo-data, location-data, current-language, etc.
         sendToParent({
             type: 'resize',
-            height: height,
-            page: config.pageIdentifier
+            data: { height: height, page: config.pageIdentifier }
         });
     }
 
