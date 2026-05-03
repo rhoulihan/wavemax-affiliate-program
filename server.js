@@ -461,18 +461,21 @@ app.get('/monitoring-dashboard.html', (req, res) => {
 // are read from process.env so we can rotate by editing .env + pm2
 // restart, without redeploying or touching public/.
 //
-// This route MUST be registered before express.static so it wins the
-// path match against the placeholder file (which has empty-string
-// fallbacks for local dev / e2e tests that pre-set the values).
-app.get('/assets/js/austin-host-mock-config.js', (req, res) => {
+// The URL deliberately lives under /api/ and has no .js extension —
+// Cloudflare's default cache rules ignore /api/* AND don't auto-cache
+// extensionless paths, so a key rotation hits browsers immediately.
+// The HTML loads it with <script src="..."> + the Content-Type below.
+app.get('/api/austin-tx/places-config', (req, res) => {
   const apiKey  = (process.env.GOOGLE_PLACES_API_KEY  || '').replace(/['"\\\n\r]/g, '');
   const placeId = (process.env.GOOGLE_PLACES_LOCATION_PLACE_ID || '').replace(/['"\\\n\r]/g, '');
   res.set('Content-Type', 'application/javascript; charset=utf-8');
-  // `private` keeps Cloudflare/edge caches from holding this so a key
-  // rotation propagates immediately. Browser cache OK for 60s — plenty
-  // for the page session, short enough that rotation reaches all
-  // clients within a minute.
-  res.set('Cache-Control', 'private, max-age=60');
+  // Belt-and-suspenders no-cache: standard Cache-Control + the
+  // Cloudflare-specific cdn-cache-control directive so neither origin
+  // browser cache nor any intermediate CDN layer holds this.
+  res.set('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
+  res.set('CDN-Cache-Control', 'no-store');
+  res.set('Cloudflare-CDN-Cache-Control', 'no-store');
+  res.set('Pragma', 'no-cache');
   res.send(
     "/* Server-rendered. Reads from process.env at request time. */\n" +
     "(function () {\n" +

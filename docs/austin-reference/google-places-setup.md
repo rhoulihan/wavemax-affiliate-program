@@ -19,7 +19,7 @@ GOOGLE_PLACES_LOCATION_PLACE_ID=ChIJ…   # ~27-char `ChIJ`-prefixed token
 ```
 
 The server-rendered route at
-[`/assets/js/austin-host-mock-config.js`](../../public/dev/austin-host-mock.html)
+[`/api/austin-tx/places-config`](../../public/dev/austin-host-mock.html)
 reads both at request time and injects them into the browser. No build
 step, no commits to source. Rotation = edit `.env` + `pm2 restart wavemax`.
 
@@ -132,7 +132,7 @@ pm2 restart wavemax --update-env
 Verify:
 
 ```bash
-curl -s https://wavemax.promo/assets/js/austin-host-mock-config.js
+curl -s https://wavemax.promo/api/austin-tx/places-config
 ```
 
 Should now return JS with the values populated, not empty strings.
@@ -163,7 +163,7 @@ If the key is ever leaked or compromised:
 2. Old key invalidates immediately.
 3. Update `.env` with the new key.
 4. `pm2 restart wavemax --update-env`.
-5. The 5-minute browser cache on `/assets/js/austin-host-mock-config.js`
+5. The 5-minute browser cache on `/api/austin-tx/places-config`
    means the very-recently-loaded pages will keep the old key for a few
    minutes; everything after that gets the new key automatically.
 
@@ -180,7 +180,7 @@ GOOGLE_PLACES_LOCATION_PLACE_ID_HOUSTON_TX=ChIJ...
 ```
 
 And resolve in the route based on the URL path. The
-`/assets/js/austin-host-mock-config.js` route already accepts a
+`/api/austin-tx/places-config` route already accepts a
 location parameter that defaults to `austin-tx`; it just doesn't read
 it yet.
 

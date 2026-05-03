@@ -447,8 +447,10 @@
 
   <!-- Server-rendered config (reads GOOGLE_PLACES_API_KEY + LOCATION_PLACE_ID
        from server env). Loads BEFORE the static data file so the env values
-       win the OR-fallback in austin-host-mock-data.js. -->
-  <script src="/assets/js/austin-host-mock-config.js"></script>
+       win the OR-fallback in austin-host-mock-data.js. URL deliberately
+       lives under /api/ + has no .js extension so Cloudflare doesn't
+       auto-cache it (rotation propagates immediately). -->
+  <script src="/api/austin-tx/places-config"></script>
 
   <!-- Page data (external for CSP compliance) — sets window.LOCATION_DATA
        before the bridge loads. The OR-fallback for GOOGLE_PLACES_API_KEY +
