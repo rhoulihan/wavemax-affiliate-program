@@ -42,22 +42,47 @@
   let locationData = null;
   let parentReadyTimer = null;
 
-  function init() {
-    iframe = document.getElementById('wavemax-iframe') ||
-             document.querySelector('iframe[data-wm-bridge]') ||
-             document.querySelector('iframe[src*="wavemax.promo"]');
+  // Listeners that don't depend on the iframe element existing yet —
+  // attach these eagerly so we don't drop events when the bridge runs
+  // BEFORE the host script creates/mounts the iframe (which is exactly
+  // what happens on austin-host-mock.html: the bridge's DOMContentLoaded
+  // handler fires before austin-host-mock.js's loadIframeRoute() injects
+  // the <iframe id="wavemax-iframe">). sendToIframe() / sendLocationData()
+  // bail out cleanly when iframe is null, and findIframe() is called
+  // again on every send, so late-arriving iframes are discovered.
+  locationData = window.LOCATION_DATA || null;
+  lastLanguage = localStorage.getItem(LANGUAGE_KEY) || 'en';
+  window.addEventListener('message', handleMessage);
+  window.addEventListener('languageChanged', onCustomLanguageEvent);
+  window.addEventListener('storage', onStorageEvent);
 
+  function findIframe() {
+    return document.getElementById('wavemax-iframe') ||
+           document.querySelector('iframe[data-wm-bridge]') ||
+           document.querySelector('iframe[src*="wavemax.promo"]');
+  }
+
+  function init() {
+    iframe = findIframe();
     if (!iframe) {
+      // Iframe not mounted yet — watch for it. Once present, finish
+      // setup. MutationObserver is cheap, scoped to body, and stops
+      // observing as soon as the iframe is found.
+      const obs = new MutationObserver(() => {
+        const found = findIframe();
+        if (found) {
+          obs.disconnect();
+          iframe = found;
+          finishInit();
+        }
+      });
+      obs.observe(document.body, { childList: true, subtree: true });
       return;
     }
+    finishInit();
+  }
 
-    locationData = window.LOCATION_DATA || null;
-    lastLanguage = localStorage.getItem(LANGUAGE_KEY) || 'en';
-
-    window.addEventListener('message', handleMessage);
-    window.addEventListener('languageChanged', onCustomLanguageEvent);
-    window.addEventListener('storage', onStorageEvent);
-
+  function finishInit() {
     // Notify iframe that parent is ready (after the iframe has had time to
     // mount its own listener — small debounce instead of a fixed timer).
     parentReadyTimer = setTimeout(() => {
@@ -118,6 +143,14 @@
   }
 
   function sendToIframe(message) {
+    // Re-resolve the iframe on every send so late-mounted iframes (the
+    // host script injects the iframe after our bridge initializes) and
+    // route changes that swap the iframe element both work without
+    // requiring an explicit re-init. iframe ref is cached but always
+    // re-fetched from the DOM as a safety net.
+    if (!iframe || !iframe.contentWindow) {
+      iframe = findIframe();
+    }
     if (iframe && iframe.contentWindow) {
       try {
         iframe.contentWindow.postMessage(message, '*');
