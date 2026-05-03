@@ -452,6 +452,35 @@ app.get('/monitoring-dashboard.html', (req, res) => {
 });
 
 
+// ─── Austin reference build: server-rendered config ────────────────
+// Provides the Google Places API key + Place ID to the browser without
+// committing them to source control. The browser-direct call to the
+// Places API needs the key in the page; key abuse is bounded by HTTP
+// referrer restrictions configured on the key in Google Cloud Console
+// (wavemax.promo, *.wavemax.promo, and localhost only). Both values
+// are read from process.env so we can rotate by editing .env + pm2
+// restart, without redeploying or touching public/.
+//
+// This route MUST be registered before express.static so it wins the
+// path match against the placeholder file (which has empty-string
+// fallbacks for local dev / e2e tests that pre-set the values).
+app.get('/assets/js/austin-host-mock-config.js', (req, res) => {
+  const apiKey  = (process.env.GOOGLE_PLACES_API_KEY  || '').replace(/['"\\\n\r]/g, '');
+  const placeId = (process.env.GOOGLE_PLACES_LOCATION_PLACE_ID || '').replace(/['"\\\n\r]/g, '');
+  res.set('Content-Type', 'application/javascript; charset=utf-8');
+  // Short cache — values change rarely but rotation should propagate
+  // within minutes, so 5-minute cache is the right floor.
+  res.set('Cache-Control', 'public, max-age=300');
+  res.send(
+    "/* Server-rendered. Reads from process.env at request time. */\n" +
+    "(function () {\n" +
+    "  'use strict';\n" +
+    "  window.GOOGLE_PLACES_API_KEY = window.GOOGLE_PLACES_API_KEY || '" + apiKey + "';\n" +
+    "  window.LOCATION_PLACE_ID     = window.LOCATION_PLACE_ID     || '" + placeId + "';\n" +
+    "})();\n"
+  );
+});
+
 // Serve static files in all environments
 app.use(express.static(path.join(__dirname, 'public')));
 
