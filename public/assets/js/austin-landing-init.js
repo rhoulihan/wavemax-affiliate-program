@@ -451,20 +451,27 @@
     let paused = false;
     let scheduled = null;
 
+    let stepCount = 0;
     function step() {
+      stepCount++;
+      console.log('[austin-landing] rotator step', stepCount, 'active', active);
       try {
         imgs[active].classList.remove('is-active');
         active = (active + 1) % imgs.length;
         imgs[active].classList.add('is-active');
       } catch (e) {
-        // Don't let one bad tick kill the chain
+        console.error('[austin-landing] rotator step exception', e);
       }
       schedule();
     }
     function schedule() {
-      if (paused) return;
+      if (paused) {
+        console.log('[austin-landing] rotator paused, not scheduling');
+        return;
+      }
       if (scheduled) clearTimeout(scheduled);
       scheduled = setTimeout(step, ROTATE_MS);
+      console.log('[austin-landing] rotator scheduled tick in', ROTATE_MS, 'ms (id=', scheduled, ')');
     }
 
     schedule();
