@@ -10,7 +10,6 @@
   /* ---------- Translations ---------- */
   const TRANSLATIONS = {
     en: {
-      'contact.eyebrow':            'CONTACT',
       'contact.title':              'Get in touch with WaveMAX Austin',
       'contact.intro':              "Call us, swing by during open hours, or drop a note below — we reply within a few hours during business hours.",
       'contact.card.heading':       'Visit, call, or get directions',
@@ -31,10 +30,21 @@
       'contact.form.submit':        'Send message',
       'contact.form.sending':       'Sending…',
       'contact.form.successDefault':"Your message has been sent — we'll be in touch shortly.",
-      'contact.form.errorDefault':  'There was a problem sending your message. Please try again, or call us directly.'
+      'contact.form.errorDefault':  'There was a problem sending your message. Please try again, or call us directly.',
+      'contact.tiles.hours.title':       'Open every day',
+      'contact.tiles.hours.text':        'Self-service floor open 7am–10pm, 365 days a year. Last wash starts 9pm so every cycle finishes before close.',
+      'contact.tiles.machines.title':    '42 + 42 commercial machines',
+      'contact.tiles.machines.text':     'Forty-two Electrolux CompassPro 450G washers and forty-two high-velocity dryers. Largest washer takes an 80-pound load — perfect for comforters and blankets.',
+      'contact.tiles.uv.title':          'Hospital-grade UV water',
+      'contact.tiles.uv.text':           'Every washer runs on Omni LUX UV-sanitized water. The same UV technology hospitals use to kill bacteria and viruses before water touches your clothes.',
+      'contact.tiles.wdf.title':         'Drop-off wash-dry-fold',
+      'contact.tiles.wdf.text':          '$1.20/lb, 10-pound minimum. 24-hour turnaround (same-day for orders before 11am). Eco-friendly hypoallergenic detergent included.',
+      'contact.tiles.amenities.title':   'Free WiFi & parking',
+      'contact.tiles.amenities.text':    'Free fast WiFi throughout the store, free on-site parking, comfortable seating, fully attended floor. Get work done while your wash runs.',
+      'contact.tiles.payment.title':     'Cards-only, no cash',
+      'contact.tiles.payment.text':      "All major credit, debit, and laundry cards. No cash needed for any service. Calibrated weigh on every WDF order so you always know what you're paying."
     },
     es: {
-      'contact.eyebrow':            'CONTACTO',
       'contact.title':              'Contacto · WaveMAX Austin',
       'contact.intro':              'Llámanos, visítanos durante el horario de atención, o envíanos un mensaje abajo — respondemos en pocas horas durante el horario laboral.',
       'contact.card.heading':       'Visítenos, llámenos o pida indicaciones',
@@ -55,10 +65,21 @@
       'contact.form.submit':        'Enviar mensaje',
       'contact.form.sending':       'Enviando…',
       'contact.form.successDefault':'Su mensaje ha sido enviado — nos pondremos en contacto pronto.',
-      'contact.form.errorDefault':  'Hubo un problema al enviar su mensaje. Inténtelo de nuevo o llámenos directamente.'
+      'contact.form.errorDefault':  'Hubo un problema al enviar su mensaje. Inténtelo de nuevo o llámenos directamente.',
+      'contact.tiles.hours.title':       'Abierto todos los días',
+      'contact.tiles.hours.text':        'Servicio de autoservicio abierto de 7am a 10pm, 365 días al año. El último lavado inicia a las 9pm para que todo termine antes del cierre.',
+      'contact.tiles.machines.title':    '42 + 42 máquinas comerciales',
+      'contact.tiles.machines.text':     'Cuarenta y dos lavadoras Electrolux CompassPro 450G y cuarenta y dos secadoras de alta velocidad. La lavadora más grande acepta carga de 80 libras — ideal para edredones y cobijas.',
+      'contact.tiles.uv.title':          'Agua UV grado hospitalario',
+      'contact.tiles.uv.text':           'Cada lavadora usa agua sanitizada con UV Omni LUX. La misma tecnología UV que usan los hospitales para eliminar bacterias y virus antes de que el agua toque su ropa.',
+      'contact.tiles.wdf.title':         'Lavado-secado-doblado',
+      'contact.tiles.wdf.text':          '$1.20/lb, mínimo 10 libras. Entrega en 24 horas (mismo día si llega antes de las 11am). Detergente hipoalergénico ecológico incluido.',
+      'contact.tiles.amenities.title':   'WiFi y estacionamiento gratis',
+      'contact.tiles.amenities.text':    'WiFi rápido gratuito en toda la tienda, estacionamiento gratis en sitio, asientos cómodos, piso totalmente atendido. Trabaje mientras su ropa se lava.',
+      'contact.tiles.payment.title':     'Solo tarjeta, sin efectivo',
+      'contact.tiles.payment.text':      'Todas las tarjetas mayores de crédito, débito y de lavandería. Sin efectivo necesario. Pesaje calibrado en cada pedido de lavado-secado-doblado para que siempre sepa lo que paga.'
     },
     pt: {
-      'contact.eyebrow':            'CONTATO',
       'contact.title':              'Fale com a WaveMAX Austin',
       'contact.intro':              'Ligue, visite durante o horário de atendimento ou envie uma mensagem abaixo — respondemos em poucas horas durante o expediente.',
       'contact.card.heading':       'Visite, ligue ou peça direções',
@@ -79,10 +100,21 @@
       'contact.form.submit':        'Enviar mensagem',
       'contact.form.sending':       'Enviando…',
       'contact.form.successDefault':'Sua mensagem foi enviada — entraremos em contato em breve.',
-      'contact.form.errorDefault':  'Houve um problema ao enviar sua mensagem. Tente novamente ou ligue diretamente.'
+      'contact.form.errorDefault':  'Houve um problema ao enviar sua mensagem. Tente novamente ou ligue diretamente.',
+      'contact.tiles.hours.title':       'Aberto todos os dias',
+      'contact.tiles.hours.text':        'Autoatendimento aberto das 7h às 22h, 365 dias por ano. Última lavagem começa às 21h para que todos os ciclos terminem antes de fechar.',
+      'contact.tiles.machines.title':    '42 + 42 máquinas comerciais',
+      'contact.tiles.machines.text':     'Quarenta e duas lavadoras Electrolux CompassPro 450G e quarenta e duas secadoras de alta velocidade. A maior lavadora suporta carga de 80 libras — ideal para edredons e cobertores.',
+      'contact.tiles.uv.title':          'Água UV nível hospitalar',
+      'contact.tiles.uv.text':           'Cada lavadora usa água sanitizada com UV Omni LUX. A mesma tecnologia UV que hospitais usam para eliminar bactérias e vírus antes que a água toque sua roupa.',
+      'contact.tiles.wdf.title':         'Entrega lavar-secar-dobrar',
+      'contact.tiles.wdf.text':          '$1.20/lb, mínimo 10 libras. Entrega em 24 horas (mesmo dia para pedidos antes das 11h). Detergente hipoalergênico ecológico incluído.',
+      'contact.tiles.amenities.title':   'WiFi e estacionamento grátis',
+      'contact.tiles.amenities.text':    'WiFi rápido gratuito em toda a loja, estacionamento grátis no local, assentos confortáveis, piso totalmente atendido. Trabalhe enquanto sua roupa lava.',
+      'contact.tiles.payment.title':     'Só cartão, sem dinheiro',
+      'contact.tiles.payment.text':      'Todos os cartões maiores de crédito, débito e cartões de lavanderia. Não precisa de dinheiro. Pesagem calibrada em cada pedido para que você sempre saiba o quanto está pagando.'
     },
     de: {
-      'contact.eyebrow':            'KONTAKT',
       'contact.title':              'Kontakt zu WaveMAX Austin',
       'contact.intro':              'Rufen Sie uns an, kommen Sie zu unseren Öffnungszeiten vorbei oder senden Sie uns eine Nachricht — wir antworten innerhalb weniger Stunden während der Geschäftszeiten.',
       'contact.card.heading':       'Besuchen Sie uns, rufen Sie an oder holen Sie sich eine Wegbeschreibung',
@@ -103,7 +135,19 @@
       'contact.form.submit':        'Nachricht senden',
       'contact.form.sending':       'Senden…',
       'contact.form.successDefault':'Ihre Nachricht wurde gesendet — wir melden uns in Kürze.',
-      'contact.form.errorDefault':  'Beim Senden Ihrer Nachricht ist ein Problem aufgetreten. Bitte versuchen Sie es erneut oder rufen Sie uns direkt an.'
+      'contact.form.errorDefault':  'Beim Senden Ihrer Nachricht ist ein Problem aufgetreten. Bitte versuchen Sie es erneut oder rufen Sie uns direkt an.',
+      'contact.tiles.hours.title':       'Täglich geöffnet',
+      'contact.tiles.hours.text':        'Selbstbedienung 7–22 Uhr, 365 Tage im Jahr. Letzter Waschgang um 21 Uhr, damit alle Programme vor Schluss enden.',
+      'contact.tiles.machines.title':    '42 + 42 Profimaschinen',
+      'contact.tiles.machines.text':     'Zweiundvierzig Electrolux CompassPro 450G Waschmaschinen und zweiundvierzig Schnelltrockner. Größte Waschmaschine fasst 80 Pfund — ideal für Decken und Bettdecken.',
+      'contact.tiles.uv.title':          'UV-Wasser in Krankenhausqualität',
+      'contact.tiles.uv.text':           'Jede Waschmaschine nutzt mit UV sanitisiertes Omni-LUX-Wasser. Dieselbe UV-Technologie, die Krankenhäuser verwenden, um Bakterien und Viren abzutöten, bevor das Wasser Ihre Kleidung berührt.',
+      'contact.tiles.wdf.title':         'Bring-Service Waschen-Trocknen-Falten',
+      'contact.tiles.wdf.text':          '$1.20/lb, Mindestmenge 10 Pfund. 24-Stunden-Lieferung (am selben Tag bei Aufträgen vor 11 Uhr). Umweltfreundliches hypoallergenes Waschmittel inklusive.',
+      'contact.tiles.amenities.title':   'Kostenloses WLAN & Parken',
+      'contact.tiles.amenities.text':    'Kostenloses schnelles WLAN im ganzen Geschäft, kostenlose Parkplätze vor Ort, komfortable Sitzgelegenheiten, vollständig betreutes Personal. Erledigen Sie Arbeit, während Ihre Wäsche läuft.',
+      'contact.tiles.payment.title':     'Nur Karte, kein Bargeld',
+      'contact.tiles.payment.text':      'Alle gängigen Kredit-, Debit- und Wäschekarten. Kein Bargeld nötig. Kalibrierte Wägung bei jedem Wasch-Trocken-Falt-Auftrag — Sie wissen immer, was Sie zahlen.'
     }
   };
 
