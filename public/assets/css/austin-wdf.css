@@ -18,12 +18,13 @@ body { background: var(--wm-bg-soft); }
   padding: var(--wm-sp-7) 0 var(--wm-sp-6);
   position: relative;
   overflow: hidden;
-  /* Match the landing page's cinematic hero so the watermark backdrop
-     has room to breathe. Inner content is centered vertically by the
-     shared .wm-hero flex rule from wavemax-components.css. */
-  min-height: 60vh;
+  /* Pixel-fixed min-height so the hero is consistent across viewport
+     sizes — vh-based values feel correct on a laptop but balloon on
+     tall monitors. ~470px is enough to give the watermark room
+     without leaving the centered content stranded in empty space. */
+  min-height: 470px;
 }
-@media (max-width: 540px) { .wm-hero { min-height: 50vh; } }
+@media (max-width: 540px) { .wm-hero { min-height: 380px; } }
 
 /* Austin watermark — same treatment as the landing-page hero.
    Background image is set on #wm-austin-watermark by austin-wdf-init.js
