@@ -225,12 +225,17 @@
   }
 
   function initContactForm() {
-    const form = document.querySelector('[data-contact-form]');
-    if (!form) return;
+    // Delegate to document — translatePage() / data-bind passes can replace
+    // child nodes, which would orphan a listener attached to the form. A
+    // delegated listener on document survives any in-tree DOM swap as long
+    // as the form keeps the data-contact-form attribute.
+    if (document.__austinContactSubmitDelegated) return;
+    document.__austinContactSubmitDelegated = true;
 
-    form.addEventListener('submit', async (e) => {
+    document.addEventListener('submit', async (e) => {
+      const form = e.target && e.target.closest && e.target.closest('[data-contact-form]');
+      if (!form) return;
       e.preventDefault();
-      // Hide both surfaces while we send
       showStatus(form, 'none', '');
       setSubmittingState(form, true);
 
