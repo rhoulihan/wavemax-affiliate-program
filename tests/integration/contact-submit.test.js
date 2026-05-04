@@ -6,10 +6,15 @@ const request = require('supertest');
 const emailService = require('../../server/utils/emailService');
 const logger = require('../../server/utils/logger');
 const { getCsrfToken, createAgent } = require('../helpers/csrfHelper');
+const { loadLocationData } = require('../../server/config/locationData');
 
 const SLUG = 'austin-tx';
 const ENDPOINT = `/api/v1/contact/${SLUG}`;
-const RECIPIENT = 'austin-franchisee@example.com';
+// Recipient is read from LOCATION_DATA — single source of truth, no env
+// override. The test pulls it from the same loader the controller uses,
+// so updates to the data file (e.g. when the franchisee's email
+// changes) don't require a test edit.
+const RECIPIENT = loadLocationData(SLUG).contact.email;
 
 const validBody = () => ({
   firstName: 'Jane',
@@ -32,20 +37,9 @@ async function postContact(app, body, { skipCsrf = false, slug = SLUG } = {}) {
 
 describe('POST /api/v1/contact/:slug', () => {
   let app;
-  const originalRecipient = process.env.CONTACT_RECIPIENT_AUSTIN;
-  const originalFrom = process.env.EMAIL_FROM;
 
   beforeAll(() => {
-    process.env.CONTACT_RECIPIENT_AUSTIN = RECIPIENT;
-    process.env.EMAIL_FROM = 'noreply@wavemax.promo';
     app = require('../../server');
-  });
-
-  afterAll(() => {
-    if (originalRecipient === undefined) delete process.env.CONTACT_RECIPIENT_AUSTIN;
-    else process.env.CONTACT_RECIPIENT_AUSTIN = originalRecipient;
-    if (originalFrom === undefined) delete process.env.EMAIL_FROM;
-    else process.env.EMAIL_FROM = originalFrom;
   });
 
   beforeEach(() => {
@@ -187,22 +181,13 @@ describe('POST /api/v1/contact/:slug', () => {
     expect(htmlBody).not.toMatch(/<script[^>]*>alert/i);
   });
 
-  it('falls back to EMAIL_FROM and logs a warning when CONTACT_RECIPIENT_AUSTIN is unset', async () => {
-    delete process.env.CONTACT_RECIPIENT_AUSTIN;
-    const warnSpy = jest.spyOn(logger, 'warn').mockImplementation(() => {});
-
-    try {
-      const res = await postContact(app, validBody());
-
-      expect(res.status).toBe(200);
-      expect(emailService.sendEmail).toHaveBeenCalledTimes(1);
-      expect(emailService.sendEmail.mock.calls[0][0]).toBe(process.env.EMAIL_FROM);
-      expect(warnSpy).toHaveBeenCalled();
-    } finally {
-      warnSpy.mockRestore();
-      process.env.CONTACT_RECIPIENT_AUSTIN = RECIPIENT;
-    }
-  });
+  // The empty-email-or-missing-data 500 path was previously tested via
+  // env-var manipulation; with LOCATION_DATA being the single source,
+  // that path is exercised by the 404-unknown-slug test above (which
+  // also flows through resolveRecipient → null → controller-level
+  // failure response). Leaving the unhappy data-corruption case to
+  // unit tests on the loader rather than the integration layer to
+  // avoid jest-mock gymnastics on a destructured controller import.
 });
 
 describe('contactRoutes — wiring', () => {
