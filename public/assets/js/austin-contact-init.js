@@ -33,6 +33,8 @@
       'contact.form.errorDefault':  'There was a problem sending your message. Please try again, or call us directly.',
       'contact.modal.successTitle': 'Message sent',
       'contact.modal.errorTitle':   "Couldn't send message",
+      'contact.modal.loadingTitle': 'Sending message…',
+      'contact.modal.loadingBody':  "We're delivering your message — this usually takes a few seconds.",
       'contact.modal.ok':           'OK',
       'contact.tiles.hours.title':       'Open every day',
       'contact.tiles.hours.text':        'Self-service floor open 7am–10pm, 365 days a year. Last wash starts 9pm so every cycle finishes before close.',
@@ -71,6 +73,8 @@
       'contact.form.errorDefault':  'Hubo un problema al enviar su mensaje. Inténtelo de nuevo o llámenos directamente.',
       'contact.modal.successTitle': 'Mensaje enviado',
       'contact.modal.errorTitle':   'No se pudo enviar',
+      'contact.modal.loadingTitle': 'Enviando mensaje…',
+      'contact.modal.loadingBody':  'Estamos entregando su mensaje — esto suele tardar unos segundos.',
       'contact.modal.ok':           'Aceptar',
       'contact.tiles.hours.title':       'Abierto todos los días',
       'contact.tiles.hours.text':        'Servicio de autoservicio abierto de 7am a 10pm, 365 días al año. El último lavado inicia a las 9pm para que todo termine antes del cierre.',
@@ -109,6 +113,8 @@
       'contact.form.errorDefault':  'Houve um problema ao enviar sua mensagem. Tente novamente ou ligue diretamente.',
       'contact.modal.successTitle': 'Mensagem enviada',
       'contact.modal.errorTitle':   'Não foi possível enviar',
+      'contact.modal.loadingTitle': 'Enviando mensagem…',
+      'contact.modal.loadingBody':  'Estamos entregando sua mensagem — geralmente leva alguns segundos.',
       'contact.modal.ok':           'OK',
       'contact.tiles.hours.title':       'Aberto todos os dias',
       'contact.tiles.hours.text':        'Autoatendimento aberto das 7h às 22h, 365 dias por ano. Última lavagem começa às 21h para que todos os ciclos terminem antes de fechar.',
@@ -147,6 +153,8 @@
       'contact.form.errorDefault':  'Beim Senden Ihrer Nachricht ist ein Problem aufgetreten. Bitte versuchen Sie es erneut oder rufen Sie uns direkt an.',
       'contact.modal.successTitle': 'Nachricht gesendet',
       'contact.modal.errorTitle':   'Senden fehlgeschlagen',
+      'contact.modal.loadingTitle': 'Nachricht wird gesendet…',
+      'contact.modal.loadingBody':  'Wir stellen Ihre Nachricht zu — dauert in der Regel ein paar Sekunden.',
       'contact.modal.ok':           'OK',
       'contact.tiles.hours.title':       'Täglich geöffnet',
       'contact.tiles.hours.text':        'Selbstbedienung 7–22 Uhr, 365 Tage im Jahr. Letzter Waschgang um 21 Uhr, damit alle Programme vor Schluss enden.',
@@ -198,7 +206,7 @@
   }
 
   function showStatus(form, kind, text) {
-    // Inline status surfaces — kept for accessibility / no-JS / e2e selectors.
+    // Inline status surfaces — kept hidden but in DOM for accessibility / no-JS.
     const success = form.querySelector('[data-contact-status="success"]');
     const error   = form.querySelector('[data-contact-status="error"]');
     if (success) {
@@ -209,55 +217,32 @@
       error.hidden = (kind !== 'error');
       if (kind === 'error' && text) error.textContent = text;
     }
-    // Modal — primary user-facing surface for success / error.
-    if (kind === 'success' || kind === 'error') {
-      showModal(kind, text);
-    }
   }
 
-  function showModal(kind, body) {
-    const modal = document.querySelector('[data-contact-modal]');
-    if (!modal) return;
+  function sendModalToParent(kind, body) {
+    if (!window.IframeBridge || !window.IframeBridge.sendToParent) return;
     const dict = getLangDict();
-    const title = (kind === 'success')
-      ? (dict['contact.modal.successTitle'] || 'Message sent')
-      : (dict['contact.modal.errorTitle']   || 'Could not send');
-    const titleEl = modal.querySelector('[data-modal-title]');
-    const bodyEl  = modal.querySelector('[data-modal-body]');
-    const iconEl  = modal.querySelector('[data-modal-icon]');
-    if (titleEl) titleEl.textContent = title;
-    if (bodyEl)  bodyEl.textContent  = body || '';
-    modal.dataset.kind = kind;
-    if (iconEl) iconEl.innerHTML = (kind === 'success')
-      ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="12" cy="12" r="10"></circle><polyline points="7 12 11 16 17 9"></polyline></svg>'
-      : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="7" x2="12" y2="13"></line><circle cx="12" cy="17" r="0.6" fill="currentColor"></circle></svg>';
-    modal.hidden = false;
-    if (window.IframeBridge && window.IframeBridge.updateHeight) window.IframeBridge.updateHeight();
-    // Focus the OK button so Enter dismisses
-    const ok = modal.querySelector('.wm-btn-cta');
-    if (ok) ok.focus();
-  }
-
-  function hideModal() {
-    const modal = document.querySelector('[data-contact-modal]');
-    if (!modal) return;
-    modal.hidden = true;
-    if (window.IframeBridge && window.IframeBridge.updateHeight) window.IframeBridge.updateHeight();
-  }
-
-  function initModalDismissers() {
-    if (document.__austinContactModalWired) return;
-    document.__austinContactModalWired = true;
-    document.addEventListener('click', (e) => {
-      const t = e.target;
-      if (t && t.closest && t.closest('[data-modal-dismiss]')) hideModal();
-    });
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') {
-        const modal = document.querySelector('[data-contact-modal]');
-        if (modal && !modal.hidden) hideModal();
+    const titleKey = kind === 'success' ? 'contact.modal.successTitle'
+                   : kind === 'error'   ? 'contact.modal.errorTitle'
+                   : 'contact.modal.loadingTitle';
+    const fallbackTitle = kind === 'success' ? 'Message sent'
+                        : kind === 'error'   ? "Couldn't send message"
+                        : 'Sending message…';
+    window.IframeBridge.sendToParent({
+      type: 'show-modal',
+      data: {
+        kind:  kind,
+        title: dict[titleKey] || fallbackTitle,
+        body:  body || '',
+        ok:    dict['contact.modal.ok'] || 'OK'
       }
     });
+  }
+
+  function hideModalOnParent() {
+    if (window.IframeBridge && window.IframeBridge.sendToParent) {
+      window.IframeBridge.sendToParent({ type: 'hide-modal' });
+    }
   }
 
   function getLangDict() {
@@ -300,6 +285,9 @@
       e.preventDefault();
       showStatus(form, 'none', '');
       setSubmittingState(form, true);
+      // Open the parent-side modal in loading state — covers the host viewport
+      // and shows the swirl spinner while we round-trip to the API.
+      sendModalToParent('loading', getLangDict()['contact.modal.loadingBody'] || "We're delivering your message — this usually takes a few seconds.");
 
       const data = {
         firstName: form.firstName.value.trim(),
@@ -328,15 +316,19 @@
           const dict = getLangDict();
           const successText = (payload && payload.message) || dict['contact.form.successDefault'];
           showStatus(form, 'success', successText);
+          sendModalToParent('success', successText);
           form.reset();
         } else {
           const dict = getLangDict();
           const errText = summariseErrors(payload) || dict['contact.form.errorDefault'];
           showStatus(form, 'error', errText);
+          sendModalToParent('error', errText);
         }
       } catch (_) {
         const dict = getLangDict();
-        showStatus(form, 'error', dict['contact.form.errorDefault']);
+        const errText = dict['contact.form.errorDefault'];
+        showStatus(form, 'error', errText);
+        sendModalToParent('error', errText);
       } finally {
         setSubmittingState(form, false);
       }
@@ -360,7 +352,6 @@
     });
 
     initContactForm();
-    initModalDismissers();
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
