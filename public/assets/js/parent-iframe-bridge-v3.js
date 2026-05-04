@@ -271,8 +271,13 @@
     }
 
     if (Array.isArray(seo.alternateLanguages)) {
-      // Remove previous bridge-injected hreflang links, then re-add.
-      document.querySelectorAll('link[rel="alternate"][data-wm-bridge]').forEach(el => el.remove());
+      // Wipe ALL existing hreflang alternates (both prior bridge-injected
+      // ones AND the host page's static fallbacks) before installing the
+      // iframe's set. Static fallbacks only matter pre-iframe-ready; once
+      // the bridge has SEO data the iframe is the source of truth, and
+      // leaving stale entries causes duplicate hreflang codes that Google
+      // will ignore (or worse, treat as conflicting signals).
+      document.querySelectorAll('link[rel="alternate"][hreflang]').forEach(el => el.remove());
       seo.alternateLanguages.forEach(({ hreflang, href }) => {
         if (!hreflang || !href) return;
         const link = document.createElement('link');
