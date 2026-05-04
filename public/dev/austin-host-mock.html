@@ -68,6 +68,47 @@
   <link rel="alternate" hreflang="de"    href="https://wavemax.promo/dev/austin-host-mock.html?lang=de">
   <link rel="alternate" hreflang="x-default" href="https://wavemax.promo/dev/austin-host-mock.html">
 
+  <!-- ════════════════════════════════════════════════════════════════════
+       GOOGLE SEARCH CONSOLE + GOOGLE ANALYTICS — DEPLOYMENT DEPENDENCY
+
+       ⚠ FRANCHISE OWNERS: these tags MUST live in the page HTML before
+       deployment. They CANNOT be injected by JavaScript — Google's crawler
+       reads them on first paint, before any scripts execute, so script-
+       injection is not a substitute. See docs/deployment/franchise-
+       tracking-setup.md for the full procedure.
+
+       Without these in place:
+         • Search Console will refuse to verify ownership of the host
+           domain → no indexing diagnostics, no manual-action visibility,
+           no sitemap submission.
+         • GA4 will not record traffic from this page.
+
+       Get tokens from:
+         • Search Console: search.google.com/search-console → Add property
+           → URL prefix → copy the meta-tag verification token.
+         • GA4 Measurement ID: GA4 admin → Data Streams → web stream →
+           Measurement ID (format: G-XXXXXXXXXX).
+
+       CSP additions required when enabling GA4 (server/server.js or nginx):
+         • script-src  += https://www.googletagmanager.com
+         • connect-src += https://www.google-analytics.com https://*.google-analytics.com
+         • img-src     += https://www.google-analytics.com
+       ════════════════════════════════════════════════════════════════════ -->
+  <meta name="google-site-verification" content="REPLACE_WITH_FRANCHISE_SEARCH_CONSOLE_TOKEN">
+
+  <!-- GA4 / gtag.js — uncomment and replace G-XXXXXXXXXX with the
+       franchise's measurement ID. Leave commented out until the CSP
+       updates above are deployed; otherwise the inline call below will
+       be blocked by CSP and fail silently.
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-XXXXXXXXXX');
+  </script>
+  -->
+
   <!-- Favicons. Mirrors the icon set used by the WordPress parent so
        browser tabs / bookmark UI stay visually consistent across hosts. -->
   <link rel="icon" type="image/png" sizes="32x32"  href="https://wavemaxlaundry.com/wp-content/uploads/2026/03/cropped-favicon-32x32.png">
