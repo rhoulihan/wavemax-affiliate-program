@@ -750,13 +750,26 @@
     });
   }
 
-  // Activate the tab specified by ?tab= on initial load. Called after the
-  // page renders so panels are present in the DOM.
+  // Activate the tab specified by ?tab= on initial load and ask the parent
+  // to scroll the tab section into view. The auto-resize protocol expands
+  // the iframe to its full content height, so the parent — not the iframe —
+  // owns the scroll position; we send the section's offset within the
+  // iframe document and let the parent compute the scroll target.
   function applyInitialTabFromQuery() {
     try {
       const params = new URLSearchParams(window.location.search);
       const tab = params.get('tab');
-      if (tab) activateTab(tab);
+      if (!tab) return;
+      activateTab(tab);
+      // Wait two frames so the panel reflow settles before measuring.
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        const section = document.getElementById('com-tabs');
+        if (!section) return;
+        const offset = section.getBoundingClientRect().top + window.scrollY;
+        if (window.parent && window.parent !== window) {
+          window.parent.postMessage({ type: 'scroll-to', data: { offset } }, '*');
+        }
+      }));
     } catch (_) { /* noop */ }
   }
 

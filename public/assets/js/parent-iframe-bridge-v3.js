@@ -137,6 +137,11 @@
       case 'hide-modal':
         hideStatusModal();
         break;
+      case 'scroll-to':
+        if (data && Number.isFinite(Number(data.offset))) {
+          scrollToIframeOffset(Number(data.offset));
+        }
+        break;
       default:
         // Unknown message — ignore, don't error. Forward-compat.
         break;
@@ -207,6 +212,17 @@
       lastIframeHeight = height;
       iframe.style.height = height + 'px';
     }
+  }
+
+  // The iframe runs at full content height (no internal scroll), so the
+  // parent owns the scroll position. The iframe sends an offset measured
+  // from its own document top; we add the iframe's position in the parent
+  // document to compute the parent scroll target.
+  function scrollToIframeOffset(offset) {
+    if (!iframe) iframe = findIframe();
+    if (!iframe) return;
+    const iframeTop = iframe.getBoundingClientRect().top + window.scrollY;
+    window.scrollTo({ top: iframeTop + offset, behavior: 'smooth' });
   }
 
   /* ---------- SEO injection ---------- */
