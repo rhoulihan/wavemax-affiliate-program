@@ -288,7 +288,13 @@ body { background: var(--wm-bg-soft); }
           mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path d="M3 8 l3 3 7-7" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>') center / 16px no-repeat;
 }
 
-/* ---------- How-it-works ---------- */
+/* ---------- Tabbed info section ----------
+   Consolidated container for the How / Why / FAQ panels. Light tint
+   so the section reads as its own zone without the heavy per-section
+   borders the original three sections each carried. */
+.wm-wdf-tabs-section { background: var(--wm-bg-tint); border-top: 1px solid var(--wm-border); border-bottom: 1px solid var(--wm-border); padding: var(--wm-sp-7) 0; }
+
+/* ---------- How-it-works (panel content) ---------- */
 .wm-wdf-how { background: var(--wm-bg-tint); border-top: 1px solid var(--wm-border); border-bottom: 1px solid var(--wm-border); }
 .wm-wdf-steps {
   list-style: none;

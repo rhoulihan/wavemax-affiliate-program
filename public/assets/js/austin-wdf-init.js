@@ -55,6 +55,9 @@
       'wdf.tiles.detergent.text': 'Eco-friendly, biodegradable, fragrance-light. Built for sensitive skin and households with kids or pets.',
       'wdf.tiles.hangers.title':  'Hangers on request',
       'wdf.tiles.hangers.text':   "Flag delicates at drop-off — we'll air-dry, hand-fold, and put them on hangers instead of folding into the stack.",
+      'wdf.tabs.how':             'How it works',
+      'wdf.tabs.why':             'Why WaveMAX',
+      'wdf.tabs.faq':             'FAQ',
       'wdf.tiles.cards.title':    'No subscription',
       'wdf.tiles.cards.text':     'Pay per pound, cards-only. No memberships, no contracts, no hidden fees. Use us when you need us.',
       'wdf.faq.eyebrow':          'QUESTIONS',
@@ -120,6 +123,9 @@
       'wdf.tiles.detergent.text': 'Ecológico, biodegradable, con poco perfume. Pensado para piel sensible y hogares con niños o mascotas.',
       'wdf.tiles.hangers.title':  'Ganchos a pedido',
       'wdf.tiles.hangers.text':   'Marque las prendas delicadas al dejar — las secamos al aire, las doblamos a mano y las colgamos en ganchos en lugar de doblarlas en la pila.',
+      'wdf.tabs.how':             'Cómo funciona',
+      'wdf.tabs.why':             'Por qué WaveMAX',
+      'wdf.tabs.faq':             'Preguntas',
       'wdf.tiles.cards.title':    'Sin suscripción',
       'wdf.tiles.cards.text':     'Pague por libra, solo tarjeta. Sin membresías, sin contratos, sin cargos ocultos. Úsenos cuando lo necesite.',
       'wdf.faq.eyebrow':          'PREGUNTAS',
@@ -185,6 +191,9 @@
       'wdf.tiles.detergent.text': 'Ecológico, biodegradável, com pouco perfume. Feito para pele sensível e lares com crianças ou pets.',
       'wdf.tiles.hangers.title':  'Cabides sob solicitação',
       'wdf.tiles.hangers.text':   'Marque as peças delicadas na entrega — secamos ao ar, dobramos à mão e colocamos em cabides em vez de dobrar na pilha.',
+      'wdf.tabs.how':             'Como funciona',
+      'wdf.tabs.why':             'Por que WaveMAX',
+      'wdf.tabs.faq':             'Perguntas',
       'wdf.tiles.cards.title':    'Sem assinatura',
       'wdf.tiles.cards.text':     'Pague por libra, só cartão. Sem mensalidades, sem contratos, sem taxas escondidas. Use quando precisar.',
       'wdf.faq.eyebrow':          'PERGUNTAS',
@@ -250,6 +259,9 @@
       'wdf.tiles.detergent.text': 'Umweltfreundlich, biologisch abbaubar, parfümarm. Für empfindliche Haut und Haushalte mit Kindern oder Haustieren.',
       'wdf.tiles.hangers.title':  'Bügel auf Anfrage',
       'wdf.tiles.hangers.text':   'Markieren Sie empfindliche Stücke bei der Abgabe — wir trocknen sie an der Luft, falten von Hand und hängen sie auf Bügel statt in den Stapel.',
+      'wdf.tabs.how':             'So funktioniert es',
+      'wdf.tabs.why':             'Warum WaveMAX',
+      'wdf.tabs.faq':             'FAQ',
       'wdf.tiles.cards.title':    'Kein Abo',
       'wdf.tiles.cards.text':     'Zahlen Sie pro Pfund, nur Karte. Keine Mitgliedschaften, keine Verträge, keine versteckten Gebühren. Nutzen Sie uns, wenn Sie uns brauchen.',
       'wdf.faq.eyebrow':          'FRAGEN',
@@ -491,6 +503,28 @@
     probe.src = WATERMARK_URL;
   }
 
+  /* ---------- Tabs ----------
+   * Document-level delegation so the handler survives any future
+   * iframe-doc swap. Reads data-wdf-tab on the clicked tab and
+   * toggles aria-selected / aria-hidden across the trio.
+   */
+  function initTabs() {
+    if (document.__austinWdfTabsWired) return;
+    document.__austinWdfTabsWired = true;
+    document.addEventListener('click', (e) => {
+      const tab = e.target.closest && e.target.closest('[data-wdf-tab]');
+      if (!tab) return;
+      const target = tab.getAttribute('data-wdf-tab');
+      document.querySelectorAll('[data-wdf-tab]').forEach((t) =>
+        t.setAttribute('aria-selected', t === tab ? 'true' : 'false'));
+      document.querySelectorAll('[data-wdf-panel]').forEach((p) =>
+        p.setAttribute('aria-hidden', p.getAttribute('data-wdf-panel') === target ? 'false' : 'true'));
+      if (window.IframeBridge && window.IframeBridge.updateHeight) {
+        window.IframeBridge.updateHeight();
+      }
+    });
+  }
+
   /* ---------- data-bind ---------- */
   function applyBindings(data) {
     if (!data) return;
@@ -521,6 +555,7 @@
     });
 
     setHeroWatermark();
+    initTabs();
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
