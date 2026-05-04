@@ -321,39 +321,7 @@ The displayed rating is computed from `userRatingCount` and `rating`
 on the Places response and updates without a redeploy as new reviews
 land. **Today: 4.8 ★, 48 reviews.**
 
-### 3.6. Security Baseline
-
-Before recommending the URL for corporate review, we engaged an
-independent security audit of the deployed app (the audit report is
-checked in at `docs/security/wavemax-promo-prelaunch-audit-2026-05-03.md`
-in the repo and available on request). The audit identified 24 findings
-across CRITICAL / HIGH / MEDIUM / LOW / INFO severity. Before publishing
-the demo URL we closed:
-
-- **All 4 CRITICAL findings** — production NODE_ENV correctly set,
-  test routes that leaked password hashes disabled, Mailcow admin
-  ports closed at the firewall, MongoDB TLS validation re-enabled.
-- **3 of 7 HIGH findings** — proper `SameSite=None; Secure`
-  cookies for the iframe-embed use case, CSRF Phase 2 enforcement,
-  HTTPS redirect for cleartext requests.
-- The remaining 4 HIGHs (CSRF bearer-token bypass, refresh token in
-  URL query string, legacy bridge migration, Node-as-root) are tracked
-  with assignees and target dates; none affect demo security.
-
-The deployed page ships with:
-
-- Strict Content-Security-Policy with nonce-based script-src
-- HTTP Strict Transport Security: 1 year, includeSubDomains, preload
-- Referrer-Policy: same-origin
-- X-Content-Type-Options: nosniff
-- frame-ancestors restricting embedding to `wavemax.promo`,
-  `wavemaxlaundry.com`, and `*.wavemaxlaundry.com` (corporate can lock
-  this down further per their policy)
-- Cookie flags: HttpOnly, Secure, SameSite=None
-- TLS 1.2+ enforced via Cloudflare in front
-- 36 automated end-to-end Playwright tests at 6 responsive viewports
-
-### 3.7. Performance & Operations
+### 3.6. Performance & Operations
 
 - **Cloudflare proxy** in front for static-asset edge caching, TLS
   termination, DDoS protection
