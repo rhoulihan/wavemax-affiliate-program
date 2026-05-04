@@ -233,8 +233,16 @@ body { background: var(--wm-bg); }
   outline-offset: 1px;
 }
 .wm-contact-form textarea { resize: vertical; }
-.wm-form-actions { margin-top: var(--wm-sp-2); }
+.wm-form-actions {
+  margin-top: var(--wm-sp-2);
+  display: flex;
+  justify-content: flex-end;
+}
 .wm-form-actions .wm-btn-cta { min-width: 180px; }
+@media (max-width: 540px) {
+  .wm-form-actions { justify-content: stretch; }
+  .wm-form-actions .wm-btn-cta { width: 100%; min-width: 0; }
+}
 
 /* ---------- Status surfaces ---------- */
 .wm-contact-success,
