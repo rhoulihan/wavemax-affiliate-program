@@ -54,14 +54,6 @@ body { background: var(--wm-bg-soft); }
   margin: 0 auto;
   padding: 0 var(--wm-sp-5);
   text-align: center;
-  /* Flex column with center cross-axis alignment ensures children
-     (including the nowrap'd title that may exceed the inner's
-     max-width) center themselves on the inner's true center axis,
-     rather than the title's overflow being asymmetric inside a
-     block layout. */
-  display: flex;
-  flex-direction: column;
-  align-items: center;
 }
 .wm-hero-logo {
   display: block;
@@ -80,13 +72,24 @@ body { background: var(--wm-bg-soft); }
   font-size: clamp(20px, 4.6vw, var(--wm-fs-2xl));
   font-weight: 700;
   line-height: 1.2;
-  margin: 0 0 var(--wm-sp-2);
+  /* width: max-content + auto-margin centers the title on its own
+     content width — same mechanism the subtitle uses (max-width +
+     auto). This guarantees the title is centered with the rest of
+     the hero content regardless of any nowrap overflow behavior. */
+  width: max-content;
+  max-width: 100%;
+  margin: 0 auto var(--wm-sp-2);
   color: #ffffff;
   white-space: nowrap;
 }
 /* On very narrow viewports allow the title to wrap rather than
    overflow horizontally. */
-@media (max-width: 360px) { .wm-hero-title { white-space: normal; } }
+@media (max-width: 360px) {
+  .wm-hero-title {
+    white-space: normal;
+    width: auto;
+  }
+}
 .wm-hero-tagline {
   font-family: 'Poppins', sans-serif;
   font-size: var(--wm-fs-sm);
