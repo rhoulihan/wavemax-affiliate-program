@@ -13,10 +13,11 @@
 
 The WaveMAX brand currently lives inside one monolithic WordPress site that every franchise must inherit, share, and contend with. **It does not have to.** The reference build at `wavemax.promo/dev/austin-host-mock.html?route=…` demonstrates a different model:
 
-- A **shared content library** (the iframe pages) hosted by corporate
-- An **iframe bridge** that pushes branding, theme tokens, translations, and SEO down to any host page
-- **Per-franchise host pages** that can live anywhere — WordPress, static HTML, WIX, Squarespace, Shopify, custom — all consuming the same library
-- **Complete isolation** between franchises while corporate keeps unbreakable brand control
+- A **bridge protocol + style spec** defined and maintained by corporate
+- A **reference iframe library** (the Austin build) that any franchise can reuse, fork, or replace — hosted wherever each franchise chooses
+- **Per-franchise host pages** that can live anywhere — WordPress, static HTML, WIX, Squarespace, Shopify, custom
+- **Per-franchise iframe content sources** that can also live anywhere — MHR-managed WordPress, the franchise's own server, a custom app, or the Austin reference deployment
+- **Complete isolation** between franchises while corporate keeps unbreakable brand control via the protocol, not via centralized hosting
 
 We have already built this end-to-end for Austin in **a single day** of focused work — 100 commits, 21 defects fixed, 21 new features shipped, 96+ e2e tests passing. We are offering to **package it as a fully documented, turnkey reference repository for the entire WaveMAX network at zero cost** — ready for MHR's team to own and extend on day one. Optional paid integration + training engagement is available if MHR staff would benefit from hands-on ramp-up support. The economics, the development velocity, and the operational risk profile all favor this model over the current monolith. Section 1 makes the case for executives. Section 2 explains how it works. Section 3 lays out what we are offering and what we'd ask in return.
 
@@ -26,7 +27,7 @@ We have already built this end-to-end for Austin in **a single day** of focused 
 
 ## The pattern, in one paragraph
 
-Every page a customer sees is a **host page** (WordPress, static, WIX — whatever the franchise prefers). Each host page mounts a small iframe that loads a corporate-controlled content page from `wavemax.promo`. A **bridge script** running on both sides of the iframe synchronizes language, theme, location data, SEO metadata, and modal popups in real time. The corporate library defines what a "WaveMAX page" looks like. The franchise host page provides location-specific data and any custom content above or below the embed. Neither side can break the other.
+Every page a customer sees is a **host page** (WordPress, static, WIX — whatever the franchise prefers). Each host page mounts a small iframe that loads a content page **from any source the franchise prefers** — their own private app server, an MHR-managed WordPress, a WIX site, a custom app, or the Austin reference deployment. A **bridge script** running on both sides of the iframe synchronizes language, theme, location data, SEO metadata, and modal popups in real time. The bridge protocol — defined and maintained by corporate — is what enforces the WaveMAX experience; the iframe content is whatever the franchise (or MHR on their behalf) chooses to deploy that conforms to the protocol. Neither side can break the other.
 
 ```
 ┌────────────────────────────────────────────────────────────────────────┐
@@ -40,11 +41,13 @@ Every page a customer sees is a **host page** (WordPress, static, WIX — whatev
 │   └──────────────────────────────────────────────────────────────┘    │
 │                              ▲ ▼  postMessage                          │
 │   ┌──────────────────────────────────────────────────────────────┐    │
-│   │   <iframe src="https://wavemax.promo/wash-dry-fold-embed">   │    │
+│   │   <iframe src="https://[franchise-content-source]/…">       │    │
 │   │                                                              │    │
-│   │   Corporate-controlled content                               │    │
-│   │   · CSS theme tokens · Translations · Layout · SEO schema    │    │
-│   │   · Pricing logic · Forms + rate limiting                    │    │
+│   │   Iframe content (franchise picks the host)                  │    │
+│   │   · Conforms to corporate bridge + style spec                │    │
+│   │   · Could be MHR-managed WP, Austin reference build,         │    │
+│   │     franchise's own app server, custom app, etc.             │    │
+│   │   · CSS theme tokens · Translations · SEO schema · Forms     │    │
 │   └──────────────────────────────────────────────────────────────┘    │
 └────────────────────────────────────────────────────────────────────────┘
 ```
@@ -57,8 +60,8 @@ Every iframe page is served from corporate infrastructure. The CSS theme, the he
 **2. Franchises are not locked into corporate hosting.**
 Today, "have a WaveMAX presence" means "be on `wavemaxlaundry.com`." That coupling is the source of every coordination cost: every franchise sharing one CMS, one deploy pipeline, one DNS, one hosting bill, one set of permissions. With this pattern, a franchise that wants their own WordPress, their own static landing page, their own WIX/Squarespace, or their own Shopify storefront just embeds the iframe. They get corporate-grade chrome **without paying for corporate infrastructure or asking corporate to deploy on their behalf**.
 
-**3. Updates ship instantly to every franchise, with no per-site deploy.**
-A pricing change, a new feature, a translation fix, a security patch — corporate ships it once to `wavemax.promo`, and every franchise's host page picks it up on the next page load. No franchise-side action required, no risk of outdated copies in the wild.
+**3. Updates ship instantly to every franchise that opts in, with no per-site deploy.**
+The bridge protocol is forward-compatible: a pricing change, a new feature, a translation fix, or a security patch in any iframe content source picks up on the next page load — no franchise-side action required. Franchises that pull from MHR-managed iframe hosting get corporate's iteration cadence for free; franchises that self-host their iframe content control their own release cadence. Either way, the brand contract still holds.
 
 **4. Isolation: a franchise compromise can't reach the corporate site, and vice versa.**
 Each franchise host page lives in its own DNS, its own hosting environment, its own admin perimeter. The iframe is the only attack surface that crosses, and `frame-ancestors` in CSP locks down where the embed can be loaded. A WordPress plugin vulnerability on one franchise's site doesn't put the corporate brand at risk — the iframe content is independent.
@@ -109,32 +112,41 @@ This velocity is **only possible because the architecture decouples content from
 ### Proposed — modular network
 
 ```
-                    ┌─────────────────────────────────┐
-                    │   wavemax.promo (CONTENT LIB.)  │
-                    │   ─────────────────────────────  │
-                    │   landing  ·  WDF  ·  self-serve │
-                    │   contact  ·  commercial  ·  …   │
-                    │   theme tokens  ·  translations  │
-                    │   bridge JS  ·  SEO schema       │
-                    └─────────────────────────────────┘
+                ┌──────────────────────────────────────────┐
+                │   CORPORATE-MAINTAINED SPECIFICATION     │
+                │   ──────────────────────────────────────  │
+                │   Bridge protocol  ·  Theme tokens       │
+                │   Style guide      ·  SEO schema reqs    │
+                │   Reference iframe library (Austin build)│
+                └──────────────────────────────────────────┘
+                              ▲ conforms to spec
+                              │
+              ┌──────────┬──────────┬──────────┬──────────┐
+              │  Iframe  │  Iframe  │  Iframe  │  Iframe  │
+              │ content  │ content  │ content  │ content  │
+              │ source A │ source B │ source C │ source D │
+              │(Austin   │(MHR-     │(franch.  │(WIX or   │
+              │ ref repo)│ managed  │ private  │ custom   │
+              │          │ WP)      │ server)  │ app)     │
+              └──────────┴──────────┴──────────┴──────────┘
                               │     │     │     │
-                              │ iframe embeds (postMessage bridge)
+                              │ iframe embeds (bridge protocol)
                               ▼     ▼     ▼     ▼
               ┌──────────┬──────────┬──────────┬──────────┐
-              │ Austin   │ Dallas   │ Houston  │ Denver   │
-              │ self-host│ MHR-host │ WIX      │ static   │
-              │ WordPress│ WordPress│          │ HTML     │
+              │ Host A   │ Host B   │ Host C   │ Host D   │
+              │ self-WP  │ MHR-WP   │ WIX      │ static   │
               └──────────┴──────────┴──────────┴──────────┘
-                Each franchise picks its own host. Corporate
-                still controls every pixel of brand chrome.
+                Each franchise picks its own host AND its own
+                iframe content source. Corporate enforces brand
+                via the protocol, not via centralized hosting.
 ```
 
 ## Visual: hosting flexibility
 
 ```
-   THE BRIDGE IS HOST-AGNOSTIC
+   THE BRIDGE IS HOST-AGNOSTIC AND CONTENT-SOURCE-AGNOSTIC
 
-   <iframe src="…wavemax.promo/wash-dry-fold-embed.html">
+   <iframe src="https://[any conforming source]/wash-dry-fold">
                        │
         ┌──────────────┼──────────────┬──────────────┬──────────────┐
         │              │              │              │              │
@@ -146,16 +158,16 @@ This velocity is **only possible because the architecture decouples content from
    │ block)  │    │         │    │ embed) │    │            │  │ Vue/etc)│
    └─────────┘    └─────────┘    └─────────┘    └─────────┘    └─────────┘
 
-   Same iframe URL. Same CSS. Same translations. Same SEO. Same forms.
-   The bridge JS in each host pushes LOCATION_DATA into the iframe.
-   Nothing else differs.
+   Each host can also point its iframe at any conforming content source —
+   their own WP, MHR-managed WP, the Austin reference, a custom app, etc.
+   Same bridge protocol. Same CSS spec. Same SEO contract.
 ```
 
 ## What corporate gains
 
 - **Centralized brand enforcement** — CSS tokens, type scale, copy voice, schema all in one repo
 - **Centralized security** — CSRF, rate limiting, XSS sanitization, encrypted at-rest storage all live behind the iframe API, not duplicated per franchise
-- **Faster iteration** — corporate ships a fix to `wavemax.promo` and every franchise sees it on the next page load
+- **Faster iteration** — corporate ships a fix to the spec or reference repo; every franchise pulling from MHR-managed iframe hosting sees it on the next page load. Self-hosted franchises pull on their own cadence.
 - **Lower hosting bill** — franchises pay for their own host pages
 - **Lower coordination cost** — franchises can self-serve their content schedule instead of competing for corporate's CMS attention
 - **An obvious upsell tier** — managed hosting, integrations, custom development — sold to franchises who don't want to host themselves (more on this below)
@@ -221,26 +233,35 @@ iframe → host   { type: 'navigate',          data: { href } }
 
 Adding a new message type is additive — old hosts ignore unknown types.
 
-### Layer 3: The corporate content library
+### Layer 3: The iframe content (per-franchise hosting)
 
-A flat collection of standalone HTML pages:
+A flat collection of standalone HTML pages, conforming to the corporate spec:
 
 - `wash-dry-fold-embed.html`
 - `self-serve-laundry-embed.html`
 - `commercial-embed.html`
 - `contact-embed.html`
-- `austin-landing-v3-embed.html`
+- `landing-v3-embed.html`
 - *(and one per service / page type the network needs)*
+
+The Austin reference build implements all of these and is freely reusable. **Where a franchise hosts these pages is their choice:**
+
+- **Use the Austin reference deployment** as-is (fastest path to live)
+- **Fork the reference repo** and host the iframe content on their own server (private app server, Cloudflare Pages, S3, etc.)
+- **Stand up an MHR-managed deployment** on MHR infrastructure (a paid service tier MHR can offer)
+- **Build a custom implementation** in any tech stack, as long as it speaks the bridge protocol and follows the style spec
 
 Each page is fully self-contained: HTML structure, CSS reference, JS init, translation dictionary, SEO config, structured-data schemas. They consume `LOCATION_DATA` from the host via the bridge. They never assume a specific host — the same page renders identically inside WordPress, WIX, or a static `<html>` document.
 
-Backed by Express on the corporate side for:
+The iframe content can be backed by a small server-side stack for:
 
 - Per-IP rate limiting on contact-form / sensitive operations (MongoDB-backed, distributed-safe)
 - CSRF protection where needed
-- Mailcow SMTP relay for form submissions
+- SMTP relay for form submissions
 - Encrypted-at-rest storage for OAuth tokens / W-9 documents
 - Centralized logging + audit trail
+
+The Austin reference includes all of these as Express middleware. Franchises that don't run a server can still use the iframe pages — they'd lose form-submission and authenticated features, but the read-only marketing pages work fine on a static CDN.
 
 ## Hosting integration patterns
 
@@ -257,13 +278,19 @@ Backed by Express on the corporate side for:
     /* … */
   };
 </script>
-<script src="https://wavemax.promo/assets/js/parent-iframe-bridge-v3.js?v=20260504"></script>
+<!-- Bridge JS — published once per franchise (could be a CDN copy of the
+     reference, MHR-hosted, or self-hosted; same file either way). -->
+<script src="https://[your-bridge-host]/parent-iframe-bridge-v3.js?v=20260504"></script>
+
+<!-- Iframe content — point this at whichever conforming source the
+     franchise chose: their own app server, MHR-managed hosting,
+     the Austin reference deployment, etc. -->
 <iframe id="wavemax-iframe"
-        src="https://wavemax.promo/wash-dry-fold-embed.html?v=20260504"
+        src="https://[franchise-content-source]/wash-dry-fold-embed.html?v=20260504"
         style="width:100%;border:0"></iframe>
 ```
 
-Drop into a Gutenberg "Custom HTML" block, an Elementor "HTML widget," or a Divi "Code module." No theme work, no plugin install required.
+Drop into a Gutenberg "Custom HTML" block, an Elementor "HTML widget," or a Divi "Code module." No theme work, no plugin install required. The two URLs are independent — you can host the bridge on one server and the iframe content on another.
 
 ### Static HTML (any CDN / S3 / Cloudflare Pages)
 
@@ -335,7 +362,7 @@ A franchise gets a Google rich-result-eligible page **without writing a single l
 The MHR engineering team transitions from "we are the only path to ship a WaveMAX page" to "we own the corporate library and the per-franchise managed-hosting tier." That is a healthier role:
 
 - They keep direct ownership of the corporate-controlled content (the highest-value surface)
-- They sell **managed host pages** as a paid service tier to franchises that don't want to host themselves
+- They sell **managed host pages and/or managed iframe-content hosting** as paid service tiers to franchises that don't want to host either piece themselves
 - They sell **custom integrations** (Salesforce, Mailchimp, scheduling, white-label apps) on top of the iframe API
 - They retire the per-franchise WordPress drama (themes, plugins, admin escalations) — that overhead moves to the franchise that chose self-hosting
 
