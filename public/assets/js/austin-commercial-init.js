@@ -727,21 +727,37 @@
   }
 
   /* ---------- Tabs (delegated) ---------- */
+  const VALID_TABS = ['medical', 'gym', 'airbnb', 'restaurant', 'contractors', 'faq'];
+
+  function activateTab(target) {
+    if (!target || !VALID_TABS.includes(target)) return;
+    document.querySelectorAll('[data-com-tab]').forEach((t) =>
+      t.setAttribute('aria-selected', t.getAttribute('data-com-tab') === target ? 'true' : 'false'));
+    document.querySelectorAll('[data-com-panel]').forEach((p) =>
+      p.setAttribute('aria-hidden', p.getAttribute('data-com-panel') === target ? 'false' : 'true'));
+    if (window.IframeBridge && window.IframeBridge.updateHeight) {
+      window.IframeBridge.updateHeight();
+    }
+  }
+
   function initTabs() {
     if (document.__austinComTabsWired) return;
     document.__austinComTabsWired = true;
     document.addEventListener('click', (e) => {
       const tab = e.target.closest && e.target.closest('[data-com-tab]');
       if (!tab) return;
-      const target = tab.getAttribute('data-com-tab');
-      document.querySelectorAll('[data-com-tab]').forEach((t) =>
-        t.setAttribute('aria-selected', t === tab ? 'true' : 'false'));
-      document.querySelectorAll('[data-com-panel]').forEach((p) =>
-        p.setAttribute('aria-hidden', p.getAttribute('data-com-panel') === target ? 'false' : 'true'));
-      if (window.IframeBridge && window.IframeBridge.updateHeight) {
-        window.IframeBridge.updateHeight();
-      }
+      activateTab(tab.getAttribute('data-com-tab'));
     });
+  }
+
+  // Activate the tab specified by ?tab= on initial load. Called after the
+  // page renders so panels are present in the DOM.
+  function applyInitialTabFromQuery() {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const tab = params.get('tab');
+      if (tab) activateTab(tab);
+    } catch (_) { /* noop */ }
   }
 
   /* ---------- Cross-frame nav for vertical-page anchors ---------- */
@@ -792,6 +808,7 @@
     setHeroWatermark();
     initTabs();
     initCrossFrameNav();
+    applyInitialTabFromQuery();
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
