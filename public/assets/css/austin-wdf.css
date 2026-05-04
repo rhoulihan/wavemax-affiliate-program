@@ -35,7 +35,11 @@ body { background: var(--wm-bg-soft); }
   inset: 0;
   pointer-events: none;
   z-index: 0;
-  background-size: cover;
+  /* 80% of cover size — shrinks the photo by 20% while preserving
+     "fill the box and crop the spill" framing. The result is a
+     smaller, less-zoomed image with more of the original frame
+     visible. */
+  background-size: 80%;
   background-position: center;
   background-repeat: no-repeat;
   filter: saturate(0.95) brightness(0.85);
