@@ -279,31 +279,6 @@
 
   </section>
 
-  <!-- ════════════════════════════════════════════════════════════════════
-       Submit-status modal — shown after the contact form POST resolves.
-       Hidden by default; austin-contact-init.js toggles [hidden] and
-       writes the title/body. Backdrop click, Esc, and the OK button all
-       dismiss. Single dialog re-skinned per kind (success | error).
-       ════════════════════════════════════════════════════════════════════ -->
-  <div class="wm-modal" data-contact-modal hidden>
-    <div class="wm-modal-backdrop" data-modal-dismiss></div>
-    <div class="wm-modal-card" role="dialog" aria-modal="true" aria-labelledby="wm-contact-modal-title">
-      <button class="wm-modal-close" type="button" data-modal-dismiss aria-label="Close">×</button>
-      <div class="wm-modal-icon" data-modal-icon aria-hidden="true">
-        <!-- success checkmark by default; swapped to alert on error -->
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
-          <circle cx="12" cy="12" r="10"></circle>
-          <polyline points="7 12 11 16 17 9"></polyline>
-        </svg>
-      </div>
-      <h3 class="wm-modal-title" id="wm-contact-modal-title" data-modal-title>Message sent</h3>
-      <p class="wm-modal-body" data-modal-body>We'll be in touch shortly.</p>
-      <div class="wm-modal-actions">
-        <button class="wm-btn wm-btn-cta" type="button" data-modal-dismiss data-i18n="contact.modal.ok">OK</button>
-      </div>
-    </div>
-  </div>
-
   <script src="/assets/js/iframe-bridge-v2.js"></script>
   <script src="/assets/js/austin-contact-init.js"></script>
 

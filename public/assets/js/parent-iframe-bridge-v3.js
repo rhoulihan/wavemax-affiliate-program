@@ -131,6 +131,12 @@
         // Legacy v2 message — no-op on v3 because the host doesn't have a
         // hidden Walibu page-header section. Kept accepted to avoid noise.
         break;
+      case 'show-modal':
+        if (data) showStatusModal(data);
+        break;
+      case 'hide-modal':
+        hideStatusModal();
+        break;
       default:
         // Unknown message — ignore, don't error. Forward-compat.
         break;
@@ -318,6 +324,110 @@
   }
 
   /* ---------- Public API ---------- */
+
+  /* ──────────────────────────────────────────────────────────────────
+     Status modal — rendered in the parent frame so the overlay covers
+     the visible viewport and can darken the host page. Single instance
+     reused across show/hide. Iframe content sends a `show-modal` /
+     `hide-modal` postMessage; CSS lives in austin-host-mock.css.
+     ────────────────────────────────────────────────────────────────── */
+  let modalEl = null;
+  let modalKeyHandler = null;
+
+  function buildStatusModal() {
+    const root = document.createElement('div');
+    root.className = 'wm-status-modal';
+    root.setAttribute('hidden', '');
+    root.innerHTML =
+      '<div class="wm-status-modal-backdrop" data-status-modal-dismiss></div>' +
+      '<div class="wm-status-modal-card" role="dialog" aria-modal="true" aria-labelledby="wm-status-modal-title">' +
+        '<button type="button" class="wm-status-modal-close" data-status-modal-dismiss aria-label="Close">×</button>' +
+        '<div class="wm-status-modal-icon" data-status-modal-icon aria-hidden="true"></div>' +
+        '<h3 class="wm-status-modal-title" id="wm-status-modal-title" data-status-modal-title></h3>' +
+        '<p class="wm-status-modal-body" data-status-modal-body></p>' +
+        '<div class="wm-status-modal-actions">' +
+          '<button type="button" class="wm-status-modal-ok" data-status-modal-dismiss></button>' +
+        '</div>' +
+      '</div>';
+    document.body.appendChild(root);
+    root.addEventListener('click', (e) => {
+      if (e.target && e.target.closest && e.target.closest('[data-status-modal-dismiss]')) {
+        hideStatusModal();
+      }
+    });
+    return root;
+  }
+
+  function showStatusModal(data) {
+    if (!modalEl) modalEl = buildStatusModal();
+    const kind  = (data.kind === 'error') ? 'error'
+                : (data.kind === 'loading') ? 'loading'
+                : 'success';
+    const title = data.title || (
+      kind === 'success' ? 'Message sent' :
+      kind === 'error'   ? 'Could not send' :
+      'Sending message…'
+    );
+    const body  = data.body || '';
+    const ok    = data.ok   || 'OK';
+    modalEl.dataset.kind = kind;
+    modalEl.querySelector('[data-status-modal-title]').textContent = title;
+    modalEl.querySelector('[data-status-modal-body]').textContent  = body;
+
+    // Icon: swirl spinner for loading, check/alert SVG otherwise.
+    const iconEl = modalEl.querySelector('[data-status-modal-icon]');
+    if (kind === 'loading' && window.SwirlSpinner) {
+      iconEl.innerHTML = '';
+      const spinner = new window.SwirlSpinner({ size: 'default', speed: 'normal', container: iconEl });
+      spinner.show();
+      modalEl.__activeSpinner = spinner;
+    } else {
+      // Tear down any prior spinner so we don't leak DOM nodes.
+      if (modalEl.__activeSpinner) {
+        try { modalEl.__activeSpinner.destroy(); } catch (_) { /* defensive */ }
+        modalEl.__activeSpinner = null;
+      }
+      iconEl.innerHTML = (kind === 'success')
+        ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="12" cy="12" r="10"></circle><polyline points="7 12 11 16 17 9"></polyline></svg>'
+        : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="7" x2="12" y2="13"></line><circle cx="12" cy="17" r="0.6" fill="currentColor"></circle></svg>';
+    }
+
+    // Loading state: hide dismissers (await server response).
+    const closeBtn = modalEl.querySelector('.wm-status-modal-close');
+    const okBtn    = modalEl.querySelector('.wm-status-modal-ok');
+    const isLoading = (kind === 'loading');
+    if (closeBtn) closeBtn.hidden = isLoading;
+    if (okBtn) {
+      okBtn.hidden = isLoading;
+      okBtn.textContent = ok;
+    }
+
+    modalEl.hidden = false;
+    if (!isLoading) {
+      setTimeout(() => { if (okBtn) okBtn.focus(); }, 0);
+      if (!modalKeyHandler) {
+        modalKeyHandler = (e) => { if (e.key === 'Escape') hideStatusModal(); };
+        document.addEventListener('keydown', modalKeyHandler);
+      }
+    } else if (modalKeyHandler) {
+      document.removeEventListener('keydown', modalKeyHandler);
+      modalKeyHandler = null;
+    }
+  }
+
+  function hideStatusModal() {
+    if (modalEl) {
+      if (modalEl.__activeSpinner) {
+        try { modalEl.__activeSpinner.destroy(); } catch (_) { /* defensive */ }
+        modalEl.__activeSpinner = null;
+      }
+      modalEl.hidden = true;
+    }
+    if (modalKeyHandler) {
+      document.removeEventListener('keydown', modalKeyHandler);
+      modalKeyHandler = null;
+    }
+  }
 
   window.WaveMaxBridgeV3 = {
     sendToIframe,

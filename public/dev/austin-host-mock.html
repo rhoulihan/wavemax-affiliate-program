@@ -445,6 +445,12 @@
   <!-- Demo-only host page styles (external for CSP compliance) -->
   <link rel="stylesheet" href="/assets/css/austin-host-mock.css">
 
+  <!-- Swirl-spinner assets — used by the parent-side status modal during
+       async work (e.g. contact-form submission). Loaded on the host so
+       the spinner renders in the parent viewport, not inside the iframe. -->
+  <link rel="stylesheet" href="/assets/css/swirl-spinner.css">
+  <script src="/assets/js/swirl-spinner.js" defer></script>
+
   <!-- Server-rendered config (reads GOOGLE_PLACES_API_KEY + LOCATION_PLACE_ID
        from server env). Loads BEFORE the static data file so the env values
        win the OR-fallback in austin-host-mock-data.js. URL deliberately

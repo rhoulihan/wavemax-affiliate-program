@@ -51,3 +51,114 @@ body { font-family: 'Barlow', sans-serif; background: #ffffff; color: #1e293b; l
 
 /* Footer noindex tag — muted text. Was: style="opacity:0.65;" */
 .wm-footer-muted { opacity: 0.65; }
+
+/* ────────────────────────────────────────────────────────────────────
+   Iframe-bridged status modal — rendered in the PARENT frame so the
+   overlay covers the visible viewport and can darken the host page.
+   The bridge inserts/removes a single .wm-status-modal element.
+   ──────────────────────────────────────────────────────────────────── */
+.wm-status-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 100000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  font-family: 'Barlow', sans-serif;
+}
+.wm-status-modal[hidden] { display: none; }
+.wm-status-modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(15, 50, 84, 0.55);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  animation: wmStatusFade 160ms ease-out;
+}
+.wm-status-modal-card {
+  position: relative;
+  width: 100%;
+  max-width: 460px;
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 24px 64px rgba(15, 50, 84, 0.45),
+              0 4px 14px rgba(0, 0, 0, 0.08);
+  padding: 28px 28px 24px;
+  text-align: center;
+  animation: wmStatusPop 200ms cubic-bezier(0.2, 0.8, 0.2, 1.0);
+}
+.wm-status-modal-close {
+  position: absolute;
+  top: 8px;
+  right: 12px;
+  width: 32px;
+  height: 32px;
+  border: 0;
+  background: transparent;
+  font-size: 24px;
+  line-height: 1;
+  color: #64748b;
+  cursor: pointer;
+  border-radius: 6px;
+}
+.wm-status-modal-close:hover { background: #f1f5f9; color: #1e293b; }
+.wm-status-modal-icon {
+  width: 64px;
+  height: 64px;
+  margin: 4px auto 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: #ecfdf5;
+  color: #047857;
+}
+.wm-status-modal[data-kind="error"] .wm-status-modal-icon {
+  background: #fef2f2;
+  color: #b91c1c;
+}
+.wm-status-modal-icon svg { width: 36px; height: 36px; }
+.wm-status-modal-title {
+  font-family: 'Poppins', sans-serif;
+  font-size: 22px;
+  font-weight: 700;
+  margin: 0 0 8px;
+  color: #0f3254;
+  line-height: 1.2;
+}
+.wm-status-modal-body {
+  font-size: 15px;
+  color: #1e293b;
+  line-height: 1.55;
+  margin: 0 0 22px;
+}
+.wm-status-modal-actions {
+  display: flex;
+  justify-content: center;
+}
+.wm-status-modal-ok {
+  min-width: 140px;
+  padding: 10px 18px;
+  border: 0;
+  border-radius: 8px;
+  background: #1a3f7a;
+  color: #ffffff;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 160ms ease-out;
+}
+.wm-status-modal-ok:hover { background: #142f5d; }
+
+@keyframes wmStatusFade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes wmStatusPop {
+  from { opacity: 0; transform: translateY(8px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0)    scale(1);    }
+}
+@media (prefers-reduced-motion: reduce) {
+  .wm-status-modal-backdrop, .wm-status-modal-card { animation: none; }
+}
