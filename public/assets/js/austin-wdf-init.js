@@ -252,11 +252,201 @@
     }
   };
 
-  /* ---------- SEO ---------- */
+  /* ---------- SEO ----------
+   * Bridge schema (parent-iframe-bridge-v3.applySeoData):
+   *   meta · openGraph · twitter · structuredData · alternateLanguages
+   *
+   * structuredData blocks emitted:
+   *   - localBusiness  (LaundryOrDryCleaner, anchored by stable @id)
+   *   - service        (the WDF service offering, with priceSpecification)
+   *   - faqPage        (the six on-page FAQs — drives Google rich results)
+   *   - breadcrumb     (Home → Austin → WDF)
+   */
+  const PAGE_URL    = 'https://wavemax.promo/dev/austin-host-mock.html?route=/wash-dry-fold';
+  const HOST_URL    = 'https://wavemax.promo/austin-tx/';
+  const HERO_IMG    = 'https://wavemaxlaundry.com/wp-content/uploads/locations/austin-tx/hero-3.jpg';
+  const BUSINESS_ID = 'https://www.wavemaxlaundry.com/austin-tx/#localbusiness';
+
   const SEO = {
-    title:       'Wash-Dry-Fold Service · WaveMAX Austin',
-    description: "Drop-off laundry service in North Austin. $1.20/lb, 10lb minimum, hospital-grade UV-sanitized water, 24-hour turnaround at 825 E Rundberg Ln F1.",
-    canonical:   'https://wavemax.promo/dev/austin-host-mock.html?route=/wash-dry-fold'
+    meta: {
+      title:        'Wash-Dry-Fold Laundry Service · WaveMAX Austin',
+      description:  'Drop-off wash-dry-fold laundry in North Austin. $1.20/lb, 10-lb minimum, hospital-grade UV-sanitized water, hypoallergenic detergent, 24-hour turnaround at 825 E Rundberg Ln F1.',
+      canonicalUrl: PAGE_URL,
+      author:       'WaveMAX Laundry Austin',
+      keywords:     'wash dry fold austin, wdf laundry austin, drop off laundry austin tx, laundry service near me, fluff and fold austin, north austin wash dry fold, wavemax austin wdf, same-day laundry austin, hypoallergenic laundry service'
+    },
+    openGraph: {
+      title:       'Wash-Dry-Fold at WaveMAX Austin · $1.20/lb · 24h turnaround',
+      description: 'Drop off, walk out. Hospital-grade UV-sanitized water, hypoallergenic detergent, calibrated weighs, hand-folded.',
+      type:        'business.business',
+      url:         PAGE_URL,
+      image:       HERO_IMG,
+      imageWidth:  '1200',
+      imageHeight: '630',
+      siteName:    'WaveMAX Laundry',
+      locale:      'en_US'
+    },
+    twitter: {
+      card:        'summary_large_image',
+      title:       'Wash-Dry-Fold · WaveMAX Austin',
+      description: '$1.20/lb drop-off laundry in North Austin. 24-hour turnaround, UV-sanitized water, hypoallergenic detergent.',
+      image:       HERO_IMG,
+      imageAlt:    'WaveMAX Laundry Austin folded laundry'
+    },
+    structuredData: {
+      localBusiness: {
+        '@context':  'https://schema.org',
+        '@type':     'LaundryOrDryCleaner',
+        '@id':       BUSINESS_ID,
+        name:        'WaveMAX Laundry Austin',
+        alternateName: 'WaveMAX Austin',
+        url:         HOST_URL,
+        telephone:   '+15125531674',
+        email:       'no-reply@wavemax.promo',
+        priceRange:  '$',
+        image:       [HERO_IMG],
+        address: {
+          '@type':         'PostalAddress',
+          streetAddress:   '825 E Rundberg Ln F1',
+          addressLocality: 'Austin',
+          addressRegion:   'TX',
+          postalCode:      '78753',
+          addressCountry:  'US'
+        },
+        geo: { '@type': 'GeoCoordinates', latitude: 30.3564789, longitude: -97.6858016 },
+        openingHoursSpecification: [{
+          '@type':   'OpeningHoursSpecification',
+          dayOfWeek: ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'],
+          opens:     '07:00',
+          closes:    '22:00'
+        }],
+        areaServed: [
+          { '@type': 'City', name: 'Austin' },
+          { '@type': 'City', name: 'Round Rock' },
+          { '@type': 'City', name: 'Cedar Park' },
+          { '@type': 'City', name: 'Pflugerville' },
+          { '@type': 'City', name: 'Georgetown' },
+          { '@type': 'City', name: 'Leander' }
+        ]
+      },
+      // The actual service offering with priceSpec — this is what
+      // Google shops to local-service search experiences.
+      service: {
+        '@context':  'https://schema.org',
+        '@type':     'Service',
+        '@id':       PAGE_URL + '#service',
+        name:        'Wash-Dry-Fold Drop-Off Laundry',
+        alternateName: 'Fluff and Fold',
+        serviceType: 'Wash and fold laundry service',
+        category:    'Laundry service',
+        url:         PAGE_URL,
+        description: 'Drop your laundry off and we wash, dry, and fold it. Hospital-grade UV-sanitized water, hypoallergenic detergent, 24-hour turnaround. 10-lb minimum.',
+        areaServed: [
+          { '@type': 'City', name: 'Austin'        },
+          { '@type': 'City', name: 'Round Rock'    },
+          { '@type': 'City', name: 'Cedar Park'    },
+          { '@type': 'City', name: 'Pflugerville'  }
+        ],
+        provider:   { '@id': BUSINESS_ID },
+        offers: {
+          '@type':         'Offer',
+          priceCurrency:   'USD',
+          price:           '1.20',
+          unitText:        'pound',
+          eligibleQuantity: { '@type': 'QuantitativeValue', minValue: 10, unitCode: 'LBR' },
+          priceSpecification: {
+            '@type':           'UnitPriceSpecification',
+            price:             1.20,
+            priceCurrency:     'USD',
+            unitText:          'pound',
+            referenceQuantity: { '@type': 'QuantitativeValue', value: 1, unitCode: 'LBR' }
+          },
+          availability:    'https://schema.org/InStock',
+          businessFunction: 'https://schema.org/Sell',
+          seller:          { '@id': BUSINESS_ID }
+        },
+        hoursAvailable: [{
+          '@type':   'OpeningHoursSpecification',
+          dayOfWeek: ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'],
+          opens:     '07:00',
+          closes:    '22:00'
+        }]
+      },
+      // FAQPage — feeds Google's "People Also Ask" / accordion rich
+      // results. Q+A wording mirrors the on-page FAQ exactly so Google
+      // can match the rendered DOM to the schema.
+      faqPage: {
+        '@context':  'https://schema.org',
+        '@type':     'FAQPage',
+        '@id':       PAGE_URL + '#faq',
+        mainEntity: [
+          {
+            '@type':         'Question',
+            name:            'How fast is the turnaround?',
+            acceptedAnswer:  {
+              '@type': 'Answer',
+              text:    "Most orders are ready in 24 hours. Drop off before 11am and we can usually have it ready the same evening. We text you when it's ready."
+            }
+          },
+          {
+            '@type':         'Question',
+            name:            'Is there a minimum order size?',
+            acceptedAnswer:  {
+              '@type': 'Answer',
+              text:    'Yes — 10 lb minimum (~$12 at the $1.20/lb rate). For reference, one full grocery bag of laundry typically weighs 8–12 lb.'
+            }
+          },
+          {
+            '@type':         'Question',
+            name:            'What about delicates and dry-clean only items?',
+            acceptedAnswer:  {
+              '@type': 'Answer',
+              text:    "Flag them at drop-off and we'll air-dry, hand-fold, and put them on hangers. We don't currently dry-clean — those items should go to a dedicated dry cleaner."
+            }
+          },
+          {
+            '@type':         'Question',
+            name:            'How are loads separated?',
+            acceptedAnswer:  {
+              '@type': 'Answer',
+              text:    "Whites and colors are washed in separate machines. Your order is never mixed with another customer's. Each bag is tagged at intake."
+            }
+          },
+          {
+            '@type':         'Question',
+            name:            'What if something goes missing?',
+            acceptedAnswer:  {
+              '@type': 'Answer',
+              text:    "We log the weight and bag count at intake, and folded items are bagged together at completion. If you notice something missing, call us within 7 days and we'll trace it."
+            }
+          },
+          {
+            '@type':         'Question',
+            name:            'When can I drop off?',
+            acceptedAnswer:  {
+              '@type': 'Answer',
+              text:    "We're open 7am–10pm, every day, 365 days a year. Drop-off is fully attended — we don't have an after-hours slot, but our hours cover most schedules."
+            }
+          }
+        ]
+      },
+      breadcrumb: {
+        '@context': 'https://schema.org',
+        '@type':    'BreadcrumbList',
+        itemListElement: [
+          { '@type': 'ListItem', position: 1, name: 'WaveMAX Laundry',  item: 'https://www.wavemaxlaundry.com/' },
+          { '@type': 'ListItem', position: 2, name: 'Austin, TX',       item: HOST_URL },
+          { '@type': 'ListItem', position: 3, name: 'Wash-Dry-Fold'                                            }
+        ]
+      }
+    },
+    alternateLanguages: [
+      { hreflang: 'en',        href: PAGE_URL },
+      { hreflang: 'es',        href: PAGE_URL },
+      { hreflang: 'pt',        href: PAGE_URL },
+      { hreflang: 'de',        href: PAGE_URL },
+      { hreflang: 'x-default', href: PAGE_URL }
+    ]
   };
 
   /* ---------- data-bind ---------- */
