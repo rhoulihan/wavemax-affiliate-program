@@ -439,17 +439,17 @@
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@500;600;700;800&display=swap" rel="stylesheet">
 
   <!-- MHR-faithful chrome stylesheets -->
-  <link rel="stylesheet" href="/assets/css/wavemax-mhr-chrome.css">
-  <link rel="stylesheet" href="/assets/css/wavemax-mhr-modal.css">
+  <link rel="stylesheet" href="/assets/css/wavemax-mhr-chrome.css?v=20260504">
+  <link rel="stylesheet" href="/assets/css/wavemax-mhr-modal.css?v=20260504">
 
   <!-- Demo-only host page styles (external for CSP compliance) -->
-  <link rel="stylesheet" href="/assets/css/austin-host-mock.css">
+  <link rel="stylesheet" href="/assets/css/austin-host-mock.css?v=20260504">
 
   <!-- Swirl-spinner assets — used by the parent-side status modal during
        async work (e.g. contact-form submission). Loaded on the host so
        the spinner renders in the parent viewport, not inside the iframe. -->
-  <link rel="stylesheet" href="/assets/css/swirl-spinner.css">
-  <script src="/assets/js/swirl-spinner.js" defer></script>
+  <link rel="stylesheet" href="/assets/css/swirl-spinner.css?v=20260504">
+  <script src="/assets/js/swirl-spinner.js?v=20260504" defer></script>
 
   <!-- Server-rendered config (reads GOOGLE_PLACES_API_KEY + LOCATION_PLACE_ID
        from server env). Loads BEFORE the static data file so the env values
@@ -461,7 +461,7 @@
   <!-- Page data (external for CSP compliance) — sets window.LOCATION_DATA
        before the bridge loads. The OR-fallback for GOOGLE_PLACES_API_KEY +
        LOCATION_PLACE_ID is preserved as a safety net for local-only dev. -->
-  <script src="/assets/js/austin-host-mock-data.js"></script>
+  <script src="/assets/js/austin-host-mock-data.js?v=20260504"></script>
 </head>
 <body>
 
@@ -800,8 +800,8 @@
 </div>
 
 <!-- Bridge + chrome wiring (CSP-clean external scripts) -->
-<script src="/assets/js/parent-iframe-bridge-v3.js"></script>
-<script src="/assets/js/austin-host-mock.js"></script>
+<script src="/assets/js/parent-iframe-bridge-v3.js?v=20260504"></script>
+<script src="/assets/js/austin-host-mock.js?v=20260504"></script>
 
 <!--
   ════════════════════════════════════════════════════════════════════
@@ -812,6 +812,6 @@
   ════════════════════════════════════════════════════════════════════
 -->
 <script src="https://reports.hibu.com/analytics/js/ybDynamicPhoneInsertion.js"></script>
-<script src="/assets/js/austin-hibu-phone-swap.js"></script>
+<script src="/assets/js/austin-hibu-phone-swap.js?v=20260504"></script>
 </body>
 </html>
