@@ -1,6 +1,32 @@
 (function() {
     'use strict';
 
+    // SEC H-3: if we landed here via a non-popup OAuth redirect, the URL
+    // carries an opaque ?fetch= key (NOT the tokens themselves). Resolve
+    // it to the auth result, store, then strip the key from the URL bar.
+    (async function consumeOAuthFetchKey() {
+        const params = new URLSearchParams(window.location.search);
+        const fetchKey = params.get('fetch');
+        if (!fetchKey) return;
+        try {
+            const res = await fetch('/api/v1/auth/oauth-session/' + encodeURIComponent(fetchKey), { credentials: 'include' });
+            const body = await res.json();
+            if (body && body.success && body.result && body.result.token) {
+                localStorage.setItem('affiliateToken', body.result.token);
+                if (body.result.affiliate) {
+                    localStorage.setItem('currentAffiliate', JSON.stringify(body.result.affiliate));
+                }
+            }
+        } catch (e) {
+            console.error('OAuth fetch-key consume failed:', e);
+        } finally {
+            params.delete('fetch');
+            const qs = params.toString();
+            const clean = window.location.pathname + (qs ? '?' + qs : '') + window.location.hash;
+            window.history.replaceState({}, '', clean);
+        }
+    })();
+
     // PostMessage communication with parent window
     function sendMessageToParent(type, data) {
         if (window.parent && window.parent !== window) {
