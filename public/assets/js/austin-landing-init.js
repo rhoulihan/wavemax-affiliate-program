@@ -516,15 +516,25 @@
     probe.src = WATERMARK_URL;
   }
 
-  /* ---------- Cross-frame nav for tab CTAs ---------- */
+  /* ---------- Cross-frame nav for tab CTAs ----------
+   * Delegate to document so the handler survives the bridge's
+   * translatePage() pass (which replaces innerHTML on translated
+   * nodes, orphaning any per-anchor listener). One-shot guard so
+   * re-init doesn't double-attach.
+   */
   function initCrossFrameNav() {
-    document.querySelectorAll('a[data-route]').forEach(a => {
-      a.addEventListener('click', (e) => {
-        e.preventDefault();
-        const href = a.getAttribute('href');
-        if (window.IframeBridge?.navigateParent) window.IframeBridge.navigateParent(href);
-        else window.parent.location.href = href;
-      });
+    if (document.__austinLandingNavWired) return;
+    document.__austinLandingNavWired = true;
+    document.addEventListener('click', (e) => {
+      const a = e.target && e.target.closest && e.target.closest('a[data-route]');
+      if (!a) return;
+      e.preventDefault();
+      const href = a.getAttribute('href');
+      if (window.IframeBridge && window.IframeBridge.navigateParent) {
+        window.IframeBridge.navigateParent(href);
+      } else {
+        window.parent.location.href = href;
+      }
     });
   }
 
