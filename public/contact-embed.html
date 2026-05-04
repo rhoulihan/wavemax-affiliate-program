@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Contact WaveMAX Austin · Laundromat in North Austin</title>
+  <meta name="description" content="Contact WaveMAX Laundry Austin — call (512) 553-1674, drop in at 825 E Rundberg Ln F1, or send us a message. Open daily 7am–10pm.">
+
+  <!-- iframe page — host is the indexable canonical -->
+  <meta name="robots" content="noindex, follow, max-image-preview:large">
+  <link rel="canonical" href="https://wavemax.promo/dev/austin-host-mock.html">
+
+  <meta name="geo.region" content="US-TX">
+  <meta name="geo.placename" content="Austin, Texas">
+  <meta name="geo.position" content="30.3564789;-97.6858016">
+  <meta name="theme-color" content="#1a3f7a">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="/assets/css/wavemax-theme.css">
+  <link rel="stylesheet" href="/assets/css/wavemax-components.css">
+  <link rel="stylesheet" href="/assets/css/austin-contact.css">
+</head>
+<body>
+
+  <!-- HERO ============================================================
+       Single-line page eyebrow + headline + intro paragraph. Kept
+       short — the actual page-of-record info lives in the contact
+       card and the form below.
+       ============================================================ -->
+  <section class="wm-contact-hero" data-section="contact-hero">
+    <div class="wm-contact-hero-inner">
+      <p class="wm-eyebrow" data-i18n="contact.eyebrow">CONTACT</p>
+      <h1 class="wm-contact-title" data-i18n="contact.title">Get in touch with WaveMAX Austin</h1>
+      <p class="wm-contact-intro" data-i18n="contact.intro">
+        Call us, swing by during open hours, or drop a note below — we
+        reply within a few hours during business hours.
+      </p>
+    </div>
+  </section>
+
+  <!-- TWO-COLUMN BODY =================================================
+       Left:  contact-info card (address, hours, phone, CTAs)
+       Right: contact form
+       Stacks on mobile.
+       ============================================================ -->
+  <section class="wm-contact-body" data-section="contact-body">
+    <div class="wm-contact-body-inner">
+
+      <!-- CONTACT-INFO CARD -->
+      <div class="wm-contact-card" data-card="info">
+        <h2 class="wm-contact-card-title" data-i18n="contact.card.heading">Visit, call, or get directions</h2>
+
+        <div class="wm-contact-row">
+          <span class="wm-contact-label" data-i18n="contact.card.addressLabel">Address</span>
+          <span class="wm-contact-value">
+            <span data-bind="contact.address">825 E Rundberg Ln F1</span><br>
+            <span data-bind="contact.addressLine2">Austin, TX 78753</span>
+          </span>
+        </div>
+
+        <div class="wm-contact-row">
+          <span class="wm-contact-label" data-i18n="contact.card.hoursLabel">Hours</span>
+          <span class="wm-contact-value">
+            <span data-bind="hours.display">7am-10pm</span> ·
+            <span data-bind="hours.days">Every day, 365 days a year</span>
+          </span>
+        </div>
+
+        <div class="wm-contact-row">
+          <span class="wm-contact-label" data-i18n="contact.card.phoneLabel">Phone</span>
+          <span class="wm-contact-value">
+            <a data-bind="contact.phoneTel" data-bind-attr="href" href="tel:+15125531674">
+              <span data-bind="contact.phone">(512) 553-1674</span>
+            </a>
+          </span>
+        </div>
+
+        <div class="wm-contact-row">
+          <span class="wm-contact-label" data-i18n="contact.card.emailLabel">Email</span>
+          <span class="wm-contact-value">
+            <a data-bind="contact.emailMailto" data-bind-attr="href" href="mailto:john@austinwavemax.com">
+              <span data-bind="contact.email">john@austinwavemax.com</span>
+            </a>
+          </span>
+        </div>
+
+        <div class="wm-contact-actions">
+          <a class="wm-btn wm-btn-cta"
+             data-bind="contact.phoneTel" data-bind-attr="href" href="tel:+15125531674">
+            <span aria-hidden="true">📞</span>
+            <span><span data-i18n="contact.card.callBtn">Call</span> <span data-bind="contact.phone">(512) 553-1674</span></span>
+          </a>
+          <a class="wm-btn wm-btn-secondary"
+             data-bind="contact.mapsUrl" data-bind-attr="href"
+             target="_blank" rel="noopener"
+             href="https://www.google.com/maps/dir/?api=1&amp;destination=825+E+Rundberg+Ln+F1+Austin+TX+78753">
+            <span aria-hidden="true">📍</span>
+            <span data-i18n="contact.card.directionsBtn">Get directions</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- CONTACT FORM -->
+      <div class="wm-contact-form-wrap">
+        <h2 class="wm-contact-form-title" data-i18n="contact.form.heading">Send us a message</h2>
+        <p class="wm-contact-form-intro" data-i18n="contact.form.intro">
+          We'll reply within a few hours during business hours.
+        </p>
+
+        <form id="contact-form"
+              class="wm-contact-form"
+              data-contact-form
+              novalidate
+              autocomplete="on">
+
+          <div class="wm-form-row">
+            <label class="wm-form-field">
+              <span class="wm-form-label" data-i18n="contact.form.firstName">First name</span>
+              <input type="text" name="firstName" required maxlength="50" autocomplete="given-name">
+            </label>
+            <label class="wm-form-field">
+              <span class="wm-form-label" data-i18n="contact.form.lastName">Last name</span>
+              <input type="text" name="lastName" required maxlength="50" autocomplete="family-name">
+            </label>
+          </div>
+
+          <label class="wm-form-field">
+            <span class="wm-form-label" data-i18n="contact.form.email">Email</span>
+            <input type="email" name="email" required maxlength="100" autocomplete="email">
+          </label>
+
+          <label class="wm-form-field">
+            <span class="wm-form-label" data-i18n="contact.form.phone">
+              Phone <span class="wm-form-optional" data-i18n="contact.form.optional">(optional)</span>
+            </span>
+            <input type="tel" name="phone" maxlength="30" autocomplete="tel">
+          </label>
+
+          <label class="wm-form-field">
+            <span class="wm-form-label" data-i18n="contact.form.message">How can we help?</span>
+            <textarea name="message" required minlength="5" maxlength="2000" rows="5"></textarea>
+          </label>
+
+          <div class="wm-form-actions">
+            <button type="submit" class="wm-btn wm-btn-cta">
+              <span data-i18n="contact.form.submit">Send message</span>
+            </button>
+          </div>
+
+          <!-- Status surface — exactly one is shown at a time after submit.
+               Test selectors look for the data attribute / class / role. -->
+          <div class="wm-contact-success"
+               data-contact-status="success"
+               role="status"
+               aria-live="polite"
+               hidden>
+            <span data-i18n="contact.form.successDefault">Your message has been sent — we'll be in touch shortly.</span>
+          </div>
+          <div class="wm-contact-error"
+               data-contact-status="error"
+               role="alert"
+               aria-live="assertive"
+               hidden>
+            <span data-i18n="contact.form.errorDefault">There was a problem sending your message. Please try again, or call us directly.</span>
+          </div>
+        </form>
+      </div>
+
+    </div>
+  </section>
+
+  <script src="/assets/js/iframe-bridge-v2.js"></script>
+  <script src="/assets/js/austin-contact-init.js"></script>
+</body>
+</html>
