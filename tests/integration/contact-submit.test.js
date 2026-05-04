@@ -191,7 +191,7 @@ describe('POST /api/v1/contact/:slug', () => {
 });
 
 describe('contactRoutes — wiring', () => {
-  it('uses sensitiveOperationLimiter on the POST route', () => {
+  it('stacks contact-form burst + hourly limiters on the POST route', () => {
     const rateLimiting = require('../../server/middleware/rateLimiting');
     const router = require('../../server/routes/contactRoutes');
 
@@ -200,6 +200,13 @@ describe('contactRoutes — wiring', () => {
     );
     expect(postLayer).toBeDefined();
     const stack = postLayer.route.stack.map((s) => s.handle);
-    expect(stack).toContain(rateLimiting.sensitiveOperationLimiter);
+    expect(stack).toContain(rateLimiting.contactFormBurstLimiter);
+    expect(stack).toContain(rateLimiting.contactFormLimiter);
+    // The burst limiter must run before the hourly limiter so a click
+    // storm hits the short-window block first instead of consuming
+    // hourly tokens.
+    const burstIdx  = stack.indexOf(rateLimiting.contactFormBurstLimiter);
+    const hourlyIdx = stack.indexOf(rateLimiting.contactFormLimiter);
+    expect(burstIdx).toBeLessThan(hourlyIdx);
   });
 });

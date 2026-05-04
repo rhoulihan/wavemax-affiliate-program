@@ -121,6 +121,43 @@ exports.sensitiveOperationLimiter = rateLimit({
   store: createMongoStore(60 * 60 * 1000)
 });
 
+// Public contact form — burst guard. Catches double-clicks and basic
+// flood attempts: 1 submission per 30 seconds per IP. Stacked under
+// contactFormLimiter for hourly volume control.
+exports.contactFormBurstLimiter = rateLimit({
+  windowMs: 30 * 1000, // 30 seconds
+  max: isRelaxed ? 30 : 1,
+  message: {
+    success: false,
+    message: 'Please wait a moment before sending another message.'
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+  skip: skipInTest,
+  keyGenerator: (req) => req.ip,
+  store: createMongoStore(30 * 1000)
+});
+
+// Public contact form — hourly cap. 5 submissions per IP per hour
+// is enough for legitimate use (a customer + a follow-up question +
+// edge cases) while making spam runs visibly painful. Tightened from
+// the shared sensitiveOperationLimiter (10/hr) because contact is
+// unauthenticated and the most-abused surface on the site.
+exports.contactFormLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1 hour
+  max: isRelaxed ? 50 : 5,
+  message: {
+    success: false,
+    message: "You've sent the maximum number of messages for now — please try again later, or call us directly.",
+    retryAfter: 60 * 60
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+  skip: skipInTest,
+  keyGenerator: (req) => req.ip,
+  store: createMongoStore(60 * 60 * 1000)
+});
+
 // Email verification - prevent abuse
 exports.emailVerificationLimiter = rateLimit({
   windowMs: 60 * 60 * 1000, // 1 hour

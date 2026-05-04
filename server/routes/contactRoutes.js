@@ -2,7 +2,7 @@ const express = require('express');
 const { body } = require('express-validator');
 
 const contactController = require('../controllers/contactController');
-const { sensitiveOperationLimiter } = require('../middleware/rateLimiting');
+const { contactFormBurstLimiter, contactFormLimiter } = require('../middleware/rateLimiting');
 
 const router = express.Router();
 
@@ -36,6 +36,12 @@ const validators = [
     .isLength({ min: 5, max: 2000 }).withMessage('Message must be between 5 and 2000 characters')
 ];
 
-router.post('/:slug', sensitiveOperationLimiter, validators, contactController.submitContact);
+router.post(
+  '/:slug',
+  contactFormBurstLimiter,
+  contactFormLimiter,
+  validators,
+  contactController.submitContact
+);
 
 module.exports = router;
