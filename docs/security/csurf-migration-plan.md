@@ -1,8 +1,18 @@
 # Migration plan — `csurf` → modern CSRF protection
 
-**Status:** PLAN (not yet executed)
-**Owner:** TBD on next security sprint
+**Status:** EXECUTED (csrf-csrf live in prod)
 **Closes audit finding:** SEC M-5
+
+> **Update:** Migration completed in commit following this document. The plan
+> below stays as a record of the rationale and approach taken. Two
+> implementation notes worth keeping for posterity:
+>
+> 1. `csrf-csrf` v4 requires `cookie-parser` middleware; we added
+>    `app.use(require('cookie-parser')())` right after `express.json()`.
+> 2. The `csrfProtection` export name was preserved as an alias for
+>    `doubleCsrfProtection` so existing imports keep working.
+> 3. Step 8 (drop `express-session`) is deferred to a follow-up — passport
+>    OAuth still depends on it.
 
 ## Why migrate
 

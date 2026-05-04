@@ -1,24 +1,56 @@
 /**
  * CSRF Configuration and Middleware
- * Implements defense-in-depth with JWT + CSRF tokens
+ * Implements defense-in-depth with JWT + CSRF tokens.
+ *
+ * SEC M-5 (closed): migrated from the deprecated `csurf` package to
+ * `csrf-csrf` (double-submit-cookie pattern, actively maintained).
+ * The conditional-enforcement logic, allowlists, and error/audit
+ * handling are unchanged — only the token generation/validation
+ * primitives were swapped.
  */
 
-const csrf = require('csurf');
+const { doubleCsrf } = require('csrf-csrf');
 const auditLogger = require('../utils/auditLogger');
 const logger = require('../utils/logger');
 
-// CSRF token generation middleware
-const csrfProtection = csrf({
-  cookie: false, // Use req.session instead of cookies
-  value: (req) => {
-    // Check multiple locations for CSRF token
-    return req.body._csrf ||
-           req.query._csrf ||
-           req.headers['csrf-token'] ||
-           req.headers['xsrf-token'] ||
-           req.headers['x-csrf-token'] ||
-           req.headers['x-xsrf-token'];
-  }
+const CSRF_COOKIE_NAME = process.env.NODE_ENV === 'production'
+  ? '__Host-x-csrf'   // host-only secure cookie name in prod
+  : 'x-csrf';         // dev (no HTTPS, __Host- requires Secure)
+
+const {
+  generateCsrfToken,
+  doubleCsrfProtection,
+  invalidCsrfTokenError
+} = doubleCsrf({
+  // Server secret for HMAC. Falls back to SESSION_SECRET (then JWT_SECRET)
+  // so existing deployments don't need a new env var to function — but a
+  // dedicated CSRF_SECRET is recommended for independent rotation.
+  getSecret: () => process.env.CSRF_SECRET
+                || process.env.SESSION_SECRET
+                || process.env.JWT_SECRET
+                || '',
+  // Stable per-user identifier used to bind the cookie token to the
+  // request origin. Express-session ID when available, else IP. The
+  // identifier is hashed into the token, never echoed back.
+  getSessionIdentifier: (req) => req.sessionID || req.ip || 'no-session',
+  cookieName: CSRF_COOKIE_NAME,
+  cookieOptions: {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',  // 'strict' breaks OAuth-popup-back navigation
+    path: '/'
+  },
+  size: 64,
+  ignoredMethods: ['GET', 'HEAD', 'OPTIONS'],
+  // Accept the token in any of the headers/body fields we historically
+  // supported, so existing clients keep working.
+  getCsrfTokenFromRequest: (req) =>
+    req.body?._csrf ||
+    req.query?._csrf ||
+    req.headers['csrf-token'] ||
+    req.headers['xsrf-token'] ||
+    req.headers['x-csrf-token'] ||
+    req.headers['x-xsrf-token']
 });
 
 // Define endpoint categories for CSRF protection
@@ -246,23 +278,26 @@ const conditionalCsrf = (req, res, next) => {
   logger.info('CSRF check for:', req.path, {
     sessionID: req.sessionID,
     hasSession: !!req.session,
-    sessionCookie: req.headers.cookie,
-    hasCsrfSecret: !!req.session?.csrfSecret,
     hasAuth: !!req.headers.authorization,
     origin: req.headers.origin,
     referer: req.headers.referer,
     userAgent: req.headers['user-agent']?.substring(0, 50)
   });
 
-  // Apply CSRF protection
-  csrfProtection(req, res, (err) => {
-    if (err && err.code === 'EBADCSRFTOKEN') {
-      // Log CSRF violation with more details
+  // Apply CSRF protection (csrf-csrf double-submit-cookie validation)
+  doubleCsrfProtection(req, res, (err) => {
+    if (!err) return next();
+
+    // csrf-csrf throws invalidCsrfTokenError instances rather than
+    // EBADCSRFTOKEN strings, so identify by reference + by message.
+    const isCsrfError = err === invalidCsrfTokenError
+      || err?.code === 'EBADCSRFTOKEN'
+      || /csrf/i.test(err?.message || '');
+
+    if (isCsrfError) {
       logger.error('CSRF validation failed:', {
         error: err.message,
         sessionID: req.sessionID,
-        hasSession: !!req.session,
-        hasCsrfSecret: !!req.session?.csrfSecret,
         receivedToken: req.headers['x-csrf-token'] || 'none',
         path: req.path,
         method: req.method
@@ -281,7 +316,6 @@ const conditionalCsrf = (req, res, next) => {
         req
       );
 
-      // Return clear error message
       return res.status(403).json({
         success: false,
         error: 'Invalid or missing CSRF token',
@@ -290,65 +324,49 @@ const conditionalCsrf = (req, res, next) => {
       });
     }
 
-    if (err) {
-      // Other CSRF errors
-      logger.error('CSRF middleware error:', err);
-      return res.status(500).json({
-        success: false,
-        error: 'Security validation error',
-        message: 'An error occurred during security validation.'
-      });
-    }
-
-    next();
+    logger.error('CSRF middleware error:', err);
+    return res.status(500).json({
+      success: false,
+      error: 'Security validation error',
+      message: 'An error occurred during security validation.'
+    });
   });
 };
 
-// CSRF token generation endpoint
+// CSRF token generation endpoint. csrf-csrf's generateCsrfToken sets the
+// double-submit cookie on the response and returns the matching header
+// token. Clients send that header back on mutations; the cookie is
+// validated by doubleCsrfProtection.
 const csrfTokenEndpoint = (req, res, next) => {
-  // Initialize session if it doesn't exist
-  if (!req.session) {
-    return res.status(500).json({
-      success: false,
-      error: 'Session not initialized'
-    });
-  }
-
-  logger.info('CSRF token generation:', {
-    sessionID: req.sessionID,
-    hasSession: !!req.session,
-    hasCsrfSecret: !!req.session?.csrfSecret
-  });
-
-  // Apply CSRF protection to generate token
-  csrfProtection(req, res, (err) => {
-    if (err) {
-      logger.error('CSRF token generation error:', err);
+  try {
+    if (!req.session) {
       return res.status(500).json({
         success: false,
-        error: 'Failed to generate CSRF token'
+        error: 'Session not initialized'
       });
     }
-
-    const token = req.csrfToken();
-    logger.info('=== Generated CSRF token ===');
-    logger.info('Token:', token);
-    logger.info('Session ID:', req.sessionID);
-    logger.info('CSRF Secret:', req.session?.csrfSecret?.substring(0, 10) + '...');
-    logger.info('===========================');
-
-    // Return token
-    res.json({
-      success: true,
-      csrfToken: token
+    const token = generateCsrfToken(req, res, { overwrite: true });
+    logger.info('CSRF token issued:', {
+      sessionID: req.sessionID,
+      tokenPrefix: token.substring(0, 10) + '...'
     });
-  });
+    res.json({ success: true, csrfToken: token });
+  } catch (err) {
+    logger.error('CSRF token generation error:', err);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to generate CSRF token'
+    });
+  }
 };
 
 // Export configuration and middleware
 module.exports = {
   CSRF_CONFIG,
-  csrfProtection,
+  // Backwards-compat alias: callers that imported `csrfProtection` get
+  // the doubleCsrfProtection middleware. Same call signature, same
+  // request semantics.
+  csrfProtection: doubleCsrfProtection,
   conditionalCsrf,
   csrfTokenEndpoint,
   shouldEnforceCsrf
