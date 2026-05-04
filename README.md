@@ -192,7 +192,11 @@ See [`.env.example`](.env.example) for the full set. The critical ones:
 
 ## License
 
-MIT. See [`LICENSE`](LICENSE).
+**Proprietary — All Rights Reserved.** Copyright © 2025–2026 CRHS Enterprises, LLC.
+
+This repository is published for reference only. Viewing the source does **not** grant any license. Use, copying, modification, distribution, deployment, or training of machine-learning models on this code is prohibited without prior written authorization from CRHS Enterprises, LLC. See [`LICENSE`](LICENSE) for full terms, including confidentiality, governing law (Texas), and venue (Travis County).
+
+For licensing inquiries: rick.houlihan@gmail.com
 
 ---
 
