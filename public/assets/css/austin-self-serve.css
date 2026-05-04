@@ -65,12 +65,20 @@ body { background: var(--wm-bg-soft); }
 }
 .wm-hero-title {
   font-family: 'Poppins', sans-serif;
-  font-size: var(--wm-fs-2xl);
+  /* Fluid size: scales the title to fit one line on most screens
+     without overflowing on small viewports. clamp() floors at 20px
+     and tops out at the 2xl token; the 4.6vw middle term tracks
+     viewport width so the title keeps a single-line silhouette. */
+  font-size: clamp(20px, 4.6vw, var(--wm-fs-2xl));
   font-weight: 700;
   line-height: 1.2;
   margin: 0 0 var(--wm-sp-2);
   color: #ffffff;
+  white-space: nowrap;
 }
+/* On very narrow viewports allow the title to wrap rather than
+   overflow horizontally. */
+@media (max-width: 360px) { .wm-hero-title { white-space: normal; } }
 .wm-hero-tagline {
   font-family: 'Poppins', sans-serif;
   font-size: var(--wm-fs-sm);
