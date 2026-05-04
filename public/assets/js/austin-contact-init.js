@@ -171,11 +171,132 @@
     }
   };
 
-  /* ---------- SEO ---------- */
+  /* ---------- SEO ----------
+   * Bridge schema (parent-iframe-bridge-v3.applySeoData):
+   *   meta · openGraph · twitter · structuredData · alternateLanguages
+   *
+   * The structuredData block emits one <script type="application/ld+json">
+   * per key. LocalBusiness anchors the entity; ContactPage marks this as
+   * the contact surface with a PotentialAction telephoneAction; the
+   * BreadcrumbList ties it to the Austin location. */
+  const PAGE_URL    = 'https://wavemax.promo/dev/austin-host-mock.html?route=/contact';
+  const HOST_URL    = 'https://wavemax.promo/austin-tx/';
+  const HERO_IMG    = 'https://wavemaxlaundry.com/wp-content/uploads/locations/austin-tx/hero-3.jpg';
+  const BUSINESS_ID = 'https://www.wavemaxlaundry.com/austin-tx/#localbusiness';
+
   const SEO = {
-    title:       'Contact WaveMAX Austin · Laundromat in North Austin',
-    description: 'Contact WaveMAX Laundry Austin — call (512) 553-1674, drop in at 825 E Rundberg Ln F1, or send us a message. Open daily 7am–10pm.',
-    canonical:   'https://wavemax.promo/dev/austin-host-mock.html?route=/contact'
+    meta: {
+      title:        'Contact WaveMAX Austin · Laundromat in North Austin',
+      description:  'Contact WaveMAX Laundry Austin — call (512) 553-1674, drop in at 825 E Rundberg Ln F1, or send a message. Open daily 7am–10pm, 365 days a year. North Austin, TX 78753.',
+      canonicalUrl: PAGE_URL,
+      author:       'WaveMAX Laundry Austin',
+      keywords:     'laundromat austin tx, laundry near me, north austin laundromat, wavemax austin, wash dry fold austin, 24 hour laundromat austin, contact wavemax laundry'
+    },
+    openGraph: {
+      title:       'Contact WaveMAX Austin · 825 E Rundberg Ln F1',
+      description: 'Visit, call, or message WaveMAX Laundry Austin. Open daily 7am–10pm in North Austin.',
+      type:        'business.business',
+      url:         PAGE_URL,
+      image:       HERO_IMG,
+      imageWidth:  '1200',
+      imageHeight: '630',
+      siteName:    'WaveMAX Laundry',
+      locale:      'en_US'
+    },
+    twitter: {
+      card:        'summary_large_image',
+      title:       'Contact WaveMAX Austin Laundromat',
+      description: 'North Austin laundromat — call (512) 553-1674 or visit 825 E Rundberg Ln F1.',
+      image:       HERO_IMG,
+      imageAlt:    'WaveMAX Laundry Austin storefront'
+    },
+    structuredData: {
+      // Anchors all other schemas — same @id used across every Austin
+      // page so Google de-duplicates the entity graph.
+      localBusiness: {
+        '@context':  'https://schema.org',
+        '@type':     'LaundryOrDryCleaner',
+        '@id':       BUSINESS_ID,
+        name:        'WaveMAX Laundry Austin',
+        alternateName: 'WaveMAX Austin',
+        url:         HOST_URL,
+        telephone:   '+15125531674',
+        email:       'no-reply@wavemax.promo',
+        priceRange:  '$',
+        image:       [HERO_IMG],
+        address: {
+          '@type':         'PostalAddress',
+          streetAddress:   '825 E Rundberg Ln F1',
+          addressLocality: 'Austin',
+          addressRegion:   'TX',
+          postalCode:      '78753',
+          addressCountry:  'US'
+        },
+        geo: { '@type': 'GeoCoordinates', latitude: 30.3564789, longitude: -97.6858016 },
+        openingHoursSpecification: [{
+          '@type':   'OpeningHoursSpecification',
+          dayOfWeek: ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'],
+          opens:     '07:00',
+          closes:    '22:00'
+        }],
+        areaServed: [
+          { '@type': 'City', name: 'Austin' },
+          { '@type': 'City', name: 'Round Rock' },
+          { '@type': 'City', name: 'Cedar Park' },
+          { '@type': 'City', name: 'Pflugerville' },
+          { '@type': 'City', name: 'Georgetown' },
+          { '@type': 'City', name: 'Leander' }
+        ],
+        sameAs: [
+          'https://www.wavemaxlaundry.com/austin-tx/',
+          'https://www.google.com/maps/?cid=' // resolved by Place ID server-side; left for Google to fetch
+        ]
+      },
+      // Marks this page as the contact surface and exposes a phone-call
+      // action for assistant-style search experiences.
+      contactPage: {
+        '@context':  'https://schema.org',
+        '@type':     'ContactPage',
+        '@id':       PAGE_URL + '#contactpage',
+        url:         PAGE_URL,
+        name:        'Contact WaveMAX Austin',
+        about:       { '@id': BUSINESS_ID },
+        inLanguage:  ['en','es','pt','de'],
+        primaryImageOfPage: HERO_IMG,
+        potentialAction: [
+          {
+            '@type':       'CallAction',
+            target:        'tel:+15125531674',
+            name:          'Call WaveMAX Austin'
+          },
+          {
+            '@type':       'CommunicateAction',
+            target:        'mailto:no-reply@wavemax.promo',
+            name:          'Email WaveMAX Austin'
+          }
+        ]
+      },
+      breadcrumb: {
+        '@context': 'https://schema.org',
+        '@type':    'BreadcrumbList',
+        itemListElement: [
+          { '@type': 'ListItem', position: 1, name: 'WaveMAX Laundry',         item: 'https://www.wavemaxlaundry.com/' },
+          { '@type': 'ListItem', position: 2, name: 'Austin, TX',              item: HOST_URL },
+          { '@type': 'ListItem', position: 3, name: 'Contact'                                                            }
+        ]
+      }
+    },
+    // Same canonical for all four — the page selects language client-side
+    // via localStorage. x-default points to the English variant. This is
+    // the recommended pattern when localization is JS-driven on a single
+    // URL (see https://developers.google.com/search/docs/specialty/international/localized-versions).
+    alternateLanguages: [
+      { hreflang: 'en',        href: PAGE_URL },
+      { hreflang: 'es',        href: PAGE_URL },
+      { hreflang: 'pt',        href: PAGE_URL },
+      { hreflang: 'de',        href: PAGE_URL },
+      { hreflang: 'x-default', href: PAGE_URL }
+    ]
   };
 
   /* ---------- data-bind ---------- */
