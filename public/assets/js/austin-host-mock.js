@@ -43,6 +43,7 @@
     '/commercial/airbnb-rentals':       '/commercial-embed.html?tab=airbnb',
     '/commercial/restaurants-catering': '/commercial-embed.html?tab=restaurant',
     '/commercial/contractors':          '/commercial-embed.html?tab=contractors',
+    '/about-us':                        '/about-us-embed.html',
     '/contact':                         '/contact-embed.html'
   };
 
