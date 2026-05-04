@@ -16,16 +16,24 @@ const logger = require('../utils/logger');
 const isRelaxed = process.env.RELAX_RATE_LIMITING === 'true';
 const isTest = process.env.NODE_ENV === 'test';
 
-// MongoDB store for distributed rate limiting
-const createMongoStore = (windowMs = 60 * 60 * 1000) => {
+// MongoDB store for distributed rate limiting.
+//
+// Each limiter MUST get its own collection. When two stacked limiters
+// share a collection AND key by the same value (e.g. req.ip), both
+// limiters' increments target the same row — express-rate-limit's
+// own validator detects double-counting and throws
+// ERR_ERL_DOUBLE_COUNT, which surfaces as 429s for legit users. Pass
+// a unique `name` for any limiter that runs alongside another on the
+// same route.
+const createMongoStore = (windowMs = 60 * 60 * 1000, name = 'default') => {
   if (isTest) {
     return undefined; // Use memory store for tests
   }
-  
+
   try {
     return new MongoStore({
       uri: process.env.MONGODB_URI,
-      collectionName: 'rate_limits',
+      collectionName: `rate_limits_${name}`,
       expireTimeMs: windowMs, // Match the window time
       errorHandler: logger.error.bind(null, 'Rate limit store error:')
     });
@@ -51,7 +59,7 @@ exports.authLimiter = rateLimit({
   legacyHeaders: false,
   skipSuccessfulRequests: true,
   skip: skipInTest,
-  store: createMongoStore(15 * 60 * 1000)
+  store: createMongoStore(15 * 60 * 1000, 'auth')
 });
 
 // Password reset - very strict limits
@@ -67,7 +75,7 @@ exports.passwordResetLimiter = rateLimit({
   legacyHeaders: false,
   skipSuccessfulRequests: true,
   skip: skipInTest,
-  store: createMongoStore(60 * 60 * 1000)
+  store: createMongoStore(60 * 60 * 1000, 'pwreset')
 });
 
 // Registration - moderate limits
@@ -82,7 +90,7 @@ exports.registrationLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   skip: skipInTest,
-  store: createMongoStore(60 * 60 * 1000)
+  store: createMongoStore(60 * 60 * 1000, 'register')
 });
 
 // API endpoints - general limits
@@ -99,7 +107,7 @@ exports.apiLimiter = rateLimit({
     // Skip in test environment or for authenticated admin users
     return skipInTest() || (req.user && req.user.role === 'admin');
   },
-  store: createMongoStore(15 * 60 * 1000)
+  store: createMongoStore(15 * 60 * 1000, 'api')
 });
 
 // Sensitive operations - strict limits
@@ -118,7 +126,7 @@ exports.sensitiveOperationLimiter = rateLimit({
     // Rate limit by user ID if authenticated, otherwise by IP
     return req.user ? `user_${req.user.id}` : req.ip;
   },
-  store: createMongoStore(60 * 60 * 1000)
+  store: createMongoStore(60 * 60 * 1000, 'sensitive')
 });
 
 // Public contact form — burst guard. Catches double-clicks and basic
@@ -135,7 +143,7 @@ exports.contactFormBurstLimiter = rateLimit({
   legacyHeaders: false,
   skip: skipInTest,
   keyGenerator: (req) => req.ip,
-  store: createMongoStore(30 * 1000)
+  store: createMongoStore(30 * 1000, 'contact_burst')
 });
 
 // Public contact form — hourly cap. 5 submissions per IP per hour
@@ -155,7 +163,7 @@ exports.contactFormLimiter = rateLimit({
   legacyHeaders: false,
   skip: skipInTest,
   keyGenerator: (req) => req.ip,
-  store: createMongoStore(60 * 60 * 1000)
+  store: createMongoStore(60 * 60 * 1000, 'contact_hourly')
 });
 
 // Email verification - prevent abuse
@@ -173,7 +181,7 @@ exports.emailVerificationLimiter = rateLimit({
     // Rate limit by email or user ID
     return req.body.email || (req.user && req.user.id) || req.ip;
   },
-  store: createMongoStore(60 * 60 * 1000)
+  store: createMongoStore(60 * 60 * 1000, 'email_verify')
 });
 
 // OAuth callback - prevent abuse
@@ -186,7 +194,7 @@ exports.oauthCallbackLimiter = rateLimit({
   },
   standardHeaders: true,
   legacyHeaders: false,
-  store: createMongoStore(15 * 60 * 1000)
+  store: createMongoStore(15 * 60 * 1000, 'oauth')
 });
 
 // File upload - strict limits
@@ -204,7 +212,7 @@ exports.fileUploadLimiter = rateLimit({
     // Rate limit by user ID if authenticated, otherwise by IP
     return req.user ? `user_${req.user.id}` : req.ip;
   },
-  store: createMongoStore(60 * 60 * 1000)
+  store: createMongoStore(60 * 60 * 1000, 'upload')
 });
 
 // Admin operations - looser limits for authenticated admins
@@ -221,7 +229,7 @@ exports.adminOperationLimiter = rateLimit({
     // Only apply to admin users
     return !req.user || req.user.role !== 'admin';
   },
-  store: createMongoStore(15 * 60 * 1000)
+  store: createMongoStore(15 * 60 * 1000, 'admin_op')
 });
 
 // Administrator login - more lenient limits to prevent lockout
@@ -242,7 +250,7 @@ exports.adminLoginLimiter = rateLimit({
     const username = req.body.username || req.body.email || '';
     return `admin_login_${req.ip}_${username}`;
   },
-  store: createMongoStore(15 * 60 * 1000)
+  store: createMongoStore(15 * 60 * 1000, 'admin_login')
 });
 
 // Create a custom rate limiter with specific settings
@@ -250,7 +258,7 @@ exports.createCustomLimiter = (options) => {
   const defaults = {
     standardHeaders: true,
     legacyHeaders: false,
-    store: createMongoStore(options.windowMs || 15 * 60 * 1000),
+    store: createMongoStore(options.windowMs || 15 * 60 * 1000, options.name || 'custom'),
     message: {
       success: false,
       message: 'Too many requests, please try again later'
