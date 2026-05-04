@@ -32,6 +32,13 @@
        LOCATION_DATA so the directions URL stays consistent.
        ============================================================ -->
   <section class="wm-hero" data-section="hero">
+    <!-- Austin watermark photo behind the hero text — backgroundImage
+         set by austin-wdf-init.js. CSS layers a navy gradient + amber
+         multiply tint so the white hero text stays legible while the
+         store interior peeks through. Same treatment as the landing
+         page hero so the two pages read as siblings. -->
+    <div class="wm-austin-watermark" id="wm-austin-watermark" aria-hidden="true"></div>
+
     <div class="wm-hero-inner">
       <img class="wm-hero-logo"
            src="https://wavemaxlaundry.com/wp-content/uploads/2026/03/logo-wavemax.png"
@@ -59,6 +66,37 @@
           <span aria-hidden="true">📍</span>
           <span data-i18n="wdf.directionsBtn">Get directions</span>
         </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- STAT RAIL ========================================================
+       Mirrors the landing page's navy stat band — five labels calling
+       out the WDF service highlights. UV-water-treatment is featured
+       per request. Identical class set as landing so styling stays in
+       lock-step.
+       ============================================================ -->
+  <section class="wm-stats" data-section="stats">
+    <div class="wm-stats-inner">
+      <div class="wm-stat-card">
+        <div class="wm-stat-number" data-bind="pricing.wdf.display">$1.20/lb</div>
+        <div class="wm-stat-label" data-i18n="wdf.stats.rate">Per Pound</div>
+      </div>
+      <div class="wm-stat-card">
+        <div class="wm-stat-number">UV</div>
+        <div class="wm-stat-label" data-i18n="wdf.stats.uv">Sanitized Water</div>
+      </div>
+      <div class="wm-stat-card">
+        <div class="wm-stat-number">24hr</div>
+        <div class="wm-stat-label" data-i18n="wdf.stats.turnaround">Turnaround</div>
+      </div>
+      <div class="wm-stat-card">
+        <div class="wm-stat-number"><span data-bind="pricing.wdf.minLb">10</span>lb</div>
+        <div class="wm-stat-label" data-i18n="wdf.stats.min">Minimum</div>
+      </div>
+      <div class="wm-stat-card">
+        <div class="wm-stat-number">365</div>
+        <div class="wm-stat-label" data-i18n="wdf.stats.days">Days a Year</div>
       </div>
     </div>
   </section>

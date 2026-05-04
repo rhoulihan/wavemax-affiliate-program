@@ -17,12 +17,90 @@ body { background: var(--wm-bg-soft); }
   color: #ffffff;
   padding: var(--wm-sp-7) 0 var(--wm-sp-6);
   position: relative;
+  overflow: hidden;
   /* Shared wm-hero (used by the landing page) sets min-height: 60vh
      so the cinematic hero fills the viewport. The WDF hero is just
      logo + title + subtitle + two CTAs, so let it size to content. */
   min-height: 0;
 }
 @media (max-width: 540px) { .wm-hero { min-height: 0; } }
+
+/* Austin watermark — same treatment as the landing-page hero.
+   Background image is set on #wm-austin-watermark by austin-wdf-init.js
+   once the photo loads, so users on slow connections see the navy
+   gradient backdrop until the image resolves. */
+.wm-austin-watermark {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  filter: saturate(0.95) brightness(0.85);
+  opacity: 0;
+  transition: opacity 1s var(--wm-ease);
+}
+.wm-austin-watermark.is-loaded { opacity: 1; }
+.wm-austin-watermark::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(135deg,
+      rgba(15, 32, 53, 0.78) 0%,
+      rgba(20, 54, 90, 0.55) 50%,
+      rgba(15, 32, 53, 0.85) 100%),
+    radial-gradient(ellipse at 70% 50%, rgba(245, 166, 35, 0.10) 0%, transparent 60%);
+  mix-blend-mode: multiply;
+}
+/* Lift hero content above the watermark */
+.wm-hero-inner { position: relative; z-index: 1; }
+
+/* ---------- Stat rail (matches landing page .wm-stats band) ----------
+   Five tiles in a navy band right under the hero — same structure +
+   typography the landing page uses, so cross-page consistency is
+   maintained. Class names re-used so they would also pick up any
+   future shared overrides on .wm-stats. */
+.wm-stats { background: #154f82; }
+.wm-stats-inner {
+  max-width: var(--wm-content-max);
+  margin: 0 auto;
+  padding: var(--wm-sp-5);
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 0;
+  text-align: center;
+}
+.wm-stat-card {
+  padding: 0 24px;
+  border-right: 1px solid rgba(255,255,255,0.12);
+  background: transparent;
+}
+.wm-stat-card:last-child { border-right: 0; }
+.wm-stat-number {
+  font-family: 'Poppins', sans-serif;
+  font-size: 22px;
+  font-weight: 800;
+  color: #ffffff;
+  line-height: 1.2;
+  margin-bottom: 6px;
+}
+.wm-stat-label {
+  font-family: 'Poppins', sans-serif;
+  font-size: 15px;
+  font-weight: 500;
+  color: rgba(255,255,255,0.78);
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  line-height: 1.35;
+  white-space: nowrap;
+}
+@media (max-width: 768px) {
+  .wm-stats-inner { grid-template-columns: repeat(2, 1fr); gap: var(--wm-sp-4); padding: var(--wm-sp-4); }
+  .wm-stat-card { border-right: 0; padding: var(--wm-sp-2); }
+  .wm-stat-label { font-size: 13px; white-space: normal; }
+}
 .wm-hero::after {
   content: '';
   position: absolute;
