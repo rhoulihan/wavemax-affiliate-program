@@ -1,33 +1,28 @@
 const { validationResult } = require('express-validator');
 const ControllerHelpers = require('../utils/controllerHelpers');
 const contactNotificationService = require('../services/contactNotificationService');
+const { loadLocationData, getKnownSlugs } = require('../config/locationData');
 const logger = require('../utils/logger');
 
-const LOCATIONS = {
-  'austin-tx': {
-    recipientEnv: 'CONTACT_RECIPIENT_AUSTIN'
-  }
-};
-
+/**
+ * Pull the recipient email address from the location's LOCATION_DATA
+ * (the same single source of truth the browser-side chrome reads).
+ * No env var, no controller-side hardcoding — when the data file is
+ * updated, the recipient updates automatically on next pm2 restart.
+ *
+ * Returns { recipient } on success, or null if the slug is unknown,
+ * the data file is missing, or the email field is empty.
+ */
 function resolveRecipient(slug) {
-  const loc = LOCATIONS[slug];
-  if (!loc) return null;
+  const data = loadLocationData(slug);
+  if (!data) return null;
 
-  const configured = process.env[loc.recipientEnv];
-  if (configured && configured.trim() !== '') {
-    return { recipient: configured, fallback: false };
+  const email = data.contact && data.contact.email && data.contact.email.trim();
+  if (!email) {
+    logger.error('LOCATION_DATA contact.email empty for slug', { slug });
+    return null;
   }
-
-  const fallback = process.env.EMAIL_FROM;
-  if (fallback && fallback.trim() !== '') {
-    logger.warn('Contact-form recipient not configured, falling back to EMAIL_FROM', {
-      slug,
-      envName: loc.recipientEnv
-    });
-    return { recipient: fallback, fallback: true };
-  }
-
-  return null;
+  return { recipient: email };
 }
 
 function formatValidationErrors(result) {
@@ -40,7 +35,7 @@ function formatValidationErrors(result) {
 exports.submitContact = ControllerHelpers.asyncWrapper(async (req, res) => {
   const { slug } = req.params;
 
-  if (!LOCATIONS[slug]) {
+  if (!getKnownSlugs().includes(slug)) {
     return ControllerHelpers.sendError(res, `Unknown location: ${slug}`, 404);
   }
 
@@ -55,7 +50,7 @@ exports.submitContact = ControllerHelpers.asyncWrapper(async (req, res) => {
 
   const resolved = resolveRecipient(slug);
   if (!resolved) {
-    logger.error('Contact-form recipient and EMAIL_FROM both unconfigured', { slug });
+    logger.error('Contact-form recipient missing — LOCATION_DATA.contact.email empty or file unreadable', { slug });
     return ControllerHelpers.sendError(
       res,
       'Could not send your message — please try again later or call us directly.',
