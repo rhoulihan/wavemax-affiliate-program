@@ -7,6 +7,23 @@ const authController = require('../controllers/authController');
 const logger = require('../utils/logger');
 const { body, validationResult } = require('express-validator');
 const { customPasswordValidator } = require('../utils/passwordValidator');
+const { generateOAuthState, validateOAuthState } = require('../utils/oauthStateUtils');
+
+// CSRF protection on the OAuth `state` parameter (SEC L-5). Init endpoints
+// wrap the original client-supplied state in an HMAC-signed envelope; this
+// middleware unwraps it on callback and rejects forged or expired values.
+// On success it overwrites req.query.state with the inner clientPayload so
+// downstream authController logic (which reads `customer_<id>` / `oauth_<id>`
+// prefixes verbatim) keeps working unchanged.
+function requireSignedState(req, res, next) {
+  const result = validateOAuthState(req.query.state);
+  if (!result.valid) {
+    logger.warn('[OAuth] state validation failed', { reason: result.reason, path: req.path });
+    return res.status(400).json({ success: false, message: 'Invalid OAuth state' });
+  }
+  req.query.state = result.clientPayload;
+  next();
+}
 
 /**
  * @route   GET /api/auth/google
@@ -22,8 +39,10 @@ router.get('/google', (req, res, next) => {
     });
   }
 
-  // Pass state parameter through OAuth (includes sessionId for popup requests)
-  const state = req.query.state || '';
+  // Server-signed state. The original client-supplied value (typically
+  // `oauth_<sessionId>` for popup flows) is wrapped in an HMAC envelope
+  // and unwrapped by requireSignedState on callback.
+  const state = generateOAuthState(req.query.state || '');
 
   passport.authenticate('google', {
     scope: ['profile', 'email'],
@@ -36,7 +55,7 @@ router.get('/google', (req, res, next) => {
  * @desc    Handle Google OAuth callback
  * @access  Public
  */
-router.get('/google/callback', (req, res, next) => {
+router.get('/google/callback', requireSignedState, (req, res, next) => {
   passport.authenticate('google', { session: false }, (err, user, info) => {
     logger.info('[OAuth] Google callback:', { 
       error: err ? err.message : null, 
@@ -74,13 +93,9 @@ router.get('/facebook', (req, res, next) => {
   }
 
   const options = {
-    scope: ['email']
+    scope: ['email'],
+    state: generateOAuthState(req.query.state || '')
   };
-  
-  // Pass state parameter if provided
-  if (req.query.state) {
-    options.state = req.query.state;
-  }
 
   passport.authenticate('facebook', options)(req, res, next);
 });
@@ -90,7 +105,7 @@ router.get('/facebook', (req, res, next) => {
  * @desc    Handle Facebook OAuth callback
  * @access  Public
  */
-router.get('/facebook/callback', (req, res, next) => {
+router.get('/facebook/callback', requireSignedState, (req, res, next) => {
   passport.authenticate('facebook', { session: false }, (err, user, info) => {
     // Add user to request regardless of authentication result
     req.user = user;
@@ -171,15 +186,13 @@ router.get('/customer/google', (req, res, next) => {
     });
   }
 
-  // Pass state parameter through OAuth (includes sessionId for popup requests)
   const state = req.query.state || '';
-
-  // Add customer context to state parameter
+  // Wrap the customer-prefixed sessionId in a signed envelope.
   const customerState = state ? `customer_${state}` : 'customer';
 
   passport.authenticate('google', {
     scope: ['profile', 'email'],
-    state: customerState
+    state: generateOAuthState(customerState)
   })(req, res, next);
 });
 
@@ -209,13 +222,11 @@ router.get('/customer/facebook', (req, res, next) => {
   }
 
   const state = req.query.state || '';
-  
-  // Add customer context to state parameter
   const customerState = state ? `customer_${state}` : 'customer';
 
   passport.authenticate('facebook', {
     scope: ['email'],
-    state: customerState
+    state: generateOAuthState(customerState)
   })(req, res, next);
 });
 
@@ -225,6 +236,7 @@ router.get('/customer/facebook', (req, res, next) => {
  * @access  Public
  */
 router.get('/customer/facebook/callback',
+  requireSignedState,
   passport.authenticate('facebook', { session: false }),
   authController.handleCustomerSocialCallback
 );
