@@ -34,6 +34,25 @@ const generateToken = authTokenService.generateToken;
 const generateRefreshToken = (userId, userType, ip, replaceToken = null) =>
   authTokenService.generateRefreshToken({ userId, userType, ip, replaceToken, cryptoWrapper });
 
+// SEC H-3 helper: store an OAuth callback result message server-side keyed
+// by an opaque lookup key, redirect with only the key in the URL. Used by
+// every res.redirect('/oauth-success.html?...') site to keep tokens, refresh
+// tokens, and provider access tokens out of browser history / access logs /
+// Referer headers. Falls back to inline message if storage fails — better
+// to complete the flow with a logged warning than to break login entirely.
+async function redirectViaOAuthSession(res, sessionId, message, fallbackPath) {
+  const OAuthSession = require('../models/OAuthSession');
+  const lookupKey = sessionId || `oauth-result:${crypto.randomBytes(24).toString('hex')}`;
+  try {
+    await OAuthSession.createSession(lookupKey, message);
+    return res.redirect(`/oauth-success.html?session=${encodeURIComponent(lookupKey)}`);
+  } catch (dbError) {
+    logger.error('[OAuth] redirectViaOAuthSession failed; falling back to inline message', { err: dbError.message });
+    const messageParam = encodeURIComponent(JSON.stringify(message));
+    return res.redirect(`${fallbackPath || '/oauth-success.html'}?message=${messageParam}`);
+  }
+}
+
 /**
  * Affiliate login controller
  */
@@ -718,20 +737,7 @@ exports.handleSocialCallback = async (req, res) => {
           type: 'social-auth-error',
           message: 'Social authentication failed'
         };
-
-        // Store in database if sessionId is provided
-        if (sessionId) {
-          try {
-            const OAuthSession = require('../models/OAuthSession');
-            await OAuthSession.createSession(sessionId, message);
-          } catch (dbError) {
-            logger.error('Error storing OAuth session:', dbError);
-          }
-        }
-
-        // Redirect to OAuth success page with message as parameter
-        const messageParam = encodeURIComponent(JSON.stringify(message));
-        return res.redirect(`/oauth-success.html?message=${messageParam}`);
+        return await redirectViaOAuthSession(res, sessionId, message);
       }
 
       return res.redirect('/affiliate-register-embed.html?error=social_auth_failed');
@@ -770,39 +776,37 @@ exports.handleSocialCallback = async (req, res) => {
       // Log successful login
       logLoginAttempt(true, 'affiliate', user.username, req, 'Social login successful');
 
-      if (isPopup) {
-        const message = {
-          type: 'social-auth-login',
-          token: token,
-          refreshToken: refreshToken,
-          affiliate: {
-            affiliateId: user.affiliateId,
-            id: user._id,
-            firstName: user.firstName,
-            lastName: user.lastName,
-            email: user.email,
-            businessName: user.businessName,
-            registrationMethod: user.registrationMethod
-          }
-        };
-
-        // Store in database if sessionId is provided
-        if (sessionId) {
-          try {
-            const OAuthSession = require('../models/OAuthSession');
-            await OAuthSession.createSession(sessionId, message);
-          } catch (dbError) {
-            logger.error('Error storing OAuth session:', dbError);
-          }
+      const message = {
+        type: 'social-auth-login',
+        token: token,
+        refreshToken: refreshToken,
+        affiliate: {
+          affiliateId: user.affiliateId,
+          id: user._id,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          email: user.email,
+          businessName: user.businessName,
+          registrationMethod: user.registrationMethod
         }
+      };
 
-        // Redirect to OAuth success page with message as parameter
-        const messageParam = encodeURIComponent(JSON.stringify(message));
-        return res.redirect(`/oauth-success.html?message=${messageParam}`);
+      // SEC H-3: never put access/refresh tokens in a redirect URL — they
+      // leak via browser history, server access logs, and Referer headers
+      // on outbound requests. Instead store the result server-side in the
+      // OAuthSession TTL store and pass only an opaque lookup key.
+      const OAuthSession = require('../models/OAuthSession');
+      const lookupKey = sessionId || `oauth-result:${crypto.randomBytes(24).toString('hex')}`;
+      try {
+        await OAuthSession.createSession(lookupKey, message);
+      } catch (dbError) {
+        logger.error('Error storing OAuth session:', dbError);
       }
 
-      // Redirect to dashboard with tokens
-      return res.redirect(`/affiliate-dashboard-embed.html?token=${token}&refreshToken=${refreshToken}`);
+      if (isPopup) {
+        return res.redirect(`/oauth-success.html?session=${encodeURIComponent(lookupKey)}`);
+      }
+      return res.redirect(`/affiliate-dashboard-embed.html?fetch=${encodeURIComponent(lookupKey)}`);
     }
 
     // Handle case where social account already exists as a customer
@@ -820,19 +824,7 @@ exports.handleSocialCallback = async (req, res) => {
       };
 
       if (isPopup) {
-        // Store in database if sessionId is provided
-        if (sessionId) {
-          try {
-            const OAuthSession = require('../models/OAuthSession');
-            await OAuthSession.createSession(sessionId, message);
-          } catch (dbError) {
-            logger.error('Error storing OAuth session:', dbError);
-          }
-        }
-
-        // Redirect to OAuth success page with message as parameter
-        const messageParam = encodeURIComponent(JSON.stringify(message));
-        return res.redirect(`/oauth-success.html?message=${messageParam}`);
+        return await redirectViaOAuthSession(res, sessionId, message);
       }
 
       return res.redirect('/affiliate-register-embed.html?error=account_exists_as_customer');
@@ -858,19 +850,7 @@ exports.handleSocialCallback = async (req, res) => {
         provider: user.provider
       };
 
-      // Store in database if sessionId is provided
-      if (sessionId) {
-        try {
-          const OAuthSession = require('../models/OAuthSession');
-          await OAuthSession.createSession(sessionId, message);
-        } catch (dbError) {
-          logger.error('Error storing OAuth session:', dbError);
-        }
-      }
-
-      // Redirect to OAuth success page with message as parameter (consistent with other cases)
-      const messageParam = encodeURIComponent(JSON.stringify(message));
-      return res.redirect(`/oauth-success.html?message=${messageParam}`);
+      return await redirectViaOAuthSession(res, sessionId, message);
 
       // OLD CODE - replaced with redirect above for consistency
       /*return res.send(`
@@ -1160,20 +1140,7 @@ exports.handleCustomerSocialCallback = async (req, res) => {
           type: 'social-auth-error',
           message: 'Social authentication failed'
         };
-
-        // Store in database if sessionId is provided
-        if (sessionId) {
-          try {
-            const OAuthSession = require('../models/OAuthSession');
-            await OAuthSession.createSession(sessionId, message);
-          } catch (dbError) {
-            logger.error('Error storing Customer OAuth session:', dbError);
-          }
-        }
-
-        // Redirect to OAuth success page with message as parameter
-        const messageParam = encodeURIComponent(JSON.stringify(message));
-        return res.redirect(`/oauth-success.html?message=${messageParam}`);
+        return await redirectViaOAuthSession(res, sessionId, message);
       }
 
       // Always handle OAuth errors as popup to prevent redirect issues
