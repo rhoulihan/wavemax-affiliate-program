@@ -34,10 +34,14 @@
   /* Routes we OWN. Map grows as Phase 2/3/4 land. Anything not in the map
    * routes through embed-app-v2 (the existing SPA router). */
   const ROUTE_MAP = {
-    '/':                          '/austin-landing-v3-embed.html',
-    '/wash-dry-fold':             '/wash-dry-fold-embed.html',
-    '/self-serve-laundry':        '/self-serve-laundry-embed.html',
-    '/contact':                   '/contact-embed.html'
+    '/':                            '/austin-landing-v3-embed.html',
+    '/wash-dry-fold':               '/wash-dry-fold-embed.html',
+    '/self-serve-laundry':          '/self-serve-laundry-embed.html',
+    '/commercial':                  '/commercial-embed.html',
+    '/commercial/medical-offices':  '/commercial-medical-embed.html',
+    '/commercial/health-clubs':     '/commercial-health-clubs-embed.html',
+    '/commercial/airbnb-rentals':   '/commercial-airbnb-embed.html',
+    '/contact':                     '/contact-embed.html'
   };
 
   const ROUTE_BREADCRUMBS = {
