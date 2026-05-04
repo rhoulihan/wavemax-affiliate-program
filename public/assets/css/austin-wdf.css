@@ -1,0 +1,219 @@
+/* austin-wdf page-local styles. Loaded after wavemax-theme + wavemax-
+ * components, so theme tokens (--wm-primary etc.) and the .wm-btn /
+ * .wm-hero / .wm-cta-strip classes are already available. */
+
+body { background: var(--wm-bg); }
+
+/* ---------- Hero ----------
+   The shared .wm-hero rule provides a min-height + flex centering;
+   we override the inner padding for this informational page (less
+   visual chrome than the landing) and constrain the text columns. */
+.wm-hero {
+  background: linear-gradient(135deg, var(--wm-primary) 0%, #0f3254 100%);
+  color: #ffffff;
+  padding: var(--wm-sp-7) 0 var(--wm-sp-6);
+}
+.wm-hero-inner {
+  max-width: var(--wm-content-narrow);
+  margin: 0 auto;
+  padding: 0 var(--wm-sp-5);
+  text-align: center;
+}
+.wm-hero .wm-eyebrow {
+  color: rgba(255,255,255,0.65);
+  letter-spacing: 0.18em;
+  font-size: var(--wm-fs-xs);
+  font-weight: 700;
+  margin: 0 0 var(--wm-sp-2);
+  text-transform: uppercase;
+}
+.wm-hero-title {
+  font-family: 'Poppins', sans-serif;
+  font-size: var(--wm-fs-2xl);
+  font-weight: 700;
+  line-height: 1.2;
+  margin: 0 0 var(--wm-sp-3);
+  color: #ffffff;
+}
+.wm-hero-subtitle {
+  font-size: var(--wm-fs-lg);
+  line-height: 1.55;
+  max-width: 60ch;
+  margin: 0 auto var(--wm-sp-5);
+  color: rgba(255,255,255,0.92);
+}
+.wm-hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--wm-sp-3);
+  justify-content: center;
+}
+@media (max-width: 540px) {
+  .wm-hero-actions .wm-btn { flex-basis: 100%; min-width: 0; }
+}
+
+/* ---------- Section scaffolding ---------- */
+.wm-wdf-section {
+  padding: var(--wm-sp-7) 0;
+}
+.wm-wdf-section-inner {
+  max-width: var(--wm-content-max);
+  margin: 0 auto;
+  padding: 0 var(--wm-sp-5);
+}
+.wm-wdf-section-title {
+  font-family: 'Poppins', sans-serif;
+  font-size: var(--wm-fs-2xl);
+  font-weight: 700;
+  color: var(--wm-primary-dk);
+  line-height: 1.2;
+  margin: 0 0 var(--wm-sp-5);
+  max-width: 28ch;
+}
+
+/* ---------- Pricing + Includes ---------- */
+.wm-wdf-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--wm-sp-6);
+  align-items: stretch;
+}
+@media (max-width: 880px) {
+  .wm-wdf-grid { grid-template-columns: 1fr; gap: var(--wm-sp-5); }
+}
+
+.wm-wdf-card {
+  background: #ffffff;
+  border: 1px solid var(--wm-border);
+  border-radius: var(--wm-radius-lg);
+  padding: var(--wm-sp-6);
+  box-shadow: 0 4px 16px rgba(15,50,84,0.06);
+}
+.wm-wdf-card-eyebrow {
+  font-size: var(--wm-fs-xs);
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: var(--wm-text-muted);
+  text-transform: uppercase;
+  margin: 0 0 var(--wm-sp-3);
+}
+.wm-wdf-card-title {
+  font-family: 'Poppins', sans-serif;
+  font-size: var(--wm-fs-xl);
+  font-weight: 700;
+  color: var(--wm-primary-dk);
+  line-height: 1.2;
+  margin: 0 0 var(--wm-sp-4);
+}
+
+/* Pricing card */
+.wm-wdf-card-pricing {
+  display: flex;
+  flex-direction: column;
+}
+.wm-wdf-price-display {
+  margin: var(--wm-sp-2) 0 var(--wm-sp-3);
+}
+.wm-wdf-price-rate {
+  font-family: 'Poppins', sans-serif;
+  font-size: 56px;
+  font-weight: 800;
+  color: var(--wm-primary);
+  letter-spacing: -0.01em;
+}
+.wm-wdf-price-min {
+  font-size: var(--wm-fs-base);
+  color: var(--wm-text);
+  margin: 0 0 var(--wm-sp-3);
+}
+.wm-wdf-price-blurb {
+  font-size: var(--wm-fs-base);
+  color: var(--wm-text-muted);
+  line-height: 1.55;
+  margin: 0 0 var(--wm-sp-5);
+}
+.wm-wdf-price-actions { margin-top: auto; }
+.wm-wdf-price-actions .wm-btn { display: inline-flex; }
+
+/* Includes card */
+.wm-wdf-includes-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: var(--wm-sp-3);
+}
+.wm-wdf-includes-list li {
+  position: relative;
+  padding-left: 26px;
+  font-size: var(--wm-fs-base);
+  color: var(--wm-text);
+  line-height: 1.5;
+}
+.wm-wdf-includes-list li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 6px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--wm-primary);
+  -webkit-mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path d="M3 8 l3 3 7-7" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>') center / 16px no-repeat;
+          mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path d="M3 8 l3 3 7-7" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>') center / 16px no-repeat;
+}
+
+/* ---------- How-it-works ---------- */
+.wm-wdf-how { background: var(--wm-bg-soft); }
+.wm-wdf-steps {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--wm-sp-6);
+}
+@media (max-width: 880px) {
+  .wm-wdf-steps { grid-template-columns: 1fr; gap: var(--wm-sp-5); }
+}
+.wm-wdf-step {
+  padding: var(--wm-sp-5);
+  background: #ffffff;
+  border: 1px solid var(--wm-border);
+  border-radius: var(--wm-radius-lg);
+  position: relative;
+}
+.wm-wdf-step-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--wm-primary);
+  color: #ffffff;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 700;
+  font-size: 18px;
+  margin-bottom: var(--wm-sp-3);
+}
+.wm-wdf-step-title {
+  font-family: 'Poppins', sans-serif;
+  font-size: var(--wm-fs-lg);
+  font-weight: 700;
+  color: var(--wm-primary-dk);
+  margin: 0 0 var(--wm-sp-2);
+  line-height: 1.25;
+}
+.wm-wdf-step-text {
+  font-size: var(--wm-fs-base);
+  color: var(--wm-text);
+  line-height: 1.55;
+  margin: 0;
+}
+
+/* ---------- CTA strip — minor on-dark button override ---------- */
+.wm-cta-strip .wm-btn-on-dark {
+  color: #ffffff;
+  border-color: rgba(255,255,255,0.55);
+}
