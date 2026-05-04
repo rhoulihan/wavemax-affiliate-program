@@ -31,6 +31,9 @@
       'contact.form.sending':       'Sending…',
       'contact.form.successDefault':"Your message has been sent — we'll be in touch shortly.",
       'contact.form.errorDefault':  'There was a problem sending your message. Please try again, or call us directly.',
+      'contact.modal.successTitle': 'Message sent',
+      'contact.modal.errorTitle':   "Couldn't send message",
+      'contact.modal.ok':           'OK',
       'contact.tiles.hours.title':       'Open every day',
       'contact.tiles.hours.text':        'Self-service floor open 7am–10pm, 365 days a year. Last wash starts 9pm so every cycle finishes before close.',
       'contact.tiles.machines.title':    'Electrolux Commercial Washers',
@@ -66,6 +69,9 @@
       'contact.form.sending':       'Enviando…',
       'contact.form.successDefault':'Su mensaje ha sido enviado — nos pondremos en contacto pronto.',
       'contact.form.errorDefault':  'Hubo un problema al enviar su mensaje. Inténtelo de nuevo o llámenos directamente.',
+      'contact.modal.successTitle': 'Mensaje enviado',
+      'contact.modal.errorTitle':   'No se pudo enviar',
+      'contact.modal.ok':           'Aceptar',
       'contact.tiles.hours.title':       'Abierto todos los días',
       'contact.tiles.hours.text':        'Servicio de autoservicio abierto de 7am a 10pm, 365 días al año. El último lavado inicia a las 9pm para que todo termine antes del cierre.',
       'contact.tiles.machines.title':    'Lavadoras Comerciales Electrolux',
@@ -101,6 +107,9 @@
       'contact.form.sending':       'Enviando…',
       'contact.form.successDefault':'Sua mensagem foi enviada — entraremos em contato em breve.',
       'contact.form.errorDefault':  'Houve um problema ao enviar sua mensagem. Tente novamente ou ligue diretamente.',
+      'contact.modal.successTitle': 'Mensagem enviada',
+      'contact.modal.errorTitle':   'Não foi possível enviar',
+      'contact.modal.ok':           'OK',
       'contact.tiles.hours.title':       'Aberto todos os dias',
       'contact.tiles.hours.text':        'Autoatendimento aberto das 7h às 22h, 365 dias por ano. Última lavagem começa às 21h para que todos os ciclos terminem antes de fechar.',
       'contact.tiles.machines.title':    'Lavadoras Comerciais Electrolux',
@@ -136,6 +145,9 @@
       'contact.form.sending':       'Senden…',
       'contact.form.successDefault':'Ihre Nachricht wurde gesendet — wir melden uns in Kürze.',
       'contact.form.errorDefault':  'Beim Senden Ihrer Nachricht ist ein Problem aufgetreten. Bitte versuchen Sie es erneut oder rufen Sie uns direkt an.',
+      'contact.modal.successTitle': 'Nachricht gesendet',
+      'contact.modal.errorTitle':   'Senden fehlgeschlagen',
+      'contact.modal.ok':           'OK',
       'contact.tiles.hours.title':       'Täglich geöffnet',
       'contact.tiles.hours.text':        'Selbstbedienung 7–22 Uhr, 365 Tage im Jahr. Letzter Waschgang um 21 Uhr, damit alle Programme vor Schluss enden.',
       'contact.tiles.machines.title':    'Electrolux Profi-Waschmaschinen',
@@ -186,6 +198,7 @@
   }
 
   function showStatus(form, kind, text) {
+    // Inline status surfaces — kept for accessibility / no-JS / e2e selectors.
     const success = form.querySelector('[data-contact-status="success"]');
     const error   = form.querySelector('[data-contact-status="error"]');
     if (success) {
@@ -196,6 +209,55 @@
       error.hidden = (kind !== 'error');
       if (kind === 'error' && text) error.textContent = text;
     }
+    // Modal — primary user-facing surface for success / error.
+    if (kind === 'success' || kind === 'error') {
+      showModal(kind, text);
+    }
+  }
+
+  function showModal(kind, body) {
+    const modal = document.querySelector('[data-contact-modal]');
+    if (!modal) return;
+    const dict = getLangDict();
+    const title = (kind === 'success')
+      ? (dict['contact.modal.successTitle'] || 'Message sent')
+      : (dict['contact.modal.errorTitle']   || 'Could not send');
+    const titleEl = modal.querySelector('[data-modal-title]');
+    const bodyEl  = modal.querySelector('[data-modal-body]');
+    const iconEl  = modal.querySelector('[data-modal-icon]');
+    if (titleEl) titleEl.textContent = title;
+    if (bodyEl)  bodyEl.textContent  = body || '';
+    modal.dataset.kind = kind;
+    if (iconEl) iconEl.innerHTML = (kind === 'success')
+      ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="12" cy="12" r="10"></circle><polyline points="7 12 11 16 17 9"></polyline></svg>'
+      : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="7" x2="12" y2="13"></line><circle cx="12" cy="17" r="0.6" fill="currentColor"></circle></svg>';
+    modal.hidden = false;
+    if (window.IframeBridge && window.IframeBridge.updateHeight) window.IframeBridge.updateHeight();
+    // Focus the OK button so Enter dismisses
+    const ok = modal.querySelector('.wm-btn-cta');
+    if (ok) ok.focus();
+  }
+
+  function hideModal() {
+    const modal = document.querySelector('[data-contact-modal]');
+    if (!modal) return;
+    modal.hidden = true;
+    if (window.IframeBridge && window.IframeBridge.updateHeight) window.IframeBridge.updateHeight();
+  }
+
+  function initModalDismissers() {
+    if (document.__austinContactModalWired) return;
+    document.__austinContactModalWired = true;
+    document.addEventListener('click', (e) => {
+      const t = e.target;
+      if (t && t.closest && t.closest('[data-modal-dismiss]')) hideModal();
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        const modal = document.querySelector('[data-contact-modal]');
+        if (modal && !modal.hidden) hideModal();
+      }
+    });
   }
 
   function getLangDict() {
@@ -298,6 +360,7 @@
     });
 
     initContactForm();
+    initModalDismissers();
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);

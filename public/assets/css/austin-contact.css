@@ -267,6 +267,97 @@ body { background: var(--wm-bg); }
 }
 [hidden] { display: none !important; }
 
+/* ---------- Submit-status modal ---------- */
+.wm-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--wm-sp-4);
+}
+.wm-modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(15, 50, 84, 0.55);
+  backdrop-filter: blur(2px);
+  animation: wmFade 160ms var(--wm-ease);
+}
+.wm-modal-card {
+  position: relative;
+  width: 100%;
+  max-width: 460px;
+  background: #ffffff;
+  border-radius: var(--wm-radius-lg);
+  box-shadow: 0 20px 50px rgba(15, 50, 84, 0.35), 0 4px 12px rgba(0, 0, 0, 0.08);
+  padding: var(--wm-sp-6);
+  text-align: center;
+  animation: wmPop 200ms var(--wm-ease);
+}
+.wm-modal-close {
+  position: absolute;
+  top: 8px;
+  right: 12px;
+  width: 32px;
+  height: 32px;
+  border: 0;
+  background: transparent;
+  font-size: 24px;
+  line-height: 1;
+  color: var(--wm-text-muted);
+  cursor: pointer;
+  border-radius: var(--wm-radius-sm);
+}
+.wm-modal-close:hover { background: var(--wm-bg-soft); color: var(--wm-text); }
+.wm-modal-icon {
+  width: 64px;
+  height: 64px;
+  margin: var(--wm-sp-2) auto var(--wm-sp-3);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: #ecfdf5;
+  color: #047857;
+}
+.wm-modal[data-kind="error"] .wm-modal-icon {
+  background: #fef2f2;
+  color: #b91c1c;
+}
+.wm-modal-icon svg { width: 36px; height: 36px; }
+.wm-modal-title {
+  font-family: 'Poppins', sans-serif;
+  font-size: var(--wm-fs-xl);
+  font-weight: 700;
+  margin: 0 0 var(--wm-sp-2);
+  color: var(--wm-primary-dk);
+  line-height: 1.2;
+}
+.wm-modal-body {
+  font-size: var(--wm-fs-base);
+  color: var(--wm-text);
+  line-height: 1.55;
+  margin: 0 0 var(--wm-sp-5);
+}
+.wm-modal-actions {
+  display: flex;
+  justify-content: center;
+}
+.wm-modal-actions .wm-btn-cta { min-width: 140px; }
+
+@keyframes wmFade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes wmPop {
+  from { opacity: 0; transform: translateY(8px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0)    scale(1);    }
+}
+@media (prefers-reduced-motion: reduce) {
+  .wm-modal-backdrop, .wm-modal-card { animation: none; }
+}
+
 /* ---------- Tips tiles row ---------- */
 .wm-contact-tiles-wrap {
   max-width: var(--wm-content-max);
