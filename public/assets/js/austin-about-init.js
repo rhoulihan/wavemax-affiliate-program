@@ -21,7 +21,7 @@
       'about.stats.founded':      'Serving Austin Since',
       'about.stats.owners':       'Family Owners',
       'about.stats.local':        'Austin Local',
-      'about.stats.days':         'Days a Year, Open',
+      'about.stats.disciplines':  'Disciplines',
       'about.stats.community':    'Community First',
 
       'about.mission.eyebrow':    'WHY WAVEMAX',
@@ -75,7 +75,7 @@
       'about.stats.founded':      'Sirviendo a Austin Desde',
       'about.stats.owners':       'Dueños Familiares',
       'about.stats.local':        'Local de Austin',
-      'about.stats.days':         'Días al Año, Abiertos',
+      'about.stats.disciplines':  'Disciplinas',
       'about.stats.community':    'Comunidad Primero',
 
       'about.mission.eyebrow':    'POR QUÉ WAVEMAX',
@@ -129,7 +129,7 @@
       'about.stats.founded':      'Servindo Austin Desde',
       'about.stats.owners':       'Donos Familiares',
       'about.stats.local':        'Local de Austin',
-      'about.stats.days':         'Dias por Ano, Aberto',
+      'about.stats.disciplines':  'Disciplinas',
       'about.stats.community':    'Comunidade Primeiro',
 
       'about.mission.eyebrow':    'POR QUE WAVEMAX',
@@ -183,7 +183,7 @@
       'about.stats.founded':      'Austin Bedient Seit',
       'about.stats.owners':       'Familieninhaber',
       'about.stats.local':        'Austin Lokal',
-      'about.stats.days':         'Tage im Jahr Geöffnet',
+      'about.stats.disciplines':  'Disziplinen',
       'about.stats.community':    'Gemeinschaft Zuerst',
 
       'about.mission.eyebrow':    'WARUM WAVEMAX',
