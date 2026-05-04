@@ -18,12 +18,12 @@ body { background: var(--wm-bg-soft); }
   padding: var(--wm-sp-7) 0 var(--wm-sp-6);
   position: relative;
   overflow: hidden;
-  /* Shared wm-hero (used by the landing page) sets min-height: 60vh
-     so the cinematic hero fills the viewport. The WDF hero is just
-     logo + title + subtitle + two CTAs, so let it size to content. */
-  min-height: 0;
+  /* Match the landing page's cinematic hero so the watermark backdrop
+     has room to breathe. Inner content is centered vertically by the
+     shared .wm-hero flex rule from wavemax-components.css. */
+  min-height: 60vh;
 }
-@media (max-width: 540px) { .wm-hero { min-height: 0; } }
+@media (max-width: 540px) { .wm-hero { min-height: 50vh; } }
 
 /* Austin watermark — same treatment as the landing-page hero.
    Background image is set on #wm-austin-watermark by austin-wdf-init.js
@@ -74,6 +74,11 @@ body { background: var(--wm-bg-soft); }
 }
 .wm-stat-card {
   padding: 0 24px;
+  /* Reset shared .wm-stat-card defaults from wavemax-components.css —
+     they paint a light card with an Austin-sun top stripe + rounded
+     corners, which fights the navy band treatment we want here. */
+  border-top: 0;
+  border-radius: 0;
   border-right: 1px solid rgba(255,255,255,0.12);
   background: transparent;
 }
