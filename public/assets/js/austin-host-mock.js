@@ -38,9 +38,6 @@
     '/wash-dry-fold':               '/wash-dry-fold-embed.html',
     '/self-serve-laundry':          '/self-serve-laundry-embed.html',
     '/commercial':                  '/commercial-embed.html',
-    '/commercial/medical-offices':  '/commercial-medical-embed.html',
-    '/commercial/health-clubs':     '/commercial-health-clubs-embed.html',
-    '/commercial/airbnb-rentals':   '/commercial-airbnb-embed.html',
     '/contact':                     '/contact-embed.html'
   };
 
