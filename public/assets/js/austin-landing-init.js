@@ -470,7 +470,11 @@
     let scheduled = null;
     function schedule() {
       if (scheduled) clearTimeout(scheduled);
-      scheduled = setTimeout(step, 4000);
+      // 6000ms — 50% slower than the original 4000ms cadence so each
+      // photo lingers long enough to read the alt-text caption and
+      // the every-third-frame Austin landmark feels like punctuation
+      // rather than rapid-fire flicker.
+      scheduled = setTimeout(step, 6000);
     }
     schedule();
 

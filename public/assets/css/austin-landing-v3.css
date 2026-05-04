@@ -111,6 +111,16 @@
     }
     @media (max-width: 880px) {
       .wm-hero-grid { grid-template-columns: 1fr; gap: var(--wm-sp-5); }
+      /* Below the two-column breakpoint, center every hero element —
+         logo, eyebrow, title, subtitle, CTAs — so the single-column
+         stack reads as a centered composition rather than a left-rail
+         strip with empty space on the right. */
+      .wm-hero-content { text-align: center; }
+      .wm-hero-brand-logo { margin-left: auto; margin-right: auto; }
+      .wm-hero-grid .wm-hero-eyebrow,
+      .wm-hero-grid .wm-hero-title,
+      .wm-hero-grid .wm-hero-subtitle { margin-left: auto; margin-right: auto; }
+      .wm-hero-actions { justify-content: center; }
     }
 
     /* ---- Hero visual: clean store-photo card floating on the watermark.
