@@ -427,12 +427,13 @@
   </script>
 
   <!-- Performance: pre-resolve DNS + open TCP/TLS to the hosts we hit on
-       first paint (fonts, images, store photos). Saves 150-300ms on
-       a cold connection. -->
+       first paint (fonts, images, Hibu loader, store photos). Saves
+       150-300ms on a cold connection. -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preconnect" href="https://wavemaxlaundry.com">
   <link rel="preconnect" href="https://upload.wikimedia.org">
+  <link rel="dns-prefetch" href="https://reports.hibu.com">
   <link rel="dns-prefetch" href="https://places.googleapis.com">
 
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@500;600;700;800&display=swap" rel="stylesheet">
@@ -795,5 +796,16 @@
 <!-- Bridge + chrome wiring (CSP-clean external scripts) -->
 <script src="/assets/js/parent-iframe-bridge-v3.js"></script>
 <script src="/assets/js/austin-host-mock.js"></script>
+
+<!--
+  ════════════════════════════════════════════════════════════════════
+  HIBU DYNAMIC PHONE INSERTION — source-indexed call-tracking layer.
+  Loader pulls 1×<script> from reports.hibu.com (whitelisted in CSP
+  script-src), and the local init seeds the source-indexed number
+  map. Both files external — no inline-script CSP exception needed.
+  ════════════════════════════════════════════════════════════════════
+-->
+<script src="https://reports.hibu.com/analytics/js/ybDynamicPhoneInsertion.js"></script>
+<script src="/assets/js/austin-hibu-phone-swap.js"></script>
 </body>
 </html>
