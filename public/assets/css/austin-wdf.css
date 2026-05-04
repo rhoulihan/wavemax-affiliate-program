@@ -209,10 +209,6 @@ body { background: var(--wm-bg-soft); }
   padding: var(--wm-sp-6);
   box-shadow: 0 6px 22px rgba(15,50,84,0.10);
 }
-/* Pricing card gets the Austin-sun strip; Includes card the cyan
-   secondary — sibling-but-distinct, mirroring the contact-page pair. */
-.wm-wdf-card-pricing  { border-top: 4px solid var(--austin-sun); }
-.wm-wdf-card-includes { border-top: 4px solid var(--wm-secondary); }
 .wm-wdf-card-eyebrow {
   font-size: var(--wm-fs-xs);
   font-weight: 700;
