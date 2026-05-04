@@ -53,11 +53,16 @@ body { background: var(--wm-bg-soft); }
   max-width: var(--wm-content-max);
   margin: 0 auto;
   padding: 0 var(--wm-sp-5);
+  /* Flex column with explicit cross-axis centering — every child is
+   * centered regardless of any default text-align inheritance. */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   text-align: center;
 }
 .wm-hero-logo {
   display: block;
-  margin: 0 auto var(--wm-sp-4);
+  margin: 0 0 var(--wm-sp-4);
   filter: drop-shadow(0 4px 16px rgba(0, 0, 0, 0.35));
 }
 .wm-hero-title {
