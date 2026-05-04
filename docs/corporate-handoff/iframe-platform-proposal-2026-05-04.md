@@ -18,7 +18,7 @@ The WaveMAX brand currently lives inside one monolithic WordPress site that ever
 - **Per-franchise host pages** that can live anywhere — WordPress, static HTML, WIX, Squarespace, Shopify, custom — all consuming the same library
 - **Complete isolation** between franchises while corporate keeps unbreakable brand control
 
-We have already built this end-to-end for Austin in **a single day** of focused work — 100 commits, 21 defects fixed, 21 new features shipped, 96+ e2e tests passing. We are offering to **package it as a turnkey reference repository for the entire WaveMAX network at zero cost**, plus a paid integration + training engagement for MHR's team. The economics, the development velocity, and the operational risk profile all favor this model over the current monolith. Section 1 makes the case for executives. Section 2 explains how it works. Section 3 lays out what we are offering and what we'd ask in return.
+We have already built this end-to-end for Austin in **a single day** of focused work — 100 commits, 21 defects fixed, 21 new features shipped, 96+ e2e tests passing. We are offering to **package it as a fully documented, turnkey reference repository for the entire WaveMAX network at zero cost** — ready for MHR's team to own and extend on day one. Optional paid integration + training engagement is available if MHR staff would benefit from hands-on ramp-up support. The economics, the development velocity, and the operational risk profile all favor this model over the current monolith. Section 1 makes the case for executives. Section 2 explains how it works. Section 3 lays out what we are offering and what we'd ask in return.
 
 ---
 
@@ -371,18 +371,20 @@ A **turnkey reference repository** for the WaveMAX network, derived from the pro
 | 9 | Integration testing with MHR's existing assets, security review |
 | 10 | Handoff session, training, written runbook |
 
-## What we ask in return — paid integration & training
+## Optional · paid integration & training
 
-This is where MHR and corporate take the wheel. Building a turnkey repo is half the job; getting MHR's team comfortable owning, extending, and supporting it is the other half. We offer:
+The repo handoff is **complete on its own**. Documentation, runbook, e2e tests, and a `CLAUDE.md`-style operational handbook ship with it. An MHR engineer who knows the codebase can pick it up and run with it without us in the room.
 
-- **Pair-programming sessions** with MHR's engineering leads (~5 sessions over the integration phase)
-- **One on-site working week** at MHR's office for hands-on integration with their existing tooling and franchise onboarding pipeline
+If MHR's staff would benefit from hands-on ramp-up support, we're available for a paid engagement. Scope to what the team actually needs — anything from a half-day Q&A through a full integration sprint:
+
+- **Pair-programming sessions** with MHR's engineering leads
+- **On-site working week** at MHR's office for hands-on integration with their existing tooling and franchise onboarding pipeline
 - **Six-month support window** for incident response and architecture questions
-- **Documentation handoff** including a `CLAUDE.md`-style operational handbook plus per-section technical reference
+- **Custom franchise onboardings** beyond the reference repo
 
-**Compensation:** between **$15,000 and $25,000** depending on the seniority and bandwidth of MHR's technical team and the depth of the engagement. **Plus reasonable expenses** if the on-site week is requested (flight + lodging — Austin to wherever MHR is based, one trip).
+**Compensation:** between **$15,000 and $25,000** depending on engagement depth and the seniority of MHR's technical team. **Plus reasonable expenses** if on-site time is requested (flight + lodging — Austin to wherever MHR is based, one trip).
 
-This is intentionally below market rate. We want this to work. The Austin franchise benefits directly from a healthier corporate-network architecture, and we're prepared to subsidize getting it across the line.
+This is intentionally below market rate. We want this to work. The Austin franchise benefits directly from a healthier corporate-network architecture, and we're prepared to subsidize getting it across the line if MHR wants the help.
 
 ## Why this is the right move now
 
@@ -395,7 +397,7 @@ This is intentionally below market rate. We want this to work. The Austin franch
 ## Decision points for the executive group
 
 1. **Approve the turnkey reference build** — Austin commits to deliver in 10 working days at no cost
-2. **Engage MHR for the integration phase** — $15K–$25K + expenses, scoped to MHR's actual team capacity
+2. **Optionally engage Austin for the integration phase** — $15K–$25K + expenses, scoped to whatever MHR's team actually needs (skip if MHR engineering is comfortable owning the repo from the handoff)
 3. **Pilot with two or three franchises** — recommend Austin + one MHR-managed location + one currently struggling location, so we exercise all three host scenarios at once
 4. **Set the network rollout timeline** — Austin can support 1–2 onboardings per week post-handoff for whichever franchises opt in
 
