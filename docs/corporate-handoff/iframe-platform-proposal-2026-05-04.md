@@ -18,7 +18,7 @@ The WaveMAX brand currently lives inside one monolithic WordPress site that ever
 - **Per-franchise host pages** that can live anywhere — WordPress, static HTML, WIX, Squarespace, Shopify, custom — all consuming the same library
 - **Complete isolation** between franchises while corporate keeps unbreakable brand control
 
-We have already built this end-to-end for Austin in less than two weeks. We are offering to **package it as a turnkey reference repository for the entire WaveMAX network at zero cost**, plus a paid integration + training engagement for MHR's team. The economics, the development velocity, and the operational risk profile all favor this model over the current monolith. Section 1 makes the case for executives. Section 2 explains how it works. Section 3 lays out what we are offering and what we'd ask in return.
+We have already built this end-to-end for Austin in **a single day** of focused work — 100 commits, 21 defects fixed, 21 new features shipped, 96+ e2e tests passing. We are offering to **package it as a turnkey reference repository for the entire WaveMAX network at zero cost**, plus a paid integration + training engagement for MHR's team. The economics, the development velocity, and the operational risk profile all favor this model over the current monolith. Section 1 makes the case for executives. Section 2 explains how it works. Section 3 lays out what we are offering and what we'd ask in return.
 
 ---
 
