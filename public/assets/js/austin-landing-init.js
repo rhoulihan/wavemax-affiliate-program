@@ -203,34 +203,49 @@
   };
 
   /* ---------- SEO config (sent to parent via bridge) ---------- */
+  const PAGE_URL    = 'https://wavemax.promo/dev/austin-host-mock.html';
+  const HOST_URL    = 'https://wavemax.promo/austin-tx/';
+  const HERO_IMG    = 'https://wavemaxlaundry.com/wp-content/uploads/locations/austin-tx/hero-1.jpg';
+  const BUSINESS_ID = 'https://www.wavemaxlaundry.com/austin-tx/#localbusiness';
+
   const SEO = {
     meta: {
       title:        'WaveMAX Austin · Laundromat in North Austin',
       description:  "Austin's cleanest, fastest laundromat. Self-serve laundry · wash-dry-fold drop-off · commercial accounts. Open daily 7am–10pm at 825 E Rundberg Ln F1, North Austin.",
-      canonicalUrl: 'https://wavemax.promo/austin-tx/',
-      author:       'WaveMAX Laundry Austin'
+      canonicalUrl: PAGE_URL,
+      author:       'WaveMAX Laundry Austin',
+      keywords:     'laundromat austin tx, laundromat near me, self service laundry austin, wash dry fold austin, drop off laundry austin, north austin laundromat, rundberg laundromat, commercial laundry austin, wavemax austin'
     },
     openGraph: {
       title:       'WaveMAX Austin · Laundromat in North Austin',
       description: "Austin's cleanest laundromat. UV-sanitized, fast machines, open every day.",
       type:        'business.business',
-      url:         'https://wavemax.promo/austin-tx/',
+      url:         PAGE_URL,
+      image:       HERO_IMG,
+      imageWidth:  '1200',
+      imageHeight: '630',
       siteName:    'WaveMAX Laundry',
       locale:      'en_US'
     },
     twitter: {
       card:        'summary_large_image',
       title:       'WaveMAX Austin Laundromat',
-      description: "Austin's cleanest laundromat — open daily 7am–10pm."
+      description: "Austin's cleanest laundromat — open daily 7am–10pm.",
+      image:       HERO_IMG,
+      imageAlt:    'WaveMAX Laundry Austin storefront on Rundberg Ln'
     },
     structuredData: {
       localBusiness: {
         '@context':    'https://schema.org',
-        '@type':       'LocalBusiness',
-        '@id':         'https://www.wavemaxlaundry.com/austin-tx/#localbusiness',
+        '@type':       'LaundryOrDryCleaner',
+        '@id':         BUSINESS_ID,
         name:          'WaveMAX Laundry Austin',
+        alternateName: 'WaveMAX Austin',
+        url:           HOST_URL,
         telephone:     '+15125531674',
+        email:         'no-reply@wavemax.promo',
         priceRange:    '$',
+        image:         [HERO_IMG],
         address: {
           '@type':         'PostalAddress',
           streetAddress:   '825 E Rundberg Ln F1',
@@ -239,15 +254,38 @@
           postalCode:      '78753',
           addressCountry:  'US'
         },
-        geo: { '@type': 'GeoCoordinates', latitude: '30.3564789', longitude: '-97.6858016' },
+        geo: { '@type': 'GeoCoordinates', latitude: 30.3564789, longitude: -97.6858016 },
         openingHoursSpecification: [{
           '@type':   'OpeningHoursSpecification',
           dayOfWeek: ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'],
           opens:     '07:00',
           closes:    '22:00'
-        }]
+        }],
+        areaServed: [
+          { '@type': 'City', name: 'Austin'        },
+          { '@type': 'City', name: 'Round Rock'    },
+          { '@type': 'City', name: 'Cedar Park'    },
+          { '@type': 'City', name: 'Pflugerville'  },
+          { '@type': 'City', name: 'Georgetown'    },
+          { '@type': 'City', name: 'Leander'       }
+        ]
+      },
+      breadcrumb: {
+        '@context': 'https://schema.org',
+        '@type':    'BreadcrumbList',
+        itemListElement: [
+          { '@type': 'ListItem', position: 1, name: 'WaveMAX Laundry', item: 'https://www.wavemaxlaundry.com/' },
+          { '@type': 'ListItem', position: 2, name: 'Austin, TX'                                              }
+        ]
       }
-    }
+    },
+    alternateLanguages: [
+      { hreflang: 'en',        href: PAGE_URL },
+      { hreflang: 'es',        href: PAGE_URL },
+      { hreflang: 'pt',        href: PAGE_URL },
+      { hreflang: 'de',        href: PAGE_URL },
+      { hreflang: 'x-default', href: PAGE_URL }
+    ]
   };
 
   /* ---------- data-bind ---------- */
