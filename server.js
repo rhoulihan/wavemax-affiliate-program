@@ -347,6 +347,9 @@ if (process.env.NODE_ENV !== 'production') {
 // Request body parsing
 app.use(express.json({ limit: '1mb' }));
 app.use(express.urlencoded({ extended: true, limit: '1mb' }));
+// cookie-parser is required by csrf-csrf (SEC M-5 migration) so it can
+// read its double-submit cookie from req.cookies.
+app.use(require('cookie-parser')());
 
 // Sanitization middleware
 app.use(mongoSanitize()); // Prevent NoSQL injection
