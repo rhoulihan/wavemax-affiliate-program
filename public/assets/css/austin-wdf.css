@@ -433,6 +433,96 @@ body { background: var(--wm-bg-soft); }
   margin: 0;
 }
 
+/* ---------- Sanitization panel (LUX deep-dive) ---------- */
+.wm-wdf-lux {
+  display: grid;
+  gap: var(--wm-sp-5);
+}
+.wm-wdf-lux-headline {
+  text-align: center;
+  max-width: 720px;
+  margin: 0 auto;
+}
+.wm-wdf-lux-title {
+  font-family: 'Poppins', sans-serif;
+  font-size: var(--wm-fs-2xl);
+  font-weight: 700;
+  color: var(--wm-primary-deep);
+  line-height: 1.2;
+  margin: var(--wm-sp-2) 0 var(--wm-sp-3);
+}
+.wm-wdf-lux-lede {
+  font-size: var(--wm-fs-lg);
+  line-height: 1.55;
+  color: var(--wm-text);
+  margin: 0;
+}
+.wm-wdf-lux-stats {
+  list-style: none;
+  padding: 0;
+  margin: var(--wm-sp-4) 0;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--wm-sp-4);
+}
+@media (max-width: 720px) { .wm-wdf-lux-stats { grid-template-columns: 1fr; } }
+.wm-wdf-lux-stat {
+  background: #ffffff;
+  border: 1px solid var(--wm-border);
+  border-radius: var(--wm-radius-lg);
+  padding: var(--wm-sp-5);
+  text-align: center;
+  box-shadow: 0 4px 14px rgba(15,50,84,0.08);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--wm-sp-2);
+}
+.wm-wdf-lux-num {
+  font-family: 'Poppins', sans-serif;
+  font-size: 40px;
+  font-weight: 800;
+  color: var(--wm-primary);
+  line-height: 1;
+}
+.wm-wdf-lux-stat:nth-child(1) .wm-wdf-lux-num { color: var(--wm-success); }
+.wm-wdf-lux-stat:nth-child(2) .wm-wdf-lux-num { color: var(--austin-sun); }
+.wm-wdf-lux-stat:nth-child(3) .wm-wdf-lux-num { color: var(--wm-secondary); }
+.wm-wdf-lux-label {
+  font-size: var(--wm-fs-sm);
+  color: var(--wm-text-soft);
+  line-height: 1.4;
+}
+.wm-wdf-lux-points {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: var(--wm-sp-3);
+  max-width: 760px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.wm-wdf-lux-points li {
+  position: relative;
+  padding-left: 28px;
+  font-size: var(--wm-fs-base);
+  line-height: 1.55;
+  color: var(--wm-text);
+}
+.wm-wdf-lux-points li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 7px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--wm-primary);
+  -webkit-mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 18"><path d="M4 9 l3 3 7-7" fill="none" stroke="white" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>') center / 18px no-repeat;
+          mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 18"><path d="M4 9 l3 3 7-7" fill="none" stroke="white" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>') center / 18px no-repeat;
+}
+
 /* ---------- FAQ accordion (native <details>) ---------- */
 .wm-wdf-faq { background: var(--wm-bg-tint); border-top: 1px solid var(--wm-border); border-bottom: 1px solid var(--wm-border); }
 .wm-wdf-faq-list {
