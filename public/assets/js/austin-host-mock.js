@@ -36,7 +36,8 @@
   const ROUTE_MAP = {
     '/':                          '/austin-landing-v3-embed.html',
     '/wash-dry-fold':             '/wash-dry-fold-embed.html',
-    '/self-serve-laundry':        '/self-serve-laundry-embed.html'
+    '/self-serve-laundry':        '/self-serve-laundry-embed.html',
+    '/contact':                   '/contact-embed.html'
   };
 
   const ROUTE_BREADCRUMBS = {
