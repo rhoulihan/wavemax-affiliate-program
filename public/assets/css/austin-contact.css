@@ -138,8 +138,10 @@ body { background: var(--wm-bg); }
   align-self: center;
 }
 .wm-contact-actions .wm-btn {
-  min-width: 180px;
+  min-width: 150px;
   justify-content: center;
+  font-size: var(--wm-fs-sm);
+  padding: 8px 14px;
 }
 @media (max-width: 540px) {
   .wm-contact-actions { align-self: stretch; }
