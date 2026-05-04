@@ -17,13 +17,13 @@ body { background: var(--wm-bg); }
   margin: 0 auto;
   padding: 0 var(--wm-sp-5);
 }
-.wm-contact-hero .wm-eyebrow {
-  color: rgba(255,255,255,0.65);
-  letter-spacing: 0.18em;
-  font-size: var(--wm-fs-xs);
-  font-weight: 700;
-  margin: 0 0 var(--wm-sp-2);
-  text-transform: uppercase;
+.wm-contact-hero-logo {
+  display: block;
+  width: 280px;
+  max-width: 60%;
+  height: auto;
+  margin: 0 auto var(--wm-sp-4);
+  filter: drop-shadow(0 4px 12px rgba(0,0,0,0.3));
 }
 .wm-contact-title {
   font-family: 'Poppins', sans-serif;
@@ -50,13 +50,20 @@ body { background: var(--wm-bg); }
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: var(--wm-sp-6);
-  align-items: start;
+  align-items: stretch;
 }
 @media (max-width: 880px) {
   .wm-contact-body-inner { grid-template-columns: 1fr; gap: var(--wm-sp-5); }
 }
 
-/* ---------- Contact-info card ---------- */
+/* ---------- Left col: info card + map stacked ---------- */
+.wm-contact-info-col {
+  display: flex;
+  flex-direction: column;
+  gap: var(--wm-sp-5);
+}
+
+/* ---------- Contact-info card (rows | actions inner grid) ---------- */
 .wm-contact-card {
   background: #ffffff;
   border: 1px solid var(--wm-border);
@@ -72,44 +79,92 @@ body { background: var(--wm-bg); }
   margin: 0 0 var(--wm-sp-4);
   line-height: 1.2;
 }
+.wm-contact-card-grid {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: var(--wm-sp-5);
+  align-items: center;
+}
+@media (max-width: 540px) {
+  .wm-contact-card-grid { grid-template-columns: 1fr; align-items: stretch; }
+}
+
+/* Info rows stack — each row: small icon + value */
+.wm-contact-rows {
+  display: flex;
+  flex-direction: column;
+  gap: var(--wm-sp-3);
+  min-width: 0;
+}
 .wm-contact-row {
   display: grid;
-  grid-template-columns: 96px 1fr;
+  grid-template-columns: 28px 1fr;
   gap: var(--wm-sp-3);
-  padding: var(--wm-sp-3) 0;
+  align-items: start;
+  padding: var(--wm-sp-2) 0;
   border-bottom: 1px solid var(--wm-border);
 }
-.wm-contact-row:last-of-type { border-bottom: 0; }
-.wm-contact-label {
-  font-size: var(--wm-fs-xs);
-  color: var(--wm-text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  font-weight: 700;
-  padding-top: 2px;
+.wm-contact-row:last-child { border-bottom: 0; }
+.wm-contact-icon {
+  width: 22px;
+  height: 22px;
+  color: var(--wm-primary);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 2px;
 }
+.wm-contact-icon svg { width: 22px; height: 22px; }
 .wm-contact-value {
   font-size: var(--wm-fs-base);
   color: var(--wm-text);
   line-height: 1.45;
-  /* Long unbreakable strings (emails, URLs) wrap inside the value
-     column instead of forcing horizontal overflow at narrow widths. */
   overflow-wrap: anywhere;
   min-width: 0;
 }
+.wm-contact-value-sub {
+  font-size: var(--wm-fs-sm);
+  color: var(--wm-text-muted);
+}
 .wm-contact-value a { color: var(--wm-primary); text-decoration: none; }
 .wm-contact-value a:hover { text-decoration: underline; }
+
+/* Actions column — stacked CTAs vertically centered alongside rows */
 .wm-contact-actions {
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
   gap: var(--wm-sp-3);
-  margin-top: var(--wm-sp-5);
+  justify-content: center;
+  align-self: center;
 }
-.wm-contact-actions .wm-btn { flex: 1 1 auto; min-width: 160px; justify-content: center; }
-/* Mobile: drop min-width and let the buttons stack so the card never
-   forces horizontal overflow at narrow viewports. */
+.wm-contact-actions .wm-btn {
+  min-width: 180px;
+  justify-content: center;
+}
 @media (max-width: 540px) {
-  .wm-contact-actions .wm-btn { min-width: 0; flex-basis: 100%; }
+  .wm-contact-actions { align-self: stretch; }
+  .wm-contact-actions .wm-btn { min-width: 0; }
+}
+
+/* ---------- Map ---------- */
+.wm-contact-map {
+  border-radius: var(--wm-radius-lg);
+  overflow: hidden;
+  border: 1px solid var(--wm-border);
+  box-shadow: 0 4px 16px rgba(15,50,84,0.06);
+  /* Aspect ratio + flex-grow lets the map fill remaining height in
+     the left column so the column matches the form column on the
+     right at desktop widths. min-height keeps it usable on mobile. */
+  flex: 1 1 auto;
+  min-height: 320px;
+  background: var(--wm-bg-soft);
+}
+.wm-contact-map iframe {
+  width: 100%;
+  height: 100%;
+  min-height: 320px;
+  display: block;
+  border: 0;
 }
 
 /* ---------- Form ---------- */
@@ -119,6 +174,11 @@ body { background: var(--wm-bg); }
   border-radius: var(--wm-radius-lg);
   padding: var(--wm-sp-6);
   box-shadow: 0 4px 16px rgba(15,50,84,0.06);
+  /* Form column is a flex column; the textarea wrapper grows to fill
+     the difference so the form bottom aligns with the left column's
+     map bottom. */
+  display: flex;
+  flex-direction: column;
 }
 .wm-contact-form-title {
   font-family: 'Poppins', sans-serif;
@@ -133,21 +193,22 @@ body { background: var(--wm-bg); }
   color: var(--wm-text-muted);
   margin: 0 0 var(--wm-sp-5);
 }
-.wm-contact-form { display: grid; gap: var(--wm-sp-4); }
+.wm-contact-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--wm-sp-4);
+  flex: 1 1 auto;
+}
 .wm-form-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: var(--wm-sp-4);
 }
-@media (max-width: 540px) {
-  .wm-form-row { grid-template-columns: 1fr; }
-}
+@media (max-width: 540px) { .wm-form-row { grid-template-columns: 1fr; } }
 .wm-form-field { display: grid; gap: var(--wm-sp-1); }
-.wm-form-label {
-  font-size: var(--wm-fs-sm);
-  font-weight: 600;
-  color: var(--wm-text);
-}
+.wm-form-field-message { flex: 1 1 auto; }
+.wm-form-field-message textarea { flex: 1 1 auto; min-height: 200px; }
+.wm-form-label { font-size: var(--wm-fs-sm); font-weight: 600; color: var(--wm-text); }
 .wm-form-optional {
   font-size: var(--wm-fs-xs);
   color: var(--wm-text-muted);
@@ -171,7 +232,7 @@ body { background: var(--wm-bg); }
   outline: 2px solid rgba(26,63,122,0.15);
   outline-offset: 1px;
 }
-.wm-contact-form textarea { resize: vertical; min-height: 120px; }
+.wm-contact-form textarea { resize: vertical; }
 .wm-form-actions { margin-top: var(--wm-sp-2); }
 .wm-form-actions .wm-btn-cta { min-width: 180px; }
 
@@ -195,3 +256,49 @@ body { background: var(--wm-bg); }
   border: 1px solid #fecaca;
 }
 [hidden] { display: none !important; }
+
+/* ---------- Tips tiles row ---------- */
+.wm-contact-tiles-wrap {
+  max-width: var(--wm-content-max);
+  margin: var(--wm-sp-7) auto 0;
+  padding: 0 var(--wm-sp-5);
+}
+.wm-contact-tiles {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: var(--wm-sp-4);
+}
+@media (max-width: 1180px) { .wm-contact-tiles { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 720px)  { .wm-contact-tiles { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 480px)  { .wm-contact-tiles { grid-template-columns: 1fr; } }
+
+.wm-contact-tile {
+  background: #ffffff;
+  border: 1px solid var(--wm-border);
+  border-radius: var(--wm-radius-lg);
+  padding: var(--wm-sp-5);
+  box-shadow: 0 2px 8px rgba(15,50,84,0.04);
+  display: flex;
+  flex-direction: column;
+}
+.wm-tile-icon {
+  width: 36px;
+  height: 36px;
+  color: var(--wm-primary);
+  margin-bottom: var(--wm-sp-3);
+}
+.wm-tile-icon svg { width: 36px; height: 36px; }
+.wm-tile-title {
+  font-family: 'Poppins', sans-serif;
+  font-size: var(--wm-fs-base);
+  font-weight: 700;
+  color: var(--wm-primary-dk);
+  margin: 0 0 var(--wm-sp-2);
+  line-height: 1.25;
+}
+.wm-tile-text {
+  font-size: var(--wm-fs-sm);
+  color: var(--wm-text-muted);
+  line-height: 1.5;
+  margin: 0;
+}
