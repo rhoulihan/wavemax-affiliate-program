@@ -663,7 +663,7 @@ next steps; sections 7–8 are appendices.
 
 *Prepared by WaveMAX Austin (Colin Houlihan, Owner; Rick Houlihan,
 Engineering). For questions, replies, or to schedule a walkthrough:
-john@austinwavemax.com or rick.houlihan@gmail.com.*
+colinh@wavemaxlaundry.com or rick.houlihan@gmail.com.*
 
 *© 2026 CRHS Enterprises, LLC. Internal — for review by WaveMAX
 Laundry corporate and MHR Marketing.*
