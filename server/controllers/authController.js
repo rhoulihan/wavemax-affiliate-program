@@ -13,6 +13,7 @@ const emailService = require('../utils/emailService');
 const logger = require('../utils/logger');
 const { logLoginAttempt, logAuditEvent, AuditEvents } = require('../utils/auditLogger');
 const { sanitizeInput } = require('../middleware/sanitization');
+const { escapeRegex } = require('../utils/securityUtils');
 
 const identityAvailabilityService = require('../services/identityAvailabilityService');
 const passwordResetService = require('../services/passwordResetService');
@@ -24,13 +25,6 @@ const socialAuthCustomerService = require('../services/socialAuthCustomerService
 // This allows us to mock just this function without affecting the entire crypto module
 const cryptoWrapper = {
   randomBytes: (size) => crypto.randomBytes(size)
-};
-
-/**
- * Escape special regex characters to prevent ReDoS attacks
- */
-const escapeRegex = (string) => {
-  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 };
 
 // JWT + refresh-token helpers live in authTokenService; these thin wrappers

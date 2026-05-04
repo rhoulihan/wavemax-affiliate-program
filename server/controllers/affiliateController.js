@@ -807,7 +807,7 @@ exports.getAffiliateYtdStats = async (req, res) => {
   try {
     const { affiliateId } = req.params;
 
-    if (req.user.role !== 'admin' && req.user.role !== 'administrator' && req.user.affiliateId !== affiliateId) {
+    if (!AuthorizationHelpers.isAdmin(req.user) && req.user.affiliateId !== affiliateId) {
       return res.status(403).json({ success: false, message: 'Unauthorized' });
     }
 

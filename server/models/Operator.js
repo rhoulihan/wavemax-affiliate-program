@@ -186,12 +186,21 @@ operatorSchema.pre('save', function(next) {
   next();
 });
 
+// Constant-time hex-string comparison — prevents response-time leaks
+// from per-byte string compare during password verification.
+function timingSafeHexEqual(a, b) {
+  const aBuf = Buffer.from(a, 'hex');
+  const bBuf = Buffer.from(b, 'hex');
+  if (aBuf.length !== bBuf.length) return false;
+  return crypto.timingSafeEqual(aBuf, bBuf);
+}
+
 // Method to verify password
 operatorSchema.methods.verifyPassword = function(password) {
   const [hash, salt] = this.password.split(':');
   const verifyHash = crypto.pbkdf2Sync(password, Buffer.from(salt, 'hex'), 100000, 64, 'sha512')
     .toString('hex');
-  return hash === verifyHash;
+  return timingSafeHexEqual(hash, verifyHash);
 };
 
 // Method to check if password is in history
@@ -199,12 +208,12 @@ operatorSchema.methods.isPasswordInHistory = function(password) {
   if (!this.passwordHistory || this.passwordHistory.length === 0) {
     return false;
   }
-  
+
   return this.passwordHistory.some(historyEntry => {
     const [hash, salt] = historyEntry.hash.split(':');
     const verifyHash = crypto.pbkdf2Sync(password, Buffer.from(salt, 'hex'), 100000, 64, 'sha512')
       .toString('hex');
-    return hash === verifyHash;
+    return timingSafeHexEqual(hash, verifyHash);
   });
 };
 

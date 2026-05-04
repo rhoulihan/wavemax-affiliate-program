@@ -5,6 +5,7 @@
 
 const Affiliate = require('../models/Affiliate');
 const ControllerHelpers = require('../utils/controllerHelpers');
+const AuthorizationHelpers = require('../middleware/authorizationHelpers');
 
 const VALID_DAYS = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
 const VALID_TIME_SLOTS = ['morning', 'afternoon', 'evening'];
@@ -22,7 +23,7 @@ exports.getSchedule = ControllerHelpers.asyncWrapper(async (req, res) => {
   }
 
   // Authorization check: Must be own schedule or admin
-  if (req.user.role !== 'admin' && req.user.role !== 'administrator' && req.user.affiliateId !== affiliateId) {
+  if (!AuthorizationHelpers.isAdmin(req.user) && req.user.affiliateId !== affiliateId) {
     return ControllerHelpers.sendError(res, 'Not authorized to view this schedule', 403);
   }
 
@@ -70,7 +71,7 @@ exports.updateWeeklyTemplate = ControllerHelpers.asyncWrapper(async (req, res) =
   const { weeklyTemplate } = req.body;
 
   // Authorization check
-  if (req.user.role !== 'admin' && req.user.role !== 'administrator' && req.user.affiliateId !== affiliateId) {
+  if (!AuthorizationHelpers.isAdmin(req.user) && req.user.affiliateId !== affiliateId) {
     return ControllerHelpers.sendError(res, 'Not authorized to update this schedule', 403);
   }
 
@@ -139,7 +140,7 @@ exports.addDateException = ControllerHelpers.asyncWrapper(async (req, res) => {
   const { date, type, timeSlots, reason } = req.body;
 
   // Authorization check
-  if (req.user.role !== 'admin' && req.user.role !== 'administrator' && req.user.affiliateId !== affiliateId) {
+  if (!AuthorizationHelpers.isAdmin(req.user) && req.user.affiliateId !== affiliateId) {
     return ControllerHelpers.sendError(res, 'Not authorized to update this schedule', 403);
   }
 
@@ -221,7 +222,7 @@ exports.deleteDateException = ControllerHelpers.asyncWrapper(async (req, res) =>
   const { affiliateId, exceptionId } = req.params;
 
   // Authorization check
-  if (req.user.role !== 'admin' && req.user.role !== 'administrator' && req.user.affiliateId !== affiliateId) {
+  if (!AuthorizationHelpers.isAdmin(req.user) && req.user.affiliateId !== affiliateId) {
     return ControllerHelpers.sendError(res, 'Not authorized to update this schedule', 403);
   }
 
@@ -339,7 +340,7 @@ exports.updateScheduleSettings = ControllerHelpers.asyncWrapper(async (req, res)
   const { advanceBookingDays, maxBookingDays, timezone } = req.body;
 
   // Authorization check
-  if (req.user.role !== 'admin' && req.user.role !== 'administrator' && req.user.affiliateId !== affiliateId) {
+  if (!AuthorizationHelpers.isAdmin(req.user) && req.user.affiliateId !== affiliateId) {
     return ControllerHelpers.sendError(res, 'Not authorized to update this schedule', 403);
   }
 
