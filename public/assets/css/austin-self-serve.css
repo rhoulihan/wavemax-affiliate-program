@@ -54,6 +54,14 @@ body { background: var(--wm-bg-soft); }
   margin: 0 auto;
   padding: 0 var(--wm-sp-5);
   text-align: center;
+  /* Flex column with center cross-axis alignment ensures children
+     (including the nowrap'd title that may exceed the inner's
+     max-width) center themselves on the inner's true center axis,
+     rather than the title's overflow being asymmetric inside a
+     block layout. */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 .wm-hero-logo {
   display: block;
