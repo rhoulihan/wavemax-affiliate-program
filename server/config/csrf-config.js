@@ -230,12 +230,17 @@ const conditionalCsrf = (req, res, next) => {
     return next();
   }
 
-  // For authenticated requests without session cookies (iframe context),
-  // skip CSRF check as we rely on bearer token authentication
-  if (req.headers.authorization && !req.headers.cookie?.includes('wavemax.sid')) {
-    logger.info('Skipping CSRF for authenticated request without session cookie');
-    return next();
-  }
+  // SEC H-1 (closed): the previous "bearer-only" bypass — skipping CSRF
+  // whenever an Authorization header was present and the wavemax.sid
+  // cookie was absent — was removed because (a) the bypass keyed on a
+  // single cookie name, so any future cookie-based session would silently
+  // re-introduce the CSRF hole, and (b) the comment justifying it
+  // assumed Bearer tokens are the only auth path, which is no longer
+  // strictly true (httpOnly-cookie deployments and password-change /
+  // logout flows can be cookie-driven). Defense in depth: every
+  // state-changing request that isn't on the public/auth/registration
+  // allowlist must present a CSRF token, regardless of how it
+  // authenticates.
 
   // Debug session state
   logger.info('CSRF check for:', req.path, {
