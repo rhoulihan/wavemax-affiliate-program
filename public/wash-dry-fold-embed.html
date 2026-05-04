@@ -148,141 +148,145 @@
     </div>
   </section>
 
-  <!-- HOW IT WORKS ====================================================
-       3 steps: drop off, we wash-dry-fold, you pick up.
+  <!-- TABBED INFO SECTION ==============================================
+       Three panels behind shared .wm-tabs from wavemax-components.css:
+         · How it works  — 3-step drop-off → wash → pick up
+         · Why WaveMAX   — 6-tile differentiators
+         · FAQ           — 6-question native accordion
+       data-wdf-tab / data-wdf-panel are private namespaces so the
+       landing-page tab handler (which keys off data-tab/data-panel)
+       can't accidentally drive these.
        ============================================================ -->
-  <section class="wm-wdf-section wm-wdf-how" data-section="how-it-works">
+  <section class="wm-wdf-section wm-wdf-tabs-section" data-section="info-tabs">
     <div class="wm-wdf-section-inner">
-      <p class="wm-eyebrow" data-i18n="wdf.how.eyebrow">HOW IT WORKS</p>
-      <h2 class="wm-wdf-section-title" data-i18n="wdf.how.title">Three steps, no laundry day</h2>
+      <div class="wm-tabs" role="tablist" aria-label="Wash-dry-fold service info">
+        <div class="wm-tab-strip">
+          <button type="button" class="wm-tab" role="tab" aria-selected="true"  data-wdf-tab="how">
+            <span aria-hidden="true">📋</span><span data-i18n="wdf.tabs.how">How it works</span>
+          </button>
+          <button type="button" class="wm-tab" role="tab" aria-selected="false" data-wdf-tab="why">
+            <span aria-hidden="true">✨</span><span data-i18n="wdf.tabs.why">Why WaveMAX</span>
+          </button>
+          <button type="button" class="wm-tab" role="tab" aria-selected="false" data-wdf-tab="faq">
+            <span aria-hidden="true">💬</span><span data-i18n="wdf.tabs.faq">FAQ</span>
+          </button>
+        </div>
 
-      <ol class="wm-wdf-steps">
-        <li class="wm-wdf-step">
-          <span class="wm-wdf-step-num">1</span>
-          <h3 class="wm-wdf-step-title" data-i18n="wdf.how.step1.title">Drop it off</h3>
-          <p class="wm-wdf-step-text" data-i18n="wdf.how.step1.text">
-            Walk in any time during open hours, hand your laundry
-            to the attendant, and you're done. Two-minute drop-off.
-          </p>
-          <p class="wm-wdf-step-hours">
-            <span data-i18n="wdf.how.step1.hoursLabel">Open</span>
-            <strong><span data-bind="hours.display">7am-10pm</span></strong>
-          </p>
-        </li>
-        <li class="wm-wdf-step">
-          <span class="wm-wdf-step-num">2</span>
-          <h3 class="wm-wdf-step-title" data-i18n="wdf.how.step2.title">We wash, dry, and fold</h3>
-          <p class="wm-wdf-step-text" data-i18n="wdf.how.step2.text">
-            Your clothes are weighed, washed in UV-sanitized water
-            with hypoallergenic detergent, dried at the right
-            temperature, and folded by hand. Whites separated from
-            colors, delicates flagged.
-          </p>
-        </li>
-        <li class="wm-wdf-step">
-          <span class="wm-wdf-step-num">3</span>
-          <h3 class="wm-wdf-step-title" data-i18n="wdf.how.step3.title">Pick it up the next day</h3>
-          <p class="wm-wdf-step-text" data-i18n="wdf.how.step3.text">
-            Most orders are ready in 24 hours. Drop off before 11am
-            and we can usually have it ready the same evening. We'll
-            text you when it's ready.
-          </p>
-        </li>
-      </ol>
-    </div>
-  </section>
+        <!-- Panel: How it works ------------------------------------- -->
+        <div class="wm-tab-panel" role="tabpanel" data-wdf-panel="how" aria-hidden="false">
+          <ol class="wm-wdf-steps">
+            <li class="wm-wdf-step">
+              <span class="wm-wdf-step-num">1</span>
+              <h3 class="wm-wdf-step-title" data-i18n="wdf.how.step1.title">Drop it off</h3>
+              <p class="wm-wdf-step-text" data-i18n="wdf.how.step1.text">
+                Walk in any time during open hours, hand your laundry
+                to the attendant, and you're done. Two-minute drop-off.
+              </p>
+              <p class="wm-wdf-step-hours">
+                <span data-i18n="wdf.how.step1.hoursLabel">Open</span>
+                <strong><span data-bind="hours.display">7am-10pm</span></strong>
+              </p>
+            </li>
+            <li class="wm-wdf-step">
+              <span class="wm-wdf-step-num">2</span>
+              <h3 class="wm-wdf-step-title" data-i18n="wdf.how.step2.title">We wash, dry, and fold</h3>
+              <p class="wm-wdf-step-text" data-i18n="wdf.how.step2.text">
+                Your clothes are weighed, washed in UV-sanitized water
+                with hypoallergenic detergent, dried at the right
+                temperature, and folded by hand. Whites separated from
+                colors, delicates flagged.
+              </p>
+            </li>
+            <li class="wm-wdf-step">
+              <span class="wm-wdf-step-num">3</span>
+              <h3 class="wm-wdf-step-title" data-i18n="wdf.how.step3.title">Pick it up the next day</h3>
+              <p class="wm-wdf-step-text" data-i18n="wdf.how.step3.text">
+                Most orders are ready in 24 hours. Drop off before 11am
+                and we can usually have it ready the same evening. We'll
+                text you when it's ready.
+              </p>
+            </li>
+          </ol>
+        </div>
 
-  <!-- SERVICE HIGHLIGHTS TILE BAND ====================================
-       Six bite-size differentiators. Same structure + class set as the
-       contact-page tiles row — austin-wdf.css overrides the icon-chip
-       palette so the WDF page has its own color rhythm.
-       ============================================================ -->
-  <section class="wm-wdf-tiles-section" data-section="highlights">
-    <div class="wm-wdf-section-inner">
-      <p class="wm-eyebrow" data-i18n="wdf.tiles.eyebrow">WHY WDF AT WAVEMAX</p>
-      <h2 class="wm-wdf-section-title wm-wdf-section-title-centered" data-i18n="wdf.tiles.title">More than a wash</h2>
+        <!-- Panel: Why WaveMAX ------------------------------------- -->
+        <div class="wm-tab-panel" role="tabpanel" data-wdf-panel="why" aria-hidden="true">
+          <div class="wm-wdf-tiles">
+            <div class="wm-wdf-tile">
+              <div class="wm-wdf-tile-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+              </div>
+              <h3 class="wm-wdf-tile-title" data-i18n="wdf.tiles.turnaround.title">24-hour turnaround</h3>
+              <p class="wm-wdf-tile-text" data-i18n="wdf.tiles.turnaround.text">Drop off Monday, pick up Tuesday. Drop before 11am and we can usually have it ready that same evening.</p>
+            </div>
+            <div class="wm-wdf-tile">
+              <div class="wm-wdf-tile-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="6" width="18" height="14" rx="2"></rect><path d="M3 10h18"></path><path d="M9 14h6"></path></svg>
+              </div>
+              <h3 class="wm-wdf-tile-title" data-i18n="wdf.tiles.weigh.title">Calibrated weigh</h3>
+              <p class="wm-wdf-tile-text" data-i18n="wdf.tiles.weigh.text">We weigh on a calibrated commercial scale at drop-off and again at pickup. You see what we see.</p>
+            </div>
+            <div class="wm-wdf-tile">
+              <div class="wm-wdf-tile-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 2v4M12 18v4M2 12h4M18 12h4M5 5l3 3M16 16l3 3M5 19l3-3M16 8l3-3"></path><circle cx="12" cy="12" r="3.5"></circle></svg>
+              </div>
+              <h3 class="wm-wdf-tile-title" data-i18n="wdf.tiles.uv.title">UV-sanitized water</h3>
+              <p class="wm-wdf-tile-text" data-i18n="wdf.tiles.uv.text">Every wash uses hospital-grade Omni LUX UV-treated water — the same UV technology hospitals use to kill bacteria and viruses.</p>
+            </div>
+            <div class="wm-wdf-tile">
+              <div class="wm-wdf-tile-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3 c-3 4-5 7-5 10 a5 5 0 0 0 10 0 c0-3-2-6-5-10z"></path></svg>
+              </div>
+              <h3 class="wm-wdf-tile-title" data-i18n="wdf.tiles.detergent.title">Hypoallergenic detergent</h3>
+              <p class="wm-wdf-tile-text" data-i18n="wdf.tiles.detergent.text">Eco-friendly, biodegradable, fragrance-light. Built for sensitive skin and households with kids or pets.</p>
+            </div>
+            <div class="wm-wdf-tile">
+              <div class="wm-wdf-tile-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3 l4 4 -4 5 -4-5z"></path><path d="M4 11 v9 h16 v-9"></path><path d="M4 11 h16"></path></svg>
+              </div>
+              <h3 class="wm-wdf-tile-title" data-i18n="wdf.tiles.hangers.title">Hangers on request</h3>
+              <p class="wm-wdf-tile-text" data-i18n="wdf.tiles.hangers.text">Flag delicates at drop-off — we'll air-dry, hand-fold, and put them on hangers instead of folding into the stack.</p>
+            </div>
+            <div class="wm-wdf-tile">
+              <div class="wm-wdf-tile-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="6" width="18" height="14" rx="2"></rect><path d="M3 10h18"></path><path d="M7 16h2"></path></svg>
+              </div>
+              <h3 class="wm-wdf-tile-title" data-i18n="wdf.tiles.cards.title">No subscription</h3>
+              <p class="wm-wdf-tile-text" data-i18n="wdf.tiles.cards.text">Pay per pound, cards-only. No memberships, no contracts, no hidden fees. Use us when you need us.</p>
+            </div>
+          </div>
+        </div>
 
-      <div class="wm-wdf-tiles">
-        <div class="wm-wdf-tile">
-          <div class="wm-wdf-tile-icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+        <!-- Panel: FAQ ------------------------------------------ -->
+        <div class="wm-tab-panel" role="tabpanel" data-wdf-panel="faq" aria-hidden="true">
+          <div class="wm-wdf-faq-list">
+            <details class="wm-wdf-faq-item">
+              <summary class="wm-wdf-faq-q" data-i18n="wdf.faq.q1.q">How fast is the turnaround?</summary>
+              <p class="wm-wdf-faq-a" data-i18n="wdf.faq.q1.a">Most orders are ready in 24 hours. Drop off before 11am and we can usually have it ready the same evening. We text you when it's ready.</p>
+            </details>
+            <details class="wm-wdf-faq-item">
+              <summary class="wm-wdf-faq-q" data-i18n="wdf.faq.q2.q">Is there a minimum order size?</summary>
+              <p class="wm-wdf-faq-a" data-i18n="wdf.faq.q2.a">Yes — 10 lb minimum (~$12 at the $1.20/lb rate). For reference, one full grocery bag of laundry typically weighs 8–12 lb.</p>
+            </details>
+            <details class="wm-wdf-faq-item">
+              <summary class="wm-wdf-faq-q" data-i18n="wdf.faq.q3.q">What about delicates and dry-clean only items?</summary>
+              <p class="wm-wdf-faq-a" data-i18n="wdf.faq.q3.a">Flag them at drop-off and we'll air-dry, hand-fold, and put them on hangers. We don't currently dry-clean — those items should go to a dedicated dry cleaner.</p>
+            </details>
+            <details class="wm-wdf-faq-item">
+              <summary class="wm-wdf-faq-q" data-i18n="wdf.faq.q4.q">How are loads separated?</summary>
+              <p class="wm-wdf-faq-a" data-i18n="wdf.faq.q4.a">Whites and colors are washed in separate machines. Your order is never mixed with another customer's. Each bag is tagged at intake.</p>
+            </details>
+            <details class="wm-wdf-faq-item">
+              <summary class="wm-wdf-faq-q" data-i18n="wdf.faq.q5.q">What if something goes missing?</summary>
+              <p class="wm-wdf-faq-a" data-i18n="wdf.faq.q5.a">We log the weight + bag count at intake, and folded items are bagged together at completion. If you notice something missing, call us within 7 days and we'll trace it.</p>
+            </details>
+            <details class="wm-wdf-faq-item">
+              <summary class="wm-wdf-faq-q" data-i18n="wdf.faq.q6.q">When can I drop off?</summary>
+              <p class="wm-wdf-faq-a" data-i18n="wdf.faq.q6.a">We're open 7am–10pm, every day, 365 days a year. Drop-off is fully attended — we don't have an after-hours slot, but our hours cover most schedules.</p>
+            </details>
           </div>
-          <h3 class="wm-wdf-tile-title" data-i18n="wdf.tiles.turnaround.title">24-hour turnaround</h3>
-          <p class="wm-wdf-tile-text" data-i18n="wdf.tiles.turnaround.text">Drop off Monday, pick up Tuesday. Drop before 11am and we can usually have it ready that same evening.</p>
         </div>
-        <div class="wm-wdf-tile">
-          <div class="wm-wdf-tile-icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="6" width="18" height="14" rx="2"></rect><path d="M3 10h18"></path><path d="M9 14h6"></path></svg>
-          </div>
-          <h3 class="wm-wdf-tile-title" data-i18n="wdf.tiles.weigh.title">Calibrated weigh</h3>
-          <p class="wm-wdf-tile-text" data-i18n="wdf.tiles.weigh.text">We weigh on a calibrated commercial scale at drop-off and again at pickup. You see what we see.</p>
-        </div>
-        <div class="wm-wdf-tile">
-          <div class="wm-wdf-tile-icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 2v4M12 18v4M2 12h4M18 12h4M5 5l3 3M16 16l3 3M5 19l3-3M16 8l3-3"></path><circle cx="12" cy="12" r="3.5"></circle></svg>
-          </div>
-          <h3 class="wm-wdf-tile-title" data-i18n="wdf.tiles.uv.title">UV-sanitized water</h3>
-          <p class="wm-wdf-tile-text" data-i18n="wdf.tiles.uv.text">Every wash uses hospital-grade Omni LUX UV-treated water — the same UV technology hospitals use to kill bacteria and viruses.</p>
-        </div>
-        <div class="wm-wdf-tile">
-          <div class="wm-wdf-tile-icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3 c-3 4-5 7-5 10 a5 5 0 0 0 10 0 c0-3-2-6-5-10z"></path></svg>
-          </div>
-          <h3 class="wm-wdf-tile-title" data-i18n="wdf.tiles.detergent.title">Hypoallergenic detergent</h3>
-          <p class="wm-wdf-tile-text" data-i18n="wdf.tiles.detergent.text">Eco-friendly, biodegradable, fragrance-light. Built for sensitive skin and households with kids or pets.</p>
-        </div>
-        <div class="wm-wdf-tile">
-          <div class="wm-wdf-tile-icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3 l4 4 -4 5 -4-5z"></path><path d="M4 11 v9 h16 v-9"></path><path d="M4 11 h16"></path></svg>
-          </div>
-          <h3 class="wm-wdf-tile-title" data-i18n="wdf.tiles.hangers.title">Hangers on request</h3>
-          <p class="wm-wdf-tile-text" data-i18n="wdf.tiles.hangers.text">Flag delicates at drop-off — we'll air-dry, hand-fold, and put them on hangers instead of folding into the stack.</p>
-        </div>
-        <div class="wm-wdf-tile">
-          <div class="wm-wdf-tile-icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="6" width="18" height="14" rx="2"></rect><path d="M3 10h18"></path><path d="M7 16h2"></path></svg>
-          </div>
-          <h3 class="wm-wdf-tile-title" data-i18n="wdf.tiles.cards.title">No subscription</h3>
-          <p class="wm-wdf-tile-text" data-i18n="wdf.tiles.cards.text">Pay per pound, cards-only. No memberships, no contracts, no hidden fees. Use us when you need us.</p>
-        </div>
-      </div>
-    </div>
-  </section>
 
-  <!-- FAQ ============================================================
-       Native <details>/<summary> accordion — no JS, accessible by
-       default, keyboard-friendly. Six common questions.
-       ============================================================ -->
-  <section class="wm-wdf-section wm-wdf-faq" data-section="faq">
-    <div class="wm-wdf-section-inner">
-      <p class="wm-eyebrow" data-i18n="wdf.faq.eyebrow">QUESTIONS</p>
-      <h2 class="wm-wdf-section-title" data-i18n="wdf.faq.title">Things people ask</h2>
-
-      <div class="wm-wdf-faq-list">
-        <details class="wm-wdf-faq-item">
-          <summary class="wm-wdf-faq-q" data-i18n="wdf.faq.q1.q">How fast is the turnaround?</summary>
-          <p class="wm-wdf-faq-a" data-i18n="wdf.faq.q1.a">Most orders are ready in 24 hours. Drop off before 11am and we can usually have it ready the same evening. We text you when it's ready.</p>
-        </details>
-        <details class="wm-wdf-faq-item">
-          <summary class="wm-wdf-faq-q" data-i18n="wdf.faq.q2.q">Is there a minimum order size?</summary>
-          <p class="wm-wdf-faq-a" data-i18n="wdf.faq.q2.a">Yes — 10 lb minimum (~$12 at the $1.20/lb rate). For reference, one full grocery bag of laundry typically weighs 8–12 lb.</p>
-        </details>
-        <details class="wm-wdf-faq-item">
-          <summary class="wm-wdf-faq-q" data-i18n="wdf.faq.q3.q">What about delicates and dry-clean only items?</summary>
-          <p class="wm-wdf-faq-a" data-i18n="wdf.faq.q3.a">Flag them at drop-off and we'll air-dry, hand-fold, and put them on hangers. We don't currently dry-clean — those items should go to a dedicated dry cleaner.</p>
-        </details>
-        <details class="wm-wdf-faq-item">
-          <summary class="wm-wdf-faq-q" data-i18n="wdf.faq.q4.q">How are loads separated?</summary>
-          <p class="wm-wdf-faq-a" data-i18n="wdf.faq.q4.a">Whites and colors are washed in separate machines. Your order is never mixed with another customer's. Each bag is tagged at intake.</p>
-        </details>
-        <details class="wm-wdf-faq-item">
-          <summary class="wm-wdf-faq-q" data-i18n="wdf.faq.q5.q">What if something goes missing?</summary>
-          <p class="wm-wdf-faq-a" data-i18n="wdf.faq.q5.a">We log the weight + bag count at intake, and folded items are bagged together at completion. If you notice something missing, call us within 7 days and we'll trace it.</p>
-        </details>
-        <details class="wm-wdf-faq-item">
-          <summary class="wm-wdf-faq-q" data-i18n="wdf.faq.q6.q">When can I drop off?</summary>
-          <p class="wm-wdf-faq-a" data-i18n="wdf.faq.q6.a">We're open 7am–10pm, every day, 365 days a year. Drop-off is fully attended — we don't have an after-hours slot, but our hours cover most schedules.</p>
-        </details>
       </div>
     </div>
   </section>
