@@ -22,9 +22,9 @@ body { background: var(--wm-bg-soft); }
      sizes — vh-based values feel correct on a laptop but balloon on
      tall monitors. ~470px is enough to give the watermark room
      without leaving the centered content stranded in empty space. */
-  min-height: 470px;
+  min-height: 490px;
 }
-@media (max-width: 540px) { .wm-hero { min-height: 380px; } }
+@media (max-width: 540px) { .wm-hero { min-height: 400px; } }
 
 /* Austin watermark — same treatment as the landing-page hero.
    Background image is set on #wm-austin-watermark by austin-wdf-init.js
