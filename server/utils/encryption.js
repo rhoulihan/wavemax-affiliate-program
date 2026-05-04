@@ -117,8 +117,14 @@ exports.verifyPassword = (password, storedSalt, storedHash) => {
       'sha512'
     ).toString('hex');
 
-    // Compare the generated hash with the stored hash
-    return hash === storedHash;
+    // Constant-time comparison — prevents timing attacks where an attacker
+    // measures response time to learn how many leading characters of the
+    // stored hash they've matched. timingSafeEqual requires equal-length
+    // buffers, so length-mismatch returns false before the compare runs.
+    const hashBuf = Buffer.from(hash, 'hex');
+    const storedBuf = Buffer.from(storedHash, 'hex');
+    if (hashBuf.length !== storedBuf.length) return false;
+    return crypto.timingSafeEqual(hashBuf, storedBuf);
   } catch (error) {
     logger.error('Password verification error:', error);
     throw new Error('Failed to verify password');

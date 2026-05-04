@@ -973,7 +973,7 @@ exports.verifyPaymentManually = async (req, res) => {
     const { transactionId, notes } = req.body;
     
     // Admin only
-    if (req.user.role !== 'admin' && req.user.role !== 'administrator') {
+    if (!AuthorizationHelpers.isAdmin(req.user)) {
       return res.status(403).json({
         success: false,
         message: 'Unauthorized - admin access required'
