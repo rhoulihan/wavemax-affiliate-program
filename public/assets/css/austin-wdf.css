@@ -17,7 +17,12 @@ body { background: var(--wm-bg-soft); }
   color: #ffffff;
   padding: var(--wm-sp-7) 0 var(--wm-sp-6);
   position: relative;
+  /* Shared wm-hero (used by the landing page) sets min-height: 60vh
+     so the cinematic hero fills the viewport. The WDF hero is just
+     logo + title + subtitle + two CTAs, so let it size to content. */
+  min-height: 0;
 }
+@media (max-width: 540px) { .wm-hero { min-height: 0; } }
 .wm-hero::after {
   content: '';
   position: absolute;
