@@ -16,6 +16,11 @@
       'wdf.subtitle':             "Drop your laundry off at WaveMAX Austin — we'll wash it, dry it, fold it, and have it ready for you the next day. Hospital-grade UV-sanitized water, eco-friendly hypoallergenic detergent, no cash needed.",
       'wdf.callBtn':              'Call',
       'wdf.directionsBtn':        'Get directions',
+      'wdf.stats.rate':           'Per Pound',
+      'wdf.stats.uv':             'Sanitized Water',
+      'wdf.stats.turnaround':     'Turnaround',
+      'wdf.stats.min':            'Minimum',
+      'wdf.stats.days':           'Days a Year',
       'wdf.pricing.eyebrow':      'PRICING',
       'wdf.pricing.minPrefix':    'Minimum',
       'wdf.pricing.minSuffix':    'lb per order',
@@ -76,6 +81,11 @@
       'wdf.subtitle':             'Déjenos su ropa en WaveMAX Austin — la lavamos, secamos, doblamos y la tendremos lista al día siguiente. Agua sanitizada con UV de grado hospitalario, detergente hipoalergénico ecológico, sin efectivo necesario.',
       'wdf.callBtn':              'Llamar',
       'wdf.directionsBtn':        'Cómo llegar',
+      'wdf.stats.rate':           'Por Libra',
+      'wdf.stats.uv':             'Agua UV',
+      'wdf.stats.turnaround':     'Entrega',
+      'wdf.stats.min':            'Mínimo',
+      'wdf.stats.days':           'Días al Año',
       'wdf.pricing.eyebrow':      'PRECIOS',
       'wdf.pricing.minPrefix':    'Mínimo',
       'wdf.pricing.minSuffix':    'lb por pedido',
@@ -136,6 +146,11 @@
       'wdf.subtitle':             'Deixe sua roupa na WaveMAX Austin — lavamos, secamos, dobramos e devolvemos no dia seguinte. Água sanitizada com UV de nível hospitalar, detergente hipoalergênico ecológico, sem dinheiro necessário.',
       'wdf.callBtn':              'Ligar',
       'wdf.directionsBtn':        'Como chegar',
+      'wdf.stats.rate':           'Por Libra',
+      'wdf.stats.uv':             'Água UV',
+      'wdf.stats.turnaround':     'Entrega',
+      'wdf.stats.min':            'Mínimo',
+      'wdf.stats.days':           'Dias por Ano',
       'wdf.pricing.eyebrow':      'PREÇOS',
       'wdf.pricing.minPrefix':    'Mínimo',
       'wdf.pricing.minSuffix':    'lb por pedido',
@@ -196,6 +211,11 @@
       'wdf.subtitle':             'Geben Sie Ihre Wäsche bei WaveMAX Austin ab — wir waschen, trocknen und falten sie und haben sie am nächsten Tag fertig. UV-sanitisiertes Wasser in Krankenhausqualität, umweltfreundliches hypoallergenes Waschmittel, kein Bargeld erforderlich.',
       'wdf.callBtn':              'Anrufen',
       'wdf.directionsBtn':        'Wegbeschreibung',
+      'wdf.stats.rate':           'Pro Pfund',
+      'wdf.stats.uv':             'UV-Wasser',
+      'wdf.stats.turnaround':     'Bearbeitung',
+      'wdf.stats.min':            'Mindestmenge',
+      'wdf.stats.days':           'Tage im Jahr',
       'wdf.pricing.eyebrow':      'PREISE',
       'wdf.pricing.minPrefix':    'Mindestmenge',
       'wdf.pricing.minSuffix':    'lb pro Auftrag',
@@ -449,6 +469,28 @@
     ]
   };
 
+  /* ---------- Hero watermark ----------
+   * Same treatment as the landing-page hero: set the Austin store-photo
+   * as a background-image on the watermark div once it loads, then fade
+   * in. Probe pattern means slow connections never flash an empty box. */
+  const WATERMARK_URL = 'https://wavemaxlaundry.com/wp-content/uploads/locations/austin-tx/hero-1.jpg';
+
+  function setHeroWatermark() {
+    const root = document.getElementById('wm-austin-watermark');
+    if (!root) return;
+    const probe = new Image();
+    probe.referrerPolicy = 'no-referrer';
+    probe.onload = () => {
+      root.style.backgroundImage = `url("${WATERMARK_URL}")`;
+      root.classList.add('is-loaded');
+    };
+    probe.onerror = () => {
+      // Image unreachable: still mark loaded so the gradient overlay shows.
+      root.classList.add('is-loaded');
+    };
+    probe.src = WATERMARK_URL;
+  }
+
   /* ---------- data-bind ---------- */
   function applyBindings(data) {
     if (!data) return;
@@ -477,6 +519,8 @@
       applyBindings(data);
       if (window.IframeBridge.updateHeight) window.IframeBridge.updateHeight();
     });
+
+    setHeroWatermark();
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
