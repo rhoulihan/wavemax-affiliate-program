@@ -244,6 +244,7 @@ app.use((req, res, next) => {
       'https://safepay.paymentlogistics.net',
       'https://code.jquery.com',
       'https://www.local-marketing-reports.com',
+      'https://reports.hibu.com',
       'https://static.cloudflareinsights.com'
     ],
     'style-src': [
