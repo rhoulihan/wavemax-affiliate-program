@@ -166,6 +166,20 @@ body { background: var(--wm-bg-soft); }
 @media (max-width: 540px) {
   .wm-hero-actions .wm-btn { flex-basis: 100%; min-width: 0; }
 }
+/* On-dark secondary in the hero — translucent white pill so it reads
+   clearly against the watermark photo without competing visually with
+   the primary CTA. */
+.wm-hero .wm-btn-on-dark {
+  background: rgba(255, 255, 255, 0.16);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  -webkit-backdrop-filter: blur(2px);
+  backdrop-filter: blur(2px);
+}
+.wm-hero .wm-btn-on-dark:hover {
+  background: rgba(255, 255, 255, 0.28);
+  border-color: rgba(255, 255, 255, 0.85);
+}
 
 /* ---------- Section scaffolding ---------- */
 .wm-wdf-section {
