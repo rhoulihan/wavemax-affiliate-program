@@ -34,23 +34,30 @@
   /* Routes we OWN. Map grows as Phase 2/3/4 land. Anything not in the map
    * routes through embed-app-v2 (the existing SPA router). */
   const ROUTE_MAP = {
-    '/':                            '/austin-landing-v3-embed.html',
-    '/wash-dry-fold':               '/wash-dry-fold-embed.html',
-    '/self-serve-laundry':          '/self-serve-laundry-embed.html',
-    '/commercial':                  '/commercial-embed.html',
-    '/contact':                     '/contact-embed.html'
+    '/':                                '/austin-landing-v3-embed.html',
+    '/wash-dry-fold':                   '/wash-dry-fold-embed.html',
+    '/self-serve-laundry':              '/self-serve-laundry-embed.html',
+    '/commercial':                      '/commercial-embed.html',
+    '/commercial/medical-offices':      '/commercial-embed.html?tab=medical',
+    '/commercial/health-clubs':         '/commercial-embed.html?tab=gym',
+    '/commercial/airbnb-rentals':       '/commercial-embed.html?tab=airbnb',
+    '/commercial/restaurants-catering': '/commercial-embed.html?tab=restaurant',
+    '/commercial/contractors':          '/commercial-embed.html?tab=contractors',
+    '/contact':                         '/contact-embed.html'
   };
 
   const ROUTE_BREADCRUMBS = {
-    '/':                          'Home',
-    '/wash-dry-fold':             'Wash · Dry · Fold',
-    '/self-serve-laundry':        'Self-Service Laundry',
-    '/commercial':                'Commercial',
-    '/commercial/medical-offices':'Medical Offices',
-    '/commercial/health-clubs':   'Health Clubs',
-    '/commercial/airbnb-rentals': 'Airbnb & Rentals',
-    '/about-us':                  'About Us',
-    '/contact':                   'Contact'
+    '/':                                  'Home',
+    '/wash-dry-fold':                     'Wash · Dry · Fold',
+    '/self-serve-laundry':                'Self-Service Laundry',
+    '/commercial':                        'Commercial',
+    '/commercial/medical-offices':        'Medical Offices',
+    '/commercial/health-clubs':           'Health Clubs',
+    '/commercial/airbnb-rentals':         'Airbnb & Rentals',
+    '/commercial/restaurants-catering':   'Restaurants & Catering',
+    '/commercial/contractors':            'Contractors & Service Providers',
+    '/about-us':                          'About Us',
+    '/contact':                           'Contact'
   };
 
   function $(sel, root) { return (root || document).querySelector(sel); }
@@ -211,6 +218,8 @@
       'chrome.subnav.medicalOffices':   'Medical Offices Laundry in Austin, TX',
       'chrome.subnav.healthClubs':      'Health Clubs Laundry in Austin, TX',
       'chrome.subnav.airbnbRentals':    'Airbnb & Rentals Laundry in Austin, TX',
+      'chrome.subnav.restaurants':      'Restaurants & Catering Laundry in Austin, TX',
+      'chrome.subnav.contractors':      'Contractors & Service Providers in Austin, TX',
       'chrome.subnav.aboutUs':          'About Us',
       'chrome.subnav.contact':          'Contact',
 
@@ -272,6 +281,8 @@
       'chrome.subnav.medicalOffices':   'Lavandería para Consultorios Médicos en Austin, TX',
       'chrome.subnav.healthClubs':      'Lavandería para Gimnasios en Austin, TX',
       'chrome.subnav.airbnbRentals':    'Lavandería para Airbnb y Alquileres en Austin, TX',
+      'chrome.subnav.restaurants':      'Lavandería para Restaurantes y Catering en Austin, TX',
+      'chrome.subnav.contractors':      'Contratistas y Proveedores de Servicios en Austin, TX',
       'chrome.subnav.aboutUs':          'Sobre Nosotros',
       'chrome.subnav.contact':          'Contacto',
 
@@ -333,6 +344,8 @@
       'chrome.subnav.medicalOffices':   'Lavanderia para Consultórios Médicos em Austin, TX',
       'chrome.subnav.healthClubs':      'Lavanderia para Academias em Austin, TX',
       'chrome.subnav.airbnbRentals':    'Lavanderia para Airbnb e Aluguéis em Austin, TX',
+      'chrome.subnav.restaurants':      'Lavanderia para Restaurantes e Catering em Austin, TX',
+      'chrome.subnav.contractors':      'Empreiteiros e Prestadores de Serviços em Austin, TX',
       'chrome.subnav.aboutUs':          'Sobre Nós',
       'chrome.subnav.contact':          'Contato',
 
@@ -394,6 +407,8 @@
       'chrome.subnav.medicalOffices':   'Wäscherei für Arztpraxen in Austin, TX',
       'chrome.subnav.healthClubs':      'Wäscherei für Fitnessstudios in Austin, TX',
       'chrome.subnav.airbnbRentals':    'Wäscherei für Airbnb & Vermietungen in Austin, TX',
+      'chrome.subnav.restaurants':      'Wäscherei für Restaurants & Catering in Austin, TX',
+      'chrome.subnav.contractors':      'Auftragnehmer & Dienstleister in Austin, TX',
       'chrome.subnav.aboutUs':          'Über uns',
       'chrome.subnav.contact':          'Kontakt',
 
