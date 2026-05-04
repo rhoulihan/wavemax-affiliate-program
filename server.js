@@ -187,8 +187,10 @@ app.use((req, res, next) => {
     res.setHeader('Clear-Site-Data', '"cache", "cookies", "storage"');
   }
 
-  // Override CORS and resource policy for parent bridge script
-  if (req.path === '/assets/js/parent-iframe-bridge-v2.js') {
+  // Override CORS and resource policy for parent bridge script. Franchise
+  // host pages on wavemaxlaundry.com (or any other parent domain) load
+  // the bridge from wavemax.promo and need cross-origin permission.
+  if (req.path === '/assets/js/parent-iframe-bridge-v3.js') {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
     res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
