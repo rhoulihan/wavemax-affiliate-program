@@ -464,12 +464,17 @@
     }
     window.IframeBridge.loadTranslations(TRANSLATIONS);
     window.IframeBridge.init({ pageIdentifier: 'austin-contact', enableTranslation: true, enableAutoResize: true });
-    window.IframeBridge.loadSEOConfig(SEO);
+    // SEO is built from LOCATION_DATA inside onLocationData below.
 
     // Bind data-bind attributes whenever location-data arrives
     window.IframeBridge.onLocationData((data) => {
       applyBindings(data);
-      if (window.IframeBridge.updateHeight) window.IframeBridge.updateHeight();
+      setHeroWatermark(data);
+      if (window.FranchisePage) {
+        const seo = window.FranchisePage.buildSeo(data, 'contact');
+        if (seo) window.IframeBridge.loadSEOConfig(seo);
+      }      if (window.IframeBridge.updateHeight) window.IframeBridge.updateHeight();      if (window.IframeBridge && window.IframeBridge.updateHeight) window.IframeBridge.updateHeight();
+
     });
 
     initContactForm();

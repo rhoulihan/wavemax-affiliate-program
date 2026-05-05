@@ -508,19 +508,11 @@
   };
 
   /* ---------- Hero watermark ---------- */
-  const WATERMARK_URL = 'https://wavemaxlaundry.com/wp-content/uploads/locations/austin-tx/hero-1.jpg';
-
-  function setHeroWatermark() {
-    const root = document.getElementById('wm-austin-watermark');
-    if (!root) return;
-    const probe = new Image();
-    probe.referrerPolicy = 'no-referrer';
-    probe.onload = () => {
-      root.style.backgroundImage = `url("${WATERMARK_URL}")`;
-      root.classList.add('is-loaded');
-    };
-    probe.onerror = () => { root.classList.add('is-loaded'); };
-    probe.src = WATERMARK_URL;
+  // Hero watermark + SEO are now driven from LOCATION_DATA via the
+  // shared FranchisePage helper. The Austin URL that used to live here
+  // moved to images.hero[0] in the per-franchise registry.
+  function setHeroWatermark(data) {
+    if (window.FranchisePage) window.FranchisePage.applyHeroWatermark(data);
   }
 
   /* ---------- Tabs (delegated, survives DOM swaps) ---------- */
@@ -562,14 +554,17 @@
     }
     window.IframeBridge.loadTranslations(TRANSLATIONS);
     window.IframeBridge.init({ pageIdentifier: 'austin-self-serve', enableTranslation: true, enableAutoResize: true });
-    window.IframeBridge.loadSEOConfig(SEO);
+    // SEO is built from LOCATION_DATA inside onLocationData below.
 
     window.IframeBridge.onLocationData((data) => {
       applyBindings(data);
-      if (window.IframeBridge.updateHeight) window.IframeBridge.updateHeight();
-    });
+      setHeroWatermark(data);
+      if (window.FranchisePage) {
+        const seo = window.FranchisePage.buildSeo(data, 'self-serve');
+        if (seo) window.IframeBridge.loadSEOConfig(seo);
+      }      if (window.IframeBridge.updateHeight) window.IframeBridge.updateHeight();      if (window.IframeBridge && window.IframeBridge.updateHeight) window.IframeBridge.updateHeight();
 
-    setHeroWatermark();
+    });
     initTabs();
   }
 

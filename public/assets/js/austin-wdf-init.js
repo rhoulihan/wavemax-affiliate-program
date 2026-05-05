@@ -581,22 +581,11 @@
    * Same treatment as the landing-page hero: set the Austin store-photo
    * as a background-image on the watermark div once it loads, then fade
    * in. Probe pattern means slow connections never flash an empty box. */
-  const WATERMARK_URL = 'https://wavemaxlaundry.com/wp-content/uploads/locations/austin-tx/hero-1.jpg';
-
-  function setHeroWatermark() {
-    const root = document.getElementById('wm-austin-watermark');
-    if (!root) return;
-    const probe = new Image();
-    probe.referrerPolicy = 'no-referrer';
-    probe.onload = () => {
-      root.style.backgroundImage = `url("${WATERMARK_URL}")`;
-      root.classList.add('is-loaded');
-    };
-    probe.onerror = () => {
-      // Image unreachable: still mark loaded so the gradient overlay shows.
-      root.classList.add('is-loaded');
-    };
-    probe.src = WATERMARK_URL;
+  // Hero watermark + SEO are now driven from LOCATION_DATA via the
+  // shared FranchisePage helper. Hardcoded Austin URLs that used to
+  // live here moved to images.hero[0] in the per-franchise registry.
+  function setHeroWatermark(data) {
+    if (window.FranchisePage) window.FranchisePage.applyHeroWatermark(data);
   }
 
   /* ---------- Tabs ----------
@@ -642,15 +631,21 @@
     }
     window.IframeBridge.loadTranslations(TRANSLATIONS);
     window.IframeBridge.init({ pageIdentifier: 'austin-wdf', enableTranslation: true, enableAutoResize: true });
-    window.IframeBridge.loadSEOConfig(SEO);
+    // SEO is built from LOCATION_DATA inside onLocationData below.
 
-    // Bind data-bind attributes whenever location-data arrives.
+    // Bind data-bind attributes whenever location-data arrives. Same
+    // hook applies the per-franchise hero watermark + per-franchise
+    // SEO bundle.
     window.IframeBridge.onLocationData((data) => {
       applyBindings(data);
+      setHeroWatermark(data);
+      if (window.FranchisePage) {
+        const seo = window.FranchisePage.buildSeo(data, 'wdf');
+        if (seo) window.IframeBridge.loadSEOConfig(seo);
+      }
       if (window.IframeBridge.updateHeight) window.IframeBridge.updateHeight();
     });
 
-    setHeroWatermark();
     initTabs();
   }
 
