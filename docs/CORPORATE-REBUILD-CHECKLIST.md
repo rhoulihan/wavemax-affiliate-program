@@ -68,7 +68,7 @@ Legend: **✅ shipped** · **🔧 in progress** · **☐ queued**
 
 - ✅ **Locations modal — Google Maps.** Tile list + interactive Google Maps view (dark navy theme), custom franchise pin, click-to-zoom-and-info-window per store, search-by-city / state / zip filter, scroll-snap card list. Auto-centers on the active franchise on open.
 
-- ✅ **Live Google Places reviews per store.** 5-star reviews fetched directly via the Places API (New) using each store's `place_id`. Each franchise landing page displays its actual customer reviews.
+- ✅ **Live Google Places reviews per store.** 5-star reviews fetched directly via the Places API (New) using each store's `place_id`. Each franchise landing page displays its actual customer reviews. Server-side calls explicitly set the Referer header so the production API key's referer restriction (wavemax.promo) accepts them — without it, Places returned `API_KEY_HTTP_REFERRER_BLOCKED` and reviews silently rendered empty.
 
 - ✅ **Network-wide live customer reviews aggregator.** New `networkReviewsService` samples 18 franchise Place IDs per refresh, calls the cached `googleReviewsService` for each, filters to 5-star, tags each review with the source franchise's city / state / brand / URL, and serves an aggregated rotating sample of up to 24 customer reviews via `GET /api/v1/location/network-reviews`. 6-hour aggregator cache + per-place 24h cache means the Places API is hit infrequently. Used on `/testimonials/` to render a live customer-side credibility layer alongside the franchisee owner quotes. Each card surfaces the actual customer's name, the city/state of the store they reviewed, and a deep-link to that franchise's landing page.
 
