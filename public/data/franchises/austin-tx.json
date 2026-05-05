@@ -136,6 +136,11 @@
       "washMin": 20,
       "dryMin": 20,
       "rangeDisplay": "$2.75 – $10.50"
+    },
+    "commercial": {
+      "rateFromLb": 0.95,
+      "currency": "USD",
+      "fromDisplay": "From $0.95/lb"
     }
   },
   "equipment": {
