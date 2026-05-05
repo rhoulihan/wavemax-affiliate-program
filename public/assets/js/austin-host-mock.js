@@ -552,8 +552,10 @@
     let selectedSlug = null;
 
     const open = async () => {
+      console.log('[locModal-debug] open() invoked, overlay=', overlay, 'classList before=', [...overlay.classList]);
       overlay.setAttribute('aria-hidden', 'false');
       overlay.classList.add('open');
+      console.log('[locModal-debug] classList after add=', [...overlay.classList]);
       document.body.style.overflow = 'hidden';
       // Auto-select the current franchise on open so the action bar
       // shows immediately (operator can click Visit to confirm).
@@ -746,8 +748,18 @@
 
     // Wire up open / close triggers
     const openTriggers = $$('[data-locmodal-open]');
-    console.log('[locModal-debug] attaching open handler to', openTriggers.length, 'triggers');
-    openTriggers.forEach(t => t.addEventListener('click', open));
+    console.log('[locModal-debug] attaching open handler to', openTriggers.length, 'triggers', openTriggers);
+    openTriggers.forEach((t, i) => {
+      t.addEventListener('click', (e) => {
+        console.log('[locModal-debug] trigger', i, 'clicked, target=', e.target, 'currentTarget=', e.currentTarget);
+        open(e);
+      });
+    });
+    // Document-level capture listener to verify click events propagate at all
+    document.addEventListener('click', (e) => {
+      const trig = e.target && e.target.closest && e.target.closest('[data-locmodal-open]');
+      if (trig) console.log('[locModal-debug] DOC CAPTURE saw click on locmodal trigger', trig);
+    }, true);
     $$('[data-locmodal-close]').forEach(t => t.addEventListener('click', close));
     overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
     document.addEventListener('keydown', (e) => {
