@@ -660,6 +660,9 @@ app.get(['/testimonials', '/testimonials/'], (req, res) => {
 app.get(['/why-invest-in-wavemax', '/why-invest-in-wavemax/'], (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'why-invest-in-wavemax.html'));
 });
+app.get(['/wavemax-vs-zombiemat', '/wavemax-vs-zombiemat/'], (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'wavemax-vs-zombiemat.html'));
+});
 
 // Per-franchise dynamic routes — Phase 5a. Mounted AFTER /api/* and the
 // static middleware so unknown slugs fall through to a 404 instead of
