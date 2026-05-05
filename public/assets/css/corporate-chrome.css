@@ -4,6 +4,51 @@
  */
 
 /* ============================================================
+   BREADCRUMB — matches per-franchise pages (lifted from
+   austin-host-mock.css so corporate and per-store render
+   identically). Sits below the wmlnav header.
+   ============================================================ */
+.wm-bc-host { background: #ffffff; border-bottom: 1px solid #e5e9f0; }
+.wm-bc-host-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 10px 40px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 13px;
+  color: #666;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.wm-bc-host-inner a { color: #1e72ba; text-decoration: none; }
+.wm-bc-host-inner a:hover { text-decoration: underline; }
+.wm-bc-host-sep { color: #bbb; margin: 0 2px; }
+.wm-bc-host-current { color: #333; font-weight: 600; }
+
+/* ============================================================
+   B1 UTILITY STRIP — long translations (DE / PT) need a
+   tighter font and white-space:nowrap is killing the right link
+   in EN ("$471K avg gross · 2024 Item 19 →"). Apply a uniform
+   smaller size + allow wrapping if absolutely necessary.
+   ============================================================ */
+#wmlnav-wrap .wmlnav-b1-left a,
+#wmlnav-wrap .wmlnav-b1-left span,
+#wmlnav-wrap .wmlnav-b1-right a {
+  font-size: 11.5px !important;
+  white-space: normal !important;
+  line-height: 1.35 !important;
+}
+#wmlnav-wrap .wmlnav-b1 .wmlnav-inner {
+  align-items: center !important;
+}
+@media (max-width: 1024px) {
+  #wmlnav-wrap .wmlnav-b1-left a,
+  #wmlnav-wrap .wmlnav-b1-left span,
+  #wmlnav-wrap .wmlnav-b1-right a { font-size: 11px !important; }
+}
+
+/* ============================================================
    HEADER
    ============================================================ */
 #wm-corp-header {
