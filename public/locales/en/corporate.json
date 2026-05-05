@@ -3,7 +3,7 @@
     "b1": {
       "award": "#1 Laundromat Franchise · 2026 Entrepreneur Franchise 500",
       "locations": "75+ locations nationwide & growing",
-      "item19": "$471K avg gross · 2024 Item 19 →"
+      "item19": "Item 19: $471K avg gross →"
     },
     "b2": {
       "logoAlt": "WaveMAX Laundry — Franchise home",
@@ -25,7 +25,7 @@
       "contact": "Contact"
     },
     "footer": {
-      "tag": "A national laundromat franchise.\nCleaner. Safer. Faster.",
+      "tag": "A national laundromat franchise. Cleaner. Safer. Faster.",
       "address1": "929 McDuff Ave S, Suite 107",
       "address2": "Jacksonville, FL 32205",
       "headingFranchise": "Franchise",
@@ -43,7 +43,7 @@
       "linkContact": "Contact",
       "linkFindStore": "Find a Store",
       "linkFullMap": "Full Location Map",
-      "copyright": "© {year} AU Hydro LLC dba WaveMAX Laundry. All rights reserved.",
+      "copyright": "© AU Hydro LLC dba WaveMAX Laundry. All rights reserved.",
       "privacy": "Privacy",
       "terms": "Terms"
     },
@@ -59,20 +59,87 @@
       "title2": "A real business.",
       "sub": "WaveMAX is the #1 laundromat franchise on Entrepreneur's 2026 Franchise 500. Semi-absentee from day one, modern Electrolux equipment, recession-proof demand. Build a durable cash-flowing business with national brand support behind you.",
       "ctaPrimary": "Start the conversation",
-      "ctaSecondary": "See the numbers",
-      "photoTagJax": "Jacksonville Flagship",
-      "photoTagKent": "Kent WA",
-      "photoTagOmaha": "Omaha"
+      "ctaSecondary": "See the numbers"
     },
     "stats": {
-      "locations": "Locations & growing",
+      "locationsLabel": "Locations & growing",
       "locationsSub": "Across the United States",
-      "ownerHrs": "Owner time / week",
+      "ownerHrsLabel": "Owner time / week",
       "ownerHrsSub": "Semi-absentee model",
-      "avgGross": "Average gross revenue",
+      "avgGrossLabel": "Average gross revenue",
       "avgGrossSub": "2024 · 50-store sample",
-      "payback": "Typical payback period",
+      "paybackLabel": "Typical payback period",
       "paybackSub": "25–35% reported EBITDA"
+    },
+    "why": {
+      "eyebrow": "Why owners love WaveMAX®",
+      "title": "A laundromat franchise built for serious operators.",
+      "lede": "WaveMAX is a leading laundromat franchise offering scalable, semi-absentee ownership with strong unit economics and national brand support. Disciplined site selection, smart sizing, premium equipment, and a service model that resonates with working-class communities — that's the playbook.",
+      "tile1Title": "Semi-absentee from day one",
+      "tile1Text": "~9 hours/week, 3 days a week, 3 hours per day. Most franchisees don't hire a manager initially — the model is designed to scale without a constant on-site presence.",
+      "tile2Title": "Low overhead, high ROI",
+      "tile2Text": "Lean staffing, durable equipment, no inventory to manage. Predictable cost structure with strong unit economics that compound across multi-unit operators.",
+      "tile3Title": "Essential, recession-proof",
+      "tile3Text": "Laundry is a need, not a want. Working-class families rely on laundromats out of necessity — the demand is steady through every economic cycle.",
+      "tile4Title": "Premium Electrolux equipment",
+      "tile4Text": "High-extraction commercial machines that move customers through faster, run cleaner, and last longer than what walk-in competitors operate.",
+      "tile5Title": "Easy multi-unit expansion",
+      "tile5Text": "Operators with one cash-flowing store typically open their second within 18 months. Site-selection support and proven playbook scale linearly.",
+      "tile6Title": "National brand support",
+      "tile6Text": "Marketing, training, technology, vendor relationships — the back office every owner-operator wants but most can't build alone."
+    },
+    "sauce": {
+      "eyebrow": "WaveMAX® \"secret sauce\"",
+      "title": "Right site. Right size. Right service. Right systems.",
+      "lede": "Our growth strategy is built around four disciplines that compound into reliable unit economics — and a model that's repeatable across markets.",
+      "rightSite": "Right Site",
+      "rightSiteText": "Demographic targeting, competition analysis, and real-world location strategy built for sustained demand.",
+      "rightSize": "Right Size",
+      "rightSizeText": "Each location is sized to fit the market — balancing footprint, machine count, and operational efficiency.",
+      "rightService": "Right Service",
+      "rightServiceText": "Self-serve, wash-dry-fold drop-off, and commercial accounts — three revenue streams from one footprint.",
+      "rightSystems": "Right Systems",
+      "rightSystemsText": "Card-pay technology, real-time analytics, vendor-managed supplies, and a proven operations playbook."
+    },
+    "sanit": {
+      "eyebrow": "WaveMAX sanitation",
+      "title": "Cleaner washes. Better customer confidence.",
+      "p1": "WaveMAX locations are designed with advanced sanitation technology that elevates customer confidence and improves garment care. Our mission is to bring safer, cleaner, more efficient laundry to underserved areas — and that starts with the water itself, not just the cycle.",
+      "p2": "Each WaveMAX location is built to be a trusted neighborhood hub — high-tech machines, consistent staffing, and elevated cleanliness combine to deliver a better experience for customers and stronger repeat traffic for owners."
+    },
+    "invest": {
+      "eyebrow": "The investment",
+      "title": "What it takes to own a WaveMAX®.",
+      "lede": "We're looking for committed operators with the liquidity to fund a single location and the appetite to grow into multi-unit ownership. Most franchisees finance a portion of the build-out and reach positive cash flow within the first year of operation.",
+      "card1Label": "Liquidity required",
+      "card1Text": "Cash on hand to qualify. Covers franchise fee + working capital + your share of build-out.",
+      "card2Label": "Total investment",
+      "card2Text": "Range covers all-in build-out: equipment, build, working capital, opening marketing.",
+      "card3Label": "Net income (sample)",
+      "card3Text": "A representative store's net income — even with full financing in place. Item 19 has full details."
+    },
+    "faq": {
+      "eyebrow": "Frequently asked",
+      "title": "WaveMAX® franchise FAQ",
+      "q1": "Is WaveMAX really passive income?",
+      "a1": "It's a semi-absentee business from day one. We recommend being in the store about 9 hours per week — 3 days a week, 3 hours per day. Most franchisees don't hire a dedicated manager initially; the model is designed to scale without one.",
+      "q2": "Who are your core customers?",
+      "a2": "Blue-collar, working-class families who rely on laundromats out of necessity, not luxury. The customer is steady through every economic cycle. We also serve Airbnb hosts, restaurants, gyms, and medical offices on the commercial side.",
+      "q3": "What's the total investment?",
+      "a3": "Total investment runs $1M–$1.5M; we look for $400K of liquidity to qualify. That covers franchise fee, build-out, equipment, working capital, and opening marketing. Item 19 of the FDD has the detailed breakdown.",
+      "q4": "Will WaveMAX help me find a site?",
+      "a4": "Yes. We guide you through working-class ZIP codes, demographic targeting, and brand-approved locations before lease sign-off. Site selection is the single highest-leverage decision in this business and we don't leave it to chance.",
+      "q5": "How big is WaveMAX right now?",
+      "a5": "75+ stores and growing, supported by quality unit economics, franchisee satisfaction, and a scalable national playbook. Ranked #1 laundromat franchise on Entrepreneur's 2026 Franchise 500. We build durable, cash-flowing businesses — not just franchises.",
+      "q6": "Can I open multiple locations?",
+      "a6": "Multi-unit ownership is the path most franchisees take. Operators with one cash-flowing store typically open their second within 18 months. Territory rights and area-development incentives are available for serious multi-unit operators."
+    },
+    "cta": {
+      "eyebrow": "Ready to own one?",
+      "title": "Start the conversation.",
+      "lede": "Tell us about yourself and we'll send the FDD and walk you through the process. No pressure — most owners take 3–6 months from first call to lease signed.",
+      "btnPrimary": "Apply to become a franchisee",
+      "btnSecondary": "Email franchise@wavemax.com"
     }
   },
 
