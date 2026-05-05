@@ -1,0 +1,155 @@
+{
+  "slug": "louisville-ky",
+  "brand": {
+    "name": "WaveMAX Louisville KY",
+    "parent": "WaveMAX Laundry",
+    "tagline": ""
+  },
+  "contact": {
+    "phone": "(502) 292-8895",
+    "phoneTel": "tel:+15022928895",
+    "phoneTelRaw": "+15022928895",
+    "email": "no-reply@wavemax.promo",
+    "emailMailto": "mailto:no-reply@wavemax.promo",
+    "address": "1056 E Oak St",
+    "city": "Louisville",
+    "state": "KY",
+    "zip": "40204",
+    "country": "US",
+    "addressLine2": "Louisville, KY 40204",
+    "geo": {
+      "lat": 38.2527,
+      "lng": -85.7585
+    },
+    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=1056+E+Oak+St+Louisville+KY+40204"
+  },
+  "hours": {
+    "open": "",
+    "close": "",
+    "display": "Call for hours",
+    "lastWash": "",
+    "days": ""
+  },
+  "owners": [],
+  "aboutContent": {
+    "heroTitle": "",
+    "heroTagline": "",
+    "heroSubtitle": "",
+    "missionEyebrow": "",
+    "missionTitle": "",
+    "missionBody": [],
+    "valuesEyebrow": "",
+    "valuesTitle": "",
+    "values": [],
+    "teamEyebrow": "",
+    "teamTitle": "",
+    "teamLede": "",
+    "communityTitle": "",
+    "communityBody": "",
+    "ctaText": ""
+  },
+  "pricing": {
+    "wdf": {
+      "rate": null,
+      "minLb": null,
+      "currency": "USD",
+      "display": "Call for pricing"
+    },
+    "selfServe": {
+      "minLoad": null,
+      "maxLoad": null,
+      "minLoadDisplay": "",
+      "maxLoadDisplay": "",
+      "washMin": null,
+      "dryMin": null,
+      "rangeDisplay": "Call for pricing"
+    }
+  },
+  "equipment": {
+    "washers": null,
+    "dryers": null,
+    "capacityLb": null
+  },
+  "amenities": [
+    "Free WiFi",
+    "Free Parking"
+  ],
+  "serviceArea": [
+    "Louisville"
+  ],
+  "social": {
+    "facebook": "",
+    "instagram": ""
+  },
+  "google": {
+    "placeId": "",
+    "apiKey": "",
+    "profileUrl": "",
+    "reviewsUrl": ""
+  },
+  "images": {
+    "hero": [
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/louisville-ky/hero-1.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/louisville-ky/hero-2.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/louisville-ky/hero-3.jpg"
+    ],
+    "interior": [
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/louisville-ky/interior-1.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/louisville-ky/interior-2.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/louisville-ky/interior-3.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/louisville-ky/interior-4.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/louisville-ky/interior-5.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/louisville-ky/interior-6.jpg"
+    ],
+    "owner": [],
+    "landmarks": [],
+    "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/louisville-ky/hero-1.jpg",
+    "ogImageAlt": "WaveMAX Louisville KY storefront",
+    "mapPreview": ""
+  },
+  "seo": {
+    "keywords": "laundromat louisville ky, laundromat near me, louisville laundromat, wash dry fold louisville, self service laundry louisville, drop off laundry louisville, coin laundry louisville, commercial laundry louisville, wavemax louisville, wavemax louisville ky",
+    "keywordsByPage": {
+      "/": "laundromat louisville ky, laundromat near me, louisville laundromat, wash dry fold louisville, self service laundry louisville, drop off laundry louisville, coin laundry louisville, commercial laundry louisville, wavemax louisville, wavemax louisville ky",
+      "/wash-dry-fold": "wash dry fold louisville, drop off laundry louisville, fluff and fold louisville, laundromat louisville ky, laundromat near me, louisville laundromat, wash dry fold louisville, self service laundry louisville, drop off laundry louisville",
+      "/self-serve-laundry": "self service laundry louisville, coin laundry louisville, laundromat louisville, laundromat louisville ky, laundromat near me, louisville laundromat, wash dry fold louisville, self service laundry louisville, drop off laundry louisville",
+      "/commercial": "commercial laundry louisville, business laundry louisville, hotel laundry louisville, restaurant linens louisville, laundromat louisville ky, laundromat near me, louisville laundromat, wash dry fold louisville, self service laundry louisville, drop off laundry louisville",
+      "/about-us": "wavemax owners louisville, family-owned laundromat louisville, laundromat louisville ky, laundromat near me, louisville laundromat, wash dry fold louisville",
+      "/contact": "contact wavemax louisville, laundromat phone louisville, laundromat louisville ky, laundromat near me, louisville laundromat, wash dry fold louisville"
+    },
+    "localizedHeadlines": {
+      "landingTitle": "Louisville's premier laundromat",
+      "landingSubtitle": "Self-serve laundry, wash-dry-fold, and commercial accounts in Louisville, KY.",
+      "wdfTitle": "Wash-Dry-Fold drop-off laundry in Louisville, KY",
+      "selfServeTitle": "Self-serve laundry in Louisville, KY",
+      "commercialTitle": "Commercial laundry service for Louisville businesses",
+      "aboutTitle": "About WaveMAX Louisville",
+      "contactTitle": "Contact WaveMAX Louisville, KY"
+    },
+    "geoRegion": "US-KY",
+    "geoPlacename": "Louisville, KY",
+    "geoPosition": "38.2527;-85.7585",
+    "icbm": "38.2527, -85.7585"
+  },
+  "i18n": {
+    "languagesAvailable": [
+      "en",
+      "es",
+      "pt",
+      "de"
+    ]
+  },
+  "nav": {
+    "commercialEnabled": true,
+    "commercialIndustries": {
+      "medical": true,
+      "gym": true,
+      "airbnb": true,
+      "restaurant": true,
+      "contractors": true
+    },
+    "additional": [],
+    "sublinkExtensions": {}
+  },
+  "iframeOverrides": {}
+}

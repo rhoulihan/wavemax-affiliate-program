@@ -1,0 +1,155 @@
+{
+  "slug": "southgate-mi",
+  "brand": {
+    "name": "WaveMAX Southgate, MI",
+    "parent": "WaveMAX Laundry",
+    "tagline": ""
+  },
+  "contact": {
+    "phone": "(734) 258-8026",
+    "phoneTel": "tel:+17342588026",
+    "phoneTelRaw": "+17342588026",
+    "email": "no-reply@wavemax.promo",
+    "emailMailto": "mailto:no-reply@wavemax.promo",
+    "address": "13248 Fort St",
+    "city": "Southgate",
+    "state": "MI",
+    "zip": "48195",
+    "country": "US",
+    "addressLine2": "Southgate, MI 48195",
+    "geo": {
+      "lat": 42.2139,
+      "lng": -83.1938
+    },
+    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=13248+Fort+St+Southgate+MI+48195"
+  },
+  "hours": {
+    "open": "",
+    "close": "",
+    "display": "Call for hours",
+    "lastWash": "",
+    "days": ""
+  },
+  "owners": [],
+  "aboutContent": {
+    "heroTitle": "",
+    "heroTagline": "",
+    "heroSubtitle": "",
+    "missionEyebrow": "",
+    "missionTitle": "",
+    "missionBody": [],
+    "valuesEyebrow": "",
+    "valuesTitle": "",
+    "values": [],
+    "teamEyebrow": "",
+    "teamTitle": "",
+    "teamLede": "",
+    "communityTitle": "",
+    "communityBody": "",
+    "ctaText": ""
+  },
+  "pricing": {
+    "wdf": {
+      "rate": null,
+      "minLb": null,
+      "currency": "USD",
+      "display": "Call for pricing"
+    },
+    "selfServe": {
+      "minLoad": null,
+      "maxLoad": null,
+      "minLoadDisplay": "",
+      "maxLoadDisplay": "",
+      "washMin": null,
+      "dryMin": null,
+      "rangeDisplay": "Call for pricing"
+    }
+  },
+  "equipment": {
+    "washers": null,
+    "dryers": null,
+    "capacityLb": null
+  },
+  "amenities": [
+    "Free WiFi",
+    "Free Parking"
+  ],
+  "serviceArea": [
+    "Southgate"
+  ],
+  "social": {
+    "facebook": "",
+    "instagram": ""
+  },
+  "google": {
+    "placeId": "",
+    "apiKey": "",
+    "profileUrl": "",
+    "reviewsUrl": ""
+  },
+  "images": {
+    "hero": [
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/southgate-mi/hero-1.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/southgate-mi/hero-2.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/southgate-mi/hero-3.jpg"
+    ],
+    "interior": [
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/southgate-mi/interior-1.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/southgate-mi/interior-2.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/southgate-mi/interior-3.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/southgate-mi/interior-4.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/southgate-mi/interior-5.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/southgate-mi/interior-6.jpg"
+    ],
+    "owner": [],
+    "landmarks": [],
+    "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/southgate-mi/hero-1.jpg",
+    "ogImageAlt": "WaveMAX Southgate, MI storefront",
+    "mapPreview": ""
+  },
+  "seo": {
+    "keywords": "laundromat southgate mi, laundromat near me, southgate laundromat, wash dry fold southgate, self service laundry southgate, drop off laundry southgate, coin laundry southgate, commercial laundry southgate, wavemax southgate, wavemax southgate mi",
+    "keywordsByPage": {
+      "/": "laundromat southgate mi, laundromat near me, southgate laundromat, wash dry fold southgate, self service laundry southgate, drop off laundry southgate, coin laundry southgate, commercial laundry southgate, wavemax southgate, wavemax southgate mi",
+      "/wash-dry-fold": "wash dry fold southgate, drop off laundry southgate, fluff and fold southgate, laundromat southgate mi, laundromat near me, southgate laundromat, wash dry fold southgate, self service laundry southgate, drop off laundry southgate",
+      "/self-serve-laundry": "self service laundry southgate, coin laundry southgate, laundromat southgate, laundromat southgate mi, laundromat near me, southgate laundromat, wash dry fold southgate, self service laundry southgate, drop off laundry southgate",
+      "/commercial": "commercial laundry southgate, business laundry southgate, hotel laundry southgate, restaurant linens southgate, laundromat southgate mi, laundromat near me, southgate laundromat, wash dry fold southgate, self service laundry southgate, drop off laundry southgate",
+      "/about-us": "wavemax owners southgate, family-owned laundromat southgate, laundromat southgate mi, laundromat near me, southgate laundromat, wash dry fold southgate",
+      "/contact": "contact wavemax southgate, laundromat phone southgate, laundromat southgate mi, laundromat near me, southgate laundromat, wash dry fold southgate"
+    },
+    "localizedHeadlines": {
+      "landingTitle": "Southgate's premier laundromat",
+      "landingSubtitle": "Self-serve laundry, wash-dry-fold, and commercial accounts in Southgate, MI.",
+      "wdfTitle": "Wash-Dry-Fold drop-off laundry in Southgate, MI",
+      "selfServeTitle": "Self-serve laundry in Southgate, MI",
+      "commercialTitle": "Commercial laundry service for Southgate businesses",
+      "aboutTitle": "About WaveMAX Southgate",
+      "contactTitle": "Contact WaveMAX Southgate, MI"
+    },
+    "geoRegion": "US-MI",
+    "geoPlacename": "Southgate, MI",
+    "geoPosition": "42.2139;-83.1938",
+    "icbm": "42.2139, -83.1938"
+  },
+  "i18n": {
+    "languagesAvailable": [
+      "en",
+      "es",
+      "pt",
+      "de"
+    ]
+  },
+  "nav": {
+    "commercialEnabled": true,
+    "commercialIndustries": {
+      "medical": true,
+      "gym": true,
+      "airbnb": true,
+      "restaurant": true,
+      "contractors": true
+    },
+    "additional": [],
+    "sublinkExtensions": {}
+  },
+  "iframeOverrides": {}
+}

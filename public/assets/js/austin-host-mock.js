@@ -542,6 +542,12 @@
   /* ---------- Active nav state + iframe route ---------- */
 
   function getActiveRoute() {
+    // 1) Server-rendered franchise pages publish their route via a global
+    //    so the chrome doesn't have to parse the slug-prefixed URL itself.
+    if (typeof window.FRANCHISE_INITIAL_ROUTE === 'string') {
+      return window.FRANCHISE_INITIAL_ROUTE || '/';
+    }
+    // 2) Legacy demo path: query-param routing on /dev/austin-host-mock.html.
     const params = new URLSearchParams(window.location.search);
     return params.get('route') || '/';
   }
@@ -581,6 +587,12 @@
   function loadIframeRoute(route) {
     const iframe = document.getElementById('wavemax-iframe');
     if (!iframe) return;
+    // Server-rendered franchise pages set the iframe src up front (the
+    // controller already resolved iframeOverride vs default content).
+    // Don't clobber that on first paint.
+    if (window.FRANCHISE_INITIAL_ROUTE !== undefined && iframe.getAttribute('src')) {
+      return;
+    }
     const direct = ROUTE_MAP[route];
     iframe.src = direct || `/embed-app-v2.html?route=${encodeURIComponent(route)}`;
   }

@@ -1,0 +1,150 @@
+{
+  "slug": "raleigh-nc",
+  "brand": {
+    "name": "WaveMAX Raleigh NC",
+    "parent": "WaveMAX Laundry",
+    "tagline": ""
+  },
+  "contact": {
+    "phone": "(919) 301-8054",
+    "phoneTel": "tel:+19193018054",
+    "phoneTelRaw": "+19193018054",
+    "email": "no-reply@wavemax.promo",
+    "emailMailto": "mailto:no-reply@wavemax.promo",
+    "address": "1100 North Raleigh Blvd, Suite 143",
+    "city": "Raleigh",
+    "state": "NC",
+    "zip": "27610",
+    "country": "US",
+    "addressLine2": "Raleigh, NC 27610",
+    "geo": {
+      "lat": 35.7796,
+      "lng": -78.588
+    },
+    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=1100+North+Raleigh+Blvd%2C+Suite+143+Raleigh+NC+27610"
+  },
+  "hours": {
+    "open": "",
+    "close": "",
+    "display": "Call for hours",
+    "lastWash": "",
+    "days": ""
+  },
+  "owners": [],
+  "aboutContent": {
+    "heroTitle": "",
+    "heroTagline": "",
+    "heroSubtitle": "",
+    "missionEyebrow": "",
+    "missionTitle": "",
+    "missionBody": [],
+    "valuesEyebrow": "",
+    "valuesTitle": "",
+    "values": [],
+    "teamEyebrow": "",
+    "teamTitle": "",
+    "teamLede": "",
+    "communityTitle": "",
+    "communityBody": "",
+    "ctaText": ""
+  },
+  "pricing": {
+    "wdf": {
+      "rate": null,
+      "minLb": null,
+      "currency": "USD",
+      "display": "Call for pricing"
+    },
+    "selfServe": {
+      "minLoad": null,
+      "maxLoad": null,
+      "minLoadDisplay": "",
+      "maxLoadDisplay": "",
+      "washMin": null,
+      "dryMin": null,
+      "rangeDisplay": "Call for pricing"
+    }
+  },
+  "equipment": {
+    "washers": null,
+    "dryers": null,
+    "capacityLb": null
+  },
+  "amenities": [
+    "Free WiFi",
+    "Free Parking"
+  ],
+  "serviceArea": [
+    "Raleigh"
+  ],
+  "social": {
+    "facebook": "",
+    "instagram": ""
+  },
+  "google": {
+    "placeId": "",
+    "apiKey": "",
+    "profileUrl": "",
+    "reviewsUrl": ""
+  },
+  "images": {
+    "hero": [
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/raleigh-nc/hero-1.jpg"
+    ],
+    "interior": [
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/raleigh-nc/interior-1.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/raleigh-nc/interior-2.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/raleigh-nc/interior-3.jpg"
+    ],
+    "owner": [],
+    "landmarks": [],
+    "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/raleigh-nc/hero-1.jpg",
+    "ogImageAlt": "WaveMAX Raleigh NC storefront",
+    "mapPreview": ""
+  },
+  "seo": {
+    "keywords": "laundromat raleigh nc, laundromat near me, raleigh laundromat, wash dry fold raleigh, self service laundry raleigh, drop off laundry raleigh, coin laundry raleigh, commercial laundry raleigh, wavemax raleigh, wavemax raleigh nc",
+    "keywordsByPage": {
+      "/": "laundromat raleigh nc, laundromat near me, raleigh laundromat, wash dry fold raleigh, self service laundry raleigh, drop off laundry raleigh, coin laundry raleigh, commercial laundry raleigh, wavemax raleigh, wavemax raleigh nc",
+      "/wash-dry-fold": "wash dry fold raleigh, drop off laundry raleigh, fluff and fold raleigh, laundromat raleigh nc, laundromat near me, raleigh laundromat, wash dry fold raleigh, self service laundry raleigh, drop off laundry raleigh",
+      "/self-serve-laundry": "self service laundry raleigh, coin laundry raleigh, laundromat raleigh, laundromat raleigh nc, laundromat near me, raleigh laundromat, wash dry fold raleigh, self service laundry raleigh, drop off laundry raleigh",
+      "/commercial": "commercial laundry raleigh, business laundry raleigh, hotel laundry raleigh, restaurant linens raleigh, laundromat raleigh nc, laundromat near me, raleigh laundromat, wash dry fold raleigh, self service laundry raleigh, drop off laundry raleigh",
+      "/about-us": "wavemax owners raleigh, family-owned laundromat raleigh, laundromat raleigh nc, laundromat near me, raleigh laundromat, wash dry fold raleigh",
+      "/contact": "contact wavemax raleigh, laundromat phone raleigh, laundromat raleigh nc, laundromat near me, raleigh laundromat, wash dry fold raleigh"
+    },
+    "localizedHeadlines": {
+      "landingTitle": "Raleigh's premier laundromat",
+      "landingSubtitle": "Self-serve laundry, wash-dry-fold, and commercial accounts in Raleigh, NC.",
+      "wdfTitle": "Wash-Dry-Fold drop-off laundry in Raleigh, NC",
+      "selfServeTitle": "Self-serve laundry in Raleigh, NC",
+      "commercialTitle": "Commercial laundry service for Raleigh businesses",
+      "aboutTitle": "About WaveMAX Raleigh",
+      "contactTitle": "Contact WaveMAX Raleigh, NC"
+    },
+    "geoRegion": "US-NC",
+    "geoPlacename": "Raleigh, NC",
+    "geoPosition": "35.7796;-78.588",
+    "icbm": "35.7796, -78.588"
+  },
+  "i18n": {
+    "languagesAvailable": [
+      "en",
+      "es",
+      "pt",
+      "de"
+    ]
+  },
+  "nav": {
+    "commercialEnabled": true,
+    "commercialIndustries": {
+      "medical": true,
+      "gym": true,
+      "airbnb": true,
+      "restaurant": true,
+      "contractors": true
+    },
+    "additional": [],
+    "sublinkExtensions": {}
+  },
+  "iframeOverrides": {}
+}

@@ -1,0 +1,155 @@
+{
+  "slug": "san-antonio-tx-marbach-st",
+  "brand": {
+    "name": "WaveMAX San Antonio TX Marbach",
+    "parent": "WaveMAX Laundry",
+    "tagline": ""
+  },
+  "contact": {
+    "phone": "(210) 967-3050",
+    "phoneTel": "tel:+12109673050",
+    "phoneTelRaw": "+12109673050",
+    "email": "no-reply@wavemax.promo",
+    "emailMailto": "mailto:no-reply@wavemax.promo",
+    "address": "7519 Marbach St, Ste 102",
+    "city": "San Antonio",
+    "state": "TX",
+    "zip": "78227",
+    "country": "US",
+    "addressLine2": "San Antonio, TX 78227",
+    "geo": {
+      "lat": 29.4208,
+      "lng": -98.6219
+    },
+    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=7519+Marbach+St%2C+Ste+102+San+Antonio+TX+78227"
+  },
+  "hours": {
+    "open": "",
+    "close": "",
+    "display": "Call for hours",
+    "lastWash": "",
+    "days": ""
+  },
+  "owners": [],
+  "aboutContent": {
+    "heroTitle": "",
+    "heroTagline": "",
+    "heroSubtitle": "",
+    "missionEyebrow": "",
+    "missionTitle": "",
+    "missionBody": [],
+    "valuesEyebrow": "",
+    "valuesTitle": "",
+    "values": [],
+    "teamEyebrow": "",
+    "teamTitle": "",
+    "teamLede": "",
+    "communityTitle": "",
+    "communityBody": "",
+    "ctaText": ""
+  },
+  "pricing": {
+    "wdf": {
+      "rate": null,
+      "minLb": null,
+      "currency": "USD",
+      "display": "Call for pricing"
+    },
+    "selfServe": {
+      "minLoad": null,
+      "maxLoad": null,
+      "minLoadDisplay": "",
+      "maxLoadDisplay": "",
+      "washMin": null,
+      "dryMin": null,
+      "rangeDisplay": "Call for pricing"
+    }
+  },
+  "equipment": {
+    "washers": null,
+    "dryers": null,
+    "capacityLb": null
+  },
+  "amenities": [
+    "Free WiFi",
+    "Free Parking"
+  ],
+  "serviceArea": [
+    "San Antonio"
+  ],
+  "social": {
+    "facebook": "",
+    "instagram": ""
+  },
+  "google": {
+    "placeId": "",
+    "apiKey": "",
+    "profileUrl": "",
+    "reviewsUrl": ""
+  },
+  "images": {
+    "hero": [
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/kent-wa/hero-1.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/kent-wa/hero-2.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/kent-wa/hero-3.jpg"
+    ],
+    "interior": [
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/kent-wa/interior-1.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/kent-wa/interior-2.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/kent-wa/interior-3.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/kent-wa/interior-4.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/kent-wa/interior-5.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/kent-wa/interior-6.jpg"
+    ],
+    "owner": [],
+    "landmarks": [],
+    "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/kent-wa/hero-1.jpg",
+    "ogImageAlt": "WaveMAX San Antonio TX Marbach storefront",
+    "mapPreview": ""
+  },
+  "seo": {
+    "keywords": "laundromat san antonio tx, laundromat near me, san antonio laundromat, wash dry fold san antonio, self service laundry san antonio, drop off laundry san antonio, coin laundry san antonio, commercial laundry san antonio, wavemax san antonio, wavemax san antonio tx",
+    "keywordsByPage": {
+      "/": "laundromat san antonio tx, laundromat near me, san antonio laundromat, wash dry fold san antonio, self service laundry san antonio, drop off laundry san antonio, coin laundry san antonio, commercial laundry san antonio, wavemax san antonio, wavemax san antonio tx",
+      "/wash-dry-fold": "wash dry fold san antonio, drop off laundry san antonio, fluff and fold san antonio, laundromat san antonio tx, laundromat near me, san antonio laundromat, wash dry fold san antonio, self service laundry san antonio, drop off laundry san antonio",
+      "/self-serve-laundry": "self service laundry san antonio, coin laundry san antonio, laundromat san antonio, laundromat san antonio tx, laundromat near me, san antonio laundromat, wash dry fold san antonio, self service laundry san antonio, drop off laundry san antonio",
+      "/commercial": "commercial laundry san antonio, business laundry san antonio, hotel laundry san antonio, restaurant linens san antonio, laundromat san antonio tx, laundromat near me, san antonio laundromat, wash dry fold san antonio, self service laundry san antonio, drop off laundry san antonio",
+      "/about-us": "wavemax owners san antonio, family-owned laundromat san antonio, laundromat san antonio tx, laundromat near me, san antonio laundromat, wash dry fold san antonio",
+      "/contact": "contact wavemax san antonio, laundromat phone san antonio, laundromat san antonio tx, laundromat near me, san antonio laundromat, wash dry fold san antonio"
+    },
+    "localizedHeadlines": {
+      "landingTitle": "San Antonio's premier laundromat",
+      "landingSubtitle": "Self-serve laundry, wash-dry-fold, and commercial accounts in San Antonio, TX.",
+      "wdfTitle": "Wash-Dry-Fold drop-off laundry in San Antonio, TX",
+      "selfServeTitle": "Self-serve laundry in San Antonio, TX",
+      "commercialTitle": "Commercial laundry service for San Antonio businesses",
+      "aboutTitle": "About WaveMAX San Antonio",
+      "contactTitle": "Contact WaveMAX San Antonio, TX"
+    },
+    "geoRegion": "US-TX",
+    "geoPlacename": "San Antonio, TX",
+    "geoPosition": "29.4208;-98.6219",
+    "icbm": "29.4208, -98.6219"
+  },
+  "i18n": {
+    "languagesAvailable": [
+      "en",
+      "es",
+      "pt",
+      "de"
+    ]
+  },
+  "nav": {
+    "commercialEnabled": true,
+    "commercialIndustries": {
+      "medical": true,
+      "gym": true,
+      "airbnb": true,
+      "restaurant": true,
+      "contractors": true
+    },
+    "additional": [],
+    "sublinkExtensions": {}
+  },
+  "iframeOverrides": {}
+}

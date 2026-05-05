@@ -1,0 +1,149 @@
+{
+  "slug": "new-haven-ct",
+  "brand": {
+    "name": "WaveMAX New Haven CT",
+    "parent": "WaveMAX Laundry",
+    "tagline": ""
+  },
+  "contact": {
+    "phone": "(203) 745-3477",
+    "phoneTel": "tel:+12037453477",
+    "phoneTelRaw": "+12037453477",
+    "email": "no-reply@wavemax.promo",
+    "emailMailto": "mailto:no-reply@wavemax.promo",
+    "address": "466 Foxon Blvd",
+    "city": "New Haven",
+    "state": "CT",
+    "zip": "6513",
+    "country": "US",
+    "addressLine2": "New Haven, CT 6513",
+    "geo": {
+      "lat": 41.3083,
+      "lng": -72.9279
+    },
+    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=466+Foxon+Blvd+New+Haven+CT+6513"
+  },
+  "hours": {
+    "open": "",
+    "close": "",
+    "display": "Call for hours",
+    "lastWash": "",
+    "days": ""
+  },
+  "owners": [],
+  "aboutContent": {
+    "heroTitle": "",
+    "heroTagline": "",
+    "heroSubtitle": "",
+    "missionEyebrow": "",
+    "missionTitle": "",
+    "missionBody": [],
+    "valuesEyebrow": "",
+    "valuesTitle": "",
+    "values": [],
+    "teamEyebrow": "",
+    "teamTitle": "",
+    "teamLede": "",
+    "communityTitle": "",
+    "communityBody": "",
+    "ctaText": ""
+  },
+  "pricing": {
+    "wdf": {
+      "rate": null,
+      "minLb": null,
+      "currency": "USD",
+      "display": "Call for pricing"
+    },
+    "selfServe": {
+      "minLoad": null,
+      "maxLoad": null,
+      "minLoadDisplay": "",
+      "maxLoadDisplay": "",
+      "washMin": null,
+      "dryMin": null,
+      "rangeDisplay": "Call for pricing"
+    }
+  },
+  "equipment": {
+    "washers": null,
+    "dryers": null,
+    "capacityLb": null
+  },
+  "amenities": [
+    "Free WiFi",
+    "Free Parking"
+  ],
+  "serviceArea": [
+    "New Haven"
+  ],
+  "social": {
+    "facebook": "",
+    "instagram": ""
+  },
+  "google": {
+    "placeId": "",
+    "apiKey": "",
+    "profileUrl": "",
+    "reviewsUrl": ""
+  },
+  "images": {
+    "hero": [
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/new-haven-ct/hero-1.jpg"
+    ],
+    "interior": [
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/new-haven-ct/interior-1.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/new-haven-ct/interior-2.jpg"
+    ],
+    "owner": [],
+    "landmarks": [],
+    "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/new-haven-ct/hero-1.jpg",
+    "ogImageAlt": "WaveMAX New Haven CT storefront",
+    "mapPreview": ""
+  },
+  "seo": {
+    "keywords": "laundromat new haven ct, laundromat near me, new haven laundromat, wash dry fold new haven, self service laundry new haven, drop off laundry new haven, coin laundry new haven, commercial laundry new haven, wavemax new haven, wavemax new haven ct",
+    "keywordsByPage": {
+      "/": "laundromat new haven ct, laundromat near me, new haven laundromat, wash dry fold new haven, self service laundry new haven, drop off laundry new haven, coin laundry new haven, commercial laundry new haven, wavemax new haven, wavemax new haven ct",
+      "/wash-dry-fold": "wash dry fold new haven, drop off laundry new haven, fluff and fold new haven, laundromat new haven ct, laundromat near me, new haven laundromat, wash dry fold new haven, self service laundry new haven, drop off laundry new haven",
+      "/self-serve-laundry": "self service laundry new haven, coin laundry new haven, laundromat new haven, laundromat new haven ct, laundromat near me, new haven laundromat, wash dry fold new haven, self service laundry new haven, drop off laundry new haven",
+      "/commercial": "commercial laundry new haven, business laundry new haven, hotel laundry new haven, restaurant linens new haven, laundromat new haven ct, laundromat near me, new haven laundromat, wash dry fold new haven, self service laundry new haven, drop off laundry new haven",
+      "/about-us": "wavemax owners new haven, family-owned laundromat new haven, laundromat new haven ct, laundromat near me, new haven laundromat, wash dry fold new haven",
+      "/contact": "contact wavemax new haven, laundromat phone new haven, laundromat new haven ct, laundromat near me, new haven laundromat, wash dry fold new haven"
+    },
+    "localizedHeadlines": {
+      "landingTitle": "New Haven's premier laundromat",
+      "landingSubtitle": "Self-serve laundry, wash-dry-fold, and commercial accounts in New Haven, CT.",
+      "wdfTitle": "Wash-Dry-Fold drop-off laundry in New Haven, CT",
+      "selfServeTitle": "Self-serve laundry in New Haven, CT",
+      "commercialTitle": "Commercial laundry service for New Haven businesses",
+      "aboutTitle": "About WaveMAX New Haven",
+      "contactTitle": "Contact WaveMAX New Haven, CT"
+    },
+    "geoRegion": "US-CT",
+    "geoPlacename": "New Haven, CT",
+    "geoPosition": "41.3083;-72.9279",
+    "icbm": "41.3083, -72.9279"
+  },
+  "i18n": {
+    "languagesAvailable": [
+      "en",
+      "es",
+      "pt",
+      "de"
+    ]
+  },
+  "nav": {
+    "commercialEnabled": true,
+    "commercialIndustries": {
+      "medical": true,
+      "gym": true,
+      "airbnb": true,
+      "restaurant": true,
+      "contractors": true
+    },
+    "additional": [],
+    "sublinkExtensions": {}
+  },
+  "iframeOverrides": {}
+}

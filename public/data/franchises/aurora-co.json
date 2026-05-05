@@ -1,0 +1,153 @@
+{
+  "slug": "aurora-co",
+  "brand": {
+    "name": "WaveMAX Aurora, CO",
+    "parent": "WaveMAX Laundry",
+    "tagline": ""
+  },
+  "contact": {
+    "phone": "(303) 997-9465",
+    "phoneTel": "tel:+13039979465",
+    "phoneTelRaw": "+13039979465",
+    "email": "no-reply@wavemax.promo",
+    "emailMailto": "mailto:no-reply@wavemax.promo",
+    "address": "15087 E Mississippi Ave",
+    "city": "Aurora",
+    "state": "CO",
+    "zip": "80012",
+    "country": "US",
+    "addressLine2": "Aurora, CO 80012",
+    "geo": {
+      "lat": 39.7147,
+      "lng": -104.8319
+    },
+    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=15087+E+Mississippi+Ave+Aurora+CO+80012"
+  },
+  "hours": {
+    "open": "",
+    "close": "",
+    "display": "Call for hours",
+    "lastWash": "",
+    "days": ""
+  },
+  "owners": [],
+  "aboutContent": {
+    "heroTitle": "",
+    "heroTagline": "",
+    "heroSubtitle": "",
+    "missionEyebrow": "",
+    "missionTitle": "",
+    "missionBody": [],
+    "valuesEyebrow": "",
+    "valuesTitle": "",
+    "values": [],
+    "teamEyebrow": "",
+    "teamTitle": "",
+    "teamLede": "",
+    "communityTitle": "",
+    "communityBody": "",
+    "ctaText": ""
+  },
+  "pricing": {
+    "wdf": {
+      "rate": null,
+      "minLb": null,
+      "currency": "USD",
+      "display": "Call for pricing"
+    },
+    "selfServe": {
+      "minLoad": null,
+      "maxLoad": null,
+      "minLoadDisplay": "",
+      "maxLoadDisplay": "",
+      "washMin": null,
+      "dryMin": null,
+      "rangeDisplay": "Call for pricing"
+    }
+  },
+  "equipment": {
+    "washers": null,
+    "dryers": null,
+    "capacityLb": null
+  },
+  "amenities": [
+    "Free WiFi",
+    "Free Parking"
+  ],
+  "serviceArea": [
+    "Aurora"
+  ],
+  "social": {
+    "facebook": "",
+    "instagram": ""
+  },
+  "google": {
+    "placeId": "",
+    "apiKey": "",
+    "profileUrl": "",
+    "reviewsUrl": ""
+  },
+  "images": {
+    "hero": [
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/aurora-co/hero-1.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/aurora-co/hero-2.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/aurora-co/hero-3.jpg"
+    ],
+    "interior": [
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/aurora-co/interior-1.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/aurora-co/interior-2.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/aurora-co/interior-4.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/aurora-co/interior-5.jpg"
+    ],
+    "owner": [],
+    "landmarks": [],
+    "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/aurora-co/hero-1.jpg",
+    "ogImageAlt": "WaveMAX Aurora, CO storefront",
+    "mapPreview": ""
+  },
+  "seo": {
+    "keywords": "laundromat aurora co, laundromat near me, aurora laundromat, wash dry fold aurora, self service laundry aurora, drop off laundry aurora, coin laundry aurora, commercial laundry aurora, wavemax aurora, wavemax aurora co",
+    "keywordsByPage": {
+      "/": "laundromat aurora co, laundromat near me, aurora laundromat, wash dry fold aurora, self service laundry aurora, drop off laundry aurora, coin laundry aurora, commercial laundry aurora, wavemax aurora, wavemax aurora co",
+      "/wash-dry-fold": "wash dry fold aurora, drop off laundry aurora, fluff and fold aurora, laundromat aurora co, laundromat near me, aurora laundromat, wash dry fold aurora, self service laundry aurora, drop off laundry aurora",
+      "/self-serve-laundry": "self service laundry aurora, coin laundry aurora, laundromat aurora, laundromat aurora co, laundromat near me, aurora laundromat, wash dry fold aurora, self service laundry aurora, drop off laundry aurora",
+      "/commercial": "commercial laundry aurora, business laundry aurora, hotel laundry aurora, restaurant linens aurora, laundromat aurora co, laundromat near me, aurora laundromat, wash dry fold aurora, self service laundry aurora, drop off laundry aurora",
+      "/about-us": "wavemax owners aurora, family-owned laundromat aurora, laundromat aurora co, laundromat near me, aurora laundromat, wash dry fold aurora",
+      "/contact": "contact wavemax aurora, laundromat phone aurora, laundromat aurora co, laundromat near me, aurora laundromat, wash dry fold aurora"
+    },
+    "localizedHeadlines": {
+      "landingTitle": "Aurora's premier laundromat",
+      "landingSubtitle": "Self-serve laundry, wash-dry-fold, and commercial accounts in Aurora, CO.",
+      "wdfTitle": "Wash-Dry-Fold drop-off laundry in Aurora, CO",
+      "selfServeTitle": "Self-serve laundry in Aurora, CO",
+      "commercialTitle": "Commercial laundry service for Aurora businesses",
+      "aboutTitle": "About WaveMAX Aurora",
+      "contactTitle": "Contact WaveMAX Aurora, CO"
+    },
+    "geoRegion": "US-CO",
+    "geoPlacename": "Aurora, CO",
+    "geoPosition": "39.7147;-104.8319",
+    "icbm": "39.7147, -104.8319"
+  },
+  "i18n": {
+    "languagesAvailable": [
+      "en",
+      "es",
+      "pt",
+      "de"
+    ]
+  },
+  "nav": {
+    "commercialEnabled": true,
+    "commercialIndustries": {
+      "medical": true,
+      "gym": true,
+      "airbnb": true,
+      "restaurant": true,
+      "contractors": true
+    },
+    "additional": [],
+    "sublinkExtensions": {}
+  },
+  "iframeOverrides": {}
+}

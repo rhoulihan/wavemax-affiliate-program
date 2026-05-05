@@ -221,3 +221,5 @@ docs/security/draft-23-20-notice-letter.*
 docs/security/lawyer-consultation-*
 docs/security/lawyer-intake-form-*
 docs/corporate-handoff/
+.playwright-mcp/
+about-hero-*.png

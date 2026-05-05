@@ -1,0 +1,148 @@
+{
+  "slug": "chandler-az",
+  "brand": {
+    "name": "WaveMAX Chandler AZ",
+    "parent": "WaveMAX Laundry",
+    "tagline": ""
+  },
+  "contact": {
+    "phone": "(480) 275-5535",
+    "phoneTel": "tel:+14802755535",
+    "phoneTelRaw": "+14802755535",
+    "email": "no-reply@wavemax.promo",
+    "emailMailto": "mailto:no-reply@wavemax.promo",
+    "address": "2081 N Arizona Ave #129",
+    "city": "Chandler",
+    "state": "AZ",
+    "zip": "85225",
+    "country": "US",
+    "addressLine2": "Chandler, AZ 85225",
+    "geo": {
+      "lat": 33.3062,
+      "lng": -111.8413
+    },
+    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=2081+N+Arizona+Ave+%23129+Chandler+AZ+85225"
+  },
+  "hours": {
+    "open": "",
+    "close": "",
+    "display": "Call for hours",
+    "lastWash": "",
+    "days": ""
+  },
+  "owners": [],
+  "aboutContent": {
+    "heroTitle": "",
+    "heroTagline": "",
+    "heroSubtitle": "",
+    "missionEyebrow": "",
+    "missionTitle": "",
+    "missionBody": [],
+    "valuesEyebrow": "",
+    "valuesTitle": "",
+    "values": [],
+    "teamEyebrow": "",
+    "teamTitle": "",
+    "teamLede": "",
+    "communityTitle": "",
+    "communityBody": "",
+    "ctaText": ""
+  },
+  "pricing": {
+    "wdf": {
+      "rate": null,
+      "minLb": null,
+      "currency": "USD",
+      "display": "Call for pricing"
+    },
+    "selfServe": {
+      "minLoad": null,
+      "maxLoad": null,
+      "minLoadDisplay": "",
+      "maxLoadDisplay": "",
+      "washMin": null,
+      "dryMin": null,
+      "rangeDisplay": "Call for pricing"
+    }
+  },
+  "equipment": {
+    "washers": null,
+    "dryers": null,
+    "capacityLb": null
+  },
+  "amenities": [
+    "Free WiFi",
+    "Free Parking"
+  ],
+  "serviceArea": [
+    "Chandler"
+  ],
+  "social": {
+    "facebook": "",
+    "instagram": ""
+  },
+  "google": {
+    "placeId": "",
+    "apiKey": "",
+    "profileUrl": "",
+    "reviewsUrl": ""
+  },
+  "images": {
+    "hero": [
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/chandler-az/hero-1.jpg"
+    ],
+    "interior": [
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/chandler-az/interior-4.jpg"
+    ],
+    "owner": [],
+    "landmarks": [],
+    "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/chandler-az/hero-1.jpg",
+    "ogImageAlt": "WaveMAX Chandler AZ storefront",
+    "mapPreview": ""
+  },
+  "seo": {
+    "keywords": "laundromat chandler az, laundromat near me, chandler laundromat, wash dry fold chandler, self service laundry chandler, drop off laundry chandler, coin laundry chandler, commercial laundry chandler, wavemax chandler, wavemax chandler az",
+    "keywordsByPage": {
+      "/": "laundromat chandler az, laundromat near me, chandler laundromat, wash dry fold chandler, self service laundry chandler, drop off laundry chandler, coin laundry chandler, commercial laundry chandler, wavemax chandler, wavemax chandler az",
+      "/wash-dry-fold": "wash dry fold chandler, drop off laundry chandler, fluff and fold chandler, laundromat chandler az, laundromat near me, chandler laundromat, wash dry fold chandler, self service laundry chandler, drop off laundry chandler",
+      "/self-serve-laundry": "self service laundry chandler, coin laundry chandler, laundromat chandler, laundromat chandler az, laundromat near me, chandler laundromat, wash dry fold chandler, self service laundry chandler, drop off laundry chandler",
+      "/commercial": "commercial laundry chandler, business laundry chandler, hotel laundry chandler, restaurant linens chandler, laundromat chandler az, laundromat near me, chandler laundromat, wash dry fold chandler, self service laundry chandler, drop off laundry chandler",
+      "/about-us": "wavemax owners chandler, family-owned laundromat chandler, laundromat chandler az, laundromat near me, chandler laundromat, wash dry fold chandler",
+      "/contact": "contact wavemax chandler, laundromat phone chandler, laundromat chandler az, laundromat near me, chandler laundromat, wash dry fold chandler"
+    },
+    "localizedHeadlines": {
+      "landingTitle": "Chandler's premier laundromat",
+      "landingSubtitle": "Self-serve laundry, wash-dry-fold, and commercial accounts in Chandler, AZ.",
+      "wdfTitle": "Wash-Dry-Fold drop-off laundry in Chandler, AZ",
+      "selfServeTitle": "Self-serve laundry in Chandler, AZ",
+      "commercialTitle": "Commercial laundry service for Chandler businesses",
+      "aboutTitle": "About WaveMAX Chandler",
+      "contactTitle": "Contact WaveMAX Chandler, AZ"
+    },
+    "geoRegion": "US-AZ",
+    "geoPlacename": "Chandler, AZ",
+    "geoPosition": "33.3062;-111.8413",
+    "icbm": "33.3062, -111.8413"
+  },
+  "i18n": {
+    "languagesAvailable": [
+      "en",
+      "es",
+      "pt",
+      "de"
+    ]
+  },
+  "nav": {
+    "commercialEnabled": true,
+    "commercialIndustries": {
+      "medical": true,
+      "gym": true,
+      "airbnb": true,
+      "restaurant": true,
+      "contractors": true
+    },
+    "additional": [],
+    "sublinkExtensions": {}
+  },
+  "iframeOverrides": {}
+}

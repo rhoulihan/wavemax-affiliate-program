@@ -1,0 +1,155 @@
+{
+  "slug": "tustin-ca",
+  "brand": {
+    "name": "WaveMAX Tustin CA",
+    "parent": "WaveMAX Laundry",
+    "tagline": ""
+  },
+  "contact": {
+    "phone": "(855) 492-8362",
+    "phoneTel": "tel:+18554928362",
+    "phoneTelRaw": "+18554928362",
+    "email": "no-reply@wavemax.promo",
+    "emailMailto": "mailto:no-reply@wavemax.promo",
+    "address": "412 E 1st St",
+    "city": "Tustin",
+    "state": "CA",
+    "zip": "92780",
+    "country": "US",
+    "addressLine2": "Tustin, CA 92780",
+    "geo": {
+      "lat": 33.7458,
+      "lng": -117.8262
+    },
+    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=412+E+1st+St+Tustin+CA+92780"
+  },
+  "hours": {
+    "open": "",
+    "close": "",
+    "display": "Call for hours",
+    "lastWash": "",
+    "days": ""
+  },
+  "owners": [],
+  "aboutContent": {
+    "heroTitle": "",
+    "heroTagline": "",
+    "heroSubtitle": "",
+    "missionEyebrow": "",
+    "missionTitle": "",
+    "missionBody": [],
+    "valuesEyebrow": "",
+    "valuesTitle": "",
+    "values": [],
+    "teamEyebrow": "",
+    "teamTitle": "",
+    "teamLede": "",
+    "communityTitle": "",
+    "communityBody": "",
+    "ctaText": ""
+  },
+  "pricing": {
+    "wdf": {
+      "rate": null,
+      "minLb": null,
+      "currency": "USD",
+      "display": "Call for pricing"
+    },
+    "selfServe": {
+      "minLoad": null,
+      "maxLoad": null,
+      "minLoadDisplay": "",
+      "maxLoadDisplay": "",
+      "washMin": null,
+      "dryMin": null,
+      "rangeDisplay": "Call for pricing"
+    }
+  },
+  "equipment": {
+    "washers": null,
+    "dryers": null,
+    "capacityLb": null
+  },
+  "amenities": [
+    "Free WiFi",
+    "Free Parking"
+  ],
+  "serviceArea": [
+    "Tustin"
+  ],
+  "social": {
+    "facebook": "",
+    "instagram": ""
+  },
+  "google": {
+    "placeId": "",
+    "apiKey": "",
+    "profileUrl": "",
+    "reviewsUrl": ""
+  },
+  "images": {
+    "hero": [
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/tustin-ca/hero-1.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/tustin-ca/hero-2.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/tustin-ca/hero-3.jpg"
+    ],
+    "interior": [
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/tustin-ca/interior-1.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/tustin-ca/interior-2.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/tustin-ca/interior-3.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/tustin-ca/interior-4.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/tustin-ca/interior-5.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/tustin-ca/interior-6.jpg"
+    ],
+    "owner": [],
+    "landmarks": [],
+    "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/tustin-ca/hero-1.jpg",
+    "ogImageAlt": "WaveMAX Tustin CA storefront",
+    "mapPreview": ""
+  },
+  "seo": {
+    "keywords": "laundromat tustin ca, laundromat near me, tustin laundromat, wash dry fold tustin, self service laundry tustin, drop off laundry tustin, coin laundry tustin, commercial laundry tustin, wavemax tustin, wavemax tustin ca",
+    "keywordsByPage": {
+      "/": "laundromat tustin ca, laundromat near me, tustin laundromat, wash dry fold tustin, self service laundry tustin, drop off laundry tustin, coin laundry tustin, commercial laundry tustin, wavemax tustin, wavemax tustin ca",
+      "/wash-dry-fold": "wash dry fold tustin, drop off laundry tustin, fluff and fold tustin, laundromat tustin ca, laundromat near me, tustin laundromat, wash dry fold tustin, self service laundry tustin, drop off laundry tustin",
+      "/self-serve-laundry": "self service laundry tustin, coin laundry tustin, laundromat tustin, laundromat tustin ca, laundromat near me, tustin laundromat, wash dry fold tustin, self service laundry tustin, drop off laundry tustin",
+      "/commercial": "commercial laundry tustin, business laundry tustin, hotel laundry tustin, restaurant linens tustin, laundromat tustin ca, laundromat near me, tustin laundromat, wash dry fold tustin, self service laundry tustin, drop off laundry tustin",
+      "/about-us": "wavemax owners tustin, family-owned laundromat tustin, laundromat tustin ca, laundromat near me, tustin laundromat, wash dry fold tustin",
+      "/contact": "contact wavemax tustin, laundromat phone tustin, laundromat tustin ca, laundromat near me, tustin laundromat, wash dry fold tustin"
+    },
+    "localizedHeadlines": {
+      "landingTitle": "Tustin's premier laundromat",
+      "landingSubtitle": "Self-serve laundry, wash-dry-fold, and commercial accounts in Tustin, CA.",
+      "wdfTitle": "Wash-Dry-Fold drop-off laundry in Tustin, CA",
+      "selfServeTitle": "Self-serve laundry in Tustin, CA",
+      "commercialTitle": "Commercial laundry service for Tustin businesses",
+      "aboutTitle": "About WaveMAX Tustin",
+      "contactTitle": "Contact WaveMAX Tustin, CA"
+    },
+    "geoRegion": "US-CA",
+    "geoPlacename": "Tustin, CA",
+    "geoPosition": "33.7458;-117.8262",
+    "icbm": "33.7458, -117.8262"
+  },
+  "i18n": {
+    "languagesAvailable": [
+      "en",
+      "es",
+      "pt",
+      "de"
+    ]
+  },
+  "nav": {
+    "commercialEnabled": true,
+    "commercialIndustries": {
+      "medical": true,
+      "gym": true,
+      "airbnb": true,
+      "restaurant": true,
+      "contractors": true
+    },
+    "additional": [],
+    "sublinkExtensions": {}
+  },
+  "iframeOverrides": {}
+}

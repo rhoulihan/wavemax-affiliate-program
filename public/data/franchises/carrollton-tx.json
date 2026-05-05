@@ -1,0 +1,152 @@
+{
+  "slug": "carrollton-tx",
+  "brand": {
+    "name": "WaveMAX Carrollton TX",
+    "parent": "WaveMAX Laundry",
+    "tagline": ""
+  },
+  "contact": {
+    "phone": "(214) 731-6575",
+    "phoneTel": "tel:+12147316575",
+    "phoneTelRaw": "+12147316575",
+    "email": "no-reply@wavemax.promo",
+    "emailMailto": "mailto:no-reply@wavemax.promo",
+    "address": "2760 E Trinity Mills Rd. STE 112",
+    "city": "Carrollton",
+    "state": "TX",
+    "zip": "75006",
+    "country": "US",
+    "addressLine2": "Carrollton, TX 75006",
+    "geo": {
+      "lat": 32.9756,
+      "lng": -96.8899
+    },
+    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=2760+E+Trinity+Mills+Rd.+STE+112+Carrollton+TX+75006"
+  },
+  "hours": {
+    "open": "",
+    "close": "",
+    "display": "Call for hours",
+    "lastWash": "",
+    "days": ""
+  },
+  "owners": [],
+  "aboutContent": {
+    "heroTitle": "",
+    "heroTagline": "",
+    "heroSubtitle": "",
+    "missionEyebrow": "",
+    "missionTitle": "",
+    "missionBody": [],
+    "valuesEyebrow": "",
+    "valuesTitle": "",
+    "values": [],
+    "teamEyebrow": "",
+    "teamTitle": "",
+    "teamLede": "",
+    "communityTitle": "",
+    "communityBody": "",
+    "ctaText": ""
+  },
+  "pricing": {
+    "wdf": {
+      "rate": null,
+      "minLb": null,
+      "currency": "USD",
+      "display": "Call for pricing"
+    },
+    "selfServe": {
+      "minLoad": null,
+      "maxLoad": null,
+      "minLoadDisplay": "",
+      "maxLoadDisplay": "",
+      "washMin": null,
+      "dryMin": null,
+      "rangeDisplay": "Call for pricing"
+    }
+  },
+  "equipment": {
+    "washers": null,
+    "dryers": null,
+    "capacityLb": null
+  },
+  "amenities": [
+    "Free WiFi",
+    "Free Parking"
+  ],
+  "serviceArea": [
+    "Carrollton"
+  ],
+  "social": {
+    "facebook": "",
+    "instagram": ""
+  },
+  "google": {
+    "placeId": "",
+    "apiKey": "",
+    "profileUrl": "",
+    "reviewsUrl": ""
+  },
+  "images": {
+    "hero": [
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/carrollton-tx/hero-1.webp"
+    ],
+    "interior": [
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/carrollton-tx/interior-1.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/carrollton-tx/interior-2.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/carrollton-tx/interior-3.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/carrollton-tx/interior-4.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/carrollton-tx/interior-5.jpg"
+    ],
+    "owner": [],
+    "landmarks": [],
+    "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/carrollton-tx/hero-1.webp",
+    "ogImageAlt": "WaveMAX Carrollton TX storefront",
+    "mapPreview": ""
+  },
+  "seo": {
+    "keywords": "laundromat carrollton tx, laundromat near me, carrollton laundromat, wash dry fold carrollton, self service laundry carrollton, drop off laundry carrollton, coin laundry carrollton, commercial laundry carrollton, wavemax carrollton, wavemax carrollton tx",
+    "keywordsByPage": {
+      "/": "laundromat carrollton tx, laundromat near me, carrollton laundromat, wash dry fold carrollton, self service laundry carrollton, drop off laundry carrollton, coin laundry carrollton, commercial laundry carrollton, wavemax carrollton, wavemax carrollton tx",
+      "/wash-dry-fold": "wash dry fold carrollton, drop off laundry carrollton, fluff and fold carrollton, laundromat carrollton tx, laundromat near me, carrollton laundromat, wash dry fold carrollton, self service laundry carrollton, drop off laundry carrollton",
+      "/self-serve-laundry": "self service laundry carrollton, coin laundry carrollton, laundromat carrollton, laundromat carrollton tx, laundromat near me, carrollton laundromat, wash dry fold carrollton, self service laundry carrollton, drop off laundry carrollton",
+      "/commercial": "commercial laundry carrollton, business laundry carrollton, hotel laundry carrollton, restaurant linens carrollton, laundromat carrollton tx, laundromat near me, carrollton laundromat, wash dry fold carrollton, self service laundry carrollton, drop off laundry carrollton",
+      "/about-us": "wavemax owners carrollton, family-owned laundromat carrollton, laundromat carrollton tx, laundromat near me, carrollton laundromat, wash dry fold carrollton",
+      "/contact": "contact wavemax carrollton, laundromat phone carrollton, laundromat carrollton tx, laundromat near me, carrollton laundromat, wash dry fold carrollton"
+    },
+    "localizedHeadlines": {
+      "landingTitle": "Carrollton's premier laundromat",
+      "landingSubtitle": "Self-serve laundry, wash-dry-fold, and commercial accounts in Carrollton, TX.",
+      "wdfTitle": "Wash-Dry-Fold drop-off laundry in Carrollton, TX",
+      "selfServeTitle": "Self-serve laundry in Carrollton, TX",
+      "commercialTitle": "Commercial laundry service for Carrollton businesses",
+      "aboutTitle": "About WaveMAX Carrollton",
+      "contactTitle": "Contact WaveMAX Carrollton, TX"
+    },
+    "geoRegion": "US-TX",
+    "geoPlacename": "Carrollton, TX",
+    "geoPosition": "32.9756;-96.8899",
+    "icbm": "32.9756, -96.8899"
+  },
+  "i18n": {
+    "languagesAvailable": [
+      "en",
+      "es",
+      "pt",
+      "de"
+    ]
+  },
+  "nav": {
+    "commercialEnabled": true,
+    "commercialIndustries": {
+      "medical": true,
+      "gym": true,
+      "airbnb": true,
+      "restaurant": true,
+      "contractors": true
+    },
+    "additional": [],
+    "sublinkExtensions": {}
+  },
+  "iframeOverrides": {}
+}

@@ -1,0 +1,153 @@
+{
+  "slug": "marietta-ga",
+  "brand": {
+    "name": "WaveMAX Marietta GA",
+    "parent": "WaveMAX Laundry",
+    "tagline": ""
+  },
+  "contact": {
+    "phone": "(770) 871-1870",
+    "phoneTel": "tel:+17708711870",
+    "phoneTelRaw": "+17708711870",
+    "email": "no-reply@wavemax.promo",
+    "emailMailto": "mailto:no-reply@wavemax.promo",
+    "address": "270 Cobb Pkwy S, Suite 90",
+    "city": "Marietta",
+    "state": "GA",
+    "zip": "30060",
+    "country": "US",
+    "addressLine2": "Marietta, GA 30060",
+    "geo": {
+      "lat": 33.9526,
+      "lng": -84.5499
+    },
+    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=270+Cobb+Pkwy+S%2C+Suite+90+Marietta+GA+30060"
+  },
+  "hours": {
+    "open": "",
+    "close": "",
+    "display": "Call for hours",
+    "lastWash": "",
+    "days": ""
+  },
+  "owners": [],
+  "aboutContent": {
+    "heroTitle": "",
+    "heroTagline": "",
+    "heroSubtitle": "",
+    "missionEyebrow": "",
+    "missionTitle": "",
+    "missionBody": [],
+    "valuesEyebrow": "",
+    "valuesTitle": "",
+    "values": [],
+    "teamEyebrow": "",
+    "teamTitle": "",
+    "teamLede": "",
+    "communityTitle": "",
+    "communityBody": "",
+    "ctaText": ""
+  },
+  "pricing": {
+    "wdf": {
+      "rate": null,
+      "minLb": null,
+      "currency": "USD",
+      "display": "Call for pricing"
+    },
+    "selfServe": {
+      "minLoad": null,
+      "maxLoad": null,
+      "minLoadDisplay": "",
+      "maxLoadDisplay": "",
+      "washMin": null,
+      "dryMin": null,
+      "rangeDisplay": "Call for pricing"
+    }
+  },
+  "equipment": {
+    "washers": null,
+    "dryers": null,
+    "capacityLb": null
+  },
+  "amenities": [
+    "Free WiFi",
+    "Free Parking"
+  ],
+  "serviceArea": [
+    "Marietta"
+  ],
+  "social": {
+    "facebook": "",
+    "instagram": ""
+  },
+  "google": {
+    "placeId": "",
+    "apiKey": "",
+    "profileUrl": "",
+    "reviewsUrl": ""
+  },
+  "images": {
+    "hero": [
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/marietta-ga/hero-1.jpg"
+    ],
+    "interior": [
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/marietta-ga/interior-1.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/marietta-ga/interior-2.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/marietta-ga/interior-3.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/marietta-ga/interior-4.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/marietta-ga/interior-5.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/marietta-ga/interior-6.jpg"
+    ],
+    "owner": [],
+    "landmarks": [],
+    "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/marietta-ga/hero-1.jpg",
+    "ogImageAlt": "WaveMAX Marietta GA storefront",
+    "mapPreview": ""
+  },
+  "seo": {
+    "keywords": "laundromat marietta ga, laundromat near me, marietta laundromat, wash dry fold marietta, self service laundry marietta, drop off laundry marietta, coin laundry marietta, commercial laundry marietta, wavemax marietta, wavemax marietta ga",
+    "keywordsByPage": {
+      "/": "laundromat marietta ga, laundromat near me, marietta laundromat, wash dry fold marietta, self service laundry marietta, drop off laundry marietta, coin laundry marietta, commercial laundry marietta, wavemax marietta, wavemax marietta ga",
+      "/wash-dry-fold": "wash dry fold marietta, drop off laundry marietta, fluff and fold marietta, laundromat marietta ga, laundromat near me, marietta laundromat, wash dry fold marietta, self service laundry marietta, drop off laundry marietta",
+      "/self-serve-laundry": "self service laundry marietta, coin laundry marietta, laundromat marietta, laundromat marietta ga, laundromat near me, marietta laundromat, wash dry fold marietta, self service laundry marietta, drop off laundry marietta",
+      "/commercial": "commercial laundry marietta, business laundry marietta, hotel laundry marietta, restaurant linens marietta, laundromat marietta ga, laundromat near me, marietta laundromat, wash dry fold marietta, self service laundry marietta, drop off laundry marietta",
+      "/about-us": "wavemax owners marietta, family-owned laundromat marietta, laundromat marietta ga, laundromat near me, marietta laundromat, wash dry fold marietta",
+      "/contact": "contact wavemax marietta, laundromat phone marietta, laundromat marietta ga, laundromat near me, marietta laundromat, wash dry fold marietta"
+    },
+    "localizedHeadlines": {
+      "landingTitle": "Marietta's premier laundromat",
+      "landingSubtitle": "Self-serve laundry, wash-dry-fold, and commercial accounts in Marietta, GA.",
+      "wdfTitle": "Wash-Dry-Fold drop-off laundry in Marietta, GA",
+      "selfServeTitle": "Self-serve laundry in Marietta, GA",
+      "commercialTitle": "Commercial laundry service for Marietta businesses",
+      "aboutTitle": "About WaveMAX Marietta",
+      "contactTitle": "Contact WaveMAX Marietta, GA"
+    },
+    "geoRegion": "US-GA",
+    "geoPlacename": "Marietta, GA",
+    "geoPosition": "33.9526;-84.5499",
+    "icbm": "33.9526, -84.5499"
+  },
+  "i18n": {
+    "languagesAvailable": [
+      "en",
+      "es",
+      "pt",
+      "de"
+    ]
+  },
+  "nav": {
+    "commercialEnabled": true,
+    "commercialIndustries": {
+      "medical": true,
+      "gym": true,
+      "airbnb": true,
+      "restaurant": true,
+      "contractors": true
+    },
+    "additional": [],
+    "sublinkExtensions": {}
+  },
+  "iframeOverrides": {}
+}

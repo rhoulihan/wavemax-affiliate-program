@@ -1,0 +1,157 @@
+{
+  "slug": "garland-tx",
+  "brand": {
+    "name": "WaveMAX Garland TX",
+    "parent": "WaveMAX Laundry",
+    "tagline": ""
+  },
+  "contact": {
+    "phone": "(214) 954-7063",
+    "phoneTel": "tel:+12149547063",
+    "phoneTelRaw": "+12149547063",
+    "email": "no-reply@wavemax.promo",
+    "emailMailto": "mailto:no-reply@wavemax.promo",
+    "address": "1311 Marketplace Dr, Suite 100",
+    "city": "Garland",
+    "state": "TX",
+    "zip": "75041",
+    "country": "US",
+    "addressLine2": "Garland, TX 75041",
+    "geo": {
+      "lat": 32.8874,
+      "lng": -96.6388
+    },
+    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=1311+Marketplace+Dr%2C+Suite+100+Garland+TX+75041"
+  },
+  "hours": {
+    "open": "",
+    "close": "",
+    "display": "Call for hours",
+    "lastWash": "",
+    "days": ""
+  },
+  "owners": [],
+  "aboutContent": {
+    "heroTitle": "",
+    "heroTagline": "",
+    "heroSubtitle": "",
+    "missionEyebrow": "",
+    "missionTitle": "",
+    "missionBody": [],
+    "valuesEyebrow": "",
+    "valuesTitle": "",
+    "values": [],
+    "teamEyebrow": "",
+    "teamTitle": "",
+    "teamLede": "",
+    "communityTitle": "",
+    "communityBody": "",
+    "ctaText": ""
+  },
+  "pricing": {
+    "wdf": {
+      "rate": null,
+      "minLb": null,
+      "currency": "USD",
+      "display": "Call for pricing"
+    },
+    "selfServe": {
+      "minLoad": null,
+      "maxLoad": null,
+      "minLoadDisplay": "",
+      "maxLoadDisplay": "",
+      "washMin": null,
+      "dryMin": null,
+      "rangeDisplay": "Call for pricing"
+    }
+  },
+  "equipment": {
+    "washers": null,
+    "dryers": null,
+    "capacityLb": null
+  },
+  "amenities": [
+    "Free WiFi",
+    "Free Parking"
+  ],
+  "serviceArea": [
+    "Garland"
+  ],
+  "social": {
+    "facebook": "",
+    "instagram": ""
+  },
+  "google": {
+    "placeId": "",
+    "apiKey": "",
+    "profileUrl": "",
+    "reviewsUrl": ""
+  },
+  "images": {
+    "hero": [
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/garland-tx/hero-1.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/garland-tx/hero-2.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/garland-tx/hero-3.jpg"
+    ],
+    "interior": [
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/garland-tx/interior-1.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/garland-tx/interior-2.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/garland-tx/interior-3.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/garland-tx/interior-4.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/garland-tx/interior-5.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/garland-tx/interior-6.jpg"
+    ],
+    "owner": [
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/garland-tx/owners.jpg"
+    ],
+    "landmarks": [],
+    "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/garland-tx/hero-1.jpg",
+    "ogImageAlt": "WaveMAX Garland TX storefront",
+    "mapPreview": ""
+  },
+  "seo": {
+    "keywords": "laundromat garland tx, laundromat near me, garland laundromat, wash dry fold garland, self service laundry garland, drop off laundry garland, coin laundry garland, commercial laundry garland, wavemax garland, wavemax garland tx",
+    "keywordsByPage": {
+      "/": "laundromat garland tx, laundromat near me, garland laundromat, wash dry fold garland, self service laundry garland, drop off laundry garland, coin laundry garland, commercial laundry garland, wavemax garland, wavemax garland tx",
+      "/wash-dry-fold": "wash dry fold garland, drop off laundry garland, fluff and fold garland, laundromat garland tx, laundromat near me, garland laundromat, wash dry fold garland, self service laundry garland, drop off laundry garland",
+      "/self-serve-laundry": "self service laundry garland, coin laundry garland, laundromat garland, laundromat garland tx, laundromat near me, garland laundromat, wash dry fold garland, self service laundry garland, drop off laundry garland",
+      "/commercial": "commercial laundry garland, business laundry garland, hotel laundry garland, restaurant linens garland, laundromat garland tx, laundromat near me, garland laundromat, wash dry fold garland, self service laundry garland, drop off laundry garland",
+      "/about-us": "wavemax owners garland, family-owned laundromat garland, laundromat garland tx, laundromat near me, garland laundromat, wash dry fold garland",
+      "/contact": "contact wavemax garland, laundromat phone garland, laundromat garland tx, laundromat near me, garland laundromat, wash dry fold garland"
+    },
+    "localizedHeadlines": {
+      "landingTitle": "Garland's premier laundromat",
+      "landingSubtitle": "Self-serve laundry, wash-dry-fold, and commercial accounts in Garland, TX.",
+      "wdfTitle": "Wash-Dry-Fold drop-off laundry in Garland, TX",
+      "selfServeTitle": "Self-serve laundry in Garland, TX",
+      "commercialTitle": "Commercial laundry service for Garland businesses",
+      "aboutTitle": "About WaveMAX Garland",
+      "contactTitle": "Contact WaveMAX Garland, TX"
+    },
+    "geoRegion": "US-TX",
+    "geoPlacename": "Garland, TX",
+    "geoPosition": "32.8874;-96.6388",
+    "icbm": "32.8874, -96.6388"
+  },
+  "i18n": {
+    "languagesAvailable": [
+      "en",
+      "es",
+      "pt",
+      "de"
+    ]
+  },
+  "nav": {
+    "commercialEnabled": true,
+    "commercialIndustries": {
+      "medical": true,
+      "gym": true,
+      "airbnb": true,
+      "restaurant": true,
+      "contractors": true
+    },
+    "additional": [],
+    "sublinkExtensions": {}
+  },
+  "iframeOverrides": {}
+}

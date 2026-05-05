@@ -1,0 +1,150 @@
+{
+  "slug": "cincinnati-oh",
+  "brand": {
+    "name": "WaveMAX Cincinnati OH",
+    "parent": "WaveMAX Laundry",
+    "tagline": ""
+  },
+  "contact": {
+    "phone": "(513) 445-9480",
+    "phoneTel": "tel:+15134459480",
+    "phoneTelRaw": "+15134459480",
+    "email": "no-reply@wavemax.promo",
+    "emailMailto": "mailto:no-reply@wavemax.promo",
+    "address": "8449 Colerain Ave",
+    "city": "Cincinnati",
+    "state": "OH",
+    "zip": "45239",
+    "country": "US",
+    "addressLine2": "Cincinnati, OH 45239",
+    "geo": {
+      "lat": 39.2437,
+      "lng": -84.5836
+    },
+    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=8449+Colerain+Ave+Cincinnati+OH+45239"
+  },
+  "hours": {
+    "open": "",
+    "close": "",
+    "display": "Call for hours",
+    "lastWash": "",
+    "days": ""
+  },
+  "owners": [],
+  "aboutContent": {
+    "heroTitle": "",
+    "heroTagline": "",
+    "heroSubtitle": "",
+    "missionEyebrow": "",
+    "missionTitle": "",
+    "missionBody": [],
+    "valuesEyebrow": "",
+    "valuesTitle": "",
+    "values": [],
+    "teamEyebrow": "",
+    "teamTitle": "",
+    "teamLede": "",
+    "communityTitle": "",
+    "communityBody": "",
+    "ctaText": ""
+  },
+  "pricing": {
+    "wdf": {
+      "rate": null,
+      "minLb": null,
+      "currency": "USD",
+      "display": "Call for pricing"
+    },
+    "selfServe": {
+      "minLoad": null,
+      "maxLoad": null,
+      "minLoadDisplay": "",
+      "maxLoadDisplay": "",
+      "washMin": null,
+      "dryMin": null,
+      "rangeDisplay": "Call for pricing"
+    }
+  },
+  "equipment": {
+    "washers": null,
+    "dryers": null,
+    "capacityLb": null
+  },
+  "amenities": [
+    "Free WiFi",
+    "Free Parking"
+  ],
+  "serviceArea": [
+    "Cincinnati"
+  ],
+  "social": {
+    "facebook": "",
+    "instagram": ""
+  },
+  "google": {
+    "placeId": "",
+    "apiKey": "",
+    "profileUrl": "",
+    "reviewsUrl": ""
+  },
+  "images": {
+    "hero": [
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/cincinnati-oh/hero-1.jpg"
+    ],
+    "interior": [
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/cincinnati-oh/interior-1.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/cincinnati-oh/interior-2.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/cincinnati-oh/interior-3.jpg"
+    ],
+    "owner": [],
+    "landmarks": [],
+    "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/cincinnati-oh/hero-1.jpg",
+    "ogImageAlt": "WaveMAX Cincinnati OH storefront",
+    "mapPreview": ""
+  },
+  "seo": {
+    "keywords": "laundromat cincinnati oh, laundromat near me, cincinnati laundromat, wash dry fold cincinnati, self service laundry cincinnati, drop off laundry cincinnati, coin laundry cincinnati, commercial laundry cincinnati, wavemax cincinnati, wavemax cincinnati oh",
+    "keywordsByPage": {
+      "/": "laundromat cincinnati oh, laundromat near me, cincinnati laundromat, wash dry fold cincinnati, self service laundry cincinnati, drop off laundry cincinnati, coin laundry cincinnati, commercial laundry cincinnati, wavemax cincinnati, wavemax cincinnati oh",
+      "/wash-dry-fold": "wash dry fold cincinnati, drop off laundry cincinnati, fluff and fold cincinnati, laundromat cincinnati oh, laundromat near me, cincinnati laundromat, wash dry fold cincinnati, self service laundry cincinnati, drop off laundry cincinnati",
+      "/self-serve-laundry": "self service laundry cincinnati, coin laundry cincinnati, laundromat cincinnati, laundromat cincinnati oh, laundromat near me, cincinnati laundromat, wash dry fold cincinnati, self service laundry cincinnati, drop off laundry cincinnati",
+      "/commercial": "commercial laundry cincinnati, business laundry cincinnati, hotel laundry cincinnati, restaurant linens cincinnati, laundromat cincinnati oh, laundromat near me, cincinnati laundromat, wash dry fold cincinnati, self service laundry cincinnati, drop off laundry cincinnati",
+      "/about-us": "wavemax owners cincinnati, family-owned laundromat cincinnati, laundromat cincinnati oh, laundromat near me, cincinnati laundromat, wash dry fold cincinnati",
+      "/contact": "contact wavemax cincinnati, laundromat phone cincinnati, laundromat cincinnati oh, laundromat near me, cincinnati laundromat, wash dry fold cincinnati"
+    },
+    "localizedHeadlines": {
+      "landingTitle": "Cincinnati's premier laundromat",
+      "landingSubtitle": "Self-serve laundry, wash-dry-fold, and commercial accounts in Cincinnati, OH.",
+      "wdfTitle": "Wash-Dry-Fold drop-off laundry in Cincinnati, OH",
+      "selfServeTitle": "Self-serve laundry in Cincinnati, OH",
+      "commercialTitle": "Commercial laundry service for Cincinnati businesses",
+      "aboutTitle": "About WaveMAX Cincinnati",
+      "contactTitle": "Contact WaveMAX Cincinnati, OH"
+    },
+    "geoRegion": "US-OH",
+    "geoPlacename": "Cincinnati, OH",
+    "geoPosition": "39.2437;-84.5836",
+    "icbm": "39.2437, -84.5836"
+  },
+  "i18n": {
+    "languagesAvailable": [
+      "en",
+      "es",
+      "pt",
+      "de"
+    ]
+  },
+  "nav": {
+    "commercialEnabled": true,
+    "commercialIndustries": {
+      "medical": true,
+      "gym": true,
+      "airbnb": true,
+      "restaurant": true,
+      "contractors": true
+    },
+    "additional": [],
+    "sublinkExtensions": {}
+  },
+  "iframeOverrides": {}
+}

@@ -1,0 +1,153 @@
+{
+  "slug": "midvale-ut",
+  "brand": {
+    "name": "WaveMAX Midvale UT",
+    "parent": "WaveMAX Laundry",
+    "tagline": ""
+  },
+  "contact": {
+    "phone": "(385) 557-4665",
+    "phoneTel": "tel:+13855574665",
+    "phoneTelRaw": "+13855574665",
+    "email": "no-reply@wavemax.promo",
+    "emailMailto": "mailto:no-reply@wavemax.promo",
+    "address": "48 W 7200 S",
+    "city": "Midvale",
+    "state": "UT",
+    "zip": "84047",
+    "country": "US",
+    "addressLine2": "Midvale, UT 84047",
+    "geo": {
+      "lat": 40.611,
+      "lng": -111.8997
+    },
+    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=48+W+7200+S+Midvale+UT+84047"
+  },
+  "hours": {
+    "open": "",
+    "close": "",
+    "display": "Call for hours",
+    "lastWash": "",
+    "days": ""
+  },
+  "owners": [],
+  "aboutContent": {
+    "heroTitle": "",
+    "heroTagline": "",
+    "heroSubtitle": "",
+    "missionEyebrow": "",
+    "missionTitle": "",
+    "missionBody": [],
+    "valuesEyebrow": "",
+    "valuesTitle": "",
+    "values": [],
+    "teamEyebrow": "",
+    "teamTitle": "",
+    "teamLede": "",
+    "communityTitle": "",
+    "communityBody": "",
+    "ctaText": ""
+  },
+  "pricing": {
+    "wdf": {
+      "rate": null,
+      "minLb": null,
+      "currency": "USD",
+      "display": "Call for pricing"
+    },
+    "selfServe": {
+      "minLoad": null,
+      "maxLoad": null,
+      "minLoadDisplay": "",
+      "maxLoadDisplay": "",
+      "washMin": null,
+      "dryMin": null,
+      "rangeDisplay": "Call for pricing"
+    }
+  },
+  "equipment": {
+    "washers": null,
+    "dryers": null,
+    "capacityLb": null
+  },
+  "amenities": [
+    "Free WiFi",
+    "Free Parking"
+  ],
+  "serviceArea": [
+    "Midvale"
+  ],
+  "social": {
+    "facebook": "",
+    "instagram": ""
+  },
+  "google": {
+    "placeId": "",
+    "apiKey": "",
+    "profileUrl": "",
+    "reviewsUrl": ""
+  },
+  "images": {
+    "hero": [
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/midvale-ut/hero-1.jpg"
+    ],
+    "interior": [
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/midvale-ut/interior-1.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/midvale-ut/interior-2.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/midvale-ut/interior-3.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/midvale-ut/interior-4.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/midvale-ut/interior-5.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/midvale-ut/interior-6.jpg"
+    ],
+    "owner": [],
+    "landmarks": [],
+    "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/midvale-ut/hero-1.jpg",
+    "ogImageAlt": "WaveMAX Midvale UT storefront",
+    "mapPreview": ""
+  },
+  "seo": {
+    "keywords": "laundromat midvale ut, laundromat near me, midvale laundromat, wash dry fold midvale, self service laundry midvale, drop off laundry midvale, coin laundry midvale, commercial laundry midvale, wavemax midvale, wavemax midvale ut",
+    "keywordsByPage": {
+      "/": "laundromat midvale ut, laundromat near me, midvale laundromat, wash dry fold midvale, self service laundry midvale, drop off laundry midvale, coin laundry midvale, commercial laundry midvale, wavemax midvale, wavemax midvale ut",
+      "/wash-dry-fold": "wash dry fold midvale, drop off laundry midvale, fluff and fold midvale, laundromat midvale ut, laundromat near me, midvale laundromat, wash dry fold midvale, self service laundry midvale, drop off laundry midvale",
+      "/self-serve-laundry": "self service laundry midvale, coin laundry midvale, laundromat midvale, laundromat midvale ut, laundromat near me, midvale laundromat, wash dry fold midvale, self service laundry midvale, drop off laundry midvale",
+      "/commercial": "commercial laundry midvale, business laundry midvale, hotel laundry midvale, restaurant linens midvale, laundromat midvale ut, laundromat near me, midvale laundromat, wash dry fold midvale, self service laundry midvale, drop off laundry midvale",
+      "/about-us": "wavemax owners midvale, family-owned laundromat midvale, laundromat midvale ut, laundromat near me, midvale laundromat, wash dry fold midvale",
+      "/contact": "contact wavemax midvale, laundromat phone midvale, laundromat midvale ut, laundromat near me, midvale laundromat, wash dry fold midvale"
+    },
+    "localizedHeadlines": {
+      "landingTitle": "Midvale's premier laundromat",
+      "landingSubtitle": "Self-serve laundry, wash-dry-fold, and commercial accounts in Midvale, UT.",
+      "wdfTitle": "Wash-Dry-Fold drop-off laundry in Midvale, UT",
+      "selfServeTitle": "Self-serve laundry in Midvale, UT",
+      "commercialTitle": "Commercial laundry service for Midvale businesses",
+      "aboutTitle": "About WaveMAX Midvale",
+      "contactTitle": "Contact WaveMAX Midvale, UT"
+    },
+    "geoRegion": "US-UT",
+    "geoPlacename": "Midvale, UT",
+    "geoPosition": "40.611;-111.8997",
+    "icbm": "40.611, -111.8997"
+  },
+  "i18n": {
+    "languagesAvailable": [
+      "en",
+      "es",
+      "pt",
+      "de"
+    ]
+  },
+  "nav": {
+    "commercialEnabled": true,
+    "commercialIndustries": {
+      "medical": true,
+      "gym": true,
+      "airbnb": true,
+      "restaurant": true,
+      "contractors": true
+    },
+    "additional": [],
+    "sublinkExtensions": {}
+  },
+  "iframeOverrides": {}
+}

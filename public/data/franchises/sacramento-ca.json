@@ -1,0 +1,155 @@
+{
+  "slug": "sacramento-ca",
+  "brand": {
+    "name": "WaveMAX Sacramento CA",
+    "parent": "WaveMAX Laundry",
+    "tagline": ""
+  },
+  "contact": {
+    "phone": "(916) 873-3017",
+    "phoneTel": "tel:+19168733017",
+    "phoneTelRaw": "+19168733017",
+    "email": "no-reply@wavemax.promo",
+    "emailMailto": "mailto:no-reply@wavemax.promo",
+    "address": "2428 Watt Ave",
+    "city": "Sacramento",
+    "state": "CA",
+    "zip": "95825",
+    "country": "US",
+    "addressLine2": "Sacramento, CA 95825",
+    "geo": {
+      "lat": 38.6052,
+      "lng": -121.398
+    },
+    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=2428+Watt+Ave+Sacramento+CA+95825"
+  },
+  "hours": {
+    "open": "",
+    "close": "",
+    "display": "Call for hours",
+    "lastWash": "",
+    "days": ""
+  },
+  "owners": [],
+  "aboutContent": {
+    "heroTitle": "",
+    "heroTagline": "",
+    "heroSubtitle": "",
+    "missionEyebrow": "",
+    "missionTitle": "",
+    "missionBody": [],
+    "valuesEyebrow": "",
+    "valuesTitle": "",
+    "values": [],
+    "teamEyebrow": "",
+    "teamTitle": "",
+    "teamLede": "",
+    "communityTitle": "",
+    "communityBody": "",
+    "ctaText": ""
+  },
+  "pricing": {
+    "wdf": {
+      "rate": null,
+      "minLb": null,
+      "currency": "USD",
+      "display": "Call for pricing"
+    },
+    "selfServe": {
+      "minLoad": null,
+      "maxLoad": null,
+      "minLoadDisplay": "",
+      "maxLoadDisplay": "",
+      "washMin": null,
+      "dryMin": null,
+      "rangeDisplay": "Call for pricing"
+    }
+  },
+  "equipment": {
+    "washers": null,
+    "dryers": null,
+    "capacityLb": null
+  },
+  "amenities": [
+    "Free WiFi",
+    "Free Parking"
+  ],
+  "serviceArea": [
+    "Sacramento"
+  ],
+  "social": {
+    "facebook": "",
+    "instagram": ""
+  },
+  "google": {
+    "placeId": "",
+    "apiKey": "",
+    "profileUrl": "",
+    "reviewsUrl": ""
+  },
+  "images": {
+    "hero": [
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/kent-wa/hero-1.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/kent-wa/hero-2.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/kent-wa/hero-3.jpg"
+    ],
+    "interior": [
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/kent-wa/interior-1.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/kent-wa/interior-2.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/kent-wa/interior-3.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/kent-wa/interior-4.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/kent-wa/interior-5.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/kent-wa/interior-6.jpg"
+    ],
+    "owner": [],
+    "landmarks": [],
+    "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/kent-wa/hero-1.jpg",
+    "ogImageAlt": "WaveMAX Sacramento CA storefront",
+    "mapPreview": ""
+  },
+  "seo": {
+    "keywords": "laundromat sacramento ca, laundromat near me, sacramento laundromat, wash dry fold sacramento, self service laundry sacramento, drop off laundry sacramento, coin laundry sacramento, commercial laundry sacramento, wavemax sacramento, wavemax sacramento ca",
+    "keywordsByPage": {
+      "/": "laundromat sacramento ca, laundromat near me, sacramento laundromat, wash dry fold sacramento, self service laundry sacramento, drop off laundry sacramento, coin laundry sacramento, commercial laundry sacramento, wavemax sacramento, wavemax sacramento ca",
+      "/wash-dry-fold": "wash dry fold sacramento, drop off laundry sacramento, fluff and fold sacramento, laundromat sacramento ca, laundromat near me, sacramento laundromat, wash dry fold sacramento, self service laundry sacramento, drop off laundry sacramento",
+      "/self-serve-laundry": "self service laundry sacramento, coin laundry sacramento, laundromat sacramento, laundromat sacramento ca, laundromat near me, sacramento laundromat, wash dry fold sacramento, self service laundry sacramento, drop off laundry sacramento",
+      "/commercial": "commercial laundry sacramento, business laundry sacramento, hotel laundry sacramento, restaurant linens sacramento, laundromat sacramento ca, laundromat near me, sacramento laundromat, wash dry fold sacramento, self service laundry sacramento, drop off laundry sacramento",
+      "/about-us": "wavemax owners sacramento, family-owned laundromat sacramento, laundromat sacramento ca, laundromat near me, sacramento laundromat, wash dry fold sacramento",
+      "/contact": "contact wavemax sacramento, laundromat phone sacramento, laundromat sacramento ca, laundromat near me, sacramento laundromat, wash dry fold sacramento"
+    },
+    "localizedHeadlines": {
+      "landingTitle": "Sacramento's premier laundromat",
+      "landingSubtitle": "Self-serve laundry, wash-dry-fold, and commercial accounts in Sacramento, CA.",
+      "wdfTitle": "Wash-Dry-Fold drop-off laundry in Sacramento, CA",
+      "selfServeTitle": "Self-serve laundry in Sacramento, CA",
+      "commercialTitle": "Commercial laundry service for Sacramento businesses",
+      "aboutTitle": "About WaveMAX Sacramento",
+      "contactTitle": "Contact WaveMAX Sacramento, CA"
+    },
+    "geoRegion": "US-CA",
+    "geoPlacename": "Sacramento, CA",
+    "geoPosition": "38.6052;-121.398",
+    "icbm": "38.6052, -121.398"
+  },
+  "i18n": {
+    "languagesAvailable": [
+      "en",
+      "es",
+      "pt",
+      "de"
+    ]
+  },
+  "nav": {
+    "commercialEnabled": true,
+    "commercialIndustries": {
+      "medical": true,
+      "gym": true,
+      "airbnb": true,
+      "restaurant": true,
+      "contractors": true
+    },
+    "additional": [],
+    "sublinkExtensions": {}
+  },
+  "iframeOverrides": {}
+}

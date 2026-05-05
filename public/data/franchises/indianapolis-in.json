@@ -1,0 +1,155 @@
+{
+  "slug": "indianapolis-in",
+  "brand": {
+    "name": "WaveMAX Indianapolis IN",
+    "parent": "WaveMAX Laundry",
+    "tagline": ""
+  },
+  "contact": {
+    "phone": "(317) 388-5954",
+    "phoneTel": "tel:+13173885954",
+    "phoneTelRaw": "+13173885954",
+    "email": "no-reply@wavemax.promo",
+    "emailMailto": "mailto:no-reply@wavemax.promo",
+    "address": "2814 W 71st Street",
+    "city": "Indianapolis",
+    "state": "IN",
+    "zip": "46268",
+    "country": "US",
+    "addressLine2": "Indianapolis, IN 46268",
+    "geo": {
+      "lat": 39.8738,
+      "lng": -86.2284
+    },
+    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=2814+W+71st+Street+Indianapolis+IN+46268"
+  },
+  "hours": {
+    "open": "",
+    "close": "",
+    "display": "Call for hours",
+    "lastWash": "",
+    "days": ""
+  },
+  "owners": [],
+  "aboutContent": {
+    "heroTitle": "",
+    "heroTagline": "",
+    "heroSubtitle": "",
+    "missionEyebrow": "",
+    "missionTitle": "",
+    "missionBody": [],
+    "valuesEyebrow": "",
+    "valuesTitle": "",
+    "values": [],
+    "teamEyebrow": "",
+    "teamTitle": "",
+    "teamLede": "",
+    "communityTitle": "",
+    "communityBody": "",
+    "ctaText": ""
+  },
+  "pricing": {
+    "wdf": {
+      "rate": null,
+      "minLb": null,
+      "currency": "USD",
+      "display": "Call for pricing"
+    },
+    "selfServe": {
+      "minLoad": null,
+      "maxLoad": null,
+      "minLoadDisplay": "",
+      "maxLoadDisplay": "",
+      "washMin": null,
+      "dryMin": null,
+      "rangeDisplay": "Call for pricing"
+    }
+  },
+  "equipment": {
+    "washers": null,
+    "dryers": null,
+    "capacityLb": null
+  },
+  "amenities": [
+    "Free WiFi",
+    "Free Parking"
+  ],
+  "serviceArea": [
+    "Indianapolis"
+  ],
+  "social": {
+    "facebook": "",
+    "instagram": ""
+  },
+  "google": {
+    "placeId": "",
+    "apiKey": "",
+    "profileUrl": "",
+    "reviewsUrl": ""
+  },
+  "images": {
+    "hero": [
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/kent-wa/hero-1.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/kent-wa/hero-2.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/kent-wa/hero-3.jpg"
+    ],
+    "interior": [
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/kent-wa/interior-1.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/kent-wa/interior-2.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/kent-wa/interior-3.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/kent-wa/interior-4.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/kent-wa/interior-5.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/kent-wa/interior-6.jpg"
+    ],
+    "owner": [],
+    "landmarks": [],
+    "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/kent-wa/hero-1.jpg",
+    "ogImageAlt": "WaveMAX Indianapolis IN storefront",
+    "mapPreview": ""
+  },
+  "seo": {
+    "keywords": "laundromat indianapolis in, laundromat near me, indianapolis laundromat, wash dry fold indianapolis, self service laundry indianapolis, drop off laundry indianapolis, coin laundry indianapolis, commercial laundry indianapolis, wavemax indianapolis, wavemax indianapolis in",
+    "keywordsByPage": {
+      "/": "laundromat indianapolis in, laundromat near me, indianapolis laundromat, wash dry fold indianapolis, self service laundry indianapolis, drop off laundry indianapolis, coin laundry indianapolis, commercial laundry indianapolis, wavemax indianapolis, wavemax indianapolis in",
+      "/wash-dry-fold": "wash dry fold indianapolis, drop off laundry indianapolis, fluff and fold indianapolis, laundromat indianapolis in, laundromat near me, indianapolis laundromat, wash dry fold indianapolis, self service laundry indianapolis, drop off laundry indianapolis",
+      "/self-serve-laundry": "self service laundry indianapolis, coin laundry indianapolis, laundromat indianapolis, laundromat indianapolis in, laundromat near me, indianapolis laundromat, wash dry fold indianapolis, self service laundry indianapolis, drop off laundry indianapolis",
+      "/commercial": "commercial laundry indianapolis, business laundry indianapolis, hotel laundry indianapolis, restaurant linens indianapolis, laundromat indianapolis in, laundromat near me, indianapolis laundromat, wash dry fold indianapolis, self service laundry indianapolis, drop off laundry indianapolis",
+      "/about-us": "wavemax owners indianapolis, family-owned laundromat indianapolis, laundromat indianapolis in, laundromat near me, indianapolis laundromat, wash dry fold indianapolis",
+      "/contact": "contact wavemax indianapolis, laundromat phone indianapolis, laundromat indianapolis in, laundromat near me, indianapolis laundromat, wash dry fold indianapolis"
+    },
+    "localizedHeadlines": {
+      "landingTitle": "Indianapolis's premier laundromat",
+      "landingSubtitle": "Self-serve laundry, wash-dry-fold, and commercial accounts in Indianapolis, IN.",
+      "wdfTitle": "Wash-Dry-Fold drop-off laundry in Indianapolis, IN",
+      "selfServeTitle": "Self-serve laundry in Indianapolis, IN",
+      "commercialTitle": "Commercial laundry service for Indianapolis businesses",
+      "aboutTitle": "About WaveMAX Indianapolis",
+      "contactTitle": "Contact WaveMAX Indianapolis, IN"
+    },
+    "geoRegion": "US-IN",
+    "geoPlacename": "Indianapolis, IN",
+    "geoPosition": "39.8738;-86.2284",
+    "icbm": "39.8738, -86.2284"
+  },
+  "i18n": {
+    "languagesAvailable": [
+      "en",
+      "es",
+      "pt",
+      "de"
+    ]
+  },
+  "nav": {
+    "commercialEnabled": true,
+    "commercialIndustries": {
+      "medical": true,
+      "gym": true,
+      "airbnb": true,
+      "restaurant": true,
+      "contractors": true
+    },
+    "additional": [],
+    "sublinkExtensions": {}
+  },
+  "iframeOverrides": {}
+}

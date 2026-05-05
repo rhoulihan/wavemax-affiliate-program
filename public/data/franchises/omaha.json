@@ -1,0 +1,155 @@
+{
+  "slug": "omaha",
+  "brand": {
+    "name": "WaveMAX Omaha",
+    "parent": "WaveMAX Laundry",
+    "tagline": ""
+  },
+  "contact": {
+    "phone": "(531) 466-2847",
+    "phoneTel": "tel:+15314662847",
+    "phoneTelRaw": "+15314662847",
+    "email": "no-reply@wavemax.promo",
+    "emailMailto": "mailto:no-reply@wavemax.promo",
+    "address": "5092 Ames Ave",
+    "city": "Omaha",
+    "state": "NE",
+    "zip": "68104",
+    "country": "US",
+    "addressLine2": "Omaha, NE 68104",
+    "geo": {
+      "lat": 41.2811,
+      "lng": -96.0203
+    },
+    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=5092+Ames+Ave+Omaha+NE+68104"
+  },
+  "hours": {
+    "open": "",
+    "close": "",
+    "display": "Call for hours",
+    "lastWash": "",
+    "days": ""
+  },
+  "owners": [],
+  "aboutContent": {
+    "heroTitle": "",
+    "heroTagline": "",
+    "heroSubtitle": "",
+    "missionEyebrow": "",
+    "missionTitle": "",
+    "missionBody": [],
+    "valuesEyebrow": "",
+    "valuesTitle": "",
+    "values": [],
+    "teamEyebrow": "",
+    "teamTitle": "",
+    "teamLede": "",
+    "communityTitle": "",
+    "communityBody": "",
+    "ctaText": ""
+  },
+  "pricing": {
+    "wdf": {
+      "rate": null,
+      "minLb": null,
+      "currency": "USD",
+      "display": "Call for pricing"
+    },
+    "selfServe": {
+      "minLoad": null,
+      "maxLoad": null,
+      "minLoadDisplay": "",
+      "maxLoadDisplay": "",
+      "washMin": null,
+      "dryMin": null,
+      "rangeDisplay": "Call for pricing"
+    }
+  },
+  "equipment": {
+    "washers": null,
+    "dryers": null,
+    "capacityLb": null
+  },
+  "amenities": [
+    "Free WiFi",
+    "Free Parking"
+  ],
+  "serviceArea": [
+    "Omaha"
+  ],
+  "social": {
+    "facebook": "",
+    "instagram": ""
+  },
+  "google": {
+    "placeId": "",
+    "apiKey": "",
+    "profileUrl": "",
+    "reviewsUrl": ""
+  },
+  "images": {
+    "hero": [
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/omaha/hero-1.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/omaha/hero-2.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/omaha/hero-3.jpg"
+    ],
+    "interior": [
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/omaha/interior-1.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/omaha/interior-2.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/omaha/interior-3.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/omaha/interior-4.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/omaha/interior-5.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/omaha/interior-6.jpg"
+    ],
+    "owner": [],
+    "landmarks": [],
+    "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/omaha/hero-1.jpg",
+    "ogImageAlt": "WaveMAX Omaha storefront",
+    "mapPreview": ""
+  },
+  "seo": {
+    "keywords": "laundromat omaha ne, laundromat near me, omaha laundromat, wash dry fold omaha, self service laundry omaha, drop off laundry omaha, coin laundry omaha, commercial laundry omaha, wavemax omaha, wavemax omaha ne",
+    "keywordsByPage": {
+      "/": "laundromat omaha ne, laundromat near me, omaha laundromat, wash dry fold omaha, self service laundry omaha, drop off laundry omaha, coin laundry omaha, commercial laundry omaha, wavemax omaha, wavemax omaha ne",
+      "/wash-dry-fold": "wash dry fold omaha, drop off laundry omaha, fluff and fold omaha, laundromat omaha ne, laundromat near me, omaha laundromat, wash dry fold omaha, self service laundry omaha, drop off laundry omaha",
+      "/self-serve-laundry": "self service laundry omaha, coin laundry omaha, laundromat omaha, laundromat omaha ne, laundromat near me, omaha laundromat, wash dry fold omaha, self service laundry omaha, drop off laundry omaha",
+      "/commercial": "commercial laundry omaha, business laundry omaha, hotel laundry omaha, restaurant linens omaha, laundromat omaha ne, laundromat near me, omaha laundromat, wash dry fold omaha, self service laundry omaha, drop off laundry omaha",
+      "/about-us": "wavemax owners omaha, family-owned laundromat omaha, laundromat omaha ne, laundromat near me, omaha laundromat, wash dry fold omaha",
+      "/contact": "contact wavemax omaha, laundromat phone omaha, laundromat omaha ne, laundromat near me, omaha laundromat, wash dry fold omaha"
+    },
+    "localizedHeadlines": {
+      "landingTitle": "Omaha's premier laundromat",
+      "landingSubtitle": "Self-serve laundry, wash-dry-fold, and commercial accounts in Omaha, NE.",
+      "wdfTitle": "Wash-Dry-Fold drop-off laundry in Omaha, NE",
+      "selfServeTitle": "Self-serve laundry in Omaha, NE",
+      "commercialTitle": "Commercial laundry service for Omaha businesses",
+      "aboutTitle": "About WaveMAX Omaha",
+      "contactTitle": "Contact WaveMAX Omaha, NE"
+    },
+    "geoRegion": "US-NE",
+    "geoPlacename": "Omaha, NE",
+    "geoPosition": "41.2811;-96.0203",
+    "icbm": "41.2811, -96.0203"
+  },
+  "i18n": {
+    "languagesAvailable": [
+      "en",
+      "es",
+      "pt",
+      "de"
+    ]
+  },
+  "nav": {
+    "commercialEnabled": true,
+    "commercialIndustries": {
+      "medical": true,
+      "gym": true,
+      "airbnb": true,
+      "restaurant": true,
+      "contractors": true
+    },
+    "additional": [],
+    "sublinkExtensions": {}
+  },
+  "iframeOverrides": {}
+}

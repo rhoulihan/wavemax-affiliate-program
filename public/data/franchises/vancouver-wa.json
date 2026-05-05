@@ -1,0 +1,151 @@
+{
+  "slug": "vancouver-wa",
+  "brand": {
+    "name": "WaveMAX Vancouver WA",
+    "parent": "WaveMAX Laundry",
+    "tagline": ""
+  },
+  "contact": {
+    "phone": "(360) 433-9864",
+    "phoneTel": "tel:+13604339864",
+    "phoneTelRaw": "+13604339864",
+    "email": "no-reply@wavemax.promo",
+    "emailMailto": "mailto:no-reply@wavemax.promo",
+    "address": "8109 NE Vancouver Mall Dr, Suit F&G",
+    "city": "Vancouver",
+    "state": "WA",
+    "zip": "98662",
+    "country": "US",
+    "addressLine2": "Vancouver, WA 98662",
+    "geo": {
+      "lat": 45.6387,
+      "lng": -122.5434
+    },
+    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=8109+NE+Vancouver+Mall+Dr%2C+Suit+F%26G+Vancouver+WA+98662"
+  },
+  "hours": {
+    "open": "",
+    "close": "",
+    "display": "Call for hours",
+    "lastWash": "",
+    "days": ""
+  },
+  "owners": [],
+  "aboutContent": {
+    "heroTitle": "",
+    "heroTagline": "",
+    "heroSubtitle": "",
+    "missionEyebrow": "",
+    "missionTitle": "",
+    "missionBody": [],
+    "valuesEyebrow": "",
+    "valuesTitle": "",
+    "values": [],
+    "teamEyebrow": "",
+    "teamTitle": "",
+    "teamLede": "",
+    "communityTitle": "",
+    "communityBody": "",
+    "ctaText": ""
+  },
+  "pricing": {
+    "wdf": {
+      "rate": null,
+      "minLb": null,
+      "currency": "USD",
+      "display": "Call for pricing"
+    },
+    "selfServe": {
+      "minLoad": null,
+      "maxLoad": null,
+      "minLoadDisplay": "",
+      "maxLoadDisplay": "",
+      "washMin": null,
+      "dryMin": null,
+      "rangeDisplay": "Call for pricing"
+    }
+  },
+  "equipment": {
+    "washers": null,
+    "dryers": null,
+    "capacityLb": null
+  },
+  "amenities": [
+    "Free WiFi",
+    "Free Parking"
+  ],
+  "serviceArea": [
+    "Vancouver"
+  ],
+  "social": {
+    "facebook": "",
+    "instagram": ""
+  },
+  "google": {
+    "placeId": "",
+    "apiKey": "",
+    "profileUrl": "",
+    "reviewsUrl": ""
+  },
+  "images": {
+    "hero": [
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/vancouver-wa/hero-1.jpg"
+    ],
+    "interior": [
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/vancouver-wa/interior-1.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/vancouver-wa/interior-2.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/vancouver-wa/interior-3.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/vancouver-wa/interior-4.jpg"
+    ],
+    "owner": [],
+    "landmarks": [],
+    "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/vancouver-wa/hero-1.jpg",
+    "ogImageAlt": "WaveMAX Vancouver WA storefront",
+    "mapPreview": ""
+  },
+  "seo": {
+    "keywords": "laundromat vancouver wa, laundromat near me, vancouver laundromat, wash dry fold vancouver, self service laundry vancouver, drop off laundry vancouver, coin laundry vancouver, commercial laundry vancouver, wavemax vancouver, wavemax vancouver wa",
+    "keywordsByPage": {
+      "/": "laundromat vancouver wa, laundromat near me, vancouver laundromat, wash dry fold vancouver, self service laundry vancouver, drop off laundry vancouver, coin laundry vancouver, commercial laundry vancouver, wavemax vancouver, wavemax vancouver wa",
+      "/wash-dry-fold": "wash dry fold vancouver, drop off laundry vancouver, fluff and fold vancouver, laundromat vancouver wa, laundromat near me, vancouver laundromat, wash dry fold vancouver, self service laundry vancouver, drop off laundry vancouver",
+      "/self-serve-laundry": "self service laundry vancouver, coin laundry vancouver, laundromat vancouver, laundromat vancouver wa, laundromat near me, vancouver laundromat, wash dry fold vancouver, self service laundry vancouver, drop off laundry vancouver",
+      "/commercial": "commercial laundry vancouver, business laundry vancouver, hotel laundry vancouver, restaurant linens vancouver, laundromat vancouver wa, laundromat near me, vancouver laundromat, wash dry fold vancouver, self service laundry vancouver, drop off laundry vancouver",
+      "/about-us": "wavemax owners vancouver, family-owned laundromat vancouver, laundromat vancouver wa, laundromat near me, vancouver laundromat, wash dry fold vancouver",
+      "/contact": "contact wavemax vancouver, laundromat phone vancouver, laundromat vancouver wa, laundromat near me, vancouver laundromat, wash dry fold vancouver"
+    },
+    "localizedHeadlines": {
+      "landingTitle": "Vancouver's premier laundromat",
+      "landingSubtitle": "Self-serve laundry, wash-dry-fold, and commercial accounts in Vancouver, WA.",
+      "wdfTitle": "Wash-Dry-Fold drop-off laundry in Vancouver, WA",
+      "selfServeTitle": "Self-serve laundry in Vancouver, WA",
+      "commercialTitle": "Commercial laundry service for Vancouver businesses",
+      "aboutTitle": "About WaveMAX Vancouver",
+      "contactTitle": "Contact WaveMAX Vancouver, WA"
+    },
+    "geoRegion": "US-WA",
+    "geoPlacename": "Vancouver, WA",
+    "geoPosition": "45.6387;-122.5434",
+    "icbm": "45.6387, -122.5434"
+  },
+  "i18n": {
+    "languagesAvailable": [
+      "en",
+      "es",
+      "pt",
+      "de"
+    ]
+  },
+  "nav": {
+    "commercialEnabled": true,
+    "commercialIndustries": {
+      "medical": true,
+      "gym": true,
+      "airbnb": true,
+      "restaurant": true,
+      "contractors": true
+    },
+    "additional": [],
+    "sublinkExtensions": {}
+  },
+  "iframeOverrides": {}
+}

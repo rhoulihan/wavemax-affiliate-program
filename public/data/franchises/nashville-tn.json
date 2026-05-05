@@ -1,0 +1,155 @@
+{
+  "slug": "nashville-tn",
+  "brand": {
+    "name": "WaveMAX Nashville TN",
+    "parent": "WaveMAX Laundry",
+    "tagline": ""
+  },
+  "contact": {
+    "phone": "",
+    "phoneTel": "",
+    "phoneTelRaw": "",
+    "email": "no-reply@wavemax.promo",
+    "emailMailto": "mailto:no-reply@wavemax.promo",
+    "address": "",
+    "city": "Nashville",
+    "state": "TN",
+    "zip": "",
+    "country": "US",
+    "addressLine2": "",
+    "geo": {
+      "lat": 36.1627,
+      "lng": -86.7816
+    },
+    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=+Nashville+TN+"
+  },
+  "hours": {
+    "open": "",
+    "close": "",
+    "display": "Call for hours",
+    "lastWash": "",
+    "days": ""
+  },
+  "owners": [],
+  "aboutContent": {
+    "heroTitle": "",
+    "heroTagline": "",
+    "heroSubtitle": "",
+    "missionEyebrow": "",
+    "missionTitle": "",
+    "missionBody": [],
+    "valuesEyebrow": "",
+    "valuesTitle": "",
+    "values": [],
+    "teamEyebrow": "",
+    "teamTitle": "",
+    "teamLede": "",
+    "communityTitle": "",
+    "communityBody": "",
+    "ctaText": ""
+  },
+  "pricing": {
+    "wdf": {
+      "rate": null,
+      "minLb": null,
+      "currency": "USD",
+      "display": "Call for pricing"
+    },
+    "selfServe": {
+      "minLoad": null,
+      "maxLoad": null,
+      "minLoadDisplay": "",
+      "maxLoadDisplay": "",
+      "washMin": null,
+      "dryMin": null,
+      "rangeDisplay": "Call for pricing"
+    }
+  },
+  "equipment": {
+    "washers": null,
+    "dryers": null,
+    "capacityLb": null
+  },
+  "amenities": [
+    "Free WiFi",
+    "Free Parking"
+  ],
+  "serviceArea": [
+    "Nashville"
+  ],
+  "social": {
+    "facebook": "",
+    "instagram": ""
+  },
+  "google": {
+    "placeId": "",
+    "apiKey": "",
+    "profileUrl": "",
+    "reviewsUrl": ""
+  },
+  "images": {
+    "hero": [
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/kent-wa/hero-1.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/kent-wa/hero-2.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/kent-wa/hero-3.jpg"
+    ],
+    "interior": [
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/kent-wa/interior-1.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/kent-wa/interior-2.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/kent-wa/interior-3.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/kent-wa/interior-4.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/kent-wa/interior-5.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/kent-wa/interior-6.jpg"
+    ],
+    "owner": [],
+    "landmarks": [],
+    "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/kent-wa/hero-1.jpg",
+    "ogImageAlt": "WaveMAX Nashville TN storefront",
+    "mapPreview": ""
+  },
+  "seo": {
+    "keywords": "laundromat nashville tn, laundromat near me, nashville laundromat, wash dry fold nashville, self service laundry nashville, drop off laundry nashville, coin laundry nashville, commercial laundry nashville, wavemax nashville, wavemax nashville tn",
+    "keywordsByPage": {
+      "/": "laundromat nashville tn, laundromat near me, nashville laundromat, wash dry fold nashville, self service laundry nashville, drop off laundry nashville, coin laundry nashville, commercial laundry nashville, wavemax nashville, wavemax nashville tn",
+      "/wash-dry-fold": "wash dry fold nashville, drop off laundry nashville, fluff and fold nashville, laundromat nashville tn, laundromat near me, nashville laundromat, wash dry fold nashville, self service laundry nashville, drop off laundry nashville",
+      "/self-serve-laundry": "self service laundry nashville, coin laundry nashville, laundromat nashville, laundromat nashville tn, laundromat near me, nashville laundromat, wash dry fold nashville, self service laundry nashville, drop off laundry nashville",
+      "/commercial": "commercial laundry nashville, business laundry nashville, hotel laundry nashville, restaurant linens nashville, laundromat nashville tn, laundromat near me, nashville laundromat, wash dry fold nashville, self service laundry nashville, drop off laundry nashville",
+      "/about-us": "wavemax owners nashville, family-owned laundromat nashville, laundromat nashville tn, laundromat near me, nashville laundromat, wash dry fold nashville",
+      "/contact": "contact wavemax nashville, laundromat phone nashville, laundromat nashville tn, laundromat near me, nashville laundromat, wash dry fold nashville"
+    },
+    "localizedHeadlines": {
+      "landingTitle": "Nashville's premier laundromat",
+      "landingSubtitle": "Self-serve laundry, wash-dry-fold, and commercial accounts in Nashville, TN.",
+      "wdfTitle": "Wash-Dry-Fold drop-off laundry in Nashville, TN",
+      "selfServeTitle": "Self-serve laundry in Nashville, TN",
+      "commercialTitle": "Commercial laundry service for Nashville businesses",
+      "aboutTitle": "About WaveMAX Nashville",
+      "contactTitle": "Contact WaveMAX Nashville, TN"
+    },
+    "geoRegion": "US-TN",
+    "geoPlacename": "Nashville, TN",
+    "geoPosition": "36.1627;-86.7816",
+    "icbm": "36.1627, -86.7816"
+  },
+  "i18n": {
+    "languagesAvailable": [
+      "en",
+      "es",
+      "pt",
+      "de"
+    ]
+  },
+  "nav": {
+    "commercialEnabled": true,
+    "commercialIndustries": {
+      "medical": true,
+      "gym": true,
+      "airbnb": true,
+      "restaurant": true,
+      "contractors": true
+    },
+    "additional": [],
+    "sublinkExtensions": {}
+  },
+  "iframeOverrides": {}
+}
