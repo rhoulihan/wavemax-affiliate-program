@@ -340,6 +340,7 @@
 
 .modal-map {
   height: 280px;
+  flex-shrink: 0;       /* don't let the flex parent crunch the map */
   background: var(--navy-deeper);
   border-bottom: 1px solid var(--white-10);
   position: relative;
