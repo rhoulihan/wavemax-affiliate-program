@@ -644,9 +644,12 @@ app.use('/api', (req, res, next) => {
 // Corporate-level pages — Phase 5c clone. These live on top-level paths
 // like /franchise, /about/, etc. and are static V3-styled marketing
 // pages with no per-franchise data. Mounted BEFORE the slug router so
-// /franchise doesn't get picked up as a (nonexistent) franchise slug.
+// these top-level slugs don't get picked up as (nonexistent) franchise slugs.
 app.get(['/franchise', '/franchise/'], (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'franchise.html'));
+});
+app.get(['/become-a-franchisee', '/become-a-franchisee/'], (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'become-a-franchisee.html'));
 });
 
 // Per-franchise dynamic routes — Phase 5a. Mounted AFTER /api/* and the
