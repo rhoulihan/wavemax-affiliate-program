@@ -530,9 +530,8 @@
   }
 
   function initLocationModal() {
-    console.log('[locModal-debug] initLocationModal called');
     const overlay = document.getElementById('locModal');
-    if (!overlay) { console.log('[locModal-debug] no overlay element — bail'); return; }
+    if (!overlay) return;
 
     const list           = document.getElementById('locList');
     const search         = document.getElementById('locSearch');
@@ -552,12 +551,12 @@
     let selectedSlug = null;
 
     const open = async () => {
-      // Re-fetch overlay from DOM in case it was replaced after init
+      // Re-fetch overlay each time — the Hibu phone-swap may have rewritten
+      // chrome subtrees, but the modal lives outside that subtree so the
+      // closure-captured reference is normally fine. The fallback is cheap.
       const liveOverlay = document.getElementById('locModal') || overlay;
-      console.log('[locModal-debug] open() invoked, init-overlay===live?', overlay === liveOverlay, 'init connected?', overlay.isConnected);
       liveOverlay.setAttribute('aria-hidden', 'false');
       liveOverlay.classList.add('open');
-      console.log('[locModal-debug] classList after add=', [...liveOverlay.classList]);
       document.body.style.overflow = 'hidden';
       // Auto-select the current franchise on open so the action bar
       // shows immediately (operator can click Visit to confirm).
@@ -748,27 +747,18 @@
       if (actions) actions.hidden = false;
     }
 
-    // Wire up open / close triggers
-    const openTriggers = $$('[data-locmodal-open]');
-    console.log('[locModal-debug] attaching open handler to', openTriggers.length, 'triggers', openTriggers);
-    openTriggers.forEach((t, i) => {
-      t.addEventListener('click', (e) => {
-        console.log('[locModal-debug] trigger', i, 'clicked, target=', e.target, 'currentTarget=', e.currentTarget);
-        open(e);
-      });
-    });
-    // Document-level capture listener to verify click events propagate at all,
-    // AND see whether the click target's button === one of our captured triggers
+    // Wire up open / close triggers via event delegation. The Hibu phone-
+    // insertion script (austin-hibu-phone-swap.js + ybDynamicPhoneInsertion)
+    // runs at window.load + 500ms and rewrites innerHTML on chrome elements
+    // whose subtree contains the local phone number. Anywhere it does that,
+    // event handlers attached to specific buttons get destroyed. Delegating
+    // at document level survives any number of subtree rewrites.
     document.addEventListener('click', (e) => {
-      const trig = e.target && e.target.closest && e.target.closest('[data-locmodal-open]');
-      if (trig) {
-        const matches = openTriggers.map((t, i) => t === trig ? i : null).filter(x => x !== null);
-        console.log('[locModal-debug] DOC CAPTURE click. trig connected?', trig.isConnected,
-          'matches captured trigger index:', matches.length ? matches : 'NONE — DIFFERENT NODE',
-          'captured connected:', openTriggers.map(t => t.isConnected));
-      }
-    }, true);
-    $$('[data-locmodal-close]').forEach(t => t.addEventListener('click', close));
+      const openTrig = e.target.closest && e.target.closest('[data-locmodal-open]');
+      if (openTrig) { open(e); return; }
+      const closeTrig = e.target.closest && e.target.closest('[data-locmodal-close]');
+      if (closeTrig) { close(); return; }
+    });
     overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape' && overlay.getAttribute('aria-hidden') === 'false') close();
