@@ -549,6 +549,50 @@
     }
   }
 
+  /* ---------- Hero rotator (right-column store photos + landmarks) ----------
+   * Builds <img> children from LOCATION_DATA.images.interior +
+   * LOCATION_DATA.images.landmarks. Cadence: every third slot is a
+   * landmark when both arrays are non-empty (Austin: 6 store + 3
+   * landmarks → 9 slots). Franchises with no landmarks just cycle
+   * store interiors. Franchises with no images fall through to
+   * whatever kent-wa returned at registry-build time. */
+  function populateHeroRotator(data) {
+    const rotator = document.getElementById('wm-hero-rotator');
+    if (!rotator) return;
+    const interiors = (data?.images?.interior || []).slice();
+    const landmarks = (data?.images?.landmarks || []).slice();
+    if (interiors.length === 0 && landmarks.length === 0) return;
+
+    // Interleave: 2 interiors then 1 landmark per triplet, until either
+    // list runs out. Landmarks go second-position-of-triplet so the
+    // rotator opens on a store photo (the page is about WaveMAX, not
+    // local tourism — landmarks just punctuate sense-of-place).
+    const slots = [];
+    let i = 0, l = 0;
+    while (i < interiors.length || l < landmarks.length) {
+      if (i < interiors.length) slots.push({ url: interiors[i++], alt: data.brand?.name + ' interior', isLandmark: false });
+      if (i < interiors.length) slots.push({ url: interiors[i++], alt: data.brand?.name + ' interior', isLandmark: false });
+      if (l < landmarks.length) {
+        const lm = landmarks[l++];
+        slots.push({ url: typeof lm === 'string' ? lm : lm.url, alt: typeof lm === 'string' ? '' : (lm.alt || ''), isLandmark: true });
+      }
+    }
+    if (slots.length === 0) return;
+
+    // Render — replace children atomically so re-binding from a later
+    // location-data event doesn't double-up.
+    rotator.innerHTML = '';
+    slots.forEach((slot, idx) => {
+      const img = document.createElement('img');
+      img.className = 'wm-hero-rotator-img' + (idx === 0 ? ' is-active' : '');
+      img.src = slot.url;
+      img.alt = slot.alt;
+      img.loading = idx === 0 ? 'eager' : 'lazy';
+      img.referrerPolicy = 'no-referrer';
+      rotator.appendChild(img);
+    });
+  }
+
   /* ---------- Cross-frame nav for tab CTAs ----------
    * Delegate to document so the handler survives the bridge's
    * translatePage() pass (which replaces innerHTML on translated
@@ -588,10 +632,11 @@
     initHeroRotator();
 
     // Bind whenever location-data arrives — also where the per-franchise
-    // hero watermark + SEO bundle are applied.
+    // hero watermark, rotator photos, and SEO bundle are applied.
     window.IframeBridge.onLocationData((data) => {
       applyBindings(data);
       setStoreWatermark(data);
+      populateHeroRotator(data);
       if (window.FranchisePage) {
         const seo = window.FranchisePage.buildSeo(data, 'landing');
         if (seo) window.IframeBridge.loadSEOConfig(seo);

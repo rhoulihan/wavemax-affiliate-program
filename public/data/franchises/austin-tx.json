@@ -30,23 +30,95 @@
     "lastWash": "",
     "days": ""
   },
-  "owners": [],
+  "owners": [
+    {
+      "name": "Colin Houlihan",
+      "role": "Owner / Operator",
+      "tag": "North Austin local · working musician",
+      "bio": "Colin runs the day-to-day at the Rundberg location. Born and raised North Austin, plays in the local music scene, and brings a working musician's eye for detail and showmanship to running a clean, fast, friendly store.",
+      "avatarStyle": "primary"
+    },
+    {
+      "name": "Rick Houlihan",
+      "role": "Co-Owner",
+      "tag": "Local technology executive & influencer",
+      "bio": "Rick is a long-time Austin technology executive and influencer in the data and AI community. He brings an operations and customer-experience lens to the family business — measure everything, then make it better, every shift.",
+      "avatarStyle": "secondary"
+    },
+    {
+      "name": "Simone Houlihan",
+      "role": "Co-Owner",
+      "tag": "Local artist & philanthropist",
+      "bio": "Simone is an Austin artist active in the local arts and philanthropy community. She keeps the heart of the business front and center — community-first values, quality service at the lowest fair price, with profits reinvested locally.",
+      "avatarStyle": "amber"
+    }
+  ],
   "aboutContent": {
-    "heroTitle": "",
-    "heroTagline": "",
-    "heroSubtitle": "",
-    "missionEyebrow": "",
-    "missionTitle": "",
-    "missionBody": [],
-    "valuesEyebrow": "",
-    "valuesTitle": "",
-    "values": [],
-    "teamEyebrow": "",
-    "teamTitle": "",
-    "teamLede": "",
-    "communityTitle": "",
-    "communityBody": "",
-    "ctaText": ""
+    "heroTitle": "About WaveMAX Austin",
+    "heroTagline": "A family business, building a better Austin one wash at a time.",
+    "heroSubtitle": "WaveMAX Austin is owned and operated by the Houlihan family. We chose WaveMAX because we believe in giving back to our community by investing in the best quality and service at the lowest price — and building local, every day.",
+    "missionEyebrow": "WHY WAVEMAX",
+    "missionTitle": "Why we chose WaveMAX",
+    "missionBody": [
+      "We're three Austin locals who wanted to invest in our neighborhood — not just write a check, but build something that delivers real value to the people who live here.",
+      "WaveMAX is the platform that lets us do that: best-in-class equipment, hospital-grade water sanitation, and a service model designed to keep prices low and quality high. We get to put our values into practice — community first, quality always — and people get the cleanest, fastest, friendliest laundry experience in Central Austin."
+    ],
+    "missionProud": "Proud to be serving the Central Austin community since 2025.",
+    "valuesEyebrow": "WHAT WE STAND FOR",
+    "valuesTitle": "Our values, on every wash",
+    "values": [
+      {
+        "title": "Community first.",
+        "body": "Profits reinvested locally — staff, equipment, and supporting Austin causes that matter to us."
+      },
+      {
+        "title": "Best-in-class quality.",
+        "body": "Omni LUX UV-sanitized water, eco-friendly hypoallergenic detergent, calibrated weighs, hand-folded results."
+      },
+      {
+        "title": "Lowest fair price.",
+        "body": "No hidden fees, no contracts, no subscriptions. Cards-only, transparent pricing — pay for what you use."
+      },
+      {
+        "title": "Always open.",
+        "body": "7am–10pm, every day, 365 days a year. We're here when laundry day actually happens."
+      },
+      {
+        "title": "Friendly service.",
+        "body": "Fully attended store. Real people, not a vending machine. Need help? We're here."
+      }
+    ],
+    "teamEyebrow": "MEET THE OWNERS",
+    "teamTitle": "The Houlihan family",
+    "teamLede": "Three Austin locals — a musician, a technology executive, and an artist — running the busiest WaveMAX in Texas. Different worlds, same value: invest in your community.",
+    "communityEyebrow": "GIVING BACK",
+    "communityTitle": "Investing in Central Austin",
+    "communityText": "Every fold, every wash, every dollar that comes through our door goes back into Austin — into staff who live here, suppliers who operate here, and causes the family supports here. When you choose WaveMAX Austin, you're not buying laundry from a chain. You're investing in your neighbors.",
+    "ctaText": "Come meet the family. We're at 825 E Rundberg Ln F1, every day, 7am–10pm.",
+    "ctaCallBtn": "Call us",
+    "ctaDirectionsBtn": "Get directions",
+    "stats": {
+      "founded": {
+        "number": "2025",
+        "label": "Serving Austin Since"
+      },
+      "owners": {
+        "number": "3",
+        "label": "Family Owners"
+      },
+      "local": {
+        "number": "100%",
+        "label": "Austin Local"
+      },
+      "extra": {
+        "number": "3",
+        "label": "Disciplines"
+      },
+      "community": {
+        "number": "∞",
+        "label": "Community First"
+      }
+    }
   },
   "pricing": {
     "wdf": {
@@ -109,7 +181,20 @@
       "https://wavemaxlaundry.com/wp-content/uploads/locations/austin-tx/interior-6.jpg"
     ],
     "owner": [],
-    "landmarks": [],
+    "landmarks": [
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/60/PennybackerBridge.jpg/1280px-PennybackerBridge.jpg",
+        "alt": "Pennybacker Bridge — North Austin landmark on Loop 360"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/df/TexasStateCapitol-2010-01.JPG/1280px-TexasStateCapitol-2010-01.JPG",
+        "alt": "Texas State Capitol — downtown Austin"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/96/Austin_Texas_skyline%2C_December_2023_-_Evening.jpg/1280px-Austin_Texas_skyline%2C_December_2023_-_Evening.jpg",
+        "alt": "Austin skyline at evening"
+      }
+    ],
     "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/austin-tx/hero-1.jpg",
     "ogImageAlt": "WaveMAX Austin TX storefront",
     "mapPreview": ""

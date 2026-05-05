@@ -179,11 +179,19 @@ function buildLocationData(loc) {
     owners: [],                                        // empty → placeholder card at runtime
     aboutContent: {
       heroTitle: '', heroTagline: '', heroSubtitle: '',
-      missionEyebrow: '', missionTitle: '', missionBody: [],
+      missionEyebrow: '', missionTitle: '', missionBody: [], missionProud: '',
       valuesEyebrow: '', valuesTitle: '', values: [],
       teamEyebrow: '', teamTitle: '', teamLede: '',
-      communityTitle: '', communityBody: '',
-      ctaText: ''
+      communityEyebrow: '', communityTitle: '', communityText: '',
+      ctaText: '', ctaCallBtn: '', ctaDirectionsBtn: '',
+      // Five customizable stat-band tiles. Empty number → tile hidden.
+      stats: {
+        founded:   { number: '', label: '' },
+        owners:    { number: '', label: '' },
+        local:     { number: '', label: '' },
+        extra:     { number: '', label: '' },
+        community: { number: '', label: '' }
+      }
     },
     pricing: { ...DEFAULTS.pricing },
     equipment: { ...DEFAULTS.equipment },
