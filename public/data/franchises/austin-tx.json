@@ -24,11 +24,11 @@
     "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=825+E+Rundberg+Ln+f1+Austin+TX+78753"
   },
   "hours": {
-    "open": "",
-    "close": "",
-    "display": "Call for hours",
-    "lastWash": "",
-    "days": ""
+    "open": "07:00",
+    "close": "22:00",
+    "display": "7am-10pm",
+    "lastWash": "9pm",
+    "days": "Open daily"
   },
   "owners": [
     {
