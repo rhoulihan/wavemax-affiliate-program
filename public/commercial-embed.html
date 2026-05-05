@@ -163,19 +163,19 @@
           <h3 class="wm-com-tile-title" data-i18n="com.tiles.terms.title">No contracts, no minimums</h3>
           <p class="wm-com-tile-text" data-i18n="com.tiles.terms.text">Pay per pound, scale up or down as your business needs change. Walk away anytime — no exit fees, no penalty clauses.</p>
         </div>
-        <div class="wm-com-tile">
+        <div class="wm-com-tile" data-equipment-show="hasUVSanitization">
           <div class="wm-com-tile-icon" aria-hidden="true">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 2v4M12 18v4M2 12h4M18 12h4M5 5l3 3M16 16l3 3M5 19l3-3M16 8l3-3"></path><circle cx="12" cy="12" r="3.5"></circle></svg>
           </div>
           <h3 class="wm-com-tile-title" data-i18n="com.tiles.uv.title">UV-sanitized water</h3>
           <p class="wm-com-tile-text" data-i18n="com.tiles.uv.text">Every wash uses Omni LUX UV-treated water — hospital-grade sanitization that exceeds standard commercial laundry hygiene.</p>
         </div>
-        <div class="wm-com-tile">
+        <div class="wm-com-tile" data-equipment-show="capacityLb">
           <div class="wm-com-tile-icon" aria-hidden="true">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="4" width="18" height="16" rx="2"></rect><circle cx="12" cy="13" r="5"></circle></svg>
           </div>
-          <h3 class="wm-com-tile-title" data-i18n="com.tiles.capacity.title">80-lb machines, 42 of them</h3>
-          <p class="wm-com-tile-text" data-i18n="com.tiles.capacity.text">Volume gets handled by volume. 42 commercial Electrolux 450G machines mean your load doesn't wait in queue.</p>
+          <h3 class="wm-com-tile-title" data-i18n="com.tiles.capacity.title"><span data-bind="equipment.capacityLb">80</span>-lb machines, <span data-bind="equipment.washers">42</span> of them</h3>
+          <p class="wm-com-tile-text" data-i18n="com.tiles.capacity.text">Volume gets handled by volume. <span data-bind="equipment.washers">42</span> commercial Electrolux <span data-bind="equipment.spinGDisplay">450G</span> machines mean your load doesn't wait in queue.</p>
         </div>
         <div class="wm-com-tile">
           <div class="wm-com-tile-icon" aria-hidden="true">
@@ -236,7 +236,7 @@
               <h4 class="wm-com-tile-title" data-i18n="com.medical.t1.title">What we wash</h4>
               <p class="wm-com-tile-text" data-i18n="com.medical.t1.text">Scrubs · lab coats · exam-table covers · barrier protection · therapy linens · dental bibs. Whites and colors separated, never mixed with other accounts.</p>
             </div>
-            <div class="wm-com-tile">
+            <div class="wm-com-tile" data-equipment-show="hasUVSanitization">
               <div class="wm-com-tile-icon" aria-hidden="true">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>
               </div>
@@ -270,9 +270,9 @@
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 18 L7 14 L11 18 L21 8"></path></svg>
               </div>
               <h4 class="wm-com-tile-title" data-i18n="com.gym.t2.title">Volume tier pricing</h4>
-              <p class="wm-com-tile-text" data-i18n="com.gym.t2.text">Discounts at 50, 200, and 500 lb per week. Scheduled pickup &amp; delivery in North Austin. Most clubs see daily rotations stabilize within the first month.</p>
+              <p class="wm-com-tile-text" data-i18n="com.gym.t2.text">Discounts at 50, 200, and 500 lb per week. Scheduled pickup &amp; delivery in {{contact.city}}. Most clubs see daily rotations stabilize within the first month.</p>
             </div>
-            <div class="wm-com-tile">
+            <div class="wm-com-tile" data-equipment-show="hasUVSanitization">
               <div class="wm-com-tile-icon" aria-hidden="true">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 12a9 9 0 0 1 18 0 c0 5-4 9-9 9 a9 9 0 0 1-9-9 z"></path><circle cx="12" cy="12" r="3"></circle></svg>
               </div>
@@ -328,7 +328,7 @@
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3 c-3 4-5 7-5 10 a5 5 0 0 0 10 0 c0-3-2-6-5-10z"></path></svg>
               </div>
               <h4 class="wm-com-tile-title" data-i18n="com.restaurant.t2.title">Grease-cycle protocols</h4>
-              <p class="wm-com-tile-text" data-i18n="com.restaurant.t2.text">Pre-treatment for cooking oils and stains, dedicated cycles for kitchen-grade soils. UV-sanitized water at the inlet on every load.</p>
+              <p class="wm-com-tile-text"><span data-i18n="com.restaurant.t2.textBase">Pre-treatment for cooking oils and stains, dedicated cycles for kitchen-grade soils.</span> <span data-equipment-show="hasUVSanitization" data-i18n="com.restaurant.t2.textUv">UV-sanitized water at the inlet on every load.</span></p>
             </div>
             <div class="wm-com-tile">
               <div class="wm-com-tile-icon" aria-hidden="true">
@@ -382,7 +382,7 @@
             </details>
             <details class="wm-com-faq-item">
               <summary class="wm-com-faq-q" data-i18n="com.faq.q3.q">Do you offer pickup &amp; delivery?</summary>
-              <p class="wm-com-faq-a" data-i18n="com.faq.q3.a">Yes — scheduled pickup &amp; delivery is available within North Austin and surrounding areas. Quote is part of the standard onboarding call. Most accounts use a mix of scheduled pickups + walk-in drops as their schedule allows.</p>
+              <p class="wm-com-faq-a" data-i18n="com.faq.q3.a">Yes — scheduled pickup &amp; delivery is available within {{contact.city}} and surrounding areas. Quote is part of the standard onboarding call. Most accounts use a mix of scheduled pickups + walk-in drops as their schedule allows.</p>
             </details>
             <details class="wm-com-faq-item">
               <summary class="wm-com-faq-q" data-i18n="com.faq.q4.q">How fast is the turnaround?</summary>
@@ -429,7 +429,7 @@
   </section>
 
   <script src="/assets/js/iframe-bridge-v2.js?v=20260504"></script>
-  <script src="/assets/js/franchise-page-helpers.js?v=20260505"></script>
+  <script src="/assets/js/franchise-page-helpers.js?v=20260505c"></script>
   <script src="/assets/js/austin-commercial-init.js?v=20260505b"></script>
 
   <script src="https://reports.hibu.com/analytics/js/ybDynamicPhoneInsertion.js"></script>
