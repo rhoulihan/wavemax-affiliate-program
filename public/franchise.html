@@ -203,7 +203,6 @@
     .wm-fr-stats {
       background: linear-gradient(180deg, #154f82 0%, #134770 100%);
       color: #fff; padding: clamp(48px, 5.5vw, 68px) 24px;
-      border-top: 4px solid #f5a623;
     }
     .wm-fr-stats-inner {
       max-width: 1180px; margin: 0 auto;
@@ -216,9 +215,9 @@
       width: 1px; background: rgba(255,255,255,0.15);
     }
     @media (max-width: 640px) { .wm-fr-stat:not(:last-child)::after { display: none; } }
-    .wm-fr-stat .num { font-family: var(--wm-font-heading); font-size: clamp(36px, 4.5vw, 56px); font-weight: 900; color: #f5a623; line-height: 1; margin-bottom: 6px; }
-    .wm-fr-stat .label { font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.85); text-transform: uppercase; letter-spacing: 1.5px; }
-    .wm-fr-stat .sub { font-size: 11px; color: rgba(255,255,255,0.55); margin-top: 4px; letter-spacing: 0.5px; }
+    .wm-fr-stat .num { font-family: var(--wm-font-heading); font-size: clamp(36px, 4.5vw, 56px); font-weight: 900; color: #fff; line-height: 1; margin-bottom: 6px; }
+    .wm-fr-stat .label { font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.78); text-transform: uppercase; letter-spacing: 1.5px; }
+    .wm-fr-stat .sub { font-size: 11px; color: rgba(255,255,255,0.50); margin-top: 4px; letter-spacing: 0.5px; }
     @media (max-width: 640px) {
       .wm-fr-stats-inner { grid-template-columns: repeat(2, 1fr); gap: 24px; }
     }
@@ -231,7 +230,7 @@
     }
     .wm-fr-why-tile {
       background: #fff; border-radius: 10px; padding: 28px;
-      border-left: 4px solid #f5a623;
+      border-left: 3px solid #154f82;
       box-shadow: 0 1px 3px rgba(20,56,82,0.05);
     }
     .wm-fr-why-tile-title {
