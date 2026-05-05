@@ -18,8 +18,8 @@
     "country": "US",
     "addressLine2": "Lansing, MI 48910",
     "geo": {
-      "lat": 42.7144,
-      "lng": -84.5467
+      "lat": 42.684484,
+      "lng": -84.547404
     },
     "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=4929+S+Cedar+St%2C+St+1+Lansing+MI+48910"
   },
@@ -152,8 +152,8 @@
     },
     "geoRegion": "US-MI",
     "geoPlacename": "Lansing, MI",
-    "geoPosition": "42.7144;-84.5467",
-    "icbm": "42.7144, -84.5467"
+    "geoPosition": "42.684484;-84.547404",
+    "icbm": "42.684484, -84.547404"
   },
   "i18n": {
     "languagesAvailable": [

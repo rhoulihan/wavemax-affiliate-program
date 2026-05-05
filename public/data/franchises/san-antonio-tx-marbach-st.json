@@ -18,8 +18,8 @@
     "country": "US",
     "addressLine2": "San Antonio, TX 78227",
     "geo": {
-      "lat": 29.4208,
-      "lng": -98.6219
+      "lat": 29.418183,
+      "lng": -98.637079
     },
     "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=7519+Marbach+St%2C+Ste+102+San+Antonio+TX+78227"
   },
@@ -154,8 +154,8 @@
     },
     "geoRegion": "US-TX",
     "geoPlacename": "San Antonio, TX",
-    "geoPosition": "29.4208;-98.6219",
-    "icbm": "29.4208, -98.6219"
+    "geoPosition": "29.418183;-98.637079",
+    "icbm": "29.418183, -98.637079"
   },
   "i18n": {
     "languagesAvailable": [

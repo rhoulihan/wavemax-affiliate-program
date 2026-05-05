@@ -18,8 +18,8 @@
     "country": "US",
     "addressLine2": "Inkster, MI 48141",
     "geo": {
-      "lat": 42.2939,
-      "lng": -83.3135
+      "lat": 42.31128,
+      "lng": -83.306822
     },
     "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=27125+Cherry+Hill+Rd.+Inkster+MI+48141"
   },
@@ -154,8 +154,8 @@
     },
     "geoRegion": "US-MI",
     "geoPlacename": "Inkster, MI",
-    "geoPosition": "42.2939;-83.3135",
-    "icbm": "42.2939, -83.3135"
+    "geoPosition": "42.31128;-83.306822",
+    "icbm": "42.31128, -83.306822"
   },
   "i18n": {
     "languagesAvailable": [

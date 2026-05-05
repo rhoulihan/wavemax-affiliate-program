@@ -18,8 +18,8 @@
     "country": "US",
     "addressLine2": "Phoenix, AZ 85033",
     "geo": {
-      "lat": 33.4773,
-      "lng": -112.176
+      "lat": 33.481509,
+      "lng": -112.201237
     },
     "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=6544+West+Thomas+Road+Suite+%2323+Phoenix+AZ+85033"
   },
@@ -153,8 +153,8 @@
     },
     "geoRegion": "US-AZ",
     "geoPlacename": "Phoenix, AZ",
-    "geoPosition": "33.4773;-112.176",
-    "icbm": "33.4773, -112.176"
+    "geoPosition": "33.481509;-112.201237",
+    "icbm": "33.481509, -112.201237"
   },
   "i18n": {
     "languagesAvailable": [

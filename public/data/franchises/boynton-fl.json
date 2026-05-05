@@ -18,8 +18,8 @@
     "country": "US",
     "addressLine2": "Boynton Beach, FL 33435",
     "geo": {
-      "lat": 26.535,
-      "lng": -80.0582
+      "lat": 26.540669,
+      "lng": -80.05679
     },
     "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=1550+North+Federal+Highway%2C+Suite+1+Boynton+Beach+FL+33435"
   },
@@ -154,8 +154,8 @@
     },
     "geoRegion": "US-FL",
     "geoPlacename": "Boynton Beach, FL",
-    "geoPosition": "26.535;-80.0582",
-    "icbm": "26.535, -80.0582"
+    "geoPosition": "26.540669;-80.05679",
+    "icbm": "26.540669, -80.05679"
   },
   "i18n": {
     "languagesAvailable": [

@@ -18,8 +18,8 @@
     "country": "US",
     "addressLine2": "Jacksonville, FL 32205",
     "geo": {
-      "lat": 30.3091,
-      "lng": -81.7384
+      "lat": 30.313941,
+      "lng": -81.704465
     },
     "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=929+McDuff+Ave+S+Jacksonville+FL+32205"
   },
@@ -154,8 +154,8 @@
     },
     "geoRegion": "US-FL",
     "geoPlacename": "Jacksonville, FL",
-    "geoPosition": "30.3091;-81.7384",
-    "icbm": "30.3091, -81.7384"
+    "geoPosition": "30.313941;-81.704465",
+    "icbm": "30.313941, -81.704465"
   },
   "i18n": {
     "languagesAvailable": [

@@ -18,8 +18,8 @@
     "country": "US",
     "addressLine2": "Mission, TX 78572",
     "geo": {
-      "lat": 26.2159,
-      "lng": -98.3252
+      "lat": 26.231133,
+      "lng": -98.331566
     },
     "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=301+W+Griffin+Pkwy+Mission+TX+78572"
   },
@@ -154,8 +154,8 @@
     },
     "geoRegion": "US-TX",
     "geoPlacename": "Mission, TX",
-    "geoPosition": "26.2159;-98.3252",
-    "icbm": "26.2159, -98.3252"
+    "geoPosition": "26.231133;-98.331566",
+    "icbm": "26.231133, -98.331566"
   },
   "i18n": {
     "languagesAvailable": [

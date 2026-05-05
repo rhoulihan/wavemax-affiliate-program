@@ -18,8 +18,8 @@
     "country": "US",
     "addressLine2": "Vancouver, WA 98662",
     "geo": {
-      "lat": 45.6387,
-      "lng": -122.5434
+      "lat": 45.657993,
+      "lng": -122.590562
     },
     "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=8109+NE+Vancouver+Mall+Dr%2C+Suit+F%26G+Vancouver+WA+98662"
   },
@@ -150,8 +150,8 @@
     },
     "geoRegion": "US-WA",
     "geoPlacename": "Vancouver, WA",
-    "geoPosition": "45.6387;-122.5434",
-    "icbm": "45.6387, -122.5434"
+    "geoPosition": "45.657993;-122.590562",
+    "icbm": "45.657993, -122.590562"
   },
   "i18n": {
     "languagesAvailable": [

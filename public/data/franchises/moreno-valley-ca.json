@@ -18,8 +18,8 @@
     "country": "US",
     "addressLine2": "Moreno Valley, CA 92553",
     "geo": {
-      "lat": 33.9425,
-      "lng": -117.2297
+      "lat": 33.916635,
+      "lng": -117.273628
     },
     "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=22275+Alessandro+Blvd+Moreno+Valley+CA+92553"
   },
@@ -154,8 +154,8 @@
     },
     "geoRegion": "US-CA",
     "geoPlacename": "Moreno Valley, CA",
-    "geoPosition": "33.9425;-117.2297",
-    "icbm": "33.9425, -117.2297"
+    "geoPosition": "33.916635;-117.273628",
+    "icbm": "33.916635, -117.273628"
   },
   "i18n": {
     "languagesAvailable": [

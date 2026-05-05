@@ -18,8 +18,8 @@
     "country": "US",
     "addressLine2": "Fort Worth, TX 76112",
     "geo": {
-      "lat": 32.7555,
-      "lng": -97.2522
+      "lat": 32.745418,
+      "lng": -97.217446
     },
     "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=6538+Meadowbrook+Dr+Fort+Worth+TX+76112"
   },
@@ -154,8 +154,8 @@
     },
     "geoRegion": "US-TX",
     "geoPlacename": "Fort Worth, TX",
-    "geoPosition": "32.7555;-97.2522",
-    "icbm": "32.7555, -97.2522"
+    "geoPosition": "32.745418;-97.217446",
+    "icbm": "32.745418, -97.217446"
   },
   "i18n": {
     "languagesAvailable": [

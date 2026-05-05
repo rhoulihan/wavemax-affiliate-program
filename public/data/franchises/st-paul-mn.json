@@ -18,8 +18,8 @@
     "country": "US",
     "addressLine2": "St Paul, MN 55106",
     "geo": {
-      "lat": 44.9537,
-      "lng": -93.09
+      "lat": 44.977276,
+      "lng": -93.044675
     },
     "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=1320+Maryland+Ave+E+St+Paul+MN+55106"
   },
@@ -151,8 +151,8 @@
     },
     "geoRegion": "US-MN",
     "geoPlacename": "St Paul, MN",
-    "geoPosition": "44.9537;-93.09",
-    "icbm": "44.9537, -93.09"
+    "geoPosition": "44.977276;-93.044675",
+    "icbm": "44.977276, -93.044675"
   },
   "i18n": {
     "languagesAvailable": [

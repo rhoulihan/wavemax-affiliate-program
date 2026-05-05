@@ -18,8 +18,8 @@
     "country": "US",
     "addressLine2": "Oklahoma City, OK 73159",
     "geo": {
-      "lat": 35.4203,
-      "lng": -97.5164
+      "lat": 35.403769,
+      "lng": -97.565993
     },
     "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=6125+S.+May+Avenue+Oklahoma+City+OK+73159"
   },
@@ -153,8 +153,8 @@
     },
     "geoRegion": "US-OK",
     "geoPlacename": "Oklahoma City, OK",
-    "geoPosition": "35.4203;-97.5164",
-    "icbm": "35.4203, -97.5164"
+    "geoPosition": "35.403769;-97.565993",
+    "icbm": "35.403769, -97.565993"
   },
   "i18n": {
     "languagesAvailable": [

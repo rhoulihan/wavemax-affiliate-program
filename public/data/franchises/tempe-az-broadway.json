@@ -18,8 +18,8 @@
     "country": "US",
     "addressLine2": "Tempe, AZ 85282",
     "geo": {
-      "lat": 33.4148,
-      "lng": -111.9066
+      "lat": 33.378661,
+      "lng": -111.935528
     },
     "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=1845+E+Broadway+Rd+%23114+Tempe+AZ+85282"
   },
@@ -149,8 +149,8 @@
     },
     "geoRegion": "US-AZ",
     "geoPlacename": "Tempe, AZ",
-    "geoPosition": "33.4148;-111.9066",
-    "icbm": "33.4148, -111.9066"
+    "geoPosition": "33.378661;-111.935528",
+    "icbm": "33.378661, -111.935528"
   },
   "i18n": {
     "languagesAvailable": [

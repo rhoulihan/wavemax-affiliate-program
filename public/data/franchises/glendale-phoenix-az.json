@@ -18,8 +18,8 @@
     "country": "US",
     "addressLine2": "Phoenix, AZ 85017",
     "geo": {
-      "lat": 33.5189,
-      "lng": -112.1542
+      "lat": 33.536591,
+      "lng": -112.133848
     },
     "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=6767+N+35th+Ave+Phoenix+AZ+85017"
   },
@@ -152,8 +152,8 @@
     },
     "geoRegion": "US-AZ",
     "geoPlacename": "Phoenix, AZ",
-    "geoPosition": "33.5189;-112.1542",
-    "icbm": "33.5189, -112.1542"
+    "geoPosition": "33.536591;-112.133848",
+    "icbm": "33.536591, -112.133848"
   },
   "i18n": {
     "languagesAvailable": [

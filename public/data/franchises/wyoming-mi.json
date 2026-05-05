@@ -18,8 +18,8 @@
     "country": "US",
     "addressLine2": "Wyoming, MI 49519",
     "geo": {
-      "lat": 42.9134,
-      "lng": -85.7053
+      "lat": 42.914528,
+      "lng": -85.706175
     },
     "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=1633+28th+St+SW+unit+G+Wyoming+MI+49519"
   },
@@ -154,8 +154,8 @@
     },
     "geoRegion": "US-MI",
     "geoPlacename": "Wyoming, MI",
-    "geoPosition": "42.9134;-85.7053",
-    "icbm": "42.9134, -85.7053"
+    "geoPosition": "42.914528;-85.706175",
+    "icbm": "42.914528, -85.706175"
   },
   "i18n": {
     "languagesAvailable": [

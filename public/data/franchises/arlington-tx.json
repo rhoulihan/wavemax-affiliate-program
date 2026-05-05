@@ -18,8 +18,8 @@
     "country": "US",
     "addressLine2": "Arlington, TX 76013",
     "geo": {
-      "lat": 32.7341,
-      "lng": -97.1248
+      "lat": 32.722159,
+      "lng": -97.152342
     },
     "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=2823+W+Park+Row+Dr+Arlington+TX+76013"
   },
@@ -154,8 +154,8 @@
     },
     "geoRegion": "US-TX",
     "geoPlacename": "Arlington, TX",
-    "geoPosition": "32.7341;-97.1248",
-    "icbm": "32.7341, -97.1248"
+    "geoPosition": "32.722159;-97.152342",
+    "icbm": "32.722159, -97.152342"
   },
   "i18n": {
     "languagesAvailable": [

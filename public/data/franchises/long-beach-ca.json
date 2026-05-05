@@ -18,8 +18,8 @@
     "country": "US",
     "addressLine2": "Long Beach, CA 90813",
     "geo": {
-      "lat": 33.7701,
-      "lng": -118.1937
+      "lat": 33.775668,
+      "lng": -118.184696
     },
     "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=601+E+7th+Street+Long+Beach+CA+90813"
   },
@@ -152,8 +152,8 @@
     },
     "geoRegion": "US-CA",
     "geoPlacename": "Long Beach, CA",
-    "geoPosition": "33.7701;-118.1937",
-    "icbm": "33.7701, -118.1937"
+    "geoPosition": "33.775668;-118.184696",
+    "icbm": "33.775668, -118.184696"
   },
   "i18n": {
     "languagesAvailable": [

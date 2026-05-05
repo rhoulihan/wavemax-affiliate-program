@@ -18,8 +18,8 @@
     "country": "US",
     "addressLine2": "Louisville, KY 40204",
     "geo": {
-      "lat": 38.2527,
-      "lng": -85.7585
+      "lat": 38.233093,
+      "lng": -85.734374
     },
     "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=1056+E+Oak+St+Louisville+KY+40204"
   },
@@ -154,8 +154,8 @@
     },
     "geoRegion": "US-KY",
     "geoPlacename": "Louisville, KY",
-    "geoPosition": "38.2527;-85.7585",
-    "icbm": "38.2527, -85.7585"
+    "geoPosition": "38.233093;-85.734374",
+    "icbm": "38.233093, -85.734374"
   },
   "i18n": {
     "languagesAvailable": [

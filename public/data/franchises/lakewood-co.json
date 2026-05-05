@@ -18,8 +18,8 @@
     "country": "US",
     "addressLine2": "Lakewood, CO 80226",
     "geo": {
-      "lat": 39.7055,
-      "lng": -105.0813
+      "lat": 39.696957,
+      "lng": -105.080777
     },
     "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=1090+S+Wadsworth+Blvd+Lakewood+CO+80226"
   },
@@ -147,8 +147,8 @@
     },
     "geoRegion": "US-CO",
     "geoPlacename": "Lakewood, CO",
-    "geoPosition": "39.7055;-105.0813",
-    "icbm": "39.7055, -105.0813"
+    "geoPosition": "39.696957;-105.080777",
+    "icbm": "39.696957, -105.080777"
   },
   "i18n": {
     "languagesAvailable": [

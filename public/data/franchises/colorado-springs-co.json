@@ -18,8 +18,8 @@
     "country": "US",
     "addressLine2": "Colorado Springs, CO 80910",
     "geo": {
-      "lat": 38.8003,
-      "lng": -104.7534
+      "lat": 38.823156,
+      "lng": -104.780075
     },
     "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=609+South+Circle+Drive+Colorado+Springs+CO+80910"
   },
@@ -156,8 +156,8 @@
     },
     "geoRegion": "US-CO",
     "geoPlacename": "Colorado Springs, CO",
-    "geoPosition": "38.8003;-104.7534",
-    "icbm": "38.8003, -104.7534"
+    "geoPosition": "38.823156;-104.780075",
+    "icbm": "38.823156, -104.780075"
   },
   "i18n": {
     "languagesAvailable": [

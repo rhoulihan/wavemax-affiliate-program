@@ -18,8 +18,8 @@
     "country": "US",
     "addressLine2": "Durham, NC 27705",
     "geo": {
-      "lat": 36.0107,
-      "lng": -78.9499
+      "lat": 36.037456,
+      "lng": -78.928957
     },
     "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=3222+Guess+Road+Durham+NC+27705"
   },
@@ -154,8 +154,8 @@
     },
     "geoRegion": "US-NC",
     "geoPlacename": "Durham, NC",
-    "geoPosition": "36.0107;-78.9499",
-    "icbm": "36.0107, -78.9499"
+    "geoPosition": "36.037456;-78.928957",
+    "icbm": "36.037456, -78.928957"
   },
   "i18n": {
     "languagesAvailable": [

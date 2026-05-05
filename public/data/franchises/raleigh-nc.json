@@ -18,8 +18,8 @@
     "country": "US",
     "addressLine2": "Raleigh, NC 27610",
     "geo": {
-      "lat": 35.7796,
-      "lng": -78.588
+      "lat": 35.79498,
+      "lng": -78.610736
     },
     "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=1100+North+Raleigh+Blvd%2C+Suite+143+Raleigh+NC+27610"
   },
@@ -149,8 +149,8 @@
     },
     "geoRegion": "US-NC",
     "geoPlacename": "Raleigh, NC",
-    "geoPosition": "35.7796;-78.588",
-    "icbm": "35.7796, -78.588"
+    "geoPosition": "35.79498;-78.610736",
+    "icbm": "35.79498, -78.610736"
   },
   "i18n": {
     "languagesAvailable": [

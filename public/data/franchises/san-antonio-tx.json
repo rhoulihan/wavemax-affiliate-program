@@ -18,8 +18,8 @@
     "country": "US",
     "addressLine2": "San Antonio, TX 78229",
     "geo": {
-      "lat": 29.4963,
-      "lng": -98.5695
+      "lat": 29.491546,
+      "lng": -98.569899
     },
     "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=1552+Babcock+Rd+San+Antonio+TX+78229"
   },
@@ -152,8 +152,8 @@
     },
     "geoRegion": "US-TX",
     "geoPlacename": "San Antonio, TX",
-    "geoPosition": "29.4963;-98.5695",
-    "icbm": "29.4963, -98.5695"
+    "geoPosition": "29.491546;-98.569899",
+    "icbm": "29.491546, -98.569899"
   },
   "i18n": {
     "languagesAvailable": [

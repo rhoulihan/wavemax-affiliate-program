@@ -18,8 +18,8 @@
     "country": "US",
     "addressLine2": "",
     "geo": {
-      "lat": 30.4058,
-      "lng": -86.6187
+      "lat": 30.417087,
+      "lng": -86.609647
     },
     "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=+Walton+Beach+FL+"
   },
@@ -154,8 +154,8 @@
     },
     "geoRegion": "US-FL",
     "geoPlacename": "Walton Beach, FL",
-    "geoPosition": "30.4058;-86.6187",
-    "icbm": "30.4058, -86.6187"
+    "geoPosition": "30.417087;-86.609647",
+    "icbm": "30.417087, -86.609647"
   },
   "i18n": {
     "languagesAvailable": [

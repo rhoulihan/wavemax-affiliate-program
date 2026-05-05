@@ -18,8 +18,8 @@
     "country": "US",
     "addressLine2": "Midvale, UT 84047",
     "geo": {
-      "lat": 40.611,
-      "lng": -111.8997
+      "lat": 40.620942,
+      "lng": -111.892455
     },
     "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=48+W+7200+S+Midvale+UT+84047"
   },
@@ -152,8 +152,8 @@
     },
     "geoRegion": "US-UT",
     "geoPlacename": "Midvale, UT",
-    "geoPosition": "40.611;-111.8997",
-    "icbm": "40.611, -111.8997"
+    "geoPosition": "40.620942;-111.892455",
+    "icbm": "40.620942, -111.892455"
   },
   "i18n": {
     "languagesAvailable": [

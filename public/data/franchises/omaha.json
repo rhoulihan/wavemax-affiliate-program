@@ -18,8 +18,8 @@
     "country": "US",
     "addressLine2": "Omaha, NE 68104",
     "geo": {
-      "lat": 41.2811,
-      "lng": -96.0203
+      "lat": 41.299885,
+      "lng": -95.99241
     },
     "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=5092+Ames+Ave+Omaha+NE+68104"
   },
@@ -154,8 +154,8 @@
     },
     "geoRegion": "US-NE",
     "geoPlacename": "Omaha, NE",
-    "geoPosition": "41.2811;-96.0203",
-    "icbm": "41.2811, -96.0203"
+    "geoPosition": "41.299885;-95.99241",
+    "icbm": "41.299885, -95.99241"
   },
   "i18n": {
     "languagesAvailable": [

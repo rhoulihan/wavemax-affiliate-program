@@ -18,8 +18,8 @@
     "country": "US",
     "addressLine2": "New Orleans, LA 70122",
     "geo": {
-      "lat": 29.9646,
-      "lng": -90.0519
+      "lat": 29.99913,
+      "lng": -90.060254
     },
     "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=4001+Frenchmen+St+New+Orleans+LA+70122"
   },
@@ -148,8 +148,8 @@
     },
     "geoRegion": "US-LA",
     "geoPlacename": "New Orleans, LA",
-    "geoPosition": "29.9646;-90.0519",
-    "icbm": "29.9646, -90.0519"
+    "geoPosition": "29.99913;-90.060254",
+    "icbm": "29.99913, -90.060254"
   },
   "i18n": {
     "languagesAvailable": [

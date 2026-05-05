@@ -18,8 +18,8 @@
     "country": "US",
     "addressLine2": "Dundalk, MD 21222",
     "geo": {
-      "lat": 39.2715,
-      "lng": -76.4966
+      "lat": 39.268421,
+      "lng": -76.506071
     },
     "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=1774+Merritt+Blvd+Dundalk+MD+21222"
   },
@@ -150,8 +150,8 @@
     },
     "geoRegion": "US-MD",
     "geoPlacename": "Dundalk, MD",
-    "geoPosition": "39.2715;-76.4966",
-    "icbm": "39.2715, -76.4966"
+    "geoPosition": "39.268421;-76.506071",
+    "icbm": "39.268421, -76.506071"
   },
   "i18n": {
     "languagesAvailable": [

@@ -18,8 +18,8 @@
     "country": "US",
     "addressLine2": "Indianapolis, IN 46268",
     "geo": {
-      "lat": 39.8738,
-      "lng": -86.2284
+      "lat": 39.886495,
+      "lng": -86.209099
     },
     "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=2814+W+71st+Street+Indianapolis+IN+46268"
   },
@@ -154,8 +154,8 @@
     },
     "geoRegion": "US-IN",
     "geoPlacename": "Indianapolis, IN",
-    "geoPosition": "39.8738;-86.2284",
-    "icbm": "39.8738, -86.2284"
+    "geoPosition": "39.886495;-86.209099",
+    "icbm": "39.886495, -86.209099"
   },
   "i18n": {
     "languagesAvailable": [

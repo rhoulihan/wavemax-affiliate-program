@@ -18,8 +18,8 @@
     "country": "US",
     "addressLine2": "Maple Heights, OH 44137",
     "geo": {
-      "lat": 41.4098,
-      "lng": -81.5629
+      "lat": 41.416149,
+      "lng": -81.533567
     },
     "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=20980+Libby+Rd+Maple+Heights+OH+44137"
   },
@@ -154,8 +154,8 @@
     },
     "geoRegion": "US-OH",
     "geoPlacename": "Maple Heights, OH",
-    "geoPosition": "41.4098;-81.5629",
-    "icbm": "41.4098, -81.5629"
+    "geoPosition": "41.416149;-81.533567",
+    "icbm": "41.416149, -81.533567"
   },
   "i18n": {
     "languagesAvailable": [

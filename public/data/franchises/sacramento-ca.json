@@ -18,8 +18,8 @@
     "country": "US",
     "addressLine2": "Sacramento, CA 95825",
     "geo": {
-      "lat": 38.6052,
-      "lng": -121.398
+      "lat": 38.608948,
+      "lng": -121.381738
     },
     "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=2428+Watt+Ave+Sacramento+CA+95825"
   },
@@ -154,8 +154,8 @@
     },
     "geoRegion": "US-CA",
     "geoPlacename": "Sacramento, CA",
-    "geoPosition": "38.6052;-121.398",
-    "icbm": "38.6052, -121.398"
+    "geoPosition": "38.608948;-121.381738",
+    "icbm": "38.608948, -121.381738"
   },
   "i18n": {
     "languagesAvailable": [

@@ -18,8 +18,8 @@
     "country": "US",
     "addressLine2": "Chandler, AZ 85225",
     "geo": {
-      "lat": 33.3062,
-      "lng": -111.8413
+      "lat": 33.337383,
+      "lng": -111.841118
     },
     "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=2081+N+Arizona+Ave+%23129+Chandler+AZ+85225"
   },
@@ -147,8 +147,8 @@
     },
     "geoRegion": "US-AZ",
     "geoPlacename": "Chandler, AZ",
-    "geoPosition": "33.3062;-111.8413",
-    "icbm": "33.3062, -111.8413"
+    "geoPosition": "33.337383;-111.841118",
+    "icbm": "33.337383, -111.841118"
   },
   "i18n": {
     "languagesAvailable": [

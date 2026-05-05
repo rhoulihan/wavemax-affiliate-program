@@ -18,8 +18,8 @@
     "country": "US",
     "addressLine2": "Gaithersburg, MD 20878",
     "geo": {
-      "lat": 39.1271,
-      "lng": -77.2197
+      "lat": 39.128241,
+      "lng": -77.204965
     },
     "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=215+Muddy+Branch+Rd+Gaithersburg+MD+20878"
   },
@@ -152,8 +152,8 @@
     },
     "geoRegion": "US-MD",
     "geoPlacename": "Gaithersburg, MD",
-    "geoPosition": "39.1271;-77.2197",
-    "icbm": "39.1271, -77.2197"
+    "geoPosition": "39.128241;-77.204965",
+    "icbm": "39.128241, -77.204965"
   },
   "i18n": {
     "languagesAvailable": [

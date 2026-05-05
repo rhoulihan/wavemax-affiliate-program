@@ -18,8 +18,8 @@
     "country": "US",
     "addressLine2": "Thornton, CO 80260",
     "geo": {
-      "lat": 39.9386,
-      "lng": -104.9719
+      "lat": 39.8476,
+      "lng": -104.995602
     },
     "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=720+W+84th+Ave.+Thornton+CO+80260"
   },
@@ -154,8 +154,8 @@
     },
     "geoRegion": "US-CO",
     "geoPlacename": "Thornton, CO",
-    "geoPosition": "39.9386;-104.9719",
-    "icbm": "39.9386, -104.9719"
+    "geoPosition": "39.8476;-104.995602",
+    "icbm": "39.8476, -104.995602"
   },
   "i18n": {
     "languagesAvailable": [
