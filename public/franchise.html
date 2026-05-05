@@ -169,15 +169,22 @@
       transform: rotate(2deg);
       border: 6px solid rgba(255,255,255,0.94);
       aspect-ratio: 4 / 5;
-      background: url('https://wavemaxlaundry.com/wp-content/uploads/locations/jacksonville-fl/interior-1.jpg') center/cover;
+      background: #1a3f7a;
     }
-    .wm-fr-hero-photo-card::after {
-      content: 'Jacksonville Flagship';
+    .wm-fr-hero-photo-card img {
+      position: absolute; inset: 0;
+      width: 100%; height: 100%; object-fit: cover;
+      opacity: 0; transition: opacity 1.2s ease-in-out;
+    }
+    .wm-fr-hero-photo-card img.is-active { opacity: 1; }
+    .wm-fr-hero-photo-card .photo-tag {
       position: absolute; bottom: 14px; left: 14px;
       background: rgba(245,166,35,0.96); color: #143852;
       font-family: var(--wm-font-heading); font-weight: 800; font-size: 11px;
       letter-spacing: 1.4px; padding: 6px 12px; border-radius: 4px;
       text-transform: uppercase;
+      transition: opacity 0.4s ease 0.4s;
+      z-index: 2;
     }
     @media (max-width: 960px) { .wm-fr-hero-photo-card { transform: none; max-width: 380px; margin: 0 auto; aspect-ratio: 4/3; } }
     .wm-fr-btn-amber {
@@ -342,7 +349,14 @@
           <a class="wm-fr-btn-ghost" href="/why-invest-in-wavemax/">See the numbers</a>
         </div>
       </div>
-      <div class="wm-fr-hero-photo-card" aria-hidden="true"></div>
+      <div class="wm-fr-hero-photo-card" id="wm-fr-hero-rotator" aria-label="Photographs from across the WaveMAX network">
+        <img src="https://wavemaxlaundry.com/wp-content/uploads/locations/jacksonville-fl/interior-1.jpg" alt="WaveMAX Jacksonville flagship — Electrolux washer fleet" data-tag="Jacksonville Flagship" class="is-active">
+        <img src="https://wavemaxlaundry.com/wp-content/uploads/locations/jacksonville-fl/interior-2.jpg" alt="WaveMAX Jacksonville flagship — large-format dryers" data-tag="Jacksonville Flagship" loading="lazy">
+        <img src="https://wavemaxlaundry.com/wp-content/uploads/locations/jacksonville-fl/interior-4.jpg" alt="WaveMAX Jacksonville flagship — Wash-Dry-Fold counter" data-tag="Jacksonville Flagship" loading="lazy">
+        <img src="https://wavemaxlaundry.com/wp-content/uploads/locations/kent-wa/interior-1.jpg" alt="WaveMAX Kent WA — equipment showcase" data-tag="Kent WA" loading="lazy">
+        <img src="https://wavemaxlaundry.com/wp-content/uploads/locations/omaha/interior-1.jpg" alt="WaveMAX Omaha — customer lounge" data-tag="Omaha" loading="lazy">
+        <span class="photo-tag" id="wm-fr-hero-tag">Jacksonville Flagship</span>
+      </div>
     </div>
   </section>
 
@@ -557,6 +571,7 @@
 <footer id="wm-corp-footer"></footer>
 
 <script src="/assets/js/corporate-chrome.js?v=20260506a" defer></script>
+<script src="/assets/js/franchise-hero-rotator.js?v=20260506a" defer></script>
 
 </body>
 </html>
