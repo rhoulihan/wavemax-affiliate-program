@@ -22,9 +22,9 @@
       'about.callBtn':            'Call',
       'about.directionsBtn':      'Visit us',
 
-      'about.stats.founded':      'Serving the Community',
+      'about.stats.founded':      'Serving {{contact.city}} Since',
       'about.stats.owners':       'Local Owners',
-      'about.stats.local':        'Locally Owned',
+      'about.stats.local':        '{{contact.city}} Local',
       'about.stats.disciplines':  'Years Combined Experience',
       'about.stats.community':    'Community First',
 
@@ -61,15 +61,15 @@
     },
 
     es: {
-      'about.title':              'Sobre WaveMAX Austin',
-      'about.tagline':            'Un negocio familiar, construyendo un mejor Austin lavada por lavada.',
-      'about.subtitle':           'WaveMAX Austin es propiedad de la familia Houlihan, quienes lo operan. Elegimos WaveMAX porque creemos en retribuir a nuestra comunidad invirtiendo en la mejor calidad y servicio al precio más bajo — y construyendo localmente, todos los días.',
+      'about.title':              'Sobre WaveMAX {{contact.city}}',
+      'about.tagline':            'De propiedad local. Invertido localmente.',
+      'about.subtitle':           'Esta WaveMAX es propiedad de personas que viven en la comunidad a la que servimos. Elegimos WaveMAX porque creemos en entregar la mejor calidad y servicio al precio justo más bajo — y reinvertir en nuestro vecindario, todos los días.',
       'about.callBtn':            'Llamar',
       'about.directionsBtn':      'Visítanos',
 
-      'about.stats.founded':      'Sirviendo a Austin Desde',
+      'about.stats.founded':      'Sirviendo a {{contact.city}} Desde',
       'about.stats.owners':       'Dueños Familiares',
-      'about.stats.local':        'Local de Austin',
+      'about.stats.local':        'Local de {{contact.city}}',
       'about.stats.disciplines':  'Disciplinas',
       'about.stats.community':    'Comunidad Primero',
 
@@ -115,15 +115,15 @@
     },
 
     pt: {
-      'about.title':              'Sobre a WaveMAX Austin',
-      'about.tagline':            'Um negócio familiar, construindo uma Austin melhor uma lavagem de cada vez.',
-      'about.subtitle':           'A WaveMAX Austin é de propriedade e operada pela família Houlihan. Escolhemos a WaveMAX porque acreditamos em retribuir à nossa comunidade investindo na melhor qualidade e serviço pelo menor preço — e construindo localmente, todos os dias.',
+      'about.title':              'Sobre a WaveMAX {{contact.city}}',
+      'about.tagline':            'De propriedade local. Investido localmente.',
+      'about.subtitle':           'Esta WaveMAX é de propriedade e operada por pessoas que vivem na comunidade que servimos. Escolhemos a WaveMAX porque acreditamos em entregar a melhor qualidade e serviço pelo menor preço justo — e reinvestir em nosso bairro, todos os dias.',
       'about.callBtn':            'Ligar',
       'about.directionsBtn':      'Visite-nos',
 
-      'about.stats.founded':      'Servindo Austin Desde',
+      'about.stats.founded':      'Servindo {{contact.city}} Desde',
       'about.stats.owners':       'Donos Familiares',
-      'about.stats.local':        'Local de Austin',
+      'about.stats.local':        'Local de {{contact.city}}',
       'about.stats.disciplines':  'Disciplinas',
       'about.stats.community':    'Comunidade Primeiro',
 
@@ -169,15 +169,15 @@
     },
 
     de: {
-      'about.title':              'Über WaveMAX Austin',
-      'about.tagline':            'Ein Familienunternehmen, das ein besseres Austin Wäsche für Wäsche aufbaut.',
-      'about.subtitle':           'WaveMAX Austin ist im Besitz und wird betrieben von der Familie Houlihan. Wir haben uns für WaveMAX entschieden, weil wir daran glauben, unserer Gemeinschaft etwas zurückzugeben, indem wir in beste Qualität und Service zum niedrigsten Preis investieren — und lokal aufbauen, jeden Tag.',
+      'about.title':              'Über WaveMAX {{contact.city}}',
+      'about.tagline':            'Lokal im Besitz. Lokal investiert.',
+      'about.subtitle':           'Diese WaveMAX gehört Menschen, die in der Gemeinschaft leben, die wir bedienen, und wird von ihnen betrieben. Wir haben uns für WaveMAX entschieden, weil wir an die beste Qualität und den besten Service zum niedrigsten fairen Preis glauben — und jeden Tag in unsere Nachbarschaft reinvestieren.',
       'about.callBtn':            'Anrufen',
       'about.directionsBtn':      'Besuchen Sie uns',
 
-      'about.stats.founded':      'Austin Bedient Seit',
+      'about.stats.founded':      '{{contact.city}} bedient seit',
       'about.stats.owners':       'Familieninhaber',
-      'about.stats.local':        'Austin Lokal',
+      'about.stats.local':        '{{contact.city}} Lokal',
       'about.stats.disciplines':  'Disziplinen',
       'about.stats.community':    'Gemeinschaft Zuerst',
 
