@@ -22,7 +22,7 @@
 
   <link rel="stylesheet" href="/assets/css/wavemax-theme.css?v=20260504b">
   <link rel="stylesheet" href="/assets/css/wavemax-components.css?v=20260504b">
-  <link rel="stylesheet" href="/assets/css/austin-wdf.css?v=20260504b">
+  <link rel="stylesheet" href="/assets/css/austin-wdf.css?v=20260505">
 </head>
 <body>
 
@@ -47,11 +47,9 @@
            height="auto"
            loading="eager">
       <h1 class="wm-hero-title" data-i18n="wdf.title">Drop off, walk out</h1>
-      <p class="wm-hero-subtitle" data-i18n="wdf.subtitle">
-        Drop your laundry off at WaveMAX Austin — we'll wash it,
-        dry it, fold it, and have it ready for you the next day.
-        Hospital-grade UV-sanitized water, eco-friendly hypoallergenic
-        detergent, no cash needed.
+      <p class="wm-hero-subtitle">
+        <span data-equipment-show="hasUVSanitization" data-i18n="wdf.subtitle.premium">Drop your laundry off at WaveMAX {{contact.city}} — we'll wash it, dry it, fold it, and have it ready for you the next day. Hospital-grade UV-sanitized water, eco-friendly hypoallergenic detergent, no cash needed.</span>
+        <span data-equipment-hide="hasUVSanitization" data-i18n="wdf.subtitle.default">Drop your laundry off at WaveMAX {{contact.city}} — we'll wash it, dry it, fold it, and have it ready for you the next day. Eco-friendly hypoallergenic detergent, no cash needed.</span>
       </p>
       <div class="wm-hero-actions">
         <a class="wm-btn wm-btn-cta"
@@ -82,7 +80,7 @@
         <div class="wm-stat-number" data-bind="pricing.wdf.display">$1.20/lb</div>
         <div class="wm-stat-label" data-i18n="wdf.stats.rate">Per Pound</div>
       </div>
-      <div class="wm-stat-card">
+      <div class="wm-stat-card" data-equipment-show="hasUVSanitization">
         <div class="wm-stat-number">99.9%</div>
         <div class="wm-stat-label" data-i18n="wdf.stats.uv">UV Sanitization</div>
       </div>
@@ -133,9 +131,9 @@
 
         <div class="wm-wdf-card wm-wdf-card-includes">
           <p class="wm-wdf-card-eyebrow" data-i18n="wdf.includes.eyebrow">INCLUDED</p>
-          <h2 class="wm-wdf-card-title" data-i18n="wdf.includes.title">What you get for $1.20/lb</h2>
+          <h2 class="wm-wdf-card-title" data-i18n="wdf.includes.title">What you get for <span data-bind="pricing.wdf.display">$1.20/lb</span></h2>
           <ul class="wm-wdf-includes-list">
-            <li data-i18n="wdf.includes.uv">Hospital-grade UV-sanitized water (Omni LUX)</li>
+            <li data-equipment-show="hasUVSanitization" data-i18n="wdf.includes.uv">Hospital-grade UV-sanitized water (Omni LUX)</li>
             <li data-i18n="wdf.includes.detergent">Eco-friendly hypoallergenic detergent</li>
             <li data-i18n="wdf.includes.fold">Professional folding, ready for the closet</li>
             <li data-i18n="wdf.includes.hangers">Hangers for delicate items, on request</li>
@@ -170,7 +168,7 @@
           <button type="button" class="wm-tab" role="tab" aria-selected="false" data-wdf-tab="who">
             <span aria-hidden="true">👋</span><span data-i18n="wdf.tabs.who">Who it's for</span>
           </button>
-          <button type="button" class="wm-tab" role="tab" aria-selected="false" data-wdf-tab="lux">
+          <button type="button" class="wm-tab" role="tab" aria-selected="false" data-wdf-tab="lux" data-equipment-show="hasUVSanitization">
             <span aria-hidden="true">🧪</span><span data-i18n="wdf.tabs.lux">Sanitization</span>
           </button>
           <button type="button" class="wm-tab" role="tab" aria-selected="false" data-wdf-tab="faq">
@@ -232,7 +230,7 @@
               <h3 class="wm-wdf-tile-title" data-i18n="wdf.tiles.weigh.title">Calibrated weigh</h3>
               <p class="wm-wdf-tile-text" data-i18n="wdf.tiles.weigh.text">We weigh on a calibrated commercial scale at drop-off and again at pickup. You see what we see.</p>
             </div>
-            <div class="wm-wdf-tile">
+            <div class="wm-wdf-tile" data-equipment-show="hasUVSanitization">
               <div class="wm-wdf-tile-icon" aria-hidden="true">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 2v4M12 18v4M2 12h4M18 12h4M5 5l3 3M16 16l3 3M5 19l3-3M16 8l3-3"></path><circle cx="12" cy="12" r="3.5"></circle></svg>
               </div>
@@ -311,8 +309,10 @@
           </div>
         </div>
 
-        <!-- Panel: Sanitization (LUX deep-dive) ------------------- -->
-        <div class="wm-tab-panel" role="tabpanel" data-wdf-panel="lux" aria-hidden="true">
+        <!-- Panel: Sanitization (LUX deep-dive) — only renders for stores
+             with verified UV sanitization. Tab button itself is also
+             gated so it doesn't appear in the strip for non-UV stores. -->
+        <div class="wm-tab-panel" role="tabpanel" data-wdf-panel="lux" aria-hidden="true" data-equipment-show="hasUVSanitization">
           <div class="wm-wdf-lux">
             <div class="wm-wdf-lux-headline">
               <p class="wm-eyebrow" data-i18n="wdf.lux.eyebrow">SANITIZATION</p>
@@ -403,7 +403,7 @@
 
   <script src="/assets/js/iframe-bridge-v2.js?v=20260504b"></script>
   <script src="/assets/js/franchise-page-helpers.js?v=20260505c"></script>
-  <script src="/assets/js/austin-wdf-init.js?v=20260505"></script>
+  <script src="/assets/js/austin-wdf-init.js?v=20260505b"></script>
 
   <!-- Hibu Dynamic Phone Insertion (iframe scope) — same pattern as the
        landing + contact pages. -->

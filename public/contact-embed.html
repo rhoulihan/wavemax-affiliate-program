@@ -36,7 +36,7 @@
            src="https://wavemaxlaundry.com/wp-content/uploads/2026/03/logo-wavemax.png"
            alt="WaveMAX Laundry"
            referrerpolicy="no-referrer">
-      <h1 class="wm-contact-title" data-i18n="contact.title">Get in touch with WaveMAX Austin</h1>
+      <h1 class="wm-contact-title" data-i18n="contact.title">Get in touch with WaveMAX {{contact.city}}</h1>
       <p class="wm-contact-intro" data-i18n="contact.intro">
         Call us, swing by during open hours, or drop a note below — we
         reply within a few hours during business hours.
@@ -235,7 +235,7 @@
           <p class="wm-tile-text" data-i18n="contact.tiles.hours.text">Self-service floor open 7am–10pm, 365 days a year. Last wash starts 9pm so every cycle finishes before close.</p>
         </div>
 
-        <div class="wm-contact-tile">
+        <div class="wm-contact-tile" data-equipment-show="marketingClaims.highSpin">
           <div class="wm-tile-icon" aria-hidden="true">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 5h18M3 12h18M3 19h18"></path><circle cx="6" cy="5" r="2.2" fill="currentColor" stroke="none"></circle><circle cx="14" cy="12" r="2.2" fill="currentColor" stroke="none"></circle><circle cx="9" cy="19" r="2.2" fill="currentColor" stroke="none"></circle></svg>
           </div>
@@ -243,7 +243,7 @@
           <p class="wm-tile-text" data-i18n="contact.tiles.machines.text">42 CompassPro 450G washers and 42 high-velocity dryers. Largest washer takes an 80-pound load — perfect for comforters and blankets.</p>
         </div>
 
-        <div class="wm-contact-tile">
+        <div class="wm-contact-tile" data-equipment-show="hasUVSanitization">
           <div class="wm-tile-icon" aria-hidden="true">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 2v4M12 18v4M2 12h4M18 12h4M5 5l3 3M16 16l3 3M5 19l3-3M16 8l3-3"></path><circle cx="12" cy="12" r="3.5"></circle></svg>
           </div>
@@ -256,7 +256,7 @@
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 7h16l-1.5 11a2 2 0 0 1-2 1.7H7.5a2 2 0 0 1-2-1.7L4 7z"></path><path d="M9 7V5a3 3 0 0 1 6 0v2"></path></svg>
           </div>
           <h3 class="wm-tile-title" data-i18n="contact.tiles.wdf.title">Drop-off wash-dry-fold</h3>
-          <p class="wm-tile-text" data-i18n="contact.tiles.wdf.text">$1.20/lb, 10-pound minimum. 24-hour turnaround (same-day for orders before 11am). Eco-friendly hypoallergenic detergent included.</p>
+          <p class="wm-tile-text" data-i18n="contact.tiles.wdf.text"><span data-bind="pricing.wdf.display">$1.20/lb</span>, <span data-bind="pricing.wdf.minLb">10</span>-pound minimum. 24-hour turnaround (same-day for orders before 11am). Eco-friendly hypoallergenic detergent included.</p>
         </div>
 
         <div class="wm-contact-tile">
@@ -283,7 +283,7 @@
 
   <script src="/assets/js/iframe-bridge-v2.js?v=20260504"></script>
   <script src="/assets/js/franchise-page-helpers.js?v=20260505"></script>
-  <script src="/assets/js/austin-contact-init.js?v=20260505"></script>
+  <script src="/assets/js/austin-contact-init.js?v=20260505b"></script>
 
   <!-- ════════════════════════════════════════════════════════════════════
        Hibu Dynamic Phone Insertion (iframe scope) — same pattern as the
