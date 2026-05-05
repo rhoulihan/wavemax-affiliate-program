@@ -10,7 +10,7 @@
   /* ---------- Translations ---------- */
   const TRANSLATIONS = {
     en: {
-      'contact.title':              'Get in touch with WaveMAX Austin',
+      'contact.title':              'Get in touch with WaveMAX {{contact.city}}',
       'contact.intro':              "Call us, swing by during open hours, or drop a note below — we reply within a few hours during business hours.",
       'contact.card.heading':       'Visit, call, or get directions',
       'contact.card.addressLabel':  'Address',
@@ -50,7 +50,7 @@
       'contact.tiles.payment.text':      "All major credit, debit, and laundry cards. No cash needed for any service. Calibrated weigh on every WDF order so you always know what you're paying."
     },
     es: {
-      'contact.title':              'Contacto · WaveMAX Austin',
+      'contact.title':              'Contacto · WaveMAX {{contact.city}}',
       'contact.intro':              'Llámanos, visítanos durante el horario de atención, o envíanos un mensaje abajo — respondemos en pocas horas durante el horario laboral.',
       'contact.card.heading':       'Visítenos, llámenos o pida indicaciones',
       'contact.card.addressLabel':  'Dirección',
@@ -90,7 +90,7 @@
       'contact.tiles.payment.text':      'Todas las tarjetas mayores de crédito, débito y de lavandería. Sin efectivo necesario. Pesaje calibrado en cada pedido de lavado-secado-doblado para que siempre sepa lo que paga.'
     },
     pt: {
-      'contact.title':              'Fale com a WaveMAX Austin',
+      'contact.title':              'Fale com a WaveMAX {{contact.city}}',
       'contact.intro':              'Ligue, visite durante o horário de atendimento ou envie uma mensagem abaixo — respondemos em poucas horas durante o expediente.',
       'contact.card.heading':       'Visite, ligue ou peça direções',
       'contact.card.addressLabel':  'Endereço',
@@ -130,7 +130,7 @@
       'contact.tiles.payment.text':      'Todos os cartões maiores de crédito, débito e cartões de lavanderia. Não precisa de dinheiro. Pesagem calibrada em cada pedido para que você sempre saiba o quanto está pagando.'
     },
     de: {
-      'contact.title':              'Kontakt zu WaveMAX Austin',
+      'contact.title':              'Kontakt zu WaveMAX {{contact.city}}',
       'contact.intro':              'Rufen Sie uns an, kommen Sie zu unseren Öffnungszeiten vorbei oder senden Sie uns eine Nachricht — wir antworten innerhalb weniger Stunden während der Geschäftszeiten.',
       'contact.card.heading':       'Besuchen Sie uns, rufen Sie an oder holen Sie sich eine Wegbeschreibung',
       'contact.card.addressLabel':  'Adresse',
