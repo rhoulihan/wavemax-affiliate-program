@@ -87,8 +87,16 @@ exports.renderFranchisePage = (req, res, next) => {
   // when the franchise's own google.apiKey is empty.
   const placesApiKey = (data.google && data.google.apiKey) || process.env.GOOGLE_PLACES_API_KEY || '';
   const placeId      = (data.google && data.google.placeId) || '';
+  // Per-request CSP nonce (set by cspNonceMiddleware on res.locals).
+  // Required: the host page CSP demands a nonce on inline <script> and
+  // the 'unsafe-inline' fallback is ignored once a nonce is in the
+  // source list. Without it the script is silently blocked, leaving
+  // window.LOCATION_DATA undefined and the chrome falling back to the
+  // hardcoded austin-landing iframe path.
+  const nonce = res.locals.cspNonce || '';
+  const nonceAttr = nonce ? ` nonce="${escapeHtml(nonce)}"` : '';
   const dataInjection = [
-    '<script>',
+    `<script${nonceAttr}>`,
     `  window.LOCATION_DATA          = ${escapeJsonForScript(data)};`,
     `  window.GOOGLE_PLACES_API_KEY  = ${escapeJsonForScript(placesApiKey)};`,
     `  window.LOCATION_PLACE_ID      = ${escapeJsonForScript(placeId)};`,
