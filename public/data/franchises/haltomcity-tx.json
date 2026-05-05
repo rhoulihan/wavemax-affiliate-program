@@ -38,15 +38,41 @@
     "missionEyebrow": "",
     "missionTitle": "",
     "missionBody": [],
+    "missionProud": "",
     "valuesEyebrow": "",
     "valuesTitle": "",
     "values": [],
     "teamEyebrow": "",
     "teamTitle": "",
     "teamLede": "",
+    "communityEyebrow": "",
     "communityTitle": "",
-    "communityBody": "",
-    "ctaText": ""
+    "communityText": "",
+    "ctaText": "",
+    "ctaCallBtn": "",
+    "ctaDirectionsBtn": "",
+    "stats": {
+      "founded": {
+        "number": "",
+        "label": ""
+      },
+      "owners": {
+        "number": "",
+        "label": ""
+      },
+      "local": {
+        "number": "",
+        "label": ""
+      },
+      "extra": {
+        "number": "",
+        "label": ""
+      },
+      "community": {
+        "number": "",
+        "label": ""
+      }
+    }
   },
   "pricing": {
     "wdf": {
