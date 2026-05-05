@@ -642,6 +642,13 @@
   }
 
   /* ---------- Init ---------- */
+  // Module-scoped cache so the language-changed handler can re-apply
+  // bindings/placeholders without re-fetching. window.LOCATION_DATA is
+  // set on the host frame, not the iframe — accessing it from here
+  // returns undefined, which is why an earlier version silently failed
+  // to substitute placeholders after language switches.
+  let _locationData = null;
+
   function init() {
     if (!window.IframeBridge) {
       console.error('[austin-landing] IframeBridge missing — bridge script must load first');
@@ -660,6 +667,7 @@
     // Bind whenever location-data arrives — also where the per-franchise
     // hero watermark, rotator photos, and SEO bundle are applied.
     window.IframeBridge.onLocationData((data) => {
+      _locationData = data;
       applyBindings(data);
       setStoreWatermark(data);
       populateHeroRotator(data);
@@ -681,12 +689,13 @@
     // Re-apply equipment gates AND placeholder substitution after every
     // language change — translatePage rewrites textContent on every
     // [data-i18n] element, which both restores {{placeholder}} tokens
-    // we already substituted AND can re-show variants we hid (if a
-    // future translation reflows the markup). Cheap to redo.
+    // we already substituted AND can re-show variants we hid. Use the
+    // cached data, NOT window.LOCATION_DATA (that's the host frame).
     window.addEventListener('language-changed', () => {
-      if (window.FranchisePage && window.LOCATION_DATA) {
-        window.FranchisePage.applyEquipment(window.LOCATION_DATA);
-        window.FranchisePage.applyTextPlaceholders(window.LOCATION_DATA);
+      if (window.FranchisePage && _locationData) {
+        applyBindings(_locationData);
+        window.FranchisePage.applyEquipment(_locationData);
+        window.FranchisePage.applyTextPlaceholders(_locationData);
       }
     });
 
