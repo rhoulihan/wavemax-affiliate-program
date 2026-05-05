@@ -92,6 +92,7 @@
     }
   },
   "equipment": {
+    "profileId": "electrolux-mixed-fleet-default",
     "washers": null,
     "dryers": null,
     "capacityLb": null

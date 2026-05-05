@@ -52,7 +52,12 @@ const DEFAULTS = {
       rangeDisplay: 'Call for pricing'
     }
   },
-  equipment: { washers: null, dryers: null, capacityLb: null },
+  // profileId references scripts/franchise-build/equipment-profiles.json.
+  // Default = unaudited mixed-fleet (Electrolux brand, 18-80 lb range, no
+  // store-specific UV / cycle-time / G-rating claims). Stores that have
+  // been verified with different equipment override profileId in
+  // known-overrides.json (Austin → electrolux-450g-80lb-premium).
+  equipment: { profileId: 'electrolux-mixed-fleet-default', washers: null, dryers: null, capacityLb: null },
   amenities: ['Free WiFi', 'Free Parking'],   // safe baseline only — UV LUX, ADA etc. vary by store
   i18n: { languagesAvailable: ['en', 'es', 'pt', 'de'] }
 };

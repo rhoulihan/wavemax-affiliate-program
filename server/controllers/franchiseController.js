@@ -20,6 +20,7 @@
 const fs = require('fs');
 const path = require('path');
 const registry = require('../services/franchiseRegistryService');
+const equipmentProfileService = require('../services/equipmentProfileService');
 const logger = require('../utils/logger');
 
 const ROOT = path.resolve(__dirname, '../..');
@@ -73,7 +74,15 @@ exports.renderFranchisePage = (req, res, next) => {
     return res.status(404).send('Page not available for this franchise.');
   }
 
-  const data = resolution.data;
+  // Enrich equipment with profile-derived metrics (cycle time, spin G,
+  // UV system, marketing claims, capacity range). Pages read these out
+  // of LOCATION_DATA.equipment instead of hardcoding Austin numbers.
+  // Stores without an explicit profileId fall back to the unaudited
+  // mixed-fleet profile, so we never make claims we can't back up.
+  const data = {
+    ...resolution.data,
+    equipment: equipmentProfileService.resolve(resolution.data)
+  };
   const iframeSrc = buildInitialIframeSrc(resolution);
 
   const title = data.brand.name;

@@ -11,7 +11,10 @@
     en: {
       'landing.eyebrow':      'North Austin · Open daily 7am–10pm',
       'landing.title':        "Austin's Cleanest Laundromat",
-      'landing.subtitle':     'Hospital-grade UV-sanitized 450G washers, fast dryers, free WiFi, free parking. Drop off your wash-dry-fold or use our self-serve floor — open every day.',
+      // Equipment-aware variants — applyEquipment picks one based on
+      // LOCATION_DATA.equipment flags. Premium = verified UV+highSpin.
+      'landing.subtitle.premium': 'Hospital-grade UV-sanitized 450G washers, fast dryers, free WiFi, free parking. Drop off your wash-dry-fold or use our self-serve floor — open every day.',
+      'landing.subtitle.default': 'Premium Electrolux washers, fast dryers, free WiFi, free parking. Drop off your wash-dry-fold or use our self-serve floor — open every day.',
       'landing.callBtn':      'Call',
       'landing.directionsBtn':'Get Directions',
       'landing.heroCaption':  'North Austin · 825 E Rundberg Ln',
@@ -27,14 +30,17 @@
       'landing.tab.selfserve':    'Self-Serve Laundry',
       'landing.tab.commercial':   'Commercial',
       'landing.wdf.dropoff.title':'Drop off, walk out',
-      'landing.wdf.dropoff.text': '2-minute drop-off. We weigh, wash, dry, and fold with hospital-grade UV sanitization.',
+      'landing.wdf.dropoff.text.premium': '2-minute drop-off. We weigh, wash, dry, and fold with hospital-grade UV sanitization.',
+      'landing.wdf.dropoff.text.default': '2-minute drop-off. We weigh, wash, dry, and fold with care.',
       'landing.wdf.turnaround.title': '24-hour turnaround',
       'landing.wdf.turnaround.text':  'Drop off in the morning, pick up the next day. Need it faster? Ask about same-day.',
       'landing.wdf.pricing.minSuffix': 'lb minimum',
       'landing.wdf.pricing.text': 'Detergent, dryer sheets, and hangers included. Cards-only payment, no cash needed.',
       'landing.wdf.cta':          'See full WDF details →',
-      'landing.selfserve.machines.title': 'Electrolux CompassPro 450G Washers',
-      'landing.selfserve.machines.text': "20-minute washes, 20-minute dries. High-spin 450G machines mean less time waiting and more time doing what you'd rather be doing.",
+      'landing.selfserve.machines.title.premium': 'Electrolux CompassPro 450G Washers',
+      'landing.selfserve.machines.title.default': 'Premium Electrolux Washers & Dryers',
+      'landing.selfserve.machines.text.premium': "20-minute washes, 20-minute dries. High-spin 450G machines mean less time waiting and more time doing what you'd rather be doing.",
+      'landing.selfserve.machines.text.default': 'High-efficiency Electrolux machines from 18 lb to 80 lb capacity — pick the size that fits your load and skip a trip.',
       'landing.selfserve.uv.title':      'Omni LUX UV Water Sanitization',
       'landing.selfserve.uv.text':       'Every wash cycle benefits from our Hospital Grade UV Water Sanitization system — 99.9% pathogen kill before the water ever touches your clothes.',
       'landing.selfserve.amenities.title':'Free WiFi',
@@ -59,7 +65,8 @@
     es: {
       'landing.eyebrow':      'Norte de Austin · Abierto diariamente 7am–10pm',
       'landing.title':        'La lavandería más limpia de Austin',
-      'landing.subtitle':     'Lavadoras 450G con sanitización UV de grado hospitalario, secadoras rápidas, WiFi gratis, estacionamiento gratis. Deja tu lavado o usa el autoservicio — abierto todos los días.',
+      'landing.subtitle.premium': 'Lavadoras 450G con sanitización UV de grado hospitalario, secadoras rápidas, WiFi gratis, estacionamiento gratis. Deja tu lavado o usa el autoservicio — abierto todos los días.',
+      'landing.subtitle.default': 'Lavadoras Electrolux premium, secadoras rápidas, WiFi gratis, estacionamiento gratis. Deja tu lavado o usa el autoservicio — abierto todos los días.',
       'landing.callBtn':      'Llamar',
       'landing.directionsBtn':'Cómo Llegar',
       'landing.heroCaption':  'Norte de Austin · 825 E Rundberg Ln',
@@ -75,14 +82,17 @@
       'landing.tab.selfserve':    'Autoservicio',
       'landing.tab.commercial':   'Comercial',
       'landing.wdf.dropoff.title':'Déjalo y sal',
-      'landing.wdf.dropoff.text': 'Entrega en 2 minutos. Pesamos, lavamos, secamos y doblamos con sanitización UV de grado hospitalario.',
+      'landing.wdf.dropoff.text.premium': 'Entrega en 2 minutos. Pesamos, lavamos, secamos y doblamos con sanitización UV de grado hospitalario.',
+      'landing.wdf.dropoff.text.default': 'Entrega en 2 minutos. Pesamos, lavamos, secamos y doblamos con cuidado.',
       'landing.wdf.turnaround.title': 'Listo en 24 horas',
       'landing.wdf.turnaround.text':  'Deja por la mañana, recoge al día siguiente. ¿Más rápido? Pregunta por el mismo día.',
       'landing.wdf.pricing.minSuffix': 'lb mínimo',
       'landing.wdf.pricing.text': 'Detergente, hojas para secadora y ganchos incluidos. Solo tarjetas, no se necesita efectivo.',
       'landing.wdf.cta':          'Ver detalles completos de LSD →',
-      'landing.selfserve.machines.title': 'Lavadoras Electrolux CompassPro 450G',
-      'landing.selfserve.machines.text': 'Lavados de 20 minutos, secados de 20 minutos. Las máquinas 450G de alto centrifugado significan menos tiempo esperando.',
+      'landing.selfserve.machines.title.premium': 'Lavadoras Electrolux CompassPro 450G',
+      'landing.selfserve.machines.title.default': 'Lavadoras y secadoras Electrolux premium',
+      'landing.selfserve.machines.text.premium': 'Lavados de 20 minutos, secados de 20 minutos. Las máquinas 450G de alto centrifugado significan menos tiempo esperando.',
+      'landing.selfserve.machines.text.default': 'Máquinas Electrolux de alta eficiencia de 18 lb a 80 lb de capacidad — elige el tamaño que se ajuste a tu carga y ahorra un viaje.',
       'landing.selfserve.uv.title':      'Sanitización UV del Agua Omni LUX',
       'landing.selfserve.uv.text':       'Cada ciclo de lavado se beneficia de nuestro sistema de Sanitización UV del Agua de Grado Hospitalario — 99.9% de eliminación de patógenos antes de que el agua toque tu ropa.',
       'landing.selfserve.amenities.title':'WiFi gratis',
@@ -107,7 +117,8 @@
     pt: {
       'landing.eyebrow':      'Norte de Austin · Aberto diariamente 7am–10pm',
       'landing.title':        'A lavanderia mais limpa de Austin',
-      'landing.subtitle':     'Lavadoras 450G com sanitização UV nível hospitalar, secadoras rápidas, WiFi grátis, estacionamento grátis. Entregue sua roupa ou use o autoatendimento — aberto todos os dias.',
+      'landing.subtitle.premium': 'Lavadoras 450G com sanitização UV nível hospitalar, secadoras rápidas, WiFi grátis, estacionamento grátis. Entregue sua roupa ou use o autoatendimento — aberto todos os dias.',
+      'landing.subtitle.default': 'Lavadoras Electrolux premium, secadoras rápidas, WiFi grátis, estacionamento grátis. Entregue sua roupa ou use o autoatendimento — aberto todos os dias.',
       'landing.callBtn':      'Ligar',
       'landing.directionsBtn':'Ver Direções',
       'landing.heroCaption':  'Norte de Austin · 825 E Rundberg Ln',
@@ -123,14 +134,17 @@
       'landing.tab.selfserve':    'Autoatendimento',
       'landing.tab.commercial':   'Comercial',
       'landing.wdf.dropoff.title':'Deixe e saia',
-      'landing.wdf.dropoff.text': 'Entrega em 2 minutos. Pesamos, lavamos, secamos e dobramos com sanitização UV de nível hospitalar.',
+      'landing.wdf.dropoff.text.premium': 'Entrega em 2 minutos. Pesamos, lavamos, secamos e dobramos com sanitização UV de nível hospitalar.',
+      'landing.wdf.dropoff.text.default': 'Entrega em 2 minutos. Pesamos, lavamos, secamos e dobramos com cuidado.',
       'landing.wdf.turnaround.title': 'Pronto em 24 horas',
       'landing.wdf.turnaround.text':  'Deixe pela manhã, retire no dia seguinte. Mais rápido? Pergunte sobre o mesmo dia.',
       'landing.wdf.pricing.minSuffix': 'lb mínimo',
       'landing.wdf.pricing.text': 'Detergente, lenços para secadora e cabides inclusos. Apenas cartões, não precisa de dinheiro.',
       'landing.wdf.cta':          'Ver detalhes completos de LSD →',
-      'landing.selfserve.machines.title': 'Lavadoras Electrolux CompassPro 450G',
-      'landing.selfserve.machines.text': 'Lavagens de 20 minutos, secagens de 20 minutos. Máquinas 450G de alta centrifugação — menos tempo esperando.',
+      'landing.selfserve.machines.title.premium': 'Lavadoras Electrolux CompassPro 450G',
+      'landing.selfserve.machines.title.default': 'Lavadoras e secadoras Electrolux premium',
+      'landing.selfserve.machines.text.premium': 'Lavagens de 20 minutos, secagens de 20 minutos. Máquinas 450G de alta centrifugação — menos tempo esperando.',
+      'landing.selfserve.machines.text.default': 'Máquinas Electrolux de alta eficiência de 18 lb a 80 lb de capacidade — escolha o tamanho que se ajusta à sua carga e poupe uma viagem.',
       'landing.selfserve.uv.title':      'Sanitização UV da Água Omni LUX',
       'landing.selfserve.uv.text':       'Cada ciclo de lavagem se beneficia de nosso sistema de Sanitização UV da Água de Nível Hospitalar — 99.9% de eliminação de patógenos antes que a água toque suas roupas.',
       'landing.selfserve.amenities.title':'WiFi grátis',
@@ -155,7 +169,8 @@
     de: {
       'landing.eyebrow':      'Nord-Austin · Täglich geöffnet 7–22 Uhr',
       'landing.title':        'Austins sauberste Wäscherei',
-      'landing.subtitle':     'UV-desinfizierte 450G-Waschmaschinen in Krankenhausqualität, schnelle Trockner, kostenloses WLAN, kostenlose Parkplätze. Wäsche abgeben oder Selbstbedienung nutzen — täglich geöffnet.',
+      'landing.subtitle.premium': 'UV-desinfizierte 450G-Waschmaschinen in Krankenhausqualität, schnelle Trockner, kostenloses WLAN, kostenlose Parkplätze. Wäsche abgeben oder Selbstbedienung nutzen — täglich geöffnet.',
+      'landing.subtitle.default': 'Premium Electrolux-Waschmaschinen, schnelle Trockner, kostenloses WLAN, kostenlose Parkplätze. Wäsche abgeben oder Selbstbedienung nutzen — täglich geöffnet.',
       'landing.callBtn':      'Anrufen',
       'landing.directionsBtn':'Wegbeschreibung',
       'landing.heroCaption':  'Nord-Austin · 825 E Rundberg Ln',
@@ -171,14 +186,17 @@
       'landing.tab.selfserve':    'Selbstbedienung',
       'landing.tab.commercial':   'Gewerblich',
       'landing.wdf.dropoff.title':'Abgeben, fertig',
-      'landing.wdf.dropoff.text': '2-Minuten-Abgabe. Wir wiegen, waschen, trocknen und falten mit UV-Sanitierung in Krankenhausqualität.',
+      'landing.wdf.dropoff.text.premium': '2-Minuten-Abgabe. Wir wiegen, waschen, trocknen und falten mit UV-Sanitierung in Krankenhausqualität.',
+      'landing.wdf.dropoff.text.default': '2-Minuten-Abgabe. Wir wiegen, waschen, trocknen und falten mit Sorgfalt.',
       'landing.wdf.turnaround.title': 'Fertig in 24 Stunden',
       'landing.wdf.turnaround.text':  'Morgens abgeben, am nächsten Tag abholen. Schneller? Fragen Sie nach Same-Day.',
       'landing.wdf.pricing.minSuffix': 'lb Mindestmenge',
       'landing.wdf.pricing.text': 'Waschmittel, Trocknertücher und Bügel inklusive. Nur Karten, kein Bargeld nötig.',
       'landing.wdf.cta':          'Alle WDF-Details ansehen →',
-      'landing.selfserve.machines.title': 'Electrolux CompassPro 450G-Waschmaschinen',
-      'landing.selfserve.machines.text': '20-Minuten-Wäschen, 20-Minuten-Trocknen. 450G-Hochschleuder-Maschinen — weniger Wartezeit.',
+      'landing.selfserve.machines.title.premium': 'Electrolux CompassPro 450G-Waschmaschinen',
+      'landing.selfserve.machines.title.default': 'Premium Electrolux Waschmaschinen & Trockner',
+      'landing.selfserve.machines.text.premium': '20-Minuten-Wäschen, 20-Minuten-Trocknen. 450G-Hochschleuder-Maschinen — weniger Wartezeit.',
+      'landing.selfserve.machines.text.default': 'Hocheffiziente Electrolux-Maschinen von 18 lb bis 80 lb Kapazität — wählen Sie die Größe, die zu Ihrer Wäsche passt, und sparen Sie eine Fahrt.',
       'landing.selfserve.uv.title':      'Omni LUX UV-Wassersanitierung',
       'landing.selfserve.uv.text':       'Jeder Waschgang profitiert von unserem UV-Wassersanitierungssystem in Krankenhausqualität — 99,9 % Pathogen-Eliminierung, bevor das Wasser Ihre Wäsche berührt.',
       'landing.selfserve.amenities.title':'Kostenloses WLAN',
@@ -646,10 +664,24 @@
       setStoreWatermark(data);
       populateHeroRotator(data);
       if (window.FranchisePage) {
+        // Gate premium-only sections (Omni LUX UV cards, 450G claims) on
+        // the resolved equipment profile so non-Austin stores never show
+        // claims they can't back up.
+        window.FranchisePage.applyEquipment(data);
         const seo = window.FranchisePage.buildSeo(data, 'landing');
         if (seo) window.IframeBridge.loadSEOConfig(seo);
       }
       if (window.IframeBridge?.updateHeight) window.IframeBridge.updateHeight();
+    });
+
+    // Re-apply equipment gates after every translatePage pass — like
+    // aboutContent overrides, the gate state needs to survive language
+    // changes (translatePage rewrites text but leaves attributes intact,
+    // so this is mostly defensive in case the bridge ever rebuilds nodes).
+    window.addEventListener('language-changed', () => {
+      if (window.FranchisePage && window.LOCATION_DATA) {
+        window.FranchisePage.applyEquipment(window.LOCATION_DATA);
+      }
     });
 
     // Fetch reviews after a short delay so the bridge has time to settle
