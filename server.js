@@ -654,6 +654,9 @@ app.get(['/become-a-franchisee', '/become-a-franchisee/'], (req, res) => {
 app.get(['/about', '/about/'], (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'about.html'));
 });
+app.get(['/testimonials', '/testimonials/'], (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'testimonials.html'));
+});
 
 // Per-franchise dynamic routes — Phase 5a. Mounted AFTER /api/* and the
 // static middleware so unknown slugs fall through to a 404 instead of
