@@ -27,10 +27,11 @@
 .wm-bc-host-current { color: #333; font-weight: 600; }
 
 /* ============================================================
-   B1 UTILITY STRIP — long translations (DE / PT) need a
-   tighter font and white-space:nowrap is killing the right link
-   in EN ("$471K avg gross · 2024 Item 19 →"). Apply a uniform
-   smaller size + allow wrapping if absolutely necessary.
+   B1 UTILITY STRIP — long translations (DE / PT) need a tighter
+   font; the Item 19 CTA was getting clipped against the lang
+   switcher on the right. Move the CTA into b1-left as the
+   rightmost item, leave b1-right for the lang switcher only.
+   Bold the CTA so it reads as a primary call-to-action.
    ============================================================ */
 #wmlnav-wrap .wmlnav-b1-left a,
 #wmlnav-wrap .wmlnav-b1-left span,
@@ -41,6 +42,19 @@
 }
 #wmlnav-wrap .wmlnav-b1 .wmlnav-inner {
   align-items: center !important;
+}
+#wmlnav-wrap .wmlnav-b1-cta {
+  font-weight: 700 !important;
+  color: #ffffff !important;
+  margin-left: 8px !important;
+  padding: 4px 10px !important;
+  background: rgba(245, 166, 35, 0.18) !important;
+  border-radius: 4px !important;
+  text-decoration: none !important;
+  white-space: nowrap !important;
+}
+#wmlnav-wrap .wmlnav-b1-cta:hover {
+  background: rgba(245, 166, 35, 0.32) !important;
 }
 @media (max-width: 1024px) {
   #wmlnav-wrap .wmlnav-b1-left a,

@@ -100,9 +100,9 @@
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
                 <span data-i18n="chrome.b1.locations">75+ locations nationwide &amp; growing</span>
               </span>
+              <a class="wmlnav-b1-cta" href="/why-invest-in-wavemax/" data-i18n="chrome.b1.item19">Item 19: $471K avg gross →</a>
             </div>
             <div class="wmlnav-b1-right">
-              <a href="/why-invest-in-wavemax/" data-i18n="chrome.b1.item19">$471K avg gross · 2024 Item 19 →</a>
               <div class="wm-lang-switcher" id="wm-lang" aria-expanded="false">
                 <button type="button" class="wm-lang-btn" aria-haspopup="true" aria-label="Choose language">
                   <span class="wm-lang-flag wm-flag-en" aria-hidden="true"></span>
