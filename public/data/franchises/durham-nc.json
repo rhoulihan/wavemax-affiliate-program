@@ -129,7 +129,28 @@
       "https://wavemaxlaundry.com/wp-content/uploads/locations/durham-nc/interior-6.jpg"
     ],
     "owner": [],
-    "landmarks": [],
+    "landmarks": [
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/58/Durham_aerial_view%2C_Chanticleer_1952_page_376.jpg/1280px-Durham_aerial_view%2C_Chanticleer_1952_page_376.jpg",
+        "alt": "Durham aerial view, Chanticleer 1952 page 376 — Durham"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ea/Skyline_Panorama_of_Durham%2C_North_Carolina.jpg/1280px-Skyline_Panorama_of_Durham%2C_North_Carolina.jpg",
+        "alt": "Skyline Panorama of Durham, North Carolina — Durham"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/ab/SKYL032_Back_Porch_Skyline_DiscoverDurham.jpg/1280px-SKYL032_Back_Porch_Skyline_DiscoverDurham.jpg",
+        "alt": "SKYL032 Back Porch Skyline DiscoverDurham — Durham"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/ca/Downtown_Durham_Station.jpg/1280px-Downtown_Durham_Station.jpg",
+        "alt": "Downtown Durham Station — Durham"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/af/Duke_Memorial_United_Methodist_Church%2C_Durham%2C_NC_%2849140492242%29.jpg/1280px-Duke_Memorial_United_Methodist_Church%2C_Durham%2C_NC_%2849140492242%29.jpg",
+        "alt": "Duke Memorial United Methodist Church, Durham, NC (49140492242) — Durham"
+      }
+    ],
     "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/durham-nc/hero-1.jpg",
     "ogImageAlt": "WaveMAX Durham NC storefront",
     "mapPreview": ""

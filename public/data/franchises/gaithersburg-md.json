@@ -127,7 +127,28 @@
       "https://wavemaxlaundry.com/wp-content/uploads/locations/kent-wa/interior-6.jpg"
     ],
     "owner": [],
-    "landmarks": [],
+    "landmarks": [
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3b/2019-07-12_11_49_53_View_south_along_Interstate_270_%28Washington_National_Pike%29_from_the_overpass_for_the_ramp_from_southbound_Interstate_270_to_eastbound_Interstate_370_in_Gaithersburg%2C_Montgomery_County%2C_Maryland.jpg/1280px-thumbnail.jpg",
+        "alt": "2019-07-12 11 49 53 View south along Interstate 270 (Washington National Pike) from the overpass for the ramp from southbound Interstate 270 to eastbound Interstate 370 in Gaithersburg, Montgomery County, Maryland — Gaithersburg"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6b/Frederick_Avenue%2C_Gaithersburg%2C_MD.jpg/1280px-Frederick_Avenue%2C_Gaithersburg%2C_MD.jpg",
+        "alt": "Frederick Avenue, Gaithersburg, MD — Gaithersburg"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/1973_Chevrolet_Vegas_%28all_new%29_at_Criswell_Chevrolet_in_Gaithersburg%2C_MD.jpg/1280px-1973_Chevrolet_Vegas_%28all_new%29_at_Criswell_Chevrolet_in_Gaithersburg%2C_MD.jpg",
+        "alt": "1973 Chevrolet Vegas (all new) at Criswell Chevrolet in Gaithersburg, MD — Gaithersburg"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/29/MARCtrainGaithersburgmd.jpg/1280px-MARCtrainGaithersburgmd.jpg",
+        "alt": "MARCtrainGaithersburgmd — Gaithersburg"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5d/TRAIN_WRECK_next_to_Route_355_near_Gaithersburg%2C_MD_in_1973_just_past_Montgomery_College_in_Rockville.jpg/1280px-TRAIN_WRECK_next_to_Route_355_near_Gaithersburg%2C_MD_in_1973_just_past_Montgomery_College_in_Rockville.jpg",
+        "alt": "TRAIN WRECK next to Route 355 near Gaithersburg, MD in 1973 just past Montgomery College in Rockville — Gaithersburg"
+      }
+    ],
     "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/gaithersburg-md/hero-1.webp",
     "ogImageAlt": "WaveMAX Gaithersburg MD storefront",
     "mapPreview": ""

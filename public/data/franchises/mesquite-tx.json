@@ -128,7 +128,12 @@
       "https://wavemaxlaundry.com/wp-content/uploads/locations/mesquite-tx/interior-6.jpg"
     ],
     "owner": [],
-    "landmarks": [],
+    "landmarks": [
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/9/93/Mesquite_Golf_Club.jpg",
+        "alt": "Mesquite Golf Club — Mesquite"
+      }
+    ],
     "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/kent-wa/hero-1.jpg",
     "ogImageAlt": "WaveMAX Mesquite TX storefront",
     "mapPreview": ""

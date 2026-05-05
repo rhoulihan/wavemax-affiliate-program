@@ -129,7 +129,28 @@
       "https://wavemaxlaundry.com/wp-content/uploads/locations/wyoming-mi/interior-6.jpg"
     ],
     "owner": [],
-    "landmarks": [],
+    "landmarks": [
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/96/Wyoming%2C_Michigan_City_Hall_and_District_Court.jpg/1280px-Wyoming%2C_Michigan_City_Hall_and_District_Court.jpg",
+        "alt": "Wyoming, Michigan City Hall and District Court — Wyoming"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/4/46/Fisher%27s_Station%2C_Wyoming_Township%2C_1876.png",
+        "alt": "Fisher's Station, Wyoming Township, 1876 — Wyoming"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fb/St._John_Vianney-Wyoming.jpg/1280px-St._John_Vianney-Wyoming.jpg",
+        "alt": "St. John Vianney-Wyoming — Wyoming"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f8/Wyoming%2C_Michigan_center.jpg/1280px-Wyoming%2C_Michigan_center.jpg",
+        "alt": "Wyoming, Michigan center — Wyoming"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/ce/Wyoming_High_School.jpg/1280px-Wyoming_High_School.jpg",
+        "alt": "Wyoming High School — Wyoming"
+      }
+    ],
     "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/wyoming-mi/hero-1.jpg",
     "ogImageAlt": "WaveMAX Wyoming MI storefront",
     "mapPreview": ""

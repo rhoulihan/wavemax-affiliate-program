@@ -129,7 +129,28 @@
       "https://wavemaxlaundry.com/wp-content/uploads/locations/kent-wa/interior-6.jpg"
     ],
     "owner": [],
-    "landmarks": [],
+    "landmarks": [
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/b/b2/Kentstation.jpg",
+        "alt": "Kentstation — Kent"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/30/Kent_Space_Center_-_Boeing_-_2707478027.jpg/1280px-Kent_Space_Center_-_Boeing_-_2707478027.jpg",
+        "alt": "Kent Space Center - Boeing - 2707478027 — Kent"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b2/Kent_Washington_Above.jpg/1280px-Kent_Washington_Above.jpg",
+        "alt": "Kent Washington Above — Kent"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/3/33/Kentcityhall.jpeg",
+        "alt": "Kentcityhall — Kent"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/aa/Abies_lasiocarpa_0775.JPG/1280px-Abies_lasiocarpa_0775.JPG",
+        "alt": "Abies lasiocarpa 0775 — Kent"
+      }
+    ],
     "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/kent-wa/hero-1.jpg",
     "ogImageAlt": "WaveMAX Kent WA storefront",
     "mapPreview": ""

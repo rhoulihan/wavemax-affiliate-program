@@ -131,7 +131,28 @@
     "owner": [
       "https://wavemaxlaundry.com/wp-content/uploads/locations/colorado-springs-co/owners.jpg"
     ],
-    "landmarks": [],
+    "landmarks": [
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/9/93/Colorado_Springs_Pioneers_Museum_and_Plaza_of_the_Rockies_-_South_Tower.jpg",
+        "alt": "Colorado Springs Pioneers Museum and Plaza of the Rockies - South Tower — Colorado Springs"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e6/Colorado_Springs%2C_Colorado_city_hall.jpg/1280px-Colorado_Springs%2C_Colorado_city_hall.jpg",
+        "alt": "Colorado Springs, Colorado city hall — Colorado Springs"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/16/Saint_Mary%27s_Catholic_Church.JPG/1280px-Saint_Mary%27s_Catholic_Church.JPG",
+        "alt": "Saint Mary's Catholic Church — Colorado Springs"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/68/U.S._Olympic_%26_Paralympic_Museum.jpg/1280px-U.S._Olympic_%26_Paralympic_Museum.jpg",
+        "alt": "U.S. Olympic & Paralympic Museum — Colorado Springs"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5c/Nikola_Tesla%2C_with_his_equipment_Wellcome_M0014782_-_restoration2.jpg/1280px-Nikola_Tesla%2C_with_his_equipment_Wellcome_M0014782_-_restoration2.jpg",
+        "alt": "Nikola Tesla, with his equipment Wellcome M0014782 - restoration2 — Colorado Springs"
+      }
+    ],
     "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/colorado-springs-co/hero-1.jpg",
     "ogImageAlt": "WaveMAX Colorado Springs CO storefront",
     "mapPreview": ""

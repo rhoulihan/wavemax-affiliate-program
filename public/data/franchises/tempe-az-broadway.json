@@ -124,7 +124,28 @@
       "https://wavemaxlaundry.com/wp-content/uploads/locations/tempe-az-broadway/interior-3.webp"
     ],
     "owner": [],
-    "landmarks": [],
+    "landmarks": [
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/76/231021-2_downtown_Tempe_panorama.jpg/1280px-231021-2_downtown_Tempe_panorama.jpg",
+        "alt": "231021-2 downtown Tempe panorama — Tempe"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/2/20/Sun_Devil_Stadium_in_Tempe_Arizona.jpg",
+        "alt": "Sun Devil Stadium in Tempe Arizona — Tempe"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e4/Tempe_Diablo_Stadium.jpg/1280px-Tempe_Diablo_Stadium.jpg",
+        "alt": "Tempe Diablo Stadium — Tempe"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b4/Tempe_Diablo_Stadium_2022.jpg/1280px-Tempe_Diablo_Stadium_2022.jpg",
+        "alt": "Tempe Diablo Stadium 2022 — Tempe"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/88/%22A_Mountain%2C%22_Hayden_Butte%2C_Tempe%2C_AZ_2013_-_panoramio.jpg/1280px-%22A_Mountain%2C%22_Hayden_Butte%2C_Tempe%2C_AZ_2013_-_panoramio.jpg",
+        "alt": "\"A Mountain,\" Hayden Butte, Tempe, AZ 2013 - panoramio — Tempe"
+      }
+    ],
     "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/tempe-az-broadway/hero-1.webp",
     "ogImageAlt": "WaveMAX Tempe, AZ Broadway storefront",
     "mapPreview": ""

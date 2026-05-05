@@ -125,7 +125,28 @@
       "https://wavemaxlaundry.com/wp-content/uploads/locations/vancouver-wa/interior-4.jpg"
     ],
     "owner": [],
-    "landmarks": [],
+    "landmarks": [
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/71/Aerial_view_of_Vancouver%2C_WA.jpg/1280px-Aerial_view_of_Vancouver%2C_WA.jpg",
+        "alt": "Aerial view of Vancouver, WA — Vancouver"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f8/Vancouver_WA_Aerial%2C_June_2024.jpg/1280px-Vancouver_WA_Aerial%2C_June_2024.jpg",
+        "alt": "Vancouver WA Aerial, June 2024 — Vancouver"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5c/Vancouverskylinejuly232023.jpg/1280px-Vancouverskylinejuly232023.jpg",
+        "alt": "Vancouverskylinejuly232023 — Vancouver"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/40/Clark_County_Historical_Museum_-_Vancouver_Washington.jpg/1280px-Clark_County_Historical_Museum_-_Vancouver_Washington.jpg",
+        "alt": "Clark County Historical Museum - Vancouver Washington — Vancouver"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8d/Fort_Vancouver_National_Historic_Site_in_2021_37.jpg/1280px-Fort_Vancouver_National_Historic_Site_in_2021_37.jpg",
+        "alt": "Fort Vancouver National Historic Site in 2021 37 — Vancouver"
+      }
+    ],
     "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/vancouver-wa/hero-1.jpg",
     "ogImageAlt": "WaveMAX Vancouver WA storefront",
     "mapPreview": ""

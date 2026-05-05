@@ -129,7 +129,28 @@
       "https://wavemaxlaundry.com/wp-content/uploads/locations/fargo-nd/interior-6.jpg"
     ],
     "owner": [],
-    "landmarks": [],
+    "landmarks": [
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/eb/Downtown_Fargo_Aerial_-_Facing_Southeast_%2851009704407%29.jpg/1280px-Downtown_Fargo_Aerial_-_Facing_Southeast_%2851009704407%29.jpg",
+        "alt": "Downtown Fargo Aerial - Facing Southeast (51009704407) — Fargo"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/62/Veterans_Memorial_Bridge%2C_Fargo_ND.jpg/1280px-Veterans_Memorial_Bridge%2C_Fargo_ND.jpg",
+        "alt": "Veterans Memorial Bridge, Fargo ND — Fargo"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d7/Cathedral_of_St._Mary_-_Fargo%2C_North_Dakota_03.jpg/1280px-Cathedral_of_St._Mary_-_Fargo%2C_North_Dakota_03.jpg",
+        "alt": "Cathedral of St. Mary - Fargo, North Dakota 03 — Fargo"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d3/Fargo_Air_Museum.jpg/1280px-Fargo_Air_Museum.jpg",
+        "alt": "Fargo Air Museum — Fargo"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/33/Fargo_City_Hall%3B_May_8%2C_2024.png/1280px-Fargo_City_Hall%3B_May_8%2C_2024.png",
+        "alt": "Fargo City Hall; May 8, 2024 — Fargo"
+      }
+    ],
     "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/fargo-nd/hero-1.jpg",
     "ogImageAlt": "WaveMAX Fargo ND storefront",
     "mapPreview": ""

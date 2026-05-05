@@ -129,7 +129,28 @@
       "https://wavemaxlaundry.com/wp-content/uploads/locations/kent-wa/interior-6.jpg"
     ],
     "owner": [],
-    "landmarks": [],
+    "landmarks": [
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d9/Aerial8_%2823928920228%29.jpg/1280px-Aerial8_%2823928920228%29.jpg",
+        "alt": "Aerial8 (23928920228) — Boulder"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/14/Boulder%2C_Colorado%2C_ca._1900.jpg/1280px-Boulder%2C_Colorado%2C_ca._1900.jpg",
+        "alt": "Boulder, Colorado, ca. 1900 — Boulder"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/46/Boulder_Bike_Night_2021.jpg/1280px-Boulder_Bike_Night_2021.jpg",
+        "alt": "Boulder Bike Night 2021 — Boulder"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6d/Boulder_after_a_snowfall..JPG/1280px-Boulder_after_a_snowfall..JPG",
+        "alt": "Boulder after a snowfall. — Boulder"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/21/Bouldercolorado.jpg/1280px-Bouldercolorado.jpg",
+        "alt": "Bouldercolorado — Boulder"
+      }
+    ],
     "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/kent-wa/hero-1.jpg",
     "ogImageAlt": "WaveMAX Boulder CO storefront",
     "mapPreview": ""

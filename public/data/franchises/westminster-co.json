@@ -126,7 +126,16 @@
       "https://wavemaxlaundry.com/wp-content/uploads/locations/westminster-co/interior-6.webp"
     ],
     "owner": [],
-    "landmarks": [],
+    "landmarks": [
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Mountains_viewed_from_Westminster.jpg/1280px-Mountains_viewed_from_Westminster.jpg",
+        "alt": "Mountains viewed from Westminster — Westminster"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fa/Westminster_CO_Historic_Place.jpg/1280px-Westminster_CO_Historic_Place.jpg",
+        "alt": "Westminster CO Historic Place — Westminster"
+      }
+    ],
     "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/westminster-co/hero-1.jpg",
     "ogImageAlt": "WaveMAX Westminster CO storefront",
     "mapPreview": ""

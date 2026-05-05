@@ -125,7 +125,28 @@
       "https://wavemaxlaundry.com/wp-content/uploads/locations/knoxville-tn/interior-4.jpg"
     ],
     "owner": [],
-    "landmarks": [],
+    "landmarks": [
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b2/Knoxville_TN_skyline.jpg/1280px-Knoxville_TN_skyline.jpg",
+        "alt": "Knoxville TN skyline — Knoxville"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/93/Knoxville_aerial_2024.jpg/1280px-Knoxville_aerial_2024.jpg",
+        "alt": "Knoxville aerial 2024 — Knoxville"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f7/Knoxville_skyline_from_Tennessee_River.jpg/1280px-Knoxville_skyline_from_Tennessee_River.jpg",
+        "alt": "Knoxville skyline from Tennessee River — Knoxville"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/72/Knoxville%27s_Bijou_Theatre_following_Melvins_concert.jpg/1280px-Knoxville%27s_Bijou_Theatre_following_Melvins_concert.jpg",
+        "alt": "Knoxville's Bijou Theatre following Melvins concert — Knoxville"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/18/Neyland_Stadium%2C_University_of_Tennessee_at_Knoxville%2C_Fort_Sanders%2C_Knoxville%2C_TN.jpg/1280px-Neyland_Stadium%2C_University_of_Tennessee_at_Knoxville%2C_Fort_Sanders%2C_Knoxville%2C_TN.jpg",
+        "alt": "Neyland Stadium, University of Tennessee at Knoxville, Fort Sanders, Knoxville, TN — Knoxville"
+      }
+    ],
     "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/knoxville-tn/hero-1.jpg",
     "ogImageAlt": "WaveMAX Knoxville TN storefront",
     "mapPreview": ""

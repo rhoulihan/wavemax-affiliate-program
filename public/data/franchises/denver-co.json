@@ -122,7 +122,28 @@
       "https://wavemaxlaundry.com/wp-content/uploads/locations/denver-co/interior-1.jpg"
     ],
     "owner": [],
-    "landmarks": [],
+    "landmarks": [
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/64/2006-07-14-Denver_Skyline_Midnight.jpg/1280px-2006-07-14-Denver_Skyline_Midnight.jpg",
+        "alt": "2006-07-14-Denver Skyline Midnight — Denver"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3b/Denver%2C_Colorado_skyline_%28cropped%29.jpg/1280px-Denver%2C_Colorado_skyline_%28cropped%29.jpg",
+        "alt": "Denver, Colorado skyline (cropped) — Denver"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/46/Denver_Skyline_in_Winter.JPG/1280px-Denver_Skyline_in_Winter.JPG",
+        "alt": "Denver Skyline in Winter — Denver"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1b/Denver_skyline_from_Speer_Blvd_near_I-25%2C_April_2019.jpg/1280px-Denver_skyline_from_Speer_Blvd_near_I-25%2C_April_2019.jpg",
+        "alt": "Denver skyline from Speer Blvd near I-25, April 2019 — Denver"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/48/CU_Denver_Student_Wellness_Center_and_Student_Commons_Building_on_the_Downtown_Denver_Campus_.jpg/1280px-CU_Denver_Student_Wellness_Center_and_Student_Commons_Building_on_the_Downtown_Denver_Campus_.jpg",
+        "alt": "CU Denver Student Wellness Center and Student Commons Building on the Downtown Denver Campus  — Denver"
+      }
+    ],
     "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/denver-co/hero-1.jpg",
     "ogImageAlt": "WaveMAX Denver CO storefront",
     "mapPreview": ""

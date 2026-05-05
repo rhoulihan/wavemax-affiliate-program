@@ -126,7 +126,24 @@
       "https://wavemaxlaundry.com/wp-content/uploads/locations/carrollton-tx/interior-5.jpg"
     ],
     "owner": [],
-    "landmarks": [],
+    "landmarks": [
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0a/Carrollton_July_2019_09_%28Carrollton_Square%29.jpg/1280px-Carrollton_July_2019_09_%28Carrollton_Square%29.jpg",
+        "alt": "Carrollton July 2019 09 (Carrollton Square) — Carrollton"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/65/Carrollton_July_2019_46_%28Carrollton_City_Hall%29.jpg/1280px-Carrollton_July_2019_46_%28Carrollton_City_Hall%29.jpg",
+        "alt": "Carrollton July 2019 46 (Carrollton City Hall) — Carrollton"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Carrollton_July_2019_40_%28DeWitt_Perry_Middle_School%29.jpg/1280px-Carrollton_July_2019_40_%28DeWitt_Perry_Middle_School%29.jpg",
+        "alt": "Carrollton July 2019 40 (DeWitt Perry Middle School) — Carrollton"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/0/0d/Carrollton%2C_Texas_%28_ca._1910-1930%29.jpg",
+        "alt": "Carrollton, Texas ( ca. 1910-1930) — Carrollton"
+      }
+    ],
     "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/carrollton-tx/hero-1.webp",
     "ogImageAlt": "WaveMAX Carrollton TX storefront",
     "mapPreview": ""

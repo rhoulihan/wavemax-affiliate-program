@@ -124,7 +124,28 @@
       "https://wavemaxlaundry.com/wp-content/uploads/locations/raleigh-nc/interior-3.jpg"
     ],
     "owner": [],
-    "landmarks": [],
+    "landmarks": [
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/1/13/N.53.15.5109_Aerial_View_of_Raleigh_Showing_Railroad_Tracks_and_Business_District_about_1949_%2812343711913%29.jpg",
+        "alt": "N.53.15.5109 Aerial View of Raleigh Showing Railroad Tracks and Business District about 1949 (12343711913) — Raleigh"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b0/Duke_Energy_Center_for_the_Performing_Arts_-_Raleigh_Memorial_Auditorium_-_Christmas_tree-_right_view.jpg/1280px-Duke_Energy_Center_for_the_Performing_Arts_-_Raleigh_Memorial_Auditorium_-_Christmas_tree-_right_view.jpg",
+        "alt": "Duke Energy Center for the Performing Arts - Raleigh Memorial Auditorium - Christmas tree- right view — Raleigh"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3c/Fayetteville_Street_in_downtown_Raleigh%2C_North_Carolina.jpg/1280px-Fayetteville_Street_in_downtown_Raleigh%2C_North_Carolina.jpg",
+        "alt": "Fayetteville Street in downtown Raleigh, North Carolina — Raleigh"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9d/Downtown%2C_Raleigh%2C_NC%2C_USA_--_20_May_2012_%28panoramio.com%29.jpg/1280px-Downtown%2C_Raleigh%2C_NC%2C_USA_--_20_May_2012_%28panoramio.com%29.jpg",
+        "alt": "Downtown, Raleigh, NC, USA -- 20 May 2012 (panoramio.com) — Raleigh"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/08/Downtown%2C_Raleigh%2C_NC%2C_USA_--_9_November_2013_%28panoramio.com%29.jpg/1280px-Downtown%2C_Raleigh%2C_NC%2C_USA_--_9_November_2013_%28panoramio.com%29.jpg",
+        "alt": "Downtown, Raleigh, NC, USA -- 9 November 2013 (panoramio.com) — Raleigh"
+      }
+    ],
     "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/raleigh-nc/hero-1.jpg",
     "ogImageAlt": "WaveMAX Raleigh NC storefront",
     "mapPreview": ""

@@ -129,7 +129,28 @@
       "https://wavemaxlaundry.com/wp-content/uploads/locations/arlington-tx/interior-6.jpg"
     ],
     "owner": [],
-    "landmarks": [],
+    "landmarks": [
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/08/Arlington_June_2020_1_%28AT%26T_Stadium%29.jpg/1280px-Arlington_June_2020_1_%28AT%26T_Stadium%29.jpg",
+        "alt": "Arlington June 2020 1 (AT&T Stadium) — Arlington"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/11/Arlington_June_2020_4_%28AT%26T_Stadium%29.jpg/1280px-Arlington_June_2020_4_%28AT%26T_Stadium%29.jpg",
+        "alt": "Arlington June 2020 4 (AT&T Stadium) — Arlington"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2d/RonaldReaganMemorialHwy_ArlingtonTX.jpg/1280px-RonaldReaganMemorialHwy_ArlingtonTX.jpg",
+        "alt": "RonaldReaganMemorialHwy ArlingtonTX — Arlington"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/56/University_of_Texas_at_Arlington_March_2021_103_%28Gateway_Tower%29.jpg/1280px-University_of_Texas_at_Arlington_March_2021_103_%28Gateway_Tower%29.jpg",
+        "alt": "University of Texas at Arlington March 2021 103 (Gateway Tower) — Arlington"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/ca/Arlington_April_2019_17_%28Arlington_City_Council_Chamber%29.jpg/1280px-Arlington_April_2019_17_%28Arlington_City_Council_Chamber%29.jpg",
+        "alt": "Arlington April 2019 17 (Arlington City Council Chamber) — Arlington"
+      }
+    ],
     "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/arlington-tx/hero-1.jpg",
     "ogImageAlt": "WaveMAX Arlington TX storefront",
     "mapPreview": ""

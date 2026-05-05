@@ -127,7 +127,12 @@
       "https://wavemaxlaundry.com/wp-content/uploads/locations/midvale-ut/interior-6.jpg"
     ],
     "owner": [],
-    "landmarks": [],
+    "landmarks": [
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c6/Bus_stands_at_Midvale_Center_station%2C_Jan_15.jpg/1280px-Bus_stands_at_Midvale_Center_station%2C_Jan_15.jpg",
+        "alt": "Bus stands at Midvale Center station, Jan 15 — Midvale"
+      }
+    ],
     "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/midvale-ut/hero-1.jpg",
     "ogImageAlt": "WaveMAX Midvale UT storefront",
     "mapPreview": ""

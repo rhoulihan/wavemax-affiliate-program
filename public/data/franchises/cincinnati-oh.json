@@ -124,7 +124,28 @@
       "https://wavemaxlaundry.com/wp-content/uploads/locations/cincinnati-oh/interior-3.jpg"
     ],
     "owner": [],
-    "landmarks": [],
+    "landmarks": [
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5c/Downtown_Cincinnati_viewed_from_Devou_Park_%28cropped%29.jpg/1280px-Downtown_Cincinnati_viewed_from_Devou_Park_%28cropped%29.jpg",
+        "alt": "Downtown Cincinnati viewed from Devou Park (cropped) — Cincinnati"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f3/Downtown_Cincinnati_viewed_from_Mt._Adams_%28cropped%29.jpg/1280px-Downtown_Cincinnati_viewed_from_Mt._Adams_%28cropped%29.jpg",
+        "alt": "Downtown Cincinnati viewed from Mt. Adams (cropped) — Cincinnati"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/63/Carew_Tower%2C_Cincinnati%2C_Ohio.jpg/1280px-Carew_Tower%2C_Cincinnati%2C_Ohio.jpg",
+        "alt": "Carew Tower, Cincinnati, Ohio — Cincinnati"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/64/Cincinnati-enquirer-building.jpg/1280px-Cincinnati-enquirer-building.jpg",
+        "alt": "Cincinnati-enquirer-building — Cincinnati"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/89/Cincinnati_Art_Museum.jpg/1280px-Cincinnati_Art_Museum.jpg",
+        "alt": "Cincinnati Art Museum — Cincinnati"
+      }
+    ],
     "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/cincinnati-oh/hero-1.jpg",
     "ogImageAlt": "WaveMAX Cincinnati OH storefront",
     "mapPreview": ""

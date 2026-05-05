@@ -129,7 +129,28 @@
       "https://wavemaxlaundry.com/wp-content/uploads/locations/fort-worth-tx/interior-6.jpg"
     ],
     "owner": [],
-    "landmarks": [],
+    "landmarks": [
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/Fort_Worth_Skyline.jpg/1280px-Fort_Worth_Skyline.jpg",
+        "alt": "Fort Worth Skyline — Fort Worth"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/82/Fort_Worth_Skyline_2025.jpg/1280px-Fort_Worth_Skyline_2025.jpg",
+        "alt": "Fort Worth Skyline 2025 — Fort Worth"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/68/Fort_Worth_June_2016_46_%28Sundance_Square_Plaza%29.jpg/1280px-Fort_Worth_June_2016_46_%28Sundance_Square_Plaza%29.jpg",
+        "alt": "Fort Worth June 2016 46 (Sundance Square Plaza) — Fort Worth"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c0/0011Tarrant_County_Courthouse_Full_E_Fort_Worth_Texas.jpg/1280px-0011Tarrant_County_Courthouse_Full_E_Fort_Worth_Texas.jpg",
+        "alt": "0011Tarrant County Courthouse Full E Fort Worth Texas — Fort Worth"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/ad/Fort_Worth_Cultural_District_June_2016_13_%28Kimbell_Art_Museum%29.jpg/1280px-Fort_Worth_Cultural_District_June_2016_13_%28Kimbell_Art_Museum%29.jpg",
+        "alt": "Fort Worth Cultural District June 2016 13 (Kimbell Art Museum) — Fort Worth"
+      }
+    ],
     "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/fort-worth-tx/hero-1.jpg",
     "ogImageAlt": "WaveMAX Fort Worth TX storefront",
     "mapPreview": ""

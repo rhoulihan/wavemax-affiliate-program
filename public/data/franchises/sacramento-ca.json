@@ -129,7 +129,28 @@
       "https://wavemaxlaundry.com/wp-content/uploads/locations/kent-wa/interior-6.jpg"
     ],
     "owner": [],
-    "landmarks": [],
+    "landmarks": [
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/25/K_Street%2C_Downtown_Sacramento%2C_California_%2851030469438%29_%28cropped%29.jpg/1280px-K_Street%2C_Downtown_Sacramento%2C_California_%2851030469438%29_%28cropped%29.jpg",
+        "alt": "K Street, Downtown Sacramento, California (51030469438) (cropped) — Sacramento"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3d/%27Sacramento_Railroad_Station%27_by_William_Hahn.JPG/1280px-%27Sacramento_Railroad_Station%27_by_William_Hahn.JPG",
+        "alt": "'Sacramento Railroad Station' by William Hahn — Sacramento"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8d/300_Capitol_Mall_Sacramento.jpg/1280px-300_Capitol_Mall_Sacramento.jpg",
+        "alt": "300 Capitol Mall Sacramento — Sacramento"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/Aerial_view_of_UC_Davis_%28cropped%29.jpg/1280px-Aerial_view_of_UC_Davis_%28cropped%29.jpg",
+        "alt": "Aerial view of UC Davis (cropped) — Sacramento"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c2/Capitol_Mall_Sacramento%2CCA.jpg/1280px-Capitol_Mall_Sacramento%2CCA.jpg",
+        "alt": "Capitol Mall Sacramento,CA — Sacramento"
+      }
+    ],
     "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/kent-wa/hero-1.jpg",
     "ogImageAlt": "WaveMAX Sacramento CA storefront",
     "mapPreview": ""

@@ -125,7 +125,16 @@
       "https://wavemaxlaundry.com/wp-content/uploads/locations/dundalk-md/interior-4.jpg"
     ],
     "owner": [],
-    "landmarks": [],
+    "landmarks": [
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/8/89/DundalkShoppingCtr.jpg",
+        "alt": "DundalkShoppingCtr — Dundalk"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/c/ce/DundalkElementary.jpg",
+        "alt": "DundalkElementary — Dundalk"
+      }
+    ],
     "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/dundalk-md/hero-1.jpg",
     "ogImageAlt": "WaveMAX Dundalk MD storefront",
     "mapPreview": ""

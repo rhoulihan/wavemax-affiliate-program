@@ -129,7 +129,28 @@
       "https://wavemaxlaundry.com/wp-content/uploads/locations/moreno-valley-ca/interior-6.jpg"
     ],
     "owner": [],
-    "landmarks": [],
+    "landmarks": [
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Moreno_Valley%2C_California_City_Hall.jpg/1280px-Moreno_Valley%2C_California_City_Hall.jpg",
+        "alt": "Moreno Valley, California City Hall — Moreno Valley"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/18/Moreno_Valley-Kitching_view.jpg/1280px-Moreno_Valley-Kitching_view.jpg",
+        "alt": "Moreno Valley-Kitching view — Moreno Valley"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/a/a0/Moreno_Valley-Ironwood_view.jpg",
+        "alt": "Moreno Valley-Ironwood view — Moreno Valley"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/49/%27M%27_from_RCC_%28cropped%29.JPG/1280px-%27M%27_from_RCC_%28cropped%29.JPG",
+        "alt": "'M' from RCC (cropped) — Moreno Valley"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f2/Hidden_Springs%2C_Moreno_Valley_%28cropped%29.jpg/1280px-Hidden_Springs%2C_Moreno_Valley_%28cropped%29.jpg",
+        "alt": "Hidden Springs, Moreno Valley (cropped) — Moreno Valley"
+      }
+    ],
     "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/moreno-valley-ca/hero-1.jpg",
     "ogImageAlt": "WaveMAX Moreno Valley, CA storefront",
     "mapPreview": ""

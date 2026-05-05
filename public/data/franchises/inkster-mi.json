@@ -129,7 +129,24 @@
       "https://wavemaxlaundry.com/wp-content/uploads/locations/inkster-mi/interior-6.jpg"
     ],
     "owner": [],
-    "landmarks": [],
+    "landmarks": [
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b0/Inkster_Michigan_City_Hall.JPG/1280px-Inkster_Michigan_City_Hall.JPG",
+        "alt": "Inkster Michigan City Hall — Inkster"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e5/Michigan_Avenue_at_Beech_Daly_Road_Inkster_Michigan.jpg/1280px-Michigan_Avenue_at_Beech_Daly_Road_Inkster_Michigan.jpg",
+        "alt": "Michigan Avenue at Beech Daly Road Inkster Michigan — Inkster"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ea/Inkster_High_School_Michigan.JPG/1280px-Inkster_High_School_Michigan.JPG",
+        "alt": "Inkster High School Michigan — Inkster"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/be/Metro_Detroit_by_Sentinel-2%2C_2021-09-06_%28big_version%29.jpg/1280px-Metro_Detroit_by_Sentinel-2%2C_2021-09-06_%28big_version%29.jpg",
+        "alt": "Metro Detroit by Sentinel-2, 2021-09-06 (big version) — Inkster"
+      }
+    ],
     "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/inkster-mi/hero-1.jpg",
     "ogImageAlt": "WaveMAX Inkster MI storefront",
     "mapPreview": ""

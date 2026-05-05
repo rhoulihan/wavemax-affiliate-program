@@ -124,7 +124,28 @@
       "https://wavemaxlaundry.com/wp-content/uploads/locations/saint-petersburg-fl/interior-3.webp"
     ],
     "owner": [],
-    "landmarks": [],
+    "landmarks": [
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/61/Downtown_St_Petersburg_Skyline_Dec_2024.jpg/1280px-Downtown_St_Petersburg_Skyline_Dec_2024.jpg",
+        "alt": "Downtown St Petersburg Skyline Dec 2024 — St. Petersburg"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/29/Marina_aerial_southbasin.jpg/1280px-Marina_aerial_southbasin.jpg",
+        "alt": "Marina aerial southbasin — St. Petersburg"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/07/Saint_Petersburg_Florida_Panorama.jpeg/1280px-Saint_Petersburg_Florida_Panorama.jpeg",
+        "alt": "Saint Petersburg Florida Panorama — St. Petersburg"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/83/Museum_of_Fine_Arts_St._Petersburg.JPG/1280px-Museum_of_Fine_Arts_St._Petersburg.JPG",
+        "alt": "Museum of Fine Arts St. Petersburg — St. Petersburg"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6c/S._H._Kress_and_Co._Building_%28St._Petersburg%2C_Florida%29.jpg/1280px-S._H._Kress_and_Co._Building_%28St._Petersburg%2C_Florida%29.jpg",
+        "alt": "S. H. Kress and Co. Building (St. Petersburg, Florida) — St. Petersburg"
+      }
+    ],
     "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/saint-petersburg-fl/hero-1.webp",
     "ogImageAlt": "WaveMAX Saint Petersburg, FL storefront",
     "mapPreview": ""

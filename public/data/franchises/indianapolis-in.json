@@ -129,7 +129,28 @@
       "https://wavemaxlaundry.com/wp-content/uploads/locations/kent-wa/interior-6.jpg"
     ],
     "owner": [],
-    "landmarks": [],
+    "landmarks": [
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/85/Aerial_view_of_Geist_Reservoir_and_surrounding_housing_developments_in_Indianapolis_suburb_of_Fishers%2C_Indiana.jpg/1280px-Aerial_view_of_Geist_Reservoir_and_surrounding_housing_developments_in_Indianapolis_suburb_of_Fishers%2C_Indiana.jpg",
+        "alt": "Aerial view of Geist Reservoir and surrounding housing developments in Indianapolis suburb of Fishers, Indiana — Indianapolis"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e7/City_County_Building_of_Indianapolis.jpg/1280px-City_County_Building_of_Indianapolis.jpg",
+        "alt": "City County Building of Indianapolis — Indianapolis"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/05/Eli_Lilly_Corporate_Center%2C_Indianapolis%2C_Indiana%2C_USA.jpg/1280px-Eli_Lilly_Corporate_Center%2C_Indianapolis%2C_Indiana%2C_USA.jpg",
+        "alt": "Eli Lilly Corporate Center, Indianapolis, Indiana, USA — Indianapolis"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/20/Ethnic_Origins_in_Indianapolis.png/1280px-Ethnic_Origins_in_Indianapolis.png",
+        "alt": "Ethnic Origins in Indianapolis — Indianapolis"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/86/Greater_Indianapolis_%3Bthe_history%2C_the_industries%2C_the_institutions%2C_and_the_people_of_a_city_of_homes_%281910%29_%2814803447463%29.jpg/1280px-Greater_Indianapolis_%3Bthe_history%2C_the_industries%2C_the_institutions%2C_and_the_people_of_a_city_of_homes_%281910%29_%2814803447463%29.jpg",
+        "alt": "Greater Indianapolis ;the history, the industries, the institutions, and the people of a city of homes (1910) (14803447463) — Indianapolis"
+      }
+    ],
     "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/kent-wa/hero-1.jpg",
     "ogImageAlt": "WaveMAX Indianapolis IN storefront",
     "mapPreview": ""

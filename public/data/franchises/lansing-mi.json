@@ -127,7 +127,28 @@
       "https://wavemaxlaundry.com/wp-content/uploads/locations/lansing-mi/interior-6.jpg"
     ],
     "owner": [],
-    "landmarks": [],
+    "landmarks": [
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f4/Lansing_Skyline_2022.jpg/1280px-Lansing_Skyline_2022.jpg",
+        "alt": "Lansing Skyline 2022 — Lansing"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/10/North_Presbyterian_Church_Lansing_east_view.JPG/1280px-North_Presbyterian_Church_Lansing_east_view.JPG",
+        "alt": "North Presbyterian Church Lansing east view — Lansing"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4d/Ottawa_Street_Power_Station%2C_Lansing_MI.jpg/1280px-Ottawa_Street_Power_Station%2C_Lansing_MI.jpg",
+        "alt": "Ottawa Street Power Station, Lansing MI — Lansing"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/51/Grand_River_overlooking_Lansing_River_Trail_Bridge.jpg/1280px-Grand_River_overlooking_Lansing_River_Trail_Bridge.jpg",
+        "alt": "Grand River overlooking Lansing River Trail Bridge — Lansing"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/e/e7/Lansing_Potter_Park_Zoo_Entrance_from_River_Trail.jpg",
+        "alt": "Lansing Potter Park Zoo Entrance from River Trail — Lansing"
+      }
+    ],
     "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/lansing-mi/hero-1.jpg",
     "ogImageAlt": "WaveMAX Lansing MI storefront",
     "mapPreview": ""

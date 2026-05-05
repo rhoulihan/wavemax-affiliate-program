@@ -129,7 +129,12 @@
       "https://wavemaxlaundry.com/wp-content/uploads/locations/bedford-tx/interior-6.jpg"
     ],
     "owner": [],
-    "landmarks": [],
+    "landmarks": [
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7c/BedfordSchool1_%281_of_1%29.jpg/1280px-BedfordSchool1_%281_of_1%29.jpg",
+        "alt": "BedfordSchool1 (1 of 1) — Bedford"
+      }
+    ],
     "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/bedford-tx/hero-1.jpg",
     "ogImageAlt": "WaveMAX Bedford TX storefront",
     "mapPreview": ""

@@ -123,7 +123,24 @@
       "https://wavemaxlaundry.com/wp-content/uploads/locations/mesa-az-broadway/interior-2.jpg"
     ],
     "owner": [],
-    "landmarks": [],
+    "landmarks": [
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/82/Mesa_City_Hall.jpg/1280px-Mesa_City_Hall.jpg",
+        "alt": "Mesa City Hall — Mesa"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/32/Mesa-Mesa_Grande_Ruins-5.JPG/1280px-Mesa-Mesa_Grande_Ruins-5.JPG",
+        "alt": "Mesa-Mesa Grande Ruins-5 — Mesa"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6c/Mesa_Arts_Center_-_West_-_2009-09-16.JPG/1280px-Mesa_Arts_Center_-_West_-_2009-09-16.JPG",
+        "alt": "Mesa Arts Center - West - 2009-09-16 — Mesa"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/8/89/Mesa-Mesa_Arizona_Temple-1919.jpg",
+        "alt": "Mesa-Mesa Arizona Temple-1919 — Mesa"
+      }
+    ],
     "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/mesa-az-broadway/hero-1.jpg",
     "ogImageAlt": "WaveMAX Mesa AZ Broadway storefront",
     "mapPreview": ""

@@ -122,7 +122,20 @@
       "https://wavemaxlaundry.com/wp-content/uploads/locations/lakewood-co/interior-1.jpg"
     ],
     "owner": [],
-    "landmarks": [],
+    "landmarks": [
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c0/Green_Mountain_%28Lakewood%2C_Colorado%29.jpg/1280px-Green_Mountain_%28Lakewood%2C_Colorado%29.jpg",
+        "alt": "Green Mountain (Lakewood, Colorado) — Lakewood"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d8/LakewoodCivicCenter.JPG/1280px-LakewoodCivicCenter.JPG",
+        "alt": "LakewoodCivicCenter — Lakewood"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fc/Red_Rocks_Community_College_Main_Entrance%2C_Lakewood%2C_Colorado.jpg/1280px-Red_Rocks_Community_College_Main_Entrance%2C_Lakewood%2C_Colorado.jpg",
+        "alt": "Red Rocks Community College Main Entrance, Lakewood, Colorado — Lakewood"
+      }
+    ],
     "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/lakewood-co/hero-1.jpg",
     "ogImageAlt": "WaveMAX Lakewood CO storefront",
     "mapPreview": ""

@@ -129,7 +129,28 @@
       "https://wavemaxlaundry.com/wp-content/uploads/locations/dallas-tx/interior-6.jpg"
     ],
     "owner": [],
-    "landmarks": [],
+    "landmarks": [
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/a/a3/Dallas_bridge_skyline.jpg",
+        "alt": "Dallas bridge skyline — Dallas"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/c/c6/Dallas_downtown_skyline_seen_from_Lake_Cliff.jpg",
+        "alt": "Dallas downtown skyline seen from Lake Cliff — Dallas"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2e/Dallas_-_First_Baptist_Church_02.jpg/1280px-Dallas_-_First_Baptist_Church_02.jpg",
+        "alt": "Dallas - First Baptist Church 02 — Dallas"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8d/Dallas_-_Municipal_Building_01A.jpg/1280px-Dallas_-_Municipal_Building_01A.jpg",
+        "alt": "Dallas - Municipal Building 01A — Dallas"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/88/Dallas_County_Courthouse_-_Old_Red.jpg/1280px-Dallas_County_Courthouse_-_Old_Red.jpg",
+        "alt": "Dallas County Courthouse - Old Red — Dallas"
+      }
+    ],
     "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/dallas-tx/hero-1.jpg",
     "ogImageAlt": "WaveMAX Dallas TX storefront",
     "mapPreview": ""

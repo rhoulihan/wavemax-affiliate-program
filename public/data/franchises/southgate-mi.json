@@ -129,7 +129,28 @@
       "https://wavemaxlaundry.com/wp-content/uploads/locations/southgate-mi/interior-6.jpg"
     ],
     "owner": [],
-    "landmarks": [],
+    "landmarks": [
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/25/Southgate%2C_MI_%28Dix_Toledo_Rd%29.jpg/1280px-Southgate%2C_MI_%28Dix_Toledo_Rd%29.jpg",
+        "alt": "Southgate, MI (Dix Toledo Rd) — Southgate"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Southgate%2C_MI_location.png/1280px-Southgate%2C_MI_location.png",
+        "alt": "Southgate, MI location — Southgate"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/50/Southgate_Municipal_Complex_%28Southgate%2C_MI%29.jpg/1280px-Southgate_Municipal_Complex_%28Southgate%2C_MI%29.jpg",
+        "alt": "Southgate Municipal Complex (Southgate, MI) — Southgate"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/94/Downriver_community%2C_MI_location.png/1280px-Downriver_community%2C_MI_location.png",
+        "alt": "Downriver community, MI location — Southgate"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/be/Metro_Detroit_by_Sentinel-2%2C_2021-09-06_%28big_version%29.jpg/1280px-Metro_Detroit_by_Sentinel-2%2C_2021-09-06_%28big_version%29.jpg",
+        "alt": "Metro Detroit by Sentinel-2, 2021-09-06 (big version) — Southgate"
+      }
+    ],
     "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/southgate-mi/hero-1.jpg",
     "ogImageAlt": "WaveMAX Southgate, MI storefront",
     "mapPreview": ""

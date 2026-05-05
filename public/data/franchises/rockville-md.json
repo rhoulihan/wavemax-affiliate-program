@@ -129,7 +129,28 @@
       "https://wavemaxlaundry.com/wp-content/uploads/locations/rockville-md/interior-6.jpg"
     ],
     "owner": [],
-    "landmarks": [],
+    "landmarks": [
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1b/RockvilleMaryland-TowerBuilding.jpg/1280px-RockvilleMaryland-TowerBuilding.jpg",
+        "alt": "RockvilleMaryland-TowerBuilding — Rockville"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b4/2019-07-12_11_25_04_View_north_along_Interstate_270_%28Washington_National_Pike%29_from_the_overpass_for_West_Gude_Drive_in_Rockville%2C_Montgomery_County%2C_Maryland.jpg/1280px-thumbnail.jpg",
+        "alt": "2019-07-12 11 25 04 View north along Interstate 270 (Washington National Pike) from the overpass for West Gude Drive in Rockville, Montgomery County, Maryland — Rockville"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/45/Rockville_City_Hall.jpg/1280px-Rockville_City_Hall.jpg",
+        "alt": "Rockville City Hall — Rockville"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/58/Rockville_railroad_station.jpg/1280px-Rockville_railroad_station.jpg",
+        "alt": "Rockville railroad station — Rockville"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a8/RockvilleMaryland-Northwest.jpg/1280px-RockvilleMaryland-Northwest.jpg",
+        "alt": "RockvilleMaryland-Northwest — Rockville"
+      }
+    ],
     "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/rockville-md/hero-1.jpg",
     "ogImageAlt": "WaveMAX Rockville, MD storefront",
     "mapPreview": ""

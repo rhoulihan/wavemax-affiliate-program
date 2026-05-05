@@ -127,7 +127,28 @@
       "https://wavemaxlaundry.com/wp-content/uploads/locations/long-beach-ca/interior-6.jpg"
     ],
     "owner": [],
-    "landmarks": [],
+    "landmarks": [
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2c/Long_Beach_Naval_Shipyard_aerial_view_in_October_1993.JPEG/1280px-Long_Beach_Naval_Shipyard_aerial_view_in_October_1993.JPEG",
+        "alt": "Long Beach Naval Shipyard aerial view in October 1993 — Long Beach"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/09/LongBeachLongView.jpg/1280px-LongBeachLongView.jpg",
+        "alt": "LongBeachLongView — Long Beach"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/79/Birds_eye_of_longbeach_shot_by_Supermillion_VIsuals.jpg/1280px-Birds_eye_of_longbeach_shot_by_Supermillion_VIsuals.jpg",
+        "alt": "Birds eye of longbeach shot by Supermillion VIsuals — Long Beach"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/5/5d/LongBeach-oilfield-1920.jpg",
+        "alt": "LongBeach-oilfield-1920 — Long Beach"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1f/Downtown_Long_Beach.jpg/1280px-Downtown_Long_Beach.jpg",
+        "alt": "Downtown Long Beach — Long Beach"
+      }
+    ],
     "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/long-beach-ca/hero-1.jpg",
     "ogImageAlt": "WaveMAX Long Beach CA storefront",
     "mapPreview": ""

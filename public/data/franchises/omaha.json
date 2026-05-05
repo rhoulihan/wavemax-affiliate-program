@@ -129,7 +129,28 @@
       "https://wavemaxlaundry.com/wp-content/uploads/locations/omaha/interior-6.jpg"
     ],
     "owner": [],
-    "landmarks": [],
+    "landmarks": [
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b6/City_of_Omaha%2C_Nebraska_Skyline_on_the_Missouri_River_%2830899969517%29.jpg/1280px-City_of_Omaha%2C_Nebraska_Skyline_on_the_Missouri_River_%2830899969517%29.jpg",
+        "alt": "City of Omaha, Nebraska Skyline on the Missouri River (30899969517) — Omaha"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3f/NE_Corner_view_of_Omaha_Star_Building.jpg/1280px-NE_Corner_view_of_Omaha_Star_Building.jpg",
+        "alt": "NE Corner view of Omaha Star Building — Omaha"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/55/Office_buildings_in_downtown_Omaha.jpg/1280px-Office_buildings_in_downtown_Omaha.jpg",
+        "alt": "Office buildings in downtown Omaha — Omaha"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fc/Inside_TD_Ameritrade_Park_Omaha.jpg/1280px-Inside_TD_Ameritrade_Park_Omaha.jpg",
+        "alt": "Inside TD Ameritrade Park Omaha — Omaha"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e1/Omaha-Night-10th-Capitol-Spencer-Hession.jpg/1280px-Omaha-Night-10th-Capitol-Spencer-Hession.jpg",
+        "alt": "Omaha-Night-10th-Capitol-Spencer-Hession — Omaha"
+      }
+    ],
     "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/omaha/hero-1.jpg",
     "ogImageAlt": "WaveMAX Omaha storefront",
     "mapPreview": ""
