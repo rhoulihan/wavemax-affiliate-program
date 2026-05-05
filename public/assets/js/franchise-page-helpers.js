@@ -225,22 +225,62 @@
     return Boolean(v);
   }
 
+  function setVisible(el, visible) {
+    // Don't use el.hidden — `[hidden] { display: none }` is the browser
+    // default but ANY rule that sets display: more specifically (e.g.
+    // .wm-card { display: flex }) wins on cascade and the element stays
+    // visible. Use inline style.display which beats class-level rules.
+    if (visible) el.style.removeProperty('display');
+    else el.style.display = 'none';
+  }
+
   function applyEquipment(data) {
     const eq = data && data.equipment;
     if (!eq) return;
     document.querySelectorAll('[data-equipment-show]').forEach((el) => {
       const flag = el.getAttribute('data-equipment-show');
-      el.hidden = !getFlag(eq, flag);
+      setVisible(el, getFlag(eq, flag));
     });
     document.querySelectorAll('[data-equipment-hide]').forEach((el) => {
       const flag = el.getAttribute('data-equipment-hide');
-      el.hidden = getFlag(eq, flag);
+      setVisible(el, !getFlag(eq, flag));
+    });
+  }
+
+  /**
+   * applyTextPlaceholders(LOCATION_DATA)
+   *
+   * Walks every [data-i18n] element and substitutes {{dotted.path}}
+   * placeholders against LOCATION_DATA. Lets translations carry slots
+   * for franchise-specific values that change per store, without
+   * forcing every i18n key to ship a per-store variant.
+   *
+   *   "{{contact.city}}'s Cleanest Laundromat"
+   *     austin → "Austin's Cleanest Laundromat"
+   *     jackson-keller-san-antonio → "San Antonio's Cleanest Laundromat"
+   *
+   *   "Drop off in the morning at {{contact.city}}, {{contact.state}}"
+   *
+   * Run AFTER translatePage — that's the call that sets textContent
+   * from the i18n dictionary, and we substitute on top of that text.
+   */
+  function applyTextPlaceholders(data) {
+    if (!data) return;
+    document.querySelectorAll('[data-i18n]').forEach((el) => {
+      const text = el.textContent || '';
+      if (text.indexOf('{{') === -1) return;
+      const replaced = text.replace(/\{\{\s*([^}\s]+)\s*\}\}/g, (_, p) => {
+        const v = p.split('.').reduce((acc, k) => (acc == null ? acc : acc[k]), data);
+        return v == null ? '' : String(v);
+      });
+      if (replaced !== text) el.textContent = replaced;
     });
   }
 
   window.FranchisePage = {
     applyHeroWatermark,
     applyEquipment,
+    applyTextPlaceholders,
     buildSeo,
     businessId,
     pageUrl,

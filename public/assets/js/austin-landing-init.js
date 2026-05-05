@@ -10,7 +10,7 @@
   const TRANSLATIONS = {
     en: {
       'landing.eyebrow':      'North Austin · Open daily 7am–10pm',
-      'landing.title':        "Austin's Cleanest Laundromat",
+      'landing.title':        "{{contact.city}}'s Cleanest Laundromat",
       // Equipment-aware variants — applyEquipment picks one based on
       // LOCATION_DATA.equipment flags. Premium = verified UV+highSpin.
       'landing.subtitle.premium': 'Hospital-grade UV-sanitized 450G washers, fast dryers, free WiFi, free parking. Drop off your wash-dry-fold or use our self-serve floor — open every day.',
@@ -64,7 +64,7 @@
     },
     es: {
       'landing.eyebrow':      'Norte de Austin · Abierto diariamente 7am–10pm',
-      'landing.title':        'La lavandería más limpia de Austin',
+      'landing.title':        'La lavandería más limpia de {{contact.city}}',
       'landing.subtitle.premium': 'Lavadoras 450G con sanitización UV de grado hospitalario, secadoras rápidas, WiFi gratis, estacionamiento gratis. Deja tu lavado o usa el autoservicio — abierto todos los días.',
       'landing.subtitle.default': 'Lavadoras Electrolux premium, secadoras rápidas, WiFi gratis, estacionamiento gratis. Deja tu lavado o usa el autoservicio — abierto todos los días.',
       'landing.callBtn':      'Llamar',
@@ -116,7 +116,7 @@
     },
     pt: {
       'landing.eyebrow':      'Norte de Austin · Aberto diariamente 7am–10pm',
-      'landing.title':        'A lavanderia mais limpa de Austin',
+      'landing.title':        'A lavanderia mais limpa de {{contact.city}}',
       'landing.subtitle.premium': 'Lavadoras 450G com sanitização UV nível hospitalar, secadoras rápidas, WiFi grátis, estacionamento grátis. Entregue sua roupa ou use o autoatendimento — aberto todos os dias.',
       'landing.subtitle.default': 'Lavadoras Electrolux premium, secadoras rápidas, WiFi grátis, estacionamento grátis. Entregue sua roupa ou use o autoatendimento — aberto todos os dias.',
       'landing.callBtn':      'Ligar',
@@ -168,7 +168,7 @@
     },
     de: {
       'landing.eyebrow':      'Nord-Austin · Täglich geöffnet 7–22 Uhr',
-      'landing.title':        'Austins sauberste Wäscherei',
+      'landing.title':        '{{contact.city}}s sauberste Wäscherei',
       'landing.subtitle.premium': 'UV-desinfizierte 450G-Waschmaschinen in Krankenhausqualität, schnelle Trockner, kostenloses WLAN, kostenlose Parkplätze. Wäsche abgeben oder Selbstbedienung nutzen — täglich geöffnet.',
       'landing.subtitle.default': 'Premium Electrolux-Waschmaschinen, schnelle Trockner, kostenloses WLAN, kostenlose Parkplätze. Wäsche abgeben oder Selbstbedienung nutzen — täglich geöffnet.',
       'landing.callBtn':      'Anrufen',
@@ -668,19 +668,25 @@
         // the resolved equipment profile so non-Austin stores never show
         // claims they can't back up.
         window.FranchisePage.applyEquipment(data);
+        // Substitute {{contact.city}} etc. placeholders in translated
+        // text. Runs AFTER applyEquipment so hidden variants don't
+        // waste a substitution pass.
+        window.FranchisePage.applyTextPlaceholders(data);
         const seo = window.FranchisePage.buildSeo(data, 'landing');
         if (seo) window.IframeBridge.loadSEOConfig(seo);
       }
       if (window.IframeBridge?.updateHeight) window.IframeBridge.updateHeight();
     });
 
-    // Re-apply equipment gates after every translatePage pass — like
-    // aboutContent overrides, the gate state needs to survive language
-    // changes (translatePage rewrites text but leaves attributes intact,
-    // so this is mostly defensive in case the bridge ever rebuilds nodes).
+    // Re-apply equipment gates AND placeholder substitution after every
+    // language change — translatePage rewrites textContent on every
+    // [data-i18n] element, which both restores {{placeholder}} tokens
+    // we already substituted AND can re-show variants we hid (if a
+    // future translation reflows the markup). Cheap to redo.
     window.addEventListener('language-changed', () => {
       if (window.FranchisePage && window.LOCATION_DATA) {
         window.FranchisePage.applyEquipment(window.LOCATION_DATA);
+        window.FranchisePage.applyTextPlaceholders(window.LOCATION_DATA);
       }
     });
 
