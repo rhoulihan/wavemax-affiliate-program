@@ -21,7 +21,8 @@
       "lat": 29.519498,
       "lng": -98.532969
     },
-    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=2525+Jackson+Keller+Rd.+San+Antonio+TX+78230"
+    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=2525+Jackson+Keller+Rd.+San+Antonio+TX+78230",
+    "mapsEmbedUrl": "https://www.google.com/maps?q=WaveMAX+Laundry+2525+Jackson+Keller+Rd.+San+Antonio+TX+78230&output=embed"
   },
   "hours": {
     "open": "",

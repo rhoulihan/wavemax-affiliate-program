@@ -21,7 +21,8 @@
       "lat": 42.31128,
       "lng": -83.306822
     },
-    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=27125+Cherry+Hill+Rd.+Inkster+MI+48141"
+    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=27125+Cherry+Hill+Rd.+Inkster+MI+48141",
+    "mapsEmbedUrl": "https://www.google.com/maps?q=WaveMAX+Laundry+27125+Cherry+Hill+Rd.+Inkster+MI+48141&output=embed"
   },
   "hours": {
     "open": "",

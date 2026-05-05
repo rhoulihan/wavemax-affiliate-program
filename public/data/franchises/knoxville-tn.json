@@ -21,7 +21,8 @@
       "lat": 36.007268,
       "lng": -83.975398
     },
-    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=5210A+Schubert+Rd.+Knoxville+TN+37912"
+    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=5210A+Schubert+Rd.+Knoxville+TN+37912",
+    "mapsEmbedUrl": "https://www.google.com/maps?q=WaveMAX+Laundry+5210A+Schubert+Rd.+Knoxville+TN+37912&output=embed"
   },
   "hours": {
     "open": "",

@@ -21,7 +21,8 @@
       "lat": 33.916635,
       "lng": -117.273628
     },
-    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=22275+Alessandro+Blvd+Moreno+Valley+CA+92553"
+    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=22275+Alessandro+Blvd+Moreno+Valley+CA+92553",
+    "mapsEmbedUrl": "https://www.google.com/maps?q=WaveMAX+Laundry+22275+Alessandro+Blvd+Moreno+Valley+CA+92553&output=embed"
   },
   "hours": {
     "open": "",

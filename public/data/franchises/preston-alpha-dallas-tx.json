@@ -21,7 +21,8 @@
       "lat": 32.931785,
       "lng": -96.802686
     },
-    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=13536+Preston+Rd%2C+Suite+100+Dallas+TX+75240"
+    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=13536+Preston+Rd%2C+Suite+100+Dallas+TX+75240",
+    "mapsEmbedUrl": "https://www.google.com/maps?q=WaveMAX+Laundry+13536+Preston+Rd%2C+Suite+100+Dallas+TX+75240&output=embed"
   },
   "hours": {
     "open": "",

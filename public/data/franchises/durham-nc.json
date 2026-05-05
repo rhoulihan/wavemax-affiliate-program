@@ -21,7 +21,8 @@
       "lat": 36.037456,
       "lng": -78.928957
     },
-    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=3222+Guess+Road+Durham+NC+27705"
+    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=3222+Guess+Road+Durham+NC+27705",
+    "mapsEmbedUrl": "https://www.google.com/maps?q=WaveMAX+Laundry+3222+Guess+Road+Durham+NC+27705&output=embed"
   },
   "hours": {
     "open": "",

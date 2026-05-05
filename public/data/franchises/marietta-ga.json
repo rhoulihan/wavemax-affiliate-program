@@ -21,7 +21,8 @@
       "lat": 33.945297,
       "lng": -84.519352
     },
-    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=270+Cobb+Pkwy+S%2C+Suite+90+Marietta+GA+30060"
+    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=270+Cobb+Pkwy+S%2C+Suite+90+Marietta+GA+30060",
+    "mapsEmbedUrl": "https://www.google.com/maps?q=WaveMAX+Laundry+270+Cobb+Pkwy+S%2C+Suite+90+Marietta+GA+30060&output=embed"
   },
   "hours": {
     "open": "",

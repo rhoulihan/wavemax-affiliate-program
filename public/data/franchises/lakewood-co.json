@@ -21,7 +21,8 @@
       "lat": 39.696957,
       "lng": -105.080777
     },
-    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=1090+S+Wadsworth+Blvd+Lakewood+CO+80226"
+    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=1090+S+Wadsworth+Blvd+Lakewood+CO+80226",
+    "mapsEmbedUrl": "https://www.google.com/maps?q=WaveMAX+Laundry+1090+S+Wadsworth+Blvd+Lakewood+CO+80226&output=embed"
   },
   "hours": {
     "open": "",

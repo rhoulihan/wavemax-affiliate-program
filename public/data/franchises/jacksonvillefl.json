@@ -21,7 +21,8 @@
       "lat": 30.313941,
       "lng": -81.704465
     },
-    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=929+McDuff+Ave+S+Jacksonville+FL+32205"
+    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=929+McDuff+Ave+S+Jacksonville+FL+32205",
+    "mapsEmbedUrl": "https://www.google.com/maps?q=WaveMAX+Laundry+929+McDuff+Ave+S+Jacksonville+FL+32205&output=embed"
   },
   "hours": {
     "open": "",

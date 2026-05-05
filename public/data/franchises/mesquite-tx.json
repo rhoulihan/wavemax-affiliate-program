@@ -21,7 +21,8 @@
       "lat": 32.772494,
       "lng": -96.600711
     },
-    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=529+N.+Galloway+Ave+ste.+16+Mesquite+TX+75149"
+    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=529+N.+Galloway+Ave+ste.+16+Mesquite+TX+75149",
+    "mapsEmbedUrl": "https://www.google.com/maps?q=WaveMAX+Laundry+529+N.+Galloway+Ave+ste.+16+Mesquite+TX+75149&output=embed"
   },
   "hours": {
     "open": "",

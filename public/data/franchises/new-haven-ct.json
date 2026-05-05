@@ -21,7 +21,8 @@
       "lat": 41.320572,
       "lng": -72.870317
     },
-    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=466+Foxon+Blvd+New+Haven+CT+6513"
+    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=466+Foxon+Blvd+New+Haven+CT+6513",
+    "mapsEmbedUrl": "https://www.google.com/maps?q=WaveMAX+Laundry+466+Foxon+Blvd+New+Haven+CT+6513&output=embed"
   },
   "hours": {
     "open": "",

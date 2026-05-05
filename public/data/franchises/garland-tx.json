@@ -21,7 +21,8 @@
       "lat": 32.859851,
       "lng": -96.646451
     },
-    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=1311+Marketplace+Dr%2C+Suite+100+Garland+TX+75041"
+    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=1311+Marketplace+Dr%2C+Suite+100+Garland+TX+75041",
+    "mapsEmbedUrl": "https://www.google.com/maps?q=WaveMAX+Laundry+1311+Marketplace+Dr%2C+Suite+100+Garland+TX+75041&output=embed"
   },
   "hours": {
     "open": "",

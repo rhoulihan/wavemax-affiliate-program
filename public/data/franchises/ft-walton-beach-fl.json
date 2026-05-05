@@ -21,7 +21,8 @@
       "lat": 30.417087,
       "lng": -86.609647
     },
-    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=+Walton+Beach+FL+"
+    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=+Walton+Beach+FL+",
+    "mapsEmbedUrl": "https://www.google.com/maps?q=WaveMAX+Laundry++Walton+Beach+FL+&output=embed"
   },
   "hours": {
     "open": "",

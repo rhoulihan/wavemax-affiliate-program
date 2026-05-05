@@ -21,7 +21,8 @@
       "lat": 33.040019,
       "lng": -96.715415
     },
-    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=930+Parker+Rd.%2C+Suite+520+Plano+TX+75075"
+    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=930+Parker+Rd.%2C+Suite+520+Plano+TX+75075",
+    "mapsEmbedUrl": "https://www.google.com/maps?q=WaveMAX+Laundry+930+Parker+Rd.%2C+Suite+520+Plano+TX+75075&output=embed"
   },
   "hours": {
     "open": "",

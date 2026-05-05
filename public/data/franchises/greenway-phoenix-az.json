@@ -21,7 +21,8 @@
       "lat": 33.62837,
       "lng": -112.012932
     },
-    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=3202+E+Greenway+Rd+%231307+Phoenix+AZ+85032"
+    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=3202+E+Greenway+Rd+%231307+Phoenix+AZ+85032",
+    "mapsEmbedUrl": "https://www.google.com/maps?q=WaveMAX+Laundry+3202+E+Greenway+Rd+%231307+Phoenix+AZ+85032&output=embed"
   },
   "hours": {
     "open": "",

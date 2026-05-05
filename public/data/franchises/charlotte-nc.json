@@ -21,7 +21,8 @@
       "lat": 35.237778,
       "lng": -80.800706
     },
-    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=2915+The+Plaza+Suite+B+Charlotte+NC+28205"
+    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=2915+The+Plaza+Suite+B+Charlotte+NC+28205",
+    "mapsEmbedUrl": "https://www.google.com/maps?q=WaveMAX+Laundry+2915+The+Plaza+Suite+B+Charlotte+NC+28205&output=embed"
   },
   "hours": {
     "open": "",

@@ -21,7 +21,8 @@
       "lat": 39.223396,
       "lng": -84.590318
     },
-    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=8449+Colerain+Ave+Cincinnati+OH+45239"
+    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=8449+Colerain+Ave+Cincinnati+OH+45239",
+    "mapsEmbedUrl": "https://www.google.com/maps?q=WaveMAX+Laundry+8449+Colerain+Ave+Cincinnati+OH+45239&output=embed"
   },
   "hours": {
     "open": "",

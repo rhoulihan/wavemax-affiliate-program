@@ -21,7 +21,8 @@
       "lat": 42.684484,
       "lng": -84.547404
     },
-    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=4929+S+Cedar+St%2C+St+1+Lansing+MI+48910"
+    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=4929+S+Cedar+St%2C+St+1+Lansing+MI+48910",
+    "mapsEmbedUrl": "https://www.google.com/maps?q=WaveMAX+Laundry+4929+S+Cedar+St%2C+St+1+Lansing+MI+48910&output=embed"
   },
   "hours": {
     "open": "",

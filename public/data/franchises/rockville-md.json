@@ -21,7 +21,8 @@
       "lat": 39.058403,
       "lng": -77.125955
     },
-    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=180+Rollins+Ave+Rockville+MD+20852"
+    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=180+Rollins+Ave+Rockville+MD+20852",
+    "mapsEmbedUrl": "https://www.google.com/maps?q=WaveMAX+Laundry+180+Rollins+Ave+Rockville+MD+20852&output=embed"
   },
   "hours": {
     "open": "",

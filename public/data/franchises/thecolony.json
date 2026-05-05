@@ -21,7 +21,8 @@
       "lat": 33.096778,
       "lng": -96.894176
     },
-    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=6805+Main+St+The+Colony+TX+75056"
+    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=6805+Main+St+The+Colony+TX+75056",
+    "mapsEmbedUrl": "https://www.google.com/maps?q=WaveMAX+Laundry+6805+Main+St+The+Colony+TX+75056&output=embed"
   },
   "hours": {
     "open": "",

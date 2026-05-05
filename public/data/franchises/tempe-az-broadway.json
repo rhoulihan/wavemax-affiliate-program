@@ -21,7 +21,8 @@
       "lat": 33.378661,
       "lng": -111.935528
     },
-    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=1845+E+Broadway+Rd+%23114+Tempe+AZ+85282"
+    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=1845+E+Broadway+Rd+%23114+Tempe+AZ+85282",
+    "mapsEmbedUrl": "https://www.google.com/maps?q=WaveMAX+Laundry+1845+E+Broadway+Rd+%23114+Tempe+AZ+85282&output=embed"
   },
   "hours": {
     "open": "",

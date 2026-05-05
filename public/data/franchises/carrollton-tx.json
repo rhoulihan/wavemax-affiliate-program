@@ -21,7 +21,8 @@
       "lat": 32.985779,
       "lng": -96.85732
     },
-    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=2760+E+Trinity+Mills+Rd.+STE+112+Carrollton+TX+75006"
+    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=2760+E+Trinity+Mills+Rd.+STE+112+Carrollton+TX+75006",
+    "mapsEmbedUrl": "https://www.google.com/maps?q=WaveMAX+Laundry+2760+E+Trinity+Mills+Rd.+STE+112+Carrollton+TX+75006&output=embed"
   },
   "hours": {
     "open": "",

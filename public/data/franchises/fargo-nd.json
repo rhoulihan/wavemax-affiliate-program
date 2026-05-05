@@ -21,7 +21,8 @@
       "lat": 46.840952,
       "lng": -96.863541
     },
-    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=2551+45th+St+S%2C+Suite+147+Fargo+ND+58104"
+    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=2551+45th+St+S%2C+Suite+147+Fargo+ND+58104",
+    "mapsEmbedUrl": "https://www.google.com/maps?q=WaveMAX+Laundry+2551+45th+St+S%2C+Suite+147+Fargo+ND+58104&output=embed"
   },
   "hours": {
     "open": "",

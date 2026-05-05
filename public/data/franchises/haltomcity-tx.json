@@ -21,7 +21,8 @@
       "lat": 32.814419,
       "lng": -97.263848
     },
-    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=3534+Denton+Hwy.+Haltom+City+TX+76117"
+    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=3534+Denton+Hwy.+Haltom+City+TX+76117",
+    "mapsEmbedUrl": "https://www.google.com/maps?q=WaveMAX+Laundry+3534+Denton+Hwy.+Haltom+City+TX+76117&output=embed"
   },
   "hours": {
     "open": "",

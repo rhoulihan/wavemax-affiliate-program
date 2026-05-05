@@ -21,7 +21,8 @@
       "lat": 31.110248,
       "lng": -97.38612
     },
-    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=10+Olaf+Dr.+Temple+TX+76504"
+    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=10+Olaf+Dr.+Temple+TX+76504",
+    "mapsEmbedUrl": "https://www.google.com/maps?q=WaveMAX+Laundry+10+Olaf+Dr.+Temple+TX+76504&output=embed"
   },
   "hours": {
     "open": "",

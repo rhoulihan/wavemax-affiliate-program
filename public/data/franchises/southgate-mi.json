@@ -21,7 +21,8 @@
       "lat": 42.211684,
       "lng": -83.181375
     },
-    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=13248+Fort+St+Southgate+MI+48195"
+    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=13248+Fort+St+Southgate+MI+48195",
+    "mapsEmbedUrl": "https://www.google.com/maps?q=WaveMAX+Laundry+13248+Fort+St+Southgate+MI+48195&output=embed"
   },
   "hours": {
     "open": "",

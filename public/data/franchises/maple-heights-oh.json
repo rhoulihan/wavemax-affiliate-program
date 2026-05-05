@@ -21,7 +21,8 @@
       "lat": 41.416149,
       "lng": -81.533567
     },
-    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=20980+Libby+Rd+Maple+Heights+OH+44137"
+    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=20980+Libby+Rd+Maple+Heights+OH+44137",
+    "mapsEmbedUrl": "https://www.google.com/maps?q=WaveMAX+Laundry+20980+Libby+Rd+Maple+Heights+OH+44137&output=embed"
   },
   "hours": {
     "open": "",

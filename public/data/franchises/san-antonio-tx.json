@@ -21,7 +21,8 @@
       "lat": 29.491546,
       "lng": -98.569899
     },
-    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=1552+Babcock+Rd+San+Antonio+TX+78229"
+    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=1552+Babcock+Rd+San+Antonio+TX+78229",
+    "mapsEmbedUrl": "https://www.google.com/maps?q=WaveMAX+Laundry+1552+Babcock+Rd+San+Antonio+TX+78229&output=embed"
   },
   "hours": {
     "open": "",

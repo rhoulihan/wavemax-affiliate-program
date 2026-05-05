@@ -21,7 +21,8 @@
       "lat": 33.580267,
       "lng": -112.222454
     },
-    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=7575+W+Peoria+Ave%2C+A102+Peoria+AZ+85345"
+    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=7575+W+Peoria+Ave%2C+A102+Peoria+AZ+85345",
+    "mapsEmbedUrl": "https://www.google.com/maps?q=WaveMAX+Laundry+7575+W+Peoria+Ave%2C+A102+Peoria+AZ+85345&output=embed"
   },
   "hours": {
     "open": "",

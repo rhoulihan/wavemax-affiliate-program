@@ -21,7 +21,8 @@
       "lat": 41.931747,
       "lng": -87.747964
     },
-    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=4830+W+Diversey+Ave+Chicago+IL+60639"
+    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=4830+W+Diversey+Ave+Chicago+IL+60639",
+    "mapsEmbedUrl": "https://www.google.com/maps?q=WaveMAX+Laundry+4830+W+Diversey+Ave+Chicago+IL+60639&output=embed"
   },
   "hours": {
     "open": "",

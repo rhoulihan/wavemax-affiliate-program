@@ -21,7 +21,8 @@
       "lat": 47.371658,
       "lng": -122.301707
     },
-    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=25642+Pacific+Hwy+S+%2316+Kent+WA+98032"
+    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=25642+Pacific+Hwy+S+%2316+Kent+WA+98032",
+    "mapsEmbedUrl": "https://www.google.com/maps?q=WaveMAX+Laundry+25642+Pacific+Hwy+S+%2316+Kent+WA+98032&output=embed"
   },
   "hours": {
     "open": "",

@@ -21,7 +21,8 @@
       "lat": 33.378661,
       "lng": -111.935528
     },
-    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=222+E+Baseline+Rd+Tempe+AZ+85283"
+    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=222+E+Baseline+Rd+Tempe+AZ+85283",
+    "mapsEmbedUrl": "https://www.google.com/maps?q=WaveMAX+Laundry+222+E+Baseline+Rd+Tempe+AZ+85283&output=embed"
   },
   "hours": {
     "open": "",

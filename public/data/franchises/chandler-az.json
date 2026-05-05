@@ -21,7 +21,8 @@
       "lat": 33.337383,
       "lng": -111.841118
     },
-    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=2081+N+Arizona+Ave+%23129+Chandler+AZ+85225"
+    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=2081+N+Arizona+Ave+%23129+Chandler+AZ+85225",
+    "mapsEmbedUrl": "https://www.google.com/maps?q=WaveMAX+Laundry+2081+N+Arizona+Ave+%23129+Chandler+AZ+85225&output=embed"
   },
   "hours": {
     "open": "",

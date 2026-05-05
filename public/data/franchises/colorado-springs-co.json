@@ -21,7 +21,8 @@
       "lat": 38.823156,
       "lng": -104.780075
     },
-    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=609+South+Circle+Drive+Colorado+Springs+CO+80910"
+    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=609+South+Circle+Drive+Colorado+Springs+CO+80910",
+    "mapsEmbedUrl": "https://www.google.com/maps?q=WaveMAX+Laundry+609+South+Circle+Drive+Colorado+Springs+CO+80910&output=embed"
   },
   "hours": {
     "open": "",

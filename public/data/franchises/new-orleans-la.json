@@ -21,7 +21,8 @@
       "lat": 29.99913,
       "lng": -90.060254
     },
-    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=4001+Frenchmen+St+New+Orleans+LA+70122"
+    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=4001+Frenchmen+St+New+Orleans+LA+70122",
+    "mapsEmbedUrl": "https://www.google.com/maps?q=WaveMAX+Laundry+4001+Frenchmen+St+New+Orleans+LA+70122&output=embed"
   },
   "hours": {
     "open": "",

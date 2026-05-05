@@ -21,7 +21,8 @@
       "lat": 39.857997,
       "lng": -105.065185
     },
-    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=8879+N+Harlan+Street+Westminster+CO+80031"
+    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=8879+N+Harlan+Street+Westminster+CO+80031",
+    "mapsEmbedUrl": "https://www.google.com/maps?q=WaveMAX+Laundry+8879+N+Harlan+Street+Westminster+CO+80031&output=embed"
   },
   "hours": {
     "open": "",

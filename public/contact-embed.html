@@ -138,9 +138,14 @@
              pinned map for the address query. CSP frame-src whitelists
              www.google.com / maps.google.com. -->
         <div class="wm-contact-map" data-section="map">
+          <!-- Map src is data-bound to LOCATION_DATA.contact.mapsEmbedUrl;
+               every franchise gets its own pinned map without per-page
+               authoring. Title attribute is bound to brand.name + address
+               so screen readers announce the right store. -->
           <iframe
-            title="Map to WaveMAX Austin — 825 E Rundberg Ln F1, Austin, TX 78753"
-            src="https://www.google.com/maps?q=WaveMAX+Laundry+Austin,+825+E+Rundberg+Ln,+Austin,+TX+78753&output=embed"
+            title="Map to this WaveMAX location"
+            data-bind="contact.mapsEmbedUrl" data-bind-attr="src"
+            src=""
             loading="lazy"
             referrerpolicy="no-referrer-when-downgrade"
             allowfullscreen></iframe>
@@ -283,7 +288,7 @@
 
   <script src="/assets/js/iframe-bridge-v2.js?v=20260504"></script>
   <script src="/assets/js/franchise-page-helpers.js?v=20260505d"></script>
-  <script src="/assets/js/austin-contact-init.js?v=20260505d"></script>
+  <script src="/assets/js/austin-contact-init.js?v=20260505e"></script>
 
   <!-- ════════════════════════════════════════════════════════════════════
        Hibu Dynamic Phone Insertion (iframe scope) — same pattern as the

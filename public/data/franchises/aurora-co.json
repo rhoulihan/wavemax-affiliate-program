@@ -21,7 +21,8 @@
       "lat": 39.697914,
       "lng": -104.812562
     },
-    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=15087+E+Mississippi+Ave+Aurora+CO+80012"
+    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=15087+E+Mississippi+Ave+Aurora+CO+80012",
+    "mapsEmbedUrl": "https://www.google.com/maps?q=WaveMAX+Laundry+15087+E+Mississippi+Ave+Aurora+CO+80012&output=embed"
   },
   "hours": {
     "open": "",

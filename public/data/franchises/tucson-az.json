@@ -21,7 +21,8 @@
       "lat": 32.205955,
       "lng": -110.905727
     },
-    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=4054+E.+22nd+Street+Tucson+AZ+85711"
+    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=4054+E.+22nd+Street+Tucson+AZ+85711",
+    "mapsEmbedUrl": "https://www.google.com/maps?q=WaveMAX+Laundry+4054+E.+22nd+Street+Tucson+AZ+85711&output=embed"
   },
   "hours": {
     "open": "",

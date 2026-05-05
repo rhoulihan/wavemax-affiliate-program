@@ -21,7 +21,8 @@
       "lat": 45.657993,
       "lng": -122.590562
     },
-    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=8109+NE+Vancouver+Mall+Dr%2C+Suit+F%26G+Vancouver+WA+98662"
+    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=8109+NE+Vancouver+Mall+Dr%2C+Suit+F%26G+Vancouver+WA+98662",
+    "mapsEmbedUrl": "https://www.google.com/maps?q=WaveMAX+Laundry+8109+NE+Vancouver+Mall+Dr%2C+Suit+F%26G+Vancouver+WA+98662&output=embed"
   },
   "hours": {
     "open": "",
