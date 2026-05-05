@@ -14,51 +14,51 @@
   'use strict';
 
   /* ---------- NAV CONFIG ---------- */
-  // Top-level nav rendered into b3.  Each entry is either { href, label }
-  // (a flat link) or { label, items:[{href,label}] } (a dropdown — pure-CSS
-  // hover behavior via .wmlnav-drop / .wmlnav-drop-menu).
+  // Top-level nav rendered into b3.  Each entry is either { href, label, key }
+  // (a flat link) or { label, key, items:[{href,label,key}] } (a dropdown).
+  // `label` is the English fallback; `key` is the i18n key.
   const NAV = [
-    { href: '/franchise/',                  label: 'Home' },
-    { label: 'Franchise', items: [
-      { href: '/franchise/',                  label: 'Overview' },
-      { href: '/become-a-franchisee/',        label: 'Become a Franchisee' },
-      { href: '/why-invest-in-wavemax/',      label: 'Why Invest in WaveMAX' },
-      { href: '/laundromat-investment-guide/', label: 'Investment Guide' },
-      { href: '/wavemax-vs-zombiemat/',       label: 'WaveMAX vs Zombiemat' }
+    { href: '/franchise/',                  label: 'Home',                  key: 'chrome.nav.home' },
+    { label: 'Franchise', key: 'chrome.nav.franchise', items: [
+      { href: '/franchise/',                  label: 'Overview',              key: 'chrome.nav.overview' },
+      { href: '/become-a-franchisee/',        label: 'Become a Franchisee',   key: 'chrome.nav.becomeFranchisee' },
+      { href: '/why-invest-in-wavemax/',      label: 'Why Invest in WaveMAX', key: 'chrome.nav.whyInvest' },
+      { href: '/laundromat-investment-guide/', label: 'Investment Guide',     key: 'chrome.nav.investmentGuide' },
+      { href: '/wavemax-vs-zombiemat/',       label: 'WaveMAX vs Zombiemat',  key: 'chrome.nav.vsZombiemat' }
     ]},
-    { href: '/virtual-tour/',               label: 'Virtual Tour' },
-    { href: '/about/',                      label: 'About' },
-    { href: '/testimonials/',               label: 'Testimonials' },
-    { href: '/faq/',                        label: 'FAQ' },
-    { href: '/contact/',                    label: 'Contact' }
+    { href: '/virtual-tour/',               label: 'Virtual Tour',          key: 'chrome.nav.virtualTour' },
+    { href: '/about/',                      label: 'About',                 key: 'chrome.nav.about' },
+    { href: '/testimonials/',               label: 'Testimonials',          key: 'chrome.nav.testimonials' },
+    { href: '/faq/',                        label: 'FAQ',                   key: 'chrome.nav.faq' },
+    { href: '/contact/',                    label: 'Contact',               key: 'chrome.nav.contact' }
   ];
 
   const FOOTER_LINKS = [
     {
-      heading: 'Franchise',
+      heading: 'Franchise', headingKey: 'chrome.footer.headingFranchise',
       links: [
-        { href: '/franchise/',                   label: 'Overview' },
-        { href: '/become-a-franchisee/',         label: 'Become a Franchisee' },
-        { href: '/why-invest-in-wavemax/',       label: 'Why Invest' },
-        { href: '/laundromat-investment-guide/', label: 'Investment Guide' },
-        { href: '/wavemax-vs-zombiemat/',        label: 'vs Zombiemat' }
+        { href: '/franchise/',                   label: 'Overview',              key: 'chrome.footer.linkOverview' },
+        { href: '/become-a-franchisee/',         label: 'Become a Franchisee',   key: 'chrome.footer.linkBecome' },
+        { href: '/why-invest-in-wavemax/',       label: 'Why Invest',            key: 'chrome.footer.linkWhy' },
+        { href: '/laundromat-investment-guide/', label: 'Investment Guide',      key: 'chrome.footer.linkGuide' },
+        { href: '/wavemax-vs-zombiemat/',        label: 'vs Zombiemat',          key: 'chrome.footer.linkVs' }
       ]
     },
     {
-      heading: 'Company',
+      heading: 'Company', headingKey: 'chrome.footer.headingCompany',
       links: [
-        { href: '/about/',         label: 'About WaveMAX' },
-        { href: '/testimonials/',  label: 'Testimonials' },
-        { href: '/virtual-tour/',  label: 'Virtual Tour' },
-        { href: '/faq/',           label: 'FAQ' },
-        { href: '/contact/',       label: 'Contact' }
+        { href: '/about/',         label: 'About WaveMAX', key: 'chrome.footer.linkAbout' },
+        { href: '/testimonials/',  label: 'Testimonials',  key: 'chrome.footer.linkTestimonials' },
+        { href: '/virtual-tour/',  label: 'Virtual Tour',  key: 'chrome.footer.linkTour' },
+        { href: '/faq/',           label: 'FAQ',           key: 'chrome.footer.linkFaq' },
+        { href: '/contact/',       label: 'Contact',       key: 'chrome.footer.linkContact' }
       ]
     },
     {
-      heading: 'Locations',
+      heading: 'Locations', headingKey: 'chrome.footer.headingLocations',
       links: [
-        { href: '#', dataAction: 'open-locations', label: 'Find a Store' },
-        { href: 'https://www.wavemaxlaundry.com/locations/', label: 'Full Location Map', external: true }
+        { href: '#', dataAction: 'open-locations', label: 'Find a Store', key: 'chrome.footer.linkFindStore' },
+        { href: 'https://www.wavemaxlaundry.com/locations/', label: 'Full Location Map', key: 'chrome.footer.linkFullMap', external: true }
       ]
     }
   ];
@@ -73,18 +73,18 @@
     const navItems = NAV.map((item) => {
       if (item.items) {
         const sub = item.items.map((s) =>
-          `<a href="${esc(s.href)}">${esc(s.label)}</a>`
+          `<a href="${esc(s.href)}" data-i18n="${esc(s.key)}">${esc(s.label)}</a>`
         ).join('');
         return `
           <div class="wmlnav-drop">
             <a href="${esc(item.items[0].href)}">
-              <span>${esc(item.label)}</span><span class="wmlnav-arrow"></span>
+              <span data-i18n="${esc(item.key)}">${esc(item.label)}</span><span class="wmlnav-arrow"></span>
             </a>
             <div class="wmlnav-drop-menu">${sub}</div>
           </div>
         `;
       }
-      return `<a href="${esc(item.href)}">${esc(item.label)}</a>`;
+      return `<a href="${esc(item.href)}" data-i18n="${esc(item.key)}">${esc(item.label)}</a>`;
     }).join('');
 
     return `
@@ -92,17 +92,25 @@
         <div class="wmlnav-b1">
           <div class="wmlnav-inner">
             <div class="wmlnav-b1-left">
-              <span aria-hidden="true">
+              <span>
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l2.39 6.95H22l-6.19 4.5 2.39 6.95L12 16l-6.2 4.4 2.39-6.95L2 8.95h7.61L12 2z"/></svg>
-                #1 Laundromat Franchise · 2026 Entrepreneur Franchise 500
+                <span data-i18n="chrome.b1.award">#1 Laundromat Franchise · 2026 Entrepreneur Franchise 500</span>
               </span>
-              <span aria-hidden="true">
+              <span>
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-                75+ locations nationwide &amp; growing
+                <span data-i18n="chrome.b1.locations">75+ locations nationwide &amp; growing</span>
               </span>
             </div>
             <div class="wmlnav-b1-right">
-              <a href="/why-invest-in-wavemax/">$471K avg gross · 2024 Item 19 →</a>
+              <a href="/why-invest-in-wavemax/" data-i18n="chrome.b1.item19">$471K avg gross · 2024 Item 19 →</a>
+              <div class="wm-lang-switcher" id="wm-lang" aria-expanded="false">
+                <button type="button" class="wm-lang-btn" aria-haspopup="true" aria-label="Choose language">
+                  <span class="wm-lang-flag wm-flag-en" aria-hidden="true"></span>
+                  <span class="wm-lang-current-label">EN</span>
+                  <svg class="wm-lang-arrow" viewBox="0 0 9 6" aria-hidden="true"><path d="M0.5 1L4.5 5L8.5 1" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </button>
+                <div class="wm-lang-menu" role="menu"></div>
+              </div>
             </div>
           </div>
         </div>
@@ -115,8 +123,8 @@
               </a>
             </div>
             <div class="wmlnav-b2-right">
-              <a href="/become-a-franchisee/" class="wmlnav-btn-out">Become a Franchisee</a>
-              <button type="button" class="wmlnav-btn-sol" data-action="open-locations">Find a Location</button>
+              <a href="/become-a-franchisee/" class="wmlnav-btn-out" data-i18n="chrome.b2.becomeFranchisee">Become a Franchisee</a>
+              <button type="button" class="wmlnav-btn-sol" data-action="open-locations" data-i18n="chrome.b2.findLocation">Find a Location</button>
             </div>
           </div>
         </div>
@@ -132,17 +140,46 @@
     `;
   }
 
+  /* ---------- BREADCRUMB ----------
+   * Page declares its own crumb via <meta name="wm-corp-breadcrumb"> with
+   * a value like "Franchise > Why Invest". The injected element is the
+   * same #wm-bc.wm-bc-host div used by per-franchise host pages — picks
+   * up the same wavemax-mhr-chrome.css styling automatically. */
+  function buildBreadcrumb() {
+    const meta = document.querySelector('meta[name="wm-corp-breadcrumb"]');
+    if (!meta) return '';
+    const path = meta.getAttribute('content') || '';
+    const parts = path.split('>').map((s) => s.trim()).filter(Boolean);
+    if (!parts.length) return '';
+
+    const home = `<a href="/franchise/">${esc(parts[0])}</a>`;
+    const rest = parts.slice(1).map((p, i) => {
+      const isLast = i === parts.length - 2;
+      const sep = `<span class="wm-bc-host-sep" aria-hidden="true">›</span>`;
+      return isLast
+        ? `${sep}<strong class="wm-bc-host-current">${esc(p)}</strong>`
+        : `${sep}${esc(p)}`;
+    }).join('');
+
+    return `
+      <div id="wm-bc" class="wm-bc-host">
+        <div class="wm-bc-host-inner">${home}${rest}</div>
+      </div>
+    `;
+  }
+
   /* ---------- FOOTER (wmcc- classes from corporate-chrome.css) ---------- */
   function buildFooter() {
     const cols = FOOTER_LINKS.map((col) => `
       <div class="wmcc-foot-col">
-        <h4>${esc(col.heading)}</h4>
+        <h4 data-i18n="${esc(col.headingKey)}">${esc(col.heading)}</h4>
         <ul>
           ${col.links.map((l) => {
             const attrs = l.external
               ? `target="_blank" rel="noopener"`
               : (l.dataAction ? `data-action="${esc(l.dataAction)}"` : '');
-            return `<li><a href="${esc(l.href)}" ${attrs}>${esc(l.label)}</a></li>`;
+            const i18n = l.key ? ` data-i18n="${esc(l.key)}"` : '';
+            return `<li><a href="${esc(l.href)}" ${attrs}${i18n}>${esc(l.label)}</a></li>`;
           }).join('')}
         </ul>
       </div>
@@ -152,16 +189,16 @@
       <div class="wmcc-foot-inner">
         <div class="wmcc-foot-brand">
           <img src="${esc(LOGO_URL)}" alt="WaveMAX Laundry" referrerpolicy="no-referrer" loading="lazy" decoding="async">
-          <p class="wmcc-foot-tag">A national laundromat franchise.<br>Cleaner. Safer. Faster.</p>
-          <p class="wmcc-foot-addr">${esc(HQ_ADDRESS)}<br>${esc(HQ_CITY)}</p>
+          <p class="wmcc-foot-tag" data-i18n="chrome.footer.tag">A national laundromat franchise.<br>Cleaner. Safer. Faster.</p>
+          <p class="wmcc-foot-addr"><span data-i18n="chrome.footer.address1">${esc(HQ_ADDRESS)}</span><br><span data-i18n="chrome.footer.address2">${esc(HQ_CITY)}</span></p>
         </div>
         <div class="wmcc-foot-cols">${cols}</div>
       </div>
       <div class="wmcc-foot-rule">
         <p class="wmcc-foot-legal">${esc(COPYRIGHT)}</p>
         <div class="wmcc-foot-legal-links">
-          <a href="/privacy-policy.html">Privacy</a>
-          <a href="/terms-and-conditions.html">Terms</a>
+          <a href="/privacy-policy.html" data-i18n="chrome.footer.privacy">Privacy</a>
+          <a href="/terms-and-conditions.html" data-i18n="chrome.footer.terms">Terms</a>
         </div>
       </div>
     `;
@@ -194,7 +231,7 @@
   function injectChrome() {
     const headerEl = document.getElementById('wm-corp-header');
     const footerEl = document.getElementById('wm-corp-footer');
-    if (headerEl) headerEl.innerHTML = buildHeader();
+    if (headerEl) headerEl.innerHTML = buildHeader() + buildBreadcrumb();
     if (footerEl) footerEl.innerHTML = buildFooter();
 
     // Highlight the active nav item based on current path.

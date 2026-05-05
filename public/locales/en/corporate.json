@@ -1,0 +1,88 @@
+{
+  "chrome": {
+    "b1": {
+      "award": "#1 Laundromat Franchise · 2026 Entrepreneur Franchise 500",
+      "locations": "75+ locations nationwide & growing",
+      "item19": "$471K avg gross · 2024 Item 19 →"
+    },
+    "b2": {
+      "logoAlt": "WaveMAX Laundry — Franchise home",
+      "becomeFranchisee": "Become a Franchisee",
+      "findLocation": "Find a Location"
+    },
+    "nav": {
+      "home": "Home",
+      "franchise": "Franchise",
+      "overview": "Overview",
+      "becomeFranchisee": "Become a Franchisee",
+      "whyInvest": "Why Invest in WaveMAX",
+      "investmentGuide": "Investment Guide",
+      "vsZombiemat": "WaveMAX vs Zombiemat",
+      "virtualTour": "Virtual Tour",
+      "about": "About",
+      "testimonials": "Testimonials",
+      "faq": "FAQ",
+      "contact": "Contact"
+    },
+    "footer": {
+      "tag": "A national laundromat franchise.\nCleaner. Safer. Faster.",
+      "address1": "929 McDuff Ave S, Suite 107",
+      "address2": "Jacksonville, FL 32205",
+      "headingFranchise": "Franchise",
+      "headingCompany": "Company",
+      "headingLocations": "Locations",
+      "linkOverview": "Overview",
+      "linkBecome": "Become a Franchisee",
+      "linkWhy": "Why Invest",
+      "linkGuide": "Investment Guide",
+      "linkVs": "vs Zombiemat",
+      "linkAbout": "About WaveMAX",
+      "linkTestimonials": "Testimonials",
+      "linkTour": "Virtual Tour",
+      "linkFaq": "FAQ",
+      "linkContact": "Contact",
+      "linkFindStore": "Find a Store",
+      "linkFullMap": "Full Location Map",
+      "copyright": "© {year} AU Hydro LLC dba WaveMAX Laundry. All rights reserved.",
+      "privacy": "Privacy",
+      "terms": "Terms"
+    },
+    "breadcrumb": {
+      "home": "Home"
+    }
+  },
+
+  "franchise": {
+    "hero": {
+      "eyebrow": "#1 Laundromat Franchise · 2026 Entrepreneur Franchise 500",
+      "title1": "Not your typical laundromat.",
+      "title2": "A real business.",
+      "sub": "WaveMAX is the #1 laundromat franchise on Entrepreneur's 2026 Franchise 500. Semi-absentee from day one, modern Electrolux equipment, recession-proof demand. Build a durable cash-flowing business with national brand support behind you.",
+      "ctaPrimary": "Start the conversation",
+      "ctaSecondary": "See the numbers",
+      "photoTagJax": "Jacksonville Flagship",
+      "photoTagKent": "Kent WA",
+      "photoTagOmaha": "Omaha"
+    },
+    "stats": {
+      "locations": "Locations & growing",
+      "locationsSub": "Across the United States",
+      "ownerHrs": "Owner time / week",
+      "ownerHrsSub": "Semi-absentee model",
+      "avgGross": "Average gross revenue",
+      "avgGrossSub": "2024 · 50-store sample",
+      "payback": "Typical payback period",
+      "paybackSub": "25–35% reported EBITDA"
+    }
+  },
+
+  "common": {
+    "ctaLearnMore": "Learn more",
+    "ctaGetGuide": "Get the Investment Guide",
+    "ctaScheduleCall": "Schedule the call",
+    "ctaSeeNumbers": "See the numbers",
+    "ctaStartConversation": "Start the conversation",
+    "ctaBecomeFranchisee": "Become a franchisee",
+    "ctaFindLocation": "Find a location"
+  }
+}
