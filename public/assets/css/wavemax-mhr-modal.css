@@ -346,42 +346,9 @@
   position: relative;
   overflow: hidden;
 }
-.modal-map .leaflet-container {
-  background: var(--navy-deeper);
-  font-family: 'Barlow', sans-serif;
-}
-.modal-map .leaflet-tile-pane { filter: contrast(1.05) saturate(0.85) brightness(0.95); }
-.modal-map .leaflet-popup-content-wrapper {
-  background: var(--white);
-  border-radius: 12px;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.32);
-}
-.modal-map .leaflet-popup-content {
-  font-size: 0.86rem;
-  color: var(--navy-deeper);
-  margin: 10px 14px;
-  line-height: 1.4;
-}
-.modal-map .leaflet-popup-content strong { display: block; color: var(--navy); margin-bottom: 2px; font-weight: 700; }
-.modal-map .leaflet-popup-tip { background: var(--white); }
-
-/* Custom DivIcon styling for franchise markers — base + selected */
-.wm-loc-marker {
-  width: 22px; height: 22px;
-  border-radius: 50%;
-  background: var(--cyan, #27aae1);
-  border: 2px solid #fff;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.35);
-  display: block;
-  transition: transform 0.18s ease, background 0.18s ease;
-}
-.wm-loc-marker--selected {
-  background: #f5a623;
-  width: 30px; height: 30px;
-  transform: translate(-4px,-4px);
-  box-shadow: 0 4px 12px rgba(245,166,35,0.55);
-  z-index: 2 !important;
-}
+/* Google Maps inside the modal: the API ships its own canvas, no
+ * extra CSS needed. We just give the container a sane background
+ * for the brief moment before tiles paint. */
 
 /* Sticky action bar at the modal bottom (only visible after a tile
    selection). Two CTAs: Visit (primary) and Directions (secondary). */
