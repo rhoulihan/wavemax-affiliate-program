@@ -25,7 +25,7 @@
       "contact": "Contacto"
     },
     "footer": {
-      "tag": "Una franquicia nacional de lavandería.\nMás limpia. Más segura. Más rápida.",
+      "tag": "Una franquicia nacional de lavandería. Más limpia. Más segura. Más rápida.",
       "address1": "929 McDuff Ave S, Suite 107",
       "address2": "Jacksonville, FL 32205",
       "headingFranchise": "Franquicia",
@@ -43,7 +43,7 @@
       "linkContact": "Contacto",
       "linkFindStore": "Encontrar Tienda",
       "linkFullMap": "Mapa completo de ubicaciones",
-      "copyright": "© {year} AU Hydro LLC dba WaveMAX Laundry. Todos los derechos reservados.",
+      "copyright": "© AU Hydro LLC dba WaveMAX Laundry. Todos los derechos reservados.",
       "privacy": "Privacidad",
       "terms": "Términos"
     },
@@ -59,20 +59,87 @@
       "title2": "Un negocio real.",
       "sub": "WaveMAX es la franquicia de lavandería #1 en el Franchise 500 2026 de Entrepreneur. Semi-ausente desde el primer día, equipo Electrolux moderno, demanda a prueba de recesión. Construya un negocio duradero con flujo de efectivo, respaldado por una marca nacional.",
       "ctaPrimary": "Comenzar la conversación",
-      "ctaSecondary": "Ver los números",
-      "photoTagJax": "Tienda insignia de Jacksonville",
-      "photoTagKent": "Kent WA",
-      "photoTagOmaha": "Omaha"
+      "ctaSecondary": "Ver los números"
     },
     "stats": {
-      "locations": "Ubicaciones y creciendo",
+      "locationsLabel": "Ubicaciones y creciendo",
       "locationsSub": "Por los Estados Unidos",
-      "ownerHrs": "Tiempo del propietario / semana",
+      "ownerHrsLabel": "Tiempo del propietario / semana",
       "ownerHrsSub": "Modelo semi-ausente",
-      "avgGross": "Ingresos brutos promedio",
+      "avgGrossLabel": "Ingresos brutos promedio",
       "avgGrossSub": "2024 · muestra de 50 tiendas",
-      "payback": "Período típico de recuperación",
+      "paybackLabel": "Período típico de recuperación",
       "paybackSub": "EBITDA reportado del 25–35%"
+    },
+    "why": {
+      "eyebrow": "Por qué los propietarios aman WaveMAX®",
+      "title": "Una franquicia de lavandería pensada para operadores serios.",
+      "lede": "WaveMAX es una franquicia de lavandería líder que ofrece propiedad escalable y semi-ausente, con una economía sólida por unidad y respaldo de marca nacional. Selección disciplinada de sitios, dimensionamiento inteligente, equipos premium y un modelo de servicio que conecta con comunidades de clase trabajadora — ese es el manual.",
+      "tile1Title": "Semi-ausente desde el primer día",
+      "tile1Text": "~9 horas/semana, 3 días a la semana, 3 horas por día. La mayoría de los franquiciados no contratan a un gerente inicialmente — el modelo está diseñado para escalar sin presencia constante en el sitio.",
+      "tile2Title": "Bajos costos generales, alto ROI",
+      "tile2Text": "Personal reducido, equipo duradero, sin inventario que gestionar. Estructura de costos predecible con sólidos números por unidad que se acumulan en operadores multi-unidad.",
+      "tile3Title": "Esencial, a prueba de recesión",
+      "tile3Text": "La lavandería es una necesidad, no un lujo. Las familias trabajadoras dependen de las lavanderías por necesidad — la demanda es estable a través de cada ciclo económico.",
+      "tile4Title": "Equipos Electrolux premium",
+      "tile4Text": "Máquinas comerciales de alta extracción que mueven a los clientes más rápido, funcionan más limpias y duran más que las que operan los competidores.",
+      "tile5Title": "Expansión multi-unidad fácil",
+      "tile5Text": "Los operadores con una tienda generadora de efectivo típicamente abren la segunda dentro de 18 meses. El soporte de selección de sitios y el manual probado escalan de forma lineal.",
+      "tile6Title": "Respaldo de marca nacional",
+      "tile6Text": "Marketing, capacitación, tecnología, relaciones con proveedores — la oficina central que todo propietario quiere pero la mayoría no puede construir solo."
+    },
+    "sauce": {
+      "eyebrow": "La \"salsa secreta\" de WaveMAX®",
+      "title": "Sitio correcto. Tamaño correcto. Servicio correcto. Sistemas correctos.",
+      "lede": "Nuestra estrategia de crecimiento se construye en torno a cuatro disciplinas que se acumulan en una economía confiable por unidad — y un modelo replicable en distintos mercados.",
+      "rightSite": "Sitio correcto",
+      "rightSiteText": "Segmentación demográfica, análisis de competencia y estrategia de ubicación del mundo real diseñada para una demanda sostenida.",
+      "rightSize": "Tamaño correcto",
+      "rightSizeText": "Cada ubicación se dimensiona para encajar en el mercado — equilibrando huella, cantidad de máquinas y eficiencia operativa.",
+      "rightService": "Servicio correcto",
+      "rightServiceText": "Autoservicio, drop-off de wash-dry-fold, y cuentas comerciales — tres flujos de ingresos desde una sola huella.",
+      "rightSystems": "Sistemas correctos",
+      "rightSystemsText": "Tecnología de pago con tarjeta, analíticas en tiempo real, suministros gestionados por proveedor y un manual operativo probado."
+    },
+    "sanit": {
+      "eyebrow": "Sanitización WaveMAX",
+      "title": "Lavados más limpios. Mayor confianza del cliente.",
+      "p1": "Las ubicaciones WaveMAX están diseñadas con tecnología avanzada de sanitización que eleva la confianza del cliente y mejora el cuidado de las prendas. Nuestra misión es llevar lavandería más segura, limpia y eficiente a áreas desatendidas — y eso comienza con el agua misma, no solo con el ciclo.",
+      "p2": "Cada ubicación WaveMAX está construida para ser un centro de barrio confiable — máquinas de alta tecnología, personal consistente y limpieza elevada se combinan para entregar una mejor experiencia para los clientes y un tráfico recurrente más fuerte para los propietarios."
+    },
+    "invest": {
+      "eyebrow": "La inversión",
+      "title": "Lo que se necesita para ser propietario de una WaveMAX®.",
+      "lede": "Buscamos operadores comprometidos con la liquidez para financiar una sola ubicación y el apetito por crecer hacia la propiedad multi-unidad. La mayoría de los franquiciados financian una porción de la construcción y alcanzan flujo de efectivo positivo dentro del primer año de operación.",
+      "card1Label": "Liquidez requerida",
+      "card1Text": "Efectivo disponible para calificar. Cubre la cuota de franquicia + capital de trabajo + su parte de la construcción.",
+      "card2Label": "Inversión total",
+      "card2Text": "El rango cubre la construcción completa: equipo, obra, capital de trabajo, marketing de apertura.",
+      "card3Label": "Ingreso neto (muestra)",
+      "card3Text": "Ingreso neto de una tienda representativa — incluso con financiamiento total. El Item 19 tiene los detalles completos."
+    },
+    "faq": {
+      "eyebrow": "Preguntas frecuentes",
+      "title": "Preguntas frecuentes sobre la franquicia WaveMAX®",
+      "q1": "¿WaveMAX realmente es ingreso pasivo?",
+      "a1": "Es un negocio semi-ausente desde el primer día. Recomendamos estar en la tienda alrededor de 9 horas por semana — 3 días a la semana, 3 horas por día. La mayoría de los franquiciados no contratan a un gerente dedicado inicialmente; el modelo está diseñado para escalar sin uno.",
+      "q2": "¿Quiénes son sus clientes principales?",
+      "a2": "Familias de clase trabajadora, de cuello azul, que dependen de las lavanderías por necesidad, no por lujo. El cliente es estable a través de cada ciclo económico. También servimos anfitriones de Airbnb, restaurantes, gimnasios y consultorios médicos en el lado comercial.",
+      "q3": "¿Cuál es la inversión total?",
+      "a3": "La inversión total va de $1M a $1.5M; buscamos $400K de liquidez para calificar. Eso cubre la cuota de franquicia, construcción, equipo, capital de trabajo y marketing de apertura. El Item 19 del FDD tiene el desglose detallado.",
+      "q4": "¿WaveMAX me ayudará a encontrar un sitio?",
+      "a4": "Sí. Le guiamos a través de códigos postales de clase trabajadora, segmentación demográfica y ubicaciones aprobadas por la marca antes de firmar el contrato de arrendamiento. La selección del sitio es la decisión de mayor apalancamiento en este negocio y no la dejamos al azar.",
+      "q5": "¿Qué tan grande es WaveMAX ahora mismo?",
+      "a5": "75+ tiendas y creciendo, respaldados por economía de unidad de calidad, satisfacción del franquiciado y un manual nacional escalable. Clasificada #1 franquicia de lavandería en el Franchise 500 2026 de Entrepreneur. Construimos negocios duraderos con flujo de efectivo — no solo franquicias.",
+      "q6": "¿Puedo abrir múltiples ubicaciones?",
+      "a6": "La propiedad multi-unidad es el camino que toman la mayoría de los franquiciados. Los operadores con una tienda generadora de efectivo típicamente abren la segunda dentro de 18 meses. Hay derechos territoriales e incentivos de desarrollo de área disponibles para operadores multi-unidad serios."
+    },
+    "cta": {
+      "eyebrow": "¿Listo para tener una?",
+      "title": "Comience la conversación.",
+      "lede": "Cuéntenos sobre usted y le enviaremos el FDD y le guiaremos por el proceso. Sin presión — la mayoría de los propietarios toman 3–6 meses desde la primera llamada hasta firmar el contrato de arrendamiento.",
+      "btnPrimary": "Aplicar para ser franquiciado",
+      "btnSecondary": "Enviar correo a franchise@wavemax.com"
     }
   },
 
