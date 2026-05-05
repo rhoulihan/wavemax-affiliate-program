@@ -60,17 +60,26 @@
       max-width: var(--wm-content-max);
       margin: 0 auto;
       padding: var(--wm-sp-5) var(--wm-sp-5);
-      display: grid;
-      grid-template-columns: repeat(5, 1fr);
+      /* Flex with justify-content:center so the rail stays centered
+         when an equipment-gated tile (e.g. <45min Full Load) is hidden
+         for unaudited stores — grid would leave an empty column. */
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-wrap: wrap;
       gap: 0;
       text-align: center;
     }
     .wm-stat-card {
       background: transparent;
       border-top: 0;
-      padding: 0 24px;
+      padding: 0 32px;
       border-radius: 0;
       border-right: 1px solid rgba(255,255,255,0.12);
+      /* Each visible tile gets equal share of the rail width up to a
+         sensible max so they read like a row, not stacked text. */
+      flex: 1 1 0;
+      max-width: 240px;
     }
     .wm-stat-card:last-child { border-right: 0; }
     .wm-stat-number {
