@@ -121,6 +121,7 @@
     "faq": {
       "eyebrow": "Preguntas frecuentes",
       "title": "Preguntas frecuentes sobre la franquicia WaveMAX®",
+      "lede": "Las preguntas que escuchamos con más frecuencia durante el descubrimiento. El FAQ completo vive en /faq/ — estos son los titulares.",
       "q1": "¿WaveMAX realmente es ingreso pasivo?",
       "a1": "Es un negocio semi-ausente desde el primer día. Recomendamos estar en la tienda alrededor de 9 horas por semana — 3 días a la semana, 3 horas por día. La mayoría de los franquiciados no contratan a un gerente dedicado inicialmente; el modelo está diseñado para escalar sin uno.",
       "q2": "¿Quiénes son sus clientes principales?",
@@ -140,6 +141,67 @@
       "lede": "Cuéntenos sobre usted y le enviaremos el FDD y le guiaremos por el proceso. Sin presión — la mayoría de los propietarios toman 3–6 meses desde la primera llamada hasta firmar el contrato de arrendamiento.",
       "btnPrimary": "Aplicar para ser franquiciado",
       "btnSecondary": "Enviar correo a franchise@wavemax.com"
+    },
+    "tabs": { "why": "Por qué WaveMAX", "numbers": "Los Números", "model": "El Modelo", "equipment": "Equipos", "process": "Proceso", "faq": "FAQ" },
+    "trust": { "locations": "Ubicaciones abiertas y creciendo", "rating": "Calificación promedio del cliente", "rank": "Franquicia de lavandería · Entrepreneur 500 2026" },
+    "numbers": {
+      "title": "Números reales. FDD verificado.",
+      "lede":  "El Item 19 del FDD 2025 reporta una muestra de 50 tiendas WaveMAX. Cada candidato a franquiciado recibe estos números durante el descubrimiento — están legalmente regulados y los publicamos por adelantado.",
+      "colStat": "Estadística", "colGross": "Ingresos brutos", "colSample": "Muestra",
+      "rowAvg": "Promedio", "rowMedian": "Mediana", "rowTop": "Mejor desempeño",
+      "fiftyStores": "50 tiendas", "singleStore": "una tienda",
+      "jaxFlowLabel":   "Jacksonville · Flujo de caja neto 2024",
+      "jaxFlowText":    "Flujo de caja operativo antes del servicio de la deuda. Regalías, fondo de marketing y tarifas de POS/tecnología ya deducidas.",
+      "jaxIncomeLabel": "Ingreso neto 2024 (con financiamiento total de equipos)",
+      "jaxIncomeText":  "Ingreso neto después de deducir el pago del financiamiento de equipos — modelado con financiamiento SBA del 100%, el escenario más apalancado.",
+      "attr": "Fuente: Documento de Divulgación de Franquicia WaveMAX, edición 2025, Item 19. El desempeño pasado de una unidad propiedad de la empresa no garantiza resultados futuros del franquiciado."
+    },
+    "loc": {
+      "demoTitle":     "Segmentación demográfica",
+      "demoText":      "Códigos postales de clase trabajadora con densidad de inquilinos, bandas de ingresos por hogar y crecimiento poblacional estable.",
+      "sizeTitle":     "Tamaño de tienda optimizado",
+      "sizeText":      "Huella adaptada al mercado: cantidad de máquinas, proporción de secadoras y capacidad de cola ajustadas al volumen proyectado.",
+      "trafficTitle":  "Tráfico y visibilidad",
+      "trafficText":   "Conteo de tráfico vehicular, co-tenancia con anclas y acceso peatonal modelados — la visibilidad es la mitad del marketing."
+    },
+    "equipment": {
+      "title": "Electrolux moderno. Programado para el rendimiento.",
+      "lede":  "Montaje suave, alta extracción G, controles programables, diagnósticos en línea y partes y servicio negociados por la empresa. El resultado: ciclos más rápidos, menor costo de servicios públicos por libra y mantenimiento predecible.",
+      "stat1": "Carga completa · lavado a secado", "stat2": "Fuerza de extracción (premium)",
+      "stat3": "Unidades de gran formato",          "stat4": "Líneas equipadas con sanitización",
+      "partnerTitle": "Beneficios de la asociación con Electrolux",
+      "partner1": "Precios preferenciales en el paquete completo de equipos",
+      "partner2": "65–75% de financiamiento de proyecto a través de Electrolux",
+      "partner3": "Red de servicio y suministro de partes a nivel nacional",
+      "partner4": "Asistencia de ingeniería para layout y mezcla de máquinas",
+      "partner5": "Lavadoras solo AWS; única secadora con Eco Power",
+      "sanitTitle": "Sanitización Lux (nivel premium)",
+      "sanit1": "Mayor nivel de desinfección disponible",
+      "sanit2": "Menos detergente requerido por carga",
+      "sanit3": "Extiende la vida de las prendas ~20%",
+      "sanit4": "Blancos más brillantes, telas más suaves, sin olor",
+      "sanit5": "Reduce la retención de agua → secado más rápido",
+      "disclaimer": "Las afirmaciones de equipos premium (extracción 450G, gran formato 80lb, sanitización UV) solo aparecen en páginas de tiendas donde el equipo está verificado como instalado."
+    },
+    "process": {
+      "title": "Seis pasos desde la primera llamada hasta la apertura.",
+      "lede":  "El cronograma típico es de 6–9 meses. El ritmo está principalmente impulsado por la disponibilidad del sitio y la construcción; si un candidato ya tiene un sitio identificado y pre-aprobado, el cronograma se comprime.",
+      "step1Title": "Llamada inicial",         "step1Text": "Conversación exploratoria de 30 minutos. Mercado, capital, cronograma, encaje.",
+      "step2Title": "Revisión del FDD",        "step2Text": "Recibir y firmar el Documento de Divulgación de Franquicia. Detalle del Item 19.",
+      "step3Title": "Análisis de mercado",     "step3Text": "Estudio demográfico + de tráfico. Selección de territorio. Presentaciones a prestamistas.",
+      "step4Title": "Día de Descubrimiento",   "step4Text": "Visite la sede corporativa en Jacksonville. Conozca al equipo y recorra tiendas.",
+      "step5Title": "Acuerdo de franquicia",   "step5Text": "Ejecutar el acuerdo. Aprobación del sitio. Negociación del arrendamiento.",
+      "step6Title": "Capacitación y apertura", "step6Text": "Capacitación de varias semanas. Construcción. Marketing de apertura. Gran apertura."
+    },
+    "tabCta": {
+      "seeNumbers":         "Ver los números →",
+      "startConversation":  "Comenzar la conversación",
+      "fullBreakdown":      "Desglose completo de ROI →",
+      "getGuide":           "Obtener la Guía de Inversión",
+      "pickMarket":         "Elegir su mercado →",
+      "vsZombiemat":        "vs el Zombiemat",
+      "virtualTour":        "Tour virtual →",
+      "fullFaq":            "FAQ completo →"
     }
   },
 

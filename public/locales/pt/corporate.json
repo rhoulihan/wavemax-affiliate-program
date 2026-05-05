@@ -121,6 +121,7 @@
     "faq": {
       "eyebrow": "Perguntas frequentes",
       "title": "FAQ da franquia WaveMAX®",
+      "lede": "As perguntas que mais ouvimos durante a descoberta. O FAQ completo está em /faq/ — estes são os destaques.",
       "q1": "A WaveMAX é realmente renda passiva?",
       "a1": "É um negócio semipresencial desde o primeiro dia. Recomendamos estar na loja cerca de 9 horas por semana — 3 dias por semana, 3 horas por dia. A maioria dos franqueados não contrata um gerente dedicado inicialmente; o modelo é projetado para escalar sem um.",
       "q2": "Quem são os clientes principais?",
@@ -140,6 +141,67 @@
       "lede": "Conte-nos sobre você e enviaremos o FDD e te guiaremos pelo processo. Sem pressão — a maioria dos proprietários leva 3–6 meses da primeira ligação até a assinatura do contrato.",
       "btnPrimary": "Aplicar para ser franqueado",
       "btnSecondary": "Enviar e-mail para franchise@wavemax.com"
+    },
+    "tabs": { "why": "Por que WaveMAX", "numbers": "Os Números", "model": "O Modelo", "equipment": "Equipamentos", "process": "Processo", "faq": "FAQ" },
+    "trust": { "locations": "Unidades abertas e crescendo", "rating": "Avaliação média do cliente", "rank": "Franquia de lavanderia · Entrepreneur 500 2026" },
+    "numbers": {
+      "title": "Números reais. FDD verificado.",
+      "lede":  "O Item 19 do FDD 2025 reporta uma amostra de 50 unidades WaveMAX. Cada candidato a franqueado recebe esses números durante a descoberta — eles são legalmente regulamentados, e nós os publicamos antecipadamente.",
+      "colStat": "Estatística", "colGross": "Receita bruta", "colSample": "Amostra",
+      "rowAvg": "Média", "rowMedian": "Mediana", "rowTop": "Melhor desempenho",
+      "fiftyStores": "50 lojas", "singleStore": "uma loja",
+      "jaxFlowLabel":   "Jacksonville · Fluxo de caixa líquido 2024",
+      "jaxFlowText":    "Fluxo de caixa operacional antes do serviço da dívida. Royalties, fundo de marketing e taxas de POS/tecnologia já deduzidos.",
+      "jaxIncomeLabel": "Lucro líquido 2024 (com financiamento total de equipamentos)",
+      "jaxIncomeText":  "Lucro líquido após dedução do pagamento do financiamento de equipamentos — modelado com 100% de financiamento elegível ao SBA, o cenário mais alavancado.",
+      "attr": "Fonte: Documento de Divulgação de Franquia WaveMAX, edição 2025, Item 19. O desempenho passado de uma unidade própria da empresa não garante resultados futuros do franqueado."
+    },
+    "loc": {
+      "demoTitle":     "Segmentação demográfica",
+      "demoText":      "CEPs de classe trabalhadora com densidade de locatários, faixas de renda familiar e crescimento populacional estável.",
+      "sizeTitle":     "Tamanho de loja otimizado",
+      "sizeText":      "Metragem ajustada ao mercado: número de máquinas, proporção de secadoras e capacidade de fila sintonizadas para o volume projetado.",
+      "trafficTitle":  "Tráfego e visibilidade",
+      "trafficText":   "Contagem de tráfego, co-locação com âncoras e acesso pedestre modelados — visibilidade é metade do marketing."
+    },
+    "equipment": {
+      "title": "Electrolux moderno. Programado para o desempenho.",
+      "lede":  "Montagem suave, alta extração G, controladores programáveis, diagnósticos online e peças e serviços negociados pela empresa. O resultado: ciclos mais rápidos, custo menor de serviços públicos por libra e manutenção previsível.",
+      "stat1": "Carga completa · lavar a secar", "stat2": "Força de extração (premium)",
+      "stat3": "Unidades de grande formato",      "stat4": "Linhas com sanitização",
+      "partnerTitle": "Benefícios da parceria Electrolux",
+      "partner1": "Preços preferenciais no pacote completo de equipamentos",
+      "partner2": "65–75% de financiamento de projeto via Electrolux",
+      "partner3": "Rede de serviço e suprimento de peças em todo o país",
+      "partner4": "Assistência de engenharia para layout e mix de máquinas",
+      "partner5": "Lavadoras apenas AWS; única secadora com Eco Power",
+      "sanitTitle": "Sanitização Lux (nível premium)",
+      "sanit1": "Maior nível de desinfecção disponível",
+      "sanit2": "Menos detergente por carga",
+      "sanit3": "Aumenta a vida das peças em ~20%",
+      "sanit4": "Brancos mais brilhantes, tecidos mais macios, sem odor",
+      "sanit5": "Reduz a retenção de água → secagem mais rápida",
+      "disclaimer": "Alegações de equipamentos premium (extração 450G, grande formato 80lb, sanitização UV) só aparecem em páginas de lojas onde o equipamento foi verificado como instalado."
+    },
+    "process": {
+      "title": "Seis passos da primeira ligação à inauguração.",
+      "lede":  "O cronograma típico é de 6–9 meses. O ritmo é determinado principalmente pela disponibilidade do ponto e construção; se um candidato já tem um ponto identificado e pré-aprovado, o cronograma comprime.",
+      "step1Title": "Ligação inicial",         "step1Text": "Conversa exploratória de 30 minutos. Mercado, capital, cronograma, encaixe.",
+      "step2Title": "Revisão do FDD",          "step2Text": "Receber e assinar o Documento de Divulgação de Franquia. Detalhes do Item 19.",
+      "step3Title": "Análise de mercado",      "step3Text": "Estudo demográfico + de tráfego. Seleção de território. Apresentações a credores.",
+      "step4Title": "Discovery Day",           "step4Text": "Visite a sede corporativa em Jacksonville. Conheça a equipe e visite as lojas.",
+      "step5Title": "Contrato de franquia",    "step5Text": "Executar o contrato. Aprovação do ponto. Negociação do aluguel.",
+      "step6Title": "Treinamento e abertura",  "step6Text": "Treinamento de várias semanas. Construção. Marketing de abertura. Inauguração."
+    },
+    "tabCta": {
+      "seeNumbers":         "Ver os números →",
+      "startConversation":  "Iniciar a conversa",
+      "fullBreakdown":      "Desdobramento completo do ROI →",
+      "getGuide":           "Obter o Guia de Investimento",
+      "pickMarket":         "Escolha seu mercado →",
+      "vsZombiemat":        "vs Zombiemat",
+      "virtualTour":        "Tour virtual →",
+      "fullFaq":            "FAQ completo →"
     }
   },
 

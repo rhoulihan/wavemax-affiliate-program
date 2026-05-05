@@ -230,90 +230,146 @@
       .wm-fr-stats-inner { grid-template-columns: repeat(2, 1fr); gap: 24px; }
     }
 
-    /* WHY OWNERS — checklist tiles */
-    .wm-fr-why { background: #f6f8fb; }
-    .wm-fr-why-grid {
-      display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-      gap: 20px; margin-top: 36px;
+    /* ============================================================
+       TABS — primary navigation device, replaces long-scroll body
+       ============================================================ */
+    .wm-fr-tabs-section {
+      background: #f6f8fb;
+      padding: clamp(36px, 4vw, 56px) 24px clamp(56px, 6vw, 96px);
     }
-    .wm-fr-why-tile {
-      background: #fff; border-radius: 10px; padding: 28px;
-      border-left: 3px solid #154f82;
-      box-shadow: 0 1px 3px rgba(20,56,82,0.05);
+    .wm-fr-tabs-inner { max-width: 1180px; margin: 0 auto; }
+    .wm-fr-tab-bar {
+      display: flex; gap: 4px; flex-wrap: wrap;
+      background: #fff; padding: 6px;
+      border-radius: 12px;
+      box-shadow: 0 4px 16px rgba(20,56,82,0.06);
+      margin-bottom: 36px; position: sticky; top: 60px; z-index: 50;
     }
-    .wm-fr-why-tile-title {
-      font-family: var(--wm-font-heading); font-size: 18px; font-weight: 700;
-      color: #143852; margin: 0 0 10px 0; line-height: 1.25;
+    .wm-fr-tab {
+      flex: 1 1 auto; min-width: 120px;
+      background: transparent; border: 0; cursor: pointer;
+      padding: 14px 18px;
+      font-family: var(--wm-font-heading); font-weight: 700;
+      font-size: 13.5px; letter-spacing: 0.04em; text-transform: uppercase;
+      color: #5a6878; border-radius: 8px;
+      transition: background 0.15s ease, color 0.15s ease;
     }
-    .wm-fr-why-tile-text { font-size: 14.5px; color: #5a6878; line-height: 1.55; margin: 0; }
-
-    /* SECRET SAUCE — 4-up icon grid */
-    .wm-fr-sauce-grid {
-      display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-      gap: 24px; margin-top: 40px;
+    .wm-fr-tab:hover { color: #143852; background: #f0f4fa; }
+    .wm-fr-tab.is-active {
+      background: #143852; color: #fff;
+      box-shadow: 0 4px 12px rgba(20,56,82,0.20);
     }
-    .wm-fr-sauce-card {
-      text-align: center; padding: 28px 20px;
+    .wm-fr-tab.is-active::after {
+      content: ''; display: block; height: 2px; background: #f5a623; margin-top: 6px;
+      margin-left: -8px; margin-right: -8px;
     }
-    .wm-fr-sauce-icon {
-      width: 64px; height: 64px; margin: 0 auto 18px;
-      background: rgba(245, 166, 35, 0.12); border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 28px;
+    .wm-fr-panel { display: none; animation: fadeUp 0.4s ease; }
+    .wm-fr-panel.is-active { display: block; }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    .wm-fr-panel h3 {
+      font-family: var(--wm-font-heading); font-weight: 800;
+      color: #143852; font-size: clamp(22px, 2.4vw, 30px);
+      margin: 0 0 8px 0; letter-spacing: -0.01em;
     }
-    .wm-fr-sauce-title {
-      font-family: var(--wm-font-heading); font-size: 18px; font-weight: 700;
-      color: #143852; margin: 0 0 10px 0;
-    }
-    .wm-fr-sauce-text { font-size: 14.5px; color: #5a6878; line-height: 1.55; margin: 0; }
-
-    /* SANITATION — split */
-    .wm-fr-sanit-split {
-      display: grid; grid-template-columns: 1fr 1fr; gap: 56px; align-items: center;
-    }
-    @media (max-width: 880px) { .wm-fr-sanit-split { grid-template-columns: 1fr; gap: 32px; } }
-    .wm-fr-sanit-img {
-      width: 100%; aspect-ratio: 4/3; border-radius: 14px;
-      background: linear-gradient(135deg, #1a3f7a, #154f82);
-      display: flex; align-items: center; justify-content: center;
-      color: #fff; font-family: var(--wm-font-heading); font-size: 28px; font-weight: 800;
-      letter-spacing: 0.02em;
-      box-shadow: 0 12px 40px rgba(20,56,82,0.18);
-    }
-    .wm-fr-sanit-img.has-image {
-      background: url('https://wavemaxlaundry.com/wp-content/uploads/locations/jacksonville-fl/interior-3.jpg') center/cover;
+    .wm-fr-panel .panel-lede {
+      font-size: 16px; color: #4a5868; line-height: 1.6;
+      max-width: 760px; margin: 0 0 28px 0;
     }
 
-    /* INVESTMENT — 3 stat cards on dark */
-    .wm-fr-invest { background: #143852; color: #fff; }
-    .wm-fr-invest .wm-fr-eyebrow { color: #f5a623; }
-    .wm-fr-invest .wm-fr-title { color: #fff; }
-    .wm-fr-invest-cards {
-      display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-top: 40px;
-    }
-    @media (max-width: 800px) { .wm-fr-invest-cards { grid-template-columns: 1fr; } }
-    .wm-fr-invest-card {
-      background: rgba(255,255,255,0.05); border-radius: 12px; padding: 32px 28px;
-      border: 1px solid rgba(255,255,255,0.10);
-    }
-    .wm-fr-invest-num {
-      font-family: var(--wm-font-heading); font-size: clamp(32px, 3.6vw, 44px);
-      font-weight: 900; color: #f5a623; line-height: 1; margin-bottom: 10px;
-    }
-    .wm-fr-invest-label { font-family: var(--wm-font-heading); font-size: 14px; font-weight: 700; color: #fff; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 14px; }
-    .wm-fr-invest-text { font-size: 14.5px; color: rgba(255,255,255,0.78); line-height: 1.55; }
+    /* WHY tiles (re-used inside Why panel) */
+    .wm-fr-why-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
+    .wm-fr-why-tile { background: #fff; border-radius: 10px; padding: 24px; border-left: 3px solid #154f82; box-shadow: 0 1px 3px rgba(20,56,82,0.05); }
+    .wm-fr-why-tile-title { font-family: var(--wm-font-heading); font-size: 17px; font-weight: 700; color: #143852; margin: 0 0 8px 0; line-height: 1.25; }
+    .wm-fr-why-tile-text { font-size: 14px; color: #5a6878; line-height: 1.55; margin: 0; }
 
-    /* FAQ */
-    .wm-fr-faq-list { margin-top: 32px; }
-    .wm-fr-faq {
-      border-top: 1px solid #e3e8f0; padding: 22px 0;
-    }
-    .wm-fr-faq:first-child { border-top: 0; }
-    .wm-fr-faq-q {
-      font-family: var(--wm-font-heading); font-size: 17px; font-weight: 700;
-      color: #143852; margin: 0 0 10px 0; line-height: 1.4;
-    }
-    .wm-fr-faq-a { font-size: 15px; color: #4a5868; line-height: 1.65; margin: 0; }
+    /* Trust strip on Why panel */
+    .wm-fr-trust { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; margin-top: 24px; background: #143852; border-radius: 12px; overflow: hidden; }
+    @media (max-width: 720px) { .wm-fr-trust { grid-template-columns: 1fr; } }
+    .wm-fr-trust-cell { padding: 22px 24px; color: #fff; text-align: center; border-right: 1px solid rgba(255,255,255,0.08); }
+    .wm-fr-trust-cell:last-child { border-right: 0; }
+    .wm-fr-trust-cell .num { font-family: var(--wm-font-heading); font-size: 26px; font-weight: 900; color: #f5a623; line-height: 1; margin-bottom: 6px; }
+    .wm-fr-trust-cell .label { font-size: 12.5px; color: rgba(255,255,255,0.85); letter-spacing: 0.5px; }
+
+    /* NUMBERS panel — Item 19 + Jacksonville */
+    .wm-fr-i19-table { background: #fff; border-radius: 14px; overflow: hidden; box-shadow: 0 4px 16px rgba(20,56,82,0.06); margin-bottom: 28px; }
+    .wm-fr-i19-row { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 24px; padding: 18px 28px; border-bottom: 1px solid #e3e8f0; align-items: center; }
+    .wm-fr-i19-row:last-child { border-bottom: 0; }
+    .wm-fr-i19-row.head { background: #143852; color: #fff; font-family: var(--wm-font-heading); font-weight: 700; font-size: 12.5px; letter-spacing: 1.2px; text-transform: uppercase; padding: 14px 28px; }
+    .wm-fr-i19-label { font-family: var(--wm-font-heading); font-weight: 700; color: #143852; }
+    .wm-fr-i19-val { font-family: var(--wm-font-heading); font-weight: 800; color: #143852; font-size: 17px; text-align: right; }
+    .wm-fr-i19-val.amber { color: #f5a623; }
+    @media (max-width: 720px) { .wm-fr-i19-row { grid-template-columns: 1fr; gap: 4px; padding: 14px 18px; } .wm-fr-i19-row.head { display: none; } }
+    .wm-fr-jax-card { background: linear-gradient(135deg, #143852, #154f82); color: #fff; border-radius: 14px; padding: 28px; display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
+    @media (max-width: 720px) { .wm-fr-jax-card { grid-template-columns: 1fr; } }
+    .wm-fr-jax-cell .num { font-family: var(--wm-font-heading); font-size: clamp(28px, 3.4vw, 40px); font-weight: 900; color: #f5a623; line-height: 1; margin-bottom: 6px; }
+    .wm-fr-jax-cell .label { font-family: var(--wm-font-heading); font-weight: 700; color: #fff; font-size: 12.5px; letter-spacing: 1.4px; text-transform: uppercase; margin-bottom: 10px; }
+    .wm-fr-jax-cell .text { font-size: 14px; color: rgba(255,255,255,0.78); line-height: 1.55; }
+    .wm-fr-attr { margin-top: 20px; font-size: 12.5px; color: #5a6878; }
+
+    /* MODEL panel */
+    .wm-fr-sauce-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; }
+    .wm-fr-sauce-card { background: #fff; border-radius: 10px; padding: 24px; text-align: center; box-shadow: 0 1px 3px rgba(20,56,82,0.05); }
+    .wm-fr-sauce-icon { width: 56px; height: 56px; margin: 0 auto 14px; background: rgba(245,166,35,0.12); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; }
+    .wm-fr-sauce-title { font-family: var(--wm-font-heading); font-size: 16px; font-weight: 700; color: #143852; margin: 0 0 8px 0; }
+    .wm-fr-sauce-text { font-size: 13.5px; color: #5a6878; line-height: 1.55; margin: 0; }
+    .wm-fr-loc-strategy { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 20px; }
+    @media (max-width: 720px) { .wm-fr-loc-strategy { grid-template-columns: 1fr; } }
+    .wm-fr-loc-strategy .pillar { background: rgba(20,56,82,0.04); border: 1px solid rgba(20,56,82,0.08); padding: 18px; border-radius: 8px; }
+    .wm-fr-loc-strategy .pillar h4 { font-family: var(--wm-font-heading); font-size: 14px; font-weight: 800; color: #143852; margin: 0 0 6px 0; letter-spacing: 0.4px; }
+    .wm-fr-loc-strategy .pillar p { font-size: 13px; color: #5a6878; margin: 0; line-height: 1.55; }
+
+    /* EQUIPMENT panel */
+    .wm-fr-equip-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 24px; }
+    @media (max-width: 720px) { .wm-fr-equip-stats { grid-template-columns: repeat(2, 1fr); } }
+    .wm-fr-equip-stat { background: #143852; color: #fff; border-radius: 10px; padding: 22px 16px; text-align: center; }
+    .wm-fr-equip-stat .num { font-family: var(--wm-font-heading); font-size: 28px; font-weight: 900; color: #f5a623; line-height: 1; margin-bottom: 6px; }
+    .wm-fr-equip-stat .label { font-size: 11.5px; color: rgba(255,255,255,0.82); letter-spacing: 0.6px; }
+    .wm-fr-equip-split { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; }
+    @media (max-width: 880px) { .wm-fr-equip-split { grid-template-columns: 1fr; } }
+    .wm-fr-equip-card { background: #fff; border-radius: 12px; padding: 26px; box-shadow: 0 1px 3px rgba(20,56,82,0.05); }
+    .wm-fr-equip-card h4 { font-family: var(--wm-font-heading); font-size: 17px; font-weight: 800; color: #143852; margin: 0 0 14px 0; }
+    .wm-fr-equip-card ul { list-style: none; padding: 0; margin: 0; }
+    .wm-fr-equip-card li { padding: 8px 0 8px 22px; position: relative; font-size: 14px; color: #4a5868; line-height: 1.55; }
+    .wm-fr-equip-card li::before { content: '✓'; position: absolute; left: 0; color: #f5a623; font-weight: 800; }
+
+    /* PROCESS panel — horizontal step flow */
+    .wm-fr-steps { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; counter-reset: step; }
+    @media (max-width: 1024px) { .wm-fr-steps { grid-template-columns: repeat(3, 1fr); } }
+    @media (max-width: 600px) { .wm-fr-steps { grid-template-columns: 1fr; } }
+    .wm-fr-step { background: #fff; border-radius: 10px; padding: 22px; box-shadow: 0 1px 3px rgba(20,56,82,0.05); position: relative; counter-increment: step; }
+    .wm-fr-step::before { content: '0' counter(step); display: block; font-family: var(--wm-font-heading); font-weight: 900; font-size: 28px; color: #f5a623; line-height: 1; margin-bottom: 10px; }
+    .wm-fr-step h4 { font-family: var(--wm-font-heading); font-size: 14.5px; font-weight: 800; color: #143852; margin: 0 0 6px 0; line-height: 1.3; }
+    .wm-fr-step p { font-size: 13px; color: #5a6878; margin: 0; line-height: 1.5; }
+
+    /* FAQ panel — accordion */
+    .wm-fr-faq-acc { background: #fff; border-radius: 12px; box-shadow: 0 1px 3px rgba(20,56,82,0.05); }
+    .wm-fr-faq-item { border-top: 1px solid #e3e8f0; }
+    .wm-fr-faq-item:first-child { border-top: 0; }
+    .wm-fr-faq-q-btn { width: 100%; text-align: left; background: transparent; border: 0; cursor: pointer; padding: 18px 24px; display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; font-family: var(--wm-font-heading); font-size: 15.5px; font-weight: 700; color: #143852; line-height: 1.4; }
+    .wm-fr-faq-q-btn:hover { color: #1a3f7a; }
+    .wm-fr-faq-q-btn .icon { flex-shrink: 0; width: 22px; height: 22px; border: 1.5px solid #143852; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; transition: transform 0.2s ease, background 0.2s ease, color 0.2s ease; }
+    .wm-fr-faq-q-btn[aria-expanded="true"] .icon { transform: rotate(45deg); background: #f5a623; color: #143852; border-color: #f5a623; }
+    .wm-fr-faq-panel { max-height: 0; overflow: hidden; transition: max-height 0.3s ease; }
+    .wm-fr-faq-panel-inner { padding: 0 24px 18px; font-size: 14.5px; color: #4a5868; line-height: 1.65; }
+
+    /* TESTIMONIAL SLIDER (used inside Why panel) */
+    .wm-fr-slider { position: relative; margin-top: 28px; }
+    .wm-fr-slider-track { display: flex; gap: 16px; overflow-x: auto; scroll-snap-type: x mandatory; scroll-behavior: smooth; padding: 4px; -ms-overflow-style: none; scrollbar-width: none; }
+    .wm-fr-slider-track::-webkit-scrollbar { display: none; }
+    .wm-fr-slide { flex: 0 0 320px; scroll-snap-align: start; background: #fff; border-radius: 12px; padding: 26px; box-shadow: 0 4px 12px rgba(20,56,82,0.06); border-top: 4px solid #f5a623; }
+    .wm-fr-slide-quote { font-size: 14.5px; color: #2c3e50; line-height: 1.6; margin: 0 0 14px 0; font-style: italic; }
+    .wm-fr-slide-attr { font-family: var(--wm-font-heading); font-weight: 700; color: #143852; font-size: 13px; }
+    .wm-fr-slider-nav { position: absolute; top: 50%; transform: translateY(-50%); background: #fff; border: 1px solid #e3e8f0; border-radius: 50%; width: 38px; height: 38px; cursor: pointer; box-shadow: 0 2px 8px rgba(20,56,82,0.12); display: flex; align-items: center; justify-content: center; color: #143852; font-size: 18px; z-index: 2; }
+    .wm-fr-slider-nav.prev { left: -10px; }
+    .wm-fr-slider-nav.next { right: -10px; }
+    .wm-fr-slider-nav:hover { background: #f5a623; color: #143852; }
+
+    /* CTA inline within tabs */
+    .wm-fr-tab-cta { margin-top: 24px; display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+    .wm-fr-tab-cta a { display: inline-flex; align-items: center; padding: 10px 18px; background: #143852; color: #fff; font-family: var(--wm-font-heading); font-weight: 700; font-size: 13px; letter-spacing: 0.04em; text-transform: uppercase; text-decoration: none; border-radius: 6px; }
+    .wm-fr-tab-cta a:hover { background: #1a3f7a; }
+    .wm-fr-tab-cta a.amber { background: #f5a623; color: #143852; }
+    .wm-fr-tab-cta a.amber:hover { background: #e69819; }
 
     /* CLOSING CTA */
     .wm-fr-cta-strip {
@@ -383,150 +439,318 @@
     </div>
   </section>
 
-  <!-- WHY OWNERS LOVE -->
-  <section class="wm-fr-section wm-fr-why">
-    <div class="wm-fr-inner">
-      <p class="wm-fr-eyebrow" data-i18n="franchise.why.eyebrow">Why owners love WaveMAX®</p>
-      <h2 class="wm-fr-title" data-i18n="franchise.why.title">A laundromat franchise built for serious operators.</h2>
-      <p class="wm-fr-lede" data-i18n="franchise.why.lede">WaveMAX is a leading laundromat franchise offering scalable, semi-absentee ownership with strong unit economics and national brand support. Disciplined site selection, smart sizing, premium equipment, and a service model that resonates with working-class communities — that's the playbook.</p>
+  <!-- TAB CONTROL — replaces long-scroll body, weaves corporate content into 6 tabs -->
+  <section class="wm-fr-tabs-section">
+    <div class="wm-fr-tabs-inner">
+      <div class="wm-fr-tab-bar" role="tablist" aria-label="Franchise content tabs">
+        <button type="button" class="wm-fr-tab is-active" role="tab" aria-selected="true"  aria-controls="panel-why"       data-tab="why"       data-i18n="franchise.tabs.why">Why WaveMAX</button>
+        <button type="button" class="wm-fr-tab"           role="tab" aria-selected="false" aria-controls="panel-numbers"   data-tab="numbers"   data-i18n="franchise.tabs.numbers">The Numbers</button>
+        <button type="button" class="wm-fr-tab"           role="tab" aria-selected="false" aria-controls="panel-model"     data-tab="model"     data-i18n="franchise.tabs.model">The Model</button>
+        <button type="button" class="wm-fr-tab"           role="tab" aria-selected="false" aria-controls="panel-equipment" data-tab="equipment" data-i18n="franchise.tabs.equipment">Equipment</button>
+        <button type="button" class="wm-fr-tab"           role="tab" aria-selected="false" aria-controls="panel-process"   data-tab="process"   data-i18n="franchise.tabs.process">Process</button>
+        <button type="button" class="wm-fr-tab"           role="tab" aria-selected="false" aria-controls="panel-faq"       data-tab="faq"       data-i18n="franchise.tabs.faq">FAQ</button>
+      </div>
 
-      <div class="wm-fr-why-grid">
-        <div class="wm-fr-why-tile">
-          <h3 class="wm-fr-why-tile-title" data-i18n="franchise.why.tile1Title">Semi-absentee from day one</h3>
-          <p class="wm-fr-why-tile-text" data-i18n="franchise.why.tile1Text">~9 hours/week, 3 days a week, 3 hours per day. Most franchisees don't hire a manager initially — the model is designed to scale without a constant on-site presence.</p>
+      <!-- WHY panel -->
+      <div class="wm-fr-panel is-active" id="panel-why" role="tabpanel">
+        <h3 data-i18n="franchise.why.title">A laundromat franchise built for serious operators.</h3>
+        <p class="panel-lede" data-i18n="franchise.why.lede">WaveMAX is a leading laundromat franchise offering scalable, semi-absentee ownership with strong unit economics and national brand support. Disciplined site selection, smart sizing, premium equipment, and a service model that resonates with working-class communities — that's the playbook.</p>
+
+        <div class="wm-fr-why-grid">
+          <div class="wm-fr-why-tile">
+            <h4 class="wm-fr-why-tile-title" data-i18n="franchise.why.tile1Title">Semi-absentee from day one</h4>
+            <p class="wm-fr-why-tile-text"    data-i18n="franchise.why.tile1Text">~9 hours/week, 3 days a week, 3 hours per day. Most franchisees don't hire a manager initially — the model is designed to scale without a constant on-site presence.</p>
+          </div>
+          <div class="wm-fr-why-tile">
+            <h4 class="wm-fr-why-tile-title" data-i18n="franchise.why.tile2Title">Low overhead, high ROI</h4>
+            <p class="wm-fr-why-tile-text"    data-i18n="franchise.why.tile2Text">Lean staffing, durable equipment, no inventory to manage. Predictable cost structure with strong unit economics that compound across multi-unit operators.</p>
+          </div>
+          <div class="wm-fr-why-tile">
+            <h4 class="wm-fr-why-tile-title" data-i18n="franchise.why.tile3Title">Essential, recession-proof</h4>
+            <p class="wm-fr-why-tile-text"    data-i18n="franchise.why.tile3Text">Laundry is a need, not a want. Working-class families rely on laundromats out of necessity — the demand is steady through every economic cycle.</p>
+          </div>
+          <div class="wm-fr-why-tile">
+            <h4 class="wm-fr-why-tile-title" data-i18n="franchise.why.tile4Title">Premium Electrolux equipment</h4>
+            <p class="wm-fr-why-tile-text"    data-i18n="franchise.why.tile4Text">High-extraction commercial machines that move customers through faster, run cleaner, and last longer than what walk-in competitors operate.</p>
+          </div>
+          <div class="wm-fr-why-tile">
+            <h4 class="wm-fr-why-tile-title" data-i18n="franchise.why.tile5Title">Easy multi-unit expansion</h4>
+            <p class="wm-fr-why-tile-text"    data-i18n="franchise.why.tile5Text">Operators with one cash-flowing store typically open their second within 18 months. Site-selection support and proven playbook scale linearly.</p>
+          </div>
+          <div class="wm-fr-why-tile">
+            <h4 class="wm-fr-why-tile-title" data-i18n="franchise.why.tile6Title">National brand support</h4>
+            <p class="wm-fr-why-tile-text"    data-i18n="franchise.why.tile6Text">Marketing, training, technology, vendor relationships — the back office every owner-operator wants but most can't build alone.</p>
+          </div>
         </div>
-        <div class="wm-fr-why-tile">
-          <h3 class="wm-fr-why-tile-title" data-i18n="franchise.why.tile2Title">Low overhead, high ROI</h3>
-          <p class="wm-fr-why-tile-text" data-i18n="franchise.why.tile2Text">Lean staffing, durable equipment, no inventory to manage. Predictable cost structure with strong unit economics that compound across multi-unit operators.</p>
+
+        <div class="wm-fr-trust">
+          <div class="wm-fr-trust-cell">
+            <div class="num">75+</div>
+            <div class="label" data-i18n="franchise.trust.locations">Open locations and growing</div>
+          </div>
+          <div class="wm-fr-trust-cell">
+            <div class="num">4.8★</div>
+            <div class="label" data-i18n="franchise.trust.rating">Average customer rating</div>
+          </div>
+          <div class="wm-fr-trust-cell">
+            <div class="num">#1</div>
+            <div class="label" data-i18n="franchise.trust.rank">Laundromat franchise · 2026 Entrepreneur 500</div>
+          </div>
         </div>
-        <div class="wm-fr-why-tile">
-          <h3 class="wm-fr-why-tile-title" data-i18n="franchise.why.tile3Title">Essential, recession-proof</h3>
-          <p class="wm-fr-why-tile-text" data-i18n="franchise.why.tile3Text">Laundry is a need, not a want. Working-class families rely on laundromats out of necessity — the demand is steady through every economic cycle.</p>
+
+        <div class="wm-fr-tab-cta">
+          <a class="amber" href="/why-invest-in-wavemax/" data-i18n="franchise.tabCta.seeNumbers">See the numbers →</a>
+          <a href="/become-a-franchisee/" data-i18n="franchise.tabCta.startConversation">Start the conversation</a>
         </div>
-        <div class="wm-fr-why-tile">
-          <h3 class="wm-fr-why-tile-title" data-i18n="franchise.why.tile4Title">Premium Electrolux equipment</h3>
-          <p class="wm-fr-why-tile-text" data-i18n="franchise.why.tile4Text">High-extraction commercial machines that move customers through faster, run cleaner, and last longer than what walk-in competitors operate.</p>
+      </div>
+
+      <!-- NUMBERS panel -->
+      <div class="wm-fr-panel" id="panel-numbers" role="tabpanel">
+        <h3 data-i18n="franchise.numbers.title">Real numbers. Verified FDD.</h3>
+        <p class="panel-lede" data-i18n="franchise.numbers.lede">Item 19 of the 2025 FDD reports a 50-store sample of WaveMAX locations. Every prospective franchisee receives these numbers during discovery — they're legally regulated, and we publish them up front.</p>
+
+        <div class="wm-fr-i19-table">
+          <div class="wm-fr-i19-row head">
+            <div data-i18n="franchise.numbers.colStat">Statistic</div>
+            <div style="text-align:right;" data-i18n="franchise.numbers.colGross">Gross revenue</div>
+            <div style="text-align:right;" data-i18n="franchise.numbers.colSample">Sample</div>
+          </div>
+          <div class="wm-fr-i19-row">
+            <div class="wm-fr-i19-label" data-i18n="franchise.numbers.rowAvg">Average</div>
+            <div class="wm-fr-i19-val amber">$471,201</div>
+            <div style="text-align:right; color:#5a6878; font-size:13.5px;" data-i18n="franchise.numbers.fiftyStores">50 stores</div>
+          </div>
+          <div class="wm-fr-i19-row">
+            <div class="wm-fr-i19-label" data-i18n="franchise.numbers.rowMedian">Median</div>
+            <div class="wm-fr-i19-val">$436,114</div>
+            <div style="text-align:right; color:#5a6878; font-size:13.5px;" data-i18n="franchise.numbers.fiftyStores">50 stores</div>
+          </div>
+          <div class="wm-fr-i19-row">
+            <div class="wm-fr-i19-label" data-i18n="franchise.numbers.rowTop">Top performer</div>
+            <div class="wm-fr-i19-val">$713,934</div>
+            <div style="text-align:right; color:#5a6878; font-size:13.5px;" data-i18n="franchise.numbers.singleStore">single store</div>
+          </div>
         </div>
-        <div class="wm-fr-why-tile">
-          <h3 class="wm-fr-why-tile-title" data-i18n="franchise.why.tile5Title">Easy multi-unit expansion</h3>
-          <p class="wm-fr-why-tile-text" data-i18n="franchise.why.tile5Text">Operators with one cash-flowing store typically open their second within 18 months. Site-selection support and proven playbook scale linearly.</p>
+
+        <div class="wm-fr-jax-card">
+          <div class="wm-fr-jax-cell">
+            <div class="num">$217,762</div>
+            <div class="label" data-i18n="franchise.numbers.jaxFlowLabel">Jacksonville · 2024 net cash flow</div>
+            <div class="text" data-i18n="franchise.numbers.jaxFlowText">Operating cash flow before debt service. Royalty fee, marketing fund contribution, and POS/technology fees already deducted.</div>
+          </div>
+          <div class="wm-fr-jax-cell">
+            <div class="num">$113,074</div>
+            <div class="label" data-i18n="franchise.numbers.jaxIncomeLabel">2024 net income (full equipment financing)</div>
+            <div class="text" data-i18n="franchise.numbers.jaxIncomeText">Net income after the equipment financing payment is also deducted — modeled with 100% SBA-eligible financing, the most leveraged scenario.</div>
+          </div>
         </div>
-        <div class="wm-fr-why-tile">
-          <h3 class="wm-fr-why-tile-title" data-i18n="franchise.why.tile6Title">National brand support</h3>
-          <p class="wm-fr-why-tile-text" data-i18n="franchise.why.tile6Text">Marketing, training, technology, vendor relationships — the back office every owner-operator wants but most can't build alone.</p>
+
+        <p class="wm-fr-attr" data-i18n="franchise.numbers.attr">Source: WaveMAX Franchise Disclosure Document, 2025 issue, Item 19. Past performance of one company-owned unit is not a guarantee of future franchisee results.</p>
+
+        <div class="wm-fr-tab-cta">
+          <a class="amber" href="/why-invest-in-wavemax/" data-i18n="franchise.tabCta.fullBreakdown">Full ROI breakdown →</a>
+          <a href="/laundromat-investment-guide/" data-i18n="franchise.tabCta.getGuide">Get the Investment Guide</a>
+        </div>
+      </div>
+
+      <!-- MODEL panel -->
+      <div class="wm-fr-panel" id="panel-model" role="tabpanel">
+        <h3 data-i18n="franchise.sauce.title">Right site. Right size. Right service. Right systems.</h3>
+        <p class="panel-lede" data-i18n="franchise.sauce.lede">Our growth strategy is built around four disciplines that compound into reliable unit economics — and a model that's repeatable across markets.</p>
+
+        <div class="wm-fr-sauce-grid">
+          <div class="wm-fr-sauce-card">
+            <div class="wm-fr-sauce-icon" aria-hidden="true">📍</div>
+            <h4 class="wm-fr-sauce-title" data-i18n="franchise.sauce.rightSite">Right Site</h4>
+            <p class="wm-fr-sauce-text"    data-i18n="franchise.sauce.rightSiteText">Demographic targeting, competition analysis, and real-world location strategy built for sustained demand.</p>
+          </div>
+          <div class="wm-fr-sauce-card">
+            <div class="wm-fr-sauce-icon" aria-hidden="true">↗</div>
+            <h4 class="wm-fr-sauce-title" data-i18n="franchise.sauce.rightSize">Right Size</h4>
+            <p class="wm-fr-sauce-text"    data-i18n="franchise.sauce.rightSizeText">Each location is sized to fit the market — balancing footprint, machine count, and operational efficiency.</p>
+          </div>
+          <div class="wm-fr-sauce-card">
+            <div class="wm-fr-sauce-icon" aria-hidden="true">🧺</div>
+            <h4 class="wm-fr-sauce-title" data-i18n="franchise.sauce.rightService">Right Service</h4>
+            <p class="wm-fr-sauce-text"    data-i18n="franchise.sauce.rightServiceText">Self-serve, wash-dry-fold drop-off, and commercial accounts — three revenue streams from one footprint.</p>
+          </div>
+          <div class="wm-fr-sauce-card">
+            <div class="wm-fr-sauce-icon" aria-hidden="true">⚙️</div>
+            <h4 class="wm-fr-sauce-title" data-i18n="franchise.sauce.rightSystems">Right Systems</h4>
+            <p class="wm-fr-sauce-text"    data-i18n="franchise.sauce.rightSystemsText">Card-pay technology, real-time analytics, vendor-managed supplies, and a proven operations playbook.</p>
+          </div>
+        </div>
+
+        <div class="wm-fr-loc-strategy">
+          <div class="pillar">
+            <h4 data-i18n="franchise.loc.demoTitle">Demographic targeting</h4>
+            <p data-i18n="franchise.loc.demoText">Working-class ZIP codes with renter density, household income bands, and stable population growth.</p>
+          </div>
+          <div class="pillar">
+            <h4 data-i18n="franchise.loc.sizeTitle">Optimized store size</h4>
+            <p data-i18n="franchise.loc.sizeText">Footprint matched to market: machine count, dryer ratio, queue capacity tuned for projected volume.</p>
+          </div>
+          <div class="pillar">
+            <h4 data-i18n="franchise.loc.trafficTitle">Traffic &amp; visibility</h4>
+            <p data-i18n="franchise.loc.trafficText">Drive-by counts, anchor co-tenancy, and pedestrian access modeled — visibility is half the marketing.</p>
+          </div>
+        </div>
+
+        <div class="wm-fr-tab-cta">
+          <a class="amber" href="/become-a-franchisee/" data-i18n="franchise.tabCta.pickMarket">Pick your market →</a>
+          <a href="/wavemax-vs-zombiemat/" data-i18n="franchise.tabCta.vsZombiemat">vs the Zombiemat</a>
+        </div>
+      </div>
+
+      <!-- EQUIPMENT panel -->
+      <div class="wm-fr-panel" id="panel-equipment" role="tabpanel">
+        <h3 data-i18n="franchise.equipment.title">Modern Electrolux. Programmed for performance.</h3>
+        <p class="panel-lede" data-i18n="franchise.equipment.lede">Soft-mount, high-G extract, programmable controllers, online diagnostics, and corporate-negotiated parts and service. The result: faster cycles, lower utility cost per pound, and predictable maintenance.</p>
+
+        <div class="wm-fr-equip-stats">
+          <div class="wm-fr-equip-stat">
+            <div class="num">&lt;45m</div>
+            <div class="label" data-i18n="franchise.equipment.stat1">Full load · wash to dry</div>
+          </div>
+          <div class="wm-fr-equip-stat">
+            <div class="num">450G</div>
+            <div class="label" data-i18n="franchise.equipment.stat2">Extract force (premium)</div>
+          </div>
+          <div class="wm-fr-equip-stat">
+            <div class="num">80lb</div>
+            <div class="label" data-i18n="franchise.equipment.stat3">Large-format units</div>
+          </div>
+          <div class="wm-fr-equip-stat">
+            <div class="num">UV</div>
+            <div class="label" data-i18n="franchise.equipment.stat4">Sanitization-equipped lines</div>
+          </div>
+        </div>
+
+        <div class="wm-fr-equip-split">
+          <div class="wm-fr-equip-card">
+            <h4 data-i18n="franchise.equipment.partnerTitle">Electrolux partnership benefits</h4>
+            <ul>
+              <li data-i18n="franchise.equipment.partner1">Preferred pricing on the full equipment package</li>
+              <li data-i18n="franchise.equipment.partner2">65–75% project financing through Electrolux</li>
+              <li data-i18n="franchise.equipment.partner3">Nationwide service network and parts supply</li>
+              <li data-i18n="franchise.equipment.partner4">Store-layout and machine-mix engineering assistance</li>
+              <li data-i18n="franchise.equipment.partner5">AWS-only washers; only dryer with Eco Power</li>
+            </ul>
+          </div>
+          <div class="wm-fr-equip-card">
+            <h4 data-i18n="franchise.equipment.sanitTitle">Lux sanitization (premium tier)</h4>
+            <ul>
+              <li data-i18n="franchise.equipment.sanit1">Highest level of disinfection available</li>
+              <li data-i18n="franchise.equipment.sanit2">Less detergent required per load</li>
+              <li data-i18n="franchise.equipment.sanit3">Extends garment life ~20%</li>
+              <li data-i18n="franchise.equipment.sanit4">Brighter whites, softer fabric, no odor</li>
+              <li data-i18n="franchise.equipment.sanit5">Reduces water retention → faster drying</li>
+            </ul>
+          </div>
+        </div>
+
+        <p class="wm-fr-attr" data-i18n="franchise.equipment.disclaimer">Premium equipment claims (450G extract, 80lb large-format, UV sanitization) only appear on store pages where the equipment is verified as installed.</p>
+
+        <div class="wm-fr-tab-cta">
+          <a class="amber" href="/virtual-tour/" data-i18n="franchise.tabCta.virtualTour">Virtual tour →</a>
+        </div>
+      </div>
+
+      <!-- PROCESS panel -->
+      <div class="wm-fr-panel" id="panel-process" role="tabpanel">
+        <h3 data-i18n="franchise.process.title">Six steps from first call to grand opening.</h3>
+        <p class="panel-lede" data-i18n="franchise.process.lede">Typical timeline is 6–9 months. The pace is mostly site-availability- and buildout-driven; if a candidate already has a site identified and pre-approved, the timeline compresses.</p>
+
+        <div class="wm-fr-steps">
+          <div class="wm-fr-step">
+            <h4 data-i18n="franchise.process.step1Title">Initial call</h4>
+            <p data-i18n="franchise.process.step1Text">30-minute exploratory conversation. Market, capital, timeline, fit.</p>
+          </div>
+          <div class="wm-fr-step">
+            <h4 data-i18n="franchise.process.step2Title">FDD review</h4>
+            <p data-i18n="franchise.process.step2Text">Receive and sign the Franchise Disclosure Document. Item 19 detail.</p>
+          </div>
+          <div class="wm-fr-step">
+            <h4 data-i18n="franchise.process.step3Title">Market analysis</h4>
+            <p data-i18n="franchise.process.step3Text">Demographic + traffic study. Territory selection. Lender intros.</p>
+          </div>
+          <div class="wm-fr-step">
+            <h4 data-i18n="franchise.process.step4Title">Discovery Day</h4>
+            <p data-i18n="franchise.process.step4Text">Visit corporate HQ in Jacksonville. Meet the team and tour stores.</p>
+          </div>
+          <div class="wm-fr-step">
+            <h4 data-i18n="franchise.process.step5Title">Franchise agreement</h4>
+            <p data-i18n="franchise.process.step5Text">Execute the agreement. Site approval. Lease negotiation.</p>
+          </div>
+          <div class="wm-fr-step">
+            <h4 data-i18n="franchise.process.step6Title">Training &amp; opening</h4>
+            <p data-i18n="franchise.process.step6Text">Multi-week training. Buildout. Opening marketing. Grand opening.</p>
+          </div>
+        </div>
+
+        <div class="wm-fr-tab-cta">
+          <a class="amber" href="/become-a-franchisee/" data-i18n="franchise.tabCta.startConversation">Start the conversation</a>
+          <a href="/laundromat-investment-guide/" data-i18n="franchise.tabCta.getGuide">Get the Investment Guide</a>
+        </div>
+      </div>
+
+      <!-- FAQ panel -->
+      <div class="wm-fr-panel" id="panel-faq" role="tabpanel">
+        <h3 data-i18n="franchise.faq.title">WaveMAX® franchise FAQ</h3>
+        <p class="panel-lede" data-i18n="franchise.faq.lede">The questions we hear most often during discovery. The full FAQ lives on /faq/ — these are the headlines.</p>
+
+        <div class="wm-fr-faq-acc">
+          <div class="wm-fr-faq-item">
+            <button type="button" class="wm-fr-faq-q-btn" aria-expanded="false" aria-controls="faq-1">
+              <span data-i18n="franchise.faq.q1">Is WaveMAX really passive income?</span>
+              <span class="icon" aria-hidden="true">+</span>
+            </button>
+            <div class="wm-fr-faq-panel" id="faq-1"><div class="wm-fr-faq-panel-inner" data-i18n="franchise.faq.a1">It's a semi-absentee business from day one. We recommend being in the store about 9 hours per week — 3 days a week, 3 hours per day. Most franchisees don't hire a dedicated manager initially; the model is designed to scale without one.</div></div>
+          </div>
+          <div class="wm-fr-faq-item">
+            <button type="button" class="wm-fr-faq-q-btn" aria-expanded="false" aria-controls="faq-2">
+              <span data-i18n="franchise.faq.q2">Who are your core customers?</span>
+              <span class="icon" aria-hidden="true">+</span>
+            </button>
+            <div class="wm-fr-faq-panel" id="faq-2"><div class="wm-fr-faq-panel-inner" data-i18n="franchise.faq.a2">Blue-collar, working-class families who rely on laundromats out of necessity, not luxury. The customer is steady through every economic cycle. We also serve Airbnb hosts, restaurants, gyms, and medical offices on the commercial side.</div></div>
+          </div>
+          <div class="wm-fr-faq-item">
+            <button type="button" class="wm-fr-faq-q-btn" aria-expanded="false" aria-controls="faq-3">
+              <span data-i18n="franchise.faq.q3">What's the total investment?</span>
+              <span class="icon" aria-hidden="true">+</span>
+            </button>
+            <div class="wm-fr-faq-panel" id="faq-3"><div class="wm-fr-faq-panel-inner" data-i18n="franchise.faq.a3">Total investment runs $1M–$1.5M; we look for $400K of liquidity to qualify. That covers franchise fee, build-out, equipment, working capital, and opening marketing. Item 19 of the FDD has the detailed breakdown.</div></div>
+          </div>
+          <div class="wm-fr-faq-item">
+            <button type="button" class="wm-fr-faq-q-btn" aria-expanded="false" aria-controls="faq-4">
+              <span data-i18n="franchise.faq.q4">Will WaveMAX help me find a site?</span>
+              <span class="icon" aria-hidden="true">+</span>
+            </button>
+            <div class="wm-fr-faq-panel" id="faq-4"><div class="wm-fr-faq-panel-inner" data-i18n="franchise.faq.a4">Yes. We guide you through working-class ZIP codes, demographic targeting, and brand-approved locations before lease sign-off. Site selection is the single highest-leverage decision in this business and we don't leave it to chance.</div></div>
+          </div>
+          <div class="wm-fr-faq-item">
+            <button type="button" class="wm-fr-faq-q-btn" aria-expanded="false" aria-controls="faq-5">
+              <span data-i18n="franchise.faq.q5">How big is WaveMAX right now?</span>
+              <span class="icon" aria-hidden="true">+</span>
+            </button>
+            <div class="wm-fr-faq-panel" id="faq-5"><div class="wm-fr-faq-panel-inner" data-i18n="franchise.faq.a5">75+ stores and growing, supported by quality unit economics, franchisee satisfaction, and a scalable national playbook. Ranked #1 laundromat franchise on Entrepreneur's 2026 Franchise 500. We build durable, cash-flowing businesses — not just franchises.</div></div>
+          </div>
+          <div class="wm-fr-faq-item">
+            <button type="button" class="wm-fr-faq-q-btn" aria-expanded="false" aria-controls="faq-6">
+              <span data-i18n="franchise.faq.q6">Can I open multiple locations?</span>
+              <span class="icon" aria-hidden="true">+</span>
+            </button>
+            <div class="wm-fr-faq-panel" id="faq-6"><div class="wm-fr-faq-panel-inner" data-i18n="franchise.faq.a6">Multi-unit ownership is the path most franchisees take. Operators with one cash-flowing store typically open their second within 18 months. Territory rights and area-development incentives are available for serious multi-unit operators.</div></div>
+          </div>
+        </div>
+
+        <div class="wm-fr-tab-cta">
+          <a class="amber" href="/faq/" data-i18n="franchise.tabCta.fullFaq">Full FAQ →</a>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- SECRET SAUCE -->
-  <section class="wm-fr-section">
-    <div class="wm-fr-inner">
-      <p class="wm-fr-eyebrow" data-i18n="franchise.sauce.eyebrow">WaveMAX® "secret sauce"</p>
-      <h2 class="wm-fr-title" data-i18n="franchise.sauce.title">Right site. Right size. Right service. Right systems.</h2>
-      <p class="wm-fr-lede" data-i18n="franchise.sauce.lede">Our growth strategy is built around four disciplines that compound into reliable unit economics — and a model that's repeatable across markets.</p>
-
-      <div class="wm-fr-sauce-grid">
-        <div class="wm-fr-sauce-card">
-          <div class="wm-fr-sauce-icon" aria-hidden="true">📍</div>
-          <h3 class="wm-fr-sauce-title" data-i18n="franchise.sauce.rightSite">Right Site</h3>
-          <p class="wm-fr-sauce-text" data-i18n="franchise.sauce.rightSiteText">Demographic targeting, competition analysis, and real-world location strategy built for sustained demand.</p>
-        </div>
-        <div class="wm-fr-sauce-card">
-          <div class="wm-fr-sauce-icon" aria-hidden="true">↗</div>
-          <h3 class="wm-fr-sauce-title" data-i18n="franchise.sauce.rightSize">Right Size</h3>
-          <p class="wm-fr-sauce-text" data-i18n="franchise.sauce.rightSizeText">Each location is sized to fit the market — balancing footprint, machine count, and operational efficiency.</p>
-        </div>
-        <div class="wm-fr-sauce-card">
-          <div class="wm-fr-sauce-icon" aria-hidden="true">🧺</div>
-          <h3 class="wm-fr-sauce-title" data-i18n="franchise.sauce.rightService">Right Service</h3>
-          <p class="wm-fr-sauce-text" data-i18n="franchise.sauce.rightServiceText">Self-serve, wash-dry-fold drop-off, and commercial accounts — three revenue streams from one footprint.</p>
-        </div>
-        <div class="wm-fr-sauce-card">
-          <div class="wm-fr-sauce-icon" aria-hidden="true">⚙️</div>
-          <h3 class="wm-fr-sauce-title" data-i18n="franchise.sauce.rightSystems">Right Systems</h3>
-          <p class="wm-fr-sauce-text" data-i18n="franchise.sauce.rightSystemsText">Card-pay technology, real-time analytics, vendor-managed supplies, and a proven operations playbook.</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- SANITATION -->
-  <section class="wm-fr-section wm-fr-why">
-    <div class="wm-fr-inner">
-      <div class="wm-fr-sanit-split">
-        <div>
-          <p class="wm-fr-eyebrow" data-i18n="franchise.sanit.eyebrow">WaveMAX sanitation</p>
-          <h2 class="wm-fr-title" data-i18n="franchise.sanit.title">Cleaner washes. Better customer confidence.</h2>
-          <p class="wm-fr-lede" data-i18n="franchise.sanit.p1">WaveMAX locations are designed with advanced sanitation technology that elevates customer confidence and improves garment care. Our mission is to bring safer, cleaner, more efficient laundry to underserved areas — and that starts with the water itself, not just the cycle.</p>
-          <p class="wm-fr-lede" style="margin-top: -8px;" data-i18n="franchise.sanit.p2">Each WaveMAX location is built to be a trusted neighborhood hub — high-tech machines, consistent staffing, and elevated cleanliness combine to deliver a better experience for customers and stronger repeat traffic for owners.</p>
-        </div>
-        <div class="wm-fr-sanit-img has-image" aria-hidden="true"></div>
-      </div>
-    </div>
-  </section>
-
-  <!-- INVESTMENT -->
-  <section class="wm-fr-section wm-fr-invest" id="investment">
-    <div class="wm-fr-inner">
-      <p class="wm-fr-eyebrow" data-i18n="franchise.invest.eyebrow">The investment</p>
-      <h2 class="wm-fr-title" data-i18n="franchise.invest.title">What it takes to own a WaveMAX®.</h2>
-      <p class="wm-fr-lede" style="color: rgba(255,255,255,0.85);" data-i18n="franchise.invest.lede">We're looking for committed operators with the liquidity to fund a single location and the appetite to grow into multi-unit ownership. Most franchisees finance a portion of the build-out and reach positive cash flow within the first year of operation.</p>
-
-      <div class="wm-fr-invest-cards">
-        <div class="wm-fr-invest-card">
-          <div class="wm-fr-invest-num">$400K</div>
-          <div class="wm-fr-invest-label" data-i18n="franchise.invest.card1Label">Liquidity required</div>
-          <div class="wm-fr-invest-text" data-i18n="franchise.invest.card1Text">Cash on hand to qualify. Covers franchise fee + working capital + your share of build-out.</div>
-        </div>
-        <div class="wm-fr-invest-card">
-          <div class="wm-fr-invest-num">$1M – $1.5M</div>
-          <div class="wm-fr-invest-label" data-i18n="franchise.invest.card2Label">Total investment</div>
-          <div class="wm-fr-invest-text" data-i18n="franchise.invest.card2Text">Range covers all-in build-out: equipment, build, working capital, opening marketing.</div>
-        </div>
-        <div class="wm-fr-invest-card">
-          <div class="wm-fr-invest-num">$113K</div>
-          <div class="wm-fr-invest-label" data-i18n="franchise.invest.card3Label">Net income (sample)</div>
-          <div class="wm-fr-invest-text" data-i18n="franchise.invest.card3Text">A representative store's net income — even with full financing in place. Item 19 has full details.</div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- FAQ -->
-  <section class="wm-fr-section">
-    <div class="wm-fr-inner">
-      <p class="wm-fr-eyebrow" data-i18n="franchise.faq.eyebrow">Frequently asked</p>
-      <h2 class="wm-fr-title" data-i18n="franchise.faq.title">WaveMAX® franchise FAQ</h2>
-
-      <div class="wm-fr-faq-list">
-        <div class="wm-fr-faq">
-          <h3 class="wm-fr-faq-q" data-i18n="franchise.faq.q1">Is WaveMAX really passive income?</h3>
-          <p class="wm-fr-faq-a" data-i18n="franchise.faq.a1">It's a semi-absentee business from day one. We recommend being in the store about 9 hours per week — 3 days a week, 3 hours per day. Most franchisees don't hire a dedicated manager initially; the model is designed to scale without one.</p>
-        </div>
-        <div class="wm-fr-faq">
-          <h3 class="wm-fr-faq-q" data-i18n="franchise.faq.q2">Who are your core customers?</h3>
-          <p class="wm-fr-faq-a" data-i18n="franchise.faq.a2">Blue-collar, working-class families who rely on laundromats out of necessity, not luxury. The customer is steady through every economic cycle. We also serve Airbnb hosts, restaurants, gyms, and medical offices on the commercial side.</p>
-        </div>
-        <div class="wm-fr-faq">
-          <h3 class="wm-fr-faq-q" data-i18n="franchise.faq.q3">What's the total investment?</h3>
-          <p class="wm-fr-faq-a" data-i18n="franchise.faq.a3">Total investment runs $1M–$1.5M; we look for $400K of liquidity to qualify. That covers franchise fee, build-out, equipment, working capital, and opening marketing. Item 19 of the FDD has the detailed breakdown.</p>
-        </div>
-        <div class="wm-fr-faq">
-          <h3 class="wm-fr-faq-q" data-i18n="franchise.faq.q4">Will WaveMAX help me find a site?</h3>
-          <p class="wm-fr-faq-a" data-i18n="franchise.faq.a4">Yes. We guide you through working-class ZIP codes, demographic targeting, and brand-approved locations before lease sign-off. Site selection is the single highest-leverage decision in this business and we don't leave it to chance.</p>
-        </div>
-        <div class="wm-fr-faq">
-          <h3 class="wm-fr-faq-q" data-i18n="franchise.faq.q5">How big is WaveMAX right now?</h3>
-          <p class="wm-fr-faq-a" data-i18n="franchise.faq.a5">75+ stores and growing, supported by quality unit economics, franchisee satisfaction, and a scalable national playbook. Ranked #1 laundromat franchise on Entrepreneur's 2026 Franchise 500. We build durable, cash-flowing businesses — not just franchises.</p>
-        </div>
-        <div class="wm-fr-faq">
-          <h3 class="wm-fr-faq-q" data-i18n="franchise.faq.q6">Can I open multiple locations?</h3>
-          <p class="wm-fr-faq-a" data-i18n="franchise.faq.a6">Multi-unit ownership is the path most franchisees take. Operators with one cash-flowing store typically open their second within 18 months. Territory rights and area-development incentives are available for serious multi-unit operators.</p>
-        </div>
-      </div>
-    </div>
-  </section>
 
   <!-- CLOSING CTA -->
   <section class="wm-fr-cta-strip" id="start">
@@ -547,6 +771,7 @@
 <script src="/assets/js/corporate-chrome.js?v=20260506e" defer></script>
 <script src="/assets/js/corporate-i18n.js?v=20260506e" defer></script>
 <script src="/assets/js/franchise-hero-rotator.js?v=20260506a" defer></script>
+<script src="/assets/js/franchise-tabs.js?v=20260506e" defer></script>
 
 </body>
 </html>
