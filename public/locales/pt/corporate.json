@@ -75,6 +75,7 @@
       "eyebrow": "Por que os proprietários amam a WaveMAX®",
       "title": "Uma franquia de lavanderia construída para operadores sérios.",
       "lede": "A WaveMAX é uma das principais franquias de lavanderia, oferecendo propriedade escalável e semipresencial com economia de unidade sólida e suporte de marca nacional. Seleção disciplinada de pontos, dimensionamento inteligente, equipamentos premium e um modelo de serviço que ressoa com comunidades de classe trabalhadora — esse é o playbook.",
+      "prideful": "Esta não é uma franquia para deixar e esquecer. Buscamos proprietários que tratam operações limpas como alavanca de receita — parceiros que querem superar os \"zombiemats\" legados por meio de execução disciplinada.",
       "tile1Title": "Semipresencial desde o primeiro dia",
       "tile1Text": "~9 horas/semana, 3 dias por semana, 3 horas por dia. A maioria dos franqueados não contrata um gerente inicialmente — o modelo foi projetado para escalar sem presença constante na loja.",
       "tile2Title": "Custos fixos baixos, ROI alto",
@@ -181,7 +182,9 @@
       "sanit3": "Aumenta a vida das peças em ~20%",
       "sanit4": "Brancos mais brilhantes, tecidos mais macios, sem odor",
       "sanit5": "Reduz a retenção de água → secagem mais rápida",
-      "disclaimer": "Alegações de equipamentos premium (extração 450G, grande formato 80lb, sanitização UV) só aparecem em páginas de lojas onde o equipamento foi verificado como instalado."
+      "disclaimer": "Alegações de equipamentos premium (extração 450G, grande formato 80lb, sanitização UV) só aparecem em páginas de lojas onde o equipamento foi verificado como instalado.",
+      "tourTitle": "Caminhe por uma WaveMAX de verdade, sala por sala",
+      "tourLede":  "O passeio 3D Matterport publicado pela corporação — explore a planta, layout dos equipamentos e a experiência do cliente no navegador. Ou visite nossa galeria de fotos curada em /virtual-tour/."
     },
     "process": {
       "title": "Seis passos da primeira ligação à inauguração.",
@@ -202,6 +205,17 @@
       "vsZombiemat":        "vs Zombiemat",
       "virtualTour":        "Tour virtual →",
       "fullFaq":            "FAQ completo →"
+    },
+    "reviews": {
+      "title": "O que os clientes dizem em toda a rede",
+      "lede":  "Avaliações reais de 5 estrelas no Google, amostradas ao vivo de unidades operantes da franquia WaveMAX. Cada cartão leva à loja que ganhou a avaliação.",
+      "loading": "Carregando avaliações de toda a rede…"
+    },
+    "formula": {
+      "location":  "Localização certa",
+      "size":      "Tamanho certo",
+      "equipment": "Mix de equipamentos certo",
+      "profit":    "Lucros máximos"
     }
   },
 

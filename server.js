@@ -263,7 +263,7 @@ app.use((req, res, next) => {
     'font-src': ["'self'", 'https://cdnjs.cloudflare.com', 'https://cdn.jsdelivr.net', 'https://fonts.gstatic.com'],
     'object-src': ["'none'"],
     'media-src': ["'self'"],
-    'frame-src': ["'self'", 'https://www.google.com', 'https://maps.google.com'],
+    'frame-src': ["'self'", 'https://www.google.com', 'https://maps.google.com', 'https://my.matterport.com'],
     'form-action': ["'self'", 'https://safepay.paymentlogistics.net'],
     'frame-ancestors': ["'self'", 'https://www.wavemaxlaundry.com', 'https://wavemaxlaundry.com'],
     'base-uri': ["'self'"],
@@ -645,6 +645,9 @@ app.use('/api', (req, res, next) => {
 // like /franchise, /about/, etc. and are static V3-styled marketing
 // pages with no per-franchise data. Mounted BEFORE the slug router so
 // these top-level slugs don't get picked up as (nonexistent) franchise slugs.
+app.get('/', (req, res) => {
+  res.redirect(302, '/franchise/');
+});
 app.get(['/franchise', '/franchise/'], (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'franchise.html'));
 });

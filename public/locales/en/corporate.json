@@ -75,6 +75,7 @@
       "eyebrow": "Why owners love WaveMAX®",
       "title": "A laundromat franchise built for serious operators.",
       "lede": "WaveMAX is a leading laundromat franchise offering scalable, semi-absentee ownership with strong unit economics and national brand support. Disciplined site selection, smart sizing, premium equipment, and a service model that resonates with working-class communities — that's the playbook.",
+      "prideful": "This is not a set-it-and-forget-it franchise. We're looking for owners who treat clean operations as a revenue lever — partners who want to outperform the legacy \"zombiemats\" through disciplined execution.",
       "tile1Title": "Semi-absentee from day one",
       "tile1Text": "~9 hours/week, 3 days a week, 3 hours per day. Most franchisees don't hire a manager initially — the model is designed to scale without a constant on-site presence.",
       "tile2Title": "Low overhead, high ROI",
@@ -181,7 +182,9 @@
       "sanit3": "Extends garment life ~20%",
       "sanit4": "Brighter whites, softer fabric, no odor",
       "sanit5": "Reduces water retention → faster drying",
-      "disclaimer": "Premium equipment claims (450G extract, 80lb large-format, UV sanitization) only appear on store pages where the equipment is verified as installed."
+      "disclaimer": "Premium equipment claims (450G extract, 80lb large-format, UV sanitization) only appear on store pages where the equipment is verified as installed.",
+      "tourTitle": "Walk through a real WaveMAX, room by room",
+      "tourLede":  "Corporate's published 3D Matterport walkthrough — explore the floor plan, equipment layout, and customer experience in your browser. Or visit our curated photo gallery on /virtual-tour/."
     },
     "process": {
       "title": "Six steps from first call to grand opening.",
@@ -202,6 +205,17 @@
       "vsZombiemat":        "vs the Zombiemat",
       "virtualTour":        "Virtual tour →",
       "fullFaq":            "Full FAQ →"
+    },
+    "reviews": {
+      "title": "What customers say across the network",
+      "lede":  "Real 5-star Google reviews, sampled live from operating WaveMAX franchise locations. Every card links to the store that earned the review.",
+      "loading": "Loading reviews from across the network…"
+    },
+    "formula": {
+      "location":  "Right Location",
+      "size":      "Right Size Store",
+      "equipment": "Right Equipment Mix",
+      "profit":    "Maximum Profits"
     }
   },
 

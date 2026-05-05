@@ -7,7 +7,7 @@
 (function () {
   'use strict';
 
-  const SLIDE_MS = 5500;
+  const SLIDE_MS = 3500;
 
   function start() {
     const card = document.getElementById('wm-fr-hero-rotator');
