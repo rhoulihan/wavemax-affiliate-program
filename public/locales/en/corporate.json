@@ -121,6 +121,7 @@
     "faq": {
       "eyebrow": "Frequently asked",
       "title": "WaveMAX® franchise FAQ",
+      "lede": "The questions we hear most often during discovery. The full FAQ lives on /faq/ — these are the headlines.",
       "q1": "Is WaveMAX really passive income?",
       "a1": "It's a semi-absentee business from day one. We recommend being in the store about 9 hours per week — 3 days a week, 3 hours per day. Most franchisees don't hire a dedicated manager initially; the model is designed to scale without one.",
       "q2": "Who are your core customers?",
@@ -140,6 +141,67 @@
       "lede": "Tell us about yourself and we'll send the FDD and walk you through the process. No pressure — most owners take 3–6 months from first call to lease signed.",
       "btnPrimary": "Apply to become a franchisee",
       "btnSecondary": "Email franchise@wavemax.com"
+    },
+    "tabs": { "why": "Why WaveMAX", "numbers": "The Numbers", "model": "The Model", "equipment": "Equipment", "process": "Process", "faq": "FAQ" },
+    "trust": { "locations": "Open locations and growing", "rating": "Average customer rating", "rank": "Laundromat franchise · 2026 Entrepreneur 500" },
+    "numbers": {
+      "title": "Real numbers. Verified FDD.",
+      "lede":  "Item 19 of the 2025 FDD reports a 50-store sample of WaveMAX locations. Every prospective franchisee receives these numbers during discovery — they're legally regulated, and we publish them up front.",
+      "colStat": "Statistic", "colGross": "Gross revenue", "colSample": "Sample",
+      "rowAvg": "Average", "rowMedian": "Median", "rowTop": "Top performer",
+      "fiftyStores": "50 stores", "singleStore": "single store",
+      "jaxFlowLabel":   "Jacksonville · 2024 net cash flow",
+      "jaxFlowText":    "Operating cash flow before debt service. Royalty fee, marketing fund contribution, and POS/technology fees already deducted.",
+      "jaxIncomeLabel": "2024 net income (full equipment financing)",
+      "jaxIncomeText":  "Net income after the equipment financing payment is also deducted — modeled with 100% SBA-eligible financing, the most leveraged scenario.",
+      "attr": "Source: WaveMAX Franchise Disclosure Document, 2025 issue, Item 19. Past performance of one company-owned unit is not a guarantee of future franchisee results."
+    },
+    "loc": {
+      "demoTitle":     "Demographic targeting",
+      "demoText":      "Working-class ZIP codes with renter density, household income bands, and stable population growth.",
+      "sizeTitle":     "Optimized store size",
+      "sizeText":      "Footprint matched to market: machine count, dryer ratio, queue capacity tuned for projected volume.",
+      "trafficTitle":  "Traffic & visibility",
+      "trafficText":   "Drive-by counts, anchor co-tenancy, and pedestrian access modeled — visibility is half the marketing."
+    },
+    "equipment": {
+      "title": "Modern Electrolux. Programmed for performance.",
+      "lede":  "Soft-mount, high-G extract, programmable controllers, online diagnostics, and corporate-negotiated parts and service. The result: faster cycles, lower utility cost per pound, and predictable maintenance.",
+      "stat1": "Full load · wash to dry", "stat2": "Extract force (premium)",
+      "stat3": "Large-format units",      "stat4": "Sanitization-equipped lines",
+      "partnerTitle": "Electrolux partnership benefits",
+      "partner1": "Preferred pricing on the full equipment package",
+      "partner2": "65–75% project financing through Electrolux",
+      "partner3": "Nationwide service network and parts supply",
+      "partner4": "Store-layout and machine-mix engineering assistance",
+      "partner5": "AWS-only washers; only dryer with Eco Power",
+      "sanitTitle": "Lux sanitization (premium tier)",
+      "sanit1": "Highest level of disinfection available",
+      "sanit2": "Less detergent required per load",
+      "sanit3": "Extends garment life ~20%",
+      "sanit4": "Brighter whites, softer fabric, no odor",
+      "sanit5": "Reduces water retention → faster drying",
+      "disclaimer": "Premium equipment claims (450G extract, 80lb large-format, UV sanitization) only appear on store pages where the equipment is verified as installed."
+    },
+    "process": {
+      "title": "Six steps from first call to grand opening.",
+      "lede":  "Typical timeline is 6–9 months. The pace is mostly site-availability- and buildout-driven; if a candidate already has a site identified and pre-approved, the timeline compresses.",
+      "step1Title": "Initial call",        "step1Text": "30-minute exploratory conversation. Market, capital, timeline, fit.",
+      "step2Title": "FDD review",          "step2Text": "Receive and sign the Franchise Disclosure Document. Item 19 detail.",
+      "step3Title": "Market analysis",     "step3Text": "Demographic + traffic study. Territory selection. Lender intros.",
+      "step4Title": "Discovery Day",       "step4Text": "Visit corporate HQ in Jacksonville. Meet the team and tour stores.",
+      "step5Title": "Franchise agreement", "step5Text": "Execute the agreement. Site approval. Lease negotiation.",
+      "step6Title": "Training & opening",  "step6Text": "Multi-week training. Buildout. Opening marketing. Grand opening."
+    },
+    "tabCta": {
+      "seeNumbers":         "See the numbers →",
+      "startConversation":  "Start the conversation",
+      "fullBreakdown":      "Full ROI breakdown →",
+      "getGuide":           "Get the Investment Guide",
+      "pickMarket":         "Pick your market →",
+      "vsZombiemat":        "vs the Zombiemat",
+      "virtualTour":        "Virtual tour →",
+      "fullFaq":            "Full FAQ →"
     }
   },
 
