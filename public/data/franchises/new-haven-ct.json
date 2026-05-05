@@ -27,11 +27,19 @@
   "hours": {
     "open": "",
     "close": "",
-    "display": "Call for hours",
-    "lastWash": "",
-    "days": ""
+    "display": "Mon - Sun 7am - 10pm",
+    "lastWash": "9:00pm",
+    "days": "Open daily"
   },
-  "owners": [],
+  "owners": [
+    {
+      "name": "Jazz Skair",
+      "role": "Owner / Operator",
+      "tag": "",
+      "bio": "",
+      "avatarStyle": "primary"
+    }
+  ],
   "aboutContent": {
     "heroTitle": "",
     "heroTagline": "",
@@ -77,19 +85,19 @@
   },
   "pricing": {
     "wdf": {
-      "rate": null,
-      "minLb": null,
+      "rate": 1.19,
+      "minLb": 15,
       "currency": "USD",
-      "display": "Call for pricing"
+      "display": "$1.19/lb"
     },
     "selfServe": {
-      "minLoad": null,
-      "maxLoad": null,
-      "minLoadDisplay": "",
-      "maxLoadDisplay": "",
+      "minLoad": 4.49,
+      "maxLoad": 13.29,
+      "minLoadDisplay": "$4.49",
+      "maxLoadDisplay": "$13.29",
       "washMin": null,
       "dryMin": null,
-      "rangeDisplay": "Call for pricing"
+      "rangeDisplay": "$4.49 – $13.29"
     },
     "commercial": {
       "rateFromLb": null,
@@ -199,5 +207,9 @@
     "additional": [],
     "sublinkExtensions": {}
   },
-  "iframeOverrides": {}
+  "iframeOverrides": {},
+  "socialMedia": {
+    "facebook": "http://don't%20know,%20need%20your%20help%20with%20this",
+    "instagram": "http://don't%20know,%20need%20your%20help%20with%20this"
+  }
 }

@@ -22,16 +22,25 @@
       "lng": -104.812562
     },
     "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=15087+E+Mississippi+Ave+Aurora+CO+80012",
-    "mapsEmbedUrl": "https://www.google.com/maps?q=WaveMAX+Laundry+15087+E+Mississippi+Ave+Aurora+CO+80012&output=embed"
+    "mapsEmbedUrl": "https://www.google.com/maps?q=WaveMAX+Laundry+15087+E+Mississippi+Ave+Aurora+CO+80012&output=embed",
+    "neighborhood": "Aurora"
   },
   "hours": {
-    "open": "",
-    "close": "",
-    "display": "Call for hours",
-    "lastWash": "",
-    "days": ""
+    "open": "07:00",
+    "close": "22:00",
+    "display": "7am - 10pm",
+    "lastWash": "9:00pm",
+    "days": "Open daily"
   },
-  "owners": [],
+  "owners": [
+    {
+      "name": "Rebecca Hommertzheim",
+      "role": "Owner / Operator",
+      "tag": "",
+      "bio": "",
+      "avatarStyle": "primary"
+    }
+  ],
   "aboutContent": {
     "heroTitle": "",
     "heroTagline": "",
@@ -77,19 +86,19 @@
   },
   "pricing": {
     "wdf": {
-      "rate": null,
-      "minLb": null,
+      "rate": 1.59,
+      "minLb": 15,
       "currency": "USD",
-      "display": "Call for pricing"
+      "display": "$1.59/lb"
     },
     "selfServe": {
-      "minLoad": null,
-      "maxLoad": null,
-      "minLoadDisplay": "",
-      "maxLoadDisplay": "",
+      "minLoad": 3.49,
+      "maxLoad": 13.95,
+      "minLoadDisplay": "$3.49",
+      "maxLoadDisplay": "$13.95",
       "washMin": null,
       "dryMin": null,
-      "rangeDisplay": "Call for pricing"
+      "rangeDisplay": "$3.49 – $13.95"
     },
     "commercial": {
       "rateFromLb": null,
@@ -203,5 +212,8 @@
     "additional": [],
     "sublinkExtensions": {}
   },
-  "iframeOverrides": {}
+  "iframeOverrides": {},
+  "socialMedia": {
+    "facebook": "https://www.facebook.com/people/Wavemax-Aurora-15087-E-Mississippi-Ave/100088750614813/"
+  }
 }

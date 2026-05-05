@@ -22,16 +22,25 @@
       "lng": -112.094323
     },
     "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=1615+W+Camelback+Rd+Suite+101+Phoenix+AZ+85015",
-    "mapsEmbedUrl": "https://www.google.com/maps?q=WaveMAX+Laundry+1615+W+Camelback+Rd+Suite+101+Phoenix+AZ+85015&output=embed"
+    "mapsEmbedUrl": "https://www.google.com/maps?q=WaveMAX+Laundry+1615+W+Camelback+Rd+Suite+101+Phoenix+AZ+85015&output=embed",
+    "neighborhood": "Alhambra"
   },
   "hours": {
     "open": "",
     "close": "",
-    "display": "Call for hours",
-    "lastWash": "",
-    "days": ""
+    "display": "7am to 10pm Daily",
+    "lastWash": "9pm",
+    "days": "Open daily"
   },
-  "owners": [],
+  "owners": [
+    {
+      "name": "Alex Broderick",
+      "role": "Owner / Operator",
+      "tag": "",
+      "bio": "",
+      "avatarStyle": "primary"
+    }
+  ],
   "aboutContent": {
     "heroTitle": "",
     "heroTagline": "",
@@ -77,19 +86,19 @@
   },
   "pricing": {
     "wdf": {
-      "rate": null,
-      "minLb": null,
+      "rate": 1.49,
+      "minLb": 10,
       "currency": "USD",
-      "display": "Call for pricing"
+      "display": "$1.49/lb"
     },
     "selfServe": {
-      "minLoad": null,
-      "maxLoad": null,
-      "minLoadDisplay": "",
-      "maxLoadDisplay": "",
+      "minLoad": 3.49,
+      "maxLoad": 9.49,
+      "minLoadDisplay": "$3.49",
+      "maxLoadDisplay": "$9.49",
       "washMin": null,
       "dryMin": null,
-      "rangeDisplay": "Call for pricing"
+      "rangeDisplay": "$3.49 – $9.49"
     },
     "commercial": {
       "rateFromLb": null,
@@ -198,5 +207,8 @@
     "additional": [],
     "sublinkExtensions": {}
   },
-  "iframeOverrides": {}
+  "iframeOverrides": {},
+  "socialMedia": {
+    "facebook": "https://www.facebook.com/wavemaxlaundryphoenix/"
+  }
 }

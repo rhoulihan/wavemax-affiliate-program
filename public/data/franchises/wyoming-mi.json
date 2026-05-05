@@ -25,13 +25,21 @@
     "mapsEmbedUrl": "https://www.google.com/maps?q=WaveMAX+Laundry+1633+28th+St+SW+unit+G+Wyoming+MI+49519&output=embed"
   },
   "hours": {
-    "open": "",
-    "close": "",
-    "display": "Call for hours",
-    "lastWash": "",
-    "days": ""
+    "open": "07:00",
+    "close": "22:00",
+    "display": "7am-10pm",
+    "lastWash": "9:00pm",
+    "days": "Open daily"
   },
-  "owners": [],
+  "owners": [
+    {
+      "name": "Jason Langschied",
+      "role": "Owner / Operator",
+      "tag": "",
+      "bio": "",
+      "avatarStyle": "primary"
+    }
+  ],
   "aboutContent": {
     "heroTitle": "",
     "heroTagline": "",
@@ -77,19 +85,19 @@
   },
   "pricing": {
     "wdf": {
-      "rate": null,
-      "minLb": null,
+      "rate": 1.5,
+      "minLb": 12,
       "currency": "USD",
-      "display": "Call for pricing"
+      "display": "$1.50/lb"
     },
     "selfServe": {
-      "minLoad": null,
-      "maxLoad": null,
-      "minLoadDisplay": "",
-      "maxLoadDisplay": "",
+      "minLoad": 4,
+      "maxLoad": 8.55,
+      "minLoadDisplay": "$4.00",
+      "maxLoadDisplay": "$8.55",
       "washMin": null,
       "dryMin": null,
-      "rangeDisplay": "Call for pricing"
+      "rangeDisplay": "$4.00 – $8.55"
     },
     "commercial": {
       "rateFromLb": null,
@@ -205,5 +213,8 @@
     "additional": [],
     "sublinkExtensions": {}
   },
-  "iframeOverrides": {}
+  "iframeOverrides": {},
+  "socialMedia": {
+    "facebook": "https://www.facebook.com/search/top?q=wavemax%20wyoming%20-%201633%2028th%20st%20sw"
+  }
 }

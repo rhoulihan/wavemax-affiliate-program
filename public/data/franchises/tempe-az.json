@@ -27,11 +27,19 @@
   "hours": {
     "open": "",
     "close": "",
-    "display": "Call for hours",
+    "display": "7am to 10pm Daily",
     "lastWash": "",
-    "days": ""
+    "days": "Open daily"
   },
-  "owners": [],
+  "owners": [
+    {
+      "name": "Craig & Shuying Sawyers",
+      "role": "Owner / Operator",
+      "tag": "",
+      "bio": "",
+      "avatarStyle": "primary"
+    }
+  ],
   "aboutContent": {
     "heroTitle": "",
     "heroTagline": "",
@@ -77,19 +85,19 @@
   },
   "pricing": {
     "wdf": {
-      "rate": null,
-      "minLb": null,
+      "rate": 1.99,
+      "minLb": 20,
       "currency": "USD",
-      "display": "Call for pricing"
+      "display": "$1.99/lb"
     },
     "selfServe": {
-      "minLoad": null,
-      "maxLoad": null,
-      "minLoadDisplay": "",
-      "maxLoadDisplay": "",
+      "minLoad": 3.89,
+      "maxLoad": 11.89,
+      "minLoadDisplay": "$3.89",
+      "maxLoadDisplay": "$11.89",
       "washMin": null,
       "dryMin": null,
-      "rangeDisplay": "Call for pricing"
+      "rangeDisplay": "$3.89 – $11.89"
     },
     "commercial": {
       "rateFromLb": null,
@@ -205,5 +213,6 @@
     "additional": [],
     "sublinkExtensions": {}
   },
-  "iframeOverrides": {}
+  "iframeOverrides": {},
+  "socialMedia": {}
 }

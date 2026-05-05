@@ -22,7 +22,8 @@
       "lng": -97.686748
     },
     "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=825+E+Rundberg+Ln+f1+Austin+TX+78753",
-    "mapsEmbedUrl": "https://www.google.com/maps?q=WaveMAX+Laundry+825+E+Rundberg+Ln+f1+Austin+TX+78753&output=embed"
+    "mapsEmbedUrl": "https://www.google.com/maps?q=WaveMAX+Laundry+825+E+Rundberg+Ln+f1+Austin+TX+78753&output=embed",
+    "neighborhood": "North Austin"
   },
   "hours": {
     "open": "07:00",
@@ -250,5 +251,6 @@
     "additional": [],
     "sublinkExtensions": {}
   },
-  "iframeOverrides": {}
+  "iframeOverrides": {},
+  "socialMedia": {}
 }

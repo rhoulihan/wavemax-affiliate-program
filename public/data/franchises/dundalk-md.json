@@ -27,11 +27,19 @@
   "hours": {
     "open": "",
     "close": "",
-    "display": "Call for hours",
-    "lastWash": "",
-    "days": ""
+    "display": "Mon 7am-12am, Tue-Friday 7am-10:30pm, Sat6:30am-11:00pm, Sun 6:30am-12:00am",
+    "lastWash": "1 hour before close",
+    "days": "Open daily"
   },
-  "owners": [],
+  "owners": [
+    {
+      "name": "Zijian Mo",
+      "role": "Owner / Operator",
+      "tag": "",
+      "bio": "",
+      "avatarStyle": "primary"
+    }
+  ],
   "aboutContent": {
     "heroTitle": "",
     "heroTagline": "",
@@ -77,19 +85,19 @@
   },
   "pricing": {
     "wdf": {
-      "rate": null,
-      "minLb": null,
+      "rate": 1.35,
+      "minLb": 10,
       "currency": "USD",
-      "display": "Call for pricing"
+      "display": "$1.35/lb"
     },
     "selfServe": {
-      "minLoad": null,
-      "maxLoad": null,
-      "minLoadDisplay": "",
-      "maxLoadDisplay": "",
+      "minLoad": 3.69,
+      "maxLoad": 10.29,
+      "minLoadDisplay": "$3.69",
+      "maxLoadDisplay": "$10.29",
       "washMin": null,
       "dryMin": null,
-      "rangeDisplay": "Call for pricing"
+      "rangeDisplay": "$3.69 – $10.29"
     },
     "commercial": {
       "rateFromLb": null,
@@ -189,5 +197,9 @@
     "additional": [],
     "sublinkExtensions": {}
   },
-  "iframeOverrides": {}
+  "iframeOverrides": {},
+  "socialMedia": {
+    "facebook": "https://www.facebook.com/WaveMaxDundalk1774/",
+    "instagram": "https://www.instagram.com/wavemax.dundalk/"
+  }
 }

@@ -22,16 +22,25 @@
       "lng": -97.152342
     },
     "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=2823+W+Park+Row+Dr+Arlington+TX+76013",
-    "mapsEmbedUrl": "https://www.google.com/maps?q=WaveMAX+Laundry+2823+W+Park+Row+Dr+Arlington+TX+76013&output=embed"
+    "mapsEmbedUrl": "https://www.google.com/maps?q=WaveMAX+Laundry+2823+W+Park+Row+Dr+Arlington+TX+76013&output=embed",
+    "neighborhood": "West Arlington"
   },
   "hours": {
     "open": "",
     "close": "",
-    "display": "Call for hours",
-    "lastWash": "",
-    "days": ""
+    "display": "Monday - Sunday, 7am - 10pm",
+    "lastWash": "9:00pm",
+    "days": "Open daily"
   },
-  "owners": [],
+  "owners": [
+    {
+      "name": "Rod See",
+      "role": "Owner / Operator",
+      "tag": "",
+      "bio": "",
+      "avatarStyle": "primary"
+    }
+  ],
   "aboutContent": {
     "heroTitle": "",
     "heroTagline": "",
@@ -77,19 +86,19 @@
   },
   "pricing": {
     "wdf": {
-      "rate": null,
-      "minLb": null,
+      "rate": 1.79,
+      "minLb": 25,
       "currency": "USD",
-      "display": "Call for pricing"
+      "display": "$1.79/lb"
     },
     "selfServe": {
-      "minLoad": null,
-      "maxLoad": null,
-      "minLoadDisplay": "",
-      "maxLoadDisplay": "",
+      "minLoad": 1.99,
+      "maxLoad": 10.99,
+      "minLoadDisplay": "$1.99",
+      "maxLoadDisplay": "$10.99",
       "washMin": null,
       "dryMin": null,
-      "rangeDisplay": "Call for pricing"
+      "rangeDisplay": "$1.99 – $10.99"
     },
     "commercial": {
       "rateFromLb": null,
@@ -205,5 +214,9 @@
     "additional": [],
     "sublinkExtensions": {}
   },
-  "iframeOverrides": {}
+  "iframeOverrides": {},
+  "socialMedia": {
+    "facebook": "https://www.facebook.com/wavemaxarlingtontx",
+    "instagram": "https://www.instagram.com/wavemax_arlingtontx/"
+  }
 }

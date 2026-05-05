@@ -22,16 +22,25 @@
       "lng": -86.209099
     },
     "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=2814+W+71st+Street+Indianapolis+IN+46268",
-    "mapsEmbedUrl": "https://www.google.com/maps?q=WaveMAX+Laundry+2814+W+71st+Street+Indianapolis+IN+46268&output=embed"
+    "mapsEmbedUrl": "https://www.google.com/maps?q=WaveMAX+Laundry+2814+W+71st+Street+Indianapolis+IN+46268&output=embed",
+    "neighborhood": "Indianapolis"
   },
   "hours": {
     "open": "",
     "close": "",
-    "display": "Call for hours",
-    "lastWash": "",
-    "days": ""
+    "display": "Mon - Sun 7 am - 10 pm",
+    "lastWash": "9:00pm",
+    "days": "Open daily"
   },
-  "owners": [],
+  "owners": [
+    {
+      "name": "Matthew, Tina, Mitchell, Jessica Carter",
+      "role": "Owner / Operator",
+      "tag": "",
+      "bio": "",
+      "avatarStyle": "primary"
+    }
+  ],
   "aboutContent": {
     "heroTitle": "",
     "heroTagline": "",
@@ -77,19 +86,19 @@
   },
   "pricing": {
     "wdf": {
-      "rate": null,
-      "minLb": null,
+      "rate": 1.5,
+      "minLb": 19,
       "currency": "USD",
-      "display": "Call for pricing"
+      "display": "$1.50/lb"
     },
     "selfServe": {
-      "minLoad": null,
-      "maxLoad": null,
-      "minLoadDisplay": "",
-      "maxLoadDisplay": "",
+      "minLoad": 4,
+      "maxLoad": 11,
+      "minLoadDisplay": "$4.00",
+      "maxLoadDisplay": "$11.00",
       "washMin": null,
       "dryMin": null,
-      "rangeDisplay": "Call for pricing"
+      "rangeDisplay": "$4.00 – $11.00"
     },
     "commercial": {
       "rateFromLb": null,
@@ -205,5 +214,9 @@
     "additional": [],
     "sublinkExtensions": {}
   },
-  "iframeOverrides": {}
+  "iframeOverrides": {},
+  "socialMedia": {
+    "facebook": "https://www.facebook.com/wavemaxindianapolis/",
+    "instagram": "https://www.instagram.com/wavemaxindianapolis/"
+  }
 }

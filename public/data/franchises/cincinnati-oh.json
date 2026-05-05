@@ -22,16 +22,25 @@
       "lng": -84.590318
     },
     "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=8449+Colerain+Ave+Cincinnati+OH+45239",
-    "mapsEmbedUrl": "https://www.google.com/maps?q=WaveMAX+Laundry+8449+Colerain+Ave+Cincinnati+OH+45239&output=embed"
+    "mapsEmbedUrl": "https://www.google.com/maps?q=WaveMAX+Laundry+8449+Colerain+Ave+Cincinnati+OH+45239&output=embed",
+    "neighborhood": "Mason OH"
   },
   "hours": {
-    "open": "",
-    "close": "",
-    "display": "Call for hours",
-    "lastWash": "",
-    "days": ""
+    "open": "07:00",
+    "close": "22:00",
+    "display": "7am to 10 PM",
+    "lastWash": "9:15pm",
+    "days": "Open daily"
   },
-  "owners": [],
+  "owners": [
+    {
+      "name": "Anita Tickoo",
+      "role": "Owner / Operator",
+      "tag": "",
+      "bio": "",
+      "avatarStyle": "primary"
+    }
+  ],
   "aboutContent": {
     "heroTitle": "",
     "heroTagline": "",
@@ -77,10 +86,10 @@
   },
   "pricing": {
     "wdf": {
-      "rate": null,
-      "minLb": null,
+      "rate": 1.5,
+      "minLb": 15,
       "currency": "USD",
-      "display": "Call for pricing"
+      "display": "$1.50/lb"
     },
     "selfServe": {
       "minLoad": null,
@@ -200,5 +209,8 @@
     "additional": [],
     "sublinkExtensions": {}
   },
-  "iframeOverrides": {}
+  "iframeOverrides": {},
+  "socialMedia": {
+    "facebook": "https://www.facebook.com/profile.php?id=100082556841191"
+  }
 }

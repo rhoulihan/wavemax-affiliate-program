@@ -22,16 +22,25 @@
       "lng": -83.181375
     },
     "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=13248+Fort+St+Southgate+MI+48195",
-    "mapsEmbedUrl": "https://www.google.com/maps?q=WaveMAX+Laundry+13248+Fort+St+Southgate+MI+48195&output=embed"
+    "mapsEmbedUrl": "https://www.google.com/maps?q=WaveMAX+Laundry+13248+Fort+St+Southgate+MI+48195&output=embed",
+    "neighborhood": "Southgate"
   },
   "hours": {
     "open": "",
     "close": "",
-    "display": "Call for hours",
-    "lastWash": "",
-    "days": ""
+    "display": "Sun-Sat 7am-10pm",
+    "lastWash": "9:00pm",
+    "days": "Open daily"
   },
-  "owners": [],
+  "owners": [
+    {
+      "name": "Lee and Michelle Jackson",
+      "role": "Owner / Operator",
+      "tag": "",
+      "bio": "",
+      "avatarStyle": "primary"
+    }
+  ],
   "aboutContent": {
     "heroTitle": "",
     "heroTagline": "",
@@ -77,19 +86,19 @@
   },
   "pricing": {
     "wdf": {
-      "rate": null,
-      "minLb": null,
+      "rate": 1.5,
+      "minLb": 10,
       "currency": "USD",
-      "display": "Call for pricing"
+      "display": "$1.50/lb"
     },
     "selfServe": {
-      "minLoad": null,
-      "maxLoad": null,
-      "minLoadDisplay": "",
-      "maxLoadDisplay": "",
+      "minLoad": 3.25,
+      "maxLoad": 9.5,
+      "minLoadDisplay": "$3.25",
+      "maxLoadDisplay": "$9.50",
       "washMin": null,
       "dryMin": null,
-      "rangeDisplay": "Call for pricing"
+      "rangeDisplay": "$3.25 – $9.50"
     },
     "commercial": {
       "rateFromLb": null,
@@ -205,5 +214,9 @@
     "additional": [],
     "sublinkExtensions": {}
   },
-  "iframeOverrides": {}
+  "iframeOverrides": {},
+  "socialMedia": {
+    "facebook": "https://www.facebook.com/profile.php?id=100093625418549",
+    "instagram": "https://www.instagram.com/wavemaxlaundrysouthgate/"
+  }
 }

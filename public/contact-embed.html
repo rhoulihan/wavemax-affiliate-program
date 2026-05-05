@@ -97,19 +97,12 @@
                 </span>
               </div>
 
-              <div class="wm-contact-row">
-                <span class="wm-contact-icon" aria-hidden="true">
-                  <!-- Envelope icon — matches the line-weight + viewBox of
-                       the address/clock/phone icons above so the contact
-                       card icons read as a coherent set. -->
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"></rect><polyline points="3 7 12 13 21 7"></polyline></svg>
-                </span>
-                <span class="wm-contact-value">
-                  <a data-bind="contact.emailMailto" data-bind-attr="href" href="mailto:no-reply@wavemax.promo">
-                    <span data-bind="contact.email">no-reply@wavemax.promo</span>
-                  </a>
-                </span>
-              </div>
+              <!-- Email row removed: owner emails (scraped from corporate
+                   JSON-LD) are PII and stay server-side only. Visitors
+                   reach the franchise via the 'Send a message' form on
+                   the right column, which routes to LOCATION_DATA.contact.email
+                   server-side without ever rendering the address to the
+                   browser. -->
             </div>
 
             <!-- Actions column — Call + Get-Directions stacked, vertically
@@ -288,7 +281,7 @@
 
   <script src="/assets/js/iframe-bridge-v2.js?v=20260504"></script>
   <script src="/assets/js/franchise-page-helpers.js?v=20260505d"></script>
-  <script src="/assets/js/austin-contact-init.js?v=20260505e"></script>
+  <script src="/assets/js/austin-contact-init.js?v=20260505f"></script>
 
   <!-- ════════════════════════════════════════════════════════════════════
        Hibu Dynamic Phone Insertion (iframe scope) — same pattern as the

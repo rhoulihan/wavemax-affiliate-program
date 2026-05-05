@@ -27,11 +27,19 @@
   "hours": {
     "open": "",
     "close": "",
-    "display": "Call for hours",
-    "lastWash": "",
-    "days": ""
+    "display": "Mon-Sun 7 am-9 pm",
+    "lastWash": "8:00pm",
+    "days": "Open daily"
   },
-  "owners": [],
+  "owners": [
+    {
+      "name": "Jenny and Jordan Smith",
+      "role": "Owner / Operator",
+      "tag": "",
+      "bio": "",
+      "avatarStyle": "primary"
+    }
+  ],
   "aboutContent": {
     "heroTitle": "",
     "heroTagline": "",
@@ -77,19 +85,19 @@
   },
   "pricing": {
     "wdf": {
-      "rate": null,
-      "minLb": null,
+      "rate": 0.99,
+      "minLb": 12,
       "currency": "USD",
-      "display": "Call for pricing"
+      "display": "$0.99/lb"
     },
     "selfServe": {
-      "minLoad": null,
-      "maxLoad": null,
-      "minLoadDisplay": "",
-      "maxLoadDisplay": "",
+      "minLoad": 2.5,
+      "maxLoad": 10.75,
+      "minLoadDisplay": "$2.50",
+      "maxLoadDisplay": "$10.75",
       "washMin": null,
       "dryMin": null,
-      "rangeDisplay": "Call for pricing"
+      "rangeDisplay": "$2.50 – $10.75"
     },
     "commercial": {
       "rateFromLb": null,
@@ -205,5 +213,9 @@
     "additional": [],
     "sublinkExtensions": {}
   },
-  "iframeOverrides": {}
+  "iframeOverrides": {},
+  "socialMedia": {
+    "facebook": "https://www.facebook.com/wavemaxhouston/",
+    "instagram": "https://www.instagram.com/p/DXZm8yXiTse/"
+  }
 }
