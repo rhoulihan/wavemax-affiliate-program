@@ -18,8 +18,8 @@
     "country": "US",
     "addressLine2": "Haltom City, TX 76117",
     "geo": {
-      "lat": 32.8121,
-      "lng": -97.2697
+      "lat": 32.814419,
+      "lng": -97.263848
     },
     "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=3534+Denton+Hwy.+Haltom+City+TX+76117"
   },
@@ -154,8 +154,8 @@
     },
     "geoRegion": "US-TX",
     "geoPlacename": "Haltom City, TX",
-    "geoPosition": "32.8121;-97.2697",
-    "icbm": "32.8121, -97.2697"
+    "geoPosition": "32.814419;-97.263848",
+    "icbm": "32.814419, -97.263848"
   },
   "i18n": {
     "languagesAvailable": [

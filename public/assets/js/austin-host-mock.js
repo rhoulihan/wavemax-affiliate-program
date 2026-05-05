@@ -573,7 +573,7 @@
       // Auto-select the current franchise on open so the action bar
       // shows immediately (operator can click Visit to confirm).
       if (!initialized) await initialize();
-      if (!selectedSlug && window.FRANCHISE_SLUG) selectFranchise(window.FRANCHISE_SLUG, { centerMap: true, zoom: 12 });
+      if (!selectedSlug && window.FRANCHISE_SLUG) selectFranchise(window.FRANCHISE_SLUG, { centerMap: true, zoom: 15 });
       // Google Maps needs a resize trigger when its container goes from
       // display:none to flex (modal opens). The resize event refits the
       // bounds we computed at init.
@@ -684,11 +684,24 @@
         bounds.extend(m.getPosition());
         placedCount++;
       }
-      if (placedCount > 0) {
+      // Initial framing depends on whether we're on a franchise page.
+      // On a franchise page (window.FRANCHISE_SLUG set) we want the map
+      // centered on that store at street level; the user opened the
+      // locator from a specific store's page, so there's no benefit to
+      // showing the country overview first.
+      // On a non-franchise page (or if the slug is unknown), show the
+      // continental US fitBounds with a zoom cap so a tightly-clustered
+      // single state doesn't open at street level.
+      const homeSlug = window.FRANCHISE_SLUG;
+      const homeFranchise = homeSlug && items.find(x => x.slug === homeSlug);
+      if (homeFranchise && typeof homeFranchise.lat === 'number') {
+        map.setCenter({ lat: homeFranchise.lat, lng: homeFranchise.lng });
+        map.setZoom(15);
+      } else if (placedCount > 0) {
         map.fitBounds(bounds, 24);
-        // Cap initial zoom so a tightly-clustered single state doesn't
-        // open at street level.
-        const onceListener = gmaps.event.addListenerOnce(map, 'idle', () => {
+        // Cap once on the first idle after fitBounds; only clamp UP-zoom
+        // (anything > 6 means a tight cluster).
+        gmaps.event.addListenerOnce(map, 'idle', () => {
           if (map.getZoom() > 6) map.setZoom(6);
         });
       }

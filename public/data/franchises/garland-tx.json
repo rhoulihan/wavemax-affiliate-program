@@ -18,8 +18,8 @@
     "country": "US",
     "addressLine2": "Garland, TX 75041",
     "geo": {
-      "lat": 32.8874,
-      "lng": -96.6388
+      "lat": 32.859851,
+      "lng": -96.646451
     },
     "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=1311+Marketplace+Dr%2C+Suite+100+Garland+TX+75041"
   },
@@ -156,8 +156,8 @@
     },
     "geoRegion": "US-TX",
     "geoPlacename": "Garland, TX",
-    "geoPosition": "32.8874;-96.6388",
-    "icbm": "32.8874, -96.6388"
+    "geoPosition": "32.859851;-96.646451",
+    "icbm": "32.859851, -96.646451"
   },
   "i18n": {
     "languagesAvailable": [

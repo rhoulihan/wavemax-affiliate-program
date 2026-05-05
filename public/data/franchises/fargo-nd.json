@@ -18,8 +18,8 @@
     "country": "US",
     "addressLine2": "Fargo, ND 58104",
     "geo": {
-      "lat": 46.8366,
-      "lng": -96.7784
+      "lat": 46.840952,
+      "lng": -96.863541
     },
     "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=2551+45th+St+S%2C+Suite+147+Fargo+ND+58104"
   },
@@ -154,8 +154,8 @@
     },
     "geoRegion": "US-ND",
     "geoPlacename": "Fargo, ND",
-    "geoPosition": "46.8366;-96.7784",
-    "icbm": "46.8366, -96.7784"
+    "geoPosition": "46.840952;-96.863541",
+    "icbm": "46.840952, -96.863541"
   },
   "i18n": {
     "languagesAvailable": [

@@ -18,8 +18,8 @@
     "country": "US",
     "addressLine2": "Marietta, GA 30060",
     "geo": {
-      "lat": 33.9526,
-      "lng": -84.5499
+      "lat": 33.945297,
+      "lng": -84.519352
     },
     "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=270+Cobb+Pkwy+S%2C+Suite+90+Marietta+GA+30060"
   },
@@ -152,8 +152,8 @@
     },
     "geoRegion": "US-GA",
     "geoPlacename": "Marietta, GA",
-    "geoPosition": "33.9526;-84.5499",
-    "icbm": "33.9526, -84.5499"
+    "geoPosition": "33.945297;-84.519352",
+    "icbm": "33.945297, -84.519352"
   },
   "i18n": {
     "languagesAvailable": [

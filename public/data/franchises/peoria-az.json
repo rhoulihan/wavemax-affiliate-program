@@ -18,8 +18,8 @@
     "country": "US",
     "addressLine2": "Peoria, AZ 85345",
     "geo": {
-      "lat": 33.5806,
-      "lng": -112.2374
+      "lat": 33.580267,
+      "lng": -112.222454
     },
     "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=7575+W+Peoria+Ave%2C+A102+Peoria+AZ+85345"
   },
@@ -154,8 +154,8 @@
     },
     "geoRegion": "US-AZ",
     "geoPlacename": "Peoria, AZ",
-    "geoPosition": "33.5806;-112.2374",
-    "icbm": "33.5806, -112.2374"
+    "geoPosition": "33.580267;-112.222454",
+    "icbm": "33.580267, -112.222454"
   },
   "i18n": {
     "languagesAvailable": [

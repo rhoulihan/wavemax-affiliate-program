@@ -18,8 +18,8 @@
     "country": "US",
     "addressLine2": "Cincinnati, OH 45239",
     "geo": {
-      "lat": 39.2437,
-      "lng": -84.5836
+      "lat": 39.223396,
+      "lng": -84.590318
     },
     "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=8449+Colerain+Ave+Cincinnati+OH+45239"
   },
@@ -149,8 +149,8 @@
     },
     "geoRegion": "US-OH",
     "geoPlacename": "Cincinnati, OH",
-    "geoPosition": "39.2437;-84.5836",
-    "icbm": "39.2437, -84.5836"
+    "geoPosition": "39.223396;-84.590318",
+    "icbm": "39.223396, -84.590318"
   },
   "i18n": {
     "languagesAvailable": [

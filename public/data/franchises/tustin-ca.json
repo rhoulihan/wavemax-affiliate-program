@@ -18,8 +18,8 @@
     "country": "US",
     "addressLine2": "Tustin, CA 92780",
     "geo": {
-      "lat": 33.7458,
-      "lng": -117.8262
+      "lat": 33.745416,
+      "lng": -117.819818
     },
     "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=412+E+1st+St+Tustin+CA+92780"
   },
@@ -154,8 +154,8 @@
     },
     "geoRegion": "US-CA",
     "geoPlacename": "Tustin, CA",
-    "geoPosition": "33.7458;-117.8262",
-    "icbm": "33.7458, -117.8262"
+    "geoPosition": "33.745416;-117.819818",
+    "icbm": "33.745416, -117.819818"
   },
   "i18n": {
     "languagesAvailable": [

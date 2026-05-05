@@ -18,8 +18,8 @@
     "country": "US",
     "addressLine2": "Boulder, CO 80304",
     "geo": {
-      "lat": 40.015,
-      "lng": -105.2705
+      "lat": 40.02465,
+      "lng": -105.281177
     },
     "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=2614+Broadway+Ave.+Boulder+CO+80304"
   },
@@ -154,8 +154,8 @@
     },
     "geoRegion": "US-CO",
     "geoPlacename": "Boulder, CO",
-    "geoPosition": "40.015;-105.2705",
-    "icbm": "40.015, -105.2705"
+    "geoPosition": "40.02465;-105.281177",
+    "icbm": "40.02465, -105.281177"
   },
   "i18n": {
     "languagesAvailable": [

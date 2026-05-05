@@ -18,8 +18,8 @@
     "country": "US",
     "addressLine2": "Phoenix, AZ 85006",
     "geo": {
-      "lat": 33.4735,
-      "lng": -112.0541
+      "lat": 33.479038,
+      "lng": -112.04698
     },
     "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=2825+N+16th+St+Suite+1+Phoenix+AZ+85006"
   },
@@ -154,8 +154,8 @@
     },
     "geoRegion": "US-AZ",
     "geoPlacename": "Phoenix, AZ",
-    "geoPosition": "33.4735;-112.0541",
-    "icbm": "33.4735, -112.0541"
+    "geoPosition": "33.479038;-112.04698",
+    "icbm": "33.479038, -112.04698"
   },
   "i18n": {
     "languagesAvailable": [

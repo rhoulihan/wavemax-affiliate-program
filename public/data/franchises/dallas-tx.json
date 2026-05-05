@@ -18,8 +18,8 @@
     "country": "US",
     "addressLine2": "Dallas, TX 75211",
     "geo": {
-      "lat": 32.7489,
-      "lng": -96.8658
+      "lat": 32.749089,
+      "lng": -96.87352
     },
     "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=3220+West+Davis+St.+Dallas+TX+75211"
   },
@@ -154,8 +154,8 @@
     },
     "geoRegion": "US-TX",
     "geoPlacename": "Dallas, TX",
-    "geoPosition": "32.7489;-96.8658",
-    "icbm": "32.7489, -96.8658"
+    "geoPosition": "32.749089;-96.87352",
+    "icbm": "32.749089, -96.87352"
   },
   "i18n": {
     "languagesAvailable": [

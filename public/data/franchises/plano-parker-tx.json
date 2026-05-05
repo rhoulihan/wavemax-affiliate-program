@@ -18,8 +18,8 @@
     "country": "US",
     "addressLine2": "Plano, TX 75075",
     "geo": {
-      "lat": 33.0198,
-      "lng": -96.6989
+      "lat": 33.040019,
+      "lng": -96.715415
     },
     "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=930+Parker+Rd.%2C+Suite+520+Plano+TX+75075"
   },
@@ -154,8 +154,8 @@
     },
     "geoRegion": "US-TX",
     "geoPlacename": "Plano, TX",
-    "geoPosition": "33.0198;-96.6989",
-    "icbm": "33.0198, -96.6989"
+    "geoPosition": "33.040019;-96.715415",
+    "icbm": "33.040019, -96.715415"
   },
   "i18n": {
     "languagesAvailable": [

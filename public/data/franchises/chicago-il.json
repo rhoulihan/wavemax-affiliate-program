@@ -18,8 +18,8 @@
     "country": "US",
     "addressLine2": "Chicago, IL 60639",
     "geo": {
-      "lat": 41.9314,
-      "lng": -87.753
+      "lat": 41.931747,
+      "lng": -87.747964
     },
     "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=4830+W+Diversey+Ave+Chicago+IL+60639"
   },
@@ -150,8 +150,8 @@
     },
     "geoRegion": "US-IL",
     "geoPlacename": "Chicago, IL",
-    "geoPosition": "41.9314;-87.753",
-    "icbm": "41.9314, -87.753"
+    "geoPosition": "41.931747;-87.747964",
+    "icbm": "41.931747, -87.747964"
   },
   "i18n": {
     "languagesAvailable": [

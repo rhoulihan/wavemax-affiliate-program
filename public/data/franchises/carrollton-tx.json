@@ -18,8 +18,8 @@
     "country": "US",
     "addressLine2": "Carrollton, TX 75006",
     "geo": {
-      "lat": 32.9756,
-      "lng": -96.8899
+      "lat": 32.985779,
+      "lng": -96.85732
     },
     "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=2760+E+Trinity+Mills+Rd.+STE+112+Carrollton+TX+75006"
   },
@@ -151,8 +151,8 @@
     },
     "geoRegion": "US-TX",
     "geoPlacename": "Carrollton, TX",
-    "geoPosition": "32.9756;-96.8899",
-    "icbm": "32.9756, -96.8899"
+    "geoPosition": "32.985779;-96.85732",
+    "icbm": "32.985779, -96.85732"
   },
   "i18n": {
     "languagesAvailable": [

@@ -18,8 +18,8 @@
     "country": "US",
     "addressLine2": "San Antonio, TX 78230",
     "geo": {
-      "lat": 29.53,
-      "lng": -98.5547
+      "lat": 29.519498,
+      "lng": -98.532969
     },
     "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=2525+Jackson+Keller+Rd.+San+Antonio+TX+78230"
   },
@@ -154,8 +154,8 @@
     },
     "geoRegion": "US-TX",
     "geoPlacename": "San Antonio, TX",
-    "geoPosition": "29.53;-98.5547",
-    "icbm": "29.53, -98.5547"
+    "geoPosition": "29.519498;-98.532969",
+    "icbm": "29.519498, -98.532969"
   },
   "i18n": {
     "languagesAvailable": [

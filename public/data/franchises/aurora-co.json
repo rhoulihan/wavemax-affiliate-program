@@ -18,8 +18,8 @@
     "country": "US",
     "addressLine2": "Aurora, CO 80012",
     "geo": {
-      "lat": 39.7147,
-      "lng": -104.8319
+      "lat": 39.697914,
+      "lng": -104.812562
     },
     "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=15087+E+Mississippi+Ave+Aurora+CO+80012"
   },
@@ -152,8 +152,8 @@
     },
     "geoRegion": "US-CO",
     "geoPlacename": "Aurora, CO",
-    "geoPosition": "39.7147;-104.8319",
-    "icbm": "39.7147, -104.8319"
+    "geoPosition": "39.697914;-104.812562",
+    "icbm": "39.697914, -104.812562"
   },
   "i18n": {
     "languagesAvailable": [

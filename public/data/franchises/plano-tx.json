@@ -18,8 +18,8 @@
     "country": "US",
     "addressLine2": "Plano, TX 75074",
     "geo": {
-      "lat": 33.0198,
-      "lng": -96.6697
+      "lat": 33.014717,
+      "lng": -96.663422
     },
     "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=3611+14th+Street%2C+Suite+170+Plano+TX+75074"
   },
@@ -152,8 +152,8 @@
     },
     "geoRegion": "US-TX",
     "geoPlacename": "Plano, TX",
-    "geoPosition": "33.0198;-96.6697",
-    "icbm": "33.0198, -96.6697"
+    "geoPosition": "33.014717;-96.663422",
+    "icbm": "33.014717, -96.663422"
   },
   "i18n": {
     "languagesAvailable": [

@@ -18,8 +18,8 @@
     "country": "US",
     "addressLine2": "Phoenix, AZ 85015",
     "geo": {
-      "lat": 33.5093,
-      "lng": -112.1006
+      "lat": 33.509219,
+      "lng": -112.094323
     },
     "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=1615+W+Camelback+Rd+Suite+101+Phoenix+AZ+85015"
   },
@@ -147,8 +147,8 @@
     },
     "geoRegion": "US-AZ",
     "geoPlacename": "Phoenix, AZ",
-    "geoPosition": "33.5093;-112.1006",
-    "icbm": "33.5093, -112.1006"
+    "geoPosition": "33.509219;-112.094323",
+    "icbm": "33.509219, -112.094323"
   },
   "i18n": {
     "languagesAvailable": [

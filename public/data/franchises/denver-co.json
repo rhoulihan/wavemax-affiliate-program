@@ -18,8 +18,8 @@
     "country": "US",
     "addressLine2": "",
     "geo": {
-      "lat": 39.6708,
-      "lng": -104.8876
+      "lat": 39.653675,
+      "lng": -104.871093
     },
     "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=+Denver+CO+"
   },
@@ -147,8 +147,8 @@
     },
     "geoRegion": "US-CO",
     "geoPlacename": "Denver, CO",
-    "geoPosition": "39.6708;-104.8876",
-    "icbm": "39.6708, -104.8876"
+    "geoPosition": "39.653675;-104.871093",
+    "icbm": "39.653675, -104.871093"
   },
   "i18n": {
     "languagesAvailable": [

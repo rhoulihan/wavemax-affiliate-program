@@ -18,8 +18,8 @@
     "country": "US",
     "addressLine2": "Austin, TX 78753",
     "geo": {
-      "lat": 30.3729,
-      "lng": -97.6863
+      "lat": 30.356606,
+      "lng": -97.686748
     },
     "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=825+E+Rundberg+Ln+f1+Austin+TX+78753"
   },
@@ -220,8 +220,8 @@
     },
     "geoRegion": "US-TX",
     "geoPlacename": "Austin, TX",
-    "geoPosition": "30.3729;-97.6863",
-    "icbm": "30.3729, -97.6863"
+    "geoPosition": "30.356606;-97.686748",
+    "icbm": "30.356606, -97.686748"
   },
   "i18n": {
     "languagesAvailable": [

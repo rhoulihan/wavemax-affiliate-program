@@ -18,8 +18,8 @@
     "country": "US",
     "addressLine2": "The Colony, TX 75056",
     "geo": {
-      "lat": 33.0812,
-      "lng": -96.8886
+      "lat": 33.096778,
+      "lng": -96.894176
     },
     "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=6805+Main+St+The+Colony+TX+75056"
   },
@@ -154,8 +154,8 @@
     },
     "geoRegion": "US-TX",
     "geoPlacename": "The Colony, TX",
-    "geoPosition": "33.0812;-96.8886",
-    "icbm": "33.0812, -96.8886"
+    "geoPosition": "33.096778;-96.894176",
+    "icbm": "33.096778, -96.894176"
   },
   "i18n": {
     "languagesAvailable": [

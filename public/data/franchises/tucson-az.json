@@ -18,8 +18,8 @@
     "country": "US",
     "addressLine2": "Tucson, AZ 85711",
     "geo": {
-      "lat": 32.2174,
-      "lng": -110.908
+      "lat": 32.205955,
+      "lng": -110.905727
     },
     "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=4054+E.+22nd+Street+Tucson+AZ+85711"
   },
@@ -154,8 +154,8 @@
     },
     "geoRegion": "US-AZ",
     "geoPlacename": "Tucson, AZ",
-    "geoPosition": "32.2174;-110.908",
-    "icbm": "32.2174, -110.908"
+    "geoPosition": "32.205955;-110.905727",
+    "icbm": "32.205955, -110.905727"
   },
   "i18n": {
     "languagesAvailable": [

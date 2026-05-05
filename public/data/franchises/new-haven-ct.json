@@ -18,8 +18,8 @@
     "country": "US",
     "addressLine2": "New Haven, CT 6513",
     "geo": {
-      "lat": 41.3083,
-      "lng": -72.9279
+      "lat": 41.320572,
+      "lng": -72.870317
     },
     "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=466+Foxon+Blvd+New+Haven+CT+6513"
   },
@@ -148,8 +148,8 @@
     },
     "geoRegion": "US-CT",
     "geoPlacename": "New Haven, CT",
-    "geoPosition": "41.3083;-72.9279",
-    "icbm": "41.3083, -72.9279"
+    "geoPosition": "41.320572;-72.870317",
+    "icbm": "41.320572, -72.870317"
   },
   "i18n": {
     "languagesAvailable": [

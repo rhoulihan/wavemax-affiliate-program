@@ -18,8 +18,8 @@
     "country": "US",
     "addressLine2": "Bedford, TX 76021",
     "geo": {
-      "lat": 32.844,
-      "lng": -97.1431
+      "lat": 32.845197,
+      "lng": -97.134153
     },
     "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=2301+N+Central+Drive%2C+Suite+I+Bedford+TX+76021"
   },
@@ -154,8 +154,8 @@
     },
     "geoRegion": "US-TX",
     "geoPlacename": "Bedford, TX",
-    "geoPosition": "32.844;-97.1431",
-    "icbm": "32.844, -97.1431"
+    "geoPosition": "32.845197;-97.134153",
+    "icbm": "32.845197, -97.134153"
   },
   "i18n": {
     "languagesAvailable": [

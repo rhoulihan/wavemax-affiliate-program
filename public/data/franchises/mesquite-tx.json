@@ -18,8 +18,8 @@
     "country": "US",
     "addressLine2": "Mesquite, TX 75149",
     "geo": {
-      "lat": 32.7668,
-      "lng": -96.5992
+      "lat": 32.772494,
+      "lng": -96.600711
     },
     "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=529+N.+Galloway+Ave+ste.+16+Mesquite+TX+75149"
   },
@@ -153,8 +153,8 @@
     },
     "geoRegion": "US-TX",
     "geoPlacename": "Mesquite, TX",
-    "geoPosition": "32.7668;-96.5992",
-    "icbm": "32.7668, -96.5992"
+    "geoPosition": "32.772494;-96.600711",
+    "icbm": "32.772494, -96.600711"
   },
   "i18n": {
     "languagesAvailable": [

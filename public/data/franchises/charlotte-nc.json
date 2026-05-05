@@ -18,8 +18,8 @@
     "country": "US",
     "addressLine2": "Charlotte, NC 28205",
     "geo": {
-      "lat": 35.2271,
-      "lng": -80.7663
+      "lat": 35.237778,
+      "lng": -80.800706
     },
     "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=2915+The+Plaza+Suite+B+Charlotte+NC+28205"
   },
@@ -149,8 +149,8 @@
     },
     "geoRegion": "US-NC",
     "geoPlacename": "Charlotte, NC",
-    "geoPosition": "35.2271;-80.7663",
-    "icbm": "35.2271, -80.7663"
+    "geoPosition": "35.237778;-80.800706",
+    "icbm": "35.237778, -80.800706"
   },
   "i18n": {
     "languagesAvailable": [

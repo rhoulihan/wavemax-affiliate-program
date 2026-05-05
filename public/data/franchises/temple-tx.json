@@ -18,8 +18,8 @@
     "country": "US",
     "addressLine2": "Temple, TX 76504",
     "geo": {
-      "lat": 31.0982,
-      "lng": -97.3428
+      "lat": 31.086121,
+      "lng": -97.363586
     },
     "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=1516+S+31st+St+B+Temple+TX+76504"
   },
@@ -149,8 +149,8 @@
     },
     "geoRegion": "US-TX",
     "geoPlacename": "Temple, TX",
-    "geoPosition": "31.0982;-97.3428",
-    "icbm": "31.0982, -97.3428"
+    "geoPosition": "31.086121;-97.363586",
+    "icbm": "31.086121, -97.363586"
   },
   "i18n": {
     "languagesAvailable": [

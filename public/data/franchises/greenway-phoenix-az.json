@@ -18,8 +18,8 @@
     "country": "US",
     "addressLine2": "Phoenix, AZ 85032",
     "geo": {
-      "lat": 33.5965,
-      "lng": -111.9847
+      "lat": 33.62837,
+      "lng": -112.012932
     },
     "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=3202+E+Greenway+Rd+%231307+Phoenix+AZ+85032"
   },
@@ -154,8 +154,8 @@
     },
     "geoRegion": "US-AZ",
     "geoPlacename": "Phoenix, AZ",
-    "geoPosition": "33.5965;-111.9847",
-    "icbm": "33.5965, -111.9847"
+    "geoPosition": "33.62837;-112.012932",
+    "icbm": "33.62837, -112.012932"
   },
   "i18n": {
     "languagesAvailable": [

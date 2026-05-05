@@ -18,8 +18,8 @@
     "country": "US",
     "addressLine2": "Temple, TX 76504",
     "geo": {
-      "lat": 31.083,
-      "lng": -97.352
+      "lat": 31.110248,
+      "lng": -97.38612
     },
     "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=10+Olaf+Dr.+Temple+TX+76504"
   },
@@ -147,8 +147,8 @@
     },
     "geoRegion": "US-TX",
     "geoPlacename": "Temple, TX",
-    "geoPosition": "31.083;-97.352",
-    "icbm": "31.083, -97.352"
+    "geoPosition": "31.110248;-97.38612",
+    "icbm": "31.110248, -97.38612"
   },
   "i18n": {
     "languagesAvailable": [

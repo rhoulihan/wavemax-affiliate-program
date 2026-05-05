@@ -18,8 +18,8 @@
     "country": "US",
     "addressLine2": "Dallas, TX 75240",
     "geo": {
-      "lat": 32.9274,
-      "lng": -96.8022
+      "lat": 32.931785,
+      "lng": -96.802686
     },
     "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=13536+Preston+Rd%2C+Suite+100+Dallas+TX+75240"
   },
@@ -153,8 +153,8 @@
     },
     "geoRegion": "US-TX",
     "geoPlacename": "Dallas, TX",
-    "geoPosition": "32.9274;-96.8022",
-    "icbm": "32.9274, -96.8022"
+    "geoPosition": "32.931785;-96.802686",
+    "icbm": "32.931785, -96.802686"
   },
   "i18n": {
     "languagesAvailable": [

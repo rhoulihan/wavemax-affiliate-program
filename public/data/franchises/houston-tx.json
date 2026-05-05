@@ -18,8 +18,8 @@
     "country": "US",
     "addressLine2": "Houston, TX 77009",
     "geo": {
-      "lat": 29.7867,
-      "lng": -95.3597
+      "lat": 29.786199,
+      "lng": -95.361685
     },
     "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=2611+Fulton+Street+Houston+TX+77009"
   },
@@ -154,8 +154,8 @@
     },
     "geoRegion": "US-TX",
     "geoPlacename": "Houston, TX",
-    "geoPosition": "29.7867;-95.3597",
-    "icbm": "29.7867, -95.3597"
+    "geoPosition": "29.786199;-95.361685",
+    "icbm": "29.786199, -95.361685"
   },
   "i18n": {
     "languagesAvailable": [

@@ -18,8 +18,8 @@
     "country": "US",
     "addressLine2": "Kent, WA 98032",
     "geo": {
-      "lat": 47.3809,
-      "lng": -122.2348
+      "lat": 47.371658,
+      "lng": -122.301707
     },
     "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=25642+Pacific+Hwy+S+%2316+Kent+WA+98032"
   },
@@ -154,8 +154,8 @@
     },
     "geoRegion": "US-WA",
     "geoPlacename": "Kent, WA",
-    "geoPosition": "47.3809;-122.2348",
-    "icbm": "47.3809, -122.2348"
+    "geoPosition": "47.371658;-122.301707",
+    "icbm": "47.371658, -122.301707"
   },
   "i18n": {
     "languagesAvailable": [

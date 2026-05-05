@@ -18,8 +18,8 @@
     "country": "US",
     "addressLine2": "Rockville, MD 20852",
     "geo": {
-      "lat": 39.084,
-      "lng": -77.1528
+      "lat": 39.058403,
+      "lng": -77.125955
     },
     "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=180+Rollins+Ave+Rockville+MD+20852"
   },
@@ -154,8 +154,8 @@
     },
     "geoRegion": "US-MD",
     "geoPlacename": "Rockville, MD",
-    "geoPosition": "39.084;-77.1528",
-    "icbm": "39.084, -77.1528"
+    "geoPosition": "39.058403;-77.125955",
+    "icbm": "39.058403, -77.125955"
   },
   "i18n": {
     "languagesAvailable": [

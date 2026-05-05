@@ -18,8 +18,8 @@
     "country": "US",
     "addressLine2": "Southgate, MI 48195",
     "geo": {
-      "lat": 42.2139,
-      "lng": -83.1938
+      "lat": 42.211684,
+      "lng": -83.181375
     },
     "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=13248+Fort+St+Southgate+MI+48195"
   },
@@ -154,8 +154,8 @@
     },
     "geoRegion": "US-MI",
     "geoPlacename": "Southgate, MI",
-    "geoPosition": "42.2139;-83.1938",
-    "icbm": "42.2139, -83.1938"
+    "geoPosition": "42.211684;-83.181375",
+    "icbm": "42.211684, -83.181375"
   },
   "i18n": {
     "languagesAvailable": [

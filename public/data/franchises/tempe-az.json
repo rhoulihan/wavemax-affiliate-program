@@ -18,8 +18,8 @@
     "country": "US",
     "addressLine2": "Tempe, AZ 85283",
     "geo": {
-      "lat": 33.3748,
-      "lng": -111.9403
+      "lat": 33.378661,
+      "lng": -111.935528
     },
     "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=222+E+Baseline+Rd+Tempe+AZ+85283"
   },
@@ -154,8 +154,8 @@
     },
     "geoRegion": "US-AZ",
     "geoPlacename": "Tempe, AZ",
-    "geoPosition": "33.3748;-111.9403",
-    "icbm": "33.3748, -111.9403"
+    "geoPosition": "33.378661;-111.935528",
+    "icbm": "33.378661, -111.935528"
   },
   "i18n": {
     "languagesAvailable": [

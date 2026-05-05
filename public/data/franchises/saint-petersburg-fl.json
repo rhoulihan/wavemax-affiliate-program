@@ -18,8 +18,8 @@
     "country": "US",
     "addressLine2": "St Petersburg, FL 33716",
     "geo": {
-      "lat": 27.8372,
-      "lng": -82.637
+      "lat": 27.873575,
+      "lng": -82.640127
     },
     "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=11138+4th+St+N+St+Petersburg+FL+33716"
   },
@@ -149,8 +149,8 @@
     },
     "geoRegion": "US-FL",
     "geoPlacename": "St Petersburg, FL",
-    "geoPosition": "27.8372;-82.637",
-    "icbm": "27.8372, -82.637"
+    "geoPosition": "27.873575;-82.640127",
+    "icbm": "27.873575, -82.640127"
   },
   "i18n": {
     "languagesAvailable": [

@@ -18,8 +18,8 @@
     "country": "US",
     "addressLine2": "Westminster, CO 80031",
     "geo": {
-      "lat": 39.8966,
-      "lng": -105.0372
+      "lat": 39.857997,
+      "lng": -105.065185
     },
     "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=8879+N+Harlan+Street+Westminster+CO+80031"
   },
@@ -151,8 +151,8 @@
     },
     "geoRegion": "US-CO",
     "geoPlacename": "Westminster, CO",
-    "geoPosition": "39.8966;-105.0372",
-    "icbm": "39.8966, -105.0372"
+    "geoPosition": "39.857997;-105.065185",
+    "icbm": "39.857997, -105.065185"
   },
   "i18n": {
     "languagesAvailable": [

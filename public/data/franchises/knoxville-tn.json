@@ -18,8 +18,8 @@
     "country": "US",
     "addressLine2": "Knoxville, TN 37912",
     "geo": {
-      "lat": 36.0122,
-      "lng": -83.9723
+      "lat": 36.007268,
+      "lng": -83.975398
     },
     "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=5210A+Schubert+Rd.+Knoxville+TN+37912"
   },
@@ -150,8 +150,8 @@
     },
     "geoRegion": "US-TN",
     "geoPlacename": "Knoxville, TN",
-    "geoPosition": "36.0122;-83.9723",
-    "icbm": "36.0122, -83.9723"
+    "geoPosition": "36.007268;-83.975398",
+    "icbm": "36.007268, -83.975398"
   },
   "i18n": {
     "languagesAvailable": [
