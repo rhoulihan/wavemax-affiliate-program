@@ -141,24 +141,30 @@
   }
 
   /* ---------- BREADCRUMB ----------
-   * Page declares its own crumb via <meta name="wm-corp-breadcrumb"> with
-   * a value like "Franchise > Why Invest". The injected element is the
-   * same #wm-bc.wm-bc-host div used by per-franchise host pages — picks
-   * up the same wavemax-mhr-chrome.css styling automatically. */
+   * Page declares its crumb via <meta name="wm-corp-breadcrumb"> using
+   * pipe-separated `key:label` pairs:
+   *   <meta name="wm-corp-breadcrumb"
+   *         content="chrome.breadcrumb.home:Home|chrome.nav.franchise:Franchise">
+   * Each segment is rendered with a data-i18n attribute so corporate-i18n.js
+   * translates it on locale switch. The English label is the fallback. */
   function buildBreadcrumb() {
     const meta = document.querySelector('meta[name="wm-corp-breadcrumb"]');
     if (!meta) return '';
     const path = meta.getAttribute('content') || '';
-    const parts = path.split('>').map((s) => s.trim()).filter(Boolean);
+    const parts = path.split('|').map((s) => s.trim()).filter(Boolean).map((s) => {
+      const [key, label] = s.split(':').map((x) => x && x.trim());
+      return { key: key || '', label: label || key || '' };
+    });
     if (!parts.length) return '';
 
-    const home = `<a href="/franchise/">${esc(parts[0])}</a>`;
-    const rest = parts.slice(1).map((p, i) => {
+    const first = parts[0];
+    const home  = `<a href="/franchise/" data-i18n="${esc(first.key)}">${esc(first.label)}</a>`;
+    const rest  = parts.slice(1).map((p, i) => {
       const isLast = i === parts.length - 2;
       const sep = `<span class="wm-bc-host-sep" aria-hidden="true">›</span>`;
       return isLast
-        ? `${sep}<strong class="wm-bc-host-current">${esc(p)}</strong>`
-        : `${sep}${esc(p)}`;
+        ? `${sep}<strong class="wm-bc-host-current" data-i18n="${esc(p.key)}">${esc(p.label)}</strong>`
+        : `${sep}<span data-i18n="${esc(p.key)}">${esc(p.label)}</span>`;
     }).join('');
 
     return `
