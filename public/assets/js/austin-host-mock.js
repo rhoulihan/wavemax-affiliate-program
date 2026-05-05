@@ -530,19 +530,34 @@
   }
 
   function initLocationModal() {
-    const overlay = document.getElementById('locModal');
-    if (!overlay) return;
+    if (!document.getElementById('locModal')) return;
 
-    const list           = document.getElementById('locList');
-    const search         = document.getElementById('locSearch');
-    const status         = document.getElementById('modalStatus');
-    const statusText     = document.getElementById('modalStatusText');
-    const actions        = document.getElementById('locActions');
-    const selectedName   = document.getElementById('locSelectedName');
-    const selectedAddr   = document.getElementById('locSelectedAddr');
-    const directionsLink = document.getElementById('locActionDirections');
-    const visitLink      = document.getElementById('locActionVisit');
-    const mapEl          = document.getElementById('locMap');
+    // Hibu's phone-swap can rewrite parent subtrees that contain the local
+    // phone number. If it touches the body's innerHTML the entire modal
+    // gets re-created, leaving any closure-captured DOM references pointing
+    // at detached nodes (the modal opens because we re-fetch the overlay,
+    // but writes to list/mapEl/search render into invisible orphans). So
+    // every modal-element reference is fetched lazily through getEls() and
+    // refreshed whenever a previously-cached node is no longer connected.
+    let els = null;
+    function getEls() {
+      const cached = els && els.overlay && els.overlay.isConnected ? els : null;
+      if (cached) return cached;
+      els = {
+        overlay:        document.getElementById('locModal'),
+        list:           document.getElementById('locList'),
+        search:         document.getElementById('locSearch'),
+        status:         document.getElementById('modalStatus'),
+        statusText:     document.getElementById('modalStatusText'),
+        actions:        document.getElementById('locActions'),
+        selectedName:   document.getElementById('locSelectedName'),
+        selectedAddr:   document.getElementById('locSelectedAddr'),
+        directionsLink: document.getElementById('locActionDirections'),
+        visitLink:      document.getElementById('locActionVisit'),
+        mapEl:          document.getElementById('locMap')
+      };
+      return els;
+    }
 
     let map = null;
     let markersBySlug = new Map();
@@ -551,12 +566,9 @@
     let selectedSlug = null;
 
     const open = async () => {
-      // Re-fetch overlay each time — the Hibu phone-swap may have rewritten
-      // chrome subtrees, but the modal lives outside that subtree so the
-      // closure-captured reference is normally fine. The fallback is cheap.
-      const liveOverlay = document.getElementById('locModal') || overlay;
-      liveOverlay.setAttribute('aria-hidden', 'false');
-      liveOverlay.classList.add('open');
+      const e = getEls();
+      e.overlay.setAttribute('aria-hidden', 'false');
+      e.overlay.classList.add('open');
       document.body.style.overflow = 'hidden';
       // Auto-select the current franchise on open so the action bar
       // shows immediately (operator can click Visit to confirm).
@@ -566,33 +578,36 @@
       // display:none to flex (modal opens). The resize event refits the
       // bounds we computed at init.
       if (map) setTimeout(() => google.maps.event.trigger(map, 'resize'), 100);
-      search?.focus();
+      e.search?.focus();
     };
     const close = () => {
-      overlay.setAttribute('aria-hidden', 'true');
-      overlay.classList.remove('open');
+      const e = getEls();
+      e.overlay.setAttribute('aria-hidden', 'true');
+      e.overlay.classList.remove('open');
       document.body.style.overflow = '';
     };
 
     async function initialize() {
       if (initialized) return;
       initialized = true;
+      const e = getEls();
       try {
-        if (status) { status.hidden = false; statusText.textContent = 'Loading franchises…'; }
+        if (e.status) { e.status.hidden = false; e.statusText.textContent = 'Loading franchises…'; }
         const [google, fs] = await Promise.all([loadGoogleMaps(), loadFranchises()]);
         franchises = fs;
-        if (status) status.hidden = true;
+        if (e.status) e.status.hidden = true;
         renderTiles(franchises);
         renderMap(google, franchises);
       } catch (err) {
         console.error('[locModal] init failed', err);
-        if (status) { status.hidden = false; statusText.textContent = 'Could not load franchise list — please try again.'; }
+        if (e.status) { e.status.hidden = false; e.statusText.textContent = 'Could not load franchise list — please try again.'; }
       }
     }
 
     // Render tiles grouped by state, alphabetically.
     function renderTiles(items) {
-      list.innerHTML = '';
+      const e = getEls();
+      e.list.innerHTML = '';
       const byState = new Map();
       for (const f of items) {
         const k = f.state || '—';
@@ -624,7 +639,7 @@
           frag.appendChild(btn);
         }
       }
-      list.appendChild(frag);
+      e.list.appendChild(frag);
     }
     function escapeText(s) {
       return String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c]));
@@ -632,10 +647,11 @@
 
     let infoWindow = null;
     function renderMap(google, items) {
-      if (!mapEl) return;
+      const e = getEls();
+      if (!e.mapEl) return;
       const gmaps = google.maps;
 
-      map = new gmaps.Map(mapEl, {
+      map = new gmaps.Map(e.mapEl, {
         center:   { lat: 39.5, lng: -98.5 },   // continental US default
         zoom:     4,
         styles:   WM_MAP_STYLE,
@@ -697,12 +713,13 @@
       const f = franchises.find(x => x.slug === slug);
       if (!f) return;
       selectedSlug = slug;
+      const e = getEls();
 
       // Highlight tile + scroll the selected card to the top of the
       // visible list. Instant scroll (no 'smooth') because smooth
       // scrolling against scroll-snap left mid-row clipping where
       // the next/previous card's text was half-cut.
-      list.querySelectorAll('.loc-card').forEach(c => {
+      e.list.querySelectorAll('.loc-card').forEach(c => {
         const isSelected = c.getAttribute('data-loc-slug') === slug;
         c.setAttribute('aria-selected', isSelected ? 'true' : 'false');
         if (isSelected) {
@@ -737,77 +754,70 @@
       }
 
       // Update + show action bar
-      if (selectedName) selectedName.textContent = f.name;
-      if (selectedAddr) selectedAddr.textContent = (f.address ? f.address + ' · ' : '') + f.city + ', ' + f.state;
-      if (directionsLink) {
+      if (e.selectedName) e.selectedName.textContent = f.name;
+      if (e.selectedAddr) e.selectedAddr.textContent = (f.address ? f.address + ' · ' : '') + f.city + ', ' + f.state;
+      if (e.directionsLink) {
         const q = encodeURIComponent([f.address, f.city, f.state, f.zip].filter(Boolean).join(' '));
-        directionsLink.href = `https://www.google.com/maps/dir/?api=1&destination=${q}`;
+        e.directionsLink.href = `https://www.google.com/maps/dir/?api=1&destination=${q}`;
       }
-      if (visitLink) visitLink.href = '/' + slug + '/';
-      if (actions) actions.hidden = false;
+      if (e.visitLink) e.visitLink.href = '/' + slug + '/';
+      if (e.actions) e.actions.hidden = false;
     }
 
-    // Wire up open / close triggers via event delegation. The Hibu phone-
-    // insertion script (austin-hibu-phone-swap.js + ybDynamicPhoneInsertion)
-    // runs at window.load + 500ms and rewrites innerHTML on chrome elements
-    // whose subtree contains the local phone number. Anywhere it does that,
-    // event handlers attached to specific buttons get destroyed. Delegating
-    // at document level survives any number of subtree rewrites.
-    document.addEventListener('click', (e) => {
-      const openTrig = e.target.closest && e.target.closest('[data-locmodal-open]');
-      if (openTrig) { open(e); return; }
-      const closeTrig = e.target.closest && e.target.closest('[data-locmodal-close]');
-      if (closeTrig) { close(); return; }
-    });
-    overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && overlay.getAttribute('aria-hidden') === 'false') close();
-    });
-
-    // The Visit button navigates same-window; Directions opens a new tab
-    // AND ALSO navigates the parent (after a short delay so the new tab
-    // has time to open before this window unloads).
-    if (visitLink) {
-      visitLink.addEventListener('click', (e) => {
-        e.preventDefault();
+    // All wiring goes through delegated listeners on document so that
+    // Hibu's phone-swap (which can rewrite chrome subtrees / re-create
+    // the modal) cannot kill the handlers. The handlers walk up from
+    // e.target to the relevant data-attribute on each event.
+    document.addEventListener('click', (ev) => {
+      const t = ev.target;
+      if (!t || !t.closest) return;
+      if (t.closest('[data-locmodal-open]'))  { open(ev); return; }
+      if (t.closest('[data-locmodal-close]')) { close();   return; }
+      if (t.closest('#locActionVisit')) {
+        ev.preventDefault();
         if (!selectedSlug) return;
         close();
         window.location.href = '/' + selectedSlug + '/';
-      });
-    }
-    if (directionsLink) {
-      directionsLink.addEventListener('click', (e) => {
-        // Let the browser open the maps tab natively (target="_blank"
-        // already set), then navigate this window after a beat.
+        return;
+      }
+      if (t.closest('#locActionDirections')) {
         if (!selectedSlug) return;
         const slug = selectedSlug;
         setTimeout(() => {
           close();
           window.location.href = '/' + slug + '/';
         }, 200);
+        return;
+      }
+      // Click on the overlay backdrop (not on the modal box) closes
+      const overlayEl = getEls().overlay;
+      if (t === overlayEl) close();
+    });
+    document.addEventListener('keydown', (ev) => {
+      const overlayEl = getEls().overlay;
+      if (ev.key === 'Escape' && overlayEl && overlayEl.getAttribute('aria-hidden') === 'false') close();
+    });
+    // Search filter — delegated input listener targeted at the live
+    // #locSearch element each time. Works against both tiles and markers.
+    document.addEventListener('input', (ev) => {
+      if (!ev.target || ev.target.id !== 'locSearch') return;
+      const e = getEls();
+      const q = ev.target.value.trim().toLowerCase();
+      e.list.querySelectorAll('.loc-card').forEach(card => {
+        const text = (card.textContent || '').toLowerCase();
+        card.style.display = q && !text.includes(q) ? 'none' : '';
       });
-    }
-
-    // Search filter — works against both tiles and markers.
-    if (search) {
-      search.addEventListener('input', (e) => {
-        const q = e.target.value.trim().toLowerCase();
-        list.querySelectorAll('.loc-card').forEach(card => {
-          const text = (card.textContent || '').toLowerCase();
-          card.style.display = q && !text.includes(q) ? 'none' : '';
-        });
-        // Also hide section headers whose state has no visible cards
-        list.querySelectorAll('.loc-section-header').forEach(h => {
-          let next = h.nextElementSibling;
-          let anyVisible = false;
-          while (next && !next.classList.contains('loc-section-header')) {
-            if (next.style.display !== 'none') { anyVisible = true; break; }
-            next = next.nextElementSibling;
-          }
-          h.style.display = anyVisible ? '' : 'none';
-        });
+      // Also hide section headers whose state has no visible cards
+      e.list.querySelectorAll('.loc-section-header').forEach(h => {
+        let next = h.nextElementSibling;
+        let anyVisible = false;
+        while (next && !next.classList.contains('loc-section-header')) {
+          if (next.style.display !== 'none') { anyVisible = true; break; }
+          next = next.nextElementSibling;
+        }
+        h.style.display = anyVisible ? '' : 'none';
       });
-    }
+    });
   }
 
   /* ---------- Mobile drawer (wmv3) ---------- */
