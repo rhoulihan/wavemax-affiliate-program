@@ -271,7 +271,13 @@
   overflow-y: auto;
   flex: 1;
   padding: 8px 12px 16px;
+  /* Snap to whole-card rows so the list never settles with a card's
+   * text half-clipped at the viewport edge. */
+  scroll-snap-type: y proximity;
+  scroll-padding-top: 8px;
 }
+.loc-section-header { scroll-snap-align: start; }
+.loc-card           { scroll-snap-align: start; scroll-margin-top: 4px; }
 .modal-list::-webkit-scrollbar { width: 4px; }
 .modal-list::-webkit-scrollbar-thumb { background: var(--white-20); border-radius: 4px; }
 

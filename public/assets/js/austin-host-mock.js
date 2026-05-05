@@ -616,7 +616,7 @@
               `<div class="loc-addr">${escapeText((f.city || '') + (f.city ? ', ' : '') + (f.state || '') + ' ' + (f.zip || ''))}</div>` +
               `<div class="loc-meta">${f.phone ? `<span class="loc-phone">${escapeText(f.phone)}</span>` : ''}</div>` +
             '</div>';
-          btn.addEventListener('click', () => selectFranchise(f.slug, { centerMap: true, zoom: 13 }));
+          btn.addEventListener('click', () => selectFranchise(f.slug, { centerMap: true, zoom: 16 }));
           frag.appendChild(btn);
         }
       }
@@ -659,7 +659,7 @@
           // amber for the selected franchise via setIcon() below.
           icon:     wmMarkerIcon(false)
         });
-        m.addListener('click', () => selectFranchise(f.slug, { centerMap: true, zoom: 13 }));
+        m.addListener('click', () => selectFranchise(f.slug, { centerMap: true, zoom: 16 }));
         markersBySlug.set(f.slug, m);
         bounds.extend(m.getPosition());
         placedCount++;
@@ -694,12 +694,15 @@
       if (!f) return;
       selectedSlug = slug;
 
-      // Highlight tile
+      // Highlight tile + scroll the selected card to the top of the
+      // visible list. Instant scroll (no 'smooth') because smooth
+      // scrolling against scroll-snap left mid-row clipping where
+      // the next/previous card's text was half-cut.
       list.querySelectorAll('.loc-card').forEach(c => {
-        c.setAttribute('aria-selected', c.getAttribute('data-loc-slug') === slug ? 'true' : 'false');
-        if (c.getAttribute('data-loc-slug') === slug) {
-          // Scroll into view smoothly
-          c.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        const isSelected = c.getAttribute('data-loc-slug') === slug;
+        c.setAttribute('aria-selected', isSelected ? 'true' : 'false');
+        if (isSelected) {
+          c.scrollIntoView({ behavior: 'auto', block: 'start' });
         }
       });
 
