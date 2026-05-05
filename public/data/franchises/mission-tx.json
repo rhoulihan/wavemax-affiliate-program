@@ -129,7 +129,16 @@
       "https://wavemaxlaundry.com/wp-content/uploads/locations/kent-wa/interior-6.jpg"
     ],
     "owner": [],
-    "landmarks": [],
+    "landmarks": [
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/12/Texas_-_Mission_through_Nixon_-_NARA_-_68149606_%28cropped%29.jpg/1280px-Texas_-_Mission_through_Nixon_-_NARA_-_68149606_%28cropped%29.jpg",
+        "alt": "Texas - Mission through Nixon - NARA - 68149606 (cropped) — Mission"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/6/6d/Mission%2CTX.jpg",
+        "alt": "Mission,TX — Mission"
+      }
+    ],
     "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/kent-wa/hero-1.jpg",
     "ogImageAlt": "WaveMAX Mission TX storefront",
     "mapPreview": ""

@@ -129,7 +129,28 @@
       "https://wavemaxlaundry.com/wp-content/uploads/locations/tustin-ca/interior-6.jpg"
     ],
     "owner": [],
-    "landmarks": [],
+    "landmarks": [
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a4/Artz_Building_-_Tustin_CA.jpg/1280px-Artz_Building_-_Tustin_CA.jpg",
+        "alt": "Artz Building - Tustin CA — Tustin"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4f/Main_Street_Tustin_bust_of_Founder.jpg/1280px-Main_Street_Tustin_bust_of_Founder.jpg",
+        "alt": "Main Street Tustin bust of Founder — Tustin"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/0/07/Tustin_High_Student_Quad_%28Plaza%29.png",
+        "alt": "Tustin High Student Quad (Plaza) — Tustin"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b5/20140923-0009_Tustin.JPG/1280px-20140923-0009_Tustin.JPG",
+        "alt": "20140923-0009 Tustin — Tustin"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/24/20140923-0048_Tustin.JPG/1280px-20140923-0048_Tustin.JPG",
+        "alt": "20140923-0048 Tustin — Tustin"
+      }
+    ],
     "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/tustin-ca/hero-1.jpg",
     "ogImageAlt": "WaveMAX Tustin CA storefront",
     "mapPreview": ""

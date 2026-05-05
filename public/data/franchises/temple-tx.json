@@ -124,7 +124,20 @@
       "https://wavemaxlaundry.com/wp-content/uploads/locations/temple-tx/interior-3.webp"
     ],
     "owner": [],
-    "landmarks": [],
+    "landmarks": [
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/56/Temple_railroad_heritage_museum_2012.jpg/1280px-Temple_railroad_heritage_museum_2012.jpg",
+        "alt": "Temple railroad heritage museum 2012 — Temple"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/38/Scott_and_White_Hospital%2C_Temple%2C_TX_IMG_0682.JPG/1280px-Scott_and_White_Hospital%2C_Temple%2C_TX_IMG_0682.JPG",
+        "alt": "Scott and White Hospital, Temple, TX IMG 0682 — Temple"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/d/d1/Scott-white-hospital-temple.jpg",
+        "alt": "Scott-white-hospital-temple — Temple"
+      }
+    ],
     "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/temple-tx/hero-1.webp",
     "ogImageAlt": "WaveMAX Temple TX storefront",
     "mapPreview": ""

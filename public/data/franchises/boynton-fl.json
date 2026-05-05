@@ -129,7 +129,20 @@
       "https://wavemaxlaundry.com/wp-content/uploads/locations/boynton-fl/interior-6.jpg"
     ],
     "owner": [],
-    "landmarks": [],
+    "landmarks": [
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9f/Boynton_Beach_Station_%2841945650145%29.jpg/1280px-Boynton_Beach_Station_%2841945650145%29.jpg",
+        "alt": "Boynton Beach Station (41945650145) — Boynton Beach"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/d/d1/Ocean_Avenue_in_Boynton_Beach_in_1915.jpg",
+        "alt": "Ocean Avenue in Boynton Beach in 1915 — Boynton Beach"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/Boynton_Beach%2C_Florida.jpg/1280px-Boynton_Beach%2C_Florida.jpg",
+        "alt": "Boynton Beach, Florida — Boynton Beach"
+      }
+    ],
     "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/boynton-fl/hero-1.jpg",
     "ogImageAlt": "WaveMAX Boynton Beach FL storefront",
     "mapPreview": ""

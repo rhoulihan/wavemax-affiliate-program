@@ -122,7 +122,28 @@
       "https://wavemaxlaundry.com/wp-content/uploads/locations/camelback-phoenix-az/interior-1.webp"
     ],
     "owner": [],
-    "landmarks": [],
+    "landmarks": [
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b9/Downtown_Phoenix_Aerial_Looking_Northeast.jpg/1280px-Downtown_Phoenix_Aerial_Looking_Northeast.jpg",
+        "alt": "Downtown Phoenix Aerial Looking Northeast — Phoenix"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/14/Downtown_PHX_Panorama.jpg/1280px-Downtown_PHX_Panorama.jpg",
+        "alt": "Downtown PHX Panorama — Phoenix"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/17/Musical_Instrument_Museum_2%2C_Phoenix_AZ.JPG/1280px-Musical_Instrument_Museum_2%2C_Phoenix_AZ.JPG",
+        "alt": "Musical Instrument Museum 2, Phoenix AZ — Phoenix"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/1/1b/Camelback_Mountain_aerial_view.jpg",
+        "alt": "Camelback Mountain aerial view — Phoenix"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3f/Ethnic_Origins_in_Phoenix.png/1280px-Ethnic_Origins_in_Phoenix.png",
+        "alt": "Ethnic Origins in Phoenix — Phoenix"
+      }
+    ],
     "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/camelback-phoenix-az/hero-1.webp",
     "ogImageAlt": "WaveMAX Phoenix AZ Camelback storefront",
     "mapPreview": ""

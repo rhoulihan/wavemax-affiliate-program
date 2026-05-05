@@ -124,7 +124,28 @@
       "https://wavemaxlaundry.com/wp-content/uploads/locations/charlotte-nc/interior-3.jpg"
     ],
     "owner": [],
-    "landmarks": [],
+    "landmarks": [
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b9/Aerial_view_of_Bank_of_America_Stadium_in_Charlotte.jpg/1280px-Aerial_view_of_Bank_of_America_Stadium_in_Charlotte.jpg",
+        "alt": "Aerial view of Bank of America Stadium in Charlotte — Charlotte"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/44/Saint_Peter_Catholic_Church_%28Charlotte%2C_North_Carolina%29_-_view_from_Mint_Museum.jpg/1280px-Saint_Peter_Catholic_Church_%28Charlotte%2C_North_Carolina%29_-_view_from_Mint_Museum.jpg",
+        "alt": "Saint Peter Catholic Church (Charlotte, North Carolina) - view from Mint Museum — Charlotte"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c3/BechtlerMuseumCharlotte.jpg/1280px-BechtlerMuseumCharlotte.jpg",
+        "alt": "BechtlerMuseumCharlotte — Charlotte"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/18/Carowinds_aerial_view%2C_September_2017.JPG/1280px-Carowinds_aerial_view%2C_September_2017.JPG",
+        "alt": "Carowinds aerial view, September 2017 — Charlotte"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b6/Mint_Museum_in_uptown_Charlotte%2C_North_Carolina.jpg/1280px-Mint_Museum_in_uptown_Charlotte%2C_North_Carolina.jpg",
+        "alt": "Mint Museum in uptown Charlotte, North Carolina — Charlotte"
+      }
+    ],
     "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/charlotte-nc/hero-1.jpg",
     "ogImageAlt": "WaveMAX Charlotte NC storefront",
     "mapPreview": ""

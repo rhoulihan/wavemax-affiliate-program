@@ -125,7 +125,28 @@
       "https://wavemaxlaundry.com/wp-content/uploads/locations/chicago-il/interior-4.jpg"
     ],
     "owner": [],
-    "landmarks": [],
+    "landmarks": [
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1c/Chicago_Skyline_in_April_2024.jpg/1280px-Chicago_Skyline_in_April_2024.jpg",
+        "alt": "Chicago Skyline in April 2024 — Chicago"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/67/Chicago_Skyline_in_September_2023_pano.jpg/1280px-Chicago_Skyline_in_September_2023_pano.jpg",
+        "alt": "Chicago Skyline in September 2023 pano — Chicago"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/26/Chicago_Theatre_blend.jpg/1280px-Chicago_Theatre_blend.jpg",
+        "alt": "Chicago Theatre blend — Chicago"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/a/a3/2010-03-03_1856x2784_chicago_chicago_building.jpg",
+        "alt": "2010-03-03 1856x2784 chicago chicago building — Chicago"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6b/Buckingham_Fountain_in_Chicago%2C_USA.jpg/1280px-Buckingham_Fountain_in_Chicago%2C_USA.jpg",
+        "alt": "Buckingham Fountain in Chicago, USA — Chicago"
+      }
+    ],
     "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/chicago-il/hero-1.jpg",
     "ogImageAlt": "WaveMAX Chicago IL storefront",
     "mapPreview": ""

@@ -645,6 +645,7 @@
       if (window.FranchisePage) {
         window.FranchisePage.applyEquipment(data);
         window.FranchisePage.applyTextPlaceholders(data);
+        window.FranchisePage.applyDocumentTitle(data, 'wdf');
         const seo = window.FranchisePage.buildSeo(data, 'wdf');
         if (seo) window.IframeBridge.loadSEOConfig(seo);
       }

@@ -129,7 +129,20 @@
       "https://wavemaxlaundry.com/wp-content/uploads/locations/kent-wa/interior-6.jpg"
     ],
     "owner": [],
-    "landmarks": [],
+    "landmarks": [
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/Peoria_High_School%2C_Old_Main_Building.jpg/1280px-Peoria_High_School%2C_Old_Main_Building.jpg",
+        "alt": "Peoria High School, Old Main Building — Peoria"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/09/Peoria_Sports_Complex_WT.JPG/1280px-Peoria_Sports_Complex_WT.JPG",
+        "alt": "Peoria Sports Complex WT — Peoria"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/08/SD-Peoria_Train_Depot.jpg/1280px-SD-Peoria_Train_Depot.jpg",
+        "alt": "SD-Peoria Train Depot — Peoria"
+      }
+    ],
     "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/kent-wa/hero-1.jpg",
     "ogImageAlt": "WaveMAX Peoria AZ storefront",
     "mapPreview": ""

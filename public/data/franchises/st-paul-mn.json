@@ -126,7 +126,28 @@
       "https://wavemaxlaundry.com/wp-content/uploads/locations/st-paul-mn/interior-5.jpg"
     ],
     "owner": [],
-    "landmarks": [],
+    "landmarks": [
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/5/59/Saint_Paul_skyline%2C_West_Side_%28cropped%29.jpg",
+        "alt": "Saint Paul skyline, West Side (cropped) — St. Paul"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/99/20080312-StPaulDowntownAirport.jpg/1280px-20080312-StPaulDowntownAirport.jpg",
+        "alt": "20080312-StPaulDowntownAirport — St. Paul"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/36/Saint_Paul_City_Hall.jpg/1280px-Saint_Paul_City_Hall.jpg",
+        "alt": "Saint Paul City Hall — St. Paul"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/65/Cathedral_of_St._Paul_from_the_Landmark_Center.jpg/1280px-Cathedral_of_St._Paul_from_the_Landmark_Center.jpg",
+        "alt": "Cathedral of St. Paul from the Landmark Center — St. Paul"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/da/Como_Park_Zoo_and_Conservatory_-_15.jpg/1280px-Como_Park_Zoo_and_Conservatory_-_15.jpg",
+        "alt": "Como Park Zoo and Conservatory - 15 — St. Paul"
+      }
+    ],
     "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/st-paul-mn/hero-1.jpg",
     "ogImageAlt": "WaveMAX St Paul MN storefront",
     "mapPreview": ""

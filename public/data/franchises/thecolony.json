@@ -129,7 +129,12 @@
       "https://wavemaxlaundry.com/wp-content/uploads/locations/thecolony/interior-6.jpg"
     ],
     "owner": [],
-    "landmarks": [],
+    "landmarks": [
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/63/City_Of_The_Colony_Logo.jpg/1280px-City_Of_The_Colony_Logo.jpg",
+        "alt": "City Of The Colony Logo — The Colony"
+      }
+    ],
     "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/thecolony/hero-1.jpg",
     "ogImageAlt": "WaveMAX The Colony TX storefront",
     "mapPreview": ""

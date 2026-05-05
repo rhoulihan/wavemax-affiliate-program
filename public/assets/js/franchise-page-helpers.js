@@ -277,10 +277,39 @@
     });
   }
 
+  /**
+   * applyDocumentTitle(LOCATION_DATA, pageKey)
+   *
+   * Sets the iframe's document.title to a franchise-derived title.
+   * The parent frame's title is already set via the bridge's SEO bundle
+   * — this is purely the iframe's own title, which mostly affects
+   * accessibility (screen readers announce 'document loaded: <title>'
+   * when an iframe gains focus) and the browser tab if the iframe is
+   * opened directly. SEO is unchanged either way.
+   *
+   * pageKey aligns with PAGE_SPEC: 'landing' | 'wdf' | 'self-serve' |
+   * 'commercial' | 'about-us' | 'contact'.
+   */
+  const TITLE_PREFIX = {
+    'landing':    null,                          // brand only
+    'wdf':        'Wash-Dry-Fold',
+    'self-serve': 'Self-Serve Laundry',
+    'commercial': 'Commercial Laundry',
+    'about-us':   'About',
+    'contact':    'Contact'
+  };
+  function applyDocumentTitle(data, pageKey) {
+    const brand = data && data.brand && data.brand.name;
+    if (!brand) return;
+    const prefix = TITLE_PREFIX[pageKey];
+    document.title = prefix ? `${prefix} · ${brand}` : brand;
+  }
+
   window.FranchisePage = {
     applyHeroWatermark,
     applyEquipment,
     applyTextPlaceholders,
+    applyDocumentTitle,
     buildSeo,
     businessId,
     pageUrl,

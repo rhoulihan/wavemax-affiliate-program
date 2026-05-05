@@ -131,7 +131,24 @@
     "owner": [
       "https://wavemaxlaundry.com/wp-content/uploads/locations/garland-tx/owners.jpg"
     ],
-    "landmarks": [],
+    "landmarks": [
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f7/Downtown_Garland.jpg/1280px-Downtown_Garland.jpg",
+        "alt": "Downtown Garland — Garland"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6b/Fifth_Street_Crossing%2C_Garland%2C_Texas.jpg/1280px-Fifth_Street_Crossing%2C_Garland%2C_Texas.jpg",
+        "alt": "Fifth Street Crossing, Garland, Texas — Garland"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/dc/Garland_July_2015_08_%28Central_Library%29.jpg/1280px-Garland_July_2015_08_%28Central_Library%29.jpg",
+        "alt": "Garland July 2015 08 (Central Library) — Garland"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/90/Garland_July_2015_25_%28Richland_College_Garland_Campus%29.jpg/1280px-Garland_July_2015_25_%28Richland_College_Garland_Campus%29.jpg",
+        "alt": "Garland July 2015 25 (Richland College Garland Campus) — Garland"
+      }
+    ],
     "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/garland-tx/hero-1.jpg",
     "ogImageAlt": "WaveMAX Garland TX storefront",
     "mapPreview": ""

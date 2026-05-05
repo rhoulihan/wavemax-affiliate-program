@@ -129,7 +129,28 @@
       "https://wavemaxlaundry.com/wp-content/uploads/locations/tucson-az/interior-6.jpg"
     ],
     "owner": [],
-    "landmarks": [],
+    "landmarks": [
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/06/TucsonDowntownView1.jpg/1280px-TucsonDowntownView1.jpg",
+        "alt": "TucsonDowntownView1 — Tucson"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/2/29/The_Cathedral_of_Saint_Augustine%2C_the_mother_church_of_the_Roman_Catholic_Diocese_of_Tucson%2C_Arizona.jpg",
+        "alt": "The Cathedral of Saint Augustine, the mother church of the Roman Catholic Diocese of Tucson, Arizona — Tucson"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0f/Fox_theater_Tucson.jpg/1280px-Fox_theater_Tucson.jpg",
+        "alt": "Fox theater Tucson — Tucson"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/ba/Tucson_May_2019_22_%28Tucson_Arena_at_the_Tucson_Convention_Center%29.jpg/1280px-Tucson_May_2019_22_%28Tucson_Arena_at_the_Tucson_Convention_Center%29.jpg",
+        "alt": "Tucson May 2019 22 (Tucson Arena at the Tucson Convention Center) — Tucson"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/98/Tucson_May_2019_38_%282nd_Street%29.jpg/1280px-Tucson_May_2019_38_%282nd_Street%29.jpg",
+        "alt": "Tucson May 2019 38 (2nd Street) — Tucson"
+      }
+    ],
     "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/tucson-az/hero-1.jpg",
     "ogImageAlt": "WaveMAX Tucson AZ storefront",
     "mapPreview": ""

@@ -129,7 +129,28 @@
       "https://wavemaxlaundry.com/wp-content/uploads/locations/kent-wa/interior-6.jpg"
     ],
     "owner": [],
-    "landmarks": [],
+    "landmarks": [
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0e/AT%26T_Building%2C_Commerce_Street_and_3rd_Avenue%2C_Nashville%2C_TN_%2854384169042%29.jpg/1280px-AT%26T_Building%2C_Commerce_Street_and_3rd_Avenue%2C_Nashville%2C_TN_%2854384169042%29.jpg",
+        "alt": "AT&T Building, Commerce Street and 3rd Avenue, Nashville, TN (54384169042) — Nashville"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e4/Nashville%2C_TN_skyline.jpg/1280px-Nashville%2C_TN_skyline.jpg",
+        "alt": "Nashville, TN skyline — Nashville"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3f/Nashville_Visitor_Center_and_Bridgestone_Arena%2C_Broadway_and_5th_Avenue%2C_Nashville%2C_TN_%2854384487819%29.jpg/1280px-Nashville_Visitor_Center_and_Bridgestone_Arena%2C_Broadway_and_5th_Avenue%2C_Nashville%2C_TN_%2854384487819%29.jpg",
+        "alt": "Nashville Visitor Center and Bridgestone Arena, Broadway and 5th Avenue, Nashville, TN (54384487819) — Nashville"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/ad/Bar_Entrance_Nashville.jpg/1280px-Bar_Entrance_Nashville.jpg",
+        "alt": "Bar Entrance Nashville — Nashville"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/Blue_Angels_honored_frontline_workers_with_formation_flights_over_Nashville_and_Little_Rock._%2849897946906%29.jpg/1280px-Blue_Angels_honored_frontline_workers_with_formation_flights_over_Nashville_and_Little_Rock._%2849897946906%29.jpg",
+        "alt": "Blue Angels honored frontline workers with formation flights over Nashville and Little Rock. (49897946906) — Nashville"
+      }
+    ],
     "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/kent-wa/hero-1.jpg",
     "ogImageAlt": "WaveMAX Nashville TN storefront",
     "mapPreview": ""

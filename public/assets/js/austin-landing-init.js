@@ -680,6 +680,7 @@
         // text. Runs AFTER applyEquipment so hidden variants don't
         // waste a substitution pass.
         window.FranchisePage.applyTextPlaceholders(data);
+        window.FranchisePage.applyDocumentTitle(data, 'landing');
         const seo = window.FranchisePage.buildSeo(data, 'landing');
         if (seo) window.IframeBridge.loadSEOConfig(seo);
       }

@@ -129,7 +129,12 @@
       "https://wavemaxlaundry.com/wp-content/uploads/locations/kent-wa/interior-6.jpg"
     ],
     "owner": [],
-    "landmarks": [],
+    "landmarks": [
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/cf/Thornton%2C_CO%2C_welcome_sign_IMG_5209.JPG/1280px-Thornton%2C_CO%2C_welcome_sign_IMG_5209.JPG",
+        "alt": "Thornton, CO, welcome sign IMG 5209 — Thornton"
+      }
+    ],
     "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/kent-wa/hero-1.jpg",
     "ogImageAlt": "WaveMAX Thornton CO storefront",
     "mapPreview": ""

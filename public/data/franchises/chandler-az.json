@@ -122,7 +122,28 @@
       "https://wavemaxlaundry.com/wp-content/uploads/locations/chandler-az/interior-4.jpg"
     ],
     "owner": [],
-    "landmarks": [],
+    "landmarks": [
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a1/Chandler_Regional_Medical_Center.jpg/1280px-Chandler_Regional_Medical_Center.jpg",
+        "alt": "Chandler Regional Medical Center — Chandler"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9d/Neighborhoods_in_the_City_of_Chandler.jpg/1280px-Neighborhoods_in_the_City_of_Chandler.jpg",
+        "alt": "Neighborhoods in the City of Chandler — Chandler"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6e/Village_of_Gila_Springs%2C_Chandler%2C_Arizona.jpg/1280px-Village_of_Gila_Springs%2C_Chandler%2C_Arizona.jpg",
+        "alt": "Village of Gila Springs, Chandler, Arizona — Chandler"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/3/34/Chandler_Arizona_High_School_1921.jpg",
+        "alt": "Chandler Arizona High School 1921 — Chandler"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/0/07/Tumbleweed_Christmas_Tree_Chandler_Arizona.jpg",
+        "alt": "Tumbleweed Christmas Tree Chandler Arizona — Chandler"
+      }
+    ],
     "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/chandler-az/hero-1.jpg",
     "ogImageAlt": "WaveMAX Chandler AZ storefront",
     "mapPreview": ""

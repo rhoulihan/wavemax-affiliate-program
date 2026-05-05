@@ -129,7 +129,28 @@
       "https://wavemaxlaundry.com/wp-content/uploads/locations/kent-wa/interior-6.jpg"
     ],
     "owner": [],
-    "landmarks": [],
+    "landmarks": [
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4a/Fuller_Warren_Bridge%2C_Jacksonville_FL_1_Panorama.jpg/1280px-Fuller_Warren_Bridge%2C_Jacksonville_FL_1_Panorama.jpg",
+        "alt": "Fuller Warren Bridge, Jacksonville FL 1 Panorama — Jacksonville"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/da/EverBank_Stadium_aerial_view.jpg/1280px-EverBank_Stadium_aerial_view.jpg",
+        "alt": "EverBank Stadium aerial view — Jacksonville"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fc/Buckman_Bridge%2C_Jaxsonville_FL_Panorama_1_3667.jpg/1280px-Buckman_Bridge%2C_Jaxsonville_FL_Panorama_1_3667.jpg",
+        "alt": "Buckman Bridge, Jaxsonville FL Panorama 1 3667 — Jacksonville"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/65/Confederate_Monument_Pedestal_%28Jacksonville%2C_Florida%29.jpg/1280px-Confederate_Monument_Pedestal_%28Jacksonville%2C_Florida%29.jpg",
+        "alt": "Confederate Monument Pedestal (Jacksonville, Florida) — Jacksonville"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ec/Cummer_Museum%2C_Jacksonville%2C_FL%2C_US_%2802%29.jpg/1280px-Cummer_Museum%2C_Jacksonville%2C_FL%2C_US_%2802%29.jpg",
+        "alt": "Cummer Museum, Jacksonville, FL, US (02) — Jacksonville"
+      }
+    ],
     "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/kent-wa/hero-1.jpg",
     "ogImageAlt": "WaveMAX Jacksonville FL storefront",
     "mapPreview": ""

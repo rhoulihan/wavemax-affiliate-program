@@ -128,7 +128,28 @@
       "https://wavemaxlaundry.com/wp-content/uploads/locations/oklahoma-city-ok/interior-6.jpg"
     ],
     "owner": [],
-    "landmarks": [],
+    "landmarks": [
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/49/Paycom_Center_exterior_aerial_view.jpg/1280px-Paycom_Center_exterior_aerial_view.jpg",
+        "alt": "Paycom Center exterior aerial view — Oklahoma City"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/f/f0/Flickr_-_Nicholas_T_-_Skyline.jpg",
+        "alt": "Flickr - Nicholas T - Skyline — Oklahoma City"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fe/Oklahoma_City_Streetcar_-_green_car_on_4th_Street_passing_First_United_Methodist_Church.jpg/1280px-Oklahoma_City_Streetcar_-_green_car_on_4th_Street_passing_First_United_Methodist_Church.jpg",
+        "alt": "Oklahoma City Streetcar - green car on 4th Street passing First United Methodist Church — Oklahoma City"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/Oklahoma_City%2C_City_Hall.jpg/1280px-Oklahoma_City%2C_City_Hall.jpg",
+        "alt": "Oklahoma City, City Hall — Oklahoma City"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/40/Oklahoma_City_National_Memorial_at_Christmas.jpg/1280px-Oklahoma_City_National_Memorial_at_Christmas.jpg",
+        "alt": "Oklahoma City National Memorial at Christmas — Oklahoma City"
+      }
+    ],
     "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/oklahoma-city-ok/hero-1.jpg",
     "ogImageAlt": "WaveMAX Oklahoma City OK storefront",
     "mapPreview": ""

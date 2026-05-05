@@ -649,6 +649,7 @@
       if (window.FranchisePage) {
         window.FranchisePage.applyEquipment(data);
         window.FranchisePage.applyTextPlaceholders(data);
+        window.FranchisePage.applyDocumentTitle(data, 'commercial');
         const seo = window.FranchisePage.buildSeo(data, 'commercial');
         if (seo) window.IframeBridge.loadSEOConfig(seo);
       }

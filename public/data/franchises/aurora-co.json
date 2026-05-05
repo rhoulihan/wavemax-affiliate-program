@@ -127,7 +127,28 @@
       "https://wavemaxlaundry.com/wp-content/uploads/locations/aurora-co/interior-5.jpg"
     ],
     "owner": [],
-    "landmarks": [],
+    "landmarks": [
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/bc/Florida_Station_ped._bridge%2C_I-225%2C_Aurora%2C_CO.jpg/1280px-Florida_Station_ped._bridge%2C_I-225%2C_Aurora%2C_CO.jpg",
+        "alt": "Florida Station ped. bridge, I-225, Aurora, CO — Aurora"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/88/Aerial_view_of_Fitzsimons_Army_Hospital%2C_1973.JPEG/1280px-Aerial_view_of_Fitzsimons_Army_Hospital%2C_1973.JPEG",
+        "alt": "Aerial view of Fitzsimons Army Hospital, 1973 — Aurora"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/15/Aurora%2C_CO%2C_USA_-_panoramio_%281%29.jpg/1280px-Aurora%2C_CO%2C_USA_-_panoramio_%281%29.jpg",
+        "alt": "Aurora, CO, USA - panoramio (1) — Aurora"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/be/Buckley_AFB.png/1280px-Buckley_AFB.png",
+        "alt": "Buckley AFB — Aurora"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c9/Plains_Conservation_Center%2C_Colorado_03.jpg/1280px-Plains_Conservation_Center%2C_Colorado_03.jpg",
+        "alt": "Plains Conservation Center, Colorado 03 — Aurora"
+      }
+    ],
     "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/aurora-co/hero-1.jpg",
     "ogImageAlt": "WaveMAX Aurora, CO storefront",
     "mapPreview": ""

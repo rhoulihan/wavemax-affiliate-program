@@ -129,7 +129,28 @@
       "https://wavemaxlaundry.com/wp-content/uploads/locations/louisville-ky/interior-6.jpg"
     ],
     "owner": [],
-    "landmarks": [],
+    "landmarks": [
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3d/Louisville_Panorama.jpg/1280px-Louisville_Panorama.jpg",
+        "alt": "Louisville Panorama — Louisville"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/55/Louisville_Skyline_2021_%283%29.jpg/1280px-Louisville_Skyline_2021_%283%29.jpg",
+        "alt": "Louisville Skyline 2021 (3) — Louisville"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/e/e6/Louisville_Skyline_2021_%284%29.jpg",
+        "alt": "Louisville Skyline 2021 (4) — Louisville"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a0/Cathedral_of_the_Assumption%2C_Louisville.jpg/1280px-Cathedral_of_the_Assumption%2C_Louisville.jpg",
+        "alt": "Cathedral of the Assumption, Louisville — Louisville"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/ba/Louisville_City_Hall%2C_HABS_KY-143-9.jpg/1280px-Louisville_City_Hall%2C_HABS_KY-143-9.jpg",
+        "alt": "Louisville City Hall, HABS KY-143-9 — Louisville"
+      }
+    ],
     "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/louisville-ky/hero-1.jpg",
     "ogImageAlt": "WaveMAX Louisville KY storefront",
     "mapPreview": ""

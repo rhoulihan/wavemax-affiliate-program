@@ -564,6 +564,7 @@
       if (window.FranchisePage) {
         window.FranchisePage.applyEquipment(data);
         window.FranchisePage.applyTextPlaceholders(data);
+        window.FranchisePage.applyDocumentTitle(data, 'self-serve');
         const seo = window.FranchisePage.buildSeo(data, 'self-serve');
         if (seo) window.IframeBridge.loadSEOConfig(seo);
       }

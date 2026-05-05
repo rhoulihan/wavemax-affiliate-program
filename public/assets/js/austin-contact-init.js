@@ -485,6 +485,7 @@
       if (window.FranchisePage) {
         window.FranchisePage.applyEquipment(data);
         window.FranchisePage.applyTextPlaceholders(data);
+        window.FranchisePage.applyDocumentTitle(data, 'contact');
         const seo = window.FranchisePage.buildSeo(data, 'contact');
         if (seo) window.IframeBridge.loadSEOConfig(seo);
       }

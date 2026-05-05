@@ -123,7 +123,28 @@
       "https://wavemaxlaundry.com/wp-content/uploads/locations/new-haven-ct/interior-2.jpg"
     ],
     "owner": [],
-    "landmarks": [],
+    "landmarks": [
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ec/New_Haven%2C_Connecticut_skyline_%28cropped%29.jpg/1280px-New_Haven%2C_Connecticut_skyline_%28cropped%29.jpg",
+        "alt": "New Haven, Connecticut skyline (cropped) — New Haven"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/dd/NewHavenHillhouse5.JPG/1280px-NewHavenHillhouse5.JPG",
+        "alt": "NewHavenHillhouse5 — New Haven"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d6/Crypt_beneath_Center_Church_on_the_Green%2C_New_Haven%2C_CT_%28October_2025%29.jpg/1280px-Crypt_beneath_Center_Church_on_the_Green%2C_New_Haven%2C_CT_%28October_2025%29.jpg",
+        "alt": "Crypt beneath Center Church on the Green, New Haven, CT (October 2025) — New Haven"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/English_Station_Power_Plant.jpg/1280px-English_Station_Power_Plant.jpg",
+        "alt": "English Station Power Plant — New Haven"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/98/Front_Street_in_New_Haven_CT.jpg/1280px-Front_Street_in_New_Haven_CT.jpg",
+        "alt": "Front Street in New Haven CT — New Haven"
+      }
+    ],
     "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/new-haven-ct/hero-1.jpg",
     "ogImageAlt": "WaveMAX New Haven CT storefront",
     "mapPreview": ""

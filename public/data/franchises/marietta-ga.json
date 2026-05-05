@@ -127,7 +127,24 @@
       "https://wavemaxlaundry.com/wp-content/uploads/locations/marietta-ga/interior-6.jpg"
     ],
     "owner": [],
-    "landmarks": [],
+    "landmarks": [
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/90/Downtown_Marietta%2C_July_2017.jpg/1280px-Downtown_Marietta%2C_July_2017.jpg",
+        "alt": "Downtown Marietta, July 2017 — Marietta"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5d/Marietta_Square%2C_Marietta%2C_GA%2C_US_%2808%29.jpg/1280px-Marietta_Square%2C_Marietta%2C_GA%2C_US_%2808%29.jpg",
+        "alt": "Marietta Square, Marietta, GA, US (08) — Marietta"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fe/Mary_Phagan_Atlanta_Journal.jpg/1280px-Mary_Phagan_Atlanta_Journal.jpg",
+        "alt": "Mary Phagan Atlanta Journal — Marietta"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/c/c9/Sope_Creek_pulp_mill_retaining_wall_ruin.jpg",
+        "alt": "Sope Creek pulp mill retaining wall ruin — Marietta"
+      }
+    ],
     "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/marietta-ga/hero-1.jpg",
     "ogImageAlt": "WaveMAX Marietta GA storefront",
     "mapPreview": ""

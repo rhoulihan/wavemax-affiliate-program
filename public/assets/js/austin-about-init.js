@@ -534,6 +534,9 @@
       renderTeamGrid(data);
       applyAboutContent(data);
       if (window.FranchisePage) {
+        window.FranchisePage.applyEquipment(data);
+        window.FranchisePage.applyTextPlaceholders(data);
+        window.FranchisePage.applyDocumentTitle(data, 'about-us');
         const seo = window.FranchisePage.buildSeo(data, 'about-us');
         if (seo) window.IframeBridge.loadSEOConfig(seo);
       }
@@ -546,7 +549,13 @@
     // clobbered by the generic en/es/pt/de translations. Re-apply on
     // every language-changed so franchise-specific copy wins.
     window.addEventListener('language-changed', () => {
-      if (cachedData) applyAboutContent(cachedData);
+      if (cachedData) {
+        applyAboutContent(cachedData);
+        if (window.FranchisePage) {
+          window.FranchisePage.applyEquipment(cachedData);
+          window.FranchisePage.applyTextPlaceholders(cachedData);
+        }
+      }
     });
   }
 

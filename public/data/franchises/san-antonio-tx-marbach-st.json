@@ -129,7 +129,28 @@
       "https://wavemaxlaundry.com/wp-content/uploads/locations/kent-wa/interior-6.jpg"
     ],
     "owner": [],
-    "landmarks": [],
+    "landmarks": [
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/62/Downtown_San_Antonio_Skyline_Panorama.jpg/1280px-Downtown_San_Antonio_Skyline_Panorama.jpg",
+        "alt": "Downtown San Antonio Skyline Panorama — San Antonio"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/18/Downtown_San_Antonio_view_from_The_Tower_of_the_Americas.jpg/1280px-Downtown_San_Antonio_view_from_The_Tower_of_the_Americas.jpg",
+        "alt": "Downtown San Antonio view from The Tower of the Americas — San Antonio"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Building_for_WOAI_channel_4_in_San_Antonio%2C_Texas.jpg/1280px-Building_for_WOAI_channel_4_in_San_Antonio%2C_Texas.jpg",
+        "alt": "Building for WOAI channel 4 in San Antonio, Texas — San Antonio"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e5/McNayArtMuseum.jpg/1280px-McNayArtMuseum.jpg",
+        "alt": "McNayArtMuseum — San Antonio"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6f/San_Antonio_Botanical_Garden_Overlook_View.jpg/1280px-San_Antonio_Botanical_Garden_Overlook_View.jpg",
+        "alt": "San Antonio Botanical Garden Overlook View — San Antonio"
+      }
+    ],
     "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/kent-wa/hero-1.jpg",
     "ogImageAlt": "WaveMAX San Antonio TX Marbach storefront",
     "mapPreview": ""

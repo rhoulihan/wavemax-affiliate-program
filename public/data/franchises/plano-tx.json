@@ -127,7 +127,28 @@
       "https://wavemaxlaundry.com/wp-content/uploads/locations/plano-tx/interior-6.jpg"
     ],
     "owner": [],
-    "landmarks": [],
+    "landmarks": [
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/aa/Downtown_Plano_Station_October_2015_7.jpg/1280px-Downtown_Plano_Station_October_2015_7.jpg",
+        "alt": "Downtown Plano Station October 2015 7 — Plano"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/14/Haggard_Park_-_Dickens_in_Downtown_Plano.JPG/1280px-Haggard_Park_-_Dickens_in_Downtown_Plano.JPG",
+        "alt": "Haggard Park - Dickens in Downtown Plano — Plano"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b5/Plano_October_2015_09_%28Haggard_Park%29.jpg/1280px-Plano_October_2015_09_%28Haggard_Park%29.jpg",
+        "alt": "Plano October 2015 09 (Haggard Park) — Plano"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/en/thumb/2/24/PictureOfPlanoWest.JPG/1280px-PictureOfPlanoWest.JPG",
+        "alt": "PictureOfPlanoWest — Plano"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/88/Plano_October_2015_37_%28Municipal_Center%29.jpg/1280px-Plano_October_2015_37_%28Municipal_Center%29.jpg",
+        "alt": "Plano October 2015 37 (Municipal Center) — Plano"
+      }
+    ],
     "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/plano-tx/hero-1.jpg",
     "ogImageAlt": "WaveMAX Plano TX storefront",
     "mapPreview": ""

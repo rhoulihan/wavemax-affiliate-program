@@ -129,7 +129,28 @@
       "https://wavemaxlaundry.com/wp-content/uploads/locations/houston-tx/interior-6.webp"
     ],
     "owner": [],
-    "landmarks": [],
+    "landmarks": [
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8a/Buildings-city-houston-skyline-1870617.jpg/1280px-Buildings-city-houston-skyline-1870617.jpg",
+        "alt": "Buildings-city-houston-skyline-1870617 — Houston"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f4/Hermann_Park%2C_Sam_Houston_monument%2C_2012.JPG/1280px-Hermann_Park%2C_Sam_Houston_monument%2C_2012.JPG",
+        "alt": "Hermann Park, Sam Houston monument, 2012 — Houston"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f0/Aerial_View_of_the_Johnson_Space_Center_-_GPN-2000-001112.jpg/1280px-Aerial_View_of_the_Johnson_Space_Center_-_GPN-2000-001112.jpg",
+        "alt": "Aerial View of the Johnson Space Center - GPN-2000-001112 — Houston"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/24/Downtown_Houston_Aquarium_in_2012.jpg/1280px-Downtown_Houston_Aquarium_in_2012.jpg",
+        "alt": "Downtown Houston Aquarium in 2012 — Houston"
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f0/EthiopianchurchHoustoncanemont.JPG/1280px-EthiopianchurchHoustoncanemont.JPG",
+        "alt": "EthiopianchurchHoustoncanemont — Houston"
+      }
+    ],
     "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/houston-tx/hero-1.webp",
     "ogImageAlt": "WaveMAX Houston TX storefront",
     "mapPreview": ""
