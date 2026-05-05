@@ -14,7 +14,8 @@
     en: {
       'ss.title':                 'Wash on your time, in our space',
       'ss.tagline':               'CLEANER · FASTER · SAFER',
-      'ss.subtitle':              "Austin's cleanest self-serve laundromat — 42 Electrolux 450G washers, 42 fast dryers, hospital-grade UV-sanitized water, fully attended every shift. Family-owned, no-coin, no-membership. Wash 20 minutes, dry 20 minutes, out the door in under an hour.",
+      'ss.subtitle.premium':              "{{contact.city}}'s cleanest self-serve laundromat — 42 Electrolux 450G washers, 42 fast dryers, hospital-grade UV-sanitized water, fully attended every shift. Family-owned, no-coin, no-membership. Wash 20 minutes, dry 20 minutes, out the door in under an hour.",
+      'ss.subtitle.default':              "{{contact.city}}'s family-owned self-serve laundromat — Electrolux washers and dryers from 18 lb up to 80 lb, fully attended every shift. No-coin, no-membership. Pick the size that fits your load and skip a trip.",
       'ss.callBtn':               'Call',
       'ss.directionsBtn':         'Get directions',
       'ss.stats.washers':         'Washers',
@@ -106,7 +107,8 @@
     es: {
       'ss.title':                 'Lava cuando puedas, en nuestro espacio',
       'ss.tagline':               'MÁS LIMPIO · MÁS RÁPIDO · MÁS SEGURO',
-      'ss.subtitle':              'La lavandería autoservicio más limpia de Austin — 42 lavadoras Electrolux 450G, 42 secadoras rápidas, agua sanitizada con UV de grado hospitalario, totalmente atendida en cada turno. Negocio familiar, sin monedas, sin membresía. 20 minutos lavado, 20 minutos secado, en menos de una hora.',
+      'ss.subtitle.premium':              'La lavandería autoservicio más limpia de {{contact.city}} — 42 lavadoras Electrolux 450G, 42 secadoras rápidas, agua sanitizada con UV de grado hospitalario, totalmente atendida en cada turno. Negocio familiar, sin monedas, sin membresía. 20 minutos lavado, 20 minutos secado, en menos de una hora.',
+      'ss.subtitle.default':              'La lavandería autoservicio familiar de {{contact.city}} — lavadoras y secadoras Electrolux de 18 a 80 libras, totalmente atendida en cada turno. Sin monedas, sin membresía. Elige el tamaño que se ajuste a tu carga y ahorra un viaje.',
       'ss.callBtn':               'Llamar',
       'ss.directionsBtn':         'Cómo llegar',
       'ss.stats.washers':         'Lavadoras',
@@ -198,7 +200,8 @@
     pt: {
       'ss.title':                 'Lave no seu tempo, no nosso espaço',
       'ss.tagline':               'MAIS LIMPO · MAIS RÁPIDO · MAIS SEGURO',
-      'ss.subtitle':              'A lavanderia self-service mais limpa de Austin — 42 máquinas Electrolux 450G, 42 secadoras rápidas, água sanitizada com UV de nível hospitalar, totalmente atendida em todos os turnos. Família, sem moedas, sem mensalidade. Lavar 20 min, secar 20 min, sair em menos de uma hora.',
+      'ss.subtitle.premium':              'A lavanderia self-service mais limpa de {{contact.city}} — 42 máquinas Electrolux 450G, 42 secadoras rápidas, água sanitizada com UV de nível hospitalar, totalmente atendida em todos os turnos. Família, sem moedas, sem mensalidade. Lavar 20 min, secar 20 min, sair em menos de uma hora.',
+      'ss.subtitle.default':              'A lavanderia self-service familiar de {{contact.city}} — máquinas Electrolux de 18 a 80 libras, totalmente atendida em todos os turnos. Sem moedas, sem mensalidade. Escolha o tamanho que se ajusta à sua carga e poupe uma viagem.',
       'ss.callBtn':               'Ligar',
       'ss.directionsBtn':         'Como chegar',
       'ss.stats.washers':         'Lavadoras',
@@ -290,7 +293,8 @@
     de: {
       'ss.title':                 'Waschen wann Sie wollen, in unserem Raum',
       'ss.tagline':               'SAUBERER · SCHNELLER · SICHERER',
-      'ss.subtitle':              'Austins sauberster Selbstbedienungs-Waschsalon — 42 Electrolux 450G Waschmaschinen, 42 schnelle Trockner, UV-sanitisiertes Wasser in Krankenhausqualität, in jeder Schicht voll betreut. Familienbetrieb, kein Kleingeld, keine Mitgliedschaft. 20 Minuten waschen, 20 Minuten trocknen, in unter einer Stunde fertig.',
+      'ss.subtitle.premium':              '{{contact.city}}s sauberster Selbstbedienungs-Waschsalon — 42 Electrolux 450G Waschmaschinen, 42 schnelle Trockner, UV-sanitisiertes Wasser in Krankenhausqualität, in jeder Schicht voll betreut. Familienbetrieb, kein Kleingeld, keine Mitgliedschaft. 20 Minuten waschen, 20 Minuten trocknen, in unter einer Stunde fertig.',
+      'ss.subtitle.default':              '{{contact.city}}s familiengeführter Selbstbedienungs-Waschsalon — Electrolux Waschmaschinen und Trockner von 18 bis 80 Pfund, in jeder Schicht voll betreut. Kein Kleingeld, keine Mitgliedschaft. Wählen Sie die Größe, die zu Ihrer Wäsche passt, und sparen Sie eine Fahrt.',
       'ss.callBtn':               'Anrufen',
       'ss.directionsBtn':         'Wegbeschreibung',
       'ss.stats.washers':         'Waschmaschinen',

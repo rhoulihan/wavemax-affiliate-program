@@ -15,7 +15,8 @@
     en: {
       'com.title':                 'Commercial laundry that scales with your business',
       'com.tagline':               'VOLUME · SAME-DAY · NO CONTRACTS',
-      'com.subtitle':              'Hospital-grade UV-sanitized water, 80-lb commercial machines, scheduled or on-demand turnaround. Serving North Austin medical offices, gyms, short-term-rental hosts, salons, and restaurants — no contracts, no setup fees, lower minimums than any other commercial laundry in town.',
+      'com.subtitle.premium':              'Hospital-grade UV-sanitized water, 80-lb commercial machines, scheduled or on-demand turnaround. Serving {{contact.city}} medical offices, gyms, short-term-rental hosts, salons, and restaurants — no contracts, no setup fees, lower minimums than any other commercial laundry in town.',
+      'com.subtitle.default':              'Commercial Electrolux machines, scheduled or on-demand turnaround. Serving {{contact.city}} medical offices, gyms, short-term-rental hosts, salons, and restaurants — no contracts, no setup fees, lower minimums than any other commercial laundry in town.',
       'com.callBtn':               'Call for a quote',
       'com.directionsBtn':         'Get directions',
       'com.stats.turnaround':      'Standard Turnaround',
@@ -117,7 +118,8 @@
     es: {
       'com.title':                 'Lavandería comercial que escala con su negocio',
       'com.tagline':               'VOLUMEN · MISMO-DÍA · SIN CONTRATOS',
-      'com.subtitle':              'Agua sanitizada con UV de grado hospitalario, máquinas comerciales de 80 libras, entrega programada o por demanda. Atendiendo a oficinas médicas del norte de Austin, gimnasios, anfitriones de alquileres de corta estancia, salones y restaurantes — sin contratos, sin tarifas de configuración, mínimos más bajos que cualquier otra lavandería comercial.',
+      'com.subtitle.premium':              'Agua sanitizada con UV de grado hospitalario, máquinas comerciales de 80 libras, entrega programada o por demanda. Atendiendo a oficinas médicas de {{contact.city}}, gimnasios, anfitriones de alquileres de corta estancia, salones y restaurantes — sin contratos, sin tarifas de configuración, mínimos más bajos que cualquier otra lavandería comercial.',
+      'com.subtitle.default':              'Máquinas comerciales Electrolux, entrega programada o por demanda. Atendiendo a oficinas médicas de {{contact.city}}, gimnasios, anfitriones de alquileres de corta estancia, salones y restaurantes — sin contratos, sin tarifas de configuración, mínimos más bajos que cualquier otra lavandería comercial.',
       'com.callBtn':               'Llamar para cotización',
       'com.directionsBtn':         'Cómo llegar',
       'com.stats.turnaround':      'Entrega Estándar',
@@ -219,7 +221,8 @@
     pt: {
       'com.title':                 'Lavanderia comercial que escala com seu negócio',
       'com.tagline':               'VOLUME · MESMO-DIA · SEM CONTRATOS',
-      'com.subtitle':              'Água sanitizada com UV de nível hospitalar, máquinas comerciais de 80 libras, entrega programada ou sob demanda. Atendendo consultórios médicos do norte de Austin, academias, anfitriões de aluguel de curta temporada, salões e restaurantes — sem contratos, sem taxas de configuração, mínimos mais baixos que qualquer outra lavanderia comercial.',
+      'com.subtitle.premium':              'Água sanitizada com UV de nível hospitalar, máquinas comerciais de 80 libras, entrega programada ou sob demanda. Atendendo consultórios médicos de {{contact.city}}, academias, anfitriões de aluguel de curta temporada, salões e restaurantes — sem contratos, sem taxas de configuração, mínimos mais baixos que qualquer outra lavanderia comercial.',
+      'com.subtitle.default':              'Máquinas comerciais Electrolux, entrega programada ou sob demanda. Atendendo consultórios médicos de {{contact.city}}, academias, anfitriões de aluguel de curta temporada, salões e restaurantes — sem contratos, sem taxas de configuração, mínimos mais baixos que qualquer outra lavanderia comercial.',
       'com.callBtn':               'Ligar para orçamento',
       'com.directionsBtn':         'Como chegar',
       'com.stats.turnaround':      'Entrega Padrão',
@@ -321,7 +324,8 @@
     de: {
       'com.title':                 'Gewerbliche Wäscherei, die mit Ihrem Geschäft mitwächst',
       'com.tagline':               'VOLUMEN · GLEICHTAGIG · OHNE VERTRÄGE',
-      'com.subtitle':              'UV-sanitisiertes Wasser in Krankenhausqualität, gewerbliche 80-Pfund-Maschinen, geplante oder bedarfsorientierte Bearbeitung. Wir bedienen Arztpraxen in Nord-Austin, Fitnessstudios, Kurzzeitvermieter, Salons und Restaurants — keine Verträge, keine Einrichtungsgebühren, niedrigere Mindestmengen als jede andere Gewerbewäscherei.',
+      'com.subtitle.premium':              'UV-sanitisiertes Wasser in Krankenhausqualität, gewerbliche 80-Pfund-Maschinen, geplante oder bedarfsorientierte Bearbeitung. Wir bedienen Arztpraxen in {{contact.city}}, Fitnessstudios, Kurzzeitvermieter, Salons und Restaurants — keine Verträge, keine Einrichtungsgebühren, niedrigere Mindestmengen als jede andere Gewerbewäscherei.',
+      'com.subtitle.default':              'Gewerbliche Electrolux-Maschinen, geplante oder bedarfsorientierte Bearbeitung. Wir bedienen Arztpraxen in {{contact.city}}, Fitnessstudios, Kurzzeitvermieter, Salons und Restaurants — keine Verträge, keine Einrichtungsgebühren, niedrigere Mindestmengen als jede andere Gewerbewäscherei.',
       'com.callBtn':               'Anrufen für Angebot',
       'com.directionsBtn':         'Wegbeschreibung',
       'com.stats.turnaround':      'Standard-Bearbeitung',
