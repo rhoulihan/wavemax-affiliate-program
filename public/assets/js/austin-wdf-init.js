@@ -634,16 +634,29 @@
     // SEO is built from LOCATION_DATA inside onLocationData below.
 
     // Bind data-bind attributes whenever location-data arrives. Same
-    // hook applies the per-franchise hero watermark + per-franchise
-    // SEO bundle.
+    // hook applies the per-franchise hero watermark, equipment-aware
+    // gates (UV / 450G / 80lb claims), placeholder substitution
+    // ({{contact.city}} etc.), and the per-franchise SEO bundle.
+    let _locationData = null;
     window.IframeBridge.onLocationData((data) => {
+      _locationData = data;
       applyBindings(data);
       setHeroWatermark(data);
       if (window.FranchisePage) {
+        window.FranchisePage.applyEquipment(data);
+        window.FranchisePage.applyTextPlaceholders(data);
         const seo = window.FranchisePage.buildSeo(data, 'wdf');
         if (seo) window.IframeBridge.loadSEOConfig(seo);
       }
       if (window.IframeBridge.updateHeight) window.IframeBridge.updateHeight();
+    });
+    // Re-apply gates + substitutions after every translatePage pass.
+    window.addEventListener('language-changed', () => {
+      if (window.FranchisePage && _locationData) {
+        applyBindings(_locationData);
+        window.FranchisePage.applyEquipment(_locationData);
+        window.FranchisePage.applyTextPlaceholders(_locationData);
+      }
     });
 
     initTabs();

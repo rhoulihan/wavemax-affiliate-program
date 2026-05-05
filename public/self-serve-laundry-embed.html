@@ -22,7 +22,7 @@
 
   <link rel="stylesheet" href="/assets/css/wavemax-theme.css?v=20260504">
   <link rel="stylesheet" href="/assets/css/wavemax-components.css?v=20260504">
-  <link rel="stylesheet" href="/assets/css/austin-self-serve.css?v=20260504c">
+  <link rel="stylesheet" href="/assets/css/austin-self-serve.css?v=20260505">
 </head>
 <body>
 
@@ -42,11 +42,9 @@
            loading="eager">
       <h1 class="wm-hero-title" data-i18n="ss.title">Wash on your time, in our space</h1>
       <p class="wm-hero-tagline" data-i18n="ss.tagline">CLEANER · FASTER · SAFER</p>
-      <p class="wm-hero-subtitle" data-i18n="ss.subtitle">
-        Austin's cleanest self-serve laundromat — 42 Electrolux 450G washers, 42 fast
-        dryers, hospital-grade UV-sanitized water, fully attended every shift.
-        Family-owned, no-coin, no-membership. Wash 20 minutes, dry 20 minutes,
-        out the door in under an hour.
+      <p class="wm-hero-subtitle">
+        <span data-equipment-show="marketingClaims.highSpin" data-i18n="ss.subtitle.premium">{{contact.city}}'s cleanest self-serve laundromat — 42 Electrolux 450G washers, 42 fast dryers, hospital-grade UV-sanitized water, fully attended every shift. Family-owned, no-coin, no-membership. Wash 20 minutes, dry 20 minutes, out the door in under an hour.</span>
+        <span data-equipment-hide="marketingClaims.highSpin" data-i18n="ss.subtitle.default">{{contact.city}}'s family-owned self-serve laundromat — Electrolux washers and dryers from 18 lb up to 80 lb, fully attended every shift. No-coin, no-membership. Pick the size that fits your load and skip a trip.</span>
       </p>
       <div class="wm-hero-actions">
         <a class="wm-btn wm-btn-cta"
@@ -72,23 +70,27 @@
        ============================================================ -->
   <section class="wm-stats" data-section="stats">
     <div class="wm-stats-inner">
-      <div class="wm-stat-card">
+      <!-- Stat tiles each gate on whether the franchise has the relevant
+           equipment metric — applyBindings hides tiles whose bound value
+           is null/undefined, so unaudited stores see fewer cards instead
+           of '0 washers' or 'nullLb'. The whole row recenters via flex. -->
+      <div class="wm-stat-card" data-equipment-show="washers">
         <div class="wm-stat-number" data-bind="equipment.washers">42</div>
         <div class="wm-stat-label" data-i18n="ss.stats.washers">Washers</div>
       </div>
-      <div class="wm-stat-card">
+      <div class="wm-stat-card" data-equipment-show="dryers">
         <div class="wm-stat-number" data-bind="equipment.dryers">42</div>
         <div class="wm-stat-label" data-i18n="ss.stats.dryers">Dryers</div>
       </div>
-      <div class="wm-stat-card">
+      <div class="wm-stat-card" data-equipment-show="capacityLb">
         <div class="wm-stat-number"><span data-bind="equipment.capacityLb">80</span>lb</div>
         <div class="wm-stat-label" data-i18n="ss.stats.capacity">Largest Load</div>
       </div>
-      <div class="wm-stat-card">
+      <div class="wm-stat-card" data-equipment-show="marketingClaims.fast">
         <div class="wm-stat-number">50%</div>
         <div class="wm-stat-label" data-i18n="ss.stats.faster">Faster Drying</div>
       </div>
-      <div class="wm-stat-card">
+      <div class="wm-stat-card" data-equipment-show="hasUVSanitization">
         <div class="wm-stat-number">99.9%</div>
         <div class="wm-stat-label" data-i18n="ss.stats.uv">UV Sanitization</div>
       </div>
@@ -129,9 +131,9 @@
           <p class="wm-ss-card-eyebrow" data-i18n="ss.includes.eyebrow">INCLUDED</p>
           <h2 class="wm-ss-card-title" data-i18n="ss.includes.title">What you get with every wash</h2>
           <ul class="wm-ss-includes-list">
-            <li data-i18n="ss.includes.uv">Hospital-grade UV-sanitized water (Omni LUX)</li>
-            <li data-i18n="ss.includes.fast">Lightning-fast 450G high-extraction washers</li>
-            <li data-i18n="ss.includes.bigload">Up to 80-lb capacity for comforters &amp; bedding</li>
+            <li data-equipment-show="hasUVSanitization" data-i18n="ss.includes.uv">Hospital-grade UV-sanitized water (Omni LUX)</li>
+            <li data-equipment-show="marketingClaims.highSpin" data-i18n="ss.includes.fast">Lightning-fast 450G high-extraction washers</li>
+            <li data-equipment-show="capacityLb" data-i18n="ss.includes.bigload">Up to 80-lb capacity for comforters &amp; bedding</li>
             <li data-i18n="ss.includes.wifi">Free fast WiFi — bring a laptop or just relax</li>
             <li data-i18n="ss.includes.parking">Free on-site parking and wheelchair access</li>
             <li data-i18n="ss.includes.attended">Family-owned, fully attended every shift</li>
@@ -164,7 +166,7 @@
           <button type="button" class="wm-tab" role="tab" aria-selected="false" data-ss-tab="who">
             <span aria-hidden="true">👋</span><span data-i18n="ss.tabs.who">Who it's for</span>
           </button>
-          <button type="button" class="wm-tab" role="tab" aria-selected="false" data-ss-tab="lux">
+          <button type="button" class="wm-tab" role="tab" aria-selected="false" data-ss-tab="lux" data-equipment-show="hasUVSanitization">
             <span aria-hidden="true">🧪</span><span data-i18n="ss.tabs.lux">Sanitization</span>
           </button>
           <button type="button" class="wm-tab" role="tab" aria-selected="false" data-ss-tab="faq">
@@ -214,21 +216,21 @@
         <!-- Panel: Why WaveMAX ------------------------------------- -->
         <div class="wm-tab-panel" role="tabpanel" data-ss-panel="why" aria-hidden="true">
           <div class="wm-ss-tiles">
-            <div class="wm-ss-tile">
+            <div class="wm-ss-tile" data-equipment-show="marketingClaims.highSpin">
               <div class="wm-ss-tile-icon" aria-hidden="true">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M13 3 L4 14 H11 L9 21 L20 10 H13 L13 3 z"></path></svg>
               </div>
               <h3 class="wm-ss-tile-title" data-i18n="ss.tiles.fast.title">Lightning-fast 450G</h3>
               <p class="wm-ss-tile-text" data-i18n="ss.tiles.fast.text">High-extraction Electrolux washers spin water out faster, cutting dry time roughly 50% compared with a typical laundromat. Wash 20 minutes, dry 20 minutes.</p>
             </div>
-            <div class="wm-ss-tile">
+            <div class="wm-ss-tile" data-equipment-show="capacityLb">
               <div class="wm-ss-tile-icon" aria-hidden="true">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="4" width="18" height="16" rx="2"></rect><circle cx="12" cy="13" r="5"></circle><circle cx="6" cy="7" r="0.8" fill="currentColor"></circle></svg>
               </div>
               <h3 class="wm-ss-tile-title" data-i18n="ss.tiles.bigload.title">80-lb capacity machines</h3>
               <p class="wm-ss-tile-text" data-i18n="ss.tiles.bigload.text">Comforters, king bedding, sleeping bags, area rugs — fits in one cycle instead of three. Save the trip and the time.</p>
             </div>
-            <div class="wm-ss-tile">
+            <div class="wm-ss-tile" data-equipment-show="hasUVSanitization">
               <div class="wm-ss-tile-icon" aria-hidden="true">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 2v4M12 18v4M2 12h4M18 12h4M5 5l3 3M16 16l3 3M5 19l3-3M16 8l3-3"></path><circle cx="12" cy="12" r="3.5"></circle></svg>
               </div>
@@ -307,8 +309,9 @@
           </div>
         </div>
 
-        <!-- Panel: Sanitization (LUX deep-dive · 9 benefits) ----- -->
-        <div class="wm-tab-panel" role="tabpanel" data-ss-panel="lux" aria-hidden="true">
+        <!-- Panel: Sanitization (LUX deep-dive · 9 benefits) — only
+             renders for stores with verified UV sanitization. -->
+        <div class="wm-tab-panel" role="tabpanel" data-ss-panel="lux" aria-hidden="true" data-equipment-show="hasUVSanitization">
           <div class="wm-ss-lux">
             <div class="wm-ss-lux-headline">
               <p class="wm-eyebrow" data-i18n="ss.lux.eyebrow">SANITIZATION · OMNI LUX</p>
@@ -404,7 +407,7 @@
 
   <script src="/assets/js/iframe-bridge-v2.js?v=20260504"></script>
   <script src="/assets/js/franchise-page-helpers.js?v=20260505c"></script>
-  <script src="/assets/js/austin-self-serve-init.js?v=20260505"></script>
+  <script src="/assets/js/austin-self-serve-init.js?v=20260505b"></script>
 
   <!-- Hibu Dynamic Phone Insertion (iframe scope). -->
   <script src="https://reports.hibu.com/analytics/js/ybDynamicPhoneInsertion.js"></script>

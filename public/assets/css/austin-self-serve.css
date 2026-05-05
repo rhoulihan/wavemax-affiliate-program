@@ -133,13 +133,17 @@ body { background: var(--wm-bg-soft); }
   max-width: var(--wm-content-max);
   margin: 0 auto;
   padding: var(--wm-sp-5);
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
   gap: 0;
   text-align: center;
 }
 .wm-stat-card {
-  padding: 0 24px;
+  padding: 0 32px;
+  flex: 1 1 0;
+  max-width: 240px;
   border-top: 0;
   border-radius: 0;
   border-right: 1px solid rgba(255,255,255,0.12);

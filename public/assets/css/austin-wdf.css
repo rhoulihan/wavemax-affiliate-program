@@ -68,13 +68,19 @@ body { background: var(--wm-bg-soft); }
   max-width: var(--wm-content-max);
   margin: 0 auto;
   padding: var(--wm-sp-5);
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  /* Flex with justify-content:center so the rail recenters when an
+     equipment-gated tile (UV / 80lb / 450G) hides for unaudited stores. */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
   gap: 0;
   text-align: center;
 }
 .wm-stat-card {
-  padding: 0 24px;
+  padding: 0 32px;
+  flex: 1 1 0;
+  max-width: 240px;
   /* Reset shared .wm-stat-card defaults from wavemax-components.css —
      they paint a light card with an Austin-sun top stripe + rounded
      corners, which fights the navy band treatment we want here. */

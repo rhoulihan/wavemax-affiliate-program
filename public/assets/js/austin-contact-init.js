@@ -467,14 +467,25 @@
     // SEO is built from LOCATION_DATA inside onLocationData below.
 
     // Bind data-bind attributes whenever location-data arrives
+    let _locationData = null;
     window.IframeBridge.onLocationData((data) => {
+      _locationData = data;
       applyBindings(data);
       setHeroWatermark(data);
       if (window.FranchisePage) {
+        window.FranchisePage.applyEquipment(data);
+        window.FranchisePage.applyTextPlaceholders(data);
         const seo = window.FranchisePage.buildSeo(data, 'contact');
         if (seo) window.IframeBridge.loadSEOConfig(seo);
-      }      if (window.IframeBridge.updateHeight) window.IframeBridge.updateHeight();      if (window.IframeBridge && window.IframeBridge.updateHeight) window.IframeBridge.updateHeight();
-
+      }
+      if (window.IframeBridge && window.IframeBridge.updateHeight) window.IframeBridge.updateHeight();
+    });
+    window.addEventListener('language-changed', () => {
+      if (window.FranchisePage && _locationData) {
+        applyBindings(_locationData);
+        window.FranchisePage.applyEquipment(_locationData);
+        window.FranchisePage.applyTextPlaceholders(_locationData);
+      }
     });
 
     initContactForm();

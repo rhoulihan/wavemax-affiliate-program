@@ -22,7 +22,7 @@
 
   <link rel="stylesheet" href="/assets/css/wavemax-theme.css?v=20260504">
   <link rel="stylesheet" href="/assets/css/wavemax-components.css?v=20260504">
-  <link rel="stylesheet" href="/assets/css/austin-commercial.css?v=20260504a">
+  <link rel="stylesheet" href="/assets/css/austin-commercial.css?v=20260505">
 </head>
 <body>
 
@@ -42,12 +42,9 @@
            loading="eager">
       <h1 class="wm-hero-title" data-i18n="com.title">Commercial laundry that scales with your business</h1>
       <p class="wm-hero-tagline" data-i18n="com.tagline">VOLUME · SAME-DAY · NO CONTRACTS</p>
-      <p class="wm-hero-subtitle" data-i18n="com.subtitle">
-        Hospital-grade UV-sanitized water, 80-lb commercial machines,
-        scheduled or on-demand turnaround. Serving North Austin medical
-        offices, gyms, short-term-rental hosts, salons, and restaurants
-        — no contracts, no setup fees, lower minimums than any other
-        commercial laundry in town.
+      <p class="wm-hero-subtitle">
+        <span data-equipment-show="hasUVSanitization" data-i18n="com.subtitle.premium">Hospital-grade UV-sanitized water, 80-lb commercial machines, scheduled or on-demand turnaround. Serving {{contact.city}} medical offices, gyms, short-term-rental hosts, salons, and restaurants — no contracts, no setup fees, lower minimums than any other commercial laundry in town.</span>
+        <span data-equipment-hide="hasUVSanitization" data-i18n="com.subtitle.default">Commercial Electrolux machines, scheduled or on-demand turnaround. Serving {{contact.city}} medical offices, gyms, short-term-rental hosts, salons, and restaurants — no contracts, no setup fees, lower minimums than any other commercial laundry in town.</span>
       </p>
       <div class="wm-hero-actions">
         <a class="wm-btn wm-btn-cta"
@@ -76,11 +73,11 @@
         <div class="wm-stat-number">24hr</div>
         <div class="wm-stat-label" data-i18n="com.stats.turnaround">Standard Turnaround</div>
       </div>
-      <div class="wm-stat-card">
-        <div class="wm-stat-number">80lb</div>
+      <div class="wm-stat-card" data-equipment-show="capacityLb">
+        <div class="wm-stat-number"><span data-bind="equipment.capacityLb">80</span>lb</div>
         <div class="wm-stat-label" data-i18n="com.stats.capacity">Per-Machine Capacity</div>
       </div>
-      <div class="wm-stat-card">
+      <div class="wm-stat-card" data-equipment-show="hasUVSanitization">
         <div class="wm-stat-number">99.9%</div>
         <div class="wm-stat-label" data-i18n="com.stats.uv">UV Sanitization</div>
       </div>
@@ -128,8 +125,8 @@
           <p class="wm-com-card-eyebrow" data-i18n="com.includes.eyebrow">INCLUDED FOR EVERY ACCOUNT</p>
           <h2 class="wm-com-card-title" data-i18n="com.includes.title">What every commercial account gets</h2>
           <ul class="wm-com-includes-list">
-            <li data-i18n="com.includes.uv">Hospital-grade UV-sanitized water (Omni LUX)</li>
-            <li data-i18n="com.includes.bigload">80-lb commercial Electrolux washers + fast dryers</li>
+            <li data-equipment-show="hasUVSanitization" data-i18n="com.includes.uv">Hospital-grade UV-sanitized water (Omni LUX)</li>
+            <li data-equipment-show="capacityLb" data-i18n="com.includes.bigload">80-lb commercial Electrolux washers + fast dryers</li>
             <li data-i18n="com.includes.turnaround">24-hour standard turnaround, same-day available</li>
             <li data-i18n="com.includes.detergent">Premium hypoallergenic detergent included</li>
             <li data-i18n="com.includes.scheduled">Scheduled pickup &amp; delivery on request</li>
@@ -433,7 +430,7 @@
 
   <script src="/assets/js/iframe-bridge-v2.js?v=20260504"></script>
   <script src="/assets/js/franchise-page-helpers.js?v=20260505"></script>
-  <script src="/assets/js/austin-commercial-init.js?v=20260505"></script>
+  <script src="/assets/js/austin-commercial-init.js?v=20260505b"></script>
 
   <script src="https://reports.hibu.com/analytics/js/ybDynamicPhoneInsertion.js"></script>
   <script src="/assets/js/austin-hibu-phone-swap.js?v=20260504"></script>
