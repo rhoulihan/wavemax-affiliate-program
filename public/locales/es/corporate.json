@@ -1,0 +1,88 @@
+{
+  "chrome": {
+    "b1": {
+      "award": "#1 Franquicia de Lavandería · Entrepreneur Franchise 500 2026",
+      "locations": "75+ ubicaciones a nivel nacional y creciendo",
+      "item19": "$471K ingresos brutos prom. · Item 19 de 2024 →"
+    },
+    "b2": {
+      "logoAlt": "WaveMAX Laundry — Inicio de Franquicia",
+      "becomeFranchisee": "Ser Franquiciado",
+      "findLocation": "Encontrar Ubicación"
+    },
+    "nav": {
+      "home": "Inicio",
+      "franchise": "Franquicia",
+      "overview": "Visión general",
+      "becomeFranchisee": "Ser Franquiciado",
+      "whyInvest": "Por qué invertir en WaveMAX",
+      "investmentGuide": "Guía de Inversión",
+      "vsZombiemat": "WaveMAX vs Zombiemat",
+      "virtualTour": "Tour Virtual",
+      "about": "Acerca de",
+      "testimonials": "Testimonios",
+      "faq": "Preguntas frecuentes",
+      "contact": "Contacto"
+    },
+    "footer": {
+      "tag": "Una franquicia nacional de lavandería.\nMás limpia. Más segura. Más rápida.",
+      "address1": "929 McDuff Ave S, Suite 107",
+      "address2": "Jacksonville, FL 32205",
+      "headingFranchise": "Franquicia",
+      "headingCompany": "Empresa",
+      "headingLocations": "Ubicaciones",
+      "linkOverview": "Visión general",
+      "linkBecome": "Ser Franquiciado",
+      "linkWhy": "Por qué invertir",
+      "linkGuide": "Guía de Inversión",
+      "linkVs": "vs Zombiemat",
+      "linkAbout": "Acerca de WaveMAX",
+      "linkTestimonials": "Testimonios",
+      "linkTour": "Tour Virtual",
+      "linkFaq": "Preguntas frecuentes",
+      "linkContact": "Contacto",
+      "linkFindStore": "Encontrar Tienda",
+      "linkFullMap": "Mapa completo de ubicaciones",
+      "copyright": "© {year} AU Hydro LLC dba WaveMAX Laundry. Todos los derechos reservados.",
+      "privacy": "Privacidad",
+      "terms": "Términos"
+    },
+    "breadcrumb": {
+      "home": "Inicio"
+    }
+  },
+
+  "franchise": {
+    "hero": {
+      "eyebrow": "#1 Franquicia de Lavandería · Entrepreneur Franchise 500 2026",
+      "title1": "No es una lavandería típica.",
+      "title2": "Un negocio real.",
+      "sub": "WaveMAX es la franquicia de lavandería #1 en el Franchise 500 2026 de Entrepreneur. Semi-ausente desde el primer día, equipo Electrolux moderno, demanda a prueba de recesión. Construya un negocio duradero con flujo de efectivo, respaldado por una marca nacional.",
+      "ctaPrimary": "Comenzar la conversación",
+      "ctaSecondary": "Ver los números",
+      "photoTagJax": "Tienda insignia de Jacksonville",
+      "photoTagKent": "Kent WA",
+      "photoTagOmaha": "Omaha"
+    },
+    "stats": {
+      "locations": "Ubicaciones y creciendo",
+      "locationsSub": "Por los Estados Unidos",
+      "ownerHrs": "Tiempo del propietario / semana",
+      "ownerHrsSub": "Modelo semi-ausente",
+      "avgGross": "Ingresos brutos promedio",
+      "avgGrossSub": "2024 · muestra de 50 tiendas",
+      "payback": "Período típico de recuperación",
+      "paybackSub": "EBITDA reportado del 25–35%"
+    }
+  },
+
+  "common": {
+    "ctaLearnMore": "Más información",
+    "ctaGetGuide": "Obtener la Guía de Inversión",
+    "ctaScheduleCall": "Agendar la llamada",
+    "ctaSeeNumbers": "Ver los números",
+    "ctaStartConversation": "Comenzar la conversación",
+    "ctaBecomeFranchisee": "Ser franquiciado",
+    "ctaFindLocation": "Encontrar ubicación"
+  }
+}

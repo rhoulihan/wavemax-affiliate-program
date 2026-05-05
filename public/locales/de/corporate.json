@@ -1,0 +1,88 @@
+{
+  "chrome": {
+    "b1": {
+      "award": "#1 Waschsalon-Franchise · Entrepreneur Franchise 500 2026",
+      "locations": "75+ Standorte landesweit & wachsend",
+      "item19": "471 Tsd. $ durchschn. Bruttoumsatz · Item 19 (2024) →"
+    },
+    "b2": {
+      "logoAlt": "WaveMAX Laundry — Franchise-Startseite",
+      "becomeFranchisee": "Franchisenehmer werden",
+      "findLocation": "Standort finden"
+    },
+    "nav": {
+      "home": "Startseite",
+      "franchise": "Franchise",
+      "overview": "Überblick",
+      "becomeFranchisee": "Franchisenehmer werden",
+      "whyInvest": "Warum in WaveMAX investieren",
+      "investmentGuide": "Investitionsleitfaden",
+      "vsZombiemat": "WaveMAX vs Zombiemat",
+      "virtualTour": "Virtuelle Tour",
+      "about": "Über uns",
+      "testimonials": "Erfahrungsberichte",
+      "faq": "Häufige Fragen",
+      "contact": "Kontakt"
+    },
+    "footer": {
+      "tag": "Ein landesweites Waschsalon-Franchise.\nSauberer. Sicherer. Schneller.",
+      "address1": "929 McDuff Ave S, Suite 107",
+      "address2": "Jacksonville, FL 32205",
+      "headingFranchise": "Franchise",
+      "headingCompany": "Unternehmen",
+      "headingLocations": "Standorte",
+      "linkOverview": "Überblick",
+      "linkBecome": "Franchisenehmer werden",
+      "linkWhy": "Warum investieren",
+      "linkGuide": "Investitionsleitfaden",
+      "linkVs": "vs Zombiemat",
+      "linkAbout": "Über WaveMAX",
+      "linkTestimonials": "Erfahrungsberichte",
+      "linkTour": "Virtuelle Tour",
+      "linkFaq": "Häufige Fragen",
+      "linkContact": "Kontakt",
+      "linkFindStore": "Standort finden",
+      "linkFullMap": "Vollständige Standortkarte",
+      "copyright": "© {year} AU Hydro LLC dba WaveMAX Laundry. Alle Rechte vorbehalten.",
+      "privacy": "Datenschutz",
+      "terms": "AGB"
+    },
+    "breadcrumb": {
+      "home": "Startseite"
+    }
+  },
+
+  "franchise": {
+    "hero": {
+      "eyebrow": "#1 Waschsalon-Franchise · Entrepreneur Franchise 500 2026",
+      "title1": "Kein typischer Waschsalon.",
+      "title2": "Ein echtes Geschäft.",
+      "sub": "WaveMAX ist das #1 Waschsalon-Franchise auf Entrepreneurs Franchise 500 (2026). Semi-absent vom ersten Tag an, moderne Electrolux-Ausstattung, rezessionssichere Nachfrage. Bauen Sie ein nachhaltig cashflow-positives Geschäft mit nationaler Markenunterstützung.",
+      "ctaPrimary": "Gespräch starten",
+      "ctaSecondary": "Zahlen ansehen",
+      "photoTagJax": "Flaggschiff Jacksonville",
+      "photoTagKent": "Kent WA",
+      "photoTagOmaha": "Omaha"
+    },
+    "stats": {
+      "locations": "Standorte & wachsend",
+      "locationsSub": "In den Vereinigten Staaten",
+      "ownerHrs": "Eigentümerzeit / Woche",
+      "ownerHrsSub": "Semi-absent-Modell",
+      "avgGross": "Durchschn. Bruttoumsatz",
+      "avgGrossSub": "2024 · Stichprobe von 50 Filialen",
+      "payback": "Typische Amortisationszeit",
+      "paybackSub": "Berichtetes EBITDA 25–35 %"
+    }
+  },
+
+  "common": {
+    "ctaLearnMore": "Mehr erfahren",
+    "ctaGetGuide": "Investitionsleitfaden anfordern",
+    "ctaScheduleCall": "Anruf vereinbaren",
+    "ctaSeeNumbers": "Zahlen ansehen",
+    "ctaStartConversation": "Gespräch starten",
+    "ctaBecomeFranchisee": "Franchisenehmer werden",
+    "ctaFindLocation": "Standort finden"
+  }
+}
