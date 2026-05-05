@@ -21,7 +21,8 @@
       "lat": 35.79498,
       "lng": -78.610736
     },
-    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=1100+North+Raleigh+Blvd%2C+Suite+143+Raleigh+NC+27610"
+    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=1100+North+Raleigh+Blvd%2C+Suite+143+Raleigh+NC+27610",
+    "mapsEmbedUrl": "https://www.google.com/maps?q=WaveMAX+Laundry+1100+North+Raleigh+Blvd%2C+Suite+143+Raleigh+NC+27610&output=embed"
   },
   "hours": {
     "open": "",

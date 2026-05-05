@@ -21,7 +21,8 @@
       "lat": 32.745418,
       "lng": -97.217446
     },
-    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=6538+Meadowbrook+Dr+Fort+Worth+TX+76112"
+    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=6538+Meadowbrook+Dr+Fort+Worth+TX+76112",
+    "mapsEmbedUrl": "https://www.google.com/maps?q=WaveMAX+Laundry+6538+Meadowbrook+Dr+Fort+Worth+TX+76112&output=embed"
   },
   "hours": {
     "open": "",

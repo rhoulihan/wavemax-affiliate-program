@@ -21,7 +21,8 @@
       "lat": 41.299885,
       "lng": -95.99241
     },
-    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=5092+Ames+Ave+Omaha+NE+68104"
+    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=5092+Ames+Ave+Omaha+NE+68104",
+    "mapsEmbedUrl": "https://www.google.com/maps?q=WaveMAX+Laundry+5092+Ames+Ave+Omaha+NE+68104&output=embed"
   },
   "hours": {
     "open": "",

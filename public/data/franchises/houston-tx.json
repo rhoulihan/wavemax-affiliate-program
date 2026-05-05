@@ -21,7 +21,8 @@
       "lat": 29.786199,
       "lng": -95.361685
     },
-    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=2611+Fulton+Street+Houston+TX+77009"
+    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=2611+Fulton+Street+Houston+TX+77009",
+    "mapsEmbedUrl": "https://www.google.com/maps?q=WaveMAX+Laundry+2611+Fulton+Street+Houston+TX+77009&output=embed"
   },
   "hours": {
     "open": "",

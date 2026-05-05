@@ -21,7 +21,8 @@
       "lat": 33.536591,
       "lng": -112.133848
     },
-    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=6767+N+35th+Ave+Phoenix+AZ+85017"
+    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=6767+N+35th+Ave+Phoenix+AZ+85017",
+    "mapsEmbedUrl": "https://www.google.com/maps?q=WaveMAX+Laundry+6767+N+35th+Ave+Phoenix+AZ+85017&output=embed"
   },
   "hours": {
     "open": "",

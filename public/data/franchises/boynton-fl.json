@@ -21,7 +21,8 @@
       "lat": 26.540669,
       "lng": -80.05679
     },
-    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=1550+North+Federal+Highway%2C+Suite+1+Boynton+Beach+FL+33435"
+    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=1550+North+Federal+Highway%2C+Suite+1+Boynton+Beach+FL+33435",
+    "mapsEmbedUrl": "https://www.google.com/maps?q=WaveMAX+Laundry+1550+North+Federal+Highway%2C+Suite+1+Boynton+Beach+FL+33435&output=embed"
   },
   "hours": {
     "open": "",

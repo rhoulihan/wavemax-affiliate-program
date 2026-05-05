@@ -21,7 +21,8 @@
       "lat": 39.653675,
       "lng": -104.871093
     },
-    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=+Denver+CO+"
+    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=+Denver+CO+",
+    "mapsEmbedUrl": "https://www.google.com/maps?q=WaveMAX+Laundry++Denver+CO+&output=embed"
   },
   "hours": {
     "open": "",

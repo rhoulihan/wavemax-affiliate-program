@@ -21,7 +21,8 @@
       "lat": 39.886495,
       "lng": -86.209099
     },
-    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=2814+W+71st+Street+Indianapolis+IN+46268"
+    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=2814+W+71st+Street+Indianapolis+IN+46268",
+    "mapsEmbedUrl": "https://www.google.com/maps?q=WaveMAX+Laundry+2814+W+71st+Street+Indianapolis+IN+46268&output=embed"
   },
   "hours": {
     "open": "",

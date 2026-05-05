@@ -21,7 +21,8 @@
       "lat": 44.977276,
       "lng": -93.044675
     },
-    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=1320+Maryland+Ave+E+St+Paul+MN+55106"
+    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=1320+Maryland+Ave+E+St+Paul+MN+55106",
+    "mapsEmbedUrl": "https://www.google.com/maps?q=WaveMAX+Laundry+1320+Maryland+Ave+E+St+Paul+MN+55106&output=embed"
   },
   "hours": {
     "open": "",

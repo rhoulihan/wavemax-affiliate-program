@@ -21,7 +21,8 @@
       "lat": 33.745416,
       "lng": -117.819818
     },
-    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=412+E+1st+St+Tustin+CA+92780"
+    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=412+E+1st+St+Tustin+CA+92780",
+    "mapsEmbedUrl": "https://www.google.com/maps?q=WaveMAX+Laundry+412+E+1st+St+Tustin+CA+92780&output=embed"
   },
   "hours": {
     "open": "",

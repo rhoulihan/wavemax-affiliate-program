@@ -21,7 +21,8 @@
       "lat": 39.653675,
       "lng": -104.871093
     },
-    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=10005-A%2C+E+Hampden+Ave+Denver+CO+80231"
+    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=10005-A%2C+E+Hampden+Ave+Denver+CO+80231",
+    "mapsEmbedUrl": "https://www.google.com/maps?q=WaveMAX+Laundry+10005-A%2C+E+Hampden+Ave+Denver+CO+80231&output=embed"
   },
   "hours": {
     "open": "",

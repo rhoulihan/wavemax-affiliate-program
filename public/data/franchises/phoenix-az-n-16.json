@@ -21,7 +21,8 @@
       "lat": 33.479038,
       "lng": -112.04698
     },
-    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=2825+N+16th+St+Suite+1+Phoenix+AZ+85006"
+    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=2825+N+16th+St+Suite+1+Phoenix+AZ+85006",
+    "mapsEmbedUrl": "https://www.google.com/maps?q=WaveMAX+Laundry+2825+N+16th+St+Suite+1+Phoenix+AZ+85006&output=embed"
   },
   "hours": {
     "open": "",

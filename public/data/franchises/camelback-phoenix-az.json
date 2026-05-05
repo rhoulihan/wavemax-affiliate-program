@@ -21,7 +21,8 @@
       "lat": 33.509219,
       "lng": -112.094323
     },
-    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=1615+W+Camelback+Rd+Suite+101+Phoenix+AZ+85015"
+    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=1615+W+Camelback+Rd+Suite+101+Phoenix+AZ+85015",
+    "mapsEmbedUrl": "https://www.google.com/maps?q=WaveMAX+Laundry+1615+W+Camelback+Rd+Suite+101+Phoenix+AZ+85015&output=embed"
   },
   "hours": {
     "open": "",

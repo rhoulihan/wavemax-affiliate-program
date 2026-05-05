@@ -21,7 +21,8 @@
       "lat": 42.914528,
       "lng": -85.706175
     },
-    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=1633+28th+St+SW+unit+G+Wyoming+MI+49519"
+    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=1633+28th+St+SW+unit+G+Wyoming+MI+49519",
+    "mapsEmbedUrl": "https://www.google.com/maps?q=WaveMAX+Laundry+1633+28th+St+SW+unit+G+Wyoming+MI+49519&output=embed"
   },
   "hours": {
     "open": "",

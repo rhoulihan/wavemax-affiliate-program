@@ -21,7 +21,8 @@
       "lat": 32.749089,
       "lng": -96.87352
     },
-    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=3220+West+Davis+St.+Dallas+TX+75211"
+    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=3220+West+Davis+St.+Dallas+TX+75211",
+    "mapsEmbedUrl": "https://www.google.com/maps?q=WaveMAX+Laundry+3220+West+Davis+St.+Dallas+TX+75211&output=embed"
   },
   "hours": {
     "open": "",

@@ -21,7 +21,8 @@
       "lat": 36.1627,
       "lng": -86.7816
     },
-    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=+Nashville+TN+"
+    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=+Nashville+TN+",
+    "mapsEmbedUrl": "https://www.google.com/maps?q=WaveMAX+Laundry++Nashville+TN+&output=embed"
   },
   "hours": {
     "open": "",

@@ -21,7 +21,8 @@
       "lat": 33.014717,
       "lng": -96.663422
     },
-    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=3611+14th+Street%2C+Suite+170+Plano+TX+75074"
+    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=3611+14th+Street%2C+Suite+170+Plano+TX+75074",
+    "mapsEmbedUrl": "https://www.google.com/maps?q=WaveMAX+Laundry+3611+14th+Street%2C+Suite+170+Plano+TX+75074&output=embed"
   },
   "hours": {
     "open": "",

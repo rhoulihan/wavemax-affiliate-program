@@ -21,7 +21,8 @@
       "lat": 32.722159,
       "lng": -97.152342
     },
-    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=2823+W+Park+Row+Dr+Arlington+TX+76013"
+    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=2823+W+Park+Row+Dr+Arlington+TX+76013",
+    "mapsEmbedUrl": "https://www.google.com/maps?q=WaveMAX+Laundry+2823+W+Park+Row+Dr+Arlington+TX+76013&output=embed"
   },
   "hours": {
     "open": "",

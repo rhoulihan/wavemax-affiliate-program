@@ -21,7 +21,8 @@
       "lat": 29.418183,
       "lng": -98.637079
     },
-    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=7519+Marbach+St%2C+Ste+102+San+Antonio+TX+78227"
+    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=7519+Marbach+St%2C+Ste+102+San+Antonio+TX+78227",
+    "mapsEmbedUrl": "https://www.google.com/maps?q=WaveMAX+Laundry+7519+Marbach+St%2C+Ste+102+San+Antonio+TX+78227&output=embed"
   },
   "hours": {
     "open": "",

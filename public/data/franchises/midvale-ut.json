@@ -21,7 +21,8 @@
       "lat": 40.620942,
       "lng": -111.892455
     },
-    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=48+W+7200+S+Midvale+UT+84047"
+    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=48+W+7200+S+Midvale+UT+84047",
+    "mapsEmbedUrl": "https://www.google.com/maps?q=WaveMAX+Laundry+48+W+7200+S+Midvale+UT+84047&output=embed"
   },
   "hours": {
     "open": "",

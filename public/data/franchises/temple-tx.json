@@ -21,7 +21,8 @@
       "lat": 31.086121,
       "lng": -97.363586
     },
-    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=1516+S+31st+St+B+Temple+TX+76504"
+    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=1516+S+31st+St+B+Temple+TX+76504",
+    "mapsEmbedUrl": "https://www.google.com/maps?q=WaveMAX+Laundry+1516+S+31st+St+B+Temple+TX+76504&output=embed"
   },
   "hours": {
     "open": "",

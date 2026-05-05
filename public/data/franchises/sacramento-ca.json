@@ -21,7 +21,8 @@
       "lat": 38.608948,
       "lng": -121.381738
     },
-    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=2428+Watt+Ave+Sacramento+CA+95825"
+    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=2428+Watt+Ave+Sacramento+CA+95825",
+    "mapsEmbedUrl": "https://www.google.com/maps?q=WaveMAX+Laundry+2428+Watt+Ave+Sacramento+CA+95825&output=embed"
   },
   "hours": {
     "open": "",

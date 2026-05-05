@@ -21,7 +21,8 @@
       "lat": 39.268421,
       "lng": -76.506071
     },
-    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=1774+Merritt+Blvd+Dundalk+MD+21222"
+    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=1774+Merritt+Blvd+Dundalk+MD+21222",
+    "mapsEmbedUrl": "https://www.google.com/maps?q=WaveMAX+Laundry+1774+Merritt+Blvd+Dundalk+MD+21222&output=embed"
   },
   "hours": {
     "open": "",

@@ -21,7 +21,8 @@
       "lat": 33.41624,
       "lng": -111.872494
     },
-    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=1932+West+Main+Street+%23B103+Mesa+AZ+85201"
+    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=1932+West+Main+Street+%23B103+Mesa+AZ+85201",
+    "mapsEmbedUrl": "https://www.google.com/maps?q=WaveMAX+Laundry+1932+West+Main+Street+%23B103+Mesa+AZ+85201&output=embed"
   },
   "hours": {
     "open": "",

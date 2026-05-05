@@ -21,7 +21,8 @@
       "lat": 27.873575,
       "lng": -82.640127
     },
-    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=11138+4th+St+N+St+Petersburg+FL+33716"
+    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=11138+4th+St+N+St+Petersburg+FL+33716",
+    "mapsEmbedUrl": "https://www.google.com/maps?q=WaveMAX+Laundry+11138+4th+St+N+St+Petersburg+FL+33716&output=embed"
   },
   "hours": {
     "open": "",

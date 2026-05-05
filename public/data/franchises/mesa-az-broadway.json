@@ -21,7 +21,8 @@
       "lat": 33.407547,
       "lng": -111.774341
     },
-    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=2639+E+Broadway+Rd%2C+St.+101+Mesa+AZ+85204"
+    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=2639+E+Broadway+Rd%2C+St.+101+Mesa+AZ+85204",
+    "mapsEmbedUrl": "https://www.google.com/maps?q=WaveMAX+Laundry+2639+E+Broadway+Rd%2C+St.+101+Mesa+AZ+85204&output=embed"
   },
   "hours": {
     "open": "",

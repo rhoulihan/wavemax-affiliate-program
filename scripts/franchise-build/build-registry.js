@@ -88,6 +88,14 @@ function buildMapsUrl(addr) {
   return `https://www.google.com/maps/dir/?api=1&destination=${q}`;
 }
 
+// Embed-friendly maps URL (output=embed) for the contact-page <iframe> src.
+// Same address resolution as buildMapsUrl, different query format that
+// returns a tile-friendly pinned map rather than the directions UI.
+function buildMapsEmbedUrl(addr) {
+  const q = encodeURIComponent(`WaveMAX Laundry ${addr.address} ${addr.city} ${addr.state} ${addr.zip}`).replace(/%20/g, '+');
+  return `https://www.google.com/maps?q=${q}&output=embed`;
+}
+
 function withFallbackImages(probed) {
   return {
     hero:     probed.hero.length     > 0 ? probed.hero     : KENT_FALLBACK.hero,
@@ -178,7 +186,8 @@ function buildLocationData(loc) {
       country: 'US',
       addressLine2: cityClean && loc.zip ? `${cityClean}, ${loc.state} ${loc.zip}` : '',
       geo: { lat: loc.lat, lng: loc.lng },
-      mapsUrl: buildMapsUrl({ address: loc.address || '', city: cityClean, state: loc.state || '', zip: loc.zip || '' })
+      mapsUrl: buildMapsUrl({ address: loc.address || '', city: cityClean, state: loc.state || '', zip: loc.zip || '' }),
+      mapsEmbedUrl: buildMapsEmbedUrl({ address: loc.address || '', city: cityClean, state: loc.state || '', zip: loc.zip || '' })
     },
     hours: { ...DEFAULTS.hours },
     owners: [],                                        // empty → placeholder card at runtime

@@ -21,7 +21,8 @@
       "lat": 33.481509,
       "lng": -112.201237
     },
-    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=6544+West+Thomas+Road+Suite+%2323+Phoenix+AZ+85033"
+    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=6544+West+Thomas+Road+Suite+%2323+Phoenix+AZ+85033",
+    "mapsEmbedUrl": "https://www.google.com/maps?q=WaveMAX+Laundry+6544+West+Thomas+Road+Suite+%2323+Phoenix+AZ+85033&output=embed"
   },
   "hours": {
     "open": "",

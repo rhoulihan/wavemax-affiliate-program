@@ -21,7 +21,8 @@
       "lat": 35.403769,
       "lng": -97.565993
     },
-    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=6125+S.+May+Avenue+Oklahoma+City+OK+73159"
+    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=6125+S.+May+Avenue+Oklahoma+City+OK+73159",
+    "mapsEmbedUrl": "https://www.google.com/maps?q=WaveMAX+Laundry+6125+S.+May+Avenue+Oklahoma+City+OK+73159&output=embed"
   },
   "hours": {
     "open": "",
