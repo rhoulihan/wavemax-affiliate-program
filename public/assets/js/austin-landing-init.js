@@ -510,7 +510,9 @@
       schedule();
     }
     let scheduled = null;
+    let paused = false;
     function schedule() {
+      if (paused) return;
       if (scheduled) clearTimeout(scheduled);
       // 6000ms — 50% slower than the original 4000ms cadence so each
       // photo lingers long enough to read the alt-text caption and
@@ -522,8 +524,14 @@
 
     const rotator = document.getElementById('wm-hero-rotator');
     if (rotator) {
-      rotator.addEventListener('mouseenter', () => { paused = true; if (scheduled) { clearTimeout(scheduled); scheduled = null; } });
-      rotator.addEventListener('mouseleave', () => { paused = false; schedule(); });
+      rotator.addEventListener('mouseenter', () => {
+        paused = true;
+        if (scheduled) { clearTimeout(scheduled); scheduled = null; }
+      });
+      rotator.addEventListener('mouseleave', () => {
+        paused = false;
+        schedule();
+      });
     }
   }
 
