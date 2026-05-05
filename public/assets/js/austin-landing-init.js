@@ -537,25 +537,16 @@
    * Mt Bonnell / Lady Bird / South Congress) live in the right-side
    * rotator now — they're declared in the HTML alongside the store
    * photos, so the rotator cycles store-and-landmark together. */
-  const WATERMARK_URL = 'https://wavemaxlaundry.com/wp-content/uploads/locations/austin-tx/hero-1.jpg';
-
-  function setStoreWatermark() {
+  // Hero watermark + SEO are now driven from LOCATION_DATA via the
+  // shared FranchisePage helper. The static Austin URLs that used to
+  // live here moved to the registry's per-franchise images.hero[0].
+  function setStoreWatermark(data) {
     const root = document.getElementById('wm-austin-watermark');
     if (!root) return;
     root.setAttribute('data-watermark', 'store');
-
-    const probe = new Image();
-    probe.referrerPolicy = 'no-referrer';
-    probe.onload = () => {
-      root.style.backgroundImage = `url("${WATERMARK_URL}")`;
-      root.classList.add('is-loaded');
-    };
-    probe.onerror = () => {
-      // If the photo is unreachable (rare), still mark loaded so the
-      // navy gradient fallback in the ::after overlay shows.
-      root.classList.add('is-loaded');
-    };
-    probe.src = WATERMARK_URL;
+    if (window.FranchisePage) {
+      window.FranchisePage.applyHeroWatermark(data);
+    }
   }
 
   /* ---------- Cross-frame nav for tab CTAs ----------
@@ -588,16 +579,23 @@
     }
     window.IframeBridge.loadTranslations(TRANSLATIONS);
     window.IframeBridge.init({ pageIdentifier: 'austin-landing', enableTranslation: true, enableAutoResize: true });
-    window.IframeBridge.loadSEOConfig(SEO);
+    // SEO is built from LOCATION_DATA inside onLocationData below — the
+    // template is franchise-agnostic, so we no longer ship a static
+    // Austin-flavored bundle.
 
     initTabs();
     initCrossFrameNav();
-    setStoreWatermark();
     initHeroRotator();
 
-    // Bind whenever location-data arrives
+    // Bind whenever location-data arrives — also where the per-franchise
+    // hero watermark + SEO bundle are applied.
     window.IframeBridge.onLocationData((data) => {
       applyBindings(data);
+      setStoreWatermark(data);
+      if (window.FranchisePage) {
+        const seo = window.FranchisePage.buildSeo(data, 'landing');
+        if (seo) window.IframeBridge.loadSEOConfig(seo);
+      }
       if (window.IframeBridge?.updateHeight) window.IframeBridge.updateHeight();
     });
 
