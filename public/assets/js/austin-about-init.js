@@ -523,7 +523,12 @@
     window.IframeBridge.init({ pageIdentifier: 'austin-about', enableTranslation: true, enableAutoResize: true });
     // SEO is built from LOCATION_DATA inside onLocationData below.
 
+    // Cache the latest LOCATION_DATA so the language-change listener
+    // below can re-apply aboutContent overrides after translatePage runs.
+    let cachedData = null;
+
     window.IframeBridge.onLocationData((data) => {
+      cachedData = data;
       applyBindings(data);
       setHeroWatermark(data);
       renderTeamGrid(data);
@@ -533,6 +538,15 @@
         if (seo) window.IframeBridge.loadSEOConfig(seo);
       }
       if (window.IframeBridge && window.IframeBridge.updateHeight) window.IframeBridge.updateHeight();
+    });
+
+    // translatePage runs on every language change AND fires once after
+    // initial onLocationData (when current-language arrives from parent).
+    // If aboutContent ran before that translatePage, its overrides get
+    // clobbered by the generic en/es/pt/de translations. Re-apply on
+    // every language-changed so franchise-specific copy wins.
+    window.addEventListener('language-changed', () => {
+      if (cachedData) applyAboutContent(cachedData);
     });
   }
 
