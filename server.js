@@ -247,7 +247,9 @@ app.use((req, res, next) => {
       'https://code.jquery.com',
       'https://www.local-marketing-reports.com',
       'https://reports.hibu.com',
-      'https://static.cloudflareinsights.com'
+      'https://static.cloudflareinsights.com',
+      // Google Maps JS API loader + bootstrap (locations modal)
+      'https://maps.googleapis.com'
     ],
     'style-src': [
       "'self'",
@@ -256,8 +258,8 @@ app.use((req, res, next) => {
       'https://fonts.googleapis.com',
       'https://stackpath.bootstrapcdn.com'
     ],
-    'img-src': ["'self'", 'data:', 'https://www.wavemax.promo', 'https://*.tile.openstreetmap.org', 'https://tile.openstreetmap.org', 'https://cdnjs.cloudflare.com', 'https://flagcdn.com', 'https://secure.walibu.com', 'https://www.wavemaxlaundry.com', 'https://wavemaxlaundry.com', 'https://upload.wikimedia.org', 'https://*.googleusercontent.com'],
-    'connect-src': ["'self'", 'https://wavemax.promo', 'https://cdn.jsdelivr.net', 'https://cdnjs.cloudflare.com', 'https://stackpath.bootstrapcdn.com', 'https://router.project-osrm.org', 'https://graphhopper.com', 'https://api.openrouteservice.org', 'https://valhalla1.openstreetmap.de', 'https://nominatim.openstreetmap.org', 'https://www.local-marketing-reports.com', 'https://places.googleapis.com'],
+    'img-src': ["'self'", 'data:', 'https://www.wavemax.promo', 'https://*.tile.openstreetmap.org', 'https://tile.openstreetmap.org', 'https://cdnjs.cloudflare.com', 'https://flagcdn.com', 'https://secure.walibu.com', 'https://www.wavemaxlaundry.com', 'https://wavemaxlaundry.com', 'https://upload.wikimedia.org', 'https://*.googleusercontent.com', 'https://maps.googleapis.com', 'https://maps.gstatic.com', 'https://*.googleapis.com', 'https://*.gstatic.com'],
+    'connect-src': ["'self'", 'https://wavemax.promo', 'https://cdn.jsdelivr.net', 'https://cdnjs.cloudflare.com', 'https://stackpath.bootstrapcdn.com', 'https://router.project-osrm.org', 'https://graphhopper.com', 'https://api.openrouteservice.org', 'https://valhalla1.openstreetmap.de', 'https://nominatim.openstreetmap.org', 'https://www.local-marketing-reports.com', 'https://places.googleapis.com', 'https://maps.googleapis.com', 'https://maps.gstatic.com'],
     'font-src': ["'self'", 'https://cdnjs.cloudflare.com', 'https://cdn.jsdelivr.net', 'https://fonts.gstatic.com'],
     'object-src': ["'none'"],
     'media-src': ["'self'"],

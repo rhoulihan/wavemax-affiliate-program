@@ -474,28 +474,51 @@
   }
 
   /* ---------- Location modal ---------- */
-  // Lazy-loaded Leaflet (CSS+JS) on first modal open. Stays cached for
-  // the rest of the session.
-  const LEAFLET_CSS = 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css';
-  const LEAFLET_JS  = 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js';
-
-  let leafletPromise = null;
-  function loadLeaflet() {
-    if (window.L) return Promise.resolve(window.L);
-    if (leafletPromise) return leafletPromise;
-    leafletPromise = new Promise((resolve, reject) => {
-      const link = document.createElement('link');
-      link.rel = 'stylesheet';
-      link.href = LEAFLET_CSS;
-      document.head.appendChild(link);
+  // Lazy-loaded Google Maps JS API on first modal open. Uses the
+  // GOOGLE_PLACES_API_KEY already injected on the host page (same
+  // browser-restricted key the live-reviews call uses on the landing).
+  let mapsPromise = null;
+  function loadGoogleMaps() {
+    if (window.google?.maps?.Map) return Promise.resolve(window.google);
+    if (mapsPromise) return mapsPromise;
+    const apiKey = window.GOOGLE_PLACES_API_KEY;
+    if (!apiKey) return Promise.reject(new Error('GOOGLE_PLACES_API_KEY missing on host page'));
+    mapsPromise = new Promise((resolve, reject) => {
+      const cbName = '__wmGoogleMapsReady_' + Date.now();
+      window[cbName] = () => { delete window[cbName]; resolve(window.google); };
       const script = document.createElement('script');
-      script.src = LEAFLET_JS;
-      script.onload = () => resolve(window.L);
-      script.onerror = () => reject(new Error('Leaflet failed to load'));
+      // loading=async marks this as the modern non-blocking import; the
+      // marker library covers AdvancedMarkerElement which we use for
+      // custom-styled franchise pins.
+      script.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(apiKey)}&loading=async&libraries=marker&callback=${cbName}`;
+      script.async = true;
+      script.defer = true;
+      script.onerror = () => { delete window[cbName]; reject(new Error('Google Maps failed to load')); };
+      // Honor the page CSP nonce — same pattern the franchise data
+      // injection uses.
+      const existing = document.querySelector('script[nonce]');
+      if (existing && existing.nonce) script.nonce = existing.nonce;
       document.head.appendChild(script);
     });
-    return leafletPromise;
+    return mapsPromise;
   }
+
+  // Subtle dark map style — desaturated, navy-leaning, low-contrast
+  // labels. Keeps the map readable inside our navy modal without
+  // visually competing with the franchise tiles.
+  const WM_MAP_STYLE = [
+    { elementType: 'geometry',          stylers: [{ color: '#1e3a5f' }] },
+    { elementType: 'labels.text.stroke',stylers: [{ color: '#0f2035' }] },
+    { elementType: 'labels.text.fill',  stylers: [{ color: '#a3b8d4' }] },
+    { featureType: 'administrative.locality', elementType: 'labels.text.fill', stylers: [{ color: '#cfdcee' }] },
+    { featureType: 'poi',                     elementType: 'all',              stylers: [{ visibility: 'off' }] },
+    { featureType: 'road',          elementType: 'geometry', stylers: [{ color: '#254876' }] },
+    { featureType: 'road',          elementType: 'labels.text.fill', stylers: [{ color: '#90a4c0' }] },
+    { featureType: 'road.highway',  elementType: 'geometry', stylers: [{ color: '#2c5396' }] },
+    { featureType: 'transit',       elementType: 'all',      stylers: [{ visibility: 'off' }] },
+    { featureType: 'water',         elementType: 'geometry', stylers: [{ color: '#0f2035' }] },
+    { featureType: 'water',         elementType: 'labels.text.fill', stylers: [{ color: '#5a7398' }] }
+  ];
 
   let franchisesPromise = null;
   function loadFranchises() {
@@ -535,9 +558,10 @@
       // shows immediately (operator can click Visit to confirm).
       if (!initialized) await initialize();
       if (!selectedSlug && window.FRANCHISE_SLUG) selectFranchise(window.FRANCHISE_SLUG, { centerMap: true, zoom: 12 });
-      // Important: leaflet needs a size-recalc when its container goes
-      // from display:none to flex (modal opens).
-      if (map) setTimeout(() => map.invalidateSize(), 100);
+      // Google Maps needs a resize trigger when its container goes from
+      // display:none to flex (modal opens). The resize event refits the
+      // bounds we computed at init.
+      if (map) setTimeout(() => google.maps.event.trigger(map, 'resize'), 100);
       search?.focus();
     };
     const close = () => {
@@ -551,11 +575,11 @@
       initialized = true;
       try {
         if (status) { status.hidden = false; statusText.textContent = 'Loading franchises…'; }
-        const [L, fs] = await Promise.all([loadLeaflet(), loadFranchises()]);
+        const [google, fs] = await Promise.all([loadGoogleMaps(), loadFranchises()]);
         franchises = fs;
         if (status) status.hidden = true;
         renderTiles(franchises);
-        renderMap(L, franchises);
+        renderMap(google, franchises);
       } catch (err) {
         console.error('[locModal] init failed', err);
         if (status) { status.hidden = false; statusText.textContent = 'Could not load franchise list — please try again.'; }
@@ -602,37 +626,67 @@
       return String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c]));
     }
 
-    function renderMap(L, items) {
+    let infoWindow = null;
+    function renderMap(google, items) {
       if (!mapEl) return;
-      // Dark-themed CartoDB Voyager tiles match the modal's navy chrome.
-      // OpenStreetMap fallback is in the CSP allowlist.
-      map = L.map(mapEl, { zoomControl: true, scrollWheelZoom: true, attributionControl: true })
-            .setView([39.5, -98.5], 4);  // continental US
-      L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-        maxZoom: 19
-      }).addTo(map);
+      const gmaps = google.maps;
+
+      map = new gmaps.Map(mapEl, {
+        center:   { lat: 39.5, lng: -98.5 },   // continental US default
+        zoom:     4,
+        styles:   WM_MAP_STYLE,
+        // Strip the controls that don't make sense in a small modal map
+        // — keep zoom only, drop street view + map type + fullscreen.
+        zoomControl: true,
+        streetViewControl: false,
+        mapTypeControl: false,
+        fullscreenControl: false,
+        gestureHandling: 'greedy',  // single-finger pan on mobile
+        clickableIcons: false       // suppress non-franchise POIs
+      });
+      infoWindow = new gmaps.InfoWindow();
 
       markersBySlug.clear();
-      const bounds = [];
+      const bounds = new gmaps.LatLngBounds();
+      let placedCount = 0;
       for (const f of items) {
         if (typeof f.lat !== 'number' || typeof f.lng !== 'number') continue;
-        const icon = L.divIcon({
-          className: '',  // suppress Leaflet's default
-          html: '<span class="wm-loc-marker" data-slug="' + escapeText(f.slug) + '"></span>',
-          iconSize: [22, 22],
-          iconAnchor: [11, 11]
+        const m = new gmaps.Marker({
+          map,
+          position: { lat: f.lat, lng: f.lng },
+          title:    f.name,
+          // Custom SVG marker (cyan disc, white outline) — switches to
+          // amber for the selected franchise via setIcon() below.
+          icon:     wmMarkerIcon(false)
         });
-        const m = L.marker([f.lat, f.lng], { icon, title: f.name })
-                   .addTo(map)
-                   .bindPopup(`<strong>${escapeText(f.name)}</strong>${escapeText(f.address || '')}<br>${escapeText((f.city || '') + ', ' + (f.state || ''))}`);
-        m.on('click', () => selectFranchise(f.slug, { centerMap: false }));
+        m.addListener('click', () => selectFranchise(f.slug, { centerMap: true, zoom: 13 }));
         markersBySlug.set(f.slug, m);
-        bounds.push([f.lat, f.lng]);
+        bounds.extend(m.getPosition());
+        placedCount++;
       }
-      if (bounds.length) {
-        map.fitBounds(bounds, { padding: [24, 24], maxZoom: 6 });
+      if (placedCount > 0) {
+        map.fitBounds(bounds, 24);
+        // Cap initial zoom so a tightly-clustered single state doesn't
+        // open at street level.
+        const onceListener = gmaps.event.addListenerOnce(map, 'idle', () => {
+          if (map.getZoom() > 6) map.setZoom(6);
+        });
       }
+    }
+
+    function wmMarkerIcon(selected) {
+      // Encoded SVG so we don't ship marker assets. Selected variant is
+      // larger + amber to match the in-page hero accent color.
+      const fill   = selected ? '#f5a623' : '#27aae1';
+      const stroke = '#ffffff';
+      const r      = selected ? 11 : 8;
+      const size   = (r + 2) * 2;
+      const svg = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 ${size} ${size}'><circle cx='${size/2}' cy='${size/2}' r='${r}' fill='${fill}' stroke='${stroke}' stroke-width='2'/></svg>`;
+      return {
+        url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg),
+        scaledSize: new google.maps.Size(size, size),
+        anchor:     new google.maps.Point(size / 2, size / 2)
+      };
     }
 
     function selectFranchise(slug, opts = {}) {
@@ -649,16 +703,30 @@
         }
       });
 
-      // Highlight marker
+      // Re-icon every marker (selected gets amber + larger pin)
       markersBySlug.forEach((m, s) => {
-        const el = m.getElement()?.querySelector('.wm-loc-marker');
-        if (!el) return;
-        el.classList.toggle('wm-loc-marker--selected', s === slug);
+        m.setIcon(wmMarkerIcon(s === slug));
+        m.setZIndex(s === slug ? 1000 : 0);
       });
 
       // Pan + zoom map
       if (map && opts.centerMap !== false) {
-        map.flyTo([f.lat, f.lng], opts.zoom || 13, { duration: 0.6 });
+        map.panTo({ lat: f.lat, lng: f.lng });
+        map.setZoom(opts.zoom || 13);
+      }
+
+      // Open info window on the selected marker
+      if (infoWindow) {
+        const m = markersBySlug.get(slug);
+        if (m) {
+          infoWindow.setContent(
+            `<div style="font-family: Barlow, sans-serif; min-width: 180px;">` +
+              `<strong style="display:block; margin-bottom:2px; color:#143852;">${escapeText(f.name)}</strong>` +
+              `<span style="color:#3a4a5c; font-size:0.86rem;">${escapeText(f.address || '')}<br>${escapeText((f.city || '') + ', ' + (f.state || ''))}</span>` +
+            `</div>`
+          );
+          infoWindow.open({ map, anchor: m });
+        }
       }
 
       // Update + show action bar
