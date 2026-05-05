@@ -95,6 +95,24 @@
     ]
   }
   </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "HowTo",
+    "name": "How to open a WaveMAX laundromat franchise",
+    "description": "The six-step discovery and onboarding process for becoming a WaveMAX franchisee, from initial 30-minute call to grand opening.",
+    "totalTime": "PT9M",
+    "estimatedCost": { "@type": "MonetaryAmount", "currency": "USD", "value": "1000000" },
+    "step": [
+      { "@type": "HowToStep", "position": 1, "name": "Initial call",        "text": "30-minute exploratory conversation. Walk through the candidate's market, capital, timeline, and fit." },
+      { "@type": "HowToStep", "position": 2, "name": "FDD review",          "text": "Receive and sign the Franchise Disclosure Document. Item 19 detail and substantiation included." },
+      { "@type": "HowToStep", "position": 3, "name": "Market analysis",     "text": "Demographic and traffic-count study. Territory selection. Lender introductions through preferred SBA-eligible network." },
+      { "@type": "HowToStep", "position": 4, "name": "Discovery Day",       "text": "Visit corporate HQ in Jacksonville, FL. Meet the team and tour operating stores." },
+      { "@type": "HowToStep", "position": 5, "name": "Franchise agreement", "text": "Execute the franchise agreement. Site approval and lease negotiation." },
+      { "@type": "HowToStep", "position": 6, "name": "Training and opening","text": "Multi-week training at corporate HQ. Site buildout. Opening marketing campaign. Grand opening." }
+    ]
+  }
+  </script>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -364,6 +382,45 @@
     .wm-fr-slider-nav.next { right: -10px; }
     .wm-fr-slider-nav:hover { background: #f5a623; color: #143852; }
 
+    /* LIVE REVIEWS SLIDER (Why panel) */
+    .wm-fr-reviews { margin-top: 32px; }
+    .wm-fr-reviews-head { margin-bottom: 18px; }
+    .wm-fr-reviews-head h4 { font-family: var(--wm-font-heading); font-size: 18px; font-weight: 800; color: #143852; margin: 0 0 6px 0; }
+    .wm-fr-reviews-head p { font-size: 14px; color: #5a6878; margin: 0; line-height: 1.55; }
+    .wm-fr-slider { position: relative; }
+    .wm-fr-slider-track { display: flex; gap: 16px; overflow-x: auto; scroll-snap-type: x mandatory; scroll-behavior: smooth; padding: 4px; -ms-overflow-style: none; scrollbar-width: none; }
+    .wm-fr-slider-track::-webkit-scrollbar { display: none; }
+    .wm-fr-slide { flex: 0 0 320px; scroll-snap-align: start; background: #fff; border-radius: 12px; padding: 22px; box-shadow: 0 4px 12px rgba(20,56,82,0.06); border-top: 4px solid #f5a623; display: flex; flex-direction: column; }
+    .wm-fr-slide-stars { margin-bottom: 10px; display: flex; gap: 2px; }
+    .wm-fr-slide-quote { font-size: 14px; color: #2c3e50; line-height: 1.55; margin: 0 0 12px 0; flex: 1; }
+    .wm-fr-slide-attr { font-family: var(--wm-font-heading); font-weight: 700; color: #143852; font-size: 13px; margin-bottom: 4px; }
+    .wm-fr-slide-loc { font-size: 12px; color: #1a3f7a; text-decoration: none; font-weight: 600; }
+    .wm-fr-slide-loc:hover { text-decoration: underline; }
+    .wm-fr-slider-nav { position: absolute; top: 50%; transform: translateY(-50%); background: #fff; border: 1px solid #e3e8f0; border-radius: 50%; width: 36px; height: 36px; cursor: pointer; box-shadow: 0 2px 8px rgba(20,56,82,0.12); display: flex; align-items: center; justify-content: center; color: #143852; font-size: 22px; font-weight: 700; line-height: 1; z-index: 2; }
+    .wm-fr-slider-nav.prev { left: -10px; }
+    .wm-fr-slider-nav.next { right: -10px; }
+    .wm-fr-slider-nav:hover { background: #f5a623; color: #143852; }
+
+    /* WAVEMAX SOLUTIONS FORMULA (Model panel) */
+    .wm-fr-formula {
+      margin-top: 28px;
+      background: linear-gradient(135deg, #143852 0%, #1a3f7a 100%);
+      color: #fff; border-radius: 12px;
+      padding: 22px 28px;
+      display: flex; align-items: center; flex-wrap: wrap; gap: 12px;
+      font-family: var(--wm-font-heading); font-size: 16px; font-weight: 700;
+    }
+    .wm-fr-formula .op { color: #f5a623; font-size: 22px; font-weight: 900; }
+    .wm-fr-formula .result { color: #f5a623; font-size: 18px; font-weight: 900; }
+    @media (max-width: 720px) { .wm-fr-formula { flex-direction: column; text-align: center; gap: 6px; padding: 22px; } }
+
+    /* MATTERPORT VIRTUAL TOUR (Equipment panel) */
+    .wm-fr-matterport { margin-top: 28px; }
+    .wm-fr-matterport h4 { font-family: var(--wm-font-heading); font-size: 18px; font-weight: 800; color: #143852; margin: 0 0 8px 0; }
+    .wm-fr-matterport p { font-size: 14px; color: #5a6878; line-height: 1.55; margin: 0 0 14px 0; }
+    .wm-fr-matterport-frame { position: relative; padding-bottom: 56.25%; height: 0; border-radius: 12px; overflow: hidden; box-shadow: 0 8px 24px rgba(20,56,82,0.12); }
+    .wm-fr-matterport-frame iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0; }
+
     /* CTA inline within tabs */
     .wm-fr-tab-cta { margin-top: 24px; display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
     .wm-fr-tab-cta a { display: inline-flex; align-items: center; padding: 10px 18px; background: #143852; color: #fff; font-family: var(--wm-font-heading); font-weight: 700; font-size: 13px; letter-spacing: 0.04em; text-transform: uppercase; text-decoration: none; border-radius: 6px; }
@@ -455,6 +512,7 @@
       <div class="wm-fr-panel is-active" id="panel-why" role="tabpanel">
         <h3 data-i18n="franchise.why.title">A laundromat franchise built for serious operators.</h3>
         <p class="panel-lede" data-i18n="franchise.why.lede">WaveMAX is a leading laundromat franchise offering scalable, semi-absentee ownership with strong unit economics and national brand support. Disciplined site selection, smart sizing, premium equipment, and a service model that resonates with working-class communities — that's the playbook.</p>
+        <p class="panel-lede" style="margin-top: -12px; font-style: italic; color: #5a6878;" data-i18n="franchise.why.prideful">This is not a set-it-and-forget-it franchise. We're looking for owners who treat clean operations as a revenue lever — partners who want to outperform the legacy "zombiemats" through disciplined execution.</p>
 
         <div class="wm-fr-why-grid">
           <div class="wm-fr-why-tile">
@@ -495,6 +553,22 @@
           <div class="wm-fr-trust-cell">
             <div class="num">#1</div>
             <div class="label" data-i18n="franchise.trust.rank">Laundromat franchise · 2026 Entrepreneur 500</div>
+          </div>
+        </div>
+
+        <!-- LIVE CUSTOMER REVIEWS — pulled from /api/v1/location/network-reviews,
+             real Google reviews aggregated from operating WaveMAX franchises. -->
+        <div class="wm-fr-reviews">
+          <div class="wm-fr-reviews-head">
+            <h4 data-i18n="franchise.reviews.title">What customers say across the network</h4>
+            <p data-i18n="franchise.reviews.lede">Real 5-star Google reviews, sampled live from operating WaveMAX franchise locations. Every card links to the store that earned the review.</p>
+          </div>
+          <div class="wm-fr-slider">
+            <button type="button" class="wm-fr-slider-nav prev" aria-label="Previous review">‹</button>
+            <div class="wm-fr-slider-track" id="wm-fr-reviews-track">
+              <div class="wm-fr-slide" style="opacity:0.5;"><p class="wm-fr-slide-quote" data-i18n="franchise.reviews.loading">Loading reviews from across the network…</p></div>
+            </div>
+            <button type="button" class="wm-fr-slider-nav next" aria-label="Next review">›</button>
           </div>
         </div>
 
@@ -596,6 +670,17 @@
           </div>
         </div>
 
+        <!-- WAVEMAX SOLUTIONS FORMULA — distilled from corporate's pitch -->
+        <div class="wm-fr-formula">
+          <span data-i18n="franchise.formula.location">Right Location</span>
+          <span class="op">+</span>
+          <span data-i18n="franchise.formula.size">Right Size Store</span>
+          <span class="op">+</span>
+          <span data-i18n="franchise.formula.equipment">Right Equipment Mix</span>
+          <span class="op">=</span>
+          <span class="result" data-i18n="franchise.formula.profit">Maximum Profits</span>
+        </div>
+
         <div class="wm-fr-tab-cta">
           <a class="amber" href="/become-a-franchisee/" data-i18n="franchise.tabCta.pickMarket">Pick your market →</a>
           <a href="/wavemax-vs-zombiemat/" data-i18n="franchise.tabCta.vsZombiemat">vs the Zombiemat</a>
@@ -650,6 +735,15 @@
         </div>
 
         <p class="wm-fr-attr" data-i18n="franchise.equipment.disclaimer">Premium equipment claims (450G extract, 80lb large-format, UV sanitization) only appear on store pages where the equipment is verified as installed.</p>
+
+        <!-- MATTERPORT VIRTUAL TOUR — corporate's published 3D walkthrough -->
+        <div class="wm-fr-matterport">
+          <h4 data-i18n="franchise.equipment.tourTitle">Walk through a real WaveMAX, room by room</h4>
+          <p data-i18n="franchise.equipment.tourLede">Corporate's published 3D Matterport walkthrough — explore the floor plan, equipment layout, and customer experience in your browser. Or visit our curated photo gallery on /virtual-tour/.</p>
+          <div class="wm-fr-matterport-frame">
+            <iframe src="https://my.matterport.com/show/?m=WVGKvBC2NDJ&play=1" allow="xr-spatial-tracking; fullscreen" allowfullscreen loading="lazy" title="WaveMAX Matterport 3D walkthrough"></iframe>
+          </div>
+        </div>
 
         <div class="wm-fr-tab-cta">
           <a class="amber" href="/virtual-tour/" data-i18n="franchise.tabCta.virtualTour">Virtual tour →</a>
@@ -772,6 +866,7 @@
 <script src="/assets/js/corporate-i18n.js?v=20260506e" defer></script>
 <script src="/assets/js/franchise-hero-rotator.js?v=20260506a" defer></script>
 <script src="/assets/js/franchise-tabs.js?v=20260506e" defer></script>
+<script src="/assets/js/franchise-reviews-slider.js?v=20260506f" defer></script>
 
 </body>
 </html>

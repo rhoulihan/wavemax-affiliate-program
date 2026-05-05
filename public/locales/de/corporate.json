@@ -75,6 +75,7 @@
       "eyebrow": "Warum Eigentümer WaveMAX® lieben",
       "title": "Ein Waschsalon-Franchise für ernsthafte Betreiber.",
       "lede": "WaveMAX ist ein führendes Waschsalon-Franchise mit skalierbarem, semi-absentem Eigentum, soliden Unit-Economics und nationaler Markenunterstützung. Disziplinierte Standortwahl, intelligente Größenanpassung, Premium-Ausstattung und ein Servicemodell, das mit Arbeiterklasse-Communitys resoniert — das ist das Playbook.",
+      "prideful": "Dies ist kein „einrichten und vergessen\"-Franchise. Wir suchen Eigentümer, die saubere Abläufe als Umsatzhebel verstehen — Partner, die die alten „Zombiemats\" durch disziplinierte Ausführung übertreffen wollen.",
       "tile1Title": "Semi-absent vom ersten Tag",
       "tile1Text": "~9 Stunden/Woche, 3 Tage à 3 Stunden. Die meisten Franchisenehmer stellen anfangs keinen Manager ein — das Modell skaliert ohne ständige Vor-Ort-Präsenz.",
       "tile2Title": "Geringe Fixkosten, hohe Rendite",
@@ -181,7 +182,9 @@
       "sanit3": "Verlängert die Lebensdauer der Wäsche um ~20%",
       "sanit4": "Hellere Weißtöne, weichere Stoffe, kein Geruch",
       "sanit5": "Reduziert Wasserrückstand → schnelleres Trocknen",
-      "disclaimer": "Premium-Geräteangaben (450G-Schleudern, 80lb-Großformat, UV-Hygiene) erscheinen nur auf Filialseiten, deren Ausstattung als installiert verifiziert wurde."
+      "disclaimer": "Premium-Geräteangaben (450G-Schleudern, 80lb-Großformat, UV-Hygiene) erscheinen nur auf Filialseiten, deren Ausstattung als installiert verifiziert wurde.",
+      "tourTitle": "Gehen Sie Raum für Raum durch eine echte WaveMAX",
+      "tourLede":  "Der von der Zentrale veröffentlichte 3D-Matterport-Rundgang — erkunden Sie Grundriss, Geräteanordnung und Kundenerfahrung in Ihrem Browser. Oder besuchen Sie unsere kuratierte Fotogalerie auf /virtual-tour/."
     },
     "process": {
       "title": "Sechs Schritte vom ersten Anruf bis zur Eröffnung.",
@@ -202,6 +205,17 @@
       "vsZombiemat":        "vs Zombiemat",
       "virtualTour":        "Virtuelle Tour →",
       "fullFaq":            "Vollständiges FAQ →"
+    },
+    "reviews": {
+      "title": "Was Kunden im gesamten Netzwerk sagen",
+      "lede":  "Echte 5-Sterne-Google-Bewertungen, live aus operativen WaveMAX-Franchisestandorten gezogen. Jede Karte verlinkt zur Filiale, die die Bewertung erhalten hat.",
+      "loading": "Bewertungen aus dem Netzwerk werden geladen…"
+    },
+    "formula": {
+      "location":  "Richtiger Standort",
+      "size":      "Richtige Größe",
+      "equipment": "Richtige Geräteauswahl",
+      "profit":    "Maximale Gewinne"
     }
   },
 

@@ -75,6 +75,7 @@
       "eyebrow": "Por qué los propietarios aman WaveMAX®",
       "title": "Una franquicia de lavandería pensada para operadores serios.",
       "lede": "WaveMAX es una franquicia de lavandería líder que ofrece propiedad escalable y semi-ausente, con una economía sólida por unidad y respaldo de marca nacional. Selección disciplinada de sitios, dimensionamiento inteligente, equipos premium y un modelo de servicio que conecta con comunidades de clase trabajadora — ese es el manual.",
+      "prideful": "Esta no es una franquicia de \"póngalo y olvídelo\". Buscamos propietarios que traten las operaciones limpias como una palanca de ingresos — socios que quieran superar a las \"zombiemats\" legacy a través de una ejecución disciplinada.",
       "tile1Title": "Semi-ausente desde el primer día",
       "tile1Text": "~9 horas/semana, 3 días a la semana, 3 horas por día. La mayoría de los franquiciados no contratan a un gerente inicialmente — el modelo está diseñado para escalar sin presencia constante en el sitio.",
       "tile2Title": "Bajos costos generales, alto ROI",
@@ -181,7 +182,9 @@
       "sanit3": "Extiende la vida de las prendas ~20%",
       "sanit4": "Blancos más brillantes, telas más suaves, sin olor",
       "sanit5": "Reduce la retención de agua → secado más rápido",
-      "disclaimer": "Las afirmaciones de equipos premium (extracción 450G, gran formato 80lb, sanitización UV) solo aparecen en páginas de tiendas donde el equipo está verificado como instalado."
+      "disclaimer": "Las afirmaciones de equipos premium (extracción 450G, gran formato 80lb, sanitización UV) solo aparecen en páginas de tiendas donde el equipo está verificado como instalado.",
+      "tourTitle": "Recorra una WaveMAX real, sala por sala",
+      "tourLede":  "El recorrido 3D Matterport publicado por la empresa — explore el plano, la disposición de equipos y la experiencia del cliente desde su navegador. O visite nuestra galería de fotos curada en /virtual-tour/."
     },
     "process": {
       "title": "Seis pasos desde la primera llamada hasta la apertura.",
@@ -202,6 +205,17 @@
       "vsZombiemat":        "vs el Zombiemat",
       "virtualTour":        "Tour virtual →",
       "fullFaq":            "FAQ completo →"
+    },
+    "reviews": {
+      "title": "Lo que dicen los clientes en toda la red",
+      "lede":  "Reseñas reales de Google de 5 estrellas, muestreadas en vivo desde ubicaciones operativas de franquicias WaveMAX. Cada tarjeta enlaza con la tienda que ganó la reseña.",
+      "loading": "Cargando reseñas de toda la red…"
+    },
+    "formula": {
+      "location":  "Ubicación correcta",
+      "size":      "Tamaño correcto",
+      "equipment": "Mezcla de equipos correcta",
+      "profit":    "Máximas ganancias"
     }
   },
 
