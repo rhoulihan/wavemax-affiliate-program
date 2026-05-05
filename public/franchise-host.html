@@ -481,7 +481,7 @@
 
   <!-- MHR-faithful chrome stylesheets -->
   <link rel="stylesheet" href="/assets/css/wavemax-mhr-chrome.css?v=20260504">
-  <link rel="stylesheet" href="/assets/css/wavemax-mhr-modal.css?v=20260504">
+  <link rel="stylesheet" href="/assets/css/wavemax-mhr-modal.css?v=20260505">
 
   <!-- Demo-only host page styles (external for CSP compliance) -->
   <link rel="stylesheet" href="/assets/css/austin-host-mock.css?v=20260504">
@@ -811,11 +811,11 @@
   ════════════════════════════════════════════════════════════════════
 -->
 <div class="modal-overlay" id="locModal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="locModalTitle">
-  <div class="modal-box" role="document">
+  <div class="modal-box modal-box--with-map" role="document">
     <div class="modal-header">
       <div class="modal-header-text">
         <h3 id="locModalTitle" data-i18n="chrome.modal.title">Find a Location</h3>
-        <p id="modalSubtitle" data-i18n="chrome.modal.subtitle">Choose your store, or search by city / state / zip.</p>
+        <p id="modalSubtitle" data-i18n="chrome.modal.subtitle">Pick a location to zoom the map. Then visit the site, or get directions.</p>
       </div>
       <button class="modal-close" aria-label="Close" data-locmodal-close data-i18n-attr='{"aria-label":"chrome.modal.close"}'>✕</button>
     </div>
@@ -824,28 +824,37 @@
     </div>
     <div class="modal-status" id="modalStatus" hidden>
       <div class="spinner"></div>
-      <span id="modalStatusText" data-i18n="chrome.modal.detecting">Finding locations near you…</span>
+      <span id="modalStatusText">Loading franchises…</span>
     </div>
-    <div class="modal-list" id="locList">
-      <div class="loc-section-header">Austin, TX</div>
-      <button type="button" class="loc-card" aria-selected="true" data-loc-slug="austin-tx">
-        <div class="loc-info">
-          <div class="loc-name" data-bind="brand.name">WaveMAX Laundry Austin</div>
-          <div class="loc-addr" data-bind="contact.address">825 E Rundberg Ln F1</div>
-          <div class="loc-addr" data-bind="contact.addressLine2">Austin, TX 78753</div>
-          <div class="loc-meta">
-            <span class="loc-dist" data-i18n="chrome.modal.selected">Selected</span>
-            <span class="loc-phone" data-bind="contact.phone">(512) 553-1674</span>
-          </div>
-        </div>
-      </button>
+    <!-- Leaflet map: every franchise gets a marker; tile click pans
+         + zooms to the marker. Map is lazy-initialised on first modal
+         open so the page-load cost is zero for users who never open
+         the locator. -->
+    <div class="modal-map" id="locMap" aria-label="Map of WaveMAX locations"></div>
+    <div class="modal-list" id="locList"><!-- populated at runtime --></div>
+    <!-- Action bar sticks to the bottom of the modal once a location
+         is selected. Two buttons: Visit (close + navigate) and
+         Directions (open Google Maps + navigate). Hidden by default. -->
+    <div class="modal-actions" id="locActions" hidden>
+      <div class="modal-actions-summary" id="locSelectedSummary">
+        <strong id="locSelectedName">—</strong>
+        <span id="locSelectedAddr">—</span>
+      </div>
+      <div class="modal-actions-buttons">
+        <a class="modal-action modal-action--secondary" id="locActionDirections" href="#" target="_blank" rel="noopener">
+          📍 Directions
+        </a>
+        <a class="modal-action modal-action--primary" id="locActionVisit" href="/">
+          Visit Site →
+        </a>
+      </div>
     </div>
   </div>
 </div>
 
 <!-- Bridge + chrome wiring (CSP-clean external scripts) -->
 <script src="/assets/js/parent-iframe-bridge-v3.js?v=20260504d"></script>
-<script src="/assets/js/austin-host-mock.js?v=20260505"></script>
+<script src="/assets/js/austin-host-mock.js?v=20260505b"></script>
 
 <!--
   ════════════════════════════════════════════════════════════════════

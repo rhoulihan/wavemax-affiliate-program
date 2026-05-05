@@ -474,16 +474,71 @@
   }
 
   /* ---------- Location modal ---------- */
+  // Lazy-loaded Leaflet (CSS+JS) on first modal open. Stays cached for
+  // the rest of the session.
+  const LEAFLET_CSS = 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css';
+  const LEAFLET_JS  = 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js';
+
+  let leafletPromise = null;
+  function loadLeaflet() {
+    if (window.L) return Promise.resolve(window.L);
+    if (leafletPromise) return leafletPromise;
+    leafletPromise = new Promise((resolve, reject) => {
+      const link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = LEAFLET_CSS;
+      document.head.appendChild(link);
+      const script = document.createElement('script');
+      script.src = LEAFLET_JS;
+      script.onload = () => resolve(window.L);
+      script.onerror = () => reject(new Error('Leaflet failed to load'));
+      document.head.appendChild(script);
+    });
+    return leafletPromise;
+  }
+
+  let franchisesPromise = null;
+  function loadFranchises() {
+    if (franchisesPromise) return franchisesPromise;
+    franchisesPromise = fetch('/api/v1/franchises', { credentials: 'same-origin' })
+      .then(r => r.ok ? r.json() : Promise.reject(new Error('HTTP ' + r.status)))
+      .then(body => Array.isArray(body.franchises) ? body.franchises : []);
+    return franchisesPromise;
+  }
 
   function initLocationModal() {
     const overlay = document.getElementById('locModal');
     if (!overlay) return;
 
-    const open = () => {
+    const list           = document.getElementById('locList');
+    const search         = document.getElementById('locSearch');
+    const status         = document.getElementById('modalStatus');
+    const statusText     = document.getElementById('modalStatusText');
+    const actions        = document.getElementById('locActions');
+    const selectedName   = document.getElementById('locSelectedName');
+    const selectedAddr   = document.getElementById('locSelectedAddr');
+    const directionsLink = document.getElementById('locActionDirections');
+    const visitLink      = document.getElementById('locActionVisit');
+    const mapEl          = document.getElementById('locMap');
+
+    let map = null;
+    let markersBySlug = new Map();
+    let franchises = [];
+    let initialized = false;
+    let selectedSlug = null;
+
+    const open = async () => {
       overlay.setAttribute('aria-hidden', 'false');
       overlay.classList.add('open');
       document.body.style.overflow = 'hidden';
-      $('#locSearch')?.focus();
+      // Auto-select the current franchise on open so the action bar
+      // shows immediately (operator can click Visit to confirm).
+      if (!initialized) await initialize();
+      if (!selectedSlug && window.FRANCHISE_SLUG) selectFranchise(window.FRANCHISE_SLUG, { centerMap: true, zoom: 12 });
+      // Important: leaflet needs a size-recalc when its container goes
+      // from display:none to flex (modal opens).
+      if (map) setTimeout(() => map.invalidateSize(), 100);
+      search?.focus();
     };
     const close = () => {
       overlay.setAttribute('aria-hidden', 'true');
@@ -491,6 +546,133 @@
       document.body.style.overflow = '';
     };
 
+    async function initialize() {
+      if (initialized) return;
+      initialized = true;
+      try {
+        if (status) { status.hidden = false; statusText.textContent = 'Loading franchises…'; }
+        const [L, fs] = await Promise.all([loadLeaflet(), loadFranchises()]);
+        franchises = fs;
+        if (status) status.hidden = true;
+        renderTiles(franchises);
+        renderMap(L, franchises);
+      } catch (err) {
+        console.error('[locModal] init failed', err);
+        if (status) { status.hidden = false; statusText.textContent = 'Could not load franchise list — please try again.'; }
+      }
+    }
+
+    // Render tiles grouped by state, alphabetically.
+    function renderTiles(items) {
+      list.innerHTML = '';
+      const byState = new Map();
+      for (const f of items) {
+        const k = f.state || '—';
+        if (!byState.has(k)) byState.set(k, []);
+        byState.get(k).push(f);
+      }
+      const states = [...byState.keys()].sort();
+      const frag = document.createDocumentFragment();
+      for (const st of states) {
+        const header = document.createElement('div');
+        header.className = 'loc-section-header';
+        header.textContent = st;
+        frag.appendChild(header);
+        byState.get(st).sort((a, b) => (a.city || '').localeCompare(b.city || ''));
+        for (const f of byState.get(st)) {
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'loc-card';
+          btn.setAttribute('data-loc-slug', f.slug);
+          btn.setAttribute('aria-selected', 'false');
+          btn.innerHTML =
+            '<div class="loc-info">' +
+              `<div class="loc-name">${escapeText(f.name)}</div>` +
+              `<div class="loc-addr">${escapeText(f.address || '')}</div>` +
+              `<div class="loc-addr">${escapeText((f.city || '') + (f.city ? ', ' : '') + (f.state || '') + ' ' + (f.zip || ''))}</div>` +
+              `<div class="loc-meta">${f.phone ? `<span class="loc-phone">${escapeText(f.phone)}</span>` : ''}</div>` +
+            '</div>';
+          btn.addEventListener('click', () => selectFranchise(f.slug, { centerMap: true, zoom: 13 }));
+          frag.appendChild(btn);
+        }
+      }
+      list.appendChild(frag);
+    }
+    function escapeText(s) {
+      return String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c]));
+    }
+
+    function renderMap(L, items) {
+      if (!mapEl) return;
+      // Dark-themed CartoDB Voyager tiles match the modal's navy chrome.
+      // OpenStreetMap fallback is in the CSP allowlist.
+      map = L.map(mapEl, { zoomControl: true, scrollWheelZoom: true, attributionControl: true })
+            .setView([39.5, -98.5], 4);  // continental US
+      L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+        maxZoom: 19
+      }).addTo(map);
+
+      markersBySlug.clear();
+      const bounds = [];
+      for (const f of items) {
+        if (typeof f.lat !== 'number' || typeof f.lng !== 'number') continue;
+        const icon = L.divIcon({
+          className: '',  // suppress Leaflet's default
+          html: '<span class="wm-loc-marker" data-slug="' + escapeText(f.slug) + '"></span>',
+          iconSize: [22, 22],
+          iconAnchor: [11, 11]
+        });
+        const m = L.marker([f.lat, f.lng], { icon, title: f.name })
+                   .addTo(map)
+                   .bindPopup(`<strong>${escapeText(f.name)}</strong>${escapeText(f.address || '')}<br>${escapeText((f.city || '') + ', ' + (f.state || ''))}`);
+        m.on('click', () => selectFranchise(f.slug, { centerMap: false }));
+        markersBySlug.set(f.slug, m);
+        bounds.push([f.lat, f.lng]);
+      }
+      if (bounds.length) {
+        map.fitBounds(bounds, { padding: [24, 24], maxZoom: 6 });
+      }
+    }
+
+    function selectFranchise(slug, opts = {}) {
+      const f = franchises.find(x => x.slug === slug);
+      if (!f) return;
+      selectedSlug = slug;
+
+      // Highlight tile
+      list.querySelectorAll('.loc-card').forEach(c => {
+        c.setAttribute('aria-selected', c.getAttribute('data-loc-slug') === slug ? 'true' : 'false');
+        if (c.getAttribute('data-loc-slug') === slug) {
+          // Scroll into view smoothly
+          c.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+      });
+
+      // Highlight marker
+      markersBySlug.forEach((m, s) => {
+        const el = m.getElement()?.querySelector('.wm-loc-marker');
+        if (!el) return;
+        el.classList.toggle('wm-loc-marker--selected', s === slug);
+      });
+
+      // Pan + zoom map
+      if (map && opts.centerMap !== false) {
+        map.flyTo([f.lat, f.lng], opts.zoom || 13, { duration: 0.6 });
+      }
+
+      // Update + show action bar
+      if (selectedName) selectedName.textContent = f.name;
+      if (selectedAddr) selectedAddr.textContent = (f.address ? f.address + ' · ' : '') + f.city + ', ' + f.state;
+      if (directionsLink) {
+        const q = encodeURIComponent([f.address, f.city, f.state, f.zip].filter(Boolean).join(' '));
+        directionsLink.href = `https://www.google.com/maps/dir/?api=1&destination=${q}`;
+      }
+      if (visitLink) visitLink.href = '/' + slug + '/';
+      if (actions) actions.hidden = false;
+    }
+
+    // Wire up open / close triggers
     $$('[data-locmodal-open]').forEach(t => t.addEventListener('click', open));
     $$('[data-locmodal-close]').forEach(t => t.addEventListener('click', close));
     overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
@@ -498,29 +680,47 @@
       if (e.key === 'Escape' && overlay.getAttribute('aria-hidden') === 'false') close();
     });
 
-    // Selectable cards (F2a fix)
-    $$('.loc-card', overlay).forEach(card => {
-      card.addEventListener('click', () => {
-        $$('.loc-card', overlay).forEach(c => c.setAttribute('aria-selected', 'false'));
-        card.setAttribute('aria-selected', 'true');
-        const slug = card.getAttribute('data-loc-slug');
-        if (slug && slug !== window.LOCATION_DATA?.slug) {
-          // For the demo only one franchisee is wired; cross-franchise routing
-          // would happen here when multi-location support lands.
-          console.info('[host] location selected:', slug);
-        }
+    // The Visit button navigates same-window; Directions opens a new tab
+    // AND ALSO navigates the parent (after a short delay so the new tab
+    // has time to open before this window unloads).
+    if (visitLink) {
+      visitLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        if (!selectedSlug) return;
         close();
+        window.location.href = '/' + selectedSlug + '/';
       });
-    });
+    }
+    if (directionsLink) {
+      directionsLink.addEventListener('click', (e) => {
+        // Let the browser open the maps tab natively (target="_blank"
+        // already set), then navigate this window after a beat.
+        if (!selectedSlug) return;
+        const slug = selectedSlug;
+        setTimeout(() => {
+          close();
+          window.location.href = '/' + slug + '/';
+        }, 200);
+      });
+    }
 
-    // Search filter (basic — for demo, only one location)
-    const search = $('#locSearch');
+    // Search filter — works against both tiles and markers.
     if (search) {
       search.addEventListener('input', (e) => {
-        const q = e.target.value.toLowerCase();
-        $$('.loc-card', overlay).forEach(card => {
+        const q = e.target.value.trim().toLowerCase();
+        list.querySelectorAll('.loc-card').forEach(card => {
           const text = (card.textContent || '').toLowerCase();
           card.style.display = q && !text.includes(q) ? 'none' : '';
+        });
+        // Also hide section headers whose state has no visible cards
+        list.querySelectorAll('.loc-section-header').forEach(h => {
+          let next = h.nextElementSibling;
+          let anyVisible = false;
+          while (next && !next.classList.contains('loc-section-header')) {
+            if (next.style.display !== 'none') { anyVisible = true; break; }
+            next = next.nextElementSibling;
+          }
+          h.style.display = anyVisible ? '' : 'none';
         });
       });
     }
