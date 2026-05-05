@@ -520,6 +520,23 @@
     { featureType: 'water',         elementType: 'labels.text.fill', stylers: [{ color: '#5a7398' }] }
   ];
 
+  // US state abbreviation → full name. Used for both the section headers
+  // ("Texas" reads better than "TX" in a 75-store list) and the search
+  // index, so typing either "TX" or "Texas" matches Texas franchises.
+  const US_STATE_NAMES = {
+    AL: 'Alabama', AK: 'Alaska', AZ: 'Arizona', AR: 'Arkansas', CA: 'California',
+    CO: 'Colorado', CT: 'Connecticut', DE: 'Delaware', FL: 'Florida', GA: 'Georgia',
+    HI: 'Hawaii', ID: 'Idaho', IL: 'Illinois', IN: 'Indiana', IA: 'Iowa',
+    KS: 'Kansas', KY: 'Kentucky', LA: 'Louisiana', ME: 'Maine', MD: 'Maryland',
+    MA: 'Massachusetts', MI: 'Michigan', MN: 'Minnesota', MS: 'Mississippi', MO: 'Missouri',
+    MT: 'Montana', NE: 'Nebraska', NV: 'Nevada', NH: 'New Hampshire', NJ: 'New Jersey',
+    NM: 'New Mexico', NY: 'New York', NC: 'North Carolina', ND: 'North Dakota', OH: 'Ohio',
+    OK: 'Oklahoma', OR: 'Oregon', PA: 'Pennsylvania', RI: 'Rhode Island', SC: 'South Carolina',
+    SD: 'South Dakota', TN: 'Tennessee', TX: 'Texas', UT: 'Utah', VT: 'Vermont',
+    VA: 'Virginia', WA: 'Washington', WV: 'West Virginia', WI: 'Wisconsin', WY: 'Wyoming',
+    DC: 'District of Columbia'
+  };
+
   let franchisesPromise = null;
   function loadFranchises() {
     if (franchisesPromise) return franchisesPromise;
@@ -619,7 +636,7 @@
       for (const st of states) {
         const header = document.createElement('div');
         header.className = 'loc-section-header';
-        header.textContent = st;
+        header.textContent = US_STATE_NAMES[st] || st;
         frag.appendChild(header);
         byState.get(st).sort((a, b) => (a.city || '').localeCompare(b.city || ''));
         for (const f of byState.get(st)) {
@@ -628,6 +645,13 @@
           btn.className = 'loc-card';
           btn.setAttribute('data-loc-slug', f.slug);
           btn.setAttribute('aria-selected', 'false');
+          // Searchable index: name, address, city, state abbr + full name,
+          // zip, phone. Lets users type "Texas" or "TX" and either matches.
+          const searchKey = [
+            f.name, f.address, f.city, f.state, US_STATE_NAMES[f.state] || '',
+            f.zip, f.phone
+          ].filter(Boolean).join(' ').toLowerCase();
+          btn.setAttribute('data-loc-search', searchKey);
           btn.innerHTML =
             '<div class="loc-info">' +
               `<div class="loc-name">${escapeText(f.name)}</div>` +
@@ -817,8 +841,8 @@
       const e = getEls();
       const q = ev.target.value.trim().toLowerCase();
       e.list.querySelectorAll('.loc-card').forEach(card => {
-        const text = (card.textContent || '').toLowerCase();
-        card.style.display = q && !text.includes(q) ? 'none' : '';
+        const haystack = card.getAttribute('data-loc-search') || (card.textContent || '').toLowerCase();
+        card.style.display = q && !haystack.includes(q) ? 'none' : '';
       });
       // Also hide section headers whose state has no visible cards
       e.list.querySelectorAll('.loc-section-header').forEach(h => {
