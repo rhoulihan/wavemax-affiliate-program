@@ -491,6 +491,23 @@ app.get('/api/austin-tx/places-config', (req, res) => {
   );
 });
 
+// Legacy URL redirect: /dev/austin-host-mock.html?route=/path → /austin-tx/path/
+// The /dev/ page was the pre-resolver demo; production URLs now live at
+// /<slug>/. Mounted BEFORE the static middleware so the file isn't served
+// instead.
+app.get('/dev/austin-host-mock.html', (req, res, next) => {
+  const r = (req.query.route || '/').toString();
+  // Sanity-check: must start with / and contain only slug-safe chars,
+  // otherwise fall through to static (or just 404).
+  if (!/^\/[a-z0-9/_-]*$/i.test(r)) return next();
+  const tail = r === '/' ? '' : r.replace(/^\/+/, '').replace(/\/+$/, '') + '/';
+  // Preserve any other query params (e.g. ?lang=es), drop the route one.
+  const qs = new URLSearchParams(req.query);
+  qs.delete('route');
+  const queryString = qs.toString();
+  res.redirect(301, `/austin-tx/${tail}${queryString ? '?' + queryString : ''}`);
+});
+
 // Serve static files in all environments
 app.use(express.static(path.join(__dirname, 'public')));
 

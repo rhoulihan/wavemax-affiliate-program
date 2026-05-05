@@ -530,8 +530,9 @@
   }
 
   function initLocationModal() {
+    console.log('[locModal-debug] initLocationModal called');
     const overlay = document.getElementById('locModal');
-    if (!overlay) return;
+    if (!overlay) { console.log('[locModal-debug] no overlay element — bail'); return; }
 
     const list           = document.getElementById('locList');
     const search         = document.getElementById('locSearch');
@@ -744,7 +745,9 @@
     }
 
     // Wire up open / close triggers
-    $$('[data-locmodal-open]').forEach(t => t.addEventListener('click', open));
+    const openTriggers = $$('[data-locmodal-open]');
+    console.log('[locModal-debug] attaching open handler to', openTriggers.length, 'triggers');
+    openTriggers.forEach(t => t.addEventListener('click', open));
     $$('[data-locmodal-close]').forEach(t => t.addEventListener('click', close));
     overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
     document.addEventListener('keydown', (e) => {
