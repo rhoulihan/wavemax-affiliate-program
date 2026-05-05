@@ -312,8 +312,17 @@
     });
   }
 
-  /* ---------- Form ---------- */
-  const SLUG = 'austin-tx';
+  /* ---------- Form ----------
+   * The slug used for the POST endpoint comes from window.parent (the
+   * host frame injects window.FRANCHISE_SLUG as part of the bridge
+   * setup). Falling back to 'austin-tx' would silently route every
+   * franchise's contact form to the Austin inbox — which is the bug
+   * Rick caught on the SA page. Read fresh on each submit so a
+   * later-arriving slug (e.g. async bridge init) is still respected. */
+  function currentSlug() {
+    try { return window.parent?.FRANCHISE_SLUG || ''; }
+    catch (_) { return ''; }
+  }
 
   async function fetchCsrfToken() {
     try {
@@ -423,7 +432,8 @@
         const headers = { 'Content-Type': 'application/json', 'Accept': 'application/json' };
         if (csrf) headers['x-csrf-token'] = csrf;
 
-        const res = await fetch(`/api/v1/contact/${SLUG}`, {
+        const slug = currentSlug() || 'austin-tx';
+        const res = await fetch(`/api/v1/contact/${encodeURIComponent(slug)}`, {
           method: 'POST',
           headers,
           credentials: 'include',
