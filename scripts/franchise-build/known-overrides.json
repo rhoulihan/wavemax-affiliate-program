@@ -1,43 +1,72 @@
 {
   "_comment": "Per-franchise overrides for fields that should NOT come from the generic defaults. Each entry deep-merges into the generated franchise JSON. Add a new entry whenever we learn ground-truth equipment / pricing / amenities for a specific store. Entries here win over the build script's null defaults; an empty entry leaves the generic placeholders in place.",
-
   "austin-tx": {
     "brand": {
       "name": "WaveMAX Laundry Austin",
       "tagline": "Austin's Cleanest Laundromat"
     },
     "hours": {
-      "open": "07:00", "close": "22:00",
+      "open": "07:00",
+      "close": "22:00",
       "display": "7am-10pm",
       "lastWash": "9pm",
       "days": "Open daily"
     },
     "pricing": {
-      "wdf":       { "rate": 1.20, "minLb": 10, "currency": "USD", "display": "$1.20/lb" },
+      "wdf": {
+        "rate": 1.2,
+        "minLb": 10,
+        "currency": "USD",
+        "display": "$1.20/lb"
+      },
       "selfServe": {
-        "minLoad": 2.75, "maxLoad": 10.50,
-        "minLoadDisplay": "$2.75", "maxLoadDisplay": "$10.50",
-        "washMin": 20, "dryMin": 20,
+        "minLoad": 2.75,
+        "maxLoad": 10.5,
+        "minLoadDisplay": "$2.75",
+        "maxLoadDisplay": "$10.50",
+        "washMin": 20,
+        "dryMin": 20,
         "rangeDisplay": "$2.75 – $10.50"
       }
     },
-    "equipment": { "profileId": "electrolux-450g-80lb-premium", "washers": 42, "dryers": 42, "capacityLb": 80 },
+    "equipment": {
+      "profileId": "electrolux-450g-80lb-premium",
+      "washers": 42,
+      "dryers": 42,
+      "capacityLb": 80
+    },
     "amenities": [
       "Free WiFi",
       "Hospital-Grade UV Sanitization",
       "Free Parking",
       "Wheelchair Accessible"
     ],
-    "serviceArea": ["Austin", "Round Rock", "Cedar Park", "Pflugerville", "Georgetown", "Leander"],
+    "serviceArea": [
+      "Austin",
+      "Round Rock",
+      "Cedar Park",
+      "Pflugerville",
+      "Georgetown",
+      "Leander"
+    ],
     "google": {
       "placeId": "ChIJOUs5BpHJRIYRTjv0UotLg0o",
       "apiKey": ""
     },
     "images": {
       "landmarks": [
-        { "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/60/PennybackerBridge.jpg/1280px-PennybackerBridge.jpg", "alt": "Pennybacker Bridge — North Austin landmark on Loop 360" },
-        { "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/df/TexasStateCapitol-2010-01.JPG/1280px-TexasStateCapitol-2010-01.JPG", "alt": "Texas State Capitol — downtown Austin" },
-        { "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/96/Austin_Texas_skyline%2C_December_2023_-_Evening.jpg/1280px-Austin_Texas_skyline%2C_December_2023_-_Evening.jpg", "alt": "Austin skyline at evening" }
+        {
+          "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/60/PennybackerBridge.jpg/1280px-PennybackerBridge.jpg",
+          "alt": "Pennybacker Bridge — North Austin landmark on Loop 360"
+        },
+        {
+          "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/df/TexasStateCapitol-2010-01.JPG/1280px-TexasStateCapitol-2010-01.JPG",
+          "alt": "Texas State Capitol — downtown Austin"
+        },
+        {
+          "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/96/Austin_Texas_skyline%2C_December_2023_-_Evening.jpg/1280px-Austin_Texas_skyline%2C_December_2023_-_Evening.jpg",
+          "alt": "Austin skyline at evening"
+        }
       ]
     },
     "owners": [
@@ -77,11 +106,26 @@
       "valuesEyebrow": "WHAT WE STAND FOR",
       "valuesTitle": "Our values, on every wash",
       "values": [
-        { "title": "Community first.",        "body": "Profits reinvested locally — staff, equipment, and supporting Austin causes that matter to us." },
-        { "title": "Best-in-class quality.",  "body": "Omni LUX UV-sanitized water, eco-friendly hypoallergenic detergent, calibrated weighs, hand-folded results." },
-        { "title": "Lowest fair price.",      "body": "No hidden fees, no contracts, no subscriptions. Cards-only, transparent pricing — pay for what you use." },
-        { "title": "Always open.",            "body": "7am–10pm, every day, 365 days a year. We're here when laundry day actually happens." },
-        { "title": "Friendly service.",       "body": "Fully attended store. Real people, not a vending machine. Need help? We're here." }
+        {
+          "title": "Community first.",
+          "body": "Profits reinvested locally — staff, equipment, and supporting Austin causes that matter to us."
+        },
+        {
+          "title": "Best-in-class quality.",
+          "body": "Omni LUX UV-sanitized water, eco-friendly hypoallergenic detergent, calibrated weighs, hand-folded results."
+        },
+        {
+          "title": "Lowest fair price.",
+          "body": "No hidden fees, no contracts, no subscriptions. Cards-only, transparent pricing — pay for what you use."
+        },
+        {
+          "title": "Always open.",
+          "body": "7am–10pm, every day, 365 days a year. We're here when laundry day actually happens."
+        },
+        {
+          "title": "Friendly service.",
+          "body": "Fully attended store. Real people, not a vending machine. Need help? We're here."
+        }
       ],
       "teamEyebrow": "MEET THE OWNERS",
       "teamTitle": "The Houlihan family",
@@ -93,12 +137,372 @@
       "ctaCallBtn": "Call us",
       "ctaDirectionsBtn": "Get directions",
       "stats": {
-        "founded": { "number": "2025", "label": "Serving Austin Since" },
-        "owners":  { "number": "3",    "label": "Family Owners" },
-        "local":   { "number": "100%", "label": "Austin Local" },
-        "extra":   { "number": "3",    "label": "Disciplines" },
-        "community": { "number": "∞",  "label": "Community First" }
+        "founded": {
+          "number": "2025",
+          "label": "Serving Austin Since"
+        },
+        "owners": {
+          "number": "3",
+          "label": "Family Owners"
+        },
+        "local": {
+          "number": "100%",
+          "label": "Austin Local"
+        },
+        "extra": {
+          "number": "3",
+          "label": "Disciplines"
+        },
+        "community": {
+          "number": "∞",
+          "label": "Community First"
+        }
       }
+    }
+  },
+  "arlington-tx": {
+    "google": {
+      "placeId": "ChIJYQhUb6d9ToYRWQaaM2ktfJQ"
+    }
+  },
+  "aurora-co": {
+    "google": {
+      "placeId": "ChIJJdM7jnZjbIcRltipWL-9KWQ"
+    }
+  },
+  "bedford-tx": {
+    "google": {
+      "placeId": "ChIJ4_meSwB_ToYRvQsBM4Xn5Hg"
+    }
+  },
+  "boulder-co": {
+    "google": {
+      "placeId": "ChIJmxDiYJzua4cRkS_yiIvkJTY"
+    }
+  },
+  "boynton-fl": {
+    "google": {
+      "placeId": "ChIJVQM3-7nf2IgRfPj4Xe-x0qQ"
+    }
+  },
+  "camelback-phoenix-az": {
+    "google": {
+      "placeId": "ChIJDULVUa8TK4cRanHUYhXgR74"
+    }
+  },
+  "carrollton-tx": {
+    "google": {
+      "placeId": "ChIJm_HtW-8lTIYRSaoRh-sNbIA"
+    }
+  },
+  "chandler-az": {
+    "google": {
+      "placeId": "ChIJK1zSVlKpK4cRYRev_jYqTFM"
+    }
+  },
+  "charlotte-nc": {
+    "google": {
+      "placeId": "ChIJSfSYg04fVIgRXVN57-EVkAM"
+    }
+  },
+  "chicago-il": {
+    "google": {
+      "placeId": "ChIJlVtC0YDND4gRn2iYmlPK0WY"
+    }
+  },
+  "colorado-springs-co": {
+    "google": {
+      "placeId": "ChIJL-AOPaBFE4cRYKol3pl1Jps"
+    }
+  },
+  "dallas-tx": {
+    "google": {
+      "placeId": "ChIJI-1LzYebToYRqbvNS9OxDSA"
+    }
+  },
+  "dundalk-md": {
+    "google": {
+      "placeId": "ChIJBa5DwHwByIkRjvfYzeiO7mA"
+    }
+  },
+  "durham-nc": {
+    "google": {
+      "placeId": "ChIJ92Un99nhrIkRgaOLv4rCEuk"
+    }
+  },
+  "e-hampden-denver-co": {
+    "google": {
+      "placeId": "ChIJmV_HIgKHbIcR_BSUYbPh-zk"
+    }
+  },
+  "fargo-nd": {
+    "google": {
+      "placeId": "ChIJ3W3Z7tPNyFIRyhnMjN0M1I4"
+    }
+  },
+  "fort-worth-tx": {
+    "google": {
+      "placeId": "ChIJZctew617ToYRI4PLVPi3zt0"
+    }
+  },
+  "gaithersburg-md": {
+    "google": {
+      "placeId": "ChIJV9m_WYsttokRvx66g_TRZpk"
+    }
+  },
+  "garland-tx": {
+    "google": {
+      "placeId": "ChIJgW5fRRKnToYRY3_tTHELCEM"
+    }
+  },
+  "glendale-phoenix-az": {
+    "google": {
+      "placeId": "ChIJK4qoscdtK4cRivhi_Imcar8"
+    }
+  },
+  "greenway-phoenix-az": {
+    "google": {
+      "placeId": "ChIJWySejRFxK4cRubuHTesLugQ"
+    }
+  },
+  "haltomcity-tx": {
+    "google": {
+      "placeId": "ChIJb_NiJJx5ToYR2uX28y1RPOE"
+    }
+  },
+  "houston-tx": {
+    "google": {
+      "placeId": "ChIJRYMJnoK5QIYRJJbQpcSrG_Q"
+    }
+  },
+  "indianapolis-in": {
+    "google": {
+      "placeId": "ChIJxSbiOfdVa4gRq0h_rRx9miM"
+    }
+  },
+  "inkster-mi": {
+    "google": {
+      "placeId": "ChIJByj9hO9LO4gRB7XCSG-Jyws"
+    }
+  },
+  "jackson-keller-san-antonio-tx": {
+    "google": {
+      "placeId": "ChIJc7PonsZhXIYRjsYnUKbPqKg"
+    }
+  },
+  "jacksonvillefl": {
+    "google": {
+      "placeId": "ChIJSWuzU8y55YgRKiD432hDPHs"
+    }
+  },
+  "kent-wa": {
+    "google": {
+      "placeId": "ChIJNdQspcVbkFQR_EXRqZLJ35k"
+    }
+  },
+  "knoxville-tn": {
+    "google": {
+      "placeId": "ChIJ69Q8dl89XIgRCSmtIRp4pcQ"
+    }
+  },
+  "lakewood-co": {
+    "google": {
+      "placeId": "ChIJa4RDEF-Ba4cRyL31cCivnL4"
+    }
+  },
+  "lansing-mi": {
+    "google": {
+      "placeId": "ChIJdfhaK33BIogRdx7UURK0cXw"
+    }
+  },
+  "long-beach-ca": {
+    "google": {
+      "placeId": "ChIJlWxhA-Ax3YARmbT6KPK8M6I"
+    }
+  },
+  "louisville-ky": {
+    "google": {
+      "placeId": "ChIJU6v9BGQNaYgRcWnSIeM7kl8"
+    }
+  },
+  "maple-heights-oh": {
+    "google": {
+      "placeId": "ChIJ0c8l6-LjMIgR1YD_ItvchBs"
+    }
+  },
+  "marietta-ga": {
+    "google": {
+      "placeId": "ChIJ-VuMaycT9YgRSMgXhAbik5U"
+    }
+  },
+  "mesa-az-broadway": {
+    "google": {
+      "placeId": "ChIJc_Dlvx2pK4cR3Sc_ivs0Lkg"
+    }
+  },
+  "mesa-az-west-main": {
+    "google": {
+      "placeId": "ChIJo01JdM0JK4cRrlFGkhdvX-s"
+    }
+  },
+  "mesquite-tx": {
+    "google": {
+      "placeId": "ChIJ34k5p-GlToYRhFrh3BtzOxs"
+    }
+  },
+  "midvale-ut": {
+    "google": {
+      "placeId": "ChIJayARMJaJUocRFfiRri429z0"
+    }
+  },
+  "mission-tx": {
+    "google": {
+      "placeId": "ChIJRZ9TwcSpZYYRoUcGezcoxzQ"
+    }
+  },
+  "moreno-valley-ca": {
+    "google": {
+      "placeId": "ChIJA55HUAKl3IARiaU1I8dVAhs"
+    }
+  },
+  "new-haven-ct": {
+    "google": {
+      "placeId": "ChIJoTtLx-vX54kRQdm0fR8Ie5Q"
+    }
+  },
+  "new-orleans-la": {
+    "google": {
+      "placeId": "ChIJld1Z-OmpIIYRTPyWQkcMVO8"
+    }
+  },
+  "oklahoma-city-ok": {
+    "google": {
+      "placeId": "ChIJLSohSjATsocR5W1-gdCnf3M"
+    }
+  },
+  "omaha": {
+    "google": {
+      "placeId": "ChIJUeTfUpeTk4cR2U84o1Y_mbI"
+    }
+  },
+  "peoria-az": {
+    "google": {
+      "placeId": "ChIJNQBq8_BrK4cRFPmW4n3n7ro"
+    }
+  },
+  "phoenix-az": {
+    "google": {
+      "placeId": "ChIJWSksWpYVK4cR3SYboiTe1j4"
+    }
+  },
+  "phoenix-az-n-16": {
+    "google": {
+      "placeId": "ChIJJ2b352UNK4cRcas2XQsSCxo"
+    }
+  },
+  "plano-parker-tx": {
+    "google": {
+      "placeId": "ChIJU2YV6pYZTIYR0k84nCZMMoA"
+    }
+  },
+  "plano-tx": {
+    "google": {
+      "placeId": "ChIJwcUo440bTIYRfJWqduZE7d8"
+    }
+  },
+  "preston-alpha-dallas-tx": {
+    "google": {
+      "placeId": "ChIJGUnkAjEhTIYRDou9U6EV7WI"
+    }
+  },
+  "raleigh-nc": {
+    "google": {
+      "placeId": "ChIJu4DlulFfrIkRgOaVGhtfZI8"
+    }
+  },
+  "rockville-md": {
+    "google": {
+      "placeId": "ChIJrZIYn-7Nt4kRZPGh0s3jE6I"
+    }
+  },
+  "sacramento-ca": {
+    "google": {
+      "placeId": "ChIJ9VPMkbrbmoARZTnznUgw-A0"
+    }
+  },
+  "saint-petersburg-fl": {
+    "google": {
+      "placeId": "ChIJodQsDxbnwogR1UaDI_n926E"
+    }
+  },
+  "san-antonio-tx": {
+    "google": {
+      "placeId": "ChIJl9XLV71fXIYR0pkUx1S2m_A"
+    }
+  },
+  "san-antonio-tx-marbach-st": {
+    "google": {
+      "placeId": "ChIJJQ31JBddXIYRNWMecNUngU4"
+    }
+  },
+  "southgate-mi": {
+    "google": {
+      "placeId": "ChIJO6KqvKo3O4gRcc4T2_6M7sM"
+    }
+  },
+  "tempe-az": {
+    "google": {
+      "placeId": "ChIJ3Z8m9BsGK4cRp1jm3C_fqIk"
+    }
+  },
+  "tempe-az-broadway": {
+    "google": {
+      "placeId": "ChIJ3Z8m9BsGK4cRp1jm3C_fqIk"
+    }
+  },
+  "temple-tx": {
+    "google": {
+      "placeId": "ChIJWX2bQJZrRYYRvaGNSx-f6EE"
+    }
+  },
+  "temple-tx-olaf-dr": {
+    "google": {
+      "placeId": "ChIJtTzXh0ZrRYYRNRHcm9s4UZo"
+    }
+  },
+  "thecolony": {
+    "google": {
+      "placeId": "ChIJe0ia3iU7TIYRFLRSJAHCaVA"
+    }
+  },
+  "thornton-co": {
+    "google": {
+      "placeId": "ChIJpQ5eUBh3bIcRbvB6zMNM3Pg"
+    }
+  },
+  "tucson-az": {
+    "google": {
+      "placeId": "ChIJSyxxFv5x1oYRb5gNXNqhA-Y"
+    }
+  },
+  "tustin-ca": {
+    "google": {
+      "placeId": "ChIJoWvcNGzb3IARCOvMD75FyCA"
+    }
+  },
+  "vancouver-wa": {
+    "google": {
+      "placeId": "ChIJb1rQtwyvlVQR12_0pgvaMs4"
+    }
+  },
+  "westminster-co": {
+    "google": {
+      "placeId": "ChIJXV3y5M-Ja4cR2PQ0e6qtAsY"
+    }
+  },
+  "wyoming-mi": {
+    "google": {
+      "placeId": "ChIJ1aY6WG6xGYgRHCwfvpPVnJc"
     }
   }
 }
