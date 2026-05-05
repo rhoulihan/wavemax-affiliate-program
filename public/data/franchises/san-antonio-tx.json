@@ -27,11 +27,19 @@
   "hours": {
     "open": "",
     "close": "",
-    "display": "Call for hours",
-    "lastWash": "",
-    "days": ""
+    "display": "Monday-Sunday 7 am- 10 pm",
+    "lastWash": "9:00pm",
+    "days": "Open daily"
   },
-  "owners": [],
+  "owners": [
+    {
+      "name": "Dan Denbow / David Levenhagen",
+      "role": "Owner / Operator",
+      "tag": "",
+      "bio": "",
+      "avatarStyle": "primary"
+    }
+  ],
   "aboutContent": {
     "heroTitle": "",
     "heroTagline": "",
@@ -77,19 +85,19 @@
   },
   "pricing": {
     "wdf": {
-      "rate": null,
-      "minLb": null,
+      "rate": 1.39,
+      "minLb": 15,
       "currency": "USD",
-      "display": "Call for pricing"
+      "display": "$1.39/lb"
     },
     "selfServe": {
-      "minLoad": null,
-      "maxLoad": null,
-      "minLoadDisplay": "",
-      "maxLoadDisplay": "",
+      "minLoad": 2.49,
+      "maxLoad": 3.56,
+      "minLoadDisplay": "$2.49",
+      "maxLoadDisplay": "$3.56",
       "washMin": null,
       "dryMin": null,
-      "rangeDisplay": "Call for pricing"
+      "rangeDisplay": "$2.49 – $3.56"
     },
     "commercial": {
       "rateFromLb": null,
@@ -203,5 +211,8 @@
     "additional": [],
     "sublinkExtensions": {}
   },
-  "iframeOverrides": {}
+  "iframeOverrides": {},
+  "socialMedia": {
+    "facebook": "https://www.facebook.com/p/WaveMAX-San-Antonio-1552-Babcock-Rd-100077448057508/"
+  }
 }

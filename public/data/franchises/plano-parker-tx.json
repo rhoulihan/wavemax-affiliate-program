@@ -22,16 +22,25 @@
       "lng": -96.715415
     },
     "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=930+Parker+Rd.%2C+Suite+520+Plano+TX+75075",
-    "mapsEmbedUrl": "https://www.google.com/maps?q=WaveMAX+Laundry+930+Parker+Rd.%2C+Suite+520+Plano+TX+75075&output=embed"
+    "mapsEmbedUrl": "https://www.google.com/maps?q=WaveMAX+Laundry+930+Parker+Rd.%2C+Suite+520+Plano+TX+75075&output=embed",
+    "neighborhood": "Plano"
   },
   "hours": {
     "open": "",
     "close": "",
-    "display": "Call for hours",
-    "lastWash": "",
-    "days": ""
+    "display": "7am to 10pm Daily",
+    "lastWash": "9:00pm",
+    "days": "Open daily"
   },
-  "owners": [],
+  "owners": [
+    {
+      "name": "Kevin Ng",
+      "role": "Owner / Operator",
+      "tag": "",
+      "bio": "",
+      "avatarStyle": "primary"
+    }
+  ],
   "aboutContent": {
     "heroTitle": "",
     "heroTagline": "",
@@ -77,19 +86,19 @@
   },
   "pricing": {
     "wdf": {
-      "rate": null,
-      "minLb": null,
+      "rate": 1.95,
+      "minLb": 48,
       "currency": "USD",
-      "display": "Call for pricing"
+      "display": "$1.95/lb"
     },
     "selfServe": {
-      "minLoad": null,
-      "maxLoad": null,
-      "minLoadDisplay": "",
-      "maxLoadDisplay": "",
+      "minLoad": 2.75,
+      "maxLoad": 8.99,
+      "minLoadDisplay": "$2.75",
+      "maxLoadDisplay": "$8.99",
       "washMin": null,
       "dryMin": null,
-      "rangeDisplay": "Call for pricing"
+      "rangeDisplay": "$2.75 – $8.99"
     },
     "commercial": {
       "rateFromLb": null,
@@ -205,5 +214,9 @@
     "additional": [],
     "sublinkExtensions": {}
   },
-  "iframeOverrides": {}
+  "iframeOverrides": {},
+  "socialMedia": {
+    "facebook": "https://www.facebook.com/wavemaxplanoparker/",
+    "instagram": "https://www.instagram.com/wavemaxplanoparker/"
+  }
 }

@@ -25,13 +25,21 @@
     "mapsEmbedUrl": "https://www.google.com/maps?q=WaveMAX+Laundry+20980+Libby+Rd+Maple+Heights+OH+44137&output=embed"
   },
   "hours": {
-    "open": "",
-    "close": "",
-    "display": "Call for hours",
-    "lastWash": "",
-    "days": ""
+    "open": "07:00",
+    "close": "22:00",
+    "display": "7am - 10pm",
+    "lastWash": "9:00pm",
+    "days": "Open daily"
   },
-  "owners": [],
+  "owners": [
+    {
+      "name": "Brian and Angela Simmons",
+      "role": "Owner / Operator",
+      "tag": "",
+      "bio": "",
+      "avatarStyle": "primary"
+    }
+  ],
   "aboutContent": {
     "heroTitle": "",
     "heroTagline": "",
@@ -77,10 +85,10 @@
   },
   "pricing": {
     "wdf": {
-      "rate": null,
+      "rate": 1.99,
       "minLb": null,
       "currency": "USD",
-      "display": "Call for pricing"
+      "display": "$1.99/lb"
     },
     "selfServe": {
       "minLoad": null,
@@ -184,5 +192,6 @@
     "additional": [],
     "sublinkExtensions": {}
   },
-  "iframeOverrides": {}
+  "iframeOverrides": {},
+  "socialMedia": {}
 }

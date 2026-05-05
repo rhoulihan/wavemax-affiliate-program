@@ -27,9 +27,9 @@
   "hours": {
     "open": "",
     "close": "",
-    "display": "Call for hours",
+    "display": "7am to 10pm Daily",
     "lastWash": "",
-    "days": ""
+    "days": "Open daily"
   },
   "owners": [],
   "aboutContent": {
@@ -77,10 +77,10 @@
   },
   "pricing": {
     "wdf": {
-      "rate": null,
-      "minLb": null,
+      "rate": 1.25,
+      "minLb": 12,
       "currency": "USD",
-      "display": "Call for pricing"
+      "display": "$1.25/lb"
     },
     "selfServe": {
       "minLoad": null,
@@ -193,5 +193,6 @@
     "additional": [],
     "sublinkExtensions": {}
   },
-  "iframeOverrides": {}
+  "iframeOverrides": {},
+  "socialMedia": {}
 }

@@ -27,11 +27,19 @@
   "hours": {
     "open": "",
     "close": "",
-    "display": "Call for hours",
-    "lastWash": "",
-    "days": ""
+    "display": "Mon–Sat 8am–8pm, Sun 12pm–8pm",
+    "lastWash": "7:30pm",
+    "days": "Open daily"
   },
-  "owners": [],
+  "owners": [
+    {
+      "name": "Anil & Gina Markose",
+      "role": "Owner / Operator",
+      "tag": "",
+      "bio": "",
+      "avatarStyle": "primary"
+    }
+  ],
   "aboutContent": {
     "heroTitle": "",
     "heroTagline": "",
@@ -77,10 +85,10 @@
   },
   "pricing": {
     "wdf": {
-      "rate": null,
-      "minLb": null,
+      "rate": 2.35,
+      "minLb": 10,
       "currency": "USD",
-      "display": "Call for pricing"
+      "display": "$2.35/lb"
     },
     "selfServe": {
       "minLoad": null,
@@ -200,5 +208,8 @@
     "additional": [],
     "sublinkExtensions": {}
   },
-  "iframeOverrides": {}
+  "iframeOverrides": {},
+  "socialMedia": {
+    "instagram": "instagram.com/wavemaxlaundrystpete"
+  }
 }

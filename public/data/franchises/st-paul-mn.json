@@ -27,11 +27,19 @@
   "hours": {
     "open": "",
     "close": "",
-    "display": "Call for hours",
-    "lastWash": "",
-    "days": ""
+    "display": "Every Day 7am to 10pm",
+    "lastWash": "9:00pm",
+    "days": "Open daily"
   },
-  "owners": [],
+  "owners": [
+    {
+      "name": "Ross Johnson",
+      "role": "Owner / Operator",
+      "tag": "",
+      "bio": "",
+      "avatarStyle": "primary"
+    }
+  ],
   "aboutContent": {
     "heroTitle": "",
     "heroTagline": "",
@@ -77,19 +85,19 @@
   },
   "pricing": {
     "wdf": {
-      "rate": null,
+      "rate": 1.49,
       "minLb": null,
       "currency": "USD",
-      "display": "Call for pricing"
+      "display": "$1.49/lb"
     },
     "selfServe": {
-      "minLoad": null,
-      "maxLoad": null,
-      "minLoadDisplay": "",
-      "maxLoadDisplay": "",
+      "minLoad": 3.65,
+      "maxLoad": 11.95,
+      "minLoadDisplay": "$3.65",
+      "maxLoadDisplay": "$11.95",
       "washMin": null,
       "dryMin": null,
-      "rangeDisplay": "Call for pricing"
+      "rangeDisplay": "$3.65 – $11.95"
     },
     "commercial": {
       "rateFromLb": null,
@@ -202,5 +210,8 @@
     "additional": [],
     "sublinkExtensions": {}
   },
-  "iframeOverrides": {}
+  "iframeOverrides": {},
+  "socialMedia": {
+    "facebook": "https://www.facebook.com/wavemaxlaundrystpaul/"
+  }
 }

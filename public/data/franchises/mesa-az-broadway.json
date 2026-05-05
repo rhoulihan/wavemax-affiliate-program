@@ -22,16 +22,25 @@
       "lng": -111.774341
     },
     "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=2639+E+Broadway+Rd%2C+St.+101+Mesa+AZ+85204",
-    "mapsEmbedUrl": "https://www.google.com/maps?q=WaveMAX+Laundry+2639+E+Broadway+Rd%2C+St.+101+Mesa+AZ+85204&output=embed"
+    "mapsEmbedUrl": "https://www.google.com/maps?q=WaveMAX+Laundry+2639+E+Broadway+Rd%2C+St.+101+Mesa+AZ+85204&output=embed",
+    "neighborhood": "Mesa - Broadway and Lindsey"
   },
   "hours": {
     "open": "",
     "close": "",
-    "display": "Call for hours",
+    "display": "7am to 10pm Daily",
     "lastWash": "",
-    "days": ""
+    "days": "Open daily"
   },
-  "owners": [],
+  "owners": [
+    {
+      "name": "Ryan and Stephanie Edwards",
+      "role": "Owner / Operator",
+      "tag": "",
+      "bio": "",
+      "avatarStyle": "primary"
+    }
+  ],
   "aboutContent": {
     "heroTitle": "",
     "heroTagline": "",
@@ -77,10 +86,10 @@
   },
   "pricing": {
     "wdf": {
-      "rate": null,
-      "minLb": null,
+      "rate": 1.49,
+      "minLb": 15,
       "currency": "USD",
-      "display": "Call for pricing"
+      "display": "$1.49/lb"
     },
     "selfServe": {
       "minLoad": null,
@@ -195,5 +204,8 @@
     "additional": [],
     "sublinkExtensions": {}
   },
-  "iframeOverrides": {}
+  "iframeOverrides": {},
+  "socialMedia": {
+    "facebook": "https://www.facebook.com/wavemaxmesabroadway"
+  }
 }

@@ -27,11 +27,19 @@
   "hours": {
     "open": "",
     "close": "",
-    "display": "Call for hours",
+    "display": "7am to 10pm Daily",
     "lastWash": "",
-    "days": ""
+    "days": "Open daily"
   },
-  "owners": [],
+  "owners": [
+    {
+      "name": "Carlos Barboza",
+      "role": "Owner / Operator",
+      "tag": "",
+      "bio": "",
+      "avatarStyle": "primary"
+    }
+  ],
   "aboutContent": {
     "heroTitle": "",
     "heroTagline": "",
@@ -77,10 +85,10 @@
   },
   "pricing": {
     "wdf": {
-      "rate": null,
+      "rate": 1.25,
       "minLb": null,
       "currency": "USD",
-      "display": "Call for pricing"
+      "display": "$1.25/lb"
     },
     "selfServe": {
       "minLoad": null,
@@ -189,5 +197,6 @@
     "additional": [],
     "sublinkExtensions": {}
   },
-  "iframeOverrides": {}
+  "iframeOverrides": {},
+  "socialMedia": {}
 }

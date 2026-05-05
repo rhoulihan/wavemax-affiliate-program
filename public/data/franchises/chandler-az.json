@@ -22,16 +22,25 @@
       "lng": -111.841118
     },
     "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=2081+N+Arizona+Ave+%23129+Chandler+AZ+85225",
-    "mapsEmbedUrl": "https://www.google.com/maps?q=WaveMAX+Laundry+2081+N+Arizona+Ave+%23129+Chandler+AZ+85225&output=embed"
+    "mapsEmbedUrl": "https://www.google.com/maps?q=WaveMAX+Laundry+2081+N+Arizona+Ave+%23129+Chandler+AZ+85225&output=embed",
+    "neighborhood": "Chandler"
   },
   "hours": {
     "open": "",
     "close": "",
-    "display": "Call for hours",
-    "lastWash": "",
-    "days": ""
+    "display": "Mon-Sun 7am-10pm",
+    "lastWash": "9pm",
+    "days": "Open daily"
   },
-  "owners": [],
+  "owners": [
+    {
+      "name": "Mao Wen",
+      "role": "Owner / Operator",
+      "tag": "",
+      "bio": "",
+      "avatarStyle": "primary"
+    }
+  ],
   "aboutContent": {
     "heroTitle": "",
     "heroTagline": "",
@@ -77,19 +86,19 @@
   },
   "pricing": {
     "wdf": {
-      "rate": null,
-      "minLb": null,
+      "rate": 1.49,
+      "minLb": 10,
       "currency": "USD",
-      "display": "Call for pricing"
+      "display": "$1.49/lb"
     },
     "selfServe": {
-      "minLoad": null,
-      "maxLoad": null,
-      "minLoadDisplay": "",
-      "maxLoadDisplay": "",
+      "minLoad": 3.09,
+      "maxLoad": 10.29,
+      "minLoadDisplay": "$3.09",
+      "maxLoadDisplay": "$10.29",
       "washMin": null,
       "dryMin": null,
-      "rangeDisplay": "Call for pricing"
+      "rangeDisplay": "$3.09 – $10.29"
     },
     "commercial": {
       "rateFromLb": null,
@@ -198,5 +207,9 @@
     "additional": [],
     "sublinkExtensions": {}
   },
-  "iframeOverrides": {}
+  "iframeOverrides": {},
+  "socialMedia": {
+    "facebook": "https://www.facebook.com/wavemaxchandler/",
+    "instagram": "https://www.instagram.com/wavemaxchandler/"
+  }
 }

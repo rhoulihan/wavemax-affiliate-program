@@ -27,9 +27,9 @@
   "hours": {
     "open": "",
     "close": "",
-    "display": "Call for hours",
-    "lastWash": "",
-    "days": ""
+    "display": "Monday through Friday, 7 am to 10pm, Saturday and Sunday 6:30am to 10pm",
+    "lastWash": "9:00pm",
+    "days": "Open daily"
   },
   "owners": [],
   "aboutContent": {
@@ -77,19 +77,19 @@
   },
   "pricing": {
     "wdf": {
-      "rate": null,
-      "minLb": null,
+      "rate": 1.35,
+      "minLb": 15,
       "currency": "USD",
-      "display": "Call for pricing"
+      "display": "$1.35/lb"
     },
     "selfServe": {
-      "minLoad": null,
-      "maxLoad": null,
-      "minLoadDisplay": "",
-      "maxLoadDisplay": "",
+      "minLoad": 2.99,
+      "maxLoad": 8.99,
+      "minLoadDisplay": "$2.99",
+      "maxLoadDisplay": "$8.99",
       "washMin": null,
       "dryMin": null,
-      "rangeDisplay": "Call for pricing"
+      "rangeDisplay": "$2.99 – $8.99"
     },
     "commercial": {
       "rateFromLb": null,
@@ -203,5 +203,8 @@
     "additional": [],
     "sublinkExtensions": {}
   },
-  "iframeOverrides": {}
+  "iframeOverrides": {},
+  "socialMedia": {
+    "facebook": "https://www.facebook.com/wavemaxmd/"
+  }
 }

@@ -25,13 +25,21 @@
     "mapsEmbedUrl": "https://www.google.com/maps?q=WaveMAX+Laundry+6767+N+35th+Ave+Phoenix+AZ+85017&output=embed"
   },
   "hours": {
-    "open": "",
-    "close": "",
-    "display": "Call for hours",
-    "lastWash": "",
-    "days": ""
+    "open": "07:00",
+    "close": "22:00",
+    "display": "7 AM - 10 PM",
+    "lastWash": "9:00pm",
+    "days": "Open daily"
   },
-  "owners": [],
+  "owners": [
+    {
+      "name": "Craig & Shuying Sawyers",
+      "role": "Owner / Operator",
+      "tag": "",
+      "bio": "",
+      "avatarStyle": "primary"
+    }
+  ],
   "aboutContent": {
     "heroTitle": "",
     "heroTagline": "",
@@ -77,19 +85,19 @@
   },
   "pricing": {
     "wdf": {
-      "rate": null,
-      "minLb": null,
+      "rate": 1.89,
+      "minLb": 20,
       "currency": "USD",
-      "display": "Call for pricing"
+      "display": "$1.89/lb"
     },
     "selfServe": {
-      "minLoad": null,
-      "maxLoad": null,
-      "minLoadDisplay": "",
-      "maxLoadDisplay": "",
+      "minLoad": 3.89,
+      "maxLoad": 11.89,
+      "minLoadDisplay": "$3.89",
+      "maxLoadDisplay": "$11.89",
       "washMin": null,
       "dryMin": null,
-      "rangeDisplay": "Call for pricing"
+      "rangeDisplay": "$3.89 – $11.89"
     },
     "commercial": {
       "rateFromLb": null,
@@ -203,5 +211,6 @@
     "additional": [],
     "sublinkExtensions": {}
   },
-  "iframeOverrides": {}
+  "iframeOverrides": {},
+  "socialMedia": {}
 }

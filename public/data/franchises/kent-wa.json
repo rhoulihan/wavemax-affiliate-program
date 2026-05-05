@@ -22,16 +22,25 @@
       "lng": -122.301707
     },
     "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=25642+Pacific+Hwy+S+%2316+Kent+WA+98032",
-    "mapsEmbedUrl": "https://www.google.com/maps?q=WaveMAX+Laundry+25642+Pacific+Hwy+S+%2316+Kent+WA+98032&output=embed"
+    "mapsEmbedUrl": "https://www.google.com/maps?q=WaveMAX+Laundry+25642+Pacific+Hwy+S+%2316+Kent+WA+98032&output=embed",
+    "neighborhood": "Kent / Des Moines / Federal Way & Surrounding Communities"
   },
   "hours": {
-    "open": "",
-    "close": "",
-    "display": "Call for hours",
-    "lastWash": "",
-    "days": ""
+    "open": "07:00",
+    "close": "22:00",
+    "display": "7:00am - 10:00pm",
+    "lastWash": "9:00pm",
+    "days": "Open daily"
   },
-  "owners": [],
+  "owners": [
+    {
+      "name": "Dametra Johnson-Marletti",
+      "role": "Owner / Operator",
+      "tag": "",
+      "bio": "",
+      "avatarStyle": "primary"
+    }
+  ],
   "aboutContent": {
     "heroTitle": "",
     "heroTagline": "",
@@ -77,19 +86,19 @@
   },
   "pricing": {
     "wdf": {
-      "rate": null,
-      "minLb": null,
+      "rate": 1.5,
+      "minLb": 23,
       "currency": "USD",
-      "display": "Call for pricing"
+      "display": "$1.50/lb"
     },
     "selfServe": {
-      "minLoad": null,
-      "maxLoad": null,
-      "minLoadDisplay": "",
-      "maxLoadDisplay": "",
+      "minLoad": 4.25,
+      "maxLoad": 11,
+      "minLoadDisplay": "$4.25",
+      "maxLoadDisplay": "$11.00",
       "washMin": null,
       "dryMin": null,
-      "rangeDisplay": "Call for pricing"
+      "rangeDisplay": "$4.25 – $11.00"
     },
     "commercial": {
       "rateFromLb": null,
@@ -205,5 +214,9 @@
     "additional": [],
     "sublinkExtensions": {}
   },
-  "iframeOverrides": {}
+  "iframeOverrides": {},
+  "socialMedia": {
+    "facebook": "https://www.facebook.com/wavemaxkent",
+    "instagram": "https://www.instagram.com/wavemaxkent/"
+  }
 }

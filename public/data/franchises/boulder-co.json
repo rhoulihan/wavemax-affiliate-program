@@ -27,9 +27,9 @@
   "hours": {
     "open": "",
     "close": "",
-    "display": "Call for hours",
+    "display": "7am to 10pm Daily",
     "lastWash": "",
-    "days": ""
+    "days": "Open daily"
   },
   "owners": [],
   "aboutContent": {
@@ -205,5 +205,6 @@
     "additional": [],
     "sublinkExtensions": {}
   },
-  "iframeOverrides": {}
+  "iframeOverrides": {},
+  "socialMedia": {}
 }

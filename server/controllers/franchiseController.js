@@ -63,6 +63,20 @@ function buildInitialIframeSrc(resolution) {
   return null;
 }
 
+// Strip PII fields from the data object before injecting into the HTML.
+// Owner emails are populated server-side from corporate scraping (see
+// scripts/franchise-build/fetch-emails.js + fetch-corporate-data.js)
+// and used for contact-form delivery routing only — they must never
+// reach the rendered page or the browser-readable LOCATION_DATA blob.
+function sanitizeForClient(data) {
+  const out = JSON.parse(JSON.stringify(data));
+  if (out.contact) {
+    delete out.contact.email;
+    delete out.contact.emailMailto;
+  }
+  return out;
+}
+
 exports.renderFranchisePage = (req, res, next) => {
   const slug = req.params.slug;
   const page = req.params.page ? `/${req.params.page}` : '/';
@@ -79,10 +93,17 @@ exports.renderFranchisePage = (req, res, next) => {
   // of LOCATION_DATA.equipment instead of hardcoding Austin numbers.
   // Stores without an explicit profileId fall back to the unaudited
   // mixed-fleet profile, so we never make claims we can't back up.
-  const data = {
+  const enriched = {
     ...resolution.data,
     equipment: equipmentProfileService.resolve(resolution.data)
   };
+
+  // Owner emails (scraped from corporate JSON-LD) are PII — never expose
+  // them in the rendered HTML or in the client-side LOCATION_DATA blob.
+  // The contact form's POST handler reads contact.email directly from
+  // the registry file via loadLocationData(slug) on the server, so form
+  // routing still works; clients just don't see the address.
+  const data = sanitizeForClient(enriched);
   const iframeSrc = buildInitialIframeSrc(resolution);
 
   const title = data.brand.name;

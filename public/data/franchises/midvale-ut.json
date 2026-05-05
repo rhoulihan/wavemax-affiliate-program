@@ -22,16 +22,25 @@
       "lng": -111.892455
     },
     "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=48+W+7200+S+Midvale+UT+84047",
-    "mapsEmbedUrl": "https://www.google.com/maps?q=WaveMAX+Laundry+48+W+7200+S+Midvale+UT+84047&output=embed"
+    "mapsEmbedUrl": "https://www.google.com/maps?q=WaveMAX+Laundry+48+W+7200+S+Midvale+UT+84047&output=embed",
+    "neighborhood": "Salt Lake City Metropolitan Area"
   },
   "hours": {
     "open": "",
     "close": "",
-    "display": "Call for hours",
-    "lastWash": "",
-    "days": ""
+    "display": "7am to 10pm Daily",
+    "lastWash": "9:00pm",
+    "days": "Open daily"
   },
-  "owners": [],
+  "owners": [
+    {
+      "name": "David and Patti Royster",
+      "role": "Owner / Operator",
+      "tag": "",
+      "bio": "",
+      "avatarStyle": "primary"
+    }
+  ],
   "aboutContent": {
     "heroTitle": "",
     "heroTagline": "",
@@ -77,19 +86,19 @@
   },
   "pricing": {
     "wdf": {
-      "rate": null,
-      "minLb": null,
+      "rate": 1.49,
+      "minLb": 15,
       "currency": "USD",
-      "display": "Call for pricing"
+      "display": "$1.49/lb"
     },
     "selfServe": {
-      "minLoad": null,
-      "maxLoad": null,
-      "minLoadDisplay": "",
-      "maxLoadDisplay": "",
+      "minLoad": 3.25,
+      "maxLoad": 10,
+      "minLoadDisplay": "$3.25",
+      "maxLoadDisplay": "$10.00",
       "washMin": null,
       "dryMin": null,
-      "rangeDisplay": "Call for pricing"
+      "rangeDisplay": "$3.25 – $10.00"
     },
     "commercial": {
       "rateFromLb": null,
@@ -187,5 +196,9 @@
     "additional": [],
     "sublinkExtensions": {}
   },
-  "iframeOverrides": {}
+  "iframeOverrides": {},
+  "socialMedia": {
+    "facebook": "https://www.facebook.com/WavemaxMidvale",
+    "instagram": "https://www.instagram.com/wavemaxlaundromatmidvale/"
+  }
 }

@@ -27,11 +27,19 @@
   "hours": {
     "open": "",
     "close": "",
-    "display": "Call for hours",
-    "lastWash": "",
-    "days": ""
+    "display": "Mon-Sun 7am-10pm",
+    "lastWash": "9:00pm",
+    "days": "Open daily"
   },
-  "owners": [],
+  "owners": [
+    {
+      "name": "Anthony Reid",
+      "role": "Owner / Operator",
+      "tag": "",
+      "bio": "",
+      "avatarStyle": "primary"
+    }
+  ],
   "aboutContent": {
     "heroTitle": "",
     "heroTagline": "",
@@ -77,10 +85,10 @@
   },
   "pricing": {
     "wdf": {
-      "rate": null,
+      "rate": 0.99,
       "minLb": null,
       "currency": "USD",
-      "display": "Call for pricing"
+      "display": "$0.99/lb"
     },
     "selfServe": {
       "minLoad": null,
@@ -204,5 +212,6 @@
     "additional": [],
     "sublinkExtensions": {}
   },
-  "iframeOverrides": {}
+  "iframeOverrides": {},
+  "socialMedia": {}
 }

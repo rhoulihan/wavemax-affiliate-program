@@ -27,11 +27,19 @@
   "hours": {
     "open": "",
     "close": "",
-    "display": "Call for hours",
+    "display": "Mon-Sunday 7am to 10pm",
     "lastWash": "",
-    "days": ""
+    "days": "Open daily"
   },
-  "owners": [],
+  "owners": [
+    {
+      "name": "Heidi Boehme",
+      "role": "Owner / Operator",
+      "tag": "",
+      "bio": "",
+      "avatarStyle": "primary"
+    }
+  ],
   "aboutContent": {
     "heroTitle": "",
     "heroTagline": "",
@@ -77,10 +85,10 @@
   },
   "pricing": {
     "wdf": {
-      "rate": null,
+      "rate": 1.69,
       "minLb": null,
       "currency": "USD",
-      "display": "Call for pricing"
+      "display": "$1.69/lb"
     },
     "selfServe": {
       "minLoad": null,
@@ -201,5 +209,6 @@
     "additional": [],
     "sublinkExtensions": {}
   },
-  "iframeOverrides": {}
+  "iframeOverrides": {},
+  "socialMedia": {}
 }
