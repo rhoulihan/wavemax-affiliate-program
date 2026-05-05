@@ -3,35 +3,35 @@
  * Shared header + footer for the corporate-content pages on wavemax.promo
  * (/franchise/, /become-a-franchisee/, /about/, /testimonials/, etc.).
  *
- * These pages live OUTSIDE the per-franchise iframe architecture — they
- * have no LOCATION_DATA, no slug, no per-store data. Each page includes
- * this script and renders into two placeholder elements:
- *
- *     <header id="wm-corp-header"></header>
- *     <footer id="wm-corp-footer"></footer>
- *
- * Single source of truth for navigation across the corporate pages so
- * adding a new corporate page or renaming an existing one only edits
- * this file.
+ * Renders the SAME wmlnav-wrap chrome used by per-franchise host pages
+ * (franchise-host.html), so corporate and per-store pages share one visual
+ * identity. Picks up styling from wavemax-mhr-chrome.css. The b1 utility
+ * strip shows brand context (awards / location count) instead of a single
+ * store's hours; b2 (logo + "Find a Location" CTA) and b3 (nav) match
+ * exactly. Footer continues to use wmcc-foot- classes from corporate-chrome.css.
  */
 (function () {
   'use strict';
 
-  const NAV = {
-    franchise: {
-      label: 'Franchise',
-      items: [
-        { href: '/franchise/',                  label: 'Overview' },
-        { href: '/become-a-franchisee/',        label: 'Become a Franchisee' },
-        { href: '/why-invest-in-wavemax/',      label: 'Why Invest in WaveMAX' },
-        { href: '/laundromat-investment-guide/', label: 'Investment Guide' },
-        { href: '/wavemax-vs-zombiemat/',       label: 'WaveMAX vs Zombiemat' },
-        { href: '/virtual-tour/',               label: 'Virtual Tour' },
-        { href: '/faq/',                        label: 'FAQ' },
-        { href: '/testimonials/',               label: 'Testimonials' }
-      ]
-    }
-  };
+  /* ---------- NAV CONFIG ---------- */
+  // Top-level nav rendered into b3.  Each entry is either { href, label }
+  // (a flat link) or { label, items:[{href,label}] } (a dropdown — pure-CSS
+  // hover behavior via .wmlnav-drop / .wmlnav-drop-menu).
+  const NAV = [
+    { href: '/franchise/',                  label: 'Home' },
+    { label: 'Franchise', items: [
+      { href: '/franchise/',                  label: 'Overview' },
+      { href: '/become-a-franchisee/',        label: 'Become a Franchisee' },
+      { href: '/why-invest-in-wavemax/',      label: 'Why Invest in WaveMAX' },
+      { href: '/laundromat-investment-guide/', label: 'Investment Guide' },
+      { href: '/wavemax-vs-zombiemat/',       label: 'WaveMAX vs Zombiemat' }
+    ]},
+    { href: '/virtual-tour/',               label: 'Virtual Tour' },
+    { href: '/about/',                      label: 'About' },
+    { href: '/testimonials/',               label: 'Testimonials' },
+    { href: '/faq/',                        label: 'FAQ' },
+    { href: '/contact/',                    label: 'Contact' }
+  ];
 
   const FOOTER_LINKS = [
     {
@@ -63,50 +63,76 @@
     }
   ];
 
-  const LOGO_URL = 'https://wavemaxlaundry.com/wp-content/uploads/2026/03/logo-wavemax.png';
+  const LOGO_URL   = 'https://www.wavemaxlaundry.com/wp-content/uploads/2026/03/logo-wavemax.png';
   const HQ_ADDRESS = '929 McDuff Ave S, Suite 107';
   const HQ_CITY    = 'Jacksonville, FL 32205';
   const COPYRIGHT  = '© ' + (new Date()).getFullYear() + ' AU Hydro LLC dba WaveMAX Laundry. All rights reserved.';
 
-  /* ---------- HEADER ---------- */
+  /* ---------- HEADER (wmlnav-wrap, matches franchise-host.html) ---------- */
   function buildHeader() {
-    const navItems = NAV.franchise.items.map((it) =>
-      `<a class="wmcc-drop-item" href="${esc(it.href)}">${esc(it.label)}</a>`
-    ).join('');
+    const navItems = NAV.map((item) => {
+      if (item.items) {
+        const sub = item.items.map((s) =>
+          `<a href="${esc(s.href)}">${esc(s.label)}</a>`
+        ).join('');
+        return `
+          <div class="wmlnav-drop">
+            <a href="${esc(item.items[0].href)}">
+              <span>${esc(item.label)}</span><span class="wmlnav-arrow"></span>
+            </a>
+            <div class="wmlnav-drop-menu">${sub}</div>
+          </div>
+        `;
+      }
+      return `<a href="${esc(item.href)}">${esc(item.label)}</a>`;
+    }).join('');
 
     return `
-      <div class="wmcc-bar">
-        <div class="wmcc-bar-inner">
-          <a class="wmcc-logo" href="/franchise/" aria-label="WaveMAX Laundry — Franchise home">
-            <img src="${esc(LOGO_URL)}" alt="WaveMAX Laundry" referrerpolicy="no-referrer" loading="eager" decoding="async">
-          </a>
-          <nav class="wmcc-nav" aria-label="Primary">
-            <div class="wmcc-drop">
-              <button type="button" class="wmcc-nav-link wmcc-drop-toggle" aria-expanded="false" aria-haspopup="menu">
-                ${esc(NAV.franchise.label)} <span class="wmcc-caret" aria-hidden="true">▾</span>
-              </button>
-              <div class="wmcc-drop-menu" role="menu">${navItems}</div>
+      <div id="wmlnav-wrap">
+        <div class="wmlnav-b1">
+          <div class="wmlnav-inner">
+            <div class="wmlnav-b1-left">
+              <span aria-hidden="true">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l2.39 6.95H22l-6.19 4.5 2.39 6.95L12 16l-6.2 4.4 2.39-6.95L2 8.95h7.61L12 2z"/></svg>
+                #1 Laundromat Franchise · 2026 Entrepreneur Franchise 500
+              </span>
+              <span aria-hidden="true">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                75+ locations nationwide &amp; growing
+              </span>
             </div>
-            <a class="wmcc-nav-link" href="/about/">About</a>
-            <a class="wmcc-nav-link" href="/contact/">Contact</a>
-            <button type="button" class="wmcc-nav-cta" data-locmodal-open data-action="open-locations">Find a Location</button>
-          </nav>
-          <button type="button" class="wmcc-burger" aria-expanded="false" aria-label="Open menu">
-            <span></span><span></span><span></span>
-          </button>
+            <div class="wmlnav-b1-right">
+              <a href="/why-invest-in-wavemax/">$471K avg gross · 2024 Item 19 →</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="wmlnav-b2">
+          <div class="wmlnav-inner">
+            <div class="wmlnav-b2-logo">
+              <a href="/franchise/" aria-label="WaveMAX Laundry — Franchise home">
+                <img decoding="async" src="${esc(LOGO_URL)}" alt="WaveMAX Laundry">
+              </a>
+            </div>
+            <div class="wmlnav-b2-right">
+              <a href="/become-a-franchisee/" class="wmlnav-btn-out">Become a Franchisee</a>
+              <button type="button" class="wmlnav-btn-sol" data-action="open-locations">Find a Location</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="wmlnav-b3">
+          <div class="wmlnav-b3-inner">
+            <nav id="wmlnav-nav" aria-label="Primary navigation">
+              ${navItems}
+            </nav>
+          </div>
         </div>
       </div>
-      <nav class="wmcc-mobile" aria-label="Mobile">
-        <a class="wmcc-mob-link wmcc-mob-section" href="/franchise/">Franchise · Overview</a>
-        ${NAV.franchise.items.slice(1).map((it) => `<a class="wmcc-mob-link" href="${esc(it.href)}">${esc(it.label)}</a>`).join('')}
-        <a class="wmcc-mob-link wmcc-mob-section" href="/about/">About</a>
-        <a class="wmcc-mob-link" href="/contact/">Contact</a>
-        <a class="wmcc-mob-link" href="#" data-action="open-locations">Find a Location</a>
-      </nav>
     `;
   }
 
-  /* ---------- FOOTER ---------- */
+  /* ---------- FOOTER (wmcc- classes from corporate-chrome.css) ---------- */
   function buildFooter() {
     const cols = FOOTER_LINKS.map((col) => `
       <div class="wmcc-foot-col">
@@ -149,59 +175,18 @@
       .replace(/"/g, '&quot;');
   }
 
-  /* ---------- INTERACTIONS ---------- */
-  // Dropdown + mobile drawer + locations modal trigger.
+  /* ---------- INTERACTIONS ----------
+   * The wmlnav-drop dropdown is pure CSS hover; no JS interaction needed
+   * for that. We only wire the "Find a Location" CTA — for now it falls
+   * through to corporate's locations index. When the cross-corporate
+   * locations modal lands, this becomes a no-redirect modal pop. */
   function wireInteractions() {
     document.addEventListener('click', (e) => {
       const t = e.target;
       if (!t || !t.closest) return;
-
-      // Dropdown toggle
-      const tgl = t.closest('.wmcc-drop-toggle');
-      if (tgl) {
-        const drop = tgl.closest('.wmcc-drop');
-        const open = drop.classList.toggle('is-open');
-        tgl.setAttribute('aria-expanded', String(open));
-        return;
-      }
-
-      // Click outside dropdown closes it
-      if (!t.closest('.wmcc-drop')) {
-        document.querySelectorAll('.wmcc-drop.is-open').forEach((d) => {
-          d.classList.remove('is-open');
-          const tg = d.querySelector('.wmcc-drop-toggle');
-          if (tg) tg.setAttribute('aria-expanded', 'false');
-        });
-      }
-
-      // Burger toggle
-      if (t.closest('.wmcc-burger')) {
-        document.body.classList.toggle('wmcc-mobile-open');
-        const isOpen = document.body.classList.contains('wmcc-mobile-open');
-        t.closest('.wmcc-burger').setAttribute('aria-expanded', String(isOpen));
-        return;
-      }
-
-      // 'open-locations' triggers — corporate pages don't have the franchise
-      // chrome's locations modal yet. For now, fall back to corporate's
-      // locations page. When we wire up a corporate-side locations modal
-      // (sharing the franchise modal's tile + Google Maps view), this
-      // becomes a no-redirect modal-pop.
       if (t.closest('[data-action="open-locations"]')) {
         e.preventDefault();
         window.location.href = 'https://www.wavemaxlaundry.com/locations/';
-      }
-    });
-
-    document.addEventListener('keydown', (e) => {
-      if (e.key !== 'Escape') return;
-      document.querySelectorAll('.wmcc-drop.is-open').forEach((d) => {
-        d.classList.remove('is-open');
-        const tg = d.querySelector('.wmcc-drop-toggle');
-        if (tg) tg.setAttribute('aria-expanded', 'false');
-      });
-      if (document.body.classList.contains('wmcc-mobile-open')) {
-        document.body.classList.remove('wmcc-mobile-open');
       }
     });
   }
@@ -211,12 +196,19 @@
     const footerEl = document.getElementById('wm-corp-footer');
     if (headerEl) headerEl.innerHTML = buildHeader();
     if (footerEl) footerEl.innerHTML = buildFooter();
-    // Highlight the active nav link based on current path.
+
+    // Highlight the active nav item based on current path.
     const path = location.pathname.replace(/\/$/, '') || '/franchise';
-    document.querySelectorAll('.wmcc-drop-item, .wmcc-nav-link, .wmcc-mob-link').forEach((a) => {
+    document.querySelectorAll('#wmlnav-nav > a, #wmlnav-nav .wmlnav-drop-menu a').forEach((a) => {
       const href = (a.getAttribute('href') || '').replace(/\/$/, '');
-      if (href && href === path) a.classList.add('is-active');
+      if (href && href === path) {
+        a.classList.add('wmlnav-on');
+        // If the active link is inside a dropdown, also highlight the parent.
+        const parentDrop = a.closest('.wmlnav-drop');
+        if (parentDrop) parentDrop.classList.add('wmlnav-on');
+      }
     });
+
     wireInteractions();
   }
 
