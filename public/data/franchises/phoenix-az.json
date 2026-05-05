@@ -1,0 +1,154 @@
+{
+  "slug": "phoenix-az",
+  "brand": {
+    "name": "WaveMAX Phoenix AZ Thomas",
+    "parent": "WaveMAX Laundry",
+    "tagline": ""
+  },
+  "contact": {
+    "phone": "(623) 302-7226",
+    "phoneTel": "tel:+16233027226",
+    "phoneTelRaw": "+16233027226",
+    "email": "no-reply@wavemax.promo",
+    "emailMailto": "mailto:no-reply@wavemax.promo",
+    "address": "6544 West Thomas Road Suite #23",
+    "city": "Phoenix",
+    "state": "AZ",
+    "zip": "85033",
+    "country": "US",
+    "addressLine2": "Phoenix, AZ 85033",
+    "geo": {
+      "lat": 33.4773,
+      "lng": -112.176
+    },
+    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=6544+West+Thomas+Road+Suite+%2323+Phoenix+AZ+85033"
+  },
+  "hours": {
+    "open": "",
+    "close": "",
+    "display": "Call for hours",
+    "lastWash": "",
+    "days": ""
+  },
+  "owners": [],
+  "aboutContent": {
+    "heroTitle": "",
+    "heroTagline": "",
+    "heroSubtitle": "",
+    "missionEyebrow": "",
+    "missionTitle": "",
+    "missionBody": [],
+    "valuesEyebrow": "",
+    "valuesTitle": "",
+    "values": [],
+    "teamEyebrow": "",
+    "teamTitle": "",
+    "teamLede": "",
+    "communityTitle": "",
+    "communityBody": "",
+    "ctaText": ""
+  },
+  "pricing": {
+    "wdf": {
+      "rate": null,
+      "minLb": null,
+      "currency": "USD",
+      "display": "Call for pricing"
+    },
+    "selfServe": {
+      "minLoad": null,
+      "maxLoad": null,
+      "minLoadDisplay": "",
+      "maxLoadDisplay": "",
+      "washMin": null,
+      "dryMin": null,
+      "rangeDisplay": "Call for pricing"
+    }
+  },
+  "equipment": {
+    "washers": null,
+    "dryers": null,
+    "capacityLb": null
+  },
+  "amenities": [
+    "Free WiFi",
+    "Free Parking"
+  ],
+  "serviceArea": [
+    "Phoenix"
+  ],
+  "social": {
+    "facebook": "",
+    "instagram": ""
+  },
+  "google": {
+    "placeId": "",
+    "apiKey": "",
+    "profileUrl": "",
+    "reviewsUrl": ""
+  },
+  "images": {
+    "hero": [
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/phoenix-az/hero-1.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/phoenix-az/hero-2.jpg"
+    ],
+    "interior": [
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/phoenix-az/interior-1.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/phoenix-az/interior-2.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/phoenix-az/interior-3.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/phoenix-az/interior-4.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/phoenix-az/interior-5.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/phoenix-az/interior-6.jpg"
+    ],
+    "owner": [],
+    "landmarks": [],
+    "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/phoenix-az/hero-1.jpg",
+    "ogImageAlt": "WaveMAX Phoenix AZ Thomas storefront",
+    "mapPreview": ""
+  },
+  "seo": {
+    "keywords": "laundromat phoenix az, laundromat near me, phoenix laundromat, wash dry fold phoenix, self service laundry phoenix, drop off laundry phoenix, coin laundry phoenix, commercial laundry phoenix, wavemax phoenix, wavemax phoenix az",
+    "keywordsByPage": {
+      "/": "laundromat phoenix az, laundromat near me, phoenix laundromat, wash dry fold phoenix, self service laundry phoenix, drop off laundry phoenix, coin laundry phoenix, commercial laundry phoenix, wavemax phoenix, wavemax phoenix az",
+      "/wash-dry-fold": "wash dry fold phoenix, drop off laundry phoenix, fluff and fold phoenix, laundromat phoenix az, laundromat near me, phoenix laundromat, wash dry fold phoenix, self service laundry phoenix, drop off laundry phoenix",
+      "/self-serve-laundry": "self service laundry phoenix, coin laundry phoenix, laundromat phoenix, laundromat phoenix az, laundromat near me, phoenix laundromat, wash dry fold phoenix, self service laundry phoenix, drop off laundry phoenix",
+      "/commercial": "commercial laundry phoenix, business laundry phoenix, hotel laundry phoenix, restaurant linens phoenix, laundromat phoenix az, laundromat near me, phoenix laundromat, wash dry fold phoenix, self service laundry phoenix, drop off laundry phoenix",
+      "/about-us": "wavemax owners phoenix, family-owned laundromat phoenix, laundromat phoenix az, laundromat near me, phoenix laundromat, wash dry fold phoenix",
+      "/contact": "contact wavemax phoenix, laundromat phone phoenix, laundromat phoenix az, laundromat near me, phoenix laundromat, wash dry fold phoenix"
+    },
+    "localizedHeadlines": {
+      "landingTitle": "Phoenix's premier laundromat",
+      "landingSubtitle": "Self-serve laundry, wash-dry-fold, and commercial accounts in Phoenix, AZ.",
+      "wdfTitle": "Wash-Dry-Fold drop-off laundry in Phoenix, AZ",
+      "selfServeTitle": "Self-serve laundry in Phoenix, AZ",
+      "commercialTitle": "Commercial laundry service for Phoenix businesses",
+      "aboutTitle": "About WaveMAX Phoenix",
+      "contactTitle": "Contact WaveMAX Phoenix, AZ"
+    },
+    "geoRegion": "US-AZ",
+    "geoPlacename": "Phoenix, AZ",
+    "geoPosition": "33.4773;-112.176",
+    "icbm": "33.4773, -112.176"
+  },
+  "i18n": {
+    "languagesAvailable": [
+      "en",
+      "es",
+      "pt",
+      "de"
+    ]
+  },
+  "nav": {
+    "commercialEnabled": true,
+    "commercialIndustries": {
+      "medical": true,
+      "gym": true,
+      "airbnb": true,
+      "restaurant": true,
+      "contractors": true
+    },
+    "additional": [],
+    "sublinkExtensions": {}
+  },
+  "iframeOverrides": {}
+}

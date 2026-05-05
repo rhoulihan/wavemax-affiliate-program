@@ -1,0 +1,148 @@
+{
+  "slug": "lakewood-co",
+  "brand": {
+    "name": "WaveMAX Lakewood CO",
+    "parent": "WaveMAX Laundry",
+    "tagline": ""
+  },
+  "contact": {
+    "phone": "",
+    "phoneTel": "",
+    "phoneTelRaw": "",
+    "email": "no-reply@wavemax.promo",
+    "emailMailto": "mailto:no-reply@wavemax.promo",
+    "address": "1090 S Wadsworth Blvd",
+    "city": "Lakewood",
+    "state": "CO",
+    "zip": "80226",
+    "country": "US",
+    "addressLine2": "Lakewood, CO 80226",
+    "geo": {
+      "lat": 39.7055,
+      "lng": -105.0813
+    },
+    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=1090+S+Wadsworth+Blvd+Lakewood+CO+80226"
+  },
+  "hours": {
+    "open": "",
+    "close": "",
+    "display": "Call for hours",
+    "lastWash": "",
+    "days": ""
+  },
+  "owners": [],
+  "aboutContent": {
+    "heroTitle": "",
+    "heroTagline": "",
+    "heroSubtitle": "",
+    "missionEyebrow": "",
+    "missionTitle": "",
+    "missionBody": [],
+    "valuesEyebrow": "",
+    "valuesTitle": "",
+    "values": [],
+    "teamEyebrow": "",
+    "teamTitle": "",
+    "teamLede": "",
+    "communityTitle": "",
+    "communityBody": "",
+    "ctaText": ""
+  },
+  "pricing": {
+    "wdf": {
+      "rate": null,
+      "minLb": null,
+      "currency": "USD",
+      "display": "Call for pricing"
+    },
+    "selfServe": {
+      "minLoad": null,
+      "maxLoad": null,
+      "minLoadDisplay": "",
+      "maxLoadDisplay": "",
+      "washMin": null,
+      "dryMin": null,
+      "rangeDisplay": "Call for pricing"
+    }
+  },
+  "equipment": {
+    "washers": null,
+    "dryers": null,
+    "capacityLb": null
+  },
+  "amenities": [
+    "Free WiFi",
+    "Free Parking"
+  ],
+  "serviceArea": [
+    "Lakewood"
+  ],
+  "social": {
+    "facebook": "",
+    "instagram": ""
+  },
+  "google": {
+    "placeId": "",
+    "apiKey": "",
+    "profileUrl": "",
+    "reviewsUrl": ""
+  },
+  "images": {
+    "hero": [
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/lakewood-co/hero-1.jpg"
+    ],
+    "interior": [
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/lakewood-co/interior-1.jpg"
+    ],
+    "owner": [],
+    "landmarks": [],
+    "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/lakewood-co/hero-1.jpg",
+    "ogImageAlt": "WaveMAX Lakewood CO storefront",
+    "mapPreview": ""
+  },
+  "seo": {
+    "keywords": "laundromat lakewood co, laundromat near me, lakewood laundromat, wash dry fold lakewood, self service laundry lakewood, drop off laundry lakewood, coin laundry lakewood, commercial laundry lakewood, wavemax lakewood, wavemax lakewood co",
+    "keywordsByPage": {
+      "/": "laundromat lakewood co, laundromat near me, lakewood laundromat, wash dry fold lakewood, self service laundry lakewood, drop off laundry lakewood, coin laundry lakewood, commercial laundry lakewood, wavemax lakewood, wavemax lakewood co",
+      "/wash-dry-fold": "wash dry fold lakewood, drop off laundry lakewood, fluff and fold lakewood, laundromat lakewood co, laundromat near me, lakewood laundromat, wash dry fold lakewood, self service laundry lakewood, drop off laundry lakewood",
+      "/self-serve-laundry": "self service laundry lakewood, coin laundry lakewood, laundromat lakewood, laundromat lakewood co, laundromat near me, lakewood laundromat, wash dry fold lakewood, self service laundry lakewood, drop off laundry lakewood",
+      "/commercial": "commercial laundry lakewood, business laundry lakewood, hotel laundry lakewood, restaurant linens lakewood, laundromat lakewood co, laundromat near me, lakewood laundromat, wash dry fold lakewood, self service laundry lakewood, drop off laundry lakewood",
+      "/about-us": "wavemax owners lakewood, family-owned laundromat lakewood, laundromat lakewood co, laundromat near me, lakewood laundromat, wash dry fold lakewood",
+      "/contact": "contact wavemax lakewood, laundromat phone lakewood, laundromat lakewood co, laundromat near me, lakewood laundromat, wash dry fold lakewood"
+    },
+    "localizedHeadlines": {
+      "landingTitle": "Lakewood's premier laundromat",
+      "landingSubtitle": "Self-serve laundry, wash-dry-fold, and commercial accounts in Lakewood, CO.",
+      "wdfTitle": "Wash-Dry-Fold drop-off laundry in Lakewood, CO",
+      "selfServeTitle": "Self-serve laundry in Lakewood, CO",
+      "commercialTitle": "Commercial laundry service for Lakewood businesses",
+      "aboutTitle": "About WaveMAX Lakewood",
+      "contactTitle": "Contact WaveMAX Lakewood, CO"
+    },
+    "geoRegion": "US-CO",
+    "geoPlacename": "Lakewood, CO",
+    "geoPosition": "39.7055;-105.0813",
+    "icbm": "39.7055, -105.0813"
+  },
+  "i18n": {
+    "languagesAvailable": [
+      "en",
+      "es",
+      "pt",
+      "de"
+    ]
+  },
+  "nav": {
+    "commercialEnabled": true,
+    "commercialIndustries": {
+      "medical": true,
+      "gym": true,
+      "airbnb": true,
+      "restaurant": true,
+      "contractors": true
+    },
+    "additional": [],
+    "sublinkExtensions": {}
+  },
+  "iframeOverrides": {}
+}

@@ -1,0 +1,155 @@
+{
+  "slug": "durham-nc",
+  "brand": {
+    "name": "WaveMAX Durham NC",
+    "parent": "WaveMAX Laundry",
+    "tagline": ""
+  },
+  "contact": {
+    "phone": "(919) 748-3180",
+    "phoneTel": "tel:+19197483180",
+    "phoneTelRaw": "+19197483180",
+    "email": "no-reply@wavemax.promo",
+    "emailMailto": "mailto:no-reply@wavemax.promo",
+    "address": "3222 Guess Road",
+    "city": "Durham",
+    "state": "NC",
+    "zip": "27705",
+    "country": "US",
+    "addressLine2": "Durham, NC 27705",
+    "geo": {
+      "lat": 36.0107,
+      "lng": -78.9499
+    },
+    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=3222+Guess+Road+Durham+NC+27705"
+  },
+  "hours": {
+    "open": "",
+    "close": "",
+    "display": "Call for hours",
+    "lastWash": "",
+    "days": ""
+  },
+  "owners": [],
+  "aboutContent": {
+    "heroTitle": "",
+    "heroTagline": "",
+    "heroSubtitle": "",
+    "missionEyebrow": "",
+    "missionTitle": "",
+    "missionBody": [],
+    "valuesEyebrow": "",
+    "valuesTitle": "",
+    "values": [],
+    "teamEyebrow": "",
+    "teamTitle": "",
+    "teamLede": "",
+    "communityTitle": "",
+    "communityBody": "",
+    "ctaText": ""
+  },
+  "pricing": {
+    "wdf": {
+      "rate": null,
+      "minLb": null,
+      "currency": "USD",
+      "display": "Call for pricing"
+    },
+    "selfServe": {
+      "minLoad": null,
+      "maxLoad": null,
+      "minLoadDisplay": "",
+      "maxLoadDisplay": "",
+      "washMin": null,
+      "dryMin": null,
+      "rangeDisplay": "Call for pricing"
+    }
+  },
+  "equipment": {
+    "washers": null,
+    "dryers": null,
+    "capacityLb": null
+  },
+  "amenities": [
+    "Free WiFi",
+    "Free Parking"
+  ],
+  "serviceArea": [
+    "Durham"
+  ],
+  "social": {
+    "facebook": "",
+    "instagram": ""
+  },
+  "google": {
+    "placeId": "",
+    "apiKey": "",
+    "profileUrl": "",
+    "reviewsUrl": ""
+  },
+  "images": {
+    "hero": [
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/durham-nc/hero-1.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/durham-nc/hero-2.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/durham-nc/hero-3.jpg"
+    ],
+    "interior": [
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/durham-nc/interior-1.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/durham-nc/interior-2.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/durham-nc/interior-3.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/durham-nc/interior-4.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/durham-nc/interior-5.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/durham-nc/interior-6.jpg"
+    ],
+    "owner": [],
+    "landmarks": [],
+    "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/durham-nc/hero-1.jpg",
+    "ogImageAlt": "WaveMAX Durham NC storefront",
+    "mapPreview": ""
+  },
+  "seo": {
+    "keywords": "laundromat durham nc, laundromat near me, durham laundromat, wash dry fold durham, self service laundry durham, drop off laundry durham, coin laundry durham, commercial laundry durham, wavemax durham, wavemax durham nc",
+    "keywordsByPage": {
+      "/": "laundromat durham nc, laundromat near me, durham laundromat, wash dry fold durham, self service laundry durham, drop off laundry durham, coin laundry durham, commercial laundry durham, wavemax durham, wavemax durham nc",
+      "/wash-dry-fold": "wash dry fold durham, drop off laundry durham, fluff and fold durham, laundromat durham nc, laundromat near me, durham laundromat, wash dry fold durham, self service laundry durham, drop off laundry durham",
+      "/self-serve-laundry": "self service laundry durham, coin laundry durham, laundromat durham, laundromat durham nc, laundromat near me, durham laundromat, wash dry fold durham, self service laundry durham, drop off laundry durham",
+      "/commercial": "commercial laundry durham, business laundry durham, hotel laundry durham, restaurant linens durham, laundromat durham nc, laundromat near me, durham laundromat, wash dry fold durham, self service laundry durham, drop off laundry durham",
+      "/about-us": "wavemax owners durham, family-owned laundromat durham, laundromat durham nc, laundromat near me, durham laundromat, wash dry fold durham",
+      "/contact": "contact wavemax durham, laundromat phone durham, laundromat durham nc, laundromat near me, durham laundromat, wash dry fold durham"
+    },
+    "localizedHeadlines": {
+      "landingTitle": "Durham's premier laundromat",
+      "landingSubtitle": "Self-serve laundry, wash-dry-fold, and commercial accounts in Durham, NC.",
+      "wdfTitle": "Wash-Dry-Fold drop-off laundry in Durham, NC",
+      "selfServeTitle": "Self-serve laundry in Durham, NC",
+      "commercialTitle": "Commercial laundry service for Durham businesses",
+      "aboutTitle": "About WaveMAX Durham",
+      "contactTitle": "Contact WaveMAX Durham, NC"
+    },
+    "geoRegion": "US-NC",
+    "geoPlacename": "Durham, NC",
+    "geoPosition": "36.0107;-78.9499",
+    "icbm": "36.0107, -78.9499"
+  },
+  "i18n": {
+    "languagesAvailable": [
+      "en",
+      "es",
+      "pt",
+      "de"
+    ]
+  },
+  "nav": {
+    "commercialEnabled": true,
+    "commercialIndustries": {
+      "medical": true,
+      "gym": true,
+      "airbnb": true,
+      "restaurant": true,
+      "contractors": true
+    },
+    "additional": [],
+    "sublinkExtensions": {}
+  },
+  "iframeOverrides": {}
+}

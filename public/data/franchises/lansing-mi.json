@@ -1,0 +1,153 @@
+{
+  "slug": "lansing-mi",
+  "brand": {
+    "name": "WaveMAX Lansing MI",
+    "parent": "WaveMAX Laundry",
+    "tagline": ""
+  },
+  "contact": {
+    "phone": "(517) 300-9283",
+    "phoneTel": "tel:+15173009283",
+    "phoneTelRaw": "+15173009283",
+    "email": "no-reply@wavemax.promo",
+    "emailMailto": "mailto:no-reply@wavemax.promo",
+    "address": "4929 S Cedar St, St 1",
+    "city": "Lansing",
+    "state": "MI",
+    "zip": "48910",
+    "country": "US",
+    "addressLine2": "Lansing, MI 48910",
+    "geo": {
+      "lat": 42.7144,
+      "lng": -84.5467
+    },
+    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=4929+S+Cedar+St%2C+St+1+Lansing+MI+48910"
+  },
+  "hours": {
+    "open": "",
+    "close": "",
+    "display": "Call for hours",
+    "lastWash": "",
+    "days": ""
+  },
+  "owners": [],
+  "aboutContent": {
+    "heroTitle": "",
+    "heroTagline": "",
+    "heroSubtitle": "",
+    "missionEyebrow": "",
+    "missionTitle": "",
+    "missionBody": [],
+    "valuesEyebrow": "",
+    "valuesTitle": "",
+    "values": [],
+    "teamEyebrow": "",
+    "teamTitle": "",
+    "teamLede": "",
+    "communityTitle": "",
+    "communityBody": "",
+    "ctaText": ""
+  },
+  "pricing": {
+    "wdf": {
+      "rate": null,
+      "minLb": null,
+      "currency": "USD",
+      "display": "Call for pricing"
+    },
+    "selfServe": {
+      "minLoad": null,
+      "maxLoad": null,
+      "minLoadDisplay": "",
+      "maxLoadDisplay": "",
+      "washMin": null,
+      "dryMin": null,
+      "rangeDisplay": "Call for pricing"
+    }
+  },
+  "equipment": {
+    "washers": null,
+    "dryers": null,
+    "capacityLb": null
+  },
+  "amenities": [
+    "Free WiFi",
+    "Free Parking"
+  ],
+  "serviceArea": [
+    "Lansing"
+  ],
+  "social": {
+    "facebook": "",
+    "instagram": ""
+  },
+  "google": {
+    "placeId": "",
+    "apiKey": "",
+    "profileUrl": "",
+    "reviewsUrl": ""
+  },
+  "images": {
+    "hero": [
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/lansing-mi/hero-1.jpg"
+    ],
+    "interior": [
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/lansing-mi/interior-1.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/lansing-mi/interior-2.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/lansing-mi/interior-3.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/lansing-mi/interior-4.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/lansing-mi/interior-5.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/lansing-mi/interior-6.jpg"
+    ],
+    "owner": [],
+    "landmarks": [],
+    "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/lansing-mi/hero-1.jpg",
+    "ogImageAlt": "WaveMAX Lansing MI storefront",
+    "mapPreview": ""
+  },
+  "seo": {
+    "keywords": "laundromat lansing mi, laundromat near me, lansing laundromat, wash dry fold lansing, self service laundry lansing, drop off laundry lansing, coin laundry lansing, commercial laundry lansing, wavemax lansing, wavemax lansing mi",
+    "keywordsByPage": {
+      "/": "laundromat lansing mi, laundromat near me, lansing laundromat, wash dry fold lansing, self service laundry lansing, drop off laundry lansing, coin laundry lansing, commercial laundry lansing, wavemax lansing, wavemax lansing mi",
+      "/wash-dry-fold": "wash dry fold lansing, drop off laundry lansing, fluff and fold lansing, laundromat lansing mi, laundromat near me, lansing laundromat, wash dry fold lansing, self service laundry lansing, drop off laundry lansing",
+      "/self-serve-laundry": "self service laundry lansing, coin laundry lansing, laundromat lansing, laundromat lansing mi, laundromat near me, lansing laundromat, wash dry fold lansing, self service laundry lansing, drop off laundry lansing",
+      "/commercial": "commercial laundry lansing, business laundry lansing, hotel laundry lansing, restaurant linens lansing, laundromat lansing mi, laundromat near me, lansing laundromat, wash dry fold lansing, self service laundry lansing, drop off laundry lansing",
+      "/about-us": "wavemax owners lansing, family-owned laundromat lansing, laundromat lansing mi, laundromat near me, lansing laundromat, wash dry fold lansing",
+      "/contact": "contact wavemax lansing, laundromat phone lansing, laundromat lansing mi, laundromat near me, lansing laundromat, wash dry fold lansing"
+    },
+    "localizedHeadlines": {
+      "landingTitle": "Lansing's premier laundromat",
+      "landingSubtitle": "Self-serve laundry, wash-dry-fold, and commercial accounts in Lansing, MI.",
+      "wdfTitle": "Wash-Dry-Fold drop-off laundry in Lansing, MI",
+      "selfServeTitle": "Self-serve laundry in Lansing, MI",
+      "commercialTitle": "Commercial laundry service for Lansing businesses",
+      "aboutTitle": "About WaveMAX Lansing",
+      "contactTitle": "Contact WaveMAX Lansing, MI"
+    },
+    "geoRegion": "US-MI",
+    "geoPlacename": "Lansing, MI",
+    "geoPosition": "42.7144;-84.5467",
+    "icbm": "42.7144, -84.5467"
+  },
+  "i18n": {
+    "languagesAvailable": [
+      "en",
+      "es",
+      "pt",
+      "de"
+    ]
+  },
+  "nav": {
+    "commercialEnabled": true,
+    "commercialIndustries": {
+      "medical": true,
+      "gym": true,
+      "airbnb": true,
+      "restaurant": true,
+      "contractors": true
+    },
+    "additional": [],
+    "sublinkExtensions": {}
+  },
+  "iframeOverrides": {}
+}

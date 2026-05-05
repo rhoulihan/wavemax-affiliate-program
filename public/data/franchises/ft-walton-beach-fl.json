@@ -1,0 +1,155 @@
+{
+  "slug": "ft-walton-beach-fl",
+  "brand": {
+    "name": "WaveMAX Ft. Walton Beach FL",
+    "parent": "WaveMAX Laundry",
+    "tagline": ""
+  },
+  "contact": {
+    "phone": "",
+    "phoneTel": "",
+    "phoneTelRaw": "",
+    "email": "no-reply@wavemax.promo",
+    "emailMailto": "mailto:no-reply@wavemax.promo",
+    "address": "",
+    "city": "Walton Beach",
+    "state": "FL",
+    "zip": "",
+    "country": "US",
+    "addressLine2": "",
+    "geo": {
+      "lat": 30.4058,
+      "lng": -86.6187
+    },
+    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=+Walton+Beach+FL+"
+  },
+  "hours": {
+    "open": "",
+    "close": "",
+    "display": "Call for hours",
+    "lastWash": "",
+    "days": ""
+  },
+  "owners": [],
+  "aboutContent": {
+    "heroTitle": "",
+    "heroTagline": "",
+    "heroSubtitle": "",
+    "missionEyebrow": "",
+    "missionTitle": "",
+    "missionBody": [],
+    "valuesEyebrow": "",
+    "valuesTitle": "",
+    "values": [],
+    "teamEyebrow": "",
+    "teamTitle": "",
+    "teamLede": "",
+    "communityTitle": "",
+    "communityBody": "",
+    "ctaText": ""
+  },
+  "pricing": {
+    "wdf": {
+      "rate": null,
+      "minLb": null,
+      "currency": "USD",
+      "display": "Call for pricing"
+    },
+    "selfServe": {
+      "minLoad": null,
+      "maxLoad": null,
+      "minLoadDisplay": "",
+      "maxLoadDisplay": "",
+      "washMin": null,
+      "dryMin": null,
+      "rangeDisplay": "Call for pricing"
+    }
+  },
+  "equipment": {
+    "washers": null,
+    "dryers": null,
+    "capacityLb": null
+  },
+  "amenities": [
+    "Free WiFi",
+    "Free Parking"
+  ],
+  "serviceArea": [
+    "Walton Beach"
+  ],
+  "social": {
+    "facebook": "",
+    "instagram": ""
+  },
+  "google": {
+    "placeId": "",
+    "apiKey": "",
+    "profileUrl": "",
+    "reviewsUrl": ""
+  },
+  "images": {
+    "hero": [
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/kent-wa/hero-1.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/kent-wa/hero-2.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/kent-wa/hero-3.jpg"
+    ],
+    "interior": [
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/kent-wa/interior-1.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/kent-wa/interior-2.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/kent-wa/interior-3.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/kent-wa/interior-4.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/kent-wa/interior-5.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/kent-wa/interior-6.jpg"
+    ],
+    "owner": [],
+    "landmarks": [],
+    "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/kent-wa/hero-1.jpg",
+    "ogImageAlt": "WaveMAX Ft. Walton Beach FL storefront",
+    "mapPreview": ""
+  },
+  "seo": {
+    "keywords": "laundromat walton beach fl, laundromat near me, walton beach laundromat, wash dry fold walton beach, self service laundry walton beach, drop off laundry walton beach, coin laundry walton beach, commercial laundry walton beach, wavemax walton beach, wavemax walton beach fl",
+    "keywordsByPage": {
+      "/": "laundromat walton beach fl, laundromat near me, walton beach laundromat, wash dry fold walton beach, self service laundry walton beach, drop off laundry walton beach, coin laundry walton beach, commercial laundry walton beach, wavemax walton beach, wavemax walton beach fl",
+      "/wash-dry-fold": "wash dry fold walton beach, drop off laundry walton beach, fluff and fold walton beach, laundromat walton beach fl, laundromat near me, walton beach laundromat, wash dry fold walton beach, self service laundry walton beach, drop off laundry walton beach",
+      "/self-serve-laundry": "self service laundry walton beach, coin laundry walton beach, laundromat walton beach, laundromat walton beach fl, laundromat near me, walton beach laundromat, wash dry fold walton beach, self service laundry walton beach, drop off laundry walton beach",
+      "/commercial": "commercial laundry walton beach, business laundry walton beach, hotel laundry walton beach, restaurant linens walton beach, laundromat walton beach fl, laundromat near me, walton beach laundromat, wash dry fold walton beach, self service laundry walton beach, drop off laundry walton beach",
+      "/about-us": "wavemax owners walton beach, family-owned laundromat walton beach, laundromat walton beach fl, laundromat near me, walton beach laundromat, wash dry fold walton beach",
+      "/contact": "contact wavemax walton beach, laundromat phone walton beach, laundromat walton beach fl, laundromat near me, walton beach laundromat, wash dry fold walton beach"
+    },
+    "localizedHeadlines": {
+      "landingTitle": "Walton Beach's premier laundromat",
+      "landingSubtitle": "Self-serve laundry, wash-dry-fold, and commercial accounts in Walton Beach, FL.",
+      "wdfTitle": "Wash-Dry-Fold drop-off laundry in Walton Beach, FL",
+      "selfServeTitle": "Self-serve laundry in Walton Beach, FL",
+      "commercialTitle": "Commercial laundry service for Walton Beach businesses",
+      "aboutTitle": "About WaveMAX Walton Beach",
+      "contactTitle": "Contact WaveMAX Walton Beach, FL"
+    },
+    "geoRegion": "US-FL",
+    "geoPlacename": "Walton Beach, FL",
+    "geoPosition": "30.4058;-86.6187",
+    "icbm": "30.4058, -86.6187"
+  },
+  "i18n": {
+    "languagesAvailable": [
+      "en",
+      "es",
+      "pt",
+      "de"
+    ]
+  },
+  "nav": {
+    "commercialEnabled": true,
+    "commercialIndustries": {
+      "medical": true,
+      "gym": true,
+      "airbnb": true,
+      "restaurant": true,
+      "contractors": true
+    },
+    "additional": [],
+    "sublinkExtensions": {}
+  },
+  "iframeOverrides": {}
+}

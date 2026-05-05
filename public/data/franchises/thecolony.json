@@ -1,0 +1,155 @@
+{
+  "slug": "thecolony",
+  "brand": {
+    "name": "WaveMAX The Colony TX",
+    "parent": "WaveMAX Laundry",
+    "tagline": ""
+  },
+  "contact": {
+    "phone": "(469) 200-8400",
+    "phoneTel": "tel:+14692008400",
+    "phoneTelRaw": "+14692008400",
+    "email": "no-reply@wavemax.promo",
+    "emailMailto": "mailto:no-reply@wavemax.promo",
+    "address": "6805 Main St",
+    "city": "The Colony",
+    "state": "TX",
+    "zip": "75056",
+    "country": "US",
+    "addressLine2": "The Colony, TX 75056",
+    "geo": {
+      "lat": 33.0812,
+      "lng": -96.8886
+    },
+    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=6805+Main+St+The+Colony+TX+75056"
+  },
+  "hours": {
+    "open": "",
+    "close": "",
+    "display": "Call for hours",
+    "lastWash": "",
+    "days": ""
+  },
+  "owners": [],
+  "aboutContent": {
+    "heroTitle": "",
+    "heroTagline": "",
+    "heroSubtitle": "",
+    "missionEyebrow": "",
+    "missionTitle": "",
+    "missionBody": [],
+    "valuesEyebrow": "",
+    "valuesTitle": "",
+    "values": [],
+    "teamEyebrow": "",
+    "teamTitle": "",
+    "teamLede": "",
+    "communityTitle": "",
+    "communityBody": "",
+    "ctaText": ""
+  },
+  "pricing": {
+    "wdf": {
+      "rate": null,
+      "minLb": null,
+      "currency": "USD",
+      "display": "Call for pricing"
+    },
+    "selfServe": {
+      "minLoad": null,
+      "maxLoad": null,
+      "minLoadDisplay": "",
+      "maxLoadDisplay": "",
+      "washMin": null,
+      "dryMin": null,
+      "rangeDisplay": "Call for pricing"
+    }
+  },
+  "equipment": {
+    "washers": null,
+    "dryers": null,
+    "capacityLb": null
+  },
+  "amenities": [
+    "Free WiFi",
+    "Free Parking"
+  ],
+  "serviceArea": [
+    "The Colony"
+  ],
+  "social": {
+    "facebook": "",
+    "instagram": ""
+  },
+  "google": {
+    "placeId": "",
+    "apiKey": "",
+    "profileUrl": "",
+    "reviewsUrl": ""
+  },
+  "images": {
+    "hero": [
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/thecolony/hero-1.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/thecolony/hero-2.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/thecolony/hero-3.jpg"
+    ],
+    "interior": [
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/thecolony/interior-1.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/thecolony/interior-2.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/thecolony/interior-3.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/thecolony/interior-4.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/thecolony/interior-5.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/thecolony/interior-6.jpg"
+    ],
+    "owner": [],
+    "landmarks": [],
+    "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/thecolony/hero-1.jpg",
+    "ogImageAlt": "WaveMAX The Colony TX storefront",
+    "mapPreview": ""
+  },
+  "seo": {
+    "keywords": "laundromat the colony tx, laundromat near me, the colony laundromat, wash dry fold the colony, self service laundry the colony, drop off laundry the colony, coin laundry the colony, commercial laundry the colony, wavemax the colony, wavemax the colony tx",
+    "keywordsByPage": {
+      "/": "laundromat the colony tx, laundromat near me, the colony laundromat, wash dry fold the colony, self service laundry the colony, drop off laundry the colony, coin laundry the colony, commercial laundry the colony, wavemax the colony, wavemax the colony tx",
+      "/wash-dry-fold": "wash dry fold the colony, drop off laundry the colony, fluff and fold the colony, laundromat the colony tx, laundromat near me, the colony laundromat, wash dry fold the colony, self service laundry the colony, drop off laundry the colony",
+      "/self-serve-laundry": "self service laundry the colony, coin laundry the colony, laundromat the colony, laundromat the colony tx, laundromat near me, the colony laundromat, wash dry fold the colony, self service laundry the colony, drop off laundry the colony",
+      "/commercial": "commercial laundry the colony, business laundry the colony, hotel laundry the colony, restaurant linens the colony, laundromat the colony tx, laundromat near me, the colony laundromat, wash dry fold the colony, self service laundry the colony, drop off laundry the colony",
+      "/about-us": "wavemax owners the colony, family-owned laundromat the colony, laundromat the colony tx, laundromat near me, the colony laundromat, wash dry fold the colony",
+      "/contact": "contact wavemax the colony, laundromat phone the colony, laundromat the colony tx, laundromat near me, the colony laundromat, wash dry fold the colony"
+    },
+    "localizedHeadlines": {
+      "landingTitle": "The Colony's premier laundromat",
+      "landingSubtitle": "Self-serve laundry, wash-dry-fold, and commercial accounts in The Colony, TX.",
+      "wdfTitle": "Wash-Dry-Fold drop-off laundry in The Colony, TX",
+      "selfServeTitle": "Self-serve laundry in The Colony, TX",
+      "commercialTitle": "Commercial laundry service for The Colony businesses",
+      "aboutTitle": "About WaveMAX The Colony",
+      "contactTitle": "Contact WaveMAX The Colony, TX"
+    },
+    "geoRegion": "US-TX",
+    "geoPlacename": "The Colony, TX",
+    "geoPosition": "33.0812;-96.8886",
+    "icbm": "33.0812, -96.8886"
+  },
+  "i18n": {
+    "languagesAvailable": [
+      "en",
+      "es",
+      "pt",
+      "de"
+    ]
+  },
+  "nav": {
+    "commercialEnabled": true,
+    "commercialIndustries": {
+      "medical": true,
+      "gym": true,
+      "airbnb": true,
+      "restaurant": true,
+      "contractors": true
+    },
+    "additional": [],
+    "sublinkExtensions": {}
+  },
+  "iframeOverrides": {}
+}

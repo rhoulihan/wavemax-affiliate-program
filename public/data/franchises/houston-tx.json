@@ -1,0 +1,155 @@
+{
+  "slug": "houston-tx",
+  "brand": {
+    "name": "WaveMAX Houston TX",
+    "parent": "WaveMAX Laundry",
+    "tagline": ""
+  },
+  "contact": {
+    "phone": "(713) 485-4726",
+    "phoneTel": "tel:+17134854726",
+    "phoneTelRaw": "+17134854726",
+    "email": "no-reply@wavemax.promo",
+    "emailMailto": "mailto:no-reply@wavemax.promo",
+    "address": "2611 Fulton Street",
+    "city": "Houston",
+    "state": "TX",
+    "zip": "77009",
+    "country": "US",
+    "addressLine2": "Houston, TX 77009",
+    "geo": {
+      "lat": 29.7867,
+      "lng": -95.3597
+    },
+    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=2611+Fulton+Street+Houston+TX+77009"
+  },
+  "hours": {
+    "open": "",
+    "close": "",
+    "display": "Call for hours",
+    "lastWash": "",
+    "days": ""
+  },
+  "owners": [],
+  "aboutContent": {
+    "heroTitle": "",
+    "heroTagline": "",
+    "heroSubtitle": "",
+    "missionEyebrow": "",
+    "missionTitle": "",
+    "missionBody": [],
+    "valuesEyebrow": "",
+    "valuesTitle": "",
+    "values": [],
+    "teamEyebrow": "",
+    "teamTitle": "",
+    "teamLede": "",
+    "communityTitle": "",
+    "communityBody": "",
+    "ctaText": ""
+  },
+  "pricing": {
+    "wdf": {
+      "rate": null,
+      "minLb": null,
+      "currency": "USD",
+      "display": "Call for pricing"
+    },
+    "selfServe": {
+      "minLoad": null,
+      "maxLoad": null,
+      "minLoadDisplay": "",
+      "maxLoadDisplay": "",
+      "washMin": null,
+      "dryMin": null,
+      "rangeDisplay": "Call for pricing"
+    }
+  },
+  "equipment": {
+    "washers": null,
+    "dryers": null,
+    "capacityLb": null
+  },
+  "amenities": [
+    "Free WiFi",
+    "Free Parking"
+  ],
+  "serviceArea": [
+    "Houston"
+  ],
+  "social": {
+    "facebook": "",
+    "instagram": ""
+  },
+  "google": {
+    "placeId": "",
+    "apiKey": "",
+    "profileUrl": "",
+    "reviewsUrl": ""
+  },
+  "images": {
+    "hero": [
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/houston-tx/hero-1.webp",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/houston-tx/hero-2.webp",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/houston-tx/hero-3.webp"
+    ],
+    "interior": [
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/houston-tx/interior-1.webp",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/houston-tx/interior-2.webp",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/houston-tx/interior-3.webp",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/houston-tx/interior-4.webp",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/houston-tx/interior-5.webp",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/houston-tx/interior-6.webp"
+    ],
+    "owner": [],
+    "landmarks": [],
+    "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/houston-tx/hero-1.webp",
+    "ogImageAlt": "WaveMAX Houston TX storefront",
+    "mapPreview": ""
+  },
+  "seo": {
+    "keywords": "laundromat houston tx, laundromat near me, houston laundromat, wash dry fold houston, self service laundry houston, drop off laundry houston, coin laundry houston, commercial laundry houston, wavemax houston, wavemax houston tx",
+    "keywordsByPage": {
+      "/": "laundromat houston tx, laundromat near me, houston laundromat, wash dry fold houston, self service laundry houston, drop off laundry houston, coin laundry houston, commercial laundry houston, wavemax houston, wavemax houston tx",
+      "/wash-dry-fold": "wash dry fold houston, drop off laundry houston, fluff and fold houston, laundromat houston tx, laundromat near me, houston laundromat, wash dry fold houston, self service laundry houston, drop off laundry houston",
+      "/self-serve-laundry": "self service laundry houston, coin laundry houston, laundromat houston, laundromat houston tx, laundromat near me, houston laundromat, wash dry fold houston, self service laundry houston, drop off laundry houston",
+      "/commercial": "commercial laundry houston, business laundry houston, hotel laundry houston, restaurant linens houston, laundromat houston tx, laundromat near me, houston laundromat, wash dry fold houston, self service laundry houston, drop off laundry houston",
+      "/about-us": "wavemax owners houston, family-owned laundromat houston, laundromat houston tx, laundromat near me, houston laundromat, wash dry fold houston",
+      "/contact": "contact wavemax houston, laundromat phone houston, laundromat houston tx, laundromat near me, houston laundromat, wash dry fold houston"
+    },
+    "localizedHeadlines": {
+      "landingTitle": "Houston's premier laundromat",
+      "landingSubtitle": "Self-serve laundry, wash-dry-fold, and commercial accounts in Houston, TX.",
+      "wdfTitle": "Wash-Dry-Fold drop-off laundry in Houston, TX",
+      "selfServeTitle": "Self-serve laundry in Houston, TX",
+      "commercialTitle": "Commercial laundry service for Houston businesses",
+      "aboutTitle": "About WaveMAX Houston",
+      "contactTitle": "Contact WaveMAX Houston, TX"
+    },
+    "geoRegion": "US-TX",
+    "geoPlacename": "Houston, TX",
+    "geoPosition": "29.7867;-95.3597",
+    "icbm": "29.7867, -95.3597"
+  },
+  "i18n": {
+    "languagesAvailable": [
+      "en",
+      "es",
+      "pt",
+      "de"
+    ]
+  },
+  "nav": {
+    "commercialEnabled": true,
+    "commercialIndustries": {
+      "medical": true,
+      "gym": true,
+      "airbnb": true,
+      "restaurant": true,
+      "contractors": true
+    },
+    "additional": [],
+    "sublinkExtensions": {}
+  },
+  "iframeOverrides": {}
+}

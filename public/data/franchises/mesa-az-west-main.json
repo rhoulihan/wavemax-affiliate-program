@@ -1,0 +1,155 @@
+{
+  "slug": "mesa-az-west-main",
+  "brand": {
+    "name": "WaveMAX Mesa AZ West Main",
+    "parent": "WaveMAX Laundry",
+    "tagline": ""
+  },
+  "contact": {
+    "phone": "(480) 687-5193",
+    "phoneTel": "tel:+14806875193",
+    "phoneTelRaw": "+14806875193",
+    "email": "no-reply@wavemax.promo",
+    "emailMailto": "mailto:no-reply@wavemax.promo",
+    "address": "1932 West Main Street #B103",
+    "city": "Mesa",
+    "state": "AZ",
+    "zip": "85201",
+    "country": "US",
+    "addressLine2": "Mesa, AZ 85201",
+    "geo": {
+      "lat": 33.4152,
+      "lng": -111.8407
+    },
+    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=1932+West+Main+Street+%23B103+Mesa+AZ+85201"
+  },
+  "hours": {
+    "open": "",
+    "close": "",
+    "display": "Call for hours",
+    "lastWash": "",
+    "days": ""
+  },
+  "owners": [],
+  "aboutContent": {
+    "heroTitle": "",
+    "heroTagline": "",
+    "heroSubtitle": "",
+    "missionEyebrow": "",
+    "missionTitle": "",
+    "missionBody": [],
+    "valuesEyebrow": "",
+    "valuesTitle": "",
+    "values": [],
+    "teamEyebrow": "",
+    "teamTitle": "",
+    "teamLede": "",
+    "communityTitle": "",
+    "communityBody": "",
+    "ctaText": ""
+  },
+  "pricing": {
+    "wdf": {
+      "rate": null,
+      "minLb": null,
+      "currency": "USD",
+      "display": "Call for pricing"
+    },
+    "selfServe": {
+      "minLoad": null,
+      "maxLoad": null,
+      "minLoadDisplay": "",
+      "maxLoadDisplay": "",
+      "washMin": null,
+      "dryMin": null,
+      "rangeDisplay": "Call for pricing"
+    }
+  },
+  "equipment": {
+    "washers": null,
+    "dryers": null,
+    "capacityLb": null
+  },
+  "amenities": [
+    "Free WiFi",
+    "Free Parking"
+  ],
+  "serviceArea": [
+    "Mesa"
+  ],
+  "social": {
+    "facebook": "",
+    "instagram": ""
+  },
+  "google": {
+    "placeId": "",
+    "apiKey": "",
+    "profileUrl": "",
+    "reviewsUrl": ""
+  },
+  "images": {
+    "hero": [
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/mesa-az-west-main/hero-1.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/mesa-az-west-main/hero-2.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/mesa-az-west-main/hero-3.jpg"
+    ],
+    "interior": [
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/mesa-az-west-main/interior-1.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/mesa-az-west-main/interior-2.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/mesa-az-west-main/interior-3.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/mesa-az-west-main/interior-4.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/mesa-az-west-main/interior-5.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/mesa-az-west-main/interior-6.jpg"
+    ],
+    "owner": [],
+    "landmarks": [],
+    "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/mesa-az-west-main/hero-1.jpg",
+    "ogImageAlt": "WaveMAX Mesa AZ West Main storefront",
+    "mapPreview": ""
+  },
+  "seo": {
+    "keywords": "laundromat mesa az, laundromat near me, mesa laundromat, wash dry fold mesa, self service laundry mesa, drop off laundry mesa, coin laundry mesa, commercial laundry mesa, wavemax mesa, wavemax mesa az",
+    "keywordsByPage": {
+      "/": "laundromat mesa az, laundromat near me, mesa laundromat, wash dry fold mesa, self service laundry mesa, drop off laundry mesa, coin laundry mesa, commercial laundry mesa, wavemax mesa, wavemax mesa az",
+      "/wash-dry-fold": "wash dry fold mesa, drop off laundry mesa, fluff and fold mesa, laundromat mesa az, laundromat near me, mesa laundromat, wash dry fold mesa, self service laundry mesa, drop off laundry mesa",
+      "/self-serve-laundry": "self service laundry mesa, coin laundry mesa, laundromat mesa, laundromat mesa az, laundromat near me, mesa laundromat, wash dry fold mesa, self service laundry mesa, drop off laundry mesa",
+      "/commercial": "commercial laundry mesa, business laundry mesa, hotel laundry mesa, restaurant linens mesa, laundromat mesa az, laundromat near me, mesa laundromat, wash dry fold mesa, self service laundry mesa, drop off laundry mesa",
+      "/about-us": "wavemax owners mesa, family-owned laundromat mesa, laundromat mesa az, laundromat near me, mesa laundromat, wash dry fold mesa",
+      "/contact": "contact wavemax mesa, laundromat phone mesa, laundromat mesa az, laundromat near me, mesa laundromat, wash dry fold mesa"
+    },
+    "localizedHeadlines": {
+      "landingTitle": "Mesa's premier laundromat",
+      "landingSubtitle": "Self-serve laundry, wash-dry-fold, and commercial accounts in Mesa, AZ.",
+      "wdfTitle": "Wash-Dry-Fold drop-off laundry in Mesa, AZ",
+      "selfServeTitle": "Self-serve laundry in Mesa, AZ",
+      "commercialTitle": "Commercial laundry service for Mesa businesses",
+      "aboutTitle": "About WaveMAX Mesa",
+      "contactTitle": "Contact WaveMAX Mesa, AZ"
+    },
+    "geoRegion": "US-AZ",
+    "geoPlacename": "Mesa, AZ",
+    "geoPosition": "33.4152;-111.8407",
+    "icbm": "33.4152, -111.8407"
+  },
+  "i18n": {
+    "languagesAvailable": [
+      "en",
+      "es",
+      "pt",
+      "de"
+    ]
+  },
+  "nav": {
+    "commercialEnabled": true,
+    "commercialIndustries": {
+      "medical": true,
+      "gym": true,
+      "airbnb": true,
+      "restaurant": true,
+      "contractors": true
+    },
+    "additional": [],
+    "sublinkExtensions": {}
+  },
+  "iframeOverrides": {}
+}

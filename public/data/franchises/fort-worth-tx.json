@@ -1,0 +1,155 @@
+{
+  "slug": "fort-worth-tx",
+  "brand": {
+    "name": "WaveMAX Fort Worth TX",
+    "parent": "WaveMAX Laundry",
+    "tagline": ""
+  },
+  "contact": {
+    "phone": "(682) 301-1112",
+    "phoneTel": "tel:+16823011112",
+    "phoneTelRaw": "+16823011112",
+    "email": "no-reply@wavemax.promo",
+    "emailMailto": "mailto:no-reply@wavemax.promo",
+    "address": "6538 Meadowbrook Dr",
+    "city": "Fort Worth",
+    "state": "TX",
+    "zip": "76112",
+    "country": "US",
+    "addressLine2": "Fort Worth, TX 76112",
+    "geo": {
+      "lat": 32.7555,
+      "lng": -97.2522
+    },
+    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=6538+Meadowbrook+Dr+Fort+Worth+TX+76112"
+  },
+  "hours": {
+    "open": "",
+    "close": "",
+    "display": "Call for hours",
+    "lastWash": "",
+    "days": ""
+  },
+  "owners": [],
+  "aboutContent": {
+    "heroTitle": "",
+    "heroTagline": "",
+    "heroSubtitle": "",
+    "missionEyebrow": "",
+    "missionTitle": "",
+    "missionBody": [],
+    "valuesEyebrow": "",
+    "valuesTitle": "",
+    "values": [],
+    "teamEyebrow": "",
+    "teamTitle": "",
+    "teamLede": "",
+    "communityTitle": "",
+    "communityBody": "",
+    "ctaText": ""
+  },
+  "pricing": {
+    "wdf": {
+      "rate": null,
+      "minLb": null,
+      "currency": "USD",
+      "display": "Call for pricing"
+    },
+    "selfServe": {
+      "minLoad": null,
+      "maxLoad": null,
+      "minLoadDisplay": "",
+      "maxLoadDisplay": "",
+      "washMin": null,
+      "dryMin": null,
+      "rangeDisplay": "Call for pricing"
+    }
+  },
+  "equipment": {
+    "washers": null,
+    "dryers": null,
+    "capacityLb": null
+  },
+  "amenities": [
+    "Free WiFi",
+    "Free Parking"
+  ],
+  "serviceArea": [
+    "Fort Worth"
+  ],
+  "social": {
+    "facebook": "",
+    "instagram": ""
+  },
+  "google": {
+    "placeId": "",
+    "apiKey": "",
+    "profileUrl": "",
+    "reviewsUrl": ""
+  },
+  "images": {
+    "hero": [
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/fort-worth-tx/hero-1.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/fort-worth-tx/hero-2.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/fort-worth-tx/hero-3.jpg"
+    ],
+    "interior": [
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/fort-worth-tx/interior-1.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/fort-worth-tx/interior-2.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/fort-worth-tx/interior-3.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/fort-worth-tx/interior-4.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/fort-worth-tx/interior-5.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/fort-worth-tx/interior-6.jpg"
+    ],
+    "owner": [],
+    "landmarks": [],
+    "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/fort-worth-tx/hero-1.jpg",
+    "ogImageAlt": "WaveMAX Fort Worth TX storefront",
+    "mapPreview": ""
+  },
+  "seo": {
+    "keywords": "laundromat fort worth tx, laundromat near me, fort worth laundromat, wash dry fold fort worth, self service laundry fort worth, drop off laundry fort worth, coin laundry fort worth, commercial laundry fort worth, wavemax fort worth, wavemax fort worth tx",
+    "keywordsByPage": {
+      "/": "laundromat fort worth tx, laundromat near me, fort worth laundromat, wash dry fold fort worth, self service laundry fort worth, drop off laundry fort worth, coin laundry fort worth, commercial laundry fort worth, wavemax fort worth, wavemax fort worth tx",
+      "/wash-dry-fold": "wash dry fold fort worth, drop off laundry fort worth, fluff and fold fort worth, laundromat fort worth tx, laundromat near me, fort worth laundromat, wash dry fold fort worth, self service laundry fort worth, drop off laundry fort worth",
+      "/self-serve-laundry": "self service laundry fort worth, coin laundry fort worth, laundromat fort worth, laundromat fort worth tx, laundromat near me, fort worth laundromat, wash dry fold fort worth, self service laundry fort worth, drop off laundry fort worth",
+      "/commercial": "commercial laundry fort worth, business laundry fort worth, hotel laundry fort worth, restaurant linens fort worth, laundromat fort worth tx, laundromat near me, fort worth laundromat, wash dry fold fort worth, self service laundry fort worth, drop off laundry fort worth",
+      "/about-us": "wavemax owners fort worth, family-owned laundromat fort worth, laundromat fort worth tx, laundromat near me, fort worth laundromat, wash dry fold fort worth",
+      "/contact": "contact wavemax fort worth, laundromat phone fort worth, laundromat fort worth tx, laundromat near me, fort worth laundromat, wash dry fold fort worth"
+    },
+    "localizedHeadlines": {
+      "landingTitle": "Fort Worth's premier laundromat",
+      "landingSubtitle": "Self-serve laundry, wash-dry-fold, and commercial accounts in Fort Worth, TX.",
+      "wdfTitle": "Wash-Dry-Fold drop-off laundry in Fort Worth, TX",
+      "selfServeTitle": "Self-serve laundry in Fort Worth, TX",
+      "commercialTitle": "Commercial laundry service for Fort Worth businesses",
+      "aboutTitle": "About WaveMAX Fort Worth",
+      "contactTitle": "Contact WaveMAX Fort Worth, TX"
+    },
+    "geoRegion": "US-TX",
+    "geoPlacename": "Fort Worth, TX",
+    "geoPosition": "32.7555;-97.2522",
+    "icbm": "32.7555, -97.2522"
+  },
+  "i18n": {
+    "languagesAvailable": [
+      "en",
+      "es",
+      "pt",
+      "de"
+    ]
+  },
+  "nav": {
+    "commercialEnabled": true,
+    "commercialIndustries": {
+      "medical": true,
+      "gym": true,
+      "airbnb": true,
+      "restaurant": true,
+      "contractors": true
+    },
+    "additional": [],
+    "sublinkExtensions": {}
+  },
+  "iframeOverrides": {}
+}

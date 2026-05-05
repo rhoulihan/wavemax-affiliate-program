@@ -1,0 +1,155 @@
+{
+  "slug": "mission-tx",
+  "brand": {
+    "name": "WaveMAX Mission TX",
+    "parent": "WaveMAX Laundry",
+    "tagline": ""
+  },
+  "contact": {
+    "phone": "(214) 914-3134",
+    "phoneTel": "tel:+12149143134",
+    "phoneTelRaw": "+12149143134",
+    "email": "no-reply@wavemax.promo",
+    "emailMailto": "mailto:no-reply@wavemax.promo",
+    "address": "301 W Griffin Pkwy",
+    "city": "Mission",
+    "state": "TX",
+    "zip": "78572",
+    "country": "US",
+    "addressLine2": "Mission, TX 78572",
+    "geo": {
+      "lat": 26.2159,
+      "lng": -98.3252
+    },
+    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=301+W+Griffin+Pkwy+Mission+TX+78572"
+  },
+  "hours": {
+    "open": "",
+    "close": "",
+    "display": "Call for hours",
+    "lastWash": "",
+    "days": ""
+  },
+  "owners": [],
+  "aboutContent": {
+    "heroTitle": "",
+    "heroTagline": "",
+    "heroSubtitle": "",
+    "missionEyebrow": "",
+    "missionTitle": "",
+    "missionBody": [],
+    "valuesEyebrow": "",
+    "valuesTitle": "",
+    "values": [],
+    "teamEyebrow": "",
+    "teamTitle": "",
+    "teamLede": "",
+    "communityTitle": "",
+    "communityBody": "",
+    "ctaText": ""
+  },
+  "pricing": {
+    "wdf": {
+      "rate": null,
+      "minLb": null,
+      "currency": "USD",
+      "display": "Call for pricing"
+    },
+    "selfServe": {
+      "minLoad": null,
+      "maxLoad": null,
+      "minLoadDisplay": "",
+      "maxLoadDisplay": "",
+      "washMin": null,
+      "dryMin": null,
+      "rangeDisplay": "Call for pricing"
+    }
+  },
+  "equipment": {
+    "washers": null,
+    "dryers": null,
+    "capacityLb": null
+  },
+  "amenities": [
+    "Free WiFi",
+    "Free Parking"
+  ],
+  "serviceArea": [
+    "Mission"
+  ],
+  "social": {
+    "facebook": "",
+    "instagram": ""
+  },
+  "google": {
+    "placeId": "",
+    "apiKey": "",
+    "profileUrl": "",
+    "reviewsUrl": ""
+  },
+  "images": {
+    "hero": [
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/kent-wa/hero-1.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/kent-wa/hero-2.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/kent-wa/hero-3.jpg"
+    ],
+    "interior": [
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/kent-wa/interior-1.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/kent-wa/interior-2.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/kent-wa/interior-3.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/kent-wa/interior-4.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/kent-wa/interior-5.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/kent-wa/interior-6.jpg"
+    ],
+    "owner": [],
+    "landmarks": [],
+    "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/kent-wa/hero-1.jpg",
+    "ogImageAlt": "WaveMAX Mission TX storefront",
+    "mapPreview": ""
+  },
+  "seo": {
+    "keywords": "laundromat mission tx, laundromat near me, mission laundromat, wash dry fold mission, self service laundry mission, drop off laundry mission, coin laundry mission, commercial laundry mission, wavemax mission, wavemax mission tx",
+    "keywordsByPage": {
+      "/": "laundromat mission tx, laundromat near me, mission laundromat, wash dry fold mission, self service laundry mission, drop off laundry mission, coin laundry mission, commercial laundry mission, wavemax mission, wavemax mission tx",
+      "/wash-dry-fold": "wash dry fold mission, drop off laundry mission, fluff and fold mission, laundromat mission tx, laundromat near me, mission laundromat, wash dry fold mission, self service laundry mission, drop off laundry mission",
+      "/self-serve-laundry": "self service laundry mission, coin laundry mission, laundromat mission, laundromat mission tx, laundromat near me, mission laundromat, wash dry fold mission, self service laundry mission, drop off laundry mission",
+      "/commercial": "commercial laundry mission, business laundry mission, hotel laundry mission, restaurant linens mission, laundromat mission tx, laundromat near me, mission laundromat, wash dry fold mission, self service laundry mission, drop off laundry mission",
+      "/about-us": "wavemax owners mission, family-owned laundromat mission, laundromat mission tx, laundromat near me, mission laundromat, wash dry fold mission",
+      "/contact": "contact wavemax mission, laundromat phone mission, laundromat mission tx, laundromat near me, mission laundromat, wash dry fold mission"
+    },
+    "localizedHeadlines": {
+      "landingTitle": "Mission's premier laundromat",
+      "landingSubtitle": "Self-serve laundry, wash-dry-fold, and commercial accounts in Mission, TX.",
+      "wdfTitle": "Wash-Dry-Fold drop-off laundry in Mission, TX",
+      "selfServeTitle": "Self-serve laundry in Mission, TX",
+      "commercialTitle": "Commercial laundry service for Mission businesses",
+      "aboutTitle": "About WaveMAX Mission",
+      "contactTitle": "Contact WaveMAX Mission, TX"
+    },
+    "geoRegion": "US-TX",
+    "geoPlacename": "Mission, TX",
+    "geoPosition": "26.2159;-98.3252",
+    "icbm": "26.2159, -98.3252"
+  },
+  "i18n": {
+    "languagesAvailable": [
+      "en",
+      "es",
+      "pt",
+      "de"
+    ]
+  },
+  "nav": {
+    "commercialEnabled": true,
+    "commercialIndustries": {
+      "medical": true,
+      "gym": true,
+      "airbnb": true,
+      "restaurant": true,
+      "contractors": true
+    },
+    "additional": [],
+    "sublinkExtensions": {}
+  },
+  "iframeOverrides": {}
+}

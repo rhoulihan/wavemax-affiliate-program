@@ -549,6 +549,11 @@ if (process.env.ENABLE_TEST_PAYMENT_FORM === 'true') {
 // API Routes with versioning
 const apiV1Router = express.Router();
 
+// Franchise registry listing — drives the /locations/ finder UI on the
+// corporate clone. Mounted under /api/v1/ so the legacy /api → /api/v1
+// rewrite covers it too.
+apiV1Router.get('/franchises', require('./server/controllers/franchiseController').listFranchises);
+
 // Environment endpoint (for checking if in dev/test mode)
 apiV1Router.get('/environment', (req, res) => {
   res.json({
@@ -616,6 +621,13 @@ app.use('/api', (req, res, next) => {
   }
   next();
 }, apiV1Router);
+
+// Per-franchise dynamic routes — Phase 5a. Mounted AFTER /api/* and the
+// static middleware so unknown slugs fall through to a 404 instead of
+// shadowing real asset paths. The controller's registry-lookup gate is
+// the slug allowlist; anything not in /public/data/franchises/ calls
+// next() and Express returns the standard 404.
+app.use('/', require('./server/routes/franchiseRoutes'));
 
 // Admin routes with CSRF
 app.get('/admin/*', (req, res, next) => {

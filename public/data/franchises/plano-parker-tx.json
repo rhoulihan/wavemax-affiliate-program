@@ -1,0 +1,155 @@
+{
+  "slug": "plano-parker-tx",
+  "brand": {
+    "name": "WaveMAX Parker Plano TX",
+    "parent": "WaveMAX Laundry",
+    "tagline": ""
+  },
+  "contact": {
+    "phone": "(214) 764-8811",
+    "phoneTel": "tel:+12147648811",
+    "phoneTelRaw": "+12147648811",
+    "email": "no-reply@wavemax.promo",
+    "emailMailto": "mailto:no-reply@wavemax.promo",
+    "address": "930 Parker Rd., Suite 520",
+    "city": "Plano",
+    "state": "TX",
+    "zip": "75075",
+    "country": "US",
+    "addressLine2": "Plano, TX 75075",
+    "geo": {
+      "lat": 33.0198,
+      "lng": -96.6989
+    },
+    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=930+Parker+Rd.%2C+Suite+520+Plano+TX+75075"
+  },
+  "hours": {
+    "open": "",
+    "close": "",
+    "display": "Call for hours",
+    "lastWash": "",
+    "days": ""
+  },
+  "owners": [],
+  "aboutContent": {
+    "heroTitle": "",
+    "heroTagline": "",
+    "heroSubtitle": "",
+    "missionEyebrow": "",
+    "missionTitle": "",
+    "missionBody": [],
+    "valuesEyebrow": "",
+    "valuesTitle": "",
+    "values": [],
+    "teamEyebrow": "",
+    "teamTitle": "",
+    "teamLede": "",
+    "communityTitle": "",
+    "communityBody": "",
+    "ctaText": ""
+  },
+  "pricing": {
+    "wdf": {
+      "rate": null,
+      "minLb": null,
+      "currency": "USD",
+      "display": "Call for pricing"
+    },
+    "selfServe": {
+      "minLoad": null,
+      "maxLoad": null,
+      "minLoadDisplay": "",
+      "maxLoadDisplay": "",
+      "washMin": null,
+      "dryMin": null,
+      "rangeDisplay": "Call for pricing"
+    }
+  },
+  "equipment": {
+    "washers": null,
+    "dryers": null,
+    "capacityLb": null
+  },
+  "amenities": [
+    "Free WiFi",
+    "Free Parking"
+  ],
+  "serviceArea": [
+    "Plano"
+  ],
+  "social": {
+    "facebook": "",
+    "instagram": ""
+  },
+  "google": {
+    "placeId": "",
+    "apiKey": "",
+    "profileUrl": "",
+    "reviewsUrl": ""
+  },
+  "images": {
+    "hero": [
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/plano-parker-tx/hero-1.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/plano-parker-tx/hero-2.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/plano-parker-tx/hero-3.jpg"
+    ],
+    "interior": [
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/plano-parker-tx/interior-1.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/plano-parker-tx/interior-2.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/plano-parker-tx/interior-3.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/plano-parker-tx/interior-4.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/plano-parker-tx/interior-5.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/plano-parker-tx/interior-6.jpg"
+    ],
+    "owner": [],
+    "landmarks": [],
+    "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/plano-parker-tx/hero-1.jpg",
+    "ogImageAlt": "WaveMAX Parker Plano TX storefront",
+    "mapPreview": ""
+  },
+  "seo": {
+    "keywords": "laundromat plano tx, laundromat near me, plano laundromat, wash dry fold plano, self service laundry plano, drop off laundry plano, coin laundry plano, commercial laundry plano, wavemax plano, wavemax plano tx",
+    "keywordsByPage": {
+      "/": "laundromat plano tx, laundromat near me, plano laundromat, wash dry fold plano, self service laundry plano, drop off laundry plano, coin laundry plano, commercial laundry plano, wavemax plano, wavemax plano tx",
+      "/wash-dry-fold": "wash dry fold plano, drop off laundry plano, fluff and fold plano, laundromat plano tx, laundromat near me, plano laundromat, wash dry fold plano, self service laundry plano, drop off laundry plano",
+      "/self-serve-laundry": "self service laundry plano, coin laundry plano, laundromat plano, laundromat plano tx, laundromat near me, plano laundromat, wash dry fold plano, self service laundry plano, drop off laundry plano",
+      "/commercial": "commercial laundry plano, business laundry plano, hotel laundry plano, restaurant linens plano, laundromat plano tx, laundromat near me, plano laundromat, wash dry fold plano, self service laundry plano, drop off laundry plano",
+      "/about-us": "wavemax owners plano, family-owned laundromat plano, laundromat plano tx, laundromat near me, plano laundromat, wash dry fold plano",
+      "/contact": "contact wavemax plano, laundromat phone plano, laundromat plano tx, laundromat near me, plano laundromat, wash dry fold plano"
+    },
+    "localizedHeadlines": {
+      "landingTitle": "Plano's premier laundromat",
+      "landingSubtitle": "Self-serve laundry, wash-dry-fold, and commercial accounts in Plano, TX.",
+      "wdfTitle": "Wash-Dry-Fold drop-off laundry in Plano, TX",
+      "selfServeTitle": "Self-serve laundry in Plano, TX",
+      "commercialTitle": "Commercial laundry service for Plano businesses",
+      "aboutTitle": "About WaveMAX Plano",
+      "contactTitle": "Contact WaveMAX Plano, TX"
+    },
+    "geoRegion": "US-TX",
+    "geoPlacename": "Plano, TX",
+    "geoPosition": "33.0198;-96.6989",
+    "icbm": "33.0198, -96.6989"
+  },
+  "i18n": {
+    "languagesAvailable": [
+      "en",
+      "es",
+      "pt",
+      "de"
+    ]
+  },
+  "nav": {
+    "commercialEnabled": true,
+    "commercialIndustries": {
+      "medical": true,
+      "gym": true,
+      "airbnb": true,
+      "restaurant": true,
+      "contractors": true
+    },
+    "additional": [],
+    "sublinkExtensions": {}
+  },
+  "iframeOverrides": {}
+}

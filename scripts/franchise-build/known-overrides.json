@@ -1,0 +1,31 @@
+{
+  "_comment": "Per-franchise overrides for fields that should NOT come from the generic defaults. Each entry deep-merges into the generated franchise JSON. Add a new entry whenever we learn ground-truth equipment / pricing / amenities for a specific store. Entries here win over the build script's null defaults; an empty entry leaves the generic placeholders in place.",
+
+  "austin-tx": {
+    "brand": {
+      "name": "WaveMAX Laundry Austin",
+      "tagline": "Austin's Cleanest Laundromat"
+    },
+    "pricing": {
+      "wdf":       { "rate": 1.20, "minLb": 10, "currency": "USD", "display": "$1.20/lb" },
+      "selfServe": {
+        "minLoad": 2.75, "maxLoad": 10.50,
+        "minLoadDisplay": "$2.75", "maxLoadDisplay": "$10.50",
+        "washMin": 20, "dryMin": 20,
+        "rangeDisplay": "$2.75 – $10.50"
+      }
+    },
+    "equipment": { "washers": 42, "dryers": 42, "capacityLb": 80 },
+    "amenities": [
+      "Free WiFi",
+      "Hospital-Grade UV Sanitization",
+      "Free Parking",
+      "Wheelchair Accessible"
+    ],
+    "serviceArea": ["Austin", "Round Rock", "Cedar Park", "Pflugerville", "Georgetown", "Leander"],
+    "google": {
+      "placeId": "ChIJOUs5BpHJRIYRTjv0UotLg0o",
+      "apiKey": ""
+    }
+  }
+}

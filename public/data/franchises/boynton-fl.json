@@ -1,0 +1,155 @@
+{
+  "slug": "boynton-fl",
+  "brand": {
+    "name": "WaveMAX Boynton Beach FL",
+    "parent": "WaveMAX Laundry",
+    "tagline": ""
+  },
+  "contact": {
+    "phone": "(561) 389-0432",
+    "phoneTel": "tel:+15613890432",
+    "phoneTelRaw": "+15613890432",
+    "email": "no-reply@wavemax.promo",
+    "emailMailto": "mailto:no-reply@wavemax.promo",
+    "address": "1550 North Federal Highway, Suite 1",
+    "city": "Boynton Beach",
+    "state": "FL",
+    "zip": "33435",
+    "country": "US",
+    "addressLine2": "Boynton Beach, FL 33435",
+    "geo": {
+      "lat": 26.535,
+      "lng": -80.0582
+    },
+    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=1550+North+Federal+Highway%2C+Suite+1+Boynton+Beach+FL+33435"
+  },
+  "hours": {
+    "open": "",
+    "close": "",
+    "display": "Call for hours",
+    "lastWash": "",
+    "days": ""
+  },
+  "owners": [],
+  "aboutContent": {
+    "heroTitle": "",
+    "heroTagline": "",
+    "heroSubtitle": "",
+    "missionEyebrow": "",
+    "missionTitle": "",
+    "missionBody": [],
+    "valuesEyebrow": "",
+    "valuesTitle": "",
+    "values": [],
+    "teamEyebrow": "",
+    "teamTitle": "",
+    "teamLede": "",
+    "communityTitle": "",
+    "communityBody": "",
+    "ctaText": ""
+  },
+  "pricing": {
+    "wdf": {
+      "rate": null,
+      "minLb": null,
+      "currency": "USD",
+      "display": "Call for pricing"
+    },
+    "selfServe": {
+      "minLoad": null,
+      "maxLoad": null,
+      "minLoadDisplay": "",
+      "maxLoadDisplay": "",
+      "washMin": null,
+      "dryMin": null,
+      "rangeDisplay": "Call for pricing"
+    }
+  },
+  "equipment": {
+    "washers": null,
+    "dryers": null,
+    "capacityLb": null
+  },
+  "amenities": [
+    "Free WiFi",
+    "Free Parking"
+  ],
+  "serviceArea": [
+    "Boynton Beach"
+  ],
+  "social": {
+    "facebook": "",
+    "instagram": ""
+  },
+  "google": {
+    "placeId": "",
+    "apiKey": "",
+    "profileUrl": "",
+    "reviewsUrl": ""
+  },
+  "images": {
+    "hero": [
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/boynton-fl/hero-1.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/boynton-fl/hero-2.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/boynton-fl/hero-3.jpg"
+    ],
+    "interior": [
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/boynton-fl/interior-1.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/boynton-fl/interior-2.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/boynton-fl/interior-3.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/boynton-fl/interior-4.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/boynton-fl/interior-5.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/boynton-fl/interior-6.jpg"
+    ],
+    "owner": [],
+    "landmarks": [],
+    "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/boynton-fl/hero-1.jpg",
+    "ogImageAlt": "WaveMAX Boynton Beach FL storefront",
+    "mapPreview": ""
+  },
+  "seo": {
+    "keywords": "laundromat boynton beach fl, laundromat near me, boynton beach laundromat, wash dry fold boynton beach, self service laundry boynton beach, drop off laundry boynton beach, coin laundry boynton beach, commercial laundry boynton beach, wavemax boynton beach, wavemax boynton beach fl",
+    "keywordsByPage": {
+      "/": "laundromat boynton beach fl, laundromat near me, boynton beach laundromat, wash dry fold boynton beach, self service laundry boynton beach, drop off laundry boynton beach, coin laundry boynton beach, commercial laundry boynton beach, wavemax boynton beach, wavemax boynton beach fl",
+      "/wash-dry-fold": "wash dry fold boynton beach, drop off laundry boynton beach, fluff and fold boynton beach, laundromat boynton beach fl, laundromat near me, boynton beach laundromat, wash dry fold boynton beach, self service laundry boynton beach, drop off laundry boynton beach",
+      "/self-serve-laundry": "self service laundry boynton beach, coin laundry boynton beach, laundromat boynton beach, laundromat boynton beach fl, laundromat near me, boynton beach laundromat, wash dry fold boynton beach, self service laundry boynton beach, drop off laundry boynton beach",
+      "/commercial": "commercial laundry boynton beach, business laundry boynton beach, hotel laundry boynton beach, restaurant linens boynton beach, laundromat boynton beach fl, laundromat near me, boynton beach laundromat, wash dry fold boynton beach, self service laundry boynton beach, drop off laundry boynton beach",
+      "/about-us": "wavemax owners boynton beach, family-owned laundromat boynton beach, laundromat boynton beach fl, laundromat near me, boynton beach laundromat, wash dry fold boynton beach",
+      "/contact": "contact wavemax boynton beach, laundromat phone boynton beach, laundromat boynton beach fl, laundromat near me, boynton beach laundromat, wash dry fold boynton beach"
+    },
+    "localizedHeadlines": {
+      "landingTitle": "Boynton Beach's premier laundromat",
+      "landingSubtitle": "Self-serve laundry, wash-dry-fold, and commercial accounts in Boynton Beach, FL.",
+      "wdfTitle": "Wash-Dry-Fold drop-off laundry in Boynton Beach, FL",
+      "selfServeTitle": "Self-serve laundry in Boynton Beach, FL",
+      "commercialTitle": "Commercial laundry service for Boynton Beach businesses",
+      "aboutTitle": "About WaveMAX Boynton Beach",
+      "contactTitle": "Contact WaveMAX Boynton Beach, FL"
+    },
+    "geoRegion": "US-FL",
+    "geoPlacename": "Boynton Beach, FL",
+    "geoPosition": "26.535;-80.0582",
+    "icbm": "26.535, -80.0582"
+  },
+  "i18n": {
+    "languagesAvailable": [
+      "en",
+      "es",
+      "pt",
+      "de"
+    ]
+  },
+  "nav": {
+    "commercialEnabled": true,
+    "commercialIndustries": {
+      "medical": true,
+      "gym": true,
+      "airbnb": true,
+      "restaurant": true,
+      "contractors": true
+    },
+    "additional": [],
+    "sublinkExtensions": {}
+  },
+  "iframeOverrides": {}
+}

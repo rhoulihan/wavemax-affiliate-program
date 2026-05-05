@@ -1,0 +1,151 @@
+{
+  "slug": "knoxville-tn",
+  "brand": {
+    "name": "WaveMAX Knoxville TN",
+    "parent": "WaveMAX Laundry",
+    "tagline": ""
+  },
+  "contact": {
+    "phone": "(865) 985-0152",
+    "phoneTel": "tel:+18659850152",
+    "phoneTelRaw": "+18659850152",
+    "email": "no-reply@wavemax.promo",
+    "emailMailto": "mailto:no-reply@wavemax.promo",
+    "address": "5210A Schubert Rd.",
+    "city": "Knoxville",
+    "state": "TN",
+    "zip": "37912",
+    "country": "US",
+    "addressLine2": "Knoxville, TN 37912",
+    "geo": {
+      "lat": 36.0122,
+      "lng": -83.9723
+    },
+    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=5210A+Schubert+Rd.+Knoxville+TN+37912"
+  },
+  "hours": {
+    "open": "",
+    "close": "",
+    "display": "Call for hours",
+    "lastWash": "",
+    "days": ""
+  },
+  "owners": [],
+  "aboutContent": {
+    "heroTitle": "",
+    "heroTagline": "",
+    "heroSubtitle": "",
+    "missionEyebrow": "",
+    "missionTitle": "",
+    "missionBody": [],
+    "valuesEyebrow": "",
+    "valuesTitle": "",
+    "values": [],
+    "teamEyebrow": "",
+    "teamTitle": "",
+    "teamLede": "",
+    "communityTitle": "",
+    "communityBody": "",
+    "ctaText": ""
+  },
+  "pricing": {
+    "wdf": {
+      "rate": null,
+      "minLb": null,
+      "currency": "USD",
+      "display": "Call for pricing"
+    },
+    "selfServe": {
+      "minLoad": null,
+      "maxLoad": null,
+      "minLoadDisplay": "",
+      "maxLoadDisplay": "",
+      "washMin": null,
+      "dryMin": null,
+      "rangeDisplay": "Call for pricing"
+    }
+  },
+  "equipment": {
+    "washers": null,
+    "dryers": null,
+    "capacityLb": null
+  },
+  "amenities": [
+    "Free WiFi",
+    "Free Parking"
+  ],
+  "serviceArea": [
+    "Knoxville"
+  ],
+  "social": {
+    "facebook": "",
+    "instagram": ""
+  },
+  "google": {
+    "placeId": "",
+    "apiKey": "",
+    "profileUrl": "",
+    "reviewsUrl": ""
+  },
+  "images": {
+    "hero": [
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/knoxville-tn/hero-1.jpg"
+    ],
+    "interior": [
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/knoxville-tn/interior-1.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/knoxville-tn/interior-2.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/knoxville-tn/interior-3.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/knoxville-tn/interior-4.jpg"
+    ],
+    "owner": [],
+    "landmarks": [],
+    "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/knoxville-tn/hero-1.jpg",
+    "ogImageAlt": "WaveMAX Knoxville TN storefront",
+    "mapPreview": ""
+  },
+  "seo": {
+    "keywords": "laundromat knoxville tn, laundromat near me, knoxville laundromat, wash dry fold knoxville, self service laundry knoxville, drop off laundry knoxville, coin laundry knoxville, commercial laundry knoxville, wavemax knoxville, wavemax knoxville tn",
+    "keywordsByPage": {
+      "/": "laundromat knoxville tn, laundromat near me, knoxville laundromat, wash dry fold knoxville, self service laundry knoxville, drop off laundry knoxville, coin laundry knoxville, commercial laundry knoxville, wavemax knoxville, wavemax knoxville tn",
+      "/wash-dry-fold": "wash dry fold knoxville, drop off laundry knoxville, fluff and fold knoxville, laundromat knoxville tn, laundromat near me, knoxville laundromat, wash dry fold knoxville, self service laundry knoxville, drop off laundry knoxville",
+      "/self-serve-laundry": "self service laundry knoxville, coin laundry knoxville, laundromat knoxville, laundromat knoxville tn, laundromat near me, knoxville laundromat, wash dry fold knoxville, self service laundry knoxville, drop off laundry knoxville",
+      "/commercial": "commercial laundry knoxville, business laundry knoxville, hotel laundry knoxville, restaurant linens knoxville, laundromat knoxville tn, laundromat near me, knoxville laundromat, wash dry fold knoxville, self service laundry knoxville, drop off laundry knoxville",
+      "/about-us": "wavemax owners knoxville, family-owned laundromat knoxville, laundromat knoxville tn, laundromat near me, knoxville laundromat, wash dry fold knoxville",
+      "/contact": "contact wavemax knoxville, laundromat phone knoxville, laundromat knoxville tn, laundromat near me, knoxville laundromat, wash dry fold knoxville"
+    },
+    "localizedHeadlines": {
+      "landingTitle": "Knoxville's premier laundromat",
+      "landingSubtitle": "Self-serve laundry, wash-dry-fold, and commercial accounts in Knoxville, TN.",
+      "wdfTitle": "Wash-Dry-Fold drop-off laundry in Knoxville, TN",
+      "selfServeTitle": "Self-serve laundry in Knoxville, TN",
+      "commercialTitle": "Commercial laundry service for Knoxville businesses",
+      "aboutTitle": "About WaveMAX Knoxville",
+      "contactTitle": "Contact WaveMAX Knoxville, TN"
+    },
+    "geoRegion": "US-TN",
+    "geoPlacename": "Knoxville, TN",
+    "geoPosition": "36.0122;-83.9723",
+    "icbm": "36.0122, -83.9723"
+  },
+  "i18n": {
+    "languagesAvailable": [
+      "en",
+      "es",
+      "pt",
+      "de"
+    ]
+  },
+  "nav": {
+    "commercialEnabled": true,
+    "commercialIndustries": {
+      "medical": true,
+      "gym": true,
+      "airbnb": true,
+      "restaurant": true,
+      "contractors": true
+    },
+    "additional": [],
+    "sublinkExtensions": {}
+  },
+  "iframeOverrides": {}
+}

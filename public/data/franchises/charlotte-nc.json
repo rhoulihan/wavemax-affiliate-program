@@ -1,0 +1,150 @@
+{
+  "slug": "charlotte-nc",
+  "brand": {
+    "name": "WaveMAX Charlotte NC",
+    "parent": "WaveMAX Laundry",
+    "tagline": ""
+  },
+  "contact": {
+    "phone": "(704) 910-1587",
+    "phoneTel": "tel:+17049101587",
+    "phoneTelRaw": "+17049101587",
+    "email": "no-reply@wavemax.promo",
+    "emailMailto": "mailto:no-reply@wavemax.promo",
+    "address": "2915 The Plaza Suite B",
+    "city": "Charlotte",
+    "state": "NC",
+    "zip": "28205",
+    "country": "US",
+    "addressLine2": "Charlotte, NC 28205",
+    "geo": {
+      "lat": 35.2271,
+      "lng": -80.7663
+    },
+    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=2915+The+Plaza+Suite+B+Charlotte+NC+28205"
+  },
+  "hours": {
+    "open": "",
+    "close": "",
+    "display": "Call for hours",
+    "lastWash": "",
+    "days": ""
+  },
+  "owners": [],
+  "aboutContent": {
+    "heroTitle": "",
+    "heroTagline": "",
+    "heroSubtitle": "",
+    "missionEyebrow": "",
+    "missionTitle": "",
+    "missionBody": [],
+    "valuesEyebrow": "",
+    "valuesTitle": "",
+    "values": [],
+    "teamEyebrow": "",
+    "teamTitle": "",
+    "teamLede": "",
+    "communityTitle": "",
+    "communityBody": "",
+    "ctaText": ""
+  },
+  "pricing": {
+    "wdf": {
+      "rate": null,
+      "minLb": null,
+      "currency": "USD",
+      "display": "Call for pricing"
+    },
+    "selfServe": {
+      "minLoad": null,
+      "maxLoad": null,
+      "minLoadDisplay": "",
+      "maxLoadDisplay": "",
+      "washMin": null,
+      "dryMin": null,
+      "rangeDisplay": "Call for pricing"
+    }
+  },
+  "equipment": {
+    "washers": null,
+    "dryers": null,
+    "capacityLb": null
+  },
+  "amenities": [
+    "Free WiFi",
+    "Free Parking"
+  ],
+  "serviceArea": [
+    "Charlotte"
+  ],
+  "social": {
+    "facebook": "",
+    "instagram": ""
+  },
+  "google": {
+    "placeId": "",
+    "apiKey": "",
+    "profileUrl": "",
+    "reviewsUrl": ""
+  },
+  "images": {
+    "hero": [
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/charlotte-nc/hero-1.jpg"
+    ],
+    "interior": [
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/charlotte-nc/interior-1.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/charlotte-nc/interior-2.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/charlotte-nc/interior-3.jpg"
+    ],
+    "owner": [],
+    "landmarks": [],
+    "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/charlotte-nc/hero-1.jpg",
+    "ogImageAlt": "WaveMAX Charlotte NC storefront",
+    "mapPreview": ""
+  },
+  "seo": {
+    "keywords": "laundromat charlotte nc, laundromat near me, charlotte laundromat, wash dry fold charlotte, self service laundry charlotte, drop off laundry charlotte, coin laundry charlotte, commercial laundry charlotte, wavemax charlotte, wavemax charlotte nc",
+    "keywordsByPage": {
+      "/": "laundromat charlotte nc, laundromat near me, charlotte laundromat, wash dry fold charlotte, self service laundry charlotte, drop off laundry charlotte, coin laundry charlotte, commercial laundry charlotte, wavemax charlotte, wavemax charlotte nc",
+      "/wash-dry-fold": "wash dry fold charlotte, drop off laundry charlotte, fluff and fold charlotte, laundromat charlotte nc, laundromat near me, charlotte laundromat, wash dry fold charlotte, self service laundry charlotte, drop off laundry charlotte",
+      "/self-serve-laundry": "self service laundry charlotte, coin laundry charlotte, laundromat charlotte, laundromat charlotte nc, laundromat near me, charlotte laundromat, wash dry fold charlotte, self service laundry charlotte, drop off laundry charlotte",
+      "/commercial": "commercial laundry charlotte, business laundry charlotte, hotel laundry charlotte, restaurant linens charlotte, laundromat charlotte nc, laundromat near me, charlotte laundromat, wash dry fold charlotte, self service laundry charlotte, drop off laundry charlotte",
+      "/about-us": "wavemax owners charlotte, family-owned laundromat charlotte, laundromat charlotte nc, laundromat near me, charlotte laundromat, wash dry fold charlotte",
+      "/contact": "contact wavemax charlotte, laundromat phone charlotte, laundromat charlotte nc, laundromat near me, charlotte laundromat, wash dry fold charlotte"
+    },
+    "localizedHeadlines": {
+      "landingTitle": "Charlotte's premier laundromat",
+      "landingSubtitle": "Self-serve laundry, wash-dry-fold, and commercial accounts in Charlotte, NC.",
+      "wdfTitle": "Wash-Dry-Fold drop-off laundry in Charlotte, NC",
+      "selfServeTitle": "Self-serve laundry in Charlotte, NC",
+      "commercialTitle": "Commercial laundry service for Charlotte businesses",
+      "aboutTitle": "About WaveMAX Charlotte",
+      "contactTitle": "Contact WaveMAX Charlotte, NC"
+    },
+    "geoRegion": "US-NC",
+    "geoPlacename": "Charlotte, NC",
+    "geoPosition": "35.2271;-80.7663",
+    "icbm": "35.2271, -80.7663"
+  },
+  "i18n": {
+    "languagesAvailable": [
+      "en",
+      "es",
+      "pt",
+      "de"
+    ]
+  },
+  "nav": {
+    "commercialEnabled": true,
+    "commercialIndustries": {
+      "medical": true,
+      "gym": true,
+      "airbnb": true,
+      "restaurant": true,
+      "contractors": true
+    },
+    "additional": [],
+    "sublinkExtensions": {}
+  },
+  "iframeOverrides": {}
+}

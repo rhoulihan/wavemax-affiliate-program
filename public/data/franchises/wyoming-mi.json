@@ -1,0 +1,155 @@
+{
+  "slug": "wyoming-mi",
+  "brand": {
+    "name": "WaveMAX Wyoming MI",
+    "parent": "WaveMAX Laundry",
+    "tagline": ""
+  },
+  "contact": {
+    "phone": "(616) 288-6929",
+    "phoneTel": "tel:+16162886929",
+    "phoneTelRaw": "+16162886929",
+    "email": "no-reply@wavemax.promo",
+    "emailMailto": "mailto:no-reply@wavemax.promo",
+    "address": "1633 28th St SW unit G",
+    "city": "Wyoming",
+    "state": "MI",
+    "zip": "49519",
+    "country": "US",
+    "addressLine2": "Wyoming, MI 49519",
+    "geo": {
+      "lat": 42.9134,
+      "lng": -85.7053
+    },
+    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=1633+28th+St+SW+unit+G+Wyoming+MI+49519"
+  },
+  "hours": {
+    "open": "",
+    "close": "",
+    "display": "Call for hours",
+    "lastWash": "",
+    "days": ""
+  },
+  "owners": [],
+  "aboutContent": {
+    "heroTitle": "",
+    "heroTagline": "",
+    "heroSubtitle": "",
+    "missionEyebrow": "",
+    "missionTitle": "",
+    "missionBody": [],
+    "valuesEyebrow": "",
+    "valuesTitle": "",
+    "values": [],
+    "teamEyebrow": "",
+    "teamTitle": "",
+    "teamLede": "",
+    "communityTitle": "",
+    "communityBody": "",
+    "ctaText": ""
+  },
+  "pricing": {
+    "wdf": {
+      "rate": null,
+      "minLb": null,
+      "currency": "USD",
+      "display": "Call for pricing"
+    },
+    "selfServe": {
+      "minLoad": null,
+      "maxLoad": null,
+      "minLoadDisplay": "",
+      "maxLoadDisplay": "",
+      "washMin": null,
+      "dryMin": null,
+      "rangeDisplay": "Call for pricing"
+    }
+  },
+  "equipment": {
+    "washers": null,
+    "dryers": null,
+    "capacityLb": null
+  },
+  "amenities": [
+    "Free WiFi",
+    "Free Parking"
+  ],
+  "serviceArea": [
+    "Wyoming"
+  ],
+  "social": {
+    "facebook": "",
+    "instagram": ""
+  },
+  "google": {
+    "placeId": "",
+    "apiKey": "",
+    "profileUrl": "",
+    "reviewsUrl": ""
+  },
+  "images": {
+    "hero": [
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/wyoming-mi/hero-1.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/wyoming-mi/hero-2.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/wyoming-mi/hero-3.jpg"
+    ],
+    "interior": [
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/wyoming-mi/interior-1.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/wyoming-mi/interior-2.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/wyoming-mi/interior-3.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/wyoming-mi/interior-4.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/wyoming-mi/interior-5.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/wyoming-mi/interior-6.jpg"
+    ],
+    "owner": [],
+    "landmarks": [],
+    "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/wyoming-mi/hero-1.jpg",
+    "ogImageAlt": "WaveMAX Wyoming MI storefront",
+    "mapPreview": ""
+  },
+  "seo": {
+    "keywords": "laundromat wyoming mi, laundromat near me, wyoming laundromat, wash dry fold wyoming, self service laundry wyoming, drop off laundry wyoming, coin laundry wyoming, commercial laundry wyoming, wavemax wyoming, wavemax wyoming mi",
+    "keywordsByPage": {
+      "/": "laundromat wyoming mi, laundromat near me, wyoming laundromat, wash dry fold wyoming, self service laundry wyoming, drop off laundry wyoming, coin laundry wyoming, commercial laundry wyoming, wavemax wyoming, wavemax wyoming mi",
+      "/wash-dry-fold": "wash dry fold wyoming, drop off laundry wyoming, fluff and fold wyoming, laundromat wyoming mi, laundromat near me, wyoming laundromat, wash dry fold wyoming, self service laundry wyoming, drop off laundry wyoming",
+      "/self-serve-laundry": "self service laundry wyoming, coin laundry wyoming, laundromat wyoming, laundromat wyoming mi, laundromat near me, wyoming laundromat, wash dry fold wyoming, self service laundry wyoming, drop off laundry wyoming",
+      "/commercial": "commercial laundry wyoming, business laundry wyoming, hotel laundry wyoming, restaurant linens wyoming, laundromat wyoming mi, laundromat near me, wyoming laundromat, wash dry fold wyoming, self service laundry wyoming, drop off laundry wyoming",
+      "/about-us": "wavemax owners wyoming, family-owned laundromat wyoming, laundromat wyoming mi, laundromat near me, wyoming laundromat, wash dry fold wyoming",
+      "/contact": "contact wavemax wyoming, laundromat phone wyoming, laundromat wyoming mi, laundromat near me, wyoming laundromat, wash dry fold wyoming"
+    },
+    "localizedHeadlines": {
+      "landingTitle": "Wyoming's premier laundromat",
+      "landingSubtitle": "Self-serve laundry, wash-dry-fold, and commercial accounts in Wyoming, MI.",
+      "wdfTitle": "Wash-Dry-Fold drop-off laundry in Wyoming, MI",
+      "selfServeTitle": "Self-serve laundry in Wyoming, MI",
+      "commercialTitle": "Commercial laundry service for Wyoming businesses",
+      "aboutTitle": "About WaveMAX Wyoming",
+      "contactTitle": "Contact WaveMAX Wyoming, MI"
+    },
+    "geoRegion": "US-MI",
+    "geoPlacename": "Wyoming, MI",
+    "geoPosition": "42.9134;-85.7053",
+    "icbm": "42.9134, -85.7053"
+  },
+  "i18n": {
+    "languagesAvailable": [
+      "en",
+      "es",
+      "pt",
+      "de"
+    ]
+  },
+  "nav": {
+    "commercialEnabled": true,
+    "commercialIndustries": {
+      "medical": true,
+      "gym": true,
+      "airbnb": true,
+      "restaurant": true,
+      "contractors": true
+    },
+    "additional": [],
+    "sublinkExtensions": {}
+  },
+  "iframeOverrides": {}
+}

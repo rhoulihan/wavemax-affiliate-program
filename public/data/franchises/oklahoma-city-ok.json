@@ -1,0 +1,154 @@
+{
+  "slug": "oklahoma-city-ok",
+  "brand": {
+    "name": "WaveMAX Oklahoma City OK",
+    "parent": "WaveMAX Laundry",
+    "tagline": ""
+  },
+  "contact": {
+    "phone": "(405) 724-9935",
+    "phoneTel": "tel:+14057249935",
+    "phoneTelRaw": "+14057249935",
+    "email": "no-reply@wavemax.promo",
+    "emailMailto": "mailto:no-reply@wavemax.promo",
+    "address": "6125 S. May Avenue",
+    "city": "Oklahoma City",
+    "state": "OK",
+    "zip": "73159",
+    "country": "US",
+    "addressLine2": "Oklahoma City, OK 73159",
+    "geo": {
+      "lat": 35.4203,
+      "lng": -97.5164
+    },
+    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=6125+S.+May+Avenue+Oklahoma+City+OK+73159"
+  },
+  "hours": {
+    "open": "",
+    "close": "",
+    "display": "Call for hours",
+    "lastWash": "",
+    "days": ""
+  },
+  "owners": [],
+  "aboutContent": {
+    "heroTitle": "",
+    "heroTagline": "",
+    "heroSubtitle": "",
+    "missionEyebrow": "",
+    "missionTitle": "",
+    "missionBody": [],
+    "valuesEyebrow": "",
+    "valuesTitle": "",
+    "values": [],
+    "teamEyebrow": "",
+    "teamTitle": "",
+    "teamLede": "",
+    "communityTitle": "",
+    "communityBody": "",
+    "ctaText": ""
+  },
+  "pricing": {
+    "wdf": {
+      "rate": null,
+      "minLb": null,
+      "currency": "USD",
+      "display": "Call for pricing"
+    },
+    "selfServe": {
+      "minLoad": null,
+      "maxLoad": null,
+      "minLoadDisplay": "",
+      "maxLoadDisplay": "",
+      "washMin": null,
+      "dryMin": null,
+      "rangeDisplay": "Call for pricing"
+    }
+  },
+  "equipment": {
+    "washers": null,
+    "dryers": null,
+    "capacityLb": null
+  },
+  "amenities": [
+    "Free WiFi",
+    "Free Parking"
+  ],
+  "serviceArea": [
+    "Oklahoma City"
+  ],
+  "social": {
+    "facebook": "",
+    "instagram": ""
+  },
+  "google": {
+    "placeId": "",
+    "apiKey": "",
+    "profileUrl": "",
+    "reviewsUrl": ""
+  },
+  "images": {
+    "hero": [
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/oklahoma-city-ok/hero-1.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/oklahoma-city-ok/hero-2.jpg"
+    ],
+    "interior": [
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/oklahoma-city-ok/interior-1.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/oklahoma-city-ok/interior-2.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/oklahoma-city-ok/interior-3.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/oklahoma-city-ok/interior-4.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/oklahoma-city-ok/interior-5.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/oklahoma-city-ok/interior-6.jpg"
+    ],
+    "owner": [],
+    "landmarks": [],
+    "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/oklahoma-city-ok/hero-1.jpg",
+    "ogImageAlt": "WaveMAX Oklahoma City OK storefront",
+    "mapPreview": ""
+  },
+  "seo": {
+    "keywords": "laundromat oklahoma city ok, laundromat near me, oklahoma city laundromat, wash dry fold oklahoma city, self service laundry oklahoma city, drop off laundry oklahoma city, coin laundry oklahoma city, commercial laundry oklahoma city, wavemax oklahoma city, wavemax oklahoma city ok",
+    "keywordsByPage": {
+      "/": "laundromat oklahoma city ok, laundromat near me, oklahoma city laundromat, wash dry fold oklahoma city, self service laundry oklahoma city, drop off laundry oklahoma city, coin laundry oklahoma city, commercial laundry oklahoma city, wavemax oklahoma city, wavemax oklahoma city ok",
+      "/wash-dry-fold": "wash dry fold oklahoma city, drop off laundry oklahoma city, fluff and fold oklahoma city, laundromat oklahoma city ok, laundromat near me, oklahoma city laundromat, wash dry fold oklahoma city, self service laundry oklahoma city, drop off laundry oklahoma city",
+      "/self-serve-laundry": "self service laundry oklahoma city, coin laundry oklahoma city, laundromat oklahoma city, laundromat oklahoma city ok, laundromat near me, oklahoma city laundromat, wash dry fold oklahoma city, self service laundry oklahoma city, drop off laundry oklahoma city",
+      "/commercial": "commercial laundry oklahoma city, business laundry oklahoma city, hotel laundry oklahoma city, restaurant linens oklahoma city, laundromat oklahoma city ok, laundromat near me, oklahoma city laundromat, wash dry fold oklahoma city, self service laundry oklahoma city, drop off laundry oklahoma city",
+      "/about-us": "wavemax owners oklahoma city, family-owned laundromat oklahoma city, laundromat oklahoma city ok, laundromat near me, oklahoma city laundromat, wash dry fold oklahoma city",
+      "/contact": "contact wavemax oklahoma city, laundromat phone oklahoma city, laundromat oklahoma city ok, laundromat near me, oklahoma city laundromat, wash dry fold oklahoma city"
+    },
+    "localizedHeadlines": {
+      "landingTitle": "Oklahoma City's premier laundromat",
+      "landingSubtitle": "Self-serve laundry, wash-dry-fold, and commercial accounts in Oklahoma City, OK.",
+      "wdfTitle": "Wash-Dry-Fold drop-off laundry in Oklahoma City, OK",
+      "selfServeTitle": "Self-serve laundry in Oklahoma City, OK",
+      "commercialTitle": "Commercial laundry service for Oklahoma City businesses",
+      "aboutTitle": "About WaveMAX Oklahoma City",
+      "contactTitle": "Contact WaveMAX Oklahoma City, OK"
+    },
+    "geoRegion": "US-OK",
+    "geoPlacename": "Oklahoma City, OK",
+    "geoPosition": "35.4203;-97.5164",
+    "icbm": "35.4203, -97.5164"
+  },
+  "i18n": {
+    "languagesAvailable": [
+      "en",
+      "es",
+      "pt",
+      "de"
+    ]
+  },
+  "nav": {
+    "commercialEnabled": true,
+    "commercialIndustries": {
+      "medical": true,
+      "gym": true,
+      "airbnb": true,
+      "restaurant": true,
+      "contractors": true
+    },
+    "additional": [],
+    "sublinkExtensions": {}
+  },
+  "iframeOverrides": {}
+}

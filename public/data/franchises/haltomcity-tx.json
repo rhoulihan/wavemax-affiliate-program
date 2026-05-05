@@ -1,0 +1,155 @@
+{
+  "slug": "haltomcity-tx",
+  "brand": {
+    "name": "WaveMAX Haltom City, TX",
+    "parent": "WaveMAX Laundry",
+    "tagline": ""
+  },
+  "contact": {
+    "phone": "",
+    "phoneTel": "",
+    "phoneTelRaw": "",
+    "email": "no-reply@wavemax.promo",
+    "emailMailto": "mailto:no-reply@wavemax.promo",
+    "address": "3534 Denton Hwy.",
+    "city": "Haltom City",
+    "state": "TX",
+    "zip": "76117",
+    "country": "US",
+    "addressLine2": "Haltom City, TX 76117",
+    "geo": {
+      "lat": 32.8121,
+      "lng": -97.2697
+    },
+    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=3534+Denton+Hwy.+Haltom+City+TX+76117"
+  },
+  "hours": {
+    "open": "",
+    "close": "",
+    "display": "Call for hours",
+    "lastWash": "",
+    "days": ""
+  },
+  "owners": [],
+  "aboutContent": {
+    "heroTitle": "",
+    "heroTagline": "",
+    "heroSubtitle": "",
+    "missionEyebrow": "",
+    "missionTitle": "",
+    "missionBody": [],
+    "valuesEyebrow": "",
+    "valuesTitle": "",
+    "values": [],
+    "teamEyebrow": "",
+    "teamTitle": "",
+    "teamLede": "",
+    "communityTitle": "",
+    "communityBody": "",
+    "ctaText": ""
+  },
+  "pricing": {
+    "wdf": {
+      "rate": null,
+      "minLb": null,
+      "currency": "USD",
+      "display": "Call for pricing"
+    },
+    "selfServe": {
+      "minLoad": null,
+      "maxLoad": null,
+      "minLoadDisplay": "",
+      "maxLoadDisplay": "",
+      "washMin": null,
+      "dryMin": null,
+      "rangeDisplay": "Call for pricing"
+    }
+  },
+  "equipment": {
+    "washers": null,
+    "dryers": null,
+    "capacityLb": null
+  },
+  "amenities": [
+    "Free WiFi",
+    "Free Parking"
+  ],
+  "serviceArea": [
+    "Haltom City"
+  ],
+  "social": {
+    "facebook": "",
+    "instagram": ""
+  },
+  "google": {
+    "placeId": "",
+    "apiKey": "",
+    "profileUrl": "",
+    "reviewsUrl": ""
+  },
+  "images": {
+    "hero": [
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/kent-wa/hero-1.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/kent-wa/hero-2.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/kent-wa/hero-3.jpg"
+    ],
+    "interior": [
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/kent-wa/interior-1.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/kent-wa/interior-2.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/kent-wa/interior-3.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/kent-wa/interior-4.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/kent-wa/interior-5.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/kent-wa/interior-6.jpg"
+    ],
+    "owner": [],
+    "landmarks": [],
+    "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/kent-wa/hero-1.jpg",
+    "ogImageAlt": "WaveMAX Haltom City, TX storefront",
+    "mapPreview": ""
+  },
+  "seo": {
+    "keywords": "laundromat haltom city tx, laundromat near me, haltom city laundromat, wash dry fold haltom city, self service laundry haltom city, drop off laundry haltom city, coin laundry haltom city, commercial laundry haltom city, wavemax haltom city, wavemax haltom city tx",
+    "keywordsByPage": {
+      "/": "laundromat haltom city tx, laundromat near me, haltom city laundromat, wash dry fold haltom city, self service laundry haltom city, drop off laundry haltom city, coin laundry haltom city, commercial laundry haltom city, wavemax haltom city, wavemax haltom city tx",
+      "/wash-dry-fold": "wash dry fold haltom city, drop off laundry haltom city, fluff and fold haltom city, laundromat haltom city tx, laundromat near me, haltom city laundromat, wash dry fold haltom city, self service laundry haltom city, drop off laundry haltom city",
+      "/self-serve-laundry": "self service laundry haltom city, coin laundry haltom city, laundromat haltom city, laundromat haltom city tx, laundromat near me, haltom city laundromat, wash dry fold haltom city, self service laundry haltom city, drop off laundry haltom city",
+      "/commercial": "commercial laundry haltom city, business laundry haltom city, hotel laundry haltom city, restaurant linens haltom city, laundromat haltom city tx, laundromat near me, haltom city laundromat, wash dry fold haltom city, self service laundry haltom city, drop off laundry haltom city",
+      "/about-us": "wavemax owners haltom city, family-owned laundromat haltom city, laundromat haltom city tx, laundromat near me, haltom city laundromat, wash dry fold haltom city",
+      "/contact": "contact wavemax haltom city, laundromat phone haltom city, laundromat haltom city tx, laundromat near me, haltom city laundromat, wash dry fold haltom city"
+    },
+    "localizedHeadlines": {
+      "landingTitle": "Haltom City's premier laundromat",
+      "landingSubtitle": "Self-serve laundry, wash-dry-fold, and commercial accounts in Haltom City, TX.",
+      "wdfTitle": "Wash-Dry-Fold drop-off laundry in Haltom City, TX",
+      "selfServeTitle": "Self-serve laundry in Haltom City, TX",
+      "commercialTitle": "Commercial laundry service for Haltom City businesses",
+      "aboutTitle": "About WaveMAX Haltom City",
+      "contactTitle": "Contact WaveMAX Haltom City, TX"
+    },
+    "geoRegion": "US-TX",
+    "geoPlacename": "Haltom City, TX",
+    "geoPosition": "32.8121;-97.2697",
+    "icbm": "32.8121, -97.2697"
+  },
+  "i18n": {
+    "languagesAvailable": [
+      "en",
+      "es",
+      "pt",
+      "de"
+    ]
+  },
+  "nav": {
+    "commercialEnabled": true,
+    "commercialIndustries": {
+      "medical": true,
+      "gym": true,
+      "airbnb": true,
+      "restaurant": true,
+      "contractors": true
+    },
+    "additional": [],
+    "sublinkExtensions": {}
+  },
+  "iframeOverrides": {}
+}

@@ -1,0 +1,157 @@
+{
+  "slug": "colorado-springs-co",
+  "brand": {
+    "name": "WaveMAX Colorado Springs CO",
+    "parent": "WaveMAX Laundry",
+    "tagline": ""
+  },
+  "contact": {
+    "phone": "(719) 639-9013",
+    "phoneTel": "tel:+17196399013",
+    "phoneTelRaw": "+17196399013",
+    "email": "no-reply@wavemax.promo",
+    "emailMailto": "mailto:no-reply@wavemax.promo",
+    "address": "609 South Circle Drive",
+    "city": "Colorado Springs",
+    "state": "CO",
+    "zip": "80910",
+    "country": "US",
+    "addressLine2": "Colorado Springs, CO 80910",
+    "geo": {
+      "lat": 38.8003,
+      "lng": -104.7534
+    },
+    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=609+South+Circle+Drive+Colorado+Springs+CO+80910"
+  },
+  "hours": {
+    "open": "",
+    "close": "",
+    "display": "Call for hours",
+    "lastWash": "",
+    "days": ""
+  },
+  "owners": [],
+  "aboutContent": {
+    "heroTitle": "",
+    "heroTagline": "",
+    "heroSubtitle": "",
+    "missionEyebrow": "",
+    "missionTitle": "",
+    "missionBody": [],
+    "valuesEyebrow": "",
+    "valuesTitle": "",
+    "values": [],
+    "teamEyebrow": "",
+    "teamTitle": "",
+    "teamLede": "",
+    "communityTitle": "",
+    "communityBody": "",
+    "ctaText": ""
+  },
+  "pricing": {
+    "wdf": {
+      "rate": null,
+      "minLb": null,
+      "currency": "USD",
+      "display": "Call for pricing"
+    },
+    "selfServe": {
+      "minLoad": null,
+      "maxLoad": null,
+      "minLoadDisplay": "",
+      "maxLoadDisplay": "",
+      "washMin": null,
+      "dryMin": null,
+      "rangeDisplay": "Call for pricing"
+    }
+  },
+  "equipment": {
+    "washers": null,
+    "dryers": null,
+    "capacityLb": null
+  },
+  "amenities": [
+    "Free WiFi",
+    "Free Parking"
+  ],
+  "serviceArea": [
+    "Colorado Springs"
+  ],
+  "social": {
+    "facebook": "",
+    "instagram": ""
+  },
+  "google": {
+    "placeId": "",
+    "apiKey": "",
+    "profileUrl": "",
+    "reviewsUrl": ""
+  },
+  "images": {
+    "hero": [
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/colorado-springs-co/hero-1.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/colorado-springs-co/hero-2.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/colorado-springs-co/hero-3.jpg"
+    ],
+    "interior": [
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/colorado-springs-co/interior-1.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/colorado-springs-co/interior-2.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/colorado-springs-co/interior-3.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/colorado-springs-co/interior-4.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/colorado-springs-co/interior-5.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/colorado-springs-co/interior-6.jpg"
+    ],
+    "owner": [
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/colorado-springs-co/owners.jpg"
+    ],
+    "landmarks": [],
+    "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/colorado-springs-co/hero-1.jpg",
+    "ogImageAlt": "WaveMAX Colorado Springs CO storefront",
+    "mapPreview": ""
+  },
+  "seo": {
+    "keywords": "laundromat colorado springs co, laundromat near me, colorado springs laundromat, wash dry fold colorado springs, self service laundry colorado springs, drop off laundry colorado springs, coin laundry colorado springs, commercial laundry colorado springs, wavemax colorado springs, wavemax colorado springs co",
+    "keywordsByPage": {
+      "/": "laundromat colorado springs co, laundromat near me, colorado springs laundromat, wash dry fold colorado springs, self service laundry colorado springs, drop off laundry colorado springs, coin laundry colorado springs, commercial laundry colorado springs, wavemax colorado springs, wavemax colorado springs co",
+      "/wash-dry-fold": "wash dry fold colorado springs, drop off laundry colorado springs, fluff and fold colorado springs, laundromat colorado springs co, laundromat near me, colorado springs laundromat, wash dry fold colorado springs, self service laundry colorado springs, drop off laundry colorado springs",
+      "/self-serve-laundry": "self service laundry colorado springs, coin laundry colorado springs, laundromat colorado springs, laundromat colorado springs co, laundromat near me, colorado springs laundromat, wash dry fold colorado springs, self service laundry colorado springs, drop off laundry colorado springs",
+      "/commercial": "commercial laundry colorado springs, business laundry colorado springs, hotel laundry colorado springs, restaurant linens colorado springs, laundromat colorado springs co, laundromat near me, colorado springs laundromat, wash dry fold colorado springs, self service laundry colorado springs, drop off laundry colorado springs",
+      "/about-us": "wavemax owners colorado springs, family-owned laundromat colorado springs, laundromat colorado springs co, laundromat near me, colorado springs laundromat, wash dry fold colorado springs",
+      "/contact": "contact wavemax colorado springs, laundromat phone colorado springs, laundromat colorado springs co, laundromat near me, colorado springs laundromat, wash dry fold colorado springs"
+    },
+    "localizedHeadlines": {
+      "landingTitle": "Colorado Springs's premier laundromat",
+      "landingSubtitle": "Self-serve laundry, wash-dry-fold, and commercial accounts in Colorado Springs, CO.",
+      "wdfTitle": "Wash-Dry-Fold drop-off laundry in Colorado Springs, CO",
+      "selfServeTitle": "Self-serve laundry in Colorado Springs, CO",
+      "commercialTitle": "Commercial laundry service for Colorado Springs businesses",
+      "aboutTitle": "About WaveMAX Colorado Springs",
+      "contactTitle": "Contact WaveMAX Colorado Springs, CO"
+    },
+    "geoRegion": "US-CO",
+    "geoPlacename": "Colorado Springs, CO",
+    "geoPosition": "38.8003;-104.7534",
+    "icbm": "38.8003, -104.7534"
+  },
+  "i18n": {
+    "languagesAvailable": [
+      "en",
+      "es",
+      "pt",
+      "de"
+    ]
+  },
+  "nav": {
+    "commercialEnabled": true,
+    "commercialIndustries": {
+      "medical": true,
+      "gym": true,
+      "airbnb": true,
+      "restaurant": true,
+      "contractors": true
+    },
+    "additional": [],
+    "sublinkExtensions": {}
+  },
+  "iframeOverrides": {}
+}

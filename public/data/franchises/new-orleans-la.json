@@ -1,0 +1,149 @@
+{
+  "slug": "new-orleans-la",
+  "brand": {
+    "name": "WaveMAX New Orleans LA",
+    "parent": "WaveMAX Laundry",
+    "tagline": ""
+  },
+  "contact": {
+    "phone": "(504) 881-7239",
+    "phoneTel": "tel:+15048817239",
+    "phoneTelRaw": "+15048817239",
+    "email": "no-reply@wavemax.promo",
+    "emailMailto": "mailto:no-reply@wavemax.promo",
+    "address": "4001 Frenchmen St",
+    "city": "New Orleans",
+    "state": "LA",
+    "zip": "70122",
+    "country": "US",
+    "addressLine2": "New Orleans, LA 70122",
+    "geo": {
+      "lat": 29.9646,
+      "lng": -90.0519
+    },
+    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=4001+Frenchmen+St+New+Orleans+LA+70122"
+  },
+  "hours": {
+    "open": "",
+    "close": "",
+    "display": "Call for hours",
+    "lastWash": "",
+    "days": ""
+  },
+  "owners": [],
+  "aboutContent": {
+    "heroTitle": "",
+    "heroTagline": "",
+    "heroSubtitle": "",
+    "missionEyebrow": "",
+    "missionTitle": "",
+    "missionBody": [],
+    "valuesEyebrow": "",
+    "valuesTitle": "",
+    "values": [],
+    "teamEyebrow": "",
+    "teamTitle": "",
+    "teamLede": "",
+    "communityTitle": "",
+    "communityBody": "",
+    "ctaText": ""
+  },
+  "pricing": {
+    "wdf": {
+      "rate": null,
+      "minLb": null,
+      "currency": "USD",
+      "display": "Call for pricing"
+    },
+    "selfServe": {
+      "minLoad": null,
+      "maxLoad": null,
+      "minLoadDisplay": "",
+      "maxLoadDisplay": "",
+      "washMin": null,
+      "dryMin": null,
+      "rangeDisplay": "Call for pricing"
+    }
+  },
+  "equipment": {
+    "washers": null,
+    "dryers": null,
+    "capacityLb": null
+  },
+  "amenities": [
+    "Free WiFi",
+    "Free Parking"
+  ],
+  "serviceArea": [
+    "New Orleans"
+  ],
+  "social": {
+    "facebook": "",
+    "instagram": ""
+  },
+  "google": {
+    "placeId": "",
+    "apiKey": "",
+    "profileUrl": "",
+    "reviewsUrl": ""
+  },
+  "images": {
+    "hero": [
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/new-orleans-la/hero-1.jpg"
+    ],
+    "interior": [
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/new-orleans-la/interior-2.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/new-orleans-la/interior-3.jpg"
+    ],
+    "owner": [],
+    "landmarks": [],
+    "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/new-orleans-la/hero-1.jpg",
+    "ogImageAlt": "WaveMAX New Orleans LA storefront",
+    "mapPreview": ""
+  },
+  "seo": {
+    "keywords": "laundromat new orleans la, laundromat near me, new orleans laundromat, wash dry fold new orleans, self service laundry new orleans, drop off laundry new orleans, coin laundry new orleans, commercial laundry new orleans, wavemax new orleans, wavemax new orleans la",
+    "keywordsByPage": {
+      "/": "laundromat new orleans la, laundromat near me, new orleans laundromat, wash dry fold new orleans, self service laundry new orleans, drop off laundry new orleans, coin laundry new orleans, commercial laundry new orleans, wavemax new orleans, wavemax new orleans la",
+      "/wash-dry-fold": "wash dry fold new orleans, drop off laundry new orleans, fluff and fold new orleans, laundromat new orleans la, laundromat near me, new orleans laundromat, wash dry fold new orleans, self service laundry new orleans, drop off laundry new orleans",
+      "/self-serve-laundry": "self service laundry new orleans, coin laundry new orleans, laundromat new orleans, laundromat new orleans la, laundromat near me, new orleans laundromat, wash dry fold new orleans, self service laundry new orleans, drop off laundry new orleans",
+      "/commercial": "commercial laundry new orleans, business laundry new orleans, hotel laundry new orleans, restaurant linens new orleans, laundromat new orleans la, laundromat near me, new orleans laundromat, wash dry fold new orleans, self service laundry new orleans, drop off laundry new orleans",
+      "/about-us": "wavemax owners new orleans, family-owned laundromat new orleans, laundromat new orleans la, laundromat near me, new orleans laundromat, wash dry fold new orleans",
+      "/contact": "contact wavemax new orleans, laundromat phone new orleans, laundromat new orleans la, laundromat near me, new orleans laundromat, wash dry fold new orleans"
+    },
+    "localizedHeadlines": {
+      "landingTitle": "New Orleans's premier laundromat",
+      "landingSubtitle": "Self-serve laundry, wash-dry-fold, and commercial accounts in New Orleans, LA.",
+      "wdfTitle": "Wash-Dry-Fold drop-off laundry in New Orleans, LA",
+      "selfServeTitle": "Self-serve laundry in New Orleans, LA",
+      "commercialTitle": "Commercial laundry service for New Orleans businesses",
+      "aboutTitle": "About WaveMAX New Orleans",
+      "contactTitle": "Contact WaveMAX New Orleans, LA"
+    },
+    "geoRegion": "US-LA",
+    "geoPlacename": "New Orleans, LA",
+    "geoPosition": "29.9646;-90.0519",
+    "icbm": "29.9646, -90.0519"
+  },
+  "i18n": {
+    "languagesAvailable": [
+      "en",
+      "es",
+      "pt",
+      "de"
+    ]
+  },
+  "nav": {
+    "commercialEnabled": true,
+    "commercialIndustries": {
+      "medical": true,
+      "gym": true,
+      "airbnb": true,
+      "restaurant": true,
+      "contractors": true
+    },
+    "additional": [],
+    "sublinkExtensions": {}
+  },
+  "iframeOverrides": {}
+}

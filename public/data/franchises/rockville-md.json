@@ -1,0 +1,155 @@
+{
+  "slug": "rockville-md",
+  "brand": {
+    "name": "WaveMAX Rockville, MD",
+    "parent": "WaveMAX Laundry",
+    "tagline": ""
+  },
+  "contact": {
+    "phone": "(667) 481-7581",
+    "phoneTel": "tel:+16674817581",
+    "phoneTelRaw": "+16674817581",
+    "email": "no-reply@wavemax.promo",
+    "emailMailto": "mailto:no-reply@wavemax.promo",
+    "address": "180 Rollins Ave",
+    "city": "Rockville",
+    "state": "MD",
+    "zip": "20852",
+    "country": "US",
+    "addressLine2": "Rockville, MD 20852",
+    "geo": {
+      "lat": 39.084,
+      "lng": -77.1528
+    },
+    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=180+Rollins+Ave+Rockville+MD+20852"
+  },
+  "hours": {
+    "open": "",
+    "close": "",
+    "display": "Call for hours",
+    "lastWash": "",
+    "days": ""
+  },
+  "owners": [],
+  "aboutContent": {
+    "heroTitle": "",
+    "heroTagline": "",
+    "heroSubtitle": "",
+    "missionEyebrow": "",
+    "missionTitle": "",
+    "missionBody": [],
+    "valuesEyebrow": "",
+    "valuesTitle": "",
+    "values": [],
+    "teamEyebrow": "",
+    "teamTitle": "",
+    "teamLede": "",
+    "communityTitle": "",
+    "communityBody": "",
+    "ctaText": ""
+  },
+  "pricing": {
+    "wdf": {
+      "rate": null,
+      "minLb": null,
+      "currency": "USD",
+      "display": "Call for pricing"
+    },
+    "selfServe": {
+      "minLoad": null,
+      "maxLoad": null,
+      "minLoadDisplay": "",
+      "maxLoadDisplay": "",
+      "washMin": null,
+      "dryMin": null,
+      "rangeDisplay": "Call for pricing"
+    }
+  },
+  "equipment": {
+    "washers": null,
+    "dryers": null,
+    "capacityLb": null
+  },
+  "amenities": [
+    "Free WiFi",
+    "Free Parking"
+  ],
+  "serviceArea": [
+    "Rockville"
+  ],
+  "social": {
+    "facebook": "",
+    "instagram": ""
+  },
+  "google": {
+    "placeId": "",
+    "apiKey": "",
+    "profileUrl": "",
+    "reviewsUrl": ""
+  },
+  "images": {
+    "hero": [
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/rockville-md/hero-1.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/rockville-md/hero-2.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/rockville-md/hero-3.jpg"
+    ],
+    "interior": [
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/rockville-md/interior-1.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/rockville-md/interior-2.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/rockville-md/interior-3.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/rockville-md/interior-4.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/rockville-md/interior-5.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/rockville-md/interior-6.jpg"
+    ],
+    "owner": [],
+    "landmarks": [],
+    "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/rockville-md/hero-1.jpg",
+    "ogImageAlt": "WaveMAX Rockville, MD storefront",
+    "mapPreview": ""
+  },
+  "seo": {
+    "keywords": "laundromat rockville md, laundromat near me, rockville laundromat, wash dry fold rockville, self service laundry rockville, drop off laundry rockville, coin laundry rockville, commercial laundry rockville, wavemax rockville, wavemax rockville md",
+    "keywordsByPage": {
+      "/": "laundromat rockville md, laundromat near me, rockville laundromat, wash dry fold rockville, self service laundry rockville, drop off laundry rockville, coin laundry rockville, commercial laundry rockville, wavemax rockville, wavemax rockville md",
+      "/wash-dry-fold": "wash dry fold rockville, drop off laundry rockville, fluff and fold rockville, laundromat rockville md, laundromat near me, rockville laundromat, wash dry fold rockville, self service laundry rockville, drop off laundry rockville",
+      "/self-serve-laundry": "self service laundry rockville, coin laundry rockville, laundromat rockville, laundromat rockville md, laundromat near me, rockville laundromat, wash dry fold rockville, self service laundry rockville, drop off laundry rockville",
+      "/commercial": "commercial laundry rockville, business laundry rockville, hotel laundry rockville, restaurant linens rockville, laundromat rockville md, laundromat near me, rockville laundromat, wash dry fold rockville, self service laundry rockville, drop off laundry rockville",
+      "/about-us": "wavemax owners rockville, family-owned laundromat rockville, laundromat rockville md, laundromat near me, rockville laundromat, wash dry fold rockville",
+      "/contact": "contact wavemax rockville, laundromat phone rockville, laundromat rockville md, laundromat near me, rockville laundromat, wash dry fold rockville"
+    },
+    "localizedHeadlines": {
+      "landingTitle": "Rockville's premier laundromat",
+      "landingSubtitle": "Self-serve laundry, wash-dry-fold, and commercial accounts in Rockville, MD.",
+      "wdfTitle": "Wash-Dry-Fold drop-off laundry in Rockville, MD",
+      "selfServeTitle": "Self-serve laundry in Rockville, MD",
+      "commercialTitle": "Commercial laundry service for Rockville businesses",
+      "aboutTitle": "About WaveMAX Rockville",
+      "contactTitle": "Contact WaveMAX Rockville, MD"
+    },
+    "geoRegion": "US-MD",
+    "geoPlacename": "Rockville, MD",
+    "geoPosition": "39.084;-77.1528",
+    "icbm": "39.084, -77.1528"
+  },
+  "i18n": {
+    "languagesAvailable": [
+      "en",
+      "es",
+      "pt",
+      "de"
+    ]
+  },
+  "nav": {
+    "commercialEnabled": true,
+    "commercialIndustries": {
+      "medical": true,
+      "gym": true,
+      "airbnb": true,
+      "restaurant": true,
+      "contractors": true
+    },
+    "additional": [],
+    "sublinkExtensions": {}
+  },
+  "iframeOverrides": {}
+}

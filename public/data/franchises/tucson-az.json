@@ -1,0 +1,155 @@
+{
+  "slug": "tucson-az",
+  "brand": {
+    "name": "WaveMAX Tucson AZ",
+    "parent": "WaveMAX Laundry",
+    "tagline": ""
+  },
+  "contact": {
+    "phone": "(520) 333-2053",
+    "phoneTel": "tel:+15203332053",
+    "phoneTelRaw": "+15203332053",
+    "email": "no-reply@wavemax.promo",
+    "emailMailto": "mailto:no-reply@wavemax.promo",
+    "address": "4054 E. 22nd Street",
+    "city": "Tucson",
+    "state": "AZ",
+    "zip": "85711",
+    "country": "US",
+    "addressLine2": "Tucson, AZ 85711",
+    "geo": {
+      "lat": 32.2174,
+      "lng": -110.908
+    },
+    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=4054+E.+22nd+Street+Tucson+AZ+85711"
+  },
+  "hours": {
+    "open": "",
+    "close": "",
+    "display": "Call for hours",
+    "lastWash": "",
+    "days": ""
+  },
+  "owners": [],
+  "aboutContent": {
+    "heroTitle": "",
+    "heroTagline": "",
+    "heroSubtitle": "",
+    "missionEyebrow": "",
+    "missionTitle": "",
+    "missionBody": [],
+    "valuesEyebrow": "",
+    "valuesTitle": "",
+    "values": [],
+    "teamEyebrow": "",
+    "teamTitle": "",
+    "teamLede": "",
+    "communityTitle": "",
+    "communityBody": "",
+    "ctaText": ""
+  },
+  "pricing": {
+    "wdf": {
+      "rate": null,
+      "minLb": null,
+      "currency": "USD",
+      "display": "Call for pricing"
+    },
+    "selfServe": {
+      "minLoad": null,
+      "maxLoad": null,
+      "minLoadDisplay": "",
+      "maxLoadDisplay": "",
+      "washMin": null,
+      "dryMin": null,
+      "rangeDisplay": "Call for pricing"
+    }
+  },
+  "equipment": {
+    "washers": null,
+    "dryers": null,
+    "capacityLb": null
+  },
+  "amenities": [
+    "Free WiFi",
+    "Free Parking"
+  ],
+  "serviceArea": [
+    "Tucson"
+  ],
+  "social": {
+    "facebook": "",
+    "instagram": ""
+  },
+  "google": {
+    "placeId": "",
+    "apiKey": "",
+    "profileUrl": "",
+    "reviewsUrl": ""
+  },
+  "images": {
+    "hero": [
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/tucson-az/hero-1.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/tucson-az/hero-2.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/tucson-az/hero-3.jpg"
+    ],
+    "interior": [
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/tucson-az/interior-1.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/tucson-az/interior-2.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/tucson-az/interior-3.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/tucson-az/interior-4.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/tucson-az/interior-5.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/tucson-az/interior-6.jpg"
+    ],
+    "owner": [],
+    "landmarks": [],
+    "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/tucson-az/hero-1.jpg",
+    "ogImageAlt": "WaveMAX Tucson AZ storefront",
+    "mapPreview": ""
+  },
+  "seo": {
+    "keywords": "laundromat tucson az, laundromat near me, tucson laundromat, wash dry fold tucson, self service laundry tucson, drop off laundry tucson, coin laundry tucson, commercial laundry tucson, wavemax tucson, wavemax tucson az",
+    "keywordsByPage": {
+      "/": "laundromat tucson az, laundromat near me, tucson laundromat, wash dry fold tucson, self service laundry tucson, drop off laundry tucson, coin laundry tucson, commercial laundry tucson, wavemax tucson, wavemax tucson az",
+      "/wash-dry-fold": "wash dry fold tucson, drop off laundry tucson, fluff and fold tucson, laundromat tucson az, laundromat near me, tucson laundromat, wash dry fold tucson, self service laundry tucson, drop off laundry tucson",
+      "/self-serve-laundry": "self service laundry tucson, coin laundry tucson, laundromat tucson, laundromat tucson az, laundromat near me, tucson laundromat, wash dry fold tucson, self service laundry tucson, drop off laundry tucson",
+      "/commercial": "commercial laundry tucson, business laundry tucson, hotel laundry tucson, restaurant linens tucson, laundromat tucson az, laundromat near me, tucson laundromat, wash dry fold tucson, self service laundry tucson, drop off laundry tucson",
+      "/about-us": "wavemax owners tucson, family-owned laundromat tucson, laundromat tucson az, laundromat near me, tucson laundromat, wash dry fold tucson",
+      "/contact": "contact wavemax tucson, laundromat phone tucson, laundromat tucson az, laundromat near me, tucson laundromat, wash dry fold tucson"
+    },
+    "localizedHeadlines": {
+      "landingTitle": "Tucson's premier laundromat",
+      "landingSubtitle": "Self-serve laundry, wash-dry-fold, and commercial accounts in Tucson, AZ.",
+      "wdfTitle": "Wash-Dry-Fold drop-off laundry in Tucson, AZ",
+      "selfServeTitle": "Self-serve laundry in Tucson, AZ",
+      "commercialTitle": "Commercial laundry service for Tucson businesses",
+      "aboutTitle": "About WaveMAX Tucson",
+      "contactTitle": "Contact WaveMAX Tucson, AZ"
+    },
+    "geoRegion": "US-AZ",
+    "geoPlacename": "Tucson, AZ",
+    "geoPosition": "32.2174;-110.908",
+    "icbm": "32.2174, -110.908"
+  },
+  "i18n": {
+    "languagesAvailable": [
+      "en",
+      "es",
+      "pt",
+      "de"
+    ]
+  },
+  "nav": {
+    "commercialEnabled": true,
+    "commercialIndustries": {
+      "medical": true,
+      "gym": true,
+      "airbnb": true,
+      "restaurant": true,
+      "contractors": true
+    },
+    "additional": [],
+    "sublinkExtensions": {}
+  },
+  "iframeOverrides": {}
+}

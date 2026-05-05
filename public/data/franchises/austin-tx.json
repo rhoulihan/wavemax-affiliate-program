@@ -1,0 +1,162 @@
+{
+  "slug": "austin-tx",
+  "brand": {
+    "name": "WaveMAX Laundry Austin",
+    "parent": "WaveMAX Laundry",
+    "tagline": "Austin's Cleanest Laundromat"
+  },
+  "contact": {
+    "phone": "(512) 553-1674",
+    "phoneTel": "tel:+15125531674",
+    "phoneTelRaw": "+15125531674",
+    "email": "no-reply@wavemax.promo",
+    "emailMailto": "mailto:no-reply@wavemax.promo",
+    "address": "825 E Rundberg Ln f1",
+    "city": "Austin",
+    "state": "TX",
+    "zip": "78753",
+    "country": "US",
+    "addressLine2": "Austin, TX 78753",
+    "geo": {
+      "lat": 30.3729,
+      "lng": -97.6863
+    },
+    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=825+E+Rundberg+Ln+f1+Austin+TX+78753"
+  },
+  "hours": {
+    "open": "",
+    "close": "",
+    "display": "Call for hours",
+    "lastWash": "",
+    "days": ""
+  },
+  "owners": [],
+  "aboutContent": {
+    "heroTitle": "",
+    "heroTagline": "",
+    "heroSubtitle": "",
+    "missionEyebrow": "",
+    "missionTitle": "",
+    "missionBody": [],
+    "valuesEyebrow": "",
+    "valuesTitle": "",
+    "values": [],
+    "teamEyebrow": "",
+    "teamTitle": "",
+    "teamLede": "",
+    "communityTitle": "",
+    "communityBody": "",
+    "ctaText": ""
+  },
+  "pricing": {
+    "wdf": {
+      "rate": 1.2,
+      "minLb": 10,
+      "currency": "USD",
+      "display": "$1.20/lb"
+    },
+    "selfServe": {
+      "minLoad": 2.75,
+      "maxLoad": 10.5,
+      "minLoadDisplay": "$2.75",
+      "maxLoadDisplay": "$10.50",
+      "washMin": 20,
+      "dryMin": 20,
+      "rangeDisplay": "$2.75 – $10.50"
+    }
+  },
+  "equipment": {
+    "washers": 42,
+    "dryers": 42,
+    "capacityLb": 80
+  },
+  "amenities": [
+    "Free WiFi",
+    "Hospital-Grade UV Sanitization",
+    "Free Parking",
+    "Wheelchair Accessible"
+  ],
+  "serviceArea": [
+    "Austin",
+    "Round Rock",
+    "Cedar Park",
+    "Pflugerville",
+    "Georgetown",
+    "Leander"
+  ],
+  "social": {
+    "facebook": "",
+    "instagram": ""
+  },
+  "google": {
+    "placeId": "ChIJOUs5BpHJRIYRTjv0UotLg0o",
+    "apiKey": "",
+    "profileUrl": "",
+    "reviewsUrl": ""
+  },
+  "images": {
+    "hero": [
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/austin-tx/hero-1.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/austin-tx/hero-2.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/austin-tx/hero-3.jpg"
+    ],
+    "interior": [
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/austin-tx/interior-1.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/austin-tx/interior-2.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/austin-tx/interior-3.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/austin-tx/interior-4.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/austin-tx/interior-5.jpg",
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/austin-tx/interior-6.jpg"
+    ],
+    "owner": [],
+    "landmarks": [],
+    "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/austin-tx/hero-1.jpg",
+    "ogImageAlt": "WaveMAX Austin TX storefront",
+    "mapPreview": ""
+  },
+  "seo": {
+    "keywords": "laundromat austin tx, laundromat near me, austin laundromat, wash dry fold austin, self service laundry austin, drop off laundry austin, coin laundry austin, commercial laundry austin, wavemax austin, wavemax austin tx",
+    "keywordsByPage": {
+      "/": "laundromat austin tx, laundromat near me, austin laundromat, wash dry fold austin, self service laundry austin, drop off laundry austin, coin laundry austin, commercial laundry austin, wavemax austin, wavemax austin tx",
+      "/wash-dry-fold": "wash dry fold austin, drop off laundry austin, fluff and fold austin, laundromat austin tx, laundromat near me, austin laundromat, wash dry fold austin, self service laundry austin, drop off laundry austin",
+      "/self-serve-laundry": "self service laundry austin, coin laundry austin, laundromat austin, laundromat austin tx, laundromat near me, austin laundromat, wash dry fold austin, self service laundry austin, drop off laundry austin",
+      "/commercial": "commercial laundry austin, business laundry austin, hotel laundry austin, restaurant linens austin, laundromat austin tx, laundromat near me, austin laundromat, wash dry fold austin, self service laundry austin, drop off laundry austin",
+      "/about-us": "wavemax owners austin, family-owned laundromat austin, laundromat austin tx, laundromat near me, austin laundromat, wash dry fold austin",
+      "/contact": "contact wavemax austin, laundromat phone austin, laundromat austin tx, laundromat near me, austin laundromat, wash dry fold austin"
+    },
+    "localizedHeadlines": {
+      "landingTitle": "Austin's premier laundromat",
+      "landingSubtitle": "Self-serve laundry, wash-dry-fold, and commercial accounts in Austin, TX.",
+      "wdfTitle": "Wash-Dry-Fold drop-off laundry in Austin, TX",
+      "selfServeTitle": "Self-serve laundry in Austin, TX",
+      "commercialTitle": "Commercial laundry service for Austin businesses",
+      "aboutTitle": "About WaveMAX Austin",
+      "contactTitle": "Contact WaveMAX Austin, TX"
+    },
+    "geoRegion": "US-TX",
+    "geoPlacename": "Austin, TX",
+    "geoPosition": "30.3729;-97.6863",
+    "icbm": "30.3729, -97.6863"
+  },
+  "i18n": {
+    "languagesAvailable": [
+      "en",
+      "es",
+      "pt",
+      "de"
+    ]
+  },
+  "nav": {
+    "commercialEnabled": true,
+    "commercialIndustries": {
+      "medical": true,
+      "gym": true,
+      "airbnb": true,
+      "restaurant": true,
+      "contractors": true
+    },
+    "additional": [],
+    "sublinkExtensions": {}
+  },
+  "iframeOverrides": {}
+}

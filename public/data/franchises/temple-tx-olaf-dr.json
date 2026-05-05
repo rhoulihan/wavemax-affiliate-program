@@ -1,0 +1,148 @@
+{
+  "slug": "temple-tx-olaf-dr",
+  "brand": {
+    "name": "WaveMAX Temple TX Olaf Dr",
+    "parent": "WaveMAX Laundry",
+    "tagline": ""
+  },
+  "contact": {
+    "phone": "(254) 295-0239",
+    "phoneTel": "tel:+12542950239",
+    "phoneTelRaw": "+12542950239",
+    "email": "no-reply@wavemax.promo",
+    "emailMailto": "mailto:no-reply@wavemax.promo",
+    "address": "10 Olaf Dr.",
+    "city": "Temple",
+    "state": "TX",
+    "zip": "76504",
+    "country": "US",
+    "addressLine2": "Temple, TX 76504",
+    "geo": {
+      "lat": 31.083,
+      "lng": -97.352
+    },
+    "mapsUrl": "https://www.google.com/maps/dir/?api=1&destination=10+Olaf+Dr.+Temple+TX+76504"
+  },
+  "hours": {
+    "open": "",
+    "close": "",
+    "display": "Call for hours",
+    "lastWash": "",
+    "days": ""
+  },
+  "owners": [],
+  "aboutContent": {
+    "heroTitle": "",
+    "heroTagline": "",
+    "heroSubtitle": "",
+    "missionEyebrow": "",
+    "missionTitle": "",
+    "missionBody": [],
+    "valuesEyebrow": "",
+    "valuesTitle": "",
+    "values": [],
+    "teamEyebrow": "",
+    "teamTitle": "",
+    "teamLede": "",
+    "communityTitle": "",
+    "communityBody": "",
+    "ctaText": ""
+  },
+  "pricing": {
+    "wdf": {
+      "rate": null,
+      "minLb": null,
+      "currency": "USD",
+      "display": "Call for pricing"
+    },
+    "selfServe": {
+      "minLoad": null,
+      "maxLoad": null,
+      "minLoadDisplay": "",
+      "maxLoadDisplay": "",
+      "washMin": null,
+      "dryMin": null,
+      "rangeDisplay": "Call for pricing"
+    }
+  },
+  "equipment": {
+    "washers": null,
+    "dryers": null,
+    "capacityLb": null
+  },
+  "amenities": [
+    "Free WiFi",
+    "Free Parking"
+  ],
+  "serviceArea": [
+    "Temple"
+  ],
+  "social": {
+    "facebook": "",
+    "instagram": ""
+  },
+  "google": {
+    "placeId": "",
+    "apiKey": "",
+    "profileUrl": "",
+    "reviewsUrl": ""
+  },
+  "images": {
+    "hero": [
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/temple-tx-olaf-dr/hero-1.webp"
+    ],
+    "interior": [
+      "https://wavemaxlaundry.com/wp-content/uploads/locations/temple-tx-olaf-dr/interior-1.webp"
+    ],
+    "owner": [],
+    "landmarks": [],
+    "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/temple-tx-olaf-dr/hero-1.webp",
+    "ogImageAlt": "WaveMAX Temple TX Olaf Dr storefront",
+    "mapPreview": ""
+  },
+  "seo": {
+    "keywords": "laundromat temple tx, laundromat near me, temple laundromat, wash dry fold temple, self service laundry temple, drop off laundry temple, coin laundry temple, commercial laundry temple, wavemax temple, wavemax temple tx",
+    "keywordsByPage": {
+      "/": "laundromat temple tx, laundromat near me, temple laundromat, wash dry fold temple, self service laundry temple, drop off laundry temple, coin laundry temple, commercial laundry temple, wavemax temple, wavemax temple tx",
+      "/wash-dry-fold": "wash dry fold temple, drop off laundry temple, fluff and fold temple, laundromat temple tx, laundromat near me, temple laundromat, wash dry fold temple, self service laundry temple, drop off laundry temple",
+      "/self-serve-laundry": "self service laundry temple, coin laundry temple, laundromat temple, laundromat temple tx, laundromat near me, temple laundromat, wash dry fold temple, self service laundry temple, drop off laundry temple",
+      "/commercial": "commercial laundry temple, business laundry temple, hotel laundry temple, restaurant linens temple, laundromat temple tx, laundromat near me, temple laundromat, wash dry fold temple, self service laundry temple, drop off laundry temple",
+      "/about-us": "wavemax owners temple, family-owned laundromat temple, laundromat temple tx, laundromat near me, temple laundromat, wash dry fold temple",
+      "/contact": "contact wavemax temple, laundromat phone temple, laundromat temple tx, laundromat near me, temple laundromat, wash dry fold temple"
+    },
+    "localizedHeadlines": {
+      "landingTitle": "Temple's premier laundromat",
+      "landingSubtitle": "Self-serve laundry, wash-dry-fold, and commercial accounts in Temple, TX.",
+      "wdfTitle": "Wash-Dry-Fold drop-off laundry in Temple, TX",
+      "selfServeTitle": "Self-serve laundry in Temple, TX",
+      "commercialTitle": "Commercial laundry service for Temple businesses",
+      "aboutTitle": "About WaveMAX Temple",
+      "contactTitle": "Contact WaveMAX Temple, TX"
+    },
+    "geoRegion": "US-TX",
+    "geoPlacename": "Temple, TX",
+    "geoPosition": "31.083;-97.352",
+    "icbm": "31.083, -97.352"
+  },
+  "i18n": {
+    "languagesAvailable": [
+      "en",
+      "es",
+      "pt",
+      "de"
+    ]
+  },
+  "nav": {
+    "commercialEnabled": true,
+    "commercialIndustries": {
+      "medical": true,
+      "gym": true,
+      "airbnb": true,
+      "restaurant": true,
+      "contractors": true
+    },
+    "additional": [],
+    "sublinkExtensions": {}
+  },
+  "iframeOverrides": {}
+}
