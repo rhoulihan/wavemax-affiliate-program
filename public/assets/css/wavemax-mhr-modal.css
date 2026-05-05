@@ -345,7 +345,7 @@
 .modal-box--with-map { max-width: 720px; }
 
 .modal-map {
-  height: 280px;
+  height: 420px;
   flex-shrink: 0;       /* don't let the flex parent crunch the map */
   background: var(--navy-deeper);
   border-bottom: 1px solid var(--white-10);
@@ -421,7 +421,7 @@
 
 @media (max-width: 480px) {
   .modal-box--with-map { max-width: 100%; }
-  .modal-map { height: 220px; }
+  .modal-map { height: 330px; }
   .modal-actions { flex-direction: column; align-items: stretch; }
   .modal-actions-buttons { justify-content: stretch; }
   .modal-action { flex: 1; justify-content: center; }
