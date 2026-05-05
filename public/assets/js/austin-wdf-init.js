@@ -13,7 +13,8 @@
     en: {
       'wdf.eyebrow':              'WASH · DRY · FOLD',
       'wdf.title':                'Drop off, walk out',
-      'wdf.subtitle':             "Drop your laundry off at WaveMAX Austin — we'll wash it, dry it, fold it, and have it ready for you the next day. Hospital-grade UV-sanitized water, eco-friendly hypoallergenic detergent, no cash needed.",
+      'wdf.subtitle.premium':             "Drop your laundry off at WaveMAX {{contact.city}} — we'll wash it, dry it, fold it, and have it ready for you the next day. Hospital-grade UV-sanitized water, eco-friendly hypoallergenic detergent, no cash needed.",
+      'wdf.subtitle.default':             "Drop your laundry off at WaveMAX {{contact.city}} — we'll wash it, dry it, fold it, and have it ready for you the next day. Eco-friendly hypoallergenic detergent, no cash needed.",
       'wdf.callBtn':              'Call',
       'wdf.directionsBtn':        'Get directions',
       'wdf.stats.rate':           'Per Pound',
@@ -105,7 +106,8 @@
     es: {
       'wdf.eyebrow':              'LAVAR · SECAR · DOBLAR',
       'wdf.title':                'Déjelo, váyase',
-      'wdf.subtitle':             'Déjenos su ropa en WaveMAX Austin — la lavamos, secamos, doblamos y la tendremos lista al día siguiente. Agua sanitizada con UV de grado hospitalario, detergente hipoalergénico ecológico, sin efectivo necesario.',
+      'wdf.subtitle.premium':             'Déjenos su ropa en WaveMAX {{contact.city}} — la lavamos, secamos, doblamos y la tendremos lista al día siguiente. Agua sanitizada con UV de grado hospitalario, detergente hipoalergénico ecológico, sin efectivo necesario.',
+      'wdf.subtitle.default':             'Déjenos su ropa en WaveMAX {{contact.city}} — la lavamos, secamos, doblamos y la tendremos lista al día siguiente. Detergente hipoalergénico ecológico, sin efectivo necesario.',
       'wdf.callBtn':              'Llamar',
       'wdf.directionsBtn':        'Cómo llegar',
       'wdf.stats.rate':           'Por Libra',
@@ -197,7 +199,8 @@
     pt: {
       'wdf.eyebrow':              'LAVAR · SECAR · DOBRAR',
       'wdf.title':                'Deixe e vá',
-      'wdf.subtitle':             'Deixe sua roupa na WaveMAX Austin — lavamos, secamos, dobramos e devolvemos no dia seguinte. Água sanitizada com UV de nível hospitalar, detergente hipoalergênico ecológico, sem dinheiro necessário.',
+      'wdf.subtitle.premium':             'Deixe sua roupa na WaveMAX {{contact.city}} — lavamos, secamos, dobramos e devolvemos no dia seguinte. Água sanitizada com UV de nível hospitalar, detergente hipoalergênico ecológico, sem dinheiro necessário.',
+      'wdf.subtitle.default':             'Deixe sua roupa na WaveMAX {{contact.city}} — lavamos, secamos, dobramos e devolvemos no dia seguinte. Detergente hipoalergênico ecológico, sem dinheiro necessário.',
       'wdf.callBtn':              'Ligar',
       'wdf.directionsBtn':        'Como chegar',
       'wdf.stats.rate':           'Por Libra',
@@ -289,7 +292,8 @@
     de: {
       'wdf.eyebrow':              'WASCHEN · TROCKNEN · FALTEN',
       'wdf.title':                'Abgeben, weitergehen',
-      'wdf.subtitle':             'Geben Sie Ihre Wäsche bei WaveMAX Austin ab — wir waschen, trocknen und falten sie und haben sie am nächsten Tag fertig. UV-sanitisiertes Wasser in Krankenhausqualität, umweltfreundliches hypoallergenes Waschmittel, kein Bargeld erforderlich.',
+      'wdf.subtitle.premium':             'Geben Sie Ihre Wäsche bei WaveMAX {{contact.city}} ab — wir waschen, trocknen und falten sie und haben sie am nächsten Tag fertig. UV-sanitisiertes Wasser in Krankenhausqualität, umweltfreundliches hypoallergenes Waschmittel, kein Bargeld erforderlich.',
+      'wdf.subtitle.default':             'Geben Sie Ihre Wäsche bei WaveMAX {{contact.city}} ab — wir waschen, trocknen und falten sie und haben sie am nächsten Tag fertig. Umweltfreundliches hypoallergenes Waschmittel, kein Bargeld erforderlich.',
       'wdf.callBtn':              'Anrufen',
       'wdf.directionsBtn':        'Wegbeschreibung',
       'wdf.stats.rate':           'Pro Pfund',

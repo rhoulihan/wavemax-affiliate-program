@@ -90,6 +90,11 @@
       "washMin": null,
       "dryMin": null,
       "rangeDisplay": "Call for pricing"
+    },
+    "commercial": {
+      "rateFromLb": null,
+      "currency": "USD",
+      "fromDisplay": "Call for a quote"
     }
   },
   "equipment": {

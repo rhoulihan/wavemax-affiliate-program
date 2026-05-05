@@ -50,7 +50,11 @@ const DEFAULTS = {
       minLoadDisplay: '', maxLoadDisplay: '',
       washMin: null, dryMin: null,
       rangeDisplay: 'Call for pricing'
-    }
+    },
+    // Commercial / volume pricing varies dramatically by store + account
+    // size, so unaudited stores show 'Call for a quote' rather than a
+    // specific 'From $X/lb' rate. Austin overrides via known-overrides.
+    commercial: { rateFromLb: null, currency: 'USD', fromDisplay: 'Call for a quote' }
   },
   // profileId references scripts/franchise-build/equipment-profiles.json.
   // Default = unaudited mixed-fleet (Electrolux brand, 18-80 lb range, no
@@ -177,7 +181,12 @@ function buildLocationData(loc) {
     },
     contact: {
       ...phone,
-      email: 'no-reply@wavemax.promo',                 // single corporate email; per-franchise can override
+      // contact.email is what contactController.resolveRecipient(slug)
+      // reads to route the actual contact-form notification. Until
+      // Mailcow has per-franchise mailboxes wired up, every store
+      // delivers to the corporate inbox. Owners can override this in
+      // known-overrides.json once their own inbox is provisioned.
+      email: 'no-reply@wavemax.promo',
       emailMailto: 'mailto:no-reply@wavemax.promo',
       address: loc.address || '',
       city: cityClean,
