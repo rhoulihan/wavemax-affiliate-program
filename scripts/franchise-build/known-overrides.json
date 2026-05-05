@@ -6,6 +6,12 @@
       "name": "WaveMAX Laundry Austin",
       "tagline": "Austin's Cleanest Laundromat"
     },
+    "hours": {
+      "open": "07:00", "close": "22:00",
+      "display": "7am-10pm",
+      "lastWash": "9pm",
+      "days": "Open daily"
+    },
     "pricing": {
       "wdf":       { "rate": 1.20, "minLb": 10, "currency": "USD", "display": "$1.20/lb" },
       "selfServe": {

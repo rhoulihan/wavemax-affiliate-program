@@ -216,16 +216,16 @@
       'chrome.nav.contact':       'Contact',
 
       'chrome.subnav.commercialAll':    'Commercial Laundry',
-      'chrome.subnav.medicalOffices':   'Medical Offices Laundry in Austin, TX',
-      'chrome.subnav.healthClubs':      'Health Clubs Laundry in Austin, TX',
-      'chrome.subnav.airbnbRentals':    'Airbnb & Rentals Laundry in Austin, TX',
-      'chrome.subnav.restaurants':      'Restaurants & Catering Laundry in Austin, TX',
-      'chrome.subnav.contractors':      'Contractors & Service Providers in Austin, TX',
+      'chrome.subnav.medicalOffices':   'Medical Offices Laundry in {{contact.city}}, {{contact.state}}',
+      'chrome.subnav.healthClubs':      'Health Clubs Laundry in {{contact.city}}, {{contact.state}}',
+      'chrome.subnav.airbnbRentals':    'Airbnb & Rentals Laundry in {{contact.city}}, {{contact.state}}',
+      'chrome.subnav.restaurants':      'Restaurants & Catering Laundry in {{contact.city}}, {{contact.state}}',
+      'chrome.subnav.contractors':      'Contractors & Service Providers in {{contact.city}}, {{contact.state}}',
       'chrome.subnav.aboutUs':          'About Us',
       'chrome.subnav.contact':          'Contact',
 
       'chrome.bc.home':           'Home',
-      'chrome.bc.locationName':   'WaveMAX Austin, TX',
+      'chrome.bc.locationName':   'WaveMAX {{contact.city}}, {{contact.state}}',
 
       'chrome.footer.localLinks': 'Local Links',
       'chrome.footer.contactUs':  'Contact Us',
@@ -279,16 +279,16 @@
       'chrome.nav.contact':       'Contacto',
 
       'chrome.subnav.commercialAll':    'Lavandería Comercial',
-      'chrome.subnav.medicalOffices':   'Lavandería para Consultorios Médicos en Austin, TX',
-      'chrome.subnav.healthClubs':      'Lavandería para Gimnasios en Austin, TX',
-      'chrome.subnav.airbnbRentals':    'Lavandería para Airbnb y Alquileres en Austin, TX',
-      'chrome.subnav.restaurants':      'Lavandería para Restaurantes y Catering en Austin, TX',
-      'chrome.subnav.contractors':      'Contratistas y Proveedores de Servicios en Austin, TX',
+      'chrome.subnav.medicalOffices':   'Lavandería para Consultorios Médicos en {{contact.city}}, {{contact.state}}',
+      'chrome.subnav.healthClubs':      'Lavandería para Gimnasios en {{contact.city}}, {{contact.state}}',
+      'chrome.subnav.airbnbRentals':    'Lavandería para Airbnb y Alquileres en {{contact.city}}, {{contact.state}}',
+      'chrome.subnav.restaurants':      'Lavandería para Restaurantes y Catering en {{contact.city}}, {{contact.state}}',
+      'chrome.subnav.contractors':      'Contratistas y Proveedores de Servicios en {{contact.city}}, {{contact.state}}',
       'chrome.subnav.aboutUs':          'Sobre Nosotros',
       'chrome.subnav.contact':          'Contacto',
 
       'chrome.bc.home':           'Inicio',
-      'chrome.bc.locationName':   'WaveMAX Austin, TX',
+      'chrome.bc.locationName':   'WaveMAX {{contact.city}}, {{contact.state}}',
 
       'chrome.footer.localLinks': 'Enlaces Locales',
       'chrome.footer.contactUs':  'Contáctenos',
@@ -342,16 +342,16 @@
       'chrome.nav.contact':       'Contato',
 
       'chrome.subnav.commercialAll':    'Lavanderia Comercial',
-      'chrome.subnav.medicalOffices':   'Lavanderia para Consultórios Médicos em Austin, TX',
-      'chrome.subnav.healthClubs':      'Lavanderia para Academias em Austin, TX',
-      'chrome.subnav.airbnbRentals':    'Lavanderia para Airbnb e Aluguéis em Austin, TX',
-      'chrome.subnav.restaurants':      'Lavanderia para Restaurantes e Catering em Austin, TX',
-      'chrome.subnav.contractors':      'Empreiteiros e Prestadores de Serviços em Austin, TX',
+      'chrome.subnav.medicalOffices':   'Lavanderia para Consultórios Médicos em {{contact.city}}, {{contact.state}}',
+      'chrome.subnav.healthClubs':      'Lavanderia para Academias em {{contact.city}}, {{contact.state}}',
+      'chrome.subnav.airbnbRentals':    'Lavanderia para Airbnb e Aluguéis em {{contact.city}}, {{contact.state}}',
+      'chrome.subnav.restaurants':      'Lavanderia para Restaurantes e Catering em {{contact.city}}, {{contact.state}}',
+      'chrome.subnav.contractors':      'Empreiteiros e Prestadores de Serviços em {{contact.city}}, {{contact.state}}',
       'chrome.subnav.aboutUs':          'Sobre Nós',
       'chrome.subnav.contact':          'Contato',
 
       'chrome.bc.home':           'Início',
-      'chrome.bc.locationName':   'WaveMAX Austin, TX',
+      'chrome.bc.locationName':   'WaveMAX {{contact.city}}, {{contact.state}}',
 
       'chrome.footer.localLinks': 'Links Locais',
       'chrome.footer.contactUs':  'Fale Conosco',
@@ -405,16 +405,16 @@
       'chrome.nav.contact':       'Kontakt',
 
       'chrome.subnav.commercialAll':    'Gewerbliche Wäscherei',
-      'chrome.subnav.medicalOffices':   'Wäscherei für Arztpraxen in Austin, TX',
-      'chrome.subnav.healthClubs':      'Wäscherei für Fitnessstudios in Austin, TX',
-      'chrome.subnav.airbnbRentals':    'Wäscherei für Airbnb & Vermietungen in Austin, TX',
-      'chrome.subnav.restaurants':      'Wäscherei für Restaurants & Catering in Austin, TX',
-      'chrome.subnav.contractors':      'Auftragnehmer & Dienstleister in Austin, TX',
+      'chrome.subnav.medicalOffices':   'Wäscherei für Arztpraxen in {{contact.city}}, {{contact.state}}',
+      'chrome.subnav.healthClubs':      'Wäscherei für Fitnessstudios in {{contact.city}}, {{contact.state}}',
+      'chrome.subnav.airbnbRentals':    'Wäscherei für Airbnb & Vermietungen in {{contact.city}}, {{contact.state}}',
+      'chrome.subnav.restaurants':      'Wäscherei für Restaurants & Catering in {{contact.city}}, {{contact.state}}',
+      'chrome.subnav.contractors':      'Auftragnehmer & Dienstleister in {{contact.city}}, {{contact.state}}',
       'chrome.subnav.aboutUs':          'Über uns',
       'chrome.subnav.contact':          'Kontakt',
 
       'chrome.bc.home':           'Start',
-      'chrome.bc.locationName':   'WaveMAX Austin, TX',
+      'chrome.bc.locationName':   'WaveMAX {{contact.city}}, {{contact.state}}',
 
       'chrome.footer.localLinks': 'Lokale Links',
       'chrome.footer.contactUs':  'Kontakt',
@@ -450,12 +450,27 @@
     }
   };
 
+  // Substitute {{dotted.path}} tokens in a string against window.LOCATION_DATA.
+  // Returns input unchanged if there's no LOCATION_DATA or no tokens.
+  // Used to template chrome strings like 'WaveMAX {{contact.city}}, {{contact.state}}'
+  // with the resolved franchise data, so the breadcrumb / subnav / iframe title
+  // pick up the right city without per-store hand-curated copy.
+  function substituteLocationPlaceholders(str) {
+    const data = window.LOCATION_DATA;
+    if (!data || typeof str !== 'string' || str.indexOf('{{') === -1) return str;
+    return str.replace(/\{\{\s*([^}\s]+)\s*\}\}/g, (_, p) => {
+      const v = p.split('.').reduce((acc, k) => (acc == null ? acc : acc[k]), data);
+      return v == null ? '' : String(v);
+    });
+  }
+
   function applyChromeTranslations(lang) {
     const dict = CHROME_STRINGS[lang] || CHROME_STRINGS.en;
     $$('[data-i18n]').forEach(el => {
       const key = el.getAttribute('data-i18n');
-      const value = dict[key] || CHROME_STRINGS.en[key];
-      if (value === undefined) return;
+      const raw = dict[key] || CHROME_STRINGS.en[key];
+      if (raw === undefined) return;
+      const value = substituteLocationPlaceholders(raw);
       if (el.hasAttribute('data-i18n-html')) el.innerHTML = value;
       else el.textContent = value;
     });
@@ -466,8 +481,9 @@
       try {
         const map = JSON.parse(spec);
         Object.keys(map).forEach(attr => {
-          const val = dict[map[attr]] || CHROME_STRINGS.en[map[attr]];
-          if (val !== undefined) el.setAttribute(attr, val);
+          const raw = dict[map[attr]] || CHROME_STRINGS.en[map[attr]];
+          if (raw === undefined) return;
+          el.setAttribute(attr, substituteLocationPlaceholders(raw));
         });
       } catch (_) { /* malformed json — skip */ }
     });
