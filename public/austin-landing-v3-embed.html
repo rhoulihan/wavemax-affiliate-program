@@ -121,9 +121,12 @@
         <div class="wm-stat-number" data-bind="hours.display">7am-10pm</div>
         <div class="wm-stat-label" data-i18n="landing.stats.openDaily">Open Daily</div>
       </div>
-      <div class="wm-stat-card">
+      <div class="wm-stat-card" data-equipment-show="marketingClaims.fast">
         <!-- Full-load time comes from the resolved equipment profile.
-             Austin (premium) → 40 min, default fleet → 45 min. -->
+             Hidden for stores we haven't audited — corporate makes a
+             brand-wide '~45 min' claim, but for unverified stores
+             we'd rather drop the tile than make a specific claim we
+             can't back up. Austin (premium) → 40 min. -->
         <div class="wm-stat-number">&lt;<span data-bind="equipment.fullLoadMins">45</span>min</div>
         <div class="wm-stat-label" data-i18n="landing.stats.fullLoad">Full Load Done</div>
       </div>
@@ -271,7 +274,7 @@
 
   <script src="/assets/js/iframe-bridge-v2.js?v=20260504"></script>
   <script src="/assets/js/franchise-page-helpers.js?v=20260505c"></script>
-  <script src="/assets/js/austin-landing-init.js?v=20260505f"></script>
+  <script src="/assets/js/austin-landing-init.js?v=20260505g"></script>
 
   <!-- ════════════════════════════════════════════════════════════════════
        Hibu Dynamic Phone Insertion (iframe scope) — Hibu's loader scans
