@@ -641,6 +641,14 @@ app.use('/api', (req, res, next) => {
   next();
 }, apiV1Router);
 
+// Corporate-level pages — Phase 5c clone. These live on top-level paths
+// like /franchise, /about/, etc. and are static V3-styled marketing
+// pages with no per-franchise data. Mounted BEFORE the slug router so
+// /franchise doesn't get picked up as a (nonexistent) franchise slug.
+app.get(['/franchise', '/franchise/'], (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'franchise.html'));
+});
+
 // Per-franchise dynamic routes — Phase 5a. Mounted AFTER /api/* and the
 // static middleware so unknown slugs fall through to a 404 instead of
 // shadowing real asset paths. The controller's registry-lookup gate is
