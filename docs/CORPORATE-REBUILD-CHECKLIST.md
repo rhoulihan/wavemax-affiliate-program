@@ -86,6 +86,11 @@ Legend: **✅ shipped** · **🔧 in progress** · **☐ queued**
 
 - ✅ **i18n parameterization.** All four supported languages (en / es / pt / de) carry city placeholder substitution in equipment-aware copy, hero subtitles, contact titles, about-us stats, breadcrumb labels, and commercial subnav.
 
+### SEO foundations
+
+- ✅ **Detailed SEO across corporate-content pages.** Every corporate page (`/franchise/`, `/become-a-franchisee/`, `/about/`, `/testimonials/` — and all subsequent ones) ships with: keyword-targeted `<title>`, meta description, meta keywords, canonical URL, robots directives, full Open Graph block (type, title, description, url, image, image:width/height/alt, site_name, locale), Twitter card (summary_large_image with image:alt), geo metadata, theme-color, schema.org JSON-LD structured data appropriate to the page type (Organization / Person / Review / BreadcrumbList / LocalBusiness / FAQPage), and complete heading hierarchy.
+- ✅ **Per-franchise SEO already shipped via `FranchisePage.buildSeo()`** — generates per-franchise meta + OG + Twitter + LocalBusiness schema + breadcrumb schema + alternate-language hreflangs from each store's registry data; runs on every franchise page render.
+
 - ✅ **Locations modal click handler resilient to third-party DOM rewrites.** The Hibu dynamic-phone-insertion script replaces innerHTML on subtrees containing the local phone number, which orphans event handlers attached at the element level. The rebuild uses event delegation on `document` so click handlers survive subtree rewrites.
 
 - ✅ **Footer "All Locations" button switched from external redirect to in-page modal.** Previously linked to `wavemaxlaundry.com/locations/`, removing visitors from the site flow. Now opens the in-page locations modal.
@@ -129,7 +134,7 @@ Each rebuilt page is hand-authored V3-styled HTML, ~30KB each, mirroring the con
 - ✅ **`/become-a-franchisee/`** — buying-process page (hero, Path Forward narrative, 4-card qualifications band, 6-step process timeline, investment breakdown, 6 support pillars, 6-question FAQ, closing CTA)
 - ✅ **Shared corporate chrome** applied to both pages above
 - ✅ **`/about/`** — founding story (2012, Jacksonville, AU Hydro LLC dba WaveMAX Laundry), Mike Roberts as Founder & CEO with the verifiable framing, Sheila as CFO (no surname per the public source), Brittany Horner as Franchise Development, mission statement quote, brand thesis, Awards & Recognition section (Entrepreneur Franchise 500 #485 in 2026, #1 Laundromat Franchise category 2026, #416 in 2024)
-- ☐ **`/testimonials/`** — 4 verifiable franchisees (Stephanie Lewis / Caleb Allen / Phillip Kennedy / Sean Hansen) with attributed quotes; designed to expand
+- ✅ **`/testimonials/`** — 4 verifiable franchisees (Stephanie Lewis / Caleb Allen / Phillip Kennedy / Sean Hansen) with attributed quotes from corporate's testimonials page. Includes credentials band ($471K avg gross / 2026 #1 laundromat ranking), per-franchisee Person + Review structured data, and a callout listing verifiable Item 19 figures with cross-links to /why-invest-in-wavemax/. Designed to expand as additional cleared franchisees come online.
 - ☐ **`/why-invest-in-wavemax/`** — Item 19 figures ($471,201 avg gross from 50-store 2024 sample, per 2025 FDD), Jacksonville flagship cash-flow snapshot ($217K net cash flow / $113K net income), 25–35% EBITDA, 5–7 year payback. Total investment range per FDD: $356,455 – $1,556,350 (2025 FDD); typical builds $1M–$1.5M.
 - ☐ **`/wavemax-vs-zombiemat/`** — 10-point differentiation matrix (location / operational burden / equipment / marketing / customer experience / logistics / pricing / training / scaling / exit)
 - ☐ **`/virtual-tour/`** — Austin store image gallery + brand philosophy narrative
