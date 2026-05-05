@@ -291,14 +291,26 @@ body { background: var(--wm-bg-soft); }
   box-shadow: 0 4px 14px rgba(15, 32, 53, 0.18);
   position: relative;
 }
+/* Generic avatar palette — owner.avatarStyle in LOCATION_DATA picks one.
+ * Aliased to the original Austin-specific classes so existing markup
+ * keeps working during the transition. */
+.wm-about-team-avatar--primary,
 .wm-about-team-avatar--colin {
   background: linear-gradient(135deg, var(--wm-primary) 0%, var(--wm-primary-deep) 100%);
 }
+.wm-about-team-avatar--secondary,
 .wm-about-team-avatar--rick {
   background: linear-gradient(135deg, var(--wm-secondary) 0%, #0d7a8c 100%);
 }
+.wm-about-team-avatar--amber,
 .wm-about-team-avatar--simone {
   background: linear-gradient(135deg, #b85687 0%, var(--austin-sun-deep, #c7882d) 100%);
+}
+.wm-about-team-avatar--navy {
+  background: linear-gradient(135deg, var(--wm-navy-mid) 0%, var(--wm-navy-deep) 100%);
+}
+.wm-about-team-avatar--teal {
+  background: linear-gradient(135deg, #1aa6a6 0%, #0d7a8c 100%);
 }
 .wm-about-team-initial {
   font-family: var(--wm-font-heading);
