@@ -128,9 +128,9 @@ Each rebuilt page is hand-authored V3-styled HTML, ~30KB each, mirroring the con
 - ✅ **`/franchise/`** — franchise opportunity overview (hero, stat band, 6 why-owners-love tiles, 4-up Secret Sauce grid, sanitation split, 3 investment-detail cards, 6-question FAQ, closing CTA)
 - ✅ **`/become-a-franchisee/`** — buying-process page (hero, Path Forward narrative, 4-card qualifications band, 6-step process timeline, investment breakdown, 6 support pillars, 6-question FAQ, closing CTA)
 - ✅ **Shared corporate chrome** applied to both pages above
-- 🔧 **`/about/`** — founding story (2012, Jacksonville, AU Hydro LLC dba WaveMAX Laundry), Mike Roberts as Founder & CEO with the verifiable framing, Sheila as CFO (no surname per the public source), Brittany Horner as Franchise Development, mission statement quote, brand thesis
+- ✅ **`/about/`** — founding story (2012, Jacksonville, AU Hydro LLC dba WaveMAX Laundry), Mike Roberts as Founder & CEO with the verifiable framing, Sheila as CFO (no surname per the public source), Brittany Horner as Franchise Development, mission statement quote, brand thesis, Awards & Recognition section (Entrepreneur Franchise 500 #485 in 2026, #1 Laundromat Franchise category 2026, #416 in 2024)
 - ☐ **`/testimonials/`** — 4 verifiable franchisees (Stephanie Lewis / Caleb Allen / Phillip Kennedy / Sean Hansen) with attributed quotes; designed to expand
-- ☐ **`/why-invest-in-wavemax/`** — Item 19 figures ($471K avg / $436K median / $713K top of 50-store 2024 sample), Jacksonville flagship cash-flow snapshot ($217K net cash flow / $113K net income), 25–35% EBITDA, 5–7 year payback
+- ☐ **`/why-invest-in-wavemax/`** — Item 19 figures ($471,201 avg gross from 50-store 2024 sample, per 2025 FDD), Jacksonville flagship cash-flow snapshot ($217K net cash flow / $113K net income), 25–35% EBITDA, 5–7 year payback. Total investment range per FDD: $356,455 – $1,556,350 (2025 FDD); typical builds $1M–$1.5M.
 - ☐ **`/wavemax-vs-zombiemat/`** — 10-point differentiation matrix (location / operational burden / equipment / marketing / customer experience / logistics / pricing / training / scaling / exit)
 - ☐ **`/virtual-tour/`** — Austin store image gallery + brand philosophy narrative
 - ☐ **`/faq/`** — comprehensive franchise FAQ aggregating questions from /franchise/, /become-a-franchisee/, and corporate /faq-new/
@@ -170,7 +170,7 @@ Every dataset that drives the site is regenerable from scripts:
 
 - ☐ Per-franchise email mailbox provisioning on Mailcow (config change, not code)
 - ☐ Roberts cleared bio expansion — public sources are too generic for a detailed profile
-- ☐ Awards / rankings verification — Entrepreneur Franchise 500 placement to be verified by year + rank position before publishing
+- ✅ Awards / rankings verified and integrated — Entrepreneur Franchise 500 #485 (2026), #1 Laundromat Franchise (2026), #416 (2024). Sources: franchisechatter.com, entrepreneur.com, franzy.com.
 - ☐ Year-by-year unit growth chart — no public source data available; would require internal MHR records
 - ☐ Multi-language (es / pt / de) for new corporate pages — per-franchise pages cover all 4 languages; corporate pages currently English-only
 
