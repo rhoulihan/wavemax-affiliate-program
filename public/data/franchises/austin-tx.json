@@ -138,6 +138,7 @@
     }
   },
   "equipment": {
+    "profileId": "electrolux-450g-80lb-premium",
     "washers": 42,
     "dryers": 42,
     "capacityLb": 80

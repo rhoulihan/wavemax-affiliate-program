@@ -183,8 +183,64 @@
     };
   }
 
+  /* ---------- Equipment-aware rendering ----------
+   *
+   * applyEquipment(LOCATION_DATA) walks the page and:
+   *
+   *   1. data-equipment-show="<flag>"  — element is hidden if the flag on
+   *      LOCATION_DATA.equipment is FALSY. Use for content that should
+   *      only render for stores with verified premium equipment, e.g.
+   *      <section data-equipment-show="hasUVSanitization">...</section>.
+   *      Supported flags (resolved via equipmentProfileService):
+   *        hasUVSanitization
+   *        marketingClaims.fast
+   *        marketingClaims.premium
+   *        marketingClaims.hospitalGrade
+   *        marketingClaims.highSpin
+   *
+   *   2. data-equipment-hide="<flag>"  — opposite: hidden when flag is
+   *      TRUTHY. Use for generic-fleet copy that should disappear when a
+   *      store has premium equipment.
+   *
+   *   3. data-bind="equipment.<path>"  — handled by the bridge already,
+   *      so equipment.spinGDisplay, equipment.washCycleMins, etc. work
+   *      out of the box. (See parent-iframe-bridge-v3.js applyDataBind.)
+   *
+   * Page templates ship with GENERIC HTML defaults (safe copy that works
+   * for any store). Premium-only fragments live behind data-equipment-show
+   * and stay hidden until applyEquipment confirms the store qualifies.
+   *
+   * Run this after the bridge has injected LOCATION_DATA AND after
+   * i18n.translatePage() — translatePage may rewrite text that
+   * applyEquipment then needs to gate.
+   */
+  function getFlag(equipment, path) {
+    if (!equipment || !path) return false;
+    const parts = path.split('.');
+    let v = equipment;
+    for (const p of parts) {
+      if (v == null) return false;
+      v = v[p];
+    }
+    return Boolean(v);
+  }
+
+  function applyEquipment(data) {
+    const eq = data && data.equipment;
+    if (!eq) return;
+    document.querySelectorAll('[data-equipment-show]').forEach((el) => {
+      const flag = el.getAttribute('data-equipment-show');
+      el.hidden = !getFlag(eq, flag);
+    });
+    document.querySelectorAll('[data-equipment-hide]').forEach((el) => {
+      const flag = el.getAttribute('data-equipment-hide');
+      el.hidden = getFlag(eq, flag);
+    });
+  }
+
   window.FranchisePage = {
     applyHeroWatermark,
+    applyEquipment,
     buildSeo,
     businessId,
     pageUrl,
