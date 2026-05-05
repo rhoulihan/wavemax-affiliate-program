@@ -552,10 +552,12 @@
     let selectedSlug = null;
 
     const open = async () => {
-      console.log('[locModal-debug] open() invoked, overlay=', overlay, 'classList before=', [...overlay.classList]);
-      overlay.setAttribute('aria-hidden', 'false');
-      overlay.classList.add('open');
-      console.log('[locModal-debug] classList after add=', [...overlay.classList]);
+      // Re-fetch overlay from DOM in case it was replaced after init
+      const liveOverlay = document.getElementById('locModal') || overlay;
+      console.log('[locModal-debug] open() invoked, init-overlay===live?', overlay === liveOverlay, 'init connected?', overlay.isConnected);
+      liveOverlay.setAttribute('aria-hidden', 'false');
+      liveOverlay.classList.add('open');
+      console.log('[locModal-debug] classList after add=', [...liveOverlay.classList]);
       document.body.style.overflow = 'hidden';
       // Auto-select the current franchise on open so the action bar
       // shows immediately (operator can click Visit to confirm).
