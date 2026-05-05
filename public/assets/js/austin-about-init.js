@@ -12,55 +12,50 @@
   /* ---------- Translations (en/es/pt/de) ---------- */
   const TRANSLATIONS = {
     en: {
-      'about.title':              'About WaveMAX Austin',
-      'about.tagline':            'A family business, building a better Austin one wash at a time.',
-      'about.subtitle':           "WaveMAX Austin is owned and operated by the Houlihan family. We chose WaveMAX because we believe in giving back to our community by investing in the best quality and service at the lowest price — and building local, every day.",
+      // Defaults below are CORPORATE-GENERIC. Per-franchise overrides
+      // come from LOCATION_DATA.aboutContent (applied by applyAboutContent
+      // after translatePage runs). Austin's specific Houlihan content
+      // lives in known-overrides.json → austin-tx.json.
+      'about.title':              'About this WaveMAX',
+      'about.tagline':            'Locally owned. Locally invested.',
+      'about.subtitle':           "This WaveMAX is owned and operated by people who live in the community we serve. We chose WaveMAX because we believe in delivering the best quality and service at the lowest fair price — and reinvesting in our neighborhood, every day.",
       'about.callBtn':            'Call',
       'about.directionsBtn':      'Visit us',
 
-      'about.stats.founded':      'Serving Austin Since',
-      'about.stats.owners':       'Family Owners',
-      'about.stats.local':        'Austin Local',
-      'about.stats.disciplines':  'Disciplines',
+      'about.stats.founded':      'Serving the Community',
+      'about.stats.owners':       'Local Owners',
+      'about.stats.local':        'Locally Owned',
+      'about.stats.disciplines':  'Years Combined Experience',
       'about.stats.community':    'Community First',
 
       'about.mission.eyebrow':    'WHY WAVEMAX',
       'about.mission.title':      'Why we chose WaveMAX',
-      'about.mission.body1':      "We're three Austin locals who wanted to invest in our neighborhood — not just write a check, but build something that delivers real value to the people who live here.",
-      'about.mission.body2':      'WaveMAX is the platform that lets us do that: best-in-class equipment, hospital-grade water sanitation, and a service model designed to keep prices low and quality high. We get to put our values into practice — community first, quality always — and people get the cleanest, fastest, friendliest laundry experience in Central Austin.',
-      'about.mission.proud':      'Proud to be serving the Central Austin community since 2025.',
+      'about.mission.body1':      "We're locals who wanted to invest in our neighborhood — not just write a check, but build something that delivers real value to the people who live here.",
+      'about.mission.body2':      "WaveMAX is the platform that lets us do that: modern equipment, professional service, and a model designed to keep prices fair and quality high. Community first, quality always — that's the standard we operate by.",
+      'about.mission.proud':      'Proud to serve our local community.',
 
       'about.values.eyebrow':     'WHAT WE STAND FOR',
       'about.values.title':       'Our values, on every wash',
       'about.values.v1.t':        'Community first.',
-      'about.values.v1.b':        'Profits reinvested locally — staff, equipment, and supporting Austin causes that matter to us.',
-      'about.values.v2.t':        'Best-in-class quality.',
-      'about.values.v2.b':        'Omni LUX UV-sanitized water, eco-friendly hypoallergenic detergent, calibrated weighs, hand-folded results.',
-      'about.values.v3.t':        'Lowest fair price.',
-      'about.values.v3.b':        'No hidden fees, no contracts, no subscriptions. Cards-only, transparent pricing — pay for what you use.',
-      'about.values.v4.t':        'Always open.',
-      'about.values.v4.b':        "7am–10pm, every day, 365 days a year. We're here when laundry day actually happens.",
+      'about.values.v1.b':        'Locally owned. Profits reinvested in our community.',
+      'about.values.v2.t':        'Quality service.',
+      'about.values.v2.b':        'Modern equipment, professional standards, and a clean store every visit.',
+      'about.values.v3.t':        'Fair pricing.',
+      'about.values.v3.b':        'No hidden fees, no contracts. Pay for what you use, transparent every step.',
+      'about.values.v4.t':        'Reliable hours.',
+      'about.values.v4.b':        "Convenient hours that fit your schedule. We're here when you need us.",
       'about.values.v5.t':        'Friendly service.',
-      'about.values.v5.b':        "Fully attended store. Real people, not a vending machine. Need help? We're here.",
+      'about.values.v5.b':        "Real people, not a vending machine. Need help? We're here.",
 
       'about.team.eyebrow':       'MEET THE OWNERS',
-      'about.team.title':         'The Houlihan family',
-      'about.team.lede':          'Three Austin locals — a musician, a technology executive, and an artist — running the busiest WaveMAX in Texas. Different worlds, same value: invest in your community.',
-      'about.team.colin.role':    'Owner / Operator',
-      'about.team.colin.tag':     'North Austin local · working musician',
-      'about.team.colin.bio':     "Colin runs the day-to-day at the Rundberg location. Born and raised North Austin, plays in the local music scene, and brings a working musician's eye for detail and showmanship to running a clean, fast, friendly store.",
-      'about.team.rick.role':     'Co-Owner',
-      'about.team.rick.tag':      'Local technology executive & influencer',
-      'about.team.rick.bio':      'Rick is a long-time Austin technology executive and influencer in the data and AI community. He brings an operations and customer-experience lens to the family business — measure everything, then make it better, every shift.',
-      'about.team.simone.role':   'Co-Owner',
-      'about.team.simone.tag':    'Local artist & philanthropist',
-      'about.team.simone.bio':    'Simone is an Austin artist active in the local arts and philanthropy community. She keeps the heart of the business front and center — community-first values, quality service at the lowest fair price, with profits reinvested locally.',
+      'about.team.title':         'Meet the local owners',
+      'about.team.lede':          'Local people committed to running a clean, fast, friendly laundromat for our community.',
 
       'about.community.eyebrow':  'GIVING BACK',
-      'about.community.title':    'Investing in Central Austin',
-      'about.community.text':     "Every fold, every wash, every dollar that comes through our door goes back into Austin — into staff who live here, suppliers who operate here, and causes the family supports here. When you choose WaveMAX Austin, you're not buying laundry from a chain. You're investing in your neighbors.",
+      'about.community.title':    'Investing in our community',
+      'about.community.text':     "Every fold, every wash, every dollar that comes through our door goes back into the community — into staff who live here, suppliers who operate here, and causes we support here. When you choose this WaveMAX, you're not buying laundry from a chain. You're investing in your neighbors.",
 
-      'about.cta.text':           "Come meet the family. We're at 825 E Rundberg Ln F1, every day, 7am–10pm.",
+      'about.cta.text':           "Stop in to say hello. We'd love to meet you.",
       'about.cta.callBtn':        'Call us',
       'about.cta.directionsBtn':  'Get directions'
     },
@@ -349,6 +344,175 @@
     });
   }
 
+  /* ---------- Team grid ----------
+   * Renders LOCATION_DATA.owners[] into the team grid. Empty array →
+   * single placeholder card. avatarStyle drives the disc gradient
+   * (primary | secondary | amber | …); falls back to primary.
+   *
+   * No data-i18n on the rendered cards: bios are franchise-specific
+   * data, not translatable copy. If a franchise wants multilingual
+   * bios, they'd ship per-language strings inside owner.bio
+   * (a future schema extension; not v1).
+   */
+  function avatarClassFor(style) {
+    const s = (style || 'primary').toLowerCase();
+    return 'wm-about-team-avatar wm-about-team-avatar--' + s;
+  }
+  function initialFor(name) {
+    const trimmed = (name || '?').trim();
+    return trimmed ? trimmed.charAt(0).toUpperCase() : '?';
+  }
+  function escapeText(s) { return String(s == null ? '' : s); }
+
+  function renderTeamGrid(data) {
+    const grid = document.getElementById('wm-about-team-grid');
+    if (!grid) return;
+    const owners = (data && Array.isArray(data.owners)) ? data.owners : [];
+
+    grid.innerHTML = '';
+
+    if (owners.length === 0) {
+      // Placeholder so the grid never collapses for franchises that
+      // haven't filled in their owner block yet. Generic, friendly,
+      // doesn't claim to be anyone in particular.
+      const card = document.createElement('article');
+      card.className = 'wm-about-team-card';
+      card.innerHTML =
+        '<div class="' + avatarClassFor('primary') + '" aria-hidden="true">' +
+          '<span class="wm-about-team-initial">★</span>' +
+        '</div>' +
+        '<h3 class="wm-about-team-name">Local owner-operator</h3>' +
+        '<p class="wm-about-team-role">Owner / Operator</p>' +
+        '<p class="wm-about-team-tag">Coming soon</p>' +
+        '<p class="wm-about-team-bio">Local owner committed to your community. Full bio coming soon — check back as the team grows.</p>';
+      grid.appendChild(card);
+      return;
+    }
+
+    owners.forEach((o) => {
+      const card = document.createElement('article');
+      card.className = 'wm-about-team-card';
+      const safeName = escapeText(o && o.name);
+      const role = escapeText(o && o.role);
+      const tag  = escapeText(o && o.tag);
+      const bio  = escapeText(o && o.bio);
+      // Build with createElement to avoid HTML injection from the JSON
+      // (owner names/bios are operator-supplied content).
+      const avatar = document.createElement('div');
+      avatar.className = avatarClassFor(o && o.avatarStyle);
+      avatar.setAttribute('aria-hidden', 'true');
+      const initial = document.createElement('span');
+      initial.className = 'wm-about-team-initial';
+      initial.textContent = initialFor(safeName);
+      avatar.appendChild(initial);
+      card.appendChild(avatar);
+      const nameEl = document.createElement('h3');
+      nameEl.className = 'wm-about-team-name';
+      nameEl.textContent = safeName;
+      card.appendChild(nameEl);
+      if (role) {
+        const r = document.createElement('p');
+        r.className = 'wm-about-team-role';
+        r.textContent = role;
+        card.appendChild(r);
+      }
+      if (tag) {
+        const t = document.createElement('p');
+        t.className = 'wm-about-team-tag';
+        t.textContent = tag;
+        card.appendChild(t);
+      }
+      if (bio) {
+        const b = document.createElement('p');
+        b.className = 'wm-about-team-bio';
+        b.textContent = bio;
+        card.appendChild(b);
+      }
+      grid.appendChild(card);
+    });
+  }
+
+  /* ---------- About-content overrides ----------
+   * Apply LOCATION_DATA.aboutContent.* values to the data-i18n-keyed
+   * elements that the translations dictionary normally handles. When
+   * an aboutContent field is empty, the existing translation default
+   * stays in place (translatePage already ran by the time we get
+   * called — we just override what the franchise has supplied).
+   *
+   * Also handles missionBody (array of paragraphs) which doesn't fit
+   * the simple key→string model: replaces the two .wm-about-card-body
+   * paragraphs in the mission card with whatever the franchise shipped.
+   */
+  function setText(selector, value) {
+    if (!value) return;
+    const el = document.querySelector(selector);
+    if (el) el.textContent = value;
+  }
+  function setMissionBody(paragraphs) {
+    if (!Array.isArray(paragraphs) || paragraphs.length === 0) return;
+    const card = document.querySelector('.wm-about-card-mission');
+    if (!card) return;
+    // Find existing body paragraphs (excluding the emphasized "proud" line)
+    const bodyEls = card.querySelectorAll('.wm-about-card-body:not(.wm-about-card-emphasis)');
+    paragraphs.forEach((p, i) => {
+      if (bodyEls[i]) bodyEls[i].textContent = p;
+    });
+  }
+  function applyAboutContent(data) {
+    const a = data && data.aboutContent;
+    if (!a) return;
+
+    setText('.wm-hero-title',                      a.heroTitle);
+    setText('.wm-hero-tagline',                    a.heroTagline);
+    setText('.wm-hero-subtitle',                   a.heroSubtitle);
+    setText('.wm-about-card-mission .wm-about-card-eyebrow', a.missionEyebrow);
+    setText('.wm-about-card-mission .wm-about-card-title',   a.missionTitle);
+    setMissionBody(a.missionBody);
+    setText('.wm-about-card-mission .wm-about-card-emphasis', a.missionProud);
+    setText('.wm-about-card-values .wm-about-card-eyebrow',  a.valuesEyebrow);
+    setText('.wm-about-card-values .wm-about-card-title',    a.valuesTitle);
+    // Values list: replace items if franchise supplied 5+ entries
+    if (Array.isArray(a.values) && a.values.length > 0) {
+      const list = document.querySelector('.wm-about-values-list');
+      if (list) {
+        list.innerHTML = '';
+        a.values.forEach((v) => {
+          const li = document.createElement('li');
+          if (v.title) {
+            const strong = document.createElement('strong');
+            strong.textContent = v.title;
+            li.appendChild(strong);
+            li.appendChild(document.createTextNode(' '));
+          }
+          if (v.body) {
+            const span = document.createElement('span');
+            span.textContent = v.body;
+            li.appendChild(span);
+          }
+          list.appendChild(li);
+        });
+      }
+    }
+    setText('.wm-about-team .wm-about-eyebrow',     a.teamEyebrow);
+    setText('.wm-about-team .wm-about-section-title', a.teamTitle);
+    setText('.wm-about-team .wm-about-section-lede', a.teamLede);
+    setText('.wm-about-community .wm-about-eyebrow', a.communityEyebrow);
+    setText('.wm-about-community .wm-about-section-title', a.communityTitle);
+    setText('.wm-about-community-text',             a.communityText);
+    setText('.wm-cta-strip-text',                   a.ctaText);
+    // Stat band — replace numbers + labels per slot when supplied.
+    if (a.stats) {
+      const cards = document.querySelectorAll('.wm-stats .wm-stat-card');
+      const order = ['founded', 'owners', 'local', 'extra', 'community'];
+      order.forEach((key, i) => {
+        const stat = a.stats[key];
+        if (!stat || !cards[i]) return;
+        if (stat.number) cards[i].querySelector('.wm-stat-number').textContent = stat.number;
+        if (stat.label)  cards[i].querySelector('.wm-stat-label').textContent  = stat.label;
+      });
+    }
+  }
+
   /* ---------- Init ---------- */
   function init() {
     if (!window.IframeBridge) {
@@ -362,11 +526,13 @@
     window.IframeBridge.onLocationData((data) => {
       applyBindings(data);
       setHeroWatermark(data);
+      renderTeamGrid(data);
+      applyAboutContent(data);
       if (window.FranchisePage) {
         const seo = window.FranchisePage.buildSeo(data, 'about-us');
         if (seo) window.IframeBridge.loadSEOConfig(seo);
-      }      if (window.IframeBridge.updateHeight) window.IframeBridge.updateHeight();      if (window.IframeBridge && window.IframeBridge.updateHeight) window.IframeBridge.updateHeight();
-
+      }
+      if (window.IframeBridge && window.IframeBridge.updateHeight) window.IframeBridge.updateHeight();
     });
   }
 
