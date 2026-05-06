@@ -31,6 +31,7 @@
   <meta property="og:description" content="Top-rated laundromat in North Austin. 42 UV-sanitized washers, 42 dryers, free WiFi, free parking. Self-service or wash-dry-fold. Open daily 7am–10pm.">
   <meta property="og:url" content="https://wavemax.promo/dev/austin-host-mock.html">
   <meta property="og:site_name" content="WaveMAX Austin TX">
+  <!-- TODO: migrate when per-franchise images move to wavemax.promo origin -->
   <meta property="og:image" content="https://wavemaxlaundry.com/wp-content/uploads/locations/austin-tx/hero-3.jpg">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
@@ -55,6 +56,7 @@
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Laundromat in North Austin, TX | WaveMAX Austin">
   <meta name="twitter:description" content="42 UV-sanitized washers + 42 dryers, free WiFi, free parking, open daily 7am–10pm at 825 E Rundberg Ln F1.">
+  <!-- TODO: migrate when per-franchise images move to wavemax.promo origin -->
   <meta name="twitter:image" content="https://wavemaxlaundry.com/wp-content/uploads/locations/austin-tx/hero-3.jpg">
   <meta name="twitter:image:alt" content="WaveMAX Laundry Austin TX — interior with rows of front-load washers">
 
@@ -111,10 +113,10 @@
 
   <!-- Favicons. Mirrors the icon set used by the WordPress parent so
        browser tabs / bookmark UI stay visually consistent across hosts. -->
-  <link rel="icon" type="image/png" sizes="32x32"  href="https://wavemaxlaundry.com/wp-content/uploads/2026/03/cropped-favicon-32x32.png">
-  <link rel="icon" type="image/png" sizes="192x192" href="https://wavemaxlaundry.com/wp-content/uploads/2026/03/cropped-favicon-192x192.png">
-  <link rel="apple-touch-icon" href="https://wavemaxlaundry.com/wp-content/uploads/2026/03/cropped-favicon-180x180.png">
-  <meta name="msapplication-TileImage" content="https://wavemaxlaundry.com/wp-content/uploads/2026/03/cropped-favicon-270x270.png">
+  <link rel="icon" type="image/png" sizes="32x32"  href="/assets/images/brand/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="/assets/images/brand/favicon-192x192.png">
+  <link rel="apple-touch-icon" href="/assets/images/brand/favicon-180x180.png">
+  <meta name="msapplication-TileImage" content="/assets/images/brand/favicon-270x270.png">
   <meta name="theme-color" content="#1a3f7a">
 
   <!-- ════════════════════════════════════════════════════════════════════
@@ -141,7 +143,7 @@
       "https://wavemaxlaundry.com/wp-content/uploads/locations/austin-tx/interior-1.jpg",
       "https://wavemaxlaundry.com/wp-content/uploads/locations/austin-tx/interior-2.jpg"
     ],
-    "logo": "https://wavemaxlaundry.com/wp-content/uploads/2026/03/logo-wavemax.png",
+    "logo": "https://wavemax.promo/assets/images/brand/logo-wavemax.png",
     "priceRange": "$$",
     "currenciesAccepted": "USD",
     "paymentAccepted": "Credit Card, Debit Card, Cash",
@@ -254,7 +256,7 @@
     "@id": "https://www.wavemaxlaundry.com/#organization",
     "name": "WaveMAX Laundry",
     "url": "https://www.wavemaxlaundry.com/",
-    "logo": "https://wavemaxlaundry.com/wp-content/uploads/2026/03/logo-wavemax.png",
+    "logo": "https://wavemax.promo/assets/images/brand/logo-wavemax.png",
     "slogan": "Your friendly neighborhood laundry service.",
     "description": "WaveMAX Laundry is a network of premium self-service laundromats and wash-dry-fold drop-off centers across the United States.",
     "founder": { "@type": "Person", "name": "Mike Hagan" },
@@ -492,6 +494,10 @@
   <link rel="stylesheet" href="/assets/css/swirl-spinner.css?v=20260504">
   <script src="/assets/js/swirl-spinner.js?v=20260504" defer></script>
 
+  <!-- Centralized image-base config — exposes window.wmLocationImage for
+       per-franchise location URL resolution. Loaded before any consumer. -->
+  <script src="/assets/js/wm-image-config.js?v=20260506a" defer></script>
+
   <!-- Server-rendered config (reads GOOGLE_PLACES_API_KEY + LOCATION_PLACE_ID
        from server env). Loads BEFORE the static data file so the env values
        win the OR-fallback in austin-host-mock-data.js. URL deliberately
@@ -560,7 +566,7 @@
     <div class="wmlnav-inner">
       <div class="wmlnav-b2-logo">
         <a id="wmlnav-logo-link" href="?route=/" aria-label="WaveMAX Austin home">
-          <img decoding="async" src="https://www.wavemaxlaundry.com/wp-content/uploads/2026/03/logo-wavemax.png" alt="WaveMAX Laundry">
+          <img decoding="async" src="/assets/images/brand/logo-wavemax.png" alt="WaveMAX Laundry">
         </a>
       </div>
       <div class="wmlnav-b2-right">
@@ -635,7 +641,7 @@
 
   <div class="wmv3-logo">
     <a href="?route=/" aria-label="WaveMAX Austin home">
-      <img src="https://www.wavemaxlaundry.com/wp-content/uploads/2026/03/logo-wavemax.png" alt="WaveMAX Laundry">
+      <img src="/assets/images/brand/logo-wavemax.png" alt="WaveMAX Laundry">
     </a>
   </div>
 
@@ -781,7 +787,7 @@
         </div>
         <div class="wm-mapfooter">
           <a class="wm-btn-primary" data-bind="contact.mapsUrl" data-bind-attr="href" target="_blank" rel="noopener" href="#" data-i18n="chrome.footer.getDirections">Get Directions</a>
-          <a class="wm-btn-secondary" href="https://www.wavemaxlaundry.com/locations/" target="_blank" rel="noopener" data-i18n="chrome.footer.allLocations">All Locations</a>
+          <button type="button" class="wm-btn-secondary" data-locmodal-open data-i18n="chrome.footer.allLocations">All Locations</button>
         </div>
       </div>
     </div>
@@ -793,8 +799,8 @@
     <div class="wm-pgfooter-bottom-inner">
       <span data-i18n="chrome.footer.copyright">© 2026 CRHS Enterprises, LLC. All rights reserved.</span>
       <div class="wm-pgfooter-bottom-links">
-        <a href="https://www.wavemaxlaundry.com/privacy-policy/" target="_blank" rel="noopener" data-i18n="chrome.footer.privacy">Privacy Policy</a>
-        <a href="https://www.wavemaxlaundry.com/terms-of-service/" target="_blank" rel="noopener" data-i18n="chrome.footer.terms">Terms &amp; Conditions</a>
+        <a href="/privacy-policy.html" rel="noopener" data-i18n="chrome.footer.privacy">Privacy Policy</a>
+        <a href="/terms-and-conditions.html" rel="noopener" data-i18n="chrome.footer.terms">Terms &amp; Conditions</a>
         <span class="wm-footer-muted" data-i18n="chrome.footer.refBuild">Local-dev reference build (noindex)</span>
       </div>
     </div>

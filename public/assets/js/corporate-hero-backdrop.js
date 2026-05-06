@@ -17,12 +17,12 @@
   // (kent-wa/hero-2 and omaha/hero-3 are actually interior shots of
   // washers and dryers). The list below is the audited subset.
   const POOL = [
-    'https://wavemaxlaundry.com/wp-content/uploads/locations/jacksonville-fl/hero-1.jpg',
-    'https://wavemaxlaundry.com/wp-content/uploads/locations/jacksonville-fl/hero-3.jpg',
-    'https://wavemaxlaundry.com/wp-content/uploads/locations/kent-wa/hero-1.jpg',
-    'https://wavemaxlaundry.com/wp-content/uploads/locations/kent-wa/hero-3.jpg',
-    'https://wavemaxlaundry.com/wp-content/uploads/locations/omaha/hero-1.jpg',
-    'https://wavemaxlaundry.com/wp-content/uploads/locations/omaha/hero-2.jpg'
+    window.wmLocationImage('jacksonville-fl/hero-1.jpg'),
+    window.wmLocationImage('jacksonville-fl/hero-3.jpg'),
+    window.wmLocationImage('kent-wa/hero-1.jpg'),
+    window.wmLocationImage('kent-wa/hero-3.jpg'),
+    window.wmLocationImage('omaha/hero-1.jpg'),
+    window.wmLocationImage('omaha/hero-2.jpg')
   ];
 
   // Default gradient overlay, kept consistent across pages so the existing

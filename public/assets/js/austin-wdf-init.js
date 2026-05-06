@@ -396,7 +396,7 @@
    */
   const PAGE_URL    = 'https://wavemax.promo/dev/austin-host-mock.html?route=/wash-dry-fold';
   const HOST_URL    = 'https://wavemax.promo/austin-tx/';
-  const HERO_IMG    = 'https://wavemaxlaundry.com/wp-content/uploads/locations/austin-tx/hero-3.jpg';
+  const HERO_IMG    = window.wmLocationImage('austin-tx/hero-3.jpg');
   const BUSINESS_ID = 'https://www.wavemaxlaundry.com/austin-tx/#localbusiness';
 
   const SEO = {
