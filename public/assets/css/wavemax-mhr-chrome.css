@@ -432,7 +432,8 @@
     padding: 16px 12px 8px;
     text-align: center;
   }
-  .wmv3-logo img { max-height: 56px; width: auto; }
+  .wmv3-logo a { display: inline-block; }
+  .wmv3-logo img { max-height: 56px; width: auto; display: block; }
 
   /* 4-cell action row: Learn More | Locations | burger | lang switcher */
   .wmv3-actions {
