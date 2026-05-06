@@ -524,6 +524,86 @@
       "btnSecondary": "Investitionsleitfaden anfordern"
     }
   },
+  "tour": {
+    "hero": {
+      "eyebrow": "Virtuelle Tour",
+      "title1": "Treten Sie ein in einen",
+      "title2": "WaveMAX.",
+      "sub": "Fotografien aus dem gesamten WaveMAX-Netzwerk — unsere unternehmenseigene Vorzeigefiliale in Jacksonville, die Filiale in Kent WA aus dem Geräte-Showcase der Konzernzentrale und die in der Filialtour-Serie von WaveMAX vorgestellte Filiale in Omaha. Moderne Electrolux-Flotte, Kunden-Lounge, kostenloses Wi-Fi, Servicekraft im Dienst, markengeprägter Einzelhandelsinnenraum. Die Filiale, in der Sie sein möchten — nicht die, in der Sie sein müssen.",
+      "ctaPrimary": "Standort finden",
+      "ctaSecondary": "Bauen Sie selbst eine"
+    },
+    "philo": {
+      "eyebrow": "Markenphilosophie",
+      "title": "Sauber ist ein Gefühl, kein Häkchen.",
+      "lede": "Die meisten Waschsalons konkurrieren über den Preis pro Ladung. WaveMAX konkurriert über das Erlebnis. Jede Designentscheidung — von der Lichttemperatur über den Bodenbelag bis zur Mitarbeiterschulung — ist bewusst getroffen. Unsere Aufgabe ist nicht, Wäsche zu waschen; sie ist, Kunden dazu zu bringen, an drei Wettbewerbern vorbeizufahren, um zu uns zu gelangen.",
+      "t1Title": "Hell, nicht grell",
+      "t1Text": "Farbkorrigierte LED-Beleuchtung, die Hauttöne schmeichelt und auf der Handykamera hell wirkt. Kunden posten Fotos ihres Besuchs. Das ist kostenloses Marketing.",
+      "t2Title": "Leise, nicht industriell",
+      "t2Text": "Die modernen Electrolux-Soft-Mount-Maschinen laufen spürbar leiser als ältere starr montierte Geräte. Die Filiale ist keine Werkshalle — sie ist ein Ort zum Verweilen.",
+      "t3Title": "Großzügig, nicht beengt",
+      "t3Text": "Breite Gänge, großzügige Falttische, eigene Wagenflächen und ergonomische Beladungshöhe. Menschen kehren in Filialen zurück, die ihre Zeit und Würde respektieren.",
+      "t4Title": "Mit Marke, nicht generisch",
+      "t4Text": "Einheitliche Farbpalette, Beschilderung, Uniformen der Servicekräfte und Beschilderungssystem in jedem WaveMAX. Die Marke ist der Burggraben — Fremde wissen, was sie erwartet.",
+      "t5Title": "Vernetzt, nicht isoliert",
+      "t5Text": "Kostenloses Wi-Fi, arbeitsfreundliche Sitzplätze, Lademöglichkeit an jedem Block. Der 90-minute-Waschzyklus wird zu produktiver Zeit — nicht zu Leerlauf.",
+      "t6Title": "Betreut, nicht unbeaufsichtigt",
+      "t6Text": "Eine Servicekraft im Dienst während der ausgehängten Öffnungszeiten. Echte menschliche Hilfe, Maschinendemos für Erstbenutzer, WDF-Annahme am Tresen. Das Gegenteil jedes Münzwaschsalons, in dem Sie je waren."
+    },
+    "fl": {
+      "eyebrow": "Drei ausgewählte Standorte",
+      "title": "Gleiche Marke. Gleiches Playbook. Drei echte Filialen.",
+      "lede": "Die Fotos in dieser Galerie stammen aus drei WaveMAX-Standorten, die von der Konzernzentrale für Marketingzwecke umfassend fotografiert wurden. Jeder WaveMAX wird nach derselben Markenspezifikation gebaut — diese drei zeigen wir öffentlich, weil sie ausgereift, vollständig und repräsentativ dafür sind, wie die Marke in jedem Markt aussehen sollte.",
+      "jaxBadge": "Vorzeigefiliale",
+      "jaxText": "Unternehmenseigene Vorzeigefiliale. Die Referenzfiliale und der Standort, dessen Item-19-Cashflow-Zahlen in unserem FDD veröffentlicht sind. Der Maßstab \"so soll ein WaveMAX aussehen\".",
+      "kentBadge": "Geräte-Showcase",
+      "kentText": "Geräte-Showcase-Filiale der Konzernzentrale — der Standort, der für die Geräte-Seite auf der Konzern-Website fotografiert wurde. Moderne Electrolux-Flotte, markengeprägter Einzelhandelsinnenraum, Servicestation.",
+      "omahaBadge": "Filialtour",
+      "omahaText": "Vorgestellt in der Filialtour-Marketingserie von WaveMAX. Weitwinkel-Außenansicht, Kunden-Lounge, Betriebsbereich — ein vollständiges Bild davon, wie die Marke außerhalb der Vorzeigefiliale umgesetzt wird."
+    },
+    "gallery": {
+      "eyebrow": "Innerhalb des Netzwerks",
+      "title": "Echte WaveMAX-Filialen. Echte Fotos.",
+      "lede": "Ungestellte Fotos aus dem gesamten WaveMAX-Netzwerk. Keine Renderings, kein Fischauge, keine Twilight-Hour-Farbkorrektur. Was Sie sehen, sieht jeder Kunde, der durch die Eingangstür kommt — und so wird jeder WaveMAX gebaut.",
+      "tag1": "Jacksonville · Vorzeigefiliale",
+      "tagJax": "Jacksonville",
+      "tagKent": "Kent WA",
+      "tagOmaha": "Omaha",
+      "cap1": "Electrolux-Waschmaschinenflotte — Hauptfläche",
+      "cap2": "Großformat-Trocknerlinie",
+      "cap3": "Geräte-Showcase — Kent WA",
+      "cap4": "Falttische & Arbeitsbereich",
+      "cap5": "Kunden-Lounge — Omaha",
+      "cap6": "Wash-Dry-Fold-Annahmetheke",
+      "cap7": "Vorzeigefiliale-Außenansicht — Markenfassade",
+      "cap8": "Beleuchtete Fassade — Kent WA",
+      "cap9": "Weitwinkel-Außenansicht — Omaha",
+      "cap10": "Markeninterieur — Kent WA",
+      "cap11": "Weiträumiger Innenraum — Jacksonville",
+      "cap12": "Betriebsbereich — Omaha"
+    },
+    "fleet": {
+      "eyebrow": "Die Flotte",
+      "title": "Modernes Electrolux. Auf Leistung programmiert.",
+      "lede": "Unser Gerätepaket ist eine bewusste Wahl — soft-mount, High-G-Extraktion, programmierbare Steuerungen, Online-Diagnose sowie konzernintern verhandelte Ersatzteile und Service. Das Ergebnis: schnellere Zyklen, geringere Energiekosten pro Pfund und planbare Wartung.",
+      "s1Label": "Volle Ladung — vom Waschen bis zum Trocknen",
+      "s1Text": "Die High-G-Extraktion entfernt mehr Wasser auf der Waschseite, sodass die Trockner schneller laufen. Die Kunden-Durchlaufzeit sinkt drastisch gegenüber Legacy-Toplader-Waschmaschinen + Niedrig-G-Trocknern.",
+      "s2Label": "Schleuderkraft (Premium-Filialen)",
+      "s2Text": "Premium-WaveMAX-Filialen verfügen über 450G-Schleuderung — die Wäsche kommt nahezu trocken aus der Maschine. Reduziert Trocknungszeit, Energiekosten und Faserverschleiß.",
+      "s3Label": "Großformat-Maschinen",
+      "s3Text": "Premium-Filialen enthalten 80lb-Großformat-Einheiten — Bettdecken, Schlafsäcke, Restauranttextilien und gewerbliche Abholladungen in einem einzigen Zyklus.",
+      "s4Label": "Sanitisierungslinie (ausgewählt)",
+      "s4Text": "Ausgewählte Filialen führen UV-sanitisierte Linien für medizinische, Fitnessstudio- und Hotelleriekunden, die eine Verarbeitung in Sanitisierungsqualität benötigen.",
+      "disclaimer": "Gerätepaket und filialspezifische Ausstattung variieren je nach Standort — Aussagen zu Premium-Geräten (450G-Schleuderung, 80lb-Großformat, UV-Sanitisierung) erscheinen nur auf den Filialseiten, auf denen die Installation der Geräte verifiziert ist."
+    },
+    "cta": {
+      "eyebrow": "Machen Sie den nächsten Schritt",
+      "title": "Sehen Sie es persönlich — oder bauen Sie den nächsten.",
+      "lede": "Finden Sie Ihren nächstgelegenen WaveMAX und gehen Sie hindurch. Oder — wenn Sie auf eine Kategorie gewartet haben, die noch nicht professionalisiert wurde — starten Sie das Gespräch über den Besitz eines eigenen.",
+      "btnPrimary": "Standort finden",
+      "btnSecondary": "Franchisenehmer werden"
+    }
+  },
   "common": {
     "ctaLearnMore": "Mehr erfahren",
     "ctaGetGuide": "Investitionsleitfaden anfordern",

@@ -506,6 +506,87 @@
     }
   },
 
+  "tour": {
+    "hero": {
+      "eyebrow":      "Virtual Tour",
+      "title1":       "Step inside a",
+      "title2":       "WaveMAX.",
+      "sub":          "Photographs from across the WaveMAX network — our company-owned Jacksonville flagship, the Kent WA store featured in corporate's equipment showcase, and the Omaha location profiled in the WaveMAX store-tour. Modern Electrolux fleet, customer lounge, free Wi-Fi, attendant on duty, branded retail interior. The store you'd want to be in — not the one you have to be in.",
+      "ctaPrimary":   "Find a location",
+      "ctaSecondary": "Build one yourself"
+    },
+    "philo": {
+      "eyebrow":  "Brand Philosophy",
+      "title":    "Clean is a feeling, not a checkbox.",
+      "lede":     "Most laundromats compete on price-per-load. WaveMAX competes on experience. Every design choice — from the lighting temperature to the floor finish to the staff training — is deliberate. The job isn't to wash clothes; it's to make a customer drive past three competitors to get to us.",
+      "t1Title":  "Bright, not fluorescent",
+      "t1Text":   "Color-corrected LED lighting that flatters skin tones and reads bright on a phone camera. Customers post photos of their visit. That's free marketing.",
+      "t2Title":  "Quiet, not industrial",
+      "t2Text":   "Modern Electrolux soft-mount machines run noticeably quieter than legacy hard-mount equipment. The store isn't a factory floor — it's a place to be.",
+      "t3Title":  "Spacious, not cramped",
+      "t3Text":   "Wide aisles, generous folding tables, dedicated cart space, and ergonomic load-height. People come back to stores that respect their time and dignity.",
+      "t4Title":  "Branded, not generic",
+      "t4Text":   "Consistent palette, signage, attendant uniforms, and signage system across every WaveMAX. The brand is the moat — strangers know what they're walking into.",
+      "t5Title":  "Connected, not isolated",
+      "t5Text":   "Free Wi-Fi, work-friendly seating, charging at every cluster. The 90-minute wash-cycle becomes productive time — not dead time.",
+      "t6Title":  "Staffed, not unattended",
+      "t6Text":   "An attendant on duty during posted hours. Real human help, machine demos for first-timers, WDF intake at the counter. The opposite of every coin laundry you've been in."
+    },
+    "fl": {
+      "eyebrow":     "Three featured locations",
+      "title":       "Same brand. Same playbook. Three real stores.",
+      "lede":        "Photographs in this gallery come from three WaveMAX locations corporate has photographed extensively for marketing. Every WaveMAX is built to the same brand spec — but these three are the ones we feature publicly because they're polished, complete, and representative of what the brand should look like in any market.",
+      "jaxBadge":    "Flagship",
+      "jaxText":     "Company-owned flagship. The reference store and the location whose Item 19 cash-flow numbers are published in our FDD. The \"this is what a WaveMAX should look like\" benchmark.",
+      "kentBadge":   "Equipment showcase",
+      "kentText":    "Corporate's equipment showcase store — the location used in the equipment-page photography on the corporate site. Modern Electrolux fleet, branded retail interior, attendant station.",
+      "omahaBadge":  "Store tour",
+      "omahaText":   "Profiled in WaveMAX's store-tour marketing series. Wide-angle exterior, customer lounge, operations area — a full picture of how the brand executes outside the flagship."
+    },
+    "gallery": {
+      "eyebrow":  "Inside the network",
+      "title":    "Real WaveMAX stores. Real photographs.",
+      "lede":     "Unstaged photographs from across the WaveMAX network. No renderings, no fish-eye, no twilight-hour color grading. What you see is what every customer sees when they walk through the front door — and what every WaveMAX is built to.",
+      "tag1":     "Jacksonville · Flagship",
+      "tagJax":   "Jacksonville",
+      "tagKent":  "Kent WA",
+      "tagOmaha": "Omaha",
+      "cap1":  "Electrolux washer fleet — main floor",
+      "cap2":  "Large-format dryer line",
+      "cap3":  "Equipment showcase — Kent WA",
+      "cap4":  "Folding tables & work area",
+      "cap5":  "Customer lounge — Omaha",
+      "cap6":  "Wash-Dry-Fold drop-off counter",
+      "cap7":  "Flagship exterior — branded storefront",
+      "cap8":  "Illuminated storefront — Kent WA",
+      "cap9":  "Wide-angle exterior — Omaha",
+      "cap10": "Branded interior — Kent WA",
+      "cap11": "Wide interior — Jacksonville",
+      "cap12": "Operations area — Omaha"
+    },
+    "fleet": {
+      "eyebrow":    "The fleet",
+      "title":      "Modern Electrolux. Programmed for performance.",
+      "lede":       "Our equipment package is a deliberate choice — soft-mount, high-G extract, programmable controllers, online diagnostics, and corporate-negotiated parts and service. The result: faster cycles, lower utility cost per pound, and predictable maintenance.",
+      "s1Label":    "Full load — wash to dry",
+      "s1Text":     "High-G extract removes more water on the wash side, so dryers run faster. Customer turn time drops dramatically vs legacy top-load + low-G dryers.",
+      "s2Label":    "Extract force (premium stores)",
+      "s2Text":     "Premium-tier WaveMAX stores feature 450G extract — clothes come out close to dry. Reduces dryer time, energy cost, and wear on fabrics.",
+      "s3Label":    "Large-format machines",
+      "s3Text":     "Premium stores include 80lb large-format units — comforters, sleeping bags, restaurant linens, and commercial pickup loads in a single cycle.",
+      "s4Label":    "Sanitization line (select)",
+      "s4Text":     "Select stores carry UV-sanitization-equipped lines for medical, gym, and hospitality customers requiring sanitization-grade processing.",
+      "disclaimer": "Equipment package and store-specific features vary by location — premium equipment claims (450G extract, 80lb large-format, UV sanitization) only appear on store pages where the equipment is verified as installed."
+    },
+    "cta": {
+      "eyebrow":      "Take the next step",
+      "title":        "See it in person — or build the next one.",
+      "lede":         "Find your nearest WaveMAX and walk through it. Or — if you've been waiting for a category that hasn't been professionalized yet — start the conversation about owning one.",
+      "btnPrimary":   "Find a location",
+      "btnSecondary": "Become a franchisee"
+    }
+  },
+
   "common": {
     "ctaLearnMore": "Learn more",
     "ctaGetGuide": "Get the Investment Guide",
