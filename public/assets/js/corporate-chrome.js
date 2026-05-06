@@ -140,6 +140,69 @@
     `;
   }
 
+  /* ---------- MOBILE HEADER (wmv3-header) ----------
+   * Below 900px the desktop wmlnav-wrap is hidden via CSS in
+   * wavemax-mhr-chrome.css; this mobile-only header takes over with the
+   * same structure used by per-franchise host pages. The b1 utility
+   * info is replaced with a corporate-context strip (award badge / 75+
+   * locations / Item 19 callout). The burger toggles the nav drawer. */
+  function buildMobileHeader() {
+    const drawerItems = NAV.map((item) => {
+      if (item.items) {
+        return item.items.map((s) =>
+          `<a href="${esc(s.href)}" data-i18n="${esc(s.key)}">${esc(s.label)}</a>`
+        ).join('');
+      }
+      return `<a href="${esc(item.href)}" data-i18n="${esc(item.key)}">${esc(item.label)}</a>`;
+    }).join('');
+
+    return `
+      <header class="wmv3-header" id="wmv3-mobile">
+        <div class="wmv3-info">
+          <div class="wmv3-info-col">
+            <div class="wmv3-info-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l2.39 6.95H22l-6.19 4.5 2.39 6.95L12 16l-6.2 4.4 2.39-6.95L2 8.95h7.61L12 2z"/></svg>
+            </div>
+            <div class="wmv3-info-label" data-i18n="chrome.b1.awardShort">#1 Laundromat</div>
+            <div class="wmv3-info-value" data-i18n="chrome.b1.awardYear">2026 Franchise 500</div>
+          </div>
+          <div class="wmv3-divider" aria-hidden="true"></div>
+          <div class="wmv3-info-col">
+            <div class="wmv3-info-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            </div>
+            <div class="wmv3-info-label" data-i18n="chrome.b1.locationsShort">Locations</div>
+            <div class="wmv3-info-value">75+</div>
+          </div>
+          <div class="wmv3-divider" aria-hidden="true"></div>
+          <a class="wmv3-info-col" href="/why-invest-in-wavemax/">
+            <div class="wmv3-info-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+            </div>
+            <div class="wmv3-info-label" data-i18n="chrome.b1.item19Short">Item 19</div>
+            <div class="wmv3-info-value">$471K</div>
+          </a>
+        </div>
+
+        <div class="wmv3-logo">
+          <a href="/franchise/" aria-label="WaveMAX Laundry — Franchise home">
+            <img src="${esc(LOGO_URL)}" alt="WaveMAX Laundry">
+          </a>
+        </div>
+
+        <div class="wmv3-actions">
+          <a href="/become-a-franchisee/" class="wmv3-btn wmv3-btn-out" data-i18n="chrome.b2.becomeFranchisee">Become a Franchisee</a>
+          <button type="button" class="wmv3-btn wmv3-btn-sol" data-action="open-locations" data-i18n="chrome.b2.findLocation">Find a Location</button>
+          <button type="button" class="wmv3-burger" id="wmv3-burger" aria-label="Open menu" aria-expanded="false"><span></span><span></span><span></span></button>
+        </div>
+
+        <nav class="wmv3-drawer" id="wmv3-drawer" aria-label="Mobile menu">
+          ${drawerItems}
+        </nav>
+      </header>
+    `;
+  }
+
   /* ---------- BREADCRUMB ----------
    * Page declares its crumb via <meta name="wm-corp-breadcrumb"> using
    * pipe-separated `key:label` pairs:
@@ -227,6 +290,26 @@
     document.addEventListener('click', (e) => {
       const t = e.target;
       if (!t || !t.closest) return;
+
+      // Mobile burger -> toggle drawer
+      const burger = t.closest('#wmv3-burger');
+      if (burger) {
+        const drawer = document.getElementById('wmv3-drawer');
+        const willOpen = !burger.classList.contains('is-open');
+        burger.classList.toggle('is-open', willOpen);
+        burger.setAttribute('aria-expanded', String(willOpen));
+        if (drawer) drawer.classList.toggle('is-open', willOpen);
+        return;
+      }
+      // Tap a drawer link -> close the drawer
+      if (t.closest('#wmv3-drawer a')) {
+        const drawer = document.getElementById('wmv3-drawer');
+        const burger2 = document.getElementById('wmv3-burger');
+        if (drawer)  drawer.classList.remove('is-open');
+        if (burger2) { burger2.classList.remove('is-open'); burger2.setAttribute('aria-expanded', 'false'); }
+        // Don't preventDefault — let the link navigate
+      }
+
       if (t.closest('[data-action="open-locations"]')) {
         e.preventDefault();
         window.location.href = 'https://www.wavemaxlaundry.com/locations/';
@@ -237,7 +320,7 @@
   function injectChrome() {
     const headerEl = document.getElementById('wm-corp-header');
     const footerEl = document.getElementById('wm-corp-footer');
-    if (headerEl) headerEl.innerHTML = buildHeader() + buildBreadcrumb();
+    if (headerEl) headerEl.innerHTML = buildHeader() + buildMobileHeader() + buildBreadcrumb();
     if (footerEl) footerEl.innerHTML = buildFooter();
 
     // Highlight the active nav item based on current path.

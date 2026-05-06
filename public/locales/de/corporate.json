@@ -2,8 +2,12 @@
   "chrome": {
     "b1": {
       "award": "#1 Waschsalon-Franchise · Entrepreneur Franchise 500 2026",
+      "awardShort": "#1 Waschsalon",
+      "awardYear": "Franchise 500 2026",
       "locations": "75+ Standorte landesweit & wachsend",
-      "item19": "Item 19: 471 Tsd. $ Brutto →"
+      "locationsShort": "Standorte",
+      "item19": "Item 19: 471 Tsd. $ Brutto →",
+      "item19Short": "Item 19"
     },
     "b2": {
       "logoAlt": "WaveMAX Laundry — Franchise-Startseite",
@@ -442,6 +446,82 @@
       "lede": "Der Investitionsleitfaden enthält die vollständige Mittelherkunfts- und Mittelverwendungsrechnung, eine Beispiel-Pro-forma, die Finanzierungsstruktur sowie die 6-stufige Discovery-Roadmap. Per E-Mail zugestellt, ohne Verkaufsanruf unter Druck.",
       "btnPrimary": "Investitionsleitfaden anfordern",
       "btnSecondary": "Prüfen, ob Sie qualifiziert sind"
+    }
+  },
+  "vs": {
+    "hero": {
+      "eyebrow": "Modern vs. Legacy",
+      "title1": "WaveMAX vs.",
+      "title2": "der Zombiemat.",
+      "sub": "Die meisten Waschsalons in Amerika sind \"Zombiemats\" — veraltet, schmuddelig, nur Münzbetrieb, ohne Personal, ohne Marketing und in 1985 stehengeblieben. WaveMAX baut die Kategorie von Grund auf neu auf. Hier der direkte Vergleich, Dimension für Dimension.",
+      "ctaPrimary": "Sehen Sie die Zahlen",
+      "ctaSecondary": "Starten Sie das Gespräch"
+    },
+    "intro": {
+      "eyebrow": "Zwei Geschäftsmodelle",
+      "title": "Die gleiche Quadratmeterzahl. Zwei vollkommen unterschiedliche Geschäfte.",
+      "lede": "Die Kategorie ist dieselbe. Die Umsetzung könnte unterschiedlicher nicht sein. Das eine Modell ist ein abschreibender Vermögenswert — schleichender Niedergang, aufgeschobene Wartung, sinkender Cashflow, kein Exit. Das andere ist ein professionalisiertes Franchisesystem mit Systemunterstützung, moderner Ausstattung, Markenmarketing und Mehrkanal-Umsatz.",
+      "zombieTitle": "Die Zombiemat",
+      "zombieText": "Unabhängiger Münzwaschsalon. Toplader-Speed-Queens aus den 1980ern, Leuchtstoffröhren, Vinylsitze, handgeschriebene \"außer Betrieb\"-Schilder. Kein Personal, keine Website, kein Marketingbudget, keine Geschäftskunden, keine Lieferung. Münzkasse am Wechselautomaten. Der Eigentümer erscheint montagmorgens mit einem Besen. Die meisten arbeiten mit $200K–$300K Jahresumsatz bei sinkenden Kundenzahlen. Wiederherstellungskosten beim Verkauf: komplettes Gerätepaket + Ausbau.",
+      "waveTitle": "WaveMAX Modernes Franchise",
+      "waveText": "Professionell gebrandet, mit Servicepersonal besetzt, große Electrolux-Maschinen, Mobile-App-Zahlungen, Wash-Dry-Fold-Service, Geschäftskunden (Medizin / Hotellerie / Fitnessstudio / Airbnb / Auftragnehmer), Abholung und Lieferung, voller Marketingfonds, Schulungsprogramm, Mehrstandort-Skalierungspfad. Item-19-Durchschnitt: $471.201 brutto. Spitzenreiter: $713.934. Wird als Vielfaches des EBITDA verkauft, nicht als Notverkaufsgut."
+    },
+    "matrix": {
+      "eyebrow": "10-Punkte-Vergleich",
+      "title": "Wo das Modell gewinnt.",
+      "lede": "Zehn Dimensionen, in denen sich das WaveMAX-Franchisemodell wesentlich vom unabhängigen Legacy-Betreiber unterscheidet. Jede Zeile ist ein struktureller Vorteil, der sich in den Item-19-Ergebnissen, der Filialbewertung beim Exit und in den Stunden, die der Eigentümer tatsächlich vor Ort sein muss, niederschlägt.",
+      "colDim": "Dimension",
+      "colZombie": "Zombiemat (Legacy)",
+      "colWave": "WaveMAX (modern)",
+      "r1Dim": "1. Standortauswahl",
+      "r1Zombie": "Gekauft, wo das Geschäft sich gerade ergab. Häufig ein Ladenlokal in einem Strip-Center der 1980er mit schlechter Demografie, veralteten Verkehrszahlen und ohne formale Standortanalyse. Die Miete war \"günstig.\" Das ist die ganze Logik.",
+      "r1Wave": "Standort vom Mutterunternehmen modelliert mit demografischen, Dichte- und Wettbewerbs-Overlays. Nur Standorte, die Schwellenwerte für Bevölkerung, Haushaltseinkommen und Wettbewerbsnähe erfüllen, werden freigegeben. Wir sagen Nein zu schlechten Standorten — selbst wenn der Franchisenehmer bereits ein LOI unterzeichnet hat.",
+      "r2Dim": "2. Operative Belastung",
+      "r2Zombie": "Eigentümer-Betreiber, über 50 Stunden/Woche. Wechselautomaten leeren, Böden wischen, Beschilderung tauschen, Vandalismus regeln. Keine zentrale Betriebsunterstützung. Wenn der Eigentümer krank ist, bleibt die Tür zu.",
+      "r2Wave": "Etwa 9 Stunden/Woche Eigentümer-Engagement. Modell mit Servicepersonal, zentrales Betriebshandbuch, Lieferantenmanagement-Netzwerk, Technologie-Stack führt das Tagesgeschäft. Vom ersten Tag an semi-abwesend konzipiert.",
+      "r3Dim": "3. Ausstattung",
+      "r3Zombie": "Alternde Toplader-Münzwaschmaschinen und überholte Trockner. Zykluszeiten über 30 Minuten. Häufige Ausfälle. Reparaturbudget frisst die Marge. Ohne Hochleistungsschleuderung kommt die Wäsche nass heraus und die Trockner laufen doppelt so lange.",
+      "r3Wave": "Moderne Electrolux-Soft-Mount-Flotte mit Hochleistungsschleuderung — volle Ladung in unter 45 Minuten von Anfang bis Ende. Programmierbare Steuerungen, Online-Diagnose und zentral verhandelter Ersatzteil-Bezug. Premium-Filialen umfassen 80lb-Großmaschinen und UV-sanitisierte Linien.",
+      "r4Dim": "4. Marketing",
+      "r4Zombie": "Eine Fahne im Fenster. Vielleicht ein Eintrag in den Yellow Pages. Null digitale Präsenz, kein SEO, keine Pflege des Google-Unternehmensprofils, keine bezahlten Anzeigen, kein Community-Marketing. Kundengewinnung läuft rein nach dem Motto \"sind vorbeigefahren und haben das Schild gesehen.\"",
+      "r4Wave": "Zentraler Marketingfonds mit bezahlten digitalen Kampagnen, lokalem SEO, Pflege des Google-Unternehmensprofils für jede Filiale, Social Media, E-Mail-Automatisierungen für WDF-Abonnenten und B2B-Outbound für Geschäftskunden. Bewährte Playbooks pro Marktsegment.",
+      "r5Dim": "5. Kundenerlebnis",
+      "r5Zombie": "Flackernde Leuchtstoffröhren, klebrige Vinylsitze, defekte Verkaufsautomaten, kein Wi-Fi, kein Kinderbereich, im Sommer keine Klimaanlage. Kunden bleiben, weil sie müssen — und gehen, sobald eine bessere Option öffnet.",
+      "r5Wave": "Markengeprägter, gestalteter Einzelhandelsinnenraum — saubere weiße Oberflächen, kostenloses Wi-Fi, Spielecke für Kinder in ausgewählten Filialen, Kunden-Lounge, Klimatisierung, Servicekraft im Dienst. Das Erlebnis ist der Burggraben.",
+      "r6Dim": "6. Logistik & Servicemix",
+      "r6Zombie": "Nur Selbstbedienungs-Münzwaschsalon. Kein WDF, keine Geschäftskunden-Touren, keine Abholung & Lieferung, keine Abrechnung im Abonnement. Einkanaliger Umsatz, gebunden an Laufkundschaft.",
+      "r6Wave": "Fünf Umsatzkanäle: Selbstbedienung, Wash-Dry-Fold, Abholung & Lieferung, Geschäftskunden-Touren (Medizin / Hotellerie / Fitnessstudio / Airbnb / Restaurant / Auftragnehmer) und Abonnement. Jeder Kanal hat seine eigene Fixkosten-Hebelwirkung.",
+      "r7Dim": "7. Preise & Zahlungen",
+      "r7Zombie": "Nur Münzen oder Quarter-und-Token-Hybrid. Manuell ein- bis zweijährig nachbepreist. Keine kundenbezogenen Daten, keine Preisanalyse, kein Upsell-Flow. Bargeld wird im Hinterzimmer gezählt und zur Bank getragen.",
+      "r7Wave": "Modernes POS + Mobile-App — Apple Pay, Google Pay, Kredit-, Debitkarte und Firmenabrechnung. Daten pro Kunde, pro Maschine, pro Stunde. Dynamische Preisgestaltung. Automatisches Abo-Billing. Jede Transaktion wird digital erfasst.",
+      "r8Dim": "8. Schulung & Systemunterstützung",
+      "r8Zombie": "Gibt es nicht. Was der Vorgänger in einem Ordner hinterlassen hat, plus YouTube. Kein Peer-Netzwerk, kein Playbook für Personalbeschaffung, kein operativer Eskalationspfad.",
+      "r8Wave": "Mehrwöchiges Schulungsprogramm in der Konzernzentrale in Jacksonville, laufende Betriebsunterstützung, Franchisenehmer-Community, regionales Supportnetzwerk und Zugriff auf das vollständige System-Playbook (Personal, Betrieb, Marketing, Geschäftskundenvertrieb, Geräte-SOPs).",
+      "r9Dim": "9. Skalierungspfad",
+      "r9Zombie": "Flach. Jede neue Filiale ist ein Neuaufbau von Grund auf — neue Mietverhandlung, neue Geräte, neue Personalsuche, alles neu. Die meisten unabhängigen Betreiber bleiben bei einer Filiale.",
+      "r9Wave": "Mehrstandort-Skalierung ist im System angelegt. Standortauswahl ist wiederholbar, Schulung ist institutionell, das Betriebshandbuch ist Plug-in. Viele WaveMAX-Betreiber haben mehrere Einheiten; das Franchisesystem ist darauf ausgelegt, dieses Wachstum zu fördern — nicht zu bekämpfen.",
+      "r10Dim": "10. Exit-Bewertung",
+      "r10Zombie": "Wird zum abgeschriebenen Wert eines 30 Jahre alten Gerätepakets plus Waschmittelvorrat verkauft. Kein Goodwill, kein Markenaufschlag, kein Vielfaches auf wiederkehrende Umsätze. Oft: Pfennige für jeden ursprünglich investierten Dollar.",
+      "r10Wave": "Wird als franchisiertes Cashflow-Geschäft verkauft — typischerweise zu einem Vielfachen des EBITDA, mit Markengoodwill, etablierten wiederkehrenden WDF- und Geschäftskundenverträgen, an den Käufer übertragbarer Schulung und nach dem Verkauf fortgeführter Konzernunterstützung. Ein echter Exit."
+    },
+    "bottom": {
+      "eyebrow": "Fazit",
+      "title": "Die Mathematik ist strukturell — keine Marketing-Behauptung.",
+      "lede": "Jede der 10 Dimensionen oben fließt in dieselben drei Zahlen ein: Cashflow, Eigentümerzeit und Exit-Wert. Die Lücke zwischen der Legacy-Zombiemat und dem WaveMAX-Modell ist nicht inkrementell — sie ist kategorial.",
+      "grossLabel": "Durchschnittsumsatz (50 Filialen, 2024)",
+      "grossText": "Gemäß Item-19-Offenlegung im FDD 2025. Median $436.114. Spitzenreiter $713.934. Der Branchendurchschnitt der unabhängigen Zombiemats liegt eher bei $200K–$300K.",
+      "ownerLabel": "Eigentümer-Engagement / Woche",
+      "ownerText": "Das semi-abwesende Betriebsmodell. Der unabhängige Legacy-Betreiber arbeitet typischerweise über 50 Stunden/Woche als Vollzeit-Eigentümer-Betreiber, allein um die Tür offen zu halten.",
+      "paybackLabel": "Typische Amortisationsdauer",
+      "paybackText": "Im gesamten Franchisesystem berichtetes EBITDA von 25–35 %, SBA-fähige Finanzierung und Mehrkanal-Umsatz verkürzen die Amortisationszeit gegenüber der nur barzahlenden Einkanal-Zombiemat.",
+      "disclaimer": "Siehe FDD für vollständige Offenlegungen, Item-19-Details und Belege aller Zahlen. Vergangene Ergebnisse sind keine Garantie für künftige Ergebnisse."
+    },
+    "cta": {
+      "eyebrow": "Machen Sie den nächsten Schritt",
+      "title": "Bauen Sie ein echtes Waschsalon-Geschäft auf — keine Münzkasse von 1985.",
+      "lede": "Das vollständige FDD, die Item-19-Belege, Details zum Schulungsprogramm, Spezifikationen des Gerätepakets und Vorstellungen bei Kreditgebern sind alle Teil des Discovery-Gesprächs. Schritt 01 ist ein 30-minütiges Gespräch.",
+      "btnPrimary": "Starten Sie das Gespräch",
+      "btnSecondary": "Investitionsleitfaden anfordern"
     }
   },
   "common": {

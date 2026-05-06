@@ -2,8 +2,12 @@
   "chrome": {
     "b1": {
       "award": "#1 Franquia de Lavanderia · Entrepreneur Franchise 500 2026",
+      "awardShort": "#1 Lavanderia",
+      "awardYear": "Franchise 500 2026",
       "locations": "75+ unidades em todo o país e crescendo",
-      "item19": "Item 19: $471K bruto médio →"
+      "locationsShort": "Unidades",
+      "item19": "Item 19: $471K bruto médio →",
+      "item19Short": "Item 19"
     },
     "b2": {
       "logoAlt": "WaveMAX Laundry — Início da Franquia",
@@ -442,6 +446,82 @@
       "lede": "O guia de investimento inclui o detalhamento completo de fontes e usos, um proforma de exemplo, a estrutura de financiamento e o roteiro de descoberta em 6 passos. Entregue por e-mail, sem necessidade de chamada de vendas com pressão.",
       "btnPrimary": "Obter o guia de investimento",
       "btnSecondary": "Veja se você se qualifica"
+    }
+  },
+  "vs": {
+    "hero": {
+      "eyebrow": "Moderno vs. legado",
+      "title1": "WaveMAX vs.",
+      "title2": "o Zombiemat.",
+      "sub": "A maioria das lavanderias nos Estados Unidos são \"zombiemats\" — desatualizadas, deterioradas, apenas com moedas, sem funcionários, sem marketing e presas em 1985. A WaveMAX reconstrói a categoria do zero. Aqui está o comparativo lado a lado, dimensão por dimensão.",
+      "ctaPrimary": "Veja os números",
+      "ctaSecondary": "Inicie a conversa"
+    },
+    "intro": {
+      "eyebrow": "Dois modelos de negócio",
+      "title": "A mesma metragem. Dois negócios completamente diferentes.",
+      "lede": "A categoria é a mesma. A execução não poderia ser mais diferente. Um modelo é um ativo em depreciação — declínio lento, manutenção adiada, fluxo de caixa em queda, sem saída. O outro é um sistema de franquia profissionalizado, com suporte do sistema, equipamentos modernos, marketing de marca e receita multicanal.",
+      "zombieTitle": "O Zombiemat",
+      "zombieText": "Lavanderia independente a moedas. Speed Queens de carga superior dos anos 80, lâmpadas fluorescentes, bancos de vinil, placas de \"fora de serviço\" escritas à mão. Sem funcionários, sem site, sem orçamento de marketing, sem contas comerciais, sem entrega. Gaveta de moedas na máquina de troco. O proprietário aparece na segunda-feira de manhã com uma vassoura. A maioria opera com receita bruta anual de $200K–$300K e número de clientes em queda. Custo de reconstrução na saída: pacote completo de equipamentos + reforma.",
+      "waveTitle": "Franquia moderna WaveMAX",
+      "waveText": "Marca profissional, atendentes no local, equipamentos Electrolux de grande porte, pagamentos via aplicativo móvel, serviço de Lavar-Secar-Dobrar, contas comerciais (médico / hospitalidade / academia / Airbnb / empreiteiro), coleta e entrega, fundo de marketing completo, programa de treinamento, caminho de expansão multiunidade. Média do Item 19: $471.201 brutos. Melhor desempenho: $713.934. Vendido como múltiplo do EBITDA, não como ativo de liquidação."
+    },
+    "matrix": {
+      "eyebrow": "Comparativo de 10 pontos",
+      "title": "Onde o modelo vence.",
+      "lede": "Dez dimensões em que o modelo de franquia WaveMAX se diferencia materialmente do operador independente legado. Cada linha é uma vantagem estrutural que se acumula nos resultados do Item 19, na avaliação da loja na saída e em quantas horas o proprietário precisa de fato passar na loja.",
+      "colDim": "Dimensão",
+      "colZombie": "Zombiemat (legado)",
+      "colWave": "WaveMAX (moderno)",
+      "r1Dim": "1. Seleção de localização",
+      "r1Zombie": "Comprado onde apareceu a oportunidade. Frequentemente um ponto em strip-center dos anos 80 com perfil demográfico ruim, contagens de tráfego desatualizadas e sem análise formal do local. O aluguel era \"barato.\" Essa é toda a lógica.",
+      "r1Wave": "Local modelado pelo corporativo com sobreposições demográficas, de densidade e de concorrência. Apenas locais que atendem aos limiares de população, renda domiciliar e proximidade de concorrentes são aprovados. Dizemos não a locais ruins — mesmo quando o franqueado já assinou uma LOI.",
+      "r2Dim": "2. Carga operacional",
+      "r2Zombie": "Proprietário-operador, mais de 50 horas/semana. Esvaziar máquinas de troco, esfregar pisos, trocar sinalização, lidar com vandalismo. Sem suporte operacional corporativo. Quando o dono fica doente, as portas não abrem.",
+      "r2Wave": "~9 horas/semana de envolvimento do proprietário. Modelo de atendentes no local, manual operacional corporativo, rede de gestão de fornecedores, stack tecnológico que cuida do dia a dia. Projetado semi-ausente desde o primeiro dia.",
+      "r3Dim": "3. Equipamento",
+      "r3Zombie": "Lavadoras de carga superior envelhecidas e secadoras reformadas. Ciclos de mais de 30 minutos. Falhas frequentes. O orçamento de reparos consome a margem. Sem extração de alto G, as roupas saem molhadas e as secadoras rodam o dobro do tempo.",
+      "r3Wave": "Frota Electrolux moderna soft-mount com extração de alto G — carga completa concluída em menos de 45 minutos do início ao fim. Controladores programáveis, diagnóstico online e fornecimento de peças negociado pelo corporativo. Lojas premium incluem linhas de grande porte de 80lb e linhas com sanitização UV.",
+      "r4Dim": "4. Marketing",
+      "r4Zombie": "Uma bandeira na vitrine. Talvez uma listagem nas Yellow Pages. Zero presença digital, sem SEO, sem gestão do Perfil da Empresa no Google, sem anúncios pagos, sem marketing comunitário. A aquisição de clientes é puramente \"passaram em frente e viram a placa.\"",
+      "r4Wave": "Fundo de marketing corporativo executando digital pago, SEO local, gestão do Perfil da Empresa no Google para cada loja, social, automações de e-mail para assinantes de WDF e outbound B2B para contas comerciais. Manuais comprovados por segmento de mercado.",
+      "r5Dim": "5. Experiência do cliente",
+      "r5Zombie": "Lâmpadas fluorescentes piscando, bancos de vinil pegajosos, máquinas de venda quebradas, sem Wi-Fi, sem espaço infantil, sem ar-condicionado no verão. Os clientes ficam porque precisam — e vão embora assim que abre uma opção melhor.",
+      "r5Wave": "Interior de varejo com marca e design — acabamentos brancos e limpos, Wi-Fi gratuito, área de brincar para crianças em lojas selecionadas, lounge do cliente, controle climático, atendente de plantão. A experiência é o fosso competitivo.",
+      "r6Dim": "6. Logística e mix de serviços",
+      "r6Zombie": "Apenas lavanderia self-service a moedas. Sem WDF, sem rotas comerciais, sem coleta e entrega, sem cobrança por assinatura. Receita de canal único atrelada ao fluxo de pedestres.",
+      "r6Wave": "Cinco canais de receita: self-service, Lavar-Secar-Dobrar, coleta e entrega, rotas comerciais (médico / hospitalidade / academia / Airbnb / restaurante / empreiteiro) e assinatura. Cada canal tem sua própria alavancagem de custo fixo.",
+      "r7Dim": "7. Preços e pagamentos",
+      "r7Zombie": "Apenas moedas ou híbrido de moeda e ficha. Reajustado manualmente a cada um ou dois anos. Sem dados por cliente, sem analítica de preços, sem fluxo de upsell. O dinheiro é contado em uma sala dos fundos e levado a pé até o banco.",
+      "r7Wave": "POS moderno + aplicativo móvel — Apple Pay, Google Pay, crédito, débito e faturamento corporativo. Dados por cliente, por máquina, por hora. Preços dinâmicos. Faturamento automático de assinatura. Cada transação é capturada digitalmente.",
+      "r8Dim": "8. Treinamento e suporte do sistema",
+      "r8Zombie": "Não existe. O que o proprietário anterior deixou em uma pasta, mais YouTube. Sem rede de pares, sem manual para contratação, sem caminho de escalonamento operacional.",
+      "r8Wave": "Programa de treinamento de várias semanas na sede corporativa em Jacksonville, suporte operacional contínuo, comunidade de franqueados, rede de suporte regional e acesso ao manual completo do sistema (contratação, operações, marketing, vendas comerciais, SOPs de equipamentos).",
+      "r9Dim": "9. Caminho de expansão",
+      "r9Zombie": "Plano. Cada nova loja é uma reconstrução do zero — nova negociação de aluguel, nova aquisição de equipamentos, novo quadro de pessoal, tudo novo. A maioria dos operadores independentes para em uma.",
+      "r9Wave": "Expansão multiunidade integrada ao sistema. Seleção de locais é repetível, o treinamento é institucional, o manual operacional é plug-in. Muitos operadores WaveMAX têm várias unidades; o sistema de franquia é estruturado para apoiar esse crescimento — não combatê-lo.",
+      "r10Dim": "10. Avaliação de saída",
+      "r10Zombie": "Vendido pelo valor depreciado de um pacote de equipamentos de 30 anos mais o estoque de detergente. Sem goodwill, sem prêmio de marca, sem múltiplo por receita recorrente. Frequentemente: centavos por dólar do investimento original.",
+      "r10Wave": "Vendido como negócio franqueado com fluxo de caixa — tipicamente um múltiplo do EBITDA, com goodwill de marca, contratos recorrentes estabelecidos de WDF e comerciais, treinamento transferível ao comprador e suporte corporativo continuado após a venda. Uma saída de verdade."
+    },
+    "bottom": {
+      "eyebrow": "Conclusão",
+      "title": "A matemática é estrutural — não uma alegação de marketing.",
+      "lede": "Cada uma das 10 dimensões acima conflui para os mesmos três números: fluxo de caixa, tempo do proprietário e valor de saída. A diferença entre o zombiemat legado e o modelo WaveMAX não é incremental — é categórica.",
+      "grossLabel": "Receita bruta média (50 lojas, 2024)",
+      "grossText": "Conforme a divulgação do Item 19 do FDD 2025. Mediana $436.114. Melhor desempenho $713.934. A média do setor zombiemat independente fica mais próxima de $200K–$300K.",
+      "ownerLabel": "Envolvimento do proprietário / semana",
+      "ownerText": "O modelo operacional semi-ausente. O independente legado tipicamente trabalha mais de 50 horas/semana como proprietário-operador em tempo integral apenas para manter as portas abertas.",
+      "paybackLabel": "Período típico de retorno",
+      "paybackText": "EBITDA relatado de 25–35% em todo o sistema de franquia, financiamento elegível para SBA e receita multicanal comprimem os prazos de retorno frente ao zombiemat de canal único e apenas em dinheiro.",
+      "disclaimer": "Consulte o FDD para divulgações completas, detalhe do Item 19 e comprovação de todos os números. Desempenho passado não garante resultados futuros."
+    },
+    "cta": {
+      "eyebrow": "Dê o próximo passo",
+      "title": "Construa um negócio real de lavanderia — não uma gaveta de moedas de 1985.",
+      "lede": "O FDD completo, a comprovação do Item 19, os detalhes do programa de treinamento, as especificações do pacote de equipamentos e as apresentações a credores fazem parte da conversa de descoberta. O passo 01 é uma chamada de 30 minutos.",
+      "btnPrimary": "Inicie a conversa",
+      "btnSecondary": "Obter o guia de investimento"
     }
   },
   "common": {

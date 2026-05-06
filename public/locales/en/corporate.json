@@ -2,8 +2,12 @@
   "chrome": {
     "b1": {
       "award": "#1 Laundromat Franchise · 2026 Entrepreneur Franchise 500",
+      "awardShort": "#1 Laundromat",
+      "awardYear": "2026 Franchise 500",
       "locations": "75+ locations nationwide & growing",
-      "item19": "Item 19: $471K avg gross →"
+      "locationsShort": "Locations",
+      "item19": "Item 19: $471K avg gross →",
+      "item19Short": "Item 19"
     },
     "b2": {
       "logoAlt": "WaveMAX Laundry — Franchise home",
@@ -422,6 +426,83 @@
       "lede":         "The investment guide includes the full sources-and-uses, sample pro forma, financing structure, and the 6-step discovery roadmap. Delivered by email, no high-pressure sales call required.",
       "btnPrimary":   "Get the investment guide",
       "btnSecondary": "See if you qualify"
+    }
+  },
+
+  "vs": {
+    "hero": {
+      "eyebrow":      "Modern vs Legacy",
+      "title1":       "WaveMAX vs",
+      "title2":       "the Zombiemat.",
+      "sub":          "Most laundromats in America are \"zombiemats\" — outdated, dingy, coin-only, unstaffed, unmarketed, and stuck in 1985. WaveMAX rebuilds the category from the ground up. Here's the side-by-side, dimension by dimension.",
+      "ctaPrimary":   "See the numbers",
+      "ctaSecondary": "Start the conversation"
+    },
+    "intro": {
+      "eyebrow":     "Two business models",
+      "title":       "The same square footage. Two completely different businesses.",
+      "lede":        "The category is the same. The execution couldn't be more different. One model is a depreciating asset — slow decline, deferred maintenance, declining cash flow, no exit. The other is a professionalized franchise system with system support, modern equipment, brand marketing, and multi-channel revenue.",
+      "zombieTitle": "The Zombiemat",
+      "zombieText":  "Independent coin laundry. 1980s-era top-load Speed Queens, fluorescent tubes, vinyl seats, hand-written \"out of order\" signs. No staff, no website, no marketing budget, no commercial accounts, no delivery. Cash drawer at the change machine. Owner shows up Monday morning with a broom. Most operate at $200K–$300K annual gross with declining customer counts. Rebuild cost on exit: full equipment package + buildout.",
+      "waveTitle":   "WaveMAX Modern Franchise",
+      "waveText":    "Professionally branded, attendant-staffed, large-format Electrolux equipment, mobile app payments, Wash-Dry-Fold service, commercial accounts (medical / hospitality / gym / Airbnb / contractor), pickup and delivery, full marketing fund, training program, multi-unit scaling pathway. Item 19 average: $471,201 gross. Top performer: $713,934. Sells as a multiple of EBITDA, not as a fire-sale asset."
+    },
+    "matrix": {
+      "eyebrow":   "10-point comparison",
+      "title":     "Where the model wins.",
+      "lede":      "Ten dimensions where the WaveMAX franchise model materially differs from the legacy independent operator. Each row is a structural advantage that compounds into Item 19 results, store valuation at exit, and how many hours the owner actually has to spend in the store.",
+      "colDim":    "Dimension",
+      "colZombie": "Zombiemat (legacy)",
+      "colWave":   "WaveMAX (modern)",
+      "r1Dim":     "1. Location selection",
+      "r1Zombie":  "Bought wherever the deal came up. Often a 1980s strip-center bay with poor demographics, outdated traffic counts, and no formal site analysis. The lease was \"cheap.\" That's the whole rationale.",
+      "r1Wave":    "Site-modeled by corporate using demographic, density, and competitive overlays. Only sites that meet population, household-income, and competitor-proximity thresholds are approved. We say no to bad sites — even when the franchisee already signed an LOI.",
+      "r2Dim":     "2. Operational burden",
+      "r2Zombie":  "Owner-operator, 50+ hrs/week. Empty change machines, mop floors, swap signage, deal with vandalism. No corporate operations support. When the owner is sick the doors don't open.",
+      "r2Wave":    "~9 hrs/week owner involvement. Attendant staffing model, corporate operations playbook, vendor management network, technology stack runs the day-to-day. Designed semi-absentee from day one.",
+      "r3Dim":     "3. Equipment",
+      "r3Zombie":  "Aging top-load coin washers and rebuilt dryers. 30+ minute cycles. Frequent breakdowns. Repair budget eats margin. No high-G extraction means clothes come out wet and dryers run twice as long.",
+      "r3Wave":    "Modern Electrolux soft-mount fleet with high-G extract — full load done in under 45 minutes start to finish. Programmable controllers, online diagnostics, and corporate-negotiated parts supply. Premium stores include 80lb large-format and UV-sanitized lines.",
+      "r4Dim":     "4. Marketing",
+      "r4Zombie":  "A flag in the window. Maybe a Yellow Pages listing. Zero digital presence, no SEO, no Google Business Profile management, no paid ads, no community marketing. Customer acquisition is purely \"they drove past and saw the sign.\"",
+      "r4Wave":    "Corporate marketing fund running paid digital, local SEO, Google Business Profile management for every store, social, email automations for WDF subscribers, and B2B outbound for commercial accounts. Proven playbooks per market segment.",
+      "r5Dim":     "5. Customer experience",
+      "r5Zombie":  "Fluorescent flicker, sticky vinyl seats, broken vending machines, no Wi-Fi, no kids' area, no AC in summer. Customers stay because they have to — and leave the moment a better option opens.",
+      "r5Wave":    "Branded, designed retail interior — clean white finishes, free Wi-Fi, kids' play area in select stores, customer lounge, climate control, attendant on duty. The experience is the moat.",
+      "r6Dim":     "6. Logistics & service mix",
+      "r6Zombie":  "Self-serve coin laundry only. No WDF, no commercial routes, no pickup & delivery, no subscription billing. Single-channel revenue tied to walk-in foot traffic.",
+      "r6Wave":    "Five revenue channels: self-serve, Wash-Dry-Fold, pickup & delivery, commercial routes (medical / hospitality / gym / Airbnb / restaurant / contractor), and subscription. Each channel has its own fixed-cost leverage.",
+      "r7Dim":     "7. Pricing & payments",
+      "r7Zombie":  "Coin-only or quarter-and-token hybrid. Manually re-priced every year or two. No per-customer data, no pricing analytics, no upsell flow. Cash gets counted in a back office and walked to a bank.",
+      "r7Wave":    "Modern POS + mobile app — Apple Pay, Google Pay, credit, debit, and corporate billing. Per-customer, per-machine, per-hour data. Dynamic pricing. Subscription auto-billing. Every transaction is captured digitally.",
+      "r8Dim":     "8. Training & system support",
+      "r8Zombie":  "There isn't any. Whatever the previous owner left in a binder, plus YouTube. No peer network, no playbook for hiring, no operations escalation path.",
+      "r8Wave":    "Multi-week training program at corporate HQ in Jacksonville, ongoing operations support, franchisee community, regional support network, and access to the full system playbook (hiring, ops, marketing, commercial sales, equipment SOPs).",
+      "r9Dim":     "9. Scaling pathway",
+      "r9Zombie":  "Flat. Each new store is a from-scratch rebuild — new lease negotiation, new equipment sourcing, new staffing, new everything. Most independent operators stop at one.",
+      "r9Wave":    "Multi-unit scaling is built into the system. Site selection is repeatable, training is institutional, ops playbook plug-in. Many WaveMAX operators have multiple units; the franchise system is structured to support that growth — not fight it.",
+      "r10Dim":    "10. Exit valuation",
+      "r10Zombie": "Sells as the depreciated value of a 30-year-old equipment package plus inventory of detergent. No goodwill, no brand premium, no recurring revenue multiple. Often: pennies on the dollar of the original buildout.",
+      "r10Wave":   "Sells as a franchised cash-flow business — typically a multiple of EBITDA, with brand goodwill, established recurring WDF and commercial contracts, training transferable to the buyer, and corporate support continuing post-sale. A real exit."
+    },
+    "bottom": {
+      "eyebrow":      "Bottom line",
+      "title":        "The math is structural — not a marketing claim.",
+      "lede":         "Each of the 10 dimensions above flows into the same three numbers: cash flow, owner time, and exit value. The gap between the legacy zombiemat and the WaveMAX model isn't incremental — it's categorical.",
+      "grossLabel":   "Average gross (50-store, 2024)",
+      "grossText":    "Per the 2025 FDD Item 19 disclosure. Median $436,114. Top performer $713,934. The independent zombiemat industry average sits closer to $200K–$300K.",
+      "ownerLabel":   "Owner involvement / week",
+      "ownerText":    "The semi-absentee operating model. The legacy independent typically runs 50+ hrs/week as full-time owner-operator just to keep doors open.",
+      "paybackLabel": "Typical payback period",
+      "paybackText":  "25–35% reported EBITDA across the franchise system, SBA-eligible financing, and multi-channel revenue compress payback timelines vs the cash-only single-channel zombiemat.",
+      "disclaimer":   "See the FDD for full disclosures, Item 19 detail, and substantiation of all figures. Past performance is not a guarantee of future results."
+    },
+    "cta": {
+      "eyebrow":      "Take the next step",
+      "title":        "Build a real laundromat business — not a 1985 cash drawer.",
+      "lede":         "The full FDD, Item 19 substantiation, training program details, equipment package specs, and lender introductions are all part of the discovery conversation. Step 01 is a 30-minute call.",
+      "btnPrimary":   "Start the conversation",
+      "btnSecondary": "Get the investment guide"
     }
   },
 
