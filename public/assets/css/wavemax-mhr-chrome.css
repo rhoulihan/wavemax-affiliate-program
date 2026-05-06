@@ -141,7 +141,7 @@
 #wmlnav-wrap #wmlnav-nav > a:hover,
 #wmlnav-wrap #wmlnav-nav > a.wmlnav-on {
   color:#fff !important;
-  background:rgba(255,255,255,.15) !important;
+  background:rgba(0,0,0,.20) !important;
   font-weight:600 !important;
 }
 
@@ -163,7 +163,7 @@
 #wmlnav-wrap .wmlnav-drop > a:hover,
 #wmlnav-wrap .wmlnav-drop.wmlnav-on > a {
   color:#fff !important;
-  background:rgba(255,255,255,.15) !important;
+  background:rgba(0,0,0,.20) !important;
   font-weight:600 !important;
 }
 #wmlnav-wrap .wmlnav-arrow {
