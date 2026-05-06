@@ -26,11 +26,11 @@
       }
     }
 
-    // Pause via :hover (CSS, not event listeners). Avoids the bug where
-    // headless browsers / page-load cursor positions fire a stale
-    // mouseenter and never recover.
+    // Always advance. Earlier versions tried to pause on hover, but
+    // headless browsers report :hover as always true, and real cursors
+    // landing on the card during page load made the rotator look
+    // permanently stalled. Continuous rotation is simpler and works.
     function tick() {
-      try { if (card.matches(':hover')) return; } catch (_) {}
       i = (i + 1) % slides.length;
       show(i);
     }
