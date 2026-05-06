@@ -51,7 +51,6 @@
       "home": "Startseite"
     }
   },
-
   "franchise": {
     "hero": {
       "eyebrow": "#1 Waschsalon-Franchise · Entrepreneur Franchise 500 2026",
@@ -143,33 +142,51 @@
       "btnPrimary": "Bewerbung als Franchisenehmer",
       "btnSecondary": "E-Mail an franchise@wavemax.com"
     },
-    "tabs": { "why": "Warum WaveMAX", "numbers": "Die Zahlen", "model": "Das Modell", "equipment": "Ausstattung", "process": "Prozess", "faq": "FAQ" },
-    "trust": { "locations": "Geöffnete Standorte und wachsend", "rating": "Durchschn. Kundenbewertung", "rank": "Waschsalon-Franchise · Entrepreneur 500 2026" },
+    "tabs": {
+      "why": "Warum WaveMAX",
+      "numbers": "Die Zahlen",
+      "model": "Das Modell",
+      "equipment": "Ausstattung",
+      "process": "Prozess",
+      "faq": "FAQ"
+    },
+    "trust": {
+      "locations": "Geöffnete Standorte und wachsend",
+      "rating": "Durchschn. Kundenbewertung",
+      "rank": "Waschsalon-Franchise · Entrepreneur 500 2026"
+    },
     "numbers": {
       "title": "Echte Zahlen. Verifiziertes FDD.",
-      "lede":  "Item 19 des FDD 2025 berichtet über eine Stichprobe von 50 WaveMAX-Filialen. Jeder Franchise-Kandidat erhält diese Zahlen während der Discovery — sie sind gesetzlich reguliert, und wir veröffentlichen sie im Voraus.",
-      "colStat": "Statistik", "colGross": "Bruttoumsatz", "colSample": "Stichprobe",
-      "rowAvg": "Durchschnitt", "rowMedian": "Median", "rowTop": "Top-Performer",
-      "fiftyStores": "50 Filialen", "singleStore": "eine Filiale",
-      "jaxFlowLabel":   "Jacksonville · Netto-Cashflow 2024",
-      "jaxFlowText":    "Operativer Cashflow vor Schuldendienst. Lizenzgebühr, Marketingfonds-Beitrag und POS-/Technologiegebühren bereits abgezogen.",
+      "lede": "Item 19 des FDD 2025 berichtet über eine Stichprobe von 50 WaveMAX-Filialen. Jeder Franchise-Kandidat erhält diese Zahlen während der Discovery — sie sind gesetzlich reguliert, und wir veröffentlichen sie im Voraus.",
+      "colStat": "Statistik",
+      "colGross": "Bruttoumsatz",
+      "colSample": "Stichprobe",
+      "rowAvg": "Durchschnitt",
+      "rowMedian": "Median",
+      "rowTop": "Top-Performer",
+      "fiftyStores": "50 Filialen",
+      "singleStore": "eine Filiale",
+      "jaxFlowLabel": "Jacksonville · Netto-Cashflow 2024",
+      "jaxFlowText": "Operativer Cashflow vor Schuldendienst. Lizenzgebühr, Marketingfonds-Beitrag und POS-/Technologiegebühren bereits abgezogen.",
       "jaxIncomeLabel": "Nettoeinkommen 2024 (mit voller Geräte-Finanzierung)",
-      "jaxIncomeText":  "Nettoeinkommen nach Abzug der Gerätefinanzierung — modelliert mit 100% SBA-fähiger Finanzierung, dem stärksten Hebelszenario.",
+      "jaxIncomeText": "Nettoeinkommen nach Abzug der Gerätefinanzierung — modelliert mit 100% SBA-fähiger Finanzierung, dem stärksten Hebelszenario.",
       "attr": "Quelle: WaveMAX Franchise Disclosure Document, Ausgabe 2025, Item 19. Vergangene Performance einer firmeneigenen Filiale ist keine Garantie für zukünftige Franchise-Ergebnisse."
     },
     "loc": {
-      "demoTitle":     "Demografische Zielsetzung",
-      "demoText":      "Arbeiterklasse-PLZs mit Mieterdichte, Einkommensbändern und stabilem Bevölkerungswachstum.",
-      "sizeTitle":     "Optimierte Filialgröße",
-      "sizeText":      "Fläche an den Markt angepasst: Maschinenzahl, Trockner-Verhältnis, Warteschlangenkapazität für das prognostizierte Volumen abgestimmt.",
-      "trafficTitle":  "Verkehr & Sichtbarkeit",
-      "trafficText":   "Verkehrszählungen, Anker-Co-Tenancy und Fußgängerzugang modelliert — Sichtbarkeit ist die halbe Miete im Marketing."
+      "demoTitle": "Demografische Zielsetzung",
+      "demoText": "Arbeiterklasse-PLZs mit Mieterdichte, Einkommensbändern und stabilem Bevölkerungswachstum.",
+      "sizeTitle": "Optimierte Filialgröße",
+      "sizeText": "Fläche an den Markt angepasst: Maschinenzahl, Trockner-Verhältnis, Warteschlangenkapazität für das prognostizierte Volumen abgestimmt.",
+      "trafficTitle": "Verkehr & Sichtbarkeit",
+      "trafficText": "Verkehrszählungen, Anker-Co-Tenancy und Fußgängerzugang modelliert — Sichtbarkeit ist die halbe Miete im Marketing."
     },
     "equipment": {
       "title": "Modernes Electrolux. Auf Leistung programmiert.",
-      "lede":  "Soft-Mount, Hochleistungs-Schleudern, programmierbare Steuerungen, Online-Diagnose und korporativ verhandelte Teile und Service. Das Ergebnis: schnellere Zyklen, niedrigere Versorgungskosten pro Pfund und vorhersehbare Wartung.",
-      "stat1": "Volle Ladung · waschen bis trocken", "stat2": "Schleuderkraft (Premium)",
-      "stat3": "Großformat-Maschinen",                 "stat4": "Hygiene-Linien",
+      "lede": "Soft-Mount, Hochleistungs-Schleudern, programmierbare Steuerungen, Online-Diagnose und korporativ verhandelte Teile und Service. Das Ergebnis: schnellere Zyklen, niedrigere Versorgungskosten pro Pfund und vorhersehbare Wartung.",
+      "stat1": "Volle Ladung · waschen bis trocken",
+      "stat2": "Schleuderkraft (Premium)",
+      "stat3": "Großformat-Maschinen",
+      "stat4": "Hygiene-Linien",
       "partnerTitle": "Vorteile der Electrolux-Partnerschaft",
       "partner1": "Vorzugspreise auf das vollständige Ausstattungspaket",
       "partner2": "65–75% Projektfinanzierung über Electrolux",
@@ -184,41 +201,46 @@
       "sanit5": "Reduziert Wasserrückstand → schnelleres Trocknen",
       "disclaimer": "Premium-Geräteangaben (450G-Schleudern, 80lb-Großformat, UV-Hygiene) erscheinen nur auf Filialseiten, deren Ausstattung als installiert verifiziert wurde.",
       "tourTitle": "Gehen Sie Raum für Raum durch eine echte WaveMAX",
-      "tourLede":  "Der von der Zentrale veröffentlichte 3D-Matterport-Rundgang — erkunden Sie Grundriss, Geräteanordnung und Kundenerfahrung in Ihrem Browser. Oder besuchen Sie unsere kuratierte Fotogalerie auf /virtual-tour/."
+      "tourLede": "Der von der Zentrale veröffentlichte 3D-Matterport-Rundgang — erkunden Sie Grundriss, Geräteanordnung und Kundenerfahrung in Ihrem Browser. Oder besuchen Sie unsere kuratierte Fotogalerie auf /virtual-tour/."
     },
     "process": {
       "title": "Sechs Schritte vom ersten Anruf bis zur Eröffnung.",
-      "lede":  "Die typische Zeitspanne beträgt 6–9 Monate. Das Tempo ist hauptsächlich von der Standortverfügbarkeit und dem Ausbau abhängig; wenn ein Kandidat bereits einen Standort identifiziert und vorgenehmigt hat, verkürzt sich die Zeitspanne.",
-      "step1Title": "Erstgespräch",            "step1Text": "30-minütiges exploratives Gespräch. Markt, Kapital, Zeitplan, Passung.",
-      "step2Title": "FDD-Prüfung",             "step2Text": "Empfang und Unterzeichnung des Franchise Disclosure Document. Item 19-Details.",
-      "step3Title": "Marktanalyse",            "step3Text": "Demografie- + Verkehrsstudie. Gebietsauswahl. Kreditgeber-Vorstellungen.",
-      "step4Title": "Discovery Day",           "step4Text": "Besuch der Zentrale in Jacksonville. Team kennenlernen und Filialen besichtigen.",
-      "step5Title": "Franchise-Vertrag",       "step5Text": "Vertrag ausführen. Standortgenehmigung. Mietvertragsverhandlung.",
-      "step6Title": "Schulung & Eröffnung",    "step6Text": "Mehrwöchige Schulung. Ausbau. Eröffnungsmarketing. Eröffnung."
+      "lede": "Die typische Zeitspanne beträgt 6–9 Monate. Das Tempo ist hauptsächlich von der Standortverfügbarkeit und dem Ausbau abhängig; wenn ein Kandidat bereits einen Standort identifiziert und vorgenehmigt hat, verkürzt sich die Zeitspanne.",
+      "step1Title": "Erstgespräch",
+      "step1Text": "30-minütiges exploratives Gespräch. Markt, Kapital, Zeitplan, Passung.",
+      "step2Title": "FDD-Prüfung",
+      "step2Text": "Empfang und Unterzeichnung des Franchise Disclosure Document. Item 19-Details.",
+      "step3Title": "Marktanalyse",
+      "step3Text": "Demografie- + Verkehrsstudie. Gebietsauswahl. Kreditgeber-Vorstellungen.",
+      "step4Title": "Discovery Day",
+      "step4Text": "Besuch der Zentrale in Jacksonville. Team kennenlernen und Filialen besichtigen.",
+      "step5Title": "Franchise-Vertrag",
+      "step5Text": "Vertrag ausführen. Standortgenehmigung. Mietvertragsverhandlung.",
+      "step6Title": "Schulung & Eröffnung",
+      "step6Text": "Mehrwöchige Schulung. Ausbau. Eröffnungsmarketing. Eröffnung."
     },
     "tabCta": {
-      "seeNumbers":         "Zahlen ansehen →",
-      "startConversation":  "Gespräch starten",
-      "fullBreakdown":      "Vollständige ROI-Aufschlüsselung →",
-      "getGuide":           "Investitionsleitfaden anfordern",
-      "pickMarket":         "Markt wählen →",
-      "vsZombiemat":        "vs Zombiemat",
-      "virtualTour":        "Virtuelle Tour →",
-      "fullFaq":            "Vollständiges FAQ →"
+      "seeNumbers": "Zahlen ansehen →",
+      "startConversation": "Gespräch starten",
+      "fullBreakdown": "Vollständige ROI-Aufschlüsselung →",
+      "getGuide": "Investitionsleitfaden anfordern",
+      "pickMarket": "Markt wählen →",
+      "vsZombiemat": "vs Zombiemat",
+      "virtualTour": "Virtuelle Tour →",
+      "fullFaq": "Vollständiges FAQ →"
     },
     "reviews": {
       "title": "Was Kunden im gesamten Netzwerk sagen",
-      "lede":  "Echte 5-Sterne-Google-Bewertungen, live aus operativen WaveMAX-Franchisestandorten gezogen. Jede Karte verlinkt zur Filiale, die die Bewertung erhalten hat.",
+      "lede": "Echte 5-Sterne-Google-Bewertungen, live aus operativen WaveMAX-Franchisestandorten gezogen. Jede Karte verlinkt zur Filiale, die die Bewertung erhalten hat.",
       "loading": "Bewertungen aus dem Netzwerk werden geladen…"
     },
     "formula": {
-      "location":  "Richtiger Standort",
-      "size":      "Richtige Größe",
+      "location": "Richtiger Standort",
+      "size": "Richtige Größe",
       "equipment": "Richtige Geräteauswahl",
-      "profit":    "Maximale Gewinne"
+      "profit": "Maximale Gewinne"
     }
   },
-
   "about": {
     "hero": {
       "eyebrow": "Über uns",
@@ -229,14 +251,14 @@
       "ctaSecondary": "Kontakt"
     },
     "facts": {
-      "founded":   "Gegründet",
+      "founded": "Gegründet",
       "locations": "Standorte & wachsend",
-      "owners":    "Franchise-Eigentümer",
-      "hq":        "Hauptsitz in Jacksonville"
+      "owners": "Franchise-Eigentümer",
+      "hq": "Hauptsitz in Jacksonville"
     },
     "story": {
       "eyebrow": "Unsere Geschichte",
-      "title":   "Entwickelt, um eine in der Vergangenheit verharrende Branche zu modernisieren.",
+      "title": "Entwickelt, um eine in der Vergangenheit verharrende Branche zu modernisieren.",
       "p1": "WaveMAX wurde 2012 von Mike Roberts in Jacksonville, Florida, gegründet. Nach zwei Jahrzehnten, in denen er erfolgreiche Unternehmen in mehreren Branchen aufgebaut hatte, faszinierten Mike die Stabilität und das Cashflow-Potenzial der Waschsalon-Branche — und ebenso, wie veraltet der durchschnittliche Waschsalon als Kundenerlebnis geworden war.",
       "p2": "Die These hinter WaveMAX: Wäsche ist ein stabiles, rezessionsresistentes Geschäft, doch die meisten Waschsalons werden als marode Altanlagen betrieben — vernachlässigte Ausstattung, schlechte Beleuchtung, kein Personal, keine Systeme. Modernisieren Sie das Design, professionalisieren Sie den Betrieb und franchisen Sie das Playbook — das Ergebnis ist ein kategorieprägendes Erlebnis, das Kunden aktiv wählen, statt sich damit abzufinden.",
       "p3": "Heute wird das System als AU Hydro LLC dba WaveMAX Laundry betrieben, mit 75+ geöffneten Standorten und einem wachsenden Netzwerk unabhängiger Franchise-Eigentümer in den Vereinigten Staaten."
@@ -247,55 +269,54 @@
     },
     "awards": {
       "eyebrow": "Auszeichnungen & Anerkennung",
-      "title":   "Unabhängig verifiziert.",
-      "lede":    "WaveMAX gehört zu den wenigen Waschsalon-Franchises, die in Entrepreneurs jährlicher Franchise 500 gelistet sind — der branchenweit anspruchsvollste unabhängige Maßstab für Qualität, Wachstum, Finanzkraft und Stabilität von Franchise-Systemen.",
+      "title": "Unabhängig verifiziert.",
+      "lede": "WaveMAX gehört zu den wenigen Waschsalon-Franchises, die in Entrepreneurs jährlicher Franchise 500 gelistet sind — der branchenweit anspruchsvollste unabhängige Maßstab für Qualität, Wachstum, Finanzkraft und Stabilität von Franchise-Systemen.",
       "a1Name": "#1 Waschsalon-Franchise",
       "a1Role": "Entrepreneur Franchise 500 · 2026",
-      "a1Bio":  "Platz #1 in der Waschsalon-Kategorie auf Entrepreneurs Franchise 500 (2026).",
+      "a1Bio": "Platz #1 in der Waschsalon-Kategorie auf Entrepreneurs Franchise 500 (2026).",
       "a2Name": "Franchise 500",
       "a2Role": "Entrepreneur · 2026",
-      "a2Bio":  "Platz #485 insgesamt über alle Franchise-Systeme und Branchen hinweg auf Entrepreneurs Franchise 500 (2026).",
+      "a2Bio": "Platz #485 insgesamt über alle Franchise-Systeme und Branchen hinweg auf Entrepreneurs Franchise 500 (2026).",
       "a3Name": "Franchise 500",
       "a3Role": "Entrepreneur · 2024",
-      "a3Bio":  "Platz #416 insgesamt auf Entrepreneurs Franchise 500 (2024) — Aufstieg auf #485 im Jahr 2026 parallel zum Wachstum des Systems."
+      "a3Bio": "Platz #416 insgesamt auf Entrepreneurs Franchise 500 (2024) — Aufstieg auf #485 im Jahr 2026 parallel zum Wachstum des Systems."
     },
     "team": {
       "eyebrow": "Führung",
-      "title":   "Das Team hinter der Marke.",
-      "lede":    "WaveMAX wird von einem kleinen Team von Betreibern geführt, die das Geschäft seit 2012 leiten und skalieren. Markenintegrität, Franchisenehmer-Erfolg und operative Disziplin sind die Maßstäbe, an denen jede Entscheidung gemessen wird.",
+      "title": "Das Team hinter der Marke.",
+      "lede": "WaveMAX wird von einem kleinen Team von Betreibern geführt, die das Geschäft seit 2012 leiten und skalieren. Markenintegrität, Franchisenehmer-Erfolg und operative Disziplin sind die Maßstäbe, an denen jede Entscheidung gemessen wird.",
       "mrRole": "Gründer & Chief Executive Officer",
-      "mrBio":  "Mike gründete WaveMAX 2012, nachdem er zwei Jahrzehnte lang erfolgreiche Unternehmen in verschiedenen Branchen aufgebaut hatte. Er leitet Markenstrategie, Franchisenehmer-Entwicklung und die langfristige Vision des Systems.",
+      "mrBio": "Mike gründete WaveMAX 2012, nachdem er zwei Jahrzehnte lang erfolgreiche Unternehmen in verschiedenen Branchen aufgebaut hatte. Er leitet Markenstrategie, Franchisenehmer-Entwicklung und die langfristige Vision des Systems.",
       "shRole": "Chief Financial Officer · Managing Partner",
-      "shBio":  "Sheila ist seit der Unternehmensgründung 2012 Managing Partner. Zuvor Präsidentin von Learning Time Academy, leitet sie Finanzen, Buchhaltung und Kapitalplanung des Franchise-Systems.",
+      "shBio": "Sheila ist seit der Unternehmensgründung 2012 Managing Partner. Zuvor Präsidentin von Learning Time Academy, leitet sie Finanzen, Buchhaltung und Kapitalplanung des Franchise-Systems.",
       "bhRole": "Franchise-Entwicklung",
-      "bhBio":  "Brittany leitet die Kandidaten-Aufnahme und den Franchise-Discovery-Prozess — vom ersten Gespräch über die FDD-Prüfung und den Discovery Day bis zur Vergabe. Die Anlaufstelle für Interessenten, die WaveMAX in Betracht ziehen."
+      "bhBio": "Brittany leitet die Kandidaten-Aufnahme und den Franchise-Discovery-Prozess — vom ersten Gespräch über die FDD-Prüfung und den Discovery Day bis zur Vergabe. Die Anlaufstelle für Interessenten, die WaveMAX in Betracht ziehen."
     },
     "values": {
       "eyebrow": "Wofür wir stehen",
-      "title":   "Ein landesweites Netzwerk. Ein Betriebsstandard.",
-      "lede":    "Jede WaveMAX wird unabhängig betrieben, doch das System läuft auf gemeinsamen Betriebsstandards. Diese Werte prägen sowohl das Kundenerlebnis im Laden als auch die langfristige Partnerschaft, die wir mit jedem Eigentümer aufbauen.",
+      "title": "Ein landesweites Netzwerk. Ein Betriebsstandard.",
+      "lede": "Jede WaveMAX wird unabhängig betrieben, doch das System läuft auf gemeinsamen Betriebsstandards. Diese Werte prägen sowohl das Kundenerlebnis im Laden als auch die langfristige Partnerschaft, die wir mit jedem Eigentümer aufbauen.",
       "v1Title": "Sauberer.",
-      "v1Text":  "Moderne Ausstattung, betreute Filialen, fortschrittliche Hygiene in entsprechend ausgestatteten Standorten. Kunden sollen nie zweifeln, ob die Maschine sauber genug ist.",
+      "v1Text": "Moderne Ausstattung, betreute Filialen, fortschrittliche Hygiene in entsprechend ausgestatteten Standorten. Kunden sollen nie zweifeln, ob die Maschine sauber genug ist.",
       "v2Title": "Sicherer.",
-      "v2Text":  "Helle Filialen, betreute Öffnungszeiten und disziplinierte Standortwahl, die WaveMAX-Standorte in Nachbarschaften platziert, in denen sich Familien auch abends sicher fühlen.",
+      "v2Text": "Helle Filialen, betreute Öffnungszeiten und disziplinierte Standortwahl, die WaveMAX-Standorte in Nachbarschaften platziert, in denen sich Familien auch abends sicher fühlen.",
       "v3Title": "Schneller.",
-      "v3Text":  "Industrie-Maschinen mit hoher Schleuderwirkung verarbeiten Ladungen schneller als Heimgeräte oder typische Waschsalons. Weniger Warten, mehr erledigt.",
+      "v3Text": "Industrie-Maschinen mit hoher Schleuderwirkung verarbeiten Ladungen schneller als Heimgeräte oder typische Waschsalons. Weniger Warten, mehr erledigt.",
       "v4Title": "Markenintegrität.",
-      "v4Text":  "Wir wählen bewusst aus, an wen wir Gebiete vergeben. Jeder Eigentümer repräsentiert den WaveMAX-Standard in seinem Markt.",
+      "v4Text": "Wir wählen bewusst aus, an wen wir Gebiete vergeben. Jeder Eigentümer repräsentiert den WaveMAX-Standard in seinem Markt.",
       "v5Title": "Eigentümer-Erfolg zuerst.",
-      "v5Text":  "Maßstab jeder Entscheidung ist, ob sie den Cashflow des Franchisenehmers langfristig stärkt — nicht kurzfristige Lizenzgebühren-Maximierung.",
+      "v5Text": "Maßstab jeder Entscheidung ist, ob sie den Cashflow des Franchisenehmers langfristig stärkt — nicht kurzfristige Lizenzgebühren-Maximierung.",
       "v6Title": "Operative Disziplin.",
-      "v6Text":  "Standortwahl, Ausstattung, Schulung, Marketing und Betrieb laufen alle nach dokumentierten Playbooks. Marktübergreifend wiederholbar, nicht maßgeschneidert."
+      "v6Text": "Standortwahl, Ausstattung, Schulung, Marketing und Betrieb laufen alle nach dokumentierten Playbooks. Marktübergreifend wiederholbar, nicht maßgeschneidert."
     },
     "cta": {
-      "eyebrow":     "Mehr erfahren?",
-      "title":       "Zwei Wege zum nächsten Schritt.",
-      "lede":        "Wenn Sie Franchise-Interessent sind, beginnen Sie mit dem Franchise-Überblick. Als Kunde, Journalist oder Partner mit anderem Anliegen finden Sie auf der Kontaktseite den richtigen Kanal.",
-      "btnPrimary":  "Franchise erkunden",
+      "eyebrow": "Mehr erfahren?",
+      "title": "Zwei Wege zum nächsten Schritt.",
+      "lede": "Wenn Sie Franchise-Interessent sind, beginnen Sie mit dem Franchise-Überblick. Als Kunde, Journalist oder Partner mit anderem Anliegen finden Sie auf der Kontaktseite den richtigen Kanal.",
+      "btnPrimary": "Franchise erkunden",
       "btnSecondary": "Kontakt"
     }
   },
-
   "testimonials": {
     "hero": {
       "eyebrow": "Erfahrungsberichte",
@@ -307,46 +328,122 @@
     },
     "band": {
       "locations": "Geöffnete Standorte",
-      "owners":    "Franchise-Eigentümer",
-      "rank":      "Waschsalon-Franchise · 2026",
-      "avgGross":  "Durchschn. Brutto · FDD 2024"
+      "owners": "Franchise-Eigentümer",
+      "rank": "Waschsalon-Franchise · 2026",
+      "avgGross": "Durchschn. Brutto · FDD 2024"
     },
     "cards": {
       "eyebrow": "Aus dem Netzwerk",
-      "title":   "Hören Sie direkt von WaveMAX-Eigentümern.",
-      "lede":    "Jeder der unten gezeigten Franchisenehmer ist ein echter WaveMAX-Eigentümer mit aktiver Rolle im Netzwerk. Die Zitate stammen von ihnen, mit Name und Gebiet ausgewiesen.",
+      "title": "Hören Sie direkt von WaveMAX-Eigentümern.",
+      "lede": "Jeder der unten gezeigten Franchisenehmer ist ein echter WaveMAX-Eigentümer mit aktiver Rolle im Netzwerk. Die Zitate stammen von ihnen, mit Name und Gebiet ausgewiesen.",
       "slQuote": "WaveMAX gibt Einzelpersonen die Möglichkeit, ein Geschäft zu betreiben und sich gleichzeitig auf andere Aspekte des Lebens zu konzentrieren. Innerhalb des WaveMAX-Rahmens zu arbeiten und gleichzeitig dem Traum vom semi-absenten Geschäft eine eigene Note zu verleihen, ist die perfekte Formel. WaveMAX hat es geschafft, eine archaische Branche durch Technologie, Marketing, Gebietsanalysen und kontinuierliche operative Verbesserungen zu modernisieren und der Konkurrenz voraus zu sein.",
-      "slRole":  "Gebietsvertreterin & Filialinhaberin · Gaithersburg, MD",
+      "slRole": "Gebietsvertreterin & Filialinhaberin · Gaithersburg, MD",
       "caQuote": "Ich habe mich für WaveMAX entschieden, weil ich die einzigartige Chance sah, etwas in die Waschsalon-Branche zu bringen, was sie dringend brauchte: professionelles Management, operative Strukturen und einen höheren Qualitätsstandard. In den letzten sieben bis acht Jahren habe ich erlebt, wie diese Vision Wirklichkeit wurde. Was mich am meisten begeistert, ist, wohin wir gehen — gezielt zu skalieren und es gemeinsam aufzubauen.",
-      "caRole":  "Gebietsvertreter & Betreiber · DFW / East TX",
+      "caRole": "Gebietsvertreter & Betreiber · DFW / East TX",
       "pkQuote": "WaveMAX hat das Kundenerlebnis wirklich transformiert, indem es eine sichere, zuverlässige und einladende Umgebung geschaffen hat, der Menschen vertrauen und zu der sie zurückkehren. Die Waschsalon-Branche wurde historisch von unabhängigen, münzbetriebenen Betrieben dominiert — schlecht gewartet, inkonsistent besetzt und ohne jede Markenidentität. WaveMAX wurde gezielt als skalierbares Franchise-System aufgebaut, um genau das zu beheben.",
-      "pkRole":  "Gebietsdirektor · Georgia & Tennessee",
+      "pkRole": "Gebietsdirektor · Georgia & Tennessee",
       "shQuote": "Als erster WaveMAX-Franchisenehmer war ich dabei, als die Marke noch ihre Identität fand. Die Disziplin, die dieses Team bei Standortwahl, Ausstattung und Betrieb an den Tag legt, ist das, was WaveMAX von jedem anderen Waschsalon unterscheidet, den ich gesehen habe. Ich habe buchstäblich das Buch dazu geschrieben — SHIFT Happens.",
-      "shRole":  "Director of Operations · Erster WaveMAX-Franchisenehmer · Gebietsvertreter N. California / Nevada · Autor von SHIFT Happens"
+      "shRole": "Director of Operations · Erster WaveMAX-Franchisenehmer · Gebietsvertreter N. California / Nevada · Autor von SHIFT Happens"
     },
     "live": {
-      "eyebrow":    "Live-Kundenbewertungen",
-      "title":      "Von Kunden im gesamten Netzwerk.",
-      "lede":       "Dies sind 5-Sterne-Google-Bewertungen, die live aus WaveMAX-Standorten im ganzen Land gezogen werden. Echte Kunden, echte Bewertungen, automatisch aktualisiert — keine kuratierten Marketing-Auszüge.",
-      "loading":    "Kundenbewertungen werden geladen…",
-      "error":      "Netzwerk-Bewertungen konnten gerade nicht geladen werden. Bitte in einigen Minuten erneut aktualisieren.",
+      "eyebrow": "Live-Kundenbewertungen",
+      "title": "Von Kunden im gesamten Netzwerk.",
+      "lede": "Dies sind 5-Sterne-Google-Bewertungen, die live aus WaveMAX-Standorten im ganzen Land gezogen werden. Echte Kunden, echte Bewertungen, automatisch aktualisiert — keine kuratierten Marketing-Auszüge.",
+      "loading": "Kundenbewertungen werden geladen…",
+      "error": "Netzwerk-Bewertungen konnten gerade nicht geladen werden. Bitte in einigen Minuten erneut aktualisieren.",
       "attrPrefix": "Bewertungen über",
       "attrSuffix": "· alle 6 Stunden aktualisiert · Stichprobe aus mehreren WaveMAX-Standorten"
     },
     "callout": {
-      "eyebrow":      "Unabhängig verifizierbar",
-      "title":        "Unsere Zahlen, nicht nur unsere Zitate.",
-      "lede":         "Eigentümer-Geschichten sind Teil des Bildes, aber nicht das ganze Bild. WaveMAX veröffentlicht verifizierbare Item-19-Kennzahlen in unserem Franchise Disclosure Document, und das Kundenerlebnis jeder Filiale spiegelt sich in Live-Google-Bewertungen wider — keine handverlesenen Auszüge.",
-      "item1":        "FDD Item 19 (2024): 471.201 $ durchschn. Bruttoumsatz, 436.114 $ Median, 713.934 $ Top-Performer — Stichprobe von 50 operativen Filialen",
-      "item2":        "Jacksonville-Flaggschiff: 217.762 $ Netto-Cashflow / 113.074 $ Nettoeinkommen (mit voller Geräte-Finanzierung)",
-      "item3":        "Berichtete EBITDA-Spanne: 25–35 % im gesamten System",
-      "item4":        "Live-Kundenbewertungen: Bewertungen jedes WaveMAX-Standorts werden live aus Google Places eingespielt — das Erlebnis, das Ihre Kunden tatsächlich haben werden",
-      "item5":        "Markenbekanntheit: #1 Waschsalon-Franchise auf Entrepreneurs Franchise 500 (2026), #485 insgesamt im Jahr 2026 (von #416 im Jahr 2024)",
-      "btnPrimary":   "Investitionsdaten ansehen",
+      "eyebrow": "Unabhängig verifizierbar",
+      "title": "Unsere Zahlen, nicht nur unsere Zitate.",
+      "lede": "Eigentümer-Geschichten sind Teil des Bildes, aber nicht das ganze Bild. WaveMAX veröffentlicht verifizierbare Item-19-Kennzahlen in unserem Franchise Disclosure Document, und das Kundenerlebnis jeder Filiale spiegelt sich in Live-Google-Bewertungen wider — keine handverlesenen Auszüge.",
+      "item1": "FDD Item 19 (2024): 471.201 $ durchschn. Bruttoumsatz, 436.114 $ Median, 713.934 $ Top-Performer — Stichprobe von 50 operativen Filialen",
+      "item2": "Jacksonville-Flaggschiff: 217.762 $ Netto-Cashflow / 113.074 $ Nettoeinkommen (mit voller Geräte-Finanzierung)",
+      "item3": "Berichtete EBITDA-Spanne: 25–35 % im gesamten System",
+      "item4": "Live-Kundenbewertungen: Bewertungen jedes WaveMAX-Standorts werden live aus Google Places eingespielt — das Erlebnis, das Ihre Kunden tatsächlich haben werden",
+      "item5": "Markenbekanntheit: #1 Waschsalon-Franchise auf Entrepreneurs Franchise 500 (2026), #485 insgesamt im Jahr 2026 (von #416 im Jahr 2024)",
+      "btnPrimary": "Investitionsdaten ansehen",
       "btnSecondary": "Franchise erkunden"
     }
   },
-
+  "whyInvest": {
+    "hero": {
+      "eyebrow": "Warum in WaveMAX investieren",
+      "title1": "Echte Zahlen.",
+      "title2": "Verifizierter FDD.",
+      "sub": "WaveMAX ist die #1 Waschsalon-Franchise auf Entrepreneurs Franchise 500 (2026). Im Folgenden: die Item-19-Zahlen, Cashflow-Beispiele und die strukturellen Gründe, warum Betreiber diese Kategorie wählen. Keine herausgepickten Zahlen — verifiziert und mit Quellenangabe.",
+      "ctaPrimary": "Gespräch starten",
+      "ctaSecondary": "Investitionsleitfaden anfordern"
+    },
+    "headline": {
+      "grossLabel": "Durchschn. Bruttoumsatz",
+      "grossSub": "2024 · Stichprobe von 50 Filialen",
+      "ebitdaLabel": "EBITDA-Spanne",
+      "ebitdaSub": "Im gesamten System berichtet",
+      "paybackLabel": "Amortisationszeit",
+      "paybackSub": "Typischer Betreiber",
+      "ownerLabel": "Inhaberzeit / Woche",
+      "ownerSub": "Semi-Absentee-Modell"
+    },
+    "i19": {
+      "eyebrow": "Item-19-Offenlegung",
+      "title": "Durchschnittlicher Bruttoumsatz pro Filiale 2024.",
+      "lede": "Gemäß der Item-19-Offenlegung im FDD 2025: eine Stichprobe von 50 WaveMAX-Filialen, die ihren vollen Bruttoumsatz für 2024 melden. Diese Zahlen sind dieselben, die jeder potenzielle Franchisenehmer während der FDD-Prüfungsphase im Discovery-Prozess erhält — sie sind gesetzlich reguliert, und wir veröffentlichen sie offen im Voraus.",
+      "colStat": "Kennzahl",
+      "colGross": "Bruttoumsatz",
+      "colSample": "Stichprobengröße",
+      "rowAvg": "Durchschnitt",
+      "rowMedian": "Median",
+      "rowTop": "Top-Performer",
+      "fiftyStores": "50 Filialen",
+      "singleStore": "einzelne Filiale",
+      "attr": "Quelle: WaveMAX Franchise Disclosure Document, Ausgabe 2025, Item 19. Vollständiges Dokument wird qualifizierten Kandidaten während des Discovery-Prozesses bereitgestellt (Schritt 02)."
+    },
+    "flow": {
+      "eyebrow": "Cashflow-Momentaufnahme",
+      "title": "Jacksonville-Flaggschiff — Ist-Zahlen 2024.",
+      "lede": "Die klarste Sicht auf das WaveMAX-Modell bietet unser firmeneigenes Flaggschiff in Jacksonville. Gleicher FDD, gleiches Playbook, gleiche Kostenstruktur wie bei einer Franchise-Einheit — bei offenen Büchern. Ist-Ergebnisse 2024:",
+      "cashLabel": "Netto-Cashflow (nach Royalties + Marketing + POS)",
+      "cashText": "Operativer Cashflow vor Schuldendienst. Royalty-Gebühr, Beitrag zum Marketingfonds sowie POS-/Technologiegebühren sind bereits abgezogen.",
+      "incomeLabel": "Nettoeinkommen (mit voller Geräte-Finanzierung)",
+      "incomeText": "Nettoeinkommen, nachdem auch die Geräte-Finanzierungsrate abgezogen wurde — modelliert, als ob der Franchisenehmer 100 % des Gerätepakets über SBA-fähige Finanzierung finanziert hätte, das am stärksten gehebelte Szenario.",
+      "disclaimer": "Die vergangene Performance einer firmeneigenen Einheit ist keine Garantie für künftige Franchisenehmer-Ergebnisse. Bitte beachten Sie den FDD für vollständige Offenlegungen, Item-19-Details und die Belegung aller Zahlen."
+    },
+    "cat": {
+      "eyebrow": "Warum diese Kategorie",
+      "title": "Sechs strukturelle Gründe, warum Betreiber Wäscherei wählen.",
+      "lede": "Über die Zahlen hinaus weist die Waschsalon-Kategorie strukturelle Merkmale auf, die sie zu einem dauerhaften Cashflow-Geschäft machen — insbesondere, wenn sie modernisiert, professionalisiert und als Franchisesystem statt als isolierte unabhängige Einzelbetrieb geführt wird.",
+      "r1Title": "Rezessionsresistente Nachfrage",
+      "r1Text": "Wäsche ist eine Notwendigkeit, kein Wunsch. Familien aus der Arbeiterschicht sind aus Notwendigkeit auf Waschsalons angewiesen — die Nutzungsmuster sind über jeden Konjunkturzyklus hinweg stabil.",
+      "r2Title": "Kein Lagerrisiko",
+      "r2Text": "Das \"Produkt\" ist eine Dienstleistung, keine Ware. Kein Verderb, keine Veralterung, keine Lagerabschreibungen. Geräte schreiben sich planbar ab und sind Kreditgebern gut bekannt.",
+      "r3Title": "Bargeld-Geschäft",
+      "r3Text": "Keine Forderungen. Kein Inkasso. Keine 30-Tage-Zahlungsziele. Das Modell wandelt Umsatz noch am selben Tag, an dem er erzielt wird, in Bargeld um.",
+      "r4Title": "Schlanker Personaleinsatz",
+      "r4Text": "Moderne, betreute (aber nicht münzbetriebene) Filialen laufen mit einem kleinen Team. Die Personalkosten machen einen geringeren Anteil am Umsatz aus als im Einzelhandel oder in der Gastronomie.",
+      "r5Title": "SBA-fähige Finanzierung",
+      "r5Text": "Geräte und Ausbau sind SBA-fähig. Kreditgeber, die die Wäscherei-Ökonomik verstehen, strukturieren die Finanzierung entsprechend. Die meisten Franchisenehmer nutzen eine Mischung aus Eigenmitteln und SBA-Darlehen.",
+      "r6Title": "Mehrfilialen-Pfad",
+      "r6Text": "Das Modell ist auf Skalierung ausgelegt. Betreiber mit einer cashflow-positiven Filiale eröffnen ihre zweite typischerweise innerhalb von 18 Monaten, unterstützt durch Area-Development-Anreize."
+    },
+    "ent": {
+      "eyebrow": "Externe Validierung",
+      "title": "Unabhängig bewertet. Wiederholt ausgezeichnet.",
+      "lede": "Entrepreneurs jährliches Franchise 500 ist der strengste Branchen-Benchmark der Franchise-Industrie für Systemqualität, Wachstum, finanzielle Stärke und Stabilität. WaveMAX wurde dort konstant gelistet — und hält 2026 den #1-Platz in der Waschsalon-Kategorie.",
+      "cat2026": "Waschsalon-Franchise · 2026",
+      "overall2026": "Franchise 500 gesamt · 2026",
+      "overall2024": "Franchise 500 gesamt · 2024",
+      "years": "Betriebsjahre"
+    },
+    "cta": {
+      "eyebrow": "Bereit, tiefer einzusteigen?",
+      "title": "Fordern Sie den vollständigen Investitionsleitfaden an.",
+      "lede": "Der Investitionsleitfaden enthält die vollständige Mittelherkunfts- und Mittelverwendungsrechnung, eine Beispiel-Pro-forma, die Finanzierungsstruktur sowie die 6-stufige Discovery-Roadmap. Per E-Mail zugestellt, ohne Verkaufsanruf unter Druck.",
+      "btnPrimary": "Investitionsleitfaden anfordern",
+      "btnSecondary": "Prüfen, ob Sie qualifiziert sind"
+    }
+  },
   "common": {
     "ctaLearnMore": "Mehr erfahren",
     "ctaGetGuide": "Investitionsleitfaden anfordern",

@@ -51,7 +51,6 @@
       "home": "Inicio"
     }
   },
-
   "franchise": {
     "hero": {
       "eyebrow": "#1 Franquicia de Lavandería · Entrepreneur Franchise 500 2026",
@@ -143,33 +142,51 @@
       "btnPrimary": "Aplicar para ser franquiciado",
       "btnSecondary": "Enviar correo a franchise@wavemax.com"
     },
-    "tabs": { "why": "Por qué WaveMAX", "numbers": "Los Números", "model": "El Modelo", "equipment": "Equipos", "process": "Proceso", "faq": "FAQ" },
-    "trust": { "locations": "Ubicaciones abiertas y creciendo", "rating": "Calificación promedio del cliente", "rank": "Franquicia de lavandería · Entrepreneur 500 2026" },
+    "tabs": {
+      "why": "Por qué WaveMAX",
+      "numbers": "Los Números",
+      "model": "El Modelo",
+      "equipment": "Equipos",
+      "process": "Proceso",
+      "faq": "FAQ"
+    },
+    "trust": {
+      "locations": "Ubicaciones abiertas y creciendo",
+      "rating": "Calificación promedio del cliente",
+      "rank": "Franquicia de lavandería · Entrepreneur 500 2026"
+    },
     "numbers": {
       "title": "Números reales. FDD verificado.",
-      "lede":  "El Item 19 del FDD 2025 reporta una muestra de 50 tiendas WaveMAX. Cada candidato a franquiciado recibe estos números durante el descubrimiento — están legalmente regulados y los publicamos por adelantado.",
-      "colStat": "Estadística", "colGross": "Ingresos brutos", "colSample": "Muestra",
-      "rowAvg": "Promedio", "rowMedian": "Mediana", "rowTop": "Mejor desempeño",
-      "fiftyStores": "50 tiendas", "singleStore": "una tienda",
-      "jaxFlowLabel":   "Jacksonville · Flujo de caja neto 2024",
-      "jaxFlowText":    "Flujo de caja operativo antes del servicio de la deuda. Regalías, fondo de marketing y tarifas de POS/tecnología ya deducidas.",
+      "lede": "El Item 19 del FDD 2025 reporta una muestra de 50 tiendas WaveMAX. Cada candidato a franquiciado recibe estos números durante el descubrimiento — están legalmente regulados y los publicamos por adelantado.",
+      "colStat": "Estadística",
+      "colGross": "Ingresos brutos",
+      "colSample": "Muestra",
+      "rowAvg": "Promedio",
+      "rowMedian": "Mediana",
+      "rowTop": "Mejor desempeño",
+      "fiftyStores": "50 tiendas",
+      "singleStore": "una tienda",
+      "jaxFlowLabel": "Jacksonville · Flujo de caja neto 2024",
+      "jaxFlowText": "Flujo de caja operativo antes del servicio de la deuda. Regalías, fondo de marketing y tarifas de POS/tecnología ya deducidas.",
       "jaxIncomeLabel": "Ingreso neto 2024 (con financiamiento total de equipos)",
-      "jaxIncomeText":  "Ingreso neto después de deducir el pago del financiamiento de equipos — modelado con financiamiento SBA del 100%, el escenario más apalancado.",
+      "jaxIncomeText": "Ingreso neto después de deducir el pago del financiamiento de equipos — modelado con financiamiento SBA del 100%, el escenario más apalancado.",
       "attr": "Fuente: Documento de Divulgación de Franquicia WaveMAX, edición 2025, Item 19. El desempeño pasado de una unidad propiedad de la empresa no garantiza resultados futuros del franquiciado."
     },
     "loc": {
-      "demoTitle":     "Segmentación demográfica",
-      "demoText":      "Códigos postales de clase trabajadora con densidad de inquilinos, bandas de ingresos por hogar y crecimiento poblacional estable.",
-      "sizeTitle":     "Tamaño de tienda optimizado",
-      "sizeText":      "Huella adaptada al mercado: cantidad de máquinas, proporción de secadoras y capacidad de cola ajustadas al volumen proyectado.",
-      "trafficTitle":  "Tráfico y visibilidad",
-      "trafficText":   "Conteo de tráfico vehicular, co-tenancia con anclas y acceso peatonal modelados — la visibilidad es la mitad del marketing."
+      "demoTitle": "Segmentación demográfica",
+      "demoText": "Códigos postales de clase trabajadora con densidad de inquilinos, bandas de ingresos por hogar y crecimiento poblacional estable.",
+      "sizeTitle": "Tamaño de tienda optimizado",
+      "sizeText": "Huella adaptada al mercado: cantidad de máquinas, proporción de secadoras y capacidad de cola ajustadas al volumen proyectado.",
+      "trafficTitle": "Tráfico y visibilidad",
+      "trafficText": "Conteo de tráfico vehicular, co-tenancia con anclas y acceso peatonal modelados — la visibilidad es la mitad del marketing."
     },
     "equipment": {
       "title": "Electrolux moderno. Programado para el rendimiento.",
-      "lede":  "Montaje suave, alta extracción G, controles programables, diagnósticos en línea y partes y servicio negociados por la empresa. El resultado: ciclos más rápidos, menor costo de servicios públicos por libra y mantenimiento predecible.",
-      "stat1": "Carga completa · lavado a secado", "stat2": "Fuerza de extracción (premium)",
-      "stat3": "Unidades de gran formato",          "stat4": "Líneas equipadas con sanitización",
+      "lede": "Montaje suave, alta extracción G, controles programables, diagnósticos en línea y partes y servicio negociados por la empresa. El resultado: ciclos más rápidos, menor costo de servicios públicos por libra y mantenimiento predecible.",
+      "stat1": "Carga completa · lavado a secado",
+      "stat2": "Fuerza de extracción (premium)",
+      "stat3": "Unidades de gran formato",
+      "stat4": "Líneas equipadas con sanitización",
       "partnerTitle": "Beneficios de la asociación con Electrolux",
       "partner1": "Precios preferenciales en el paquete completo de equipos",
       "partner2": "65–75% de financiamiento de proyecto a través de Electrolux",
@@ -184,41 +201,46 @@
       "sanit5": "Reduce la retención de agua → secado más rápido",
       "disclaimer": "Las afirmaciones de equipos premium (extracción 450G, gran formato 80lb, sanitización UV) solo aparecen en páginas de tiendas donde el equipo está verificado como instalado.",
       "tourTitle": "Recorra una WaveMAX real, sala por sala",
-      "tourLede":  "El recorrido 3D Matterport publicado por la empresa — explore el plano, la disposición de equipos y la experiencia del cliente desde su navegador. O visite nuestra galería de fotos curada en /virtual-tour/."
+      "tourLede": "El recorrido 3D Matterport publicado por la empresa — explore el plano, la disposición de equipos y la experiencia del cliente desde su navegador. O visite nuestra galería de fotos curada en /virtual-tour/."
     },
     "process": {
       "title": "Seis pasos desde la primera llamada hasta la apertura.",
-      "lede":  "El cronograma típico es de 6–9 meses. El ritmo está principalmente impulsado por la disponibilidad del sitio y la construcción; si un candidato ya tiene un sitio identificado y pre-aprobado, el cronograma se comprime.",
-      "step1Title": "Llamada inicial",         "step1Text": "Conversación exploratoria de 30 minutos. Mercado, capital, cronograma, encaje.",
-      "step2Title": "Revisión del FDD",        "step2Text": "Recibir y firmar el Documento de Divulgación de Franquicia. Detalle del Item 19.",
-      "step3Title": "Análisis de mercado",     "step3Text": "Estudio demográfico + de tráfico. Selección de territorio. Presentaciones a prestamistas.",
-      "step4Title": "Día de Descubrimiento",   "step4Text": "Visite la sede corporativa en Jacksonville. Conozca al equipo y recorra tiendas.",
-      "step5Title": "Acuerdo de franquicia",   "step5Text": "Ejecutar el acuerdo. Aprobación del sitio. Negociación del arrendamiento.",
-      "step6Title": "Capacitación y apertura", "step6Text": "Capacitación de varias semanas. Construcción. Marketing de apertura. Gran apertura."
+      "lede": "El cronograma típico es de 6–9 meses. El ritmo está principalmente impulsado por la disponibilidad del sitio y la construcción; si un candidato ya tiene un sitio identificado y pre-aprobado, el cronograma se comprime.",
+      "step1Title": "Llamada inicial",
+      "step1Text": "Conversación exploratoria de 30 minutos. Mercado, capital, cronograma, encaje.",
+      "step2Title": "Revisión del FDD",
+      "step2Text": "Recibir y firmar el Documento de Divulgación de Franquicia. Detalle del Item 19.",
+      "step3Title": "Análisis de mercado",
+      "step3Text": "Estudio demográfico + de tráfico. Selección de territorio. Presentaciones a prestamistas.",
+      "step4Title": "Día de Descubrimiento",
+      "step4Text": "Visite la sede corporativa en Jacksonville. Conozca al equipo y recorra tiendas.",
+      "step5Title": "Acuerdo de franquicia",
+      "step5Text": "Ejecutar el acuerdo. Aprobación del sitio. Negociación del arrendamiento.",
+      "step6Title": "Capacitación y apertura",
+      "step6Text": "Capacitación de varias semanas. Construcción. Marketing de apertura. Gran apertura."
     },
     "tabCta": {
-      "seeNumbers":         "Ver los números →",
-      "startConversation":  "Comenzar la conversación",
-      "fullBreakdown":      "Desglose completo de ROI →",
-      "getGuide":           "Obtener la Guía de Inversión",
-      "pickMarket":         "Elegir su mercado →",
-      "vsZombiemat":        "vs el Zombiemat",
-      "virtualTour":        "Tour virtual →",
-      "fullFaq":            "FAQ completo →"
+      "seeNumbers": "Ver los números →",
+      "startConversation": "Comenzar la conversación",
+      "fullBreakdown": "Desglose completo de ROI →",
+      "getGuide": "Obtener la Guía de Inversión",
+      "pickMarket": "Elegir su mercado →",
+      "vsZombiemat": "vs el Zombiemat",
+      "virtualTour": "Tour virtual →",
+      "fullFaq": "FAQ completo →"
     },
     "reviews": {
       "title": "Lo que dicen los clientes en toda la red",
-      "lede":  "Reseñas reales de Google de 5 estrellas, muestreadas en vivo desde ubicaciones operativas de franquicias WaveMAX. Cada tarjeta enlaza con la tienda que ganó la reseña.",
+      "lede": "Reseñas reales de Google de 5 estrellas, muestreadas en vivo desde ubicaciones operativas de franquicias WaveMAX. Cada tarjeta enlaza con la tienda que ganó la reseña.",
       "loading": "Cargando reseñas de toda la red…"
     },
     "formula": {
-      "location":  "Ubicación correcta",
-      "size":      "Tamaño correcto",
+      "location": "Ubicación correcta",
+      "size": "Tamaño correcto",
       "equipment": "Mezcla de equipos correcta",
-      "profit":    "Máximas ganancias"
+      "profit": "Máximas ganancias"
     }
   },
-
   "about": {
     "hero": {
       "eyebrow": "Acerca de",
@@ -229,14 +251,14 @@
       "ctaSecondary": "Contáctenos"
     },
     "facts": {
-      "founded":   "Fundada",
+      "founded": "Fundada",
       "locations": "Ubicaciones y creciendo",
-      "owners":    "Propietarios de franquicia",
-      "hq":        "Sede en Jacksonville, FL"
+      "owners": "Propietarios de franquicia",
+      "hq": "Sede en Jacksonville, FL"
     },
     "story": {
       "eyebrow": "Nuestra historia",
-      "title":   "Construida para modernizar una industria estancada en el pasado.",
+      "title": "Construida para modernizar una industria estancada en el pasado.",
       "p1": "WaveMAX fue fundada en 2012 por Mike Roberts en Jacksonville, Florida. Después de dos décadas construyendo negocios exitosos en múltiples industrias, Mike quedó fascinado con la estabilidad de la industria de lavanderías y su potencial de flujo de efectivo — e igualmente impactado por lo desactualizada que se había vuelto la lavandería promedio como experiencia para el cliente.",
       "p2": "La tesis detrás de WaveMAX: la lavandería es un negocio estable y resistente a la recesión, pero la mayoría de las lavanderías operan como negocios legacy descompuestos — equipos descuidados, mala iluminación, sin personal, sin sistemas. Modernice el diseño, profesionalice las operaciones y franquicie el manual, y el resultado es una experiencia que define la categoría y que los clientes realmente eligen, no se conforman con tener.",
       "p3": "Hoy el sistema opera como AU Hydro LLC dba WaveMAX Laundry, con más de 75 ubicaciones abiertas y una red creciente de propietarios de franquicia independientes en todo Estados Unidos."
@@ -247,55 +269,54 @@
     },
     "awards": {
       "eyebrow": "Premios y reconocimientos",
-      "title":   "Verificado de forma independiente.",
-      "lede":    "WaveMAX es una de las pocas franquicias de lavandería clasificadas en el Franchise 500 anual de Entrepreneur — el referente independiente más riguroso de la industria sobre calidad, crecimiento, fortaleza financiera y estabilidad de los sistemas de franquicia.",
+      "title": "Verificado de forma independiente.",
+      "lede": "WaveMAX es una de las pocas franquicias de lavandería clasificadas en el Franchise 500 anual de Entrepreneur — el referente independiente más riguroso de la industria sobre calidad, crecimiento, fortaleza financiera y estabilidad de los sistemas de franquicia.",
       "a1Name": "#1 Franquicia de Lavandería",
       "a1Role": "Entrepreneur Franchise 500 · 2026",
-      "a1Bio":  "Clasificada #1 en la categoría de lavanderías en la lista Franchise 500 2026 de Entrepreneur.",
+      "a1Bio": "Clasificada #1 en la categoría de lavanderías en la lista Franchise 500 2026 de Entrepreneur.",
       "a2Name": "Franchise 500",
       "a2Role": "Entrepreneur · 2026",
-      "a2Bio":  "Clasificada #485 en general entre todos los sistemas de franquicia e industrias en el Franchise 500 2026 de Entrepreneur.",
+      "a2Bio": "Clasificada #485 en general entre todos los sistemas de franquicia e industrias en el Franchise 500 2026 de Entrepreneur.",
       "a3Name": "Franchise 500",
       "a3Role": "Entrepreneur · 2024",
-      "a3Bio":  "Clasificada #416 en general en el Franchise 500 2024 de Entrepreneur — subió a #485 en 2026 junto con la expansión del sistema."
+      "a3Bio": "Clasificada #416 en general en el Franchise 500 2024 de Entrepreneur — subió a #485 en 2026 junto con la expansión del sistema."
     },
     "team": {
       "eyebrow": "Liderazgo",
-      "title":   "El equipo detrás de la marca.",
-      "lede":    "WaveMAX es liderada por un pequeño equipo de operadores que han estado dirigiendo y escalando el negocio desde 2012. La integridad de la marca, los resultados de los franquiciados y la disciplina operativa son los estándares contra los cuales se mide cada decisión.",
+      "title": "El equipo detrás de la marca.",
+      "lede": "WaveMAX es liderada por un pequeño equipo de operadores que han estado dirigiendo y escalando el negocio desde 2012. La integridad de la marca, los resultados de los franquiciados y la disciplina operativa son los estándares contra los cuales se mide cada decisión.",
       "mrRole": "Fundador y Director Ejecutivo",
-      "mrBio":  "Mike fundó WaveMAX en 2012 después de dos décadas construyendo negocios exitosos en múltiples industrias. Lidera la estrategia de marca, el desarrollo de franquiciados y la visión de largo plazo para el sistema.",
+      "mrBio": "Mike fundó WaveMAX en 2012 después de dos décadas construyendo negocios exitosos en múltiples industrias. Lidera la estrategia de marca, el desarrollo de franquiciados y la visión de largo plazo para el sistema.",
       "shRole": "Directora Financiera · Socia Gerente",
-      "shBio":  "Sheila ha sido Socia Gerente desde la fundación de la empresa en 2012. Anteriormente Presidenta de Learning Time Academy, lidera las finanzas, contabilidad y planificación de capital del sistema de franquicia.",
+      "shBio": "Sheila ha sido Socia Gerente desde la fundación de la empresa en 2012. Anteriormente Presidenta de Learning Time Academy, lidera las finanzas, contabilidad y planificación de capital del sistema de franquicia.",
       "bhRole": "Desarrollo de Franquicia",
-      "bhBio":  "Brittany lidera la recepción de candidatos y el proceso de descubrimiento de la franquicia — desde la primera conversación hasta la revisión del FDD, el Día de Descubrimiento y la adjudicación. Es la puerta de entrada para los propietarios potenciales que consideran WaveMAX."
+      "bhBio": "Brittany lidera la recepción de candidatos y el proceso de descubrimiento de la franquicia — desde la primera conversación hasta la revisión del FDD, el Día de Descubrimiento y la adjudicación. Es la puerta de entrada para los propietarios potenciales que consideran WaveMAX."
     },
     "values": {
       "eyebrow": "Lo que defendemos",
-      "title":   "Una red nacional. Un solo estándar operativo.",
-      "lede":    "Cada WaveMAX es de propiedad y operación independiente, pero el sistema funciona sobre un conjunto compartido de estándares operativos. Estos valores moldean tanto la experiencia del cliente dentro de la tienda como la asociación de largo plazo que construimos con cada propietario.",
+      "title": "Una red nacional. Un solo estándar operativo.",
+      "lede": "Cada WaveMAX es de propiedad y operación independiente, pero el sistema funciona sobre un conjunto compartido de estándares operativos. Estos valores moldean tanto la experiencia del cliente dentro de la tienda como la asociación de largo plazo que construimos con cada propietario.",
       "v1Title": "Más Limpia.",
-      "v1Text":  "Equipos modernos, salas atendidas, sanitización avanzada en tiendas equipadas. El cliente nunca debería tener que preguntarse si la máquina está lo suficientemente limpia para usar.",
+      "v1Text": "Equipos modernos, salas atendidas, sanitización avanzada en tiendas equipadas. El cliente nunca debería tener que preguntarse si la máquina está lo suficientemente limpia para usar.",
       "v2Title": "Más Segura.",
-      "v2Text":  "Tiendas iluminadas, horarios atendidos y selección disciplinada de sitios que coloca las ubicaciones WaveMAX en barrios que se perciben seguros para las familias que hacen mandados de noche.",
+      "v2Text": "Tiendas iluminadas, horarios atendidos y selección disciplinada de sitios que coloca las ubicaciones WaveMAX en barrios que se perciben seguros para las familias que hacen mandados de noche.",
       "v3Title": "Más Rápida.",
-      "v3Text":  "Las máquinas comerciales de alta extracción procesan las cargas más rápido que las máquinas domésticas o las lavanderías típicas. Menos espera, más hecho.",
+      "v3Text": "Las máquinas comerciales de alta extracción procesan las cargas más rápido que las máquinas domésticas o las lavanderías típicas. Menos espera, más hecho.",
       "v4Title": "Integridad de marca.",
-      "v4Text":  "Somos intencionalmente selectivos sobre a quién le adjudicamos territorios. Cada propietario refleja el estándar WaveMAX en su mercado.",
+      "v4Text": "Somos intencionalmente selectivos sobre a quién le adjudicamos territorios. Cada propietario refleja el estándar WaveMAX en su mercado.",
       "v5Title": "Resultados del propietario primero.",
-      "v5Text":  "La métrica de éxito para cualquier decisión es si construye flujo de efectivo del franquiciado en el largo plazo — no extracción de regalías en el corto plazo.",
+      "v5Text": "La métrica de éxito para cualquier decisión es si construye flujo de efectivo del franquiciado en el largo plazo — no extracción de regalías en el corto plazo.",
       "v6Title": "Disciplina operativa.",
-      "v6Text":  "La selección de sitios, equipos, capacitación, marketing y operaciones funcionan sobre manuales documentados. Replicables en distintos mercados, no a la medida."
+      "v6Text": "La selección de sitios, equipos, capacitación, marketing y operaciones funcionan sobre manuales documentados. Replicables en distintos mercados, no a la medida."
     },
     "cta": {
-      "eyebrow":     "¿Quiere saber más?",
-      "title":       "Dos formas de dar el siguiente paso.",
-      "lede":        "Si es un franquiciado potencial, comience con la visión general de la franquicia. Si es cliente, periodista o socio con una pregunta diferente, la página de contacto tiene el canal correcto.",
-      "btnPrimary":  "Explorar la franquicia",
+      "eyebrow": "¿Quiere saber más?",
+      "title": "Dos formas de dar el siguiente paso.",
+      "lede": "Si es un franquiciado potencial, comience con la visión general de la franquicia. Si es cliente, periodista o socio con una pregunta diferente, la página de contacto tiene el canal correcto.",
+      "btnPrimary": "Explorar la franquicia",
       "btnSecondary": "Contáctenos"
     }
   },
-
   "testimonials": {
     "hero": {
       "eyebrow": "Testimonios",
@@ -307,46 +328,122 @@
     },
     "band": {
       "locations": "Ubicaciones abiertas",
-      "owners":    "Franquiciados",
-      "rank":      "Franquicia de lavandería · 2026",
-      "avgGross":  "Bruto prom. · FDD 2024"
+      "owners": "Franquiciados",
+      "rank": "Franquicia de lavandería · 2026",
+      "avgGross": "Bruto prom. · FDD 2024"
     },
     "cards": {
       "eyebrow": "Desde la red",
-      "title":   "Escuche directamente a los propietarios de WaveMAX.",
-      "lede":    "Cada uno de los franquiciados a continuación es un propietario real de WaveMAX con un papel activo en la red. Las citas son suyas, atribuidas por nombre y territorio.",
+      "title": "Escuche directamente a los propietarios de WaveMAX.",
+      "lede": "Cada uno de los franquiciados a continuación es un propietario real de WaveMAX con un papel activo en la red. Las citas son suyas, atribuidas por nombre y territorio.",
       "slQuote": "WaveMAX da a las personas la capacidad de operar un negocio, pero también de enfocarse en otros aspectos de la vida. Operar dentro del marco de WaveMAX, sin dejar de poner su propio toque en su sueño de ser dueño de un negocio semi-ausente, es la fórmula perfecta. WaveMAX ha descubierto cómo modernizar una industria arcaica a través de la tecnología, el marketing, los estudios de área y mejoras operativas continuas para mantenerse por delante de la competencia.",
-      "slRole":  "Representante de Área y Propietario de Tienda · Gaithersburg, MD",
+      "slRole": "Representante de Área y Propietario de Tienda · Gaithersburg, MD",
       "caQuote": "Decidí involucrarme con WaveMAX porque vi una oportunidad única de aportar algo que la industria de lavanderías necesitaba desesperadamente: gestión profesional, estructura operativa y un mayor estándar de excelencia. En los últimos siete u ocho años, he visto cómo esta visión cobra vida. Lo que más me entusiasma es hacia dónde nos dirigimos — escalar con intención y construirlo juntos.",
-      "caRole":  "Representante de Área y Operador · DFW / East TX",
+      "caRole": "Representante de Área y Operador · DFW / East TX",
       "pkQuote": "WaveMAX ha transformado verdaderamente la experiencia del cliente al crear un entorno seguro, confiable y acogedor en el que la gente confía y al que regresa. La industria de lavanderías ha estado históricamente dominada por operaciones independientes que funcionan con monedas — mal mantenidas, con personal inconsistente y sin identidad de marca. WaveMAX fue diseñada específicamente como un sistema de franquicia escalable para corregir eso.",
-      "pkRole":  "Director de Área · Georgia y Tennessee",
+      "pkRole": "Director de Área · Georgia y Tennessee",
       "shQuote": "Como el primer franquiciado de WaveMAX, estuve allí cuando la marca estaba descubriendo lo que quería ser. La disciplina que este equipo ha aportado a la selección de sitios, los equipos y las operaciones es lo que separa a WaveMAX de cualquier otra lavandería que haya visto. Literalmente escribí el libro al respecto — SHIFT Happens.",
-      "shRole":  "Director de Operaciones · Primer Franquiciado de WaveMAX · Representante de Área N. California / Nevada · Autor de SHIFT Happens"
+      "shRole": "Director de Operaciones · Primer Franquiciado de WaveMAX · Representante de Área N. California / Nevada · Autor de SHIFT Happens"
     },
     "live": {
-      "eyebrow":    "Reseñas de clientes en vivo",
-      "title":      "De clientes en toda la red.",
-      "lede":       "Estas son reseñas de Google de 5 estrellas extraídas en vivo de ubicaciones de WaveMAX en todo el país. Clientes reales, reseñas reales, actualizadas automáticamente — no extractos de marketing seleccionados.",
-      "loading":    "Cargando reseñas de clientes…",
-      "error":      "No se pudieron cargar las reseñas de la red en este momento. Intente actualizar en unos minutos.",
+      "eyebrow": "Reseñas de clientes en vivo",
+      "title": "De clientes en toda la red.",
+      "lede": "Estas son reseñas de Google de 5 estrellas extraídas en vivo de ubicaciones de WaveMAX en todo el país. Clientes reales, reseñas reales, actualizadas automáticamente — no extractos de marketing seleccionados.",
+      "loading": "Cargando reseñas de clientes…",
+      "error": "No se pudieron cargar las reseñas de la red en este momento. Intente actualizar en unos minutos.",
       "attrPrefix": "Reseñas vía",
       "attrSuffix": "· actualizadas cada 6 horas · muestreadas en múltiples ubicaciones de WaveMAX"
     },
     "callout": {
-      "eyebrow":      "Verificable de forma independiente",
-      "title":        "Nuestros números, no solo nuestras citas.",
-      "lede":         "Las historias de los propietarios son parte del panorama, pero no son el panorama completo. WaveMAX publica cifras verificables del Item 19 en nuestro Documento de Divulgación de Franquicia, y la experiencia del cliente de cada tienda se refleja en reseñas de Google en vivo — no en extractos seleccionados.",
-      "item1":        "Item 19 del FDD 2024: $471,201 de ingresos brutos promedio, $436,114 mediana, $713,934 el mejor desempeño — muestra de 50 tiendas en operación",
-      "item2":        "Tienda insignia de Jacksonville: $217,762 de flujo de caja neto / $113,074 de ingreso neto (con financiamiento total del equipo)",
-      "item3":        "Rango de EBITDA reportado: 25–35% en todo el sistema",
-      "item4":        "Reseñas de clientes en vivo: las reseñas de cada ubicación de WaveMAX se muestran en vivo desde Google Places — la experiencia que sus clientes realmente tendrán",
-      "item5":        "Reconocimiento de marca: clasificada como la franquicia de lavandería #1 en el Franchise 500 de Entrepreneur 2026, #485 a nivel general en 2026 (subiendo desde #416 en 2024)",
-      "btnPrimary":   "Vea los datos de inversión",
+      "eyebrow": "Verificable de forma independiente",
+      "title": "Nuestros números, no solo nuestras citas.",
+      "lede": "Las historias de los propietarios son parte del panorama, pero no son el panorama completo. WaveMAX publica cifras verificables del Item 19 en nuestro Documento de Divulgación de Franquicia, y la experiencia del cliente de cada tienda se refleja en reseñas de Google en vivo — no en extractos seleccionados.",
+      "item1": "Item 19 del FDD 2024: $471,201 de ingresos brutos promedio, $436,114 mediana, $713,934 el mejor desempeño — muestra de 50 tiendas en operación",
+      "item2": "Tienda insignia de Jacksonville: $217,762 de flujo de caja neto / $113,074 de ingreso neto (con financiamiento total del equipo)",
+      "item3": "Rango de EBITDA reportado: 25–35% en todo el sistema",
+      "item4": "Reseñas de clientes en vivo: las reseñas de cada ubicación de WaveMAX se muestran en vivo desde Google Places — la experiencia que sus clientes realmente tendrán",
+      "item5": "Reconocimiento de marca: clasificada como la franquicia de lavandería #1 en el Franchise 500 de Entrepreneur 2026, #485 a nivel general en 2026 (subiendo desde #416 en 2024)",
+      "btnPrimary": "Vea los datos de inversión",
       "btnSecondary": "Explorar la franquicia"
     }
   },
-
+  "whyInvest": {
+    "hero": {
+      "eyebrow": "Por qué invertir en WaveMAX",
+      "title1": "Cifras reales.",
+      "title2": "FDD verificado.",
+      "sub": "WaveMAX es la franquicia de lavandería #1 en el Franchise 500 de Entrepreneur 2026. A continuación: las cifras del Item 19, ejemplos de flujo de caja y las razones estructurales por las que los operadores eligen esta categoría. Sin números seleccionados a conveniencia — verificados y con fuente citada.",
+      "ctaPrimary": "Comenzar la conversación",
+      "ctaSecondary": "Obtener la guía de inversión"
+    },
+    "headline": {
+      "grossLabel": "Ingreso bruto promedio",
+      "grossSub": "2024 · muestra de 50 tiendas",
+      "ebitdaLabel": "Rango de EBITDA",
+      "ebitdaSub": "Reportado en todo el sistema",
+      "paybackLabel": "Período de recuperación",
+      "paybackSub": "Operador típico",
+      "ownerLabel": "Tiempo del propietario / semana",
+      "ownerSub": "Modelo semi-ausente"
+    },
+    "i19": {
+      "eyebrow": "Divulgación del Item 19",
+      "title": "Ingreso bruto promedio por tienda en 2024.",
+      "lede": "Según la divulgación del Item 19 del FDD 2025: una muestra de 50 tiendas WaveMAX que reportan los ingresos brutos del año completo 2024. Estas cifras son las mismas que recibe cada candidato a franquiciado durante la fase de revisión del FDD en el proceso de descubrimiento — están reguladas legalmente y las publicamos por adelantado.",
+      "colStat": "Estadística",
+      "colGross": "Ingreso bruto",
+      "colSample": "Tamaño de muestra",
+      "rowAvg": "Promedio",
+      "rowMedian": "Mediana",
+      "rowTop": "Mejor desempeño",
+      "fiftyStores": "50 tiendas",
+      "singleStore": "una tienda",
+      "attr": "Fuente: Documento de Divulgación de Franquicia WaveMAX, edición 2025, Item 19. Documento completo entregado a candidatos calificados durante el proceso de descubrimiento (paso 02)."
+    },
+    "flow": {
+      "eyebrow": "Resumen de flujo de caja",
+      "title": "Tienda insignia de Jacksonville — cifras reales 2024.",
+      "lede": "La lectura más clara del modelo WaveMAX es nuestra tienda insignia de Jacksonville, propiedad de la empresa. Mismo FDD, mismo manual operativo, misma estructura de costos que una unidad franquiciada — con los libros abiertos. Resultados reales 2024:",
+      "cashLabel": "Flujo de caja neto (después de regalías + marketing + POS)",
+      "cashText": "Flujo de caja operativo antes del servicio de la deuda. Ya están deducidas la regalía, la contribución al fondo de marketing y los cargos de POS / tecnología.",
+      "incomeLabel": "Ingreso neto (con financiamiento total del equipo)",
+      "incomeText": "Ingreso neto después de deducir también el pago del financiamiento del equipo — modelado como si el franquiciado financiara el 100% del paquete de equipo mediante financiamiento elegible para SBA, el escenario más apalancado.",
+      "disclaimer": "El desempeño pasado de una unidad propiedad de la empresa no garantiza resultados futuros para los franquiciados. Consulte el FDD para divulgaciones completas, detalle del Item 19 y respaldo de todas las cifras."
+    },
+    "cat": {
+      "eyebrow": "Por qué esta categoría",
+      "title": "Seis razones estructurales por las que los operadores eligen lavandería.",
+      "lede": "Más allá de las cifras, la categoría de lavandería tiene características estructurales que la convierten en un negocio duradero de flujo de caja — particularmente cuando se moderniza, se profesionaliza y se opera como un sistema de franquicia en lugar de una operación independiente aislada.",
+      "r1Title": "Demanda resistente a la recesión",
+      "r1Text": "La lavandería es una necesidad, no un capricho. Las familias trabajadoras dependen de las lavanderías por necesidad — los patrones de uso son estables a lo largo de cada ciclo económico.",
+      "r2Title": "Sin riesgo de inventario",
+      "r2Text": "El \"producto\" es un servicio, no bienes. No hay deterioro, ni obsolescencia, ni amortizaciones de inventario. El equipo se deprecia de forma predecible y es bien comprendido por los prestamistas.",
+      "r3Title": "Negocio de cobro en efectivo",
+      "r3Text": "Sin cuentas por cobrar. Sin cobranzas. Sin plazos de pago a 30 días. El modelo convierte los ingresos en efectivo el mismo día en que se generan.",
+      "r4Title": "Personal reducido",
+      "r4Text": "Las tiendas modernas con atención (no operadas por monedas) funcionan con un equipo pequeño. El costo laboral representa un porcentaje menor de los ingresos que en el comercio minorista o el servicio de comidas.",
+      "r5Title": "Financiamiento elegible para SBA",
+      "r5Text": "El equipo y la construcción son elegibles para SBA. Los prestamistas que entienden la economía de las lavanderías estructuran el financiamiento en consecuencia. La mayoría de los franquiciados utilizan una combinación de efectivo y deuda SBA.",
+      "r6Title": "Camino hacia múltiples unidades",
+      "r6Text": "El modelo está diseñado para escalar. Los operadores con una tienda generando flujo de caja típicamente abren la segunda dentro de 18 meses, con el apoyo de incentivos de desarrollo de área."
+    },
+    "ent": {
+      "eyebrow": "Validación externa",
+      "title": "Clasificada de forma independiente. Reconocida una y otra vez.",
+      "lede": "El Franchise 500 anual de Entrepreneur es el referente más riguroso de la industria de franquicias en cuanto a calidad del sistema, crecimiento, fortaleza financiera y estabilidad. WaveMAX ha sido clasificada en él de forma constante — y ha mantenido el puesto #1 en la categoría de lavandería en 2026.",
+      "cat2026": "Franquicia de lavandería · 2026",
+      "overall2026": "Franchise 500 general · 2026",
+      "overall2024": "Franchise 500 general · 2024",
+      "years": "Años en operación"
+    },
+    "cta": {
+      "eyebrow": "¿Listo para profundizar?",
+      "title": "Solicite la guía de inversión completa.",
+      "lede": "La guía de inversión incluye el detalle completo de fuentes y usos, un proforma de muestra, la estructura de financiamiento y la hoja de ruta de descubrimiento de 6 pasos. Se entrega por correo electrónico, sin necesidad de una llamada de ventas con presión.",
+      "btnPrimary": "Obtener la guía de inversión",
+      "btnSecondary": "Vea si califica"
+    }
+  },
   "common": {
     "ctaLearnMore": "Más información",
     "ctaGetGuide": "Obtener la Guía de Inversión",
