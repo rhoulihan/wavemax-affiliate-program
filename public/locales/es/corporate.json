@@ -782,6 +782,120 @@
       "btnSecondary": "Agendar la llamada"
     }
   },
+  "contact": {
+    "hero": {
+      "eyebrow": "Contacto",
+      "title1": "Hable con el equipo.",
+      "title2": "Sin árboles telefónicos.",
+      "sub": "Ya sea un futuro franquiciado, un periodista con plazo, un proveedor presentando un producto o un cliente con una pregunta — el mensaje llega a una persona real en nuestra sede de Jacksonville. Normalmente respondemos en un día hábil."
+    },
+    "hq": {
+      "eyebrow": "Sede corporativa",
+      "title": "WaveMAX Laundry",
+      "meta": "AU Hydro LLC dba WaveMAX Laundry",
+      "addressLabel": "Dirección postal",
+      "directions": "Cómo llegar →",
+      "franchiseLabel": "Desarrollo de franquicias",
+      "franchiseHint": "O use el formulario — enrutamos las consultas de franquicias automáticamente.",
+      "generalLabel": "Consultas generales",
+      "hoursLabel": "Horario de oficina",
+      "hoursText": "Lunes–Viernes, 9:00 AM – 5:00 PM ET. Los mensajes fuera de horario se leen la siguiente mañana hábil."
+    },
+    "form": {
+      "title": "Envíe un mensaje.",
+      "sub": "Elija un tema, díganos cómo contactarle y qué tiene en mente. Lo enrutaremos a la persona adecuada.",
+      "topicLabel": "Tema",
+      "topicPlaceholder": "Seleccione un tema…",
+      "topicFranchise": "Consulta de franquicia",
+      "topicCustomer": "Soporte al cliente",
+      "topicPress": "Prensa / medios",
+      "topicVendor": "Proveedor / asociación",
+      "topicGeneral": "Pregunta general",
+      "firstNameLabel": "Nombre",
+      "lastNameLabel": "Apellido",
+      "emailLabel": "Correo electrónico",
+      "phoneLabel": "Teléfono (opcional)",
+      "messageLabel": "Mensaje",
+      "submit": "Enviar mensaje"
+    }
+  },
+  "guide": {
+    "hero": {
+      "eyebrow": "PDF gratuito · Guía de Inversión",
+      "title1": "Cifras reales.",
+      "title2": "Camino real.",
+      "title3": "Sin discurso de venta.",
+      "sub": "La Guía de Inversión de WaveMAX es un PDF completo que cubre las cifras del Item 19 del FDD 2025, la instantánea de flujo de caja del establecimiento insignia de Jacksonville, las fuentes y usos de capital, la estructura de financiamiento y la hoja de ruta de descubrimiento de franquicia en 6 pasos. Entregada por correo electrónico — sin llamadas de venta de alta presión."
+    },
+    "toc": {
+      "t1": "Divulgación del Item 19 de 2024: $471,201 promedio bruto, $436,114 mediana, $713,934 mejor desempeño (muestra de 50 tiendas)",
+      "t2": "Instantánea de flujo de caja del insignia de Jacksonville: $217,762 flujo de caja neto, $113,074 ingreso neto con financiamiento completo de equipos",
+      "t3": "Fuentes y usos de capital, pro forma de muestra, cobertura del servicio de la deuda",
+      "t4": "Presentaciones de prestamistas elegibles para SBA y la estructura de financiamiento que utiliza la mayoría de los franquiciados",
+      "t5": "Proceso de descubrimiento de franquicia en 6 pasos desde la llamada inicial hasta la gran apertura"
+    },
+    "form": {
+      "title": "Obtenga la guía.",
+      "sub": "Cuéntenos un poco sobre usted y le enviaremos el PDF por correo electrónico en un día hábil.",
+      "firstNameLabel": "Nombre",
+      "lastNameLabel": "Apellido",
+      "emailLabel": "Correo electrónico",
+      "phoneLabel": "Teléfono",
+      "marketLabel": "Mercado de interés (opcional)",
+      "marketPlaceholder": "Ciudad, estado o región",
+      "timelineLabel": "Cronograma",
+      "timelinePlaceholder": "Seleccione…",
+      "timeline_asap": "Lo antes posible",
+      "timeline_3months": "Dentro de 3 meses",
+      "timeline_6months": "Dentro de 6 meses",
+      "timeline_12months": "Dentro de 12 meses",
+      "timeline_researching": "Solo estoy investigando",
+      "capitalLabel": "Capital líquido",
+      "capitalPlaceholder": "Seleccione…",
+      "capital_under400k": "Menos de $400K",
+      "capital_400k": "$400K – $750K",
+      "capital_750k": "$750K – $1.5M",
+      "capital_over1_5m": "Más de $1.5M",
+      "submit": "Envíenme la guía",
+      "disclaimer": "Al enviar, acepta ser contactado sobre la oportunidad de franquicia de WaveMAX. No compartimos su información con terceros."
+    },
+    "thanks": {
+      "title": "Solicitud recibida.",
+      "p1": "Su Guía de Inversión va camino a su bandeja de entrada. Revise su correo electrónico dentro del próximo día hábil.",
+      "p2": "Un miembro de nuestro equipo de desarrollo de franquicias se pondrá en contacto para agendar la llamada exploratoria inicial de 30 minutos.",
+      "tokenLabel": "Referencia:"
+    },
+    "what": {
+      "eyebrow": "Lo que incluye",
+      "title": "Una mirada honesta a los números de WaveMAX.",
+      "lede": "Sin relleno, sin texto de marketing generado por IA. La Guía de Inversión es la misma información que repasamos durante la fase de revisión del FDD del proceso de descubrimiento — publicada por adelantado para que pueda evaluar el modelo en términos reales.",
+      "p1Title": "Cifras del Item 19",
+      "p1Text": "Divulgación del FDD 2025: $471,201 promedio bruto, $436,114 mediana, $713,934 mejor desempeño. Muestra de 50 tiendas reportando el año completo 2024.",
+      "p2Title": "Instantánea de flujo de caja",
+      "p2Text": "Insignia propiedad de la empresa en Jacksonville 2024: $217,762 flujo de caja neto / $113,074 ingreso neto con financiamiento completo de equipos.",
+      "p3Title": "Fuentes y usos",
+      "p3Text": "Rango de inversión total $356K–$1.56M. Cómo la mayoría de los franquiciados dividen capital propio / SBA / financiamiento de equipos a lo largo de la construcción.",
+      "p4Title": "Red de prestamistas",
+      "p4Text": "Prestamistas preferidos elegibles para SBA que ya entienden la economía unitaria de WaveMAX. Presentaciones directas durante el descubrimiento.",
+      "p5Title": "Proceso de 6 pasos",
+      "p5Text": "Llamada inicial → revisión del FDD → análisis de mercado → Día de Descubrimiento → contrato de franquicia → construcción y lanzamiento. Cronograma típico de 6–9 meses.",
+      "p6Title": "PDF personalizado",
+      "p6Text": "Portada estampada con su nombre; token de referencia en el pie de página para seguimiento cruzado. Dimensionado para tableta o impresión."
+    },
+    "trust": {
+      "locations": "Ubicaciones abiertas",
+      "avgGross": "Promedio bruto · Item 19 2024",
+      "ebitda": "Rango de EBITDA reportado",
+      "rank": "Franquicia de lavandería · 2026"
+    },
+    "cta": {
+      "eyebrow": "¿Prefiere conversar primero?",
+      "title": "Sáltese el PDF — comience con la llamada.",
+      "lede": "Si prefiere repasar los números con nuestro equipo de desarrollo de franquicias, la llamada exploratoria de 30 minutos es una manera más rápida de saber si WaveMAX es el ajuste adecuado para su situación.",
+      "btnPrimary": "Agendar la llamada",
+      "btnSecondary": "Ver todas las cifras"
+    }
+  },
   "common": {
     "ctaLearnMore": "Más información",
     "ctaGetGuide": "Obtener la Guía de Inversión",

@@ -597,6 +597,8 @@ apiV1Router.use('/system/config', systemConfigRoutes);
 apiV1Router.use('/service-area', serviceAreaRoutes);  // Service area and location validation
 apiV1Router.use('/location', require('./server/routes/locationRoutes'));  // Per-location reads (reviews, etc.)
 apiV1Router.use('/contact', require('./server/routes/contactRoutes'));  // Per-location contact-form submissions
+apiV1Router.use('/', require('./server/routes/corporateInquiryRoutes'));  // /corporate-contact + /franchise-lead
+apiV1Router.use('/', require('./server/routes/mapsConfigRoute'));  // /maps-config — Maps API key for corporate pages
 apiV1Router.use('/payments', paymentRoutes);
 
 // Test routes (development only)
@@ -671,6 +673,12 @@ app.get(['/virtual-tour', '/virtual-tour/'], (req, res) => {
 });
 app.get(['/faq', '/faq/'], (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'faq.html'));
+});
+app.get(['/contact', '/contact/'], (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'contact.html'));
+});
+app.get(['/laundromat-investment-guide', '/laundromat-investment-guide/'], (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'laundromat-investment-guide.html'));
 });
 
 // Per-franchise dynamic routes — Phase 5a. Mounted AFTER /api/* and the
