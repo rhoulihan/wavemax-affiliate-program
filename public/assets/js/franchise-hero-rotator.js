@@ -26,21 +26,21 @@
       }
     }
 
-    // Always advance. Earlier versions tried to pause on hover, but
-    // headless browsers report :hover as always true, and real cursors
-    // landing on the card during page load made the rotator look
-    // permanently stalled. Continuous rotation is simpler and works.
+    // Always advance. Earlier versions tried to pause on hover (broke
+    // in headless browsers) and to honor prefers-reduced-motion (which
+    // Windows users get auto-set when "Show animations in Windows" is
+    // off, leaving the rotator stuck on slide 0). The 1.2s opacity
+    // crossfade is gentle enough not to trigger motion sensitivity.
     function tick() {
       i = (i + 1) % slides.length;
       show(i);
     }
 
-    // Don't auto-rotate if user prefers reduced motion.
-    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      return;
-    }
-
     setInterval(tick, SLIDE_MS);
+    // Kick off the first transition slightly before the first interval
+    // tick so the photo card visibly moves within ~1s of page load,
+    // which makes the rotation feature obvious to the user.
+    setTimeout(tick, 800);
   }
 
   if (document.readyState === 'loading') {
