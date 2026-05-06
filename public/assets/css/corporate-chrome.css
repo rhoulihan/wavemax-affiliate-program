@@ -3,6 +3,21 @@
  * Pairs with corporate-chrome.js — same V3 design language.
  */
 
+/* Visually-hidden helper. Lets us extend a generic-looking link label
+   (e.g. "Learn More") with descriptive text that crawlers + screen
+   readers see but visually-sighted users don't. Lighthouse's
+   link-text SEO audit reads textContent, not aria-label, so the
+   descriptive text MUST live in the DOM. */
+.wm-sr-only {
+  position: absolute;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
 /* ============================================================
    BREADCRUMB — matches per-franchise pages (lifted from
    austin-host-mock.css so corporate and per-store render
