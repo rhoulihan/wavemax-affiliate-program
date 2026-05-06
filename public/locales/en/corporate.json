@@ -587,6 +587,108 @@
     }
   },
 
+  "become": {
+    "hero": {
+      "eyebrow":      "Become a franchisee",
+      "title1":       "How to buy a",
+      "title2":       "WaveMAX®",
+      "title3":       "laundromat franchise.",
+      "sub":          "A clear, structured 6-step process from your first conversation to opening day — backed by real systems, transparent numbers, and a team that's done it 75+ times.",
+      "ctaPrimary":   "See if you qualify",
+      "ctaSecondary": "View the 6 steps"
+    },
+    "path": {
+      "eyebrow": "The path forward",
+      "title":   "From researcher to franchise owner.",
+      "p1":      "Buying a WaveMAX laundromat franchise is one of the largest financial decisions you'll make in your career. Our franchise discovery process is designed to give you the time, the data, and the direct access you need to make that decision with confidence — and to give us the chance to evaluate whether you're the right fit for our brand.",
+      "p2":      "Most laundromat franchise opportunities you'll evaluate are built around a transactional sales pitch: a smooth-talking franchise rep, a polished pitch deck, and pressure to sign before the next quarter closes. This is not that.",
+      "p3":      "We move at the pace of the qualified candidate, not the pace of the sales calendar. We expect you to talk to existing owners. We expect you to visit our company-owned store. And we expect you to walk away if it isn't the right fit. The result is a process that typically takes 60–120 days from initial conversation to award — and a franchise system where the people who make it through are some of the strongest operators in the industry."
+    },
+    "qual": {
+      "eyebrow":  "Qualifications",
+      "title":    "Are you a fit for WaveMAX?",
+      "lede":     "We're intentionally selective about who we award territories to. Brand integrity matters, and every owner reflects the WaveMAX standard. These are minimums — not aspirational targets. We don't bend on them.",
+      "q1Label":  "Min. Liquidity",
+      "q1Text":   "Cash available for investment to ensure your store is positioned for long-term success.",
+      "q2Label":  "Min. Net Worth",
+      "q2Text":   "Demonstrated financial capacity to weather build-out and ramp-up confidently.",
+      "q3Label":  "Per Week (Owner)",
+      "q3Text":   "Semi-absentee model — about 10 hours per week in-store handling staffing and KPIs.",
+      "q4Label":  "Coachable Mindset",
+      "q4Text":   "Willing to follow proven systems before improving on them. Long-term thinkers, not quick-flip operators."
+    },
+    "steps": {
+      "eyebrow":  "The path",
+      "title":    "Six steps to laundromat ownership.",
+      "lede":     "A clear path designed to help you make an informed decision — and to help us partner with the right operators.",
+      "s1Title":  "Initial Conversation",
+      "s1Text":   "A 30-minute introductory call to learn about your goals, market interest, financial position, and timeline. We answer your initial questions, share top-line numbers, and decide together whether it makes sense to keep going.",
+      "s2Title":  "Discovery & FDD Review",
+      "s2Text":   "Receive our Franchise Disclosure Document. Review the model, financials, support structure, royalty fees, territory rights, and Item 19 numbers in detail. Take as long as you need.",
+      "s3Title":  "Validation Calls",
+      "s3Text":   "Speak directly with current WaveMAX franchise owners. Ask anything. Learn what real ownership looks like — the wins, the surprises, the lessons. We do not script these calls.",
+      "s4Title":  "Discovery Day",
+      "s4Text":   "Visit our company-owned store, meet the leadership team, walk the operations end-to-end, and see the model in action. This is your chance to validate everything you've read.",
+      "s5Title":  "Award & Site Selection",
+      "s5Text":   "Sign the franchise agreement, receive your territory, and begin disciplined site selection with our real estate team. We help you find a location that meets WaveMAX standards.",
+      "s6Title":  "Build, Train & Launch",
+      "s6Text":   "Build-out coordination, equipment installation, staff hiring and training, marketing launch playbook, and grand opening — followed by ongoing operational support as you ramp."
+    },
+    "invest": {
+      "eyebrow":  "The numbers",
+      "title":    "What does it cost to buy a WaveMAX®?",
+      "lede":     "Total investment for a WaveMAX laundromat franchise typically ranges from $1 million to $1.5 million, depending on your market, real estate costs, build-out scope, and equipment configuration. This range covers everything required to open the doors.",
+      "p1Title":  "What's included",
+      "p1Text":   "Franchise fees, lease and build-out, all commercial Electrolux equipment, signage and branding, technology and POS, opening inventory, and pre-opening marketing.",
+      "p2Title":  "What's required",
+      "p2Text":   "Minimum $400,000 in liquid cash for investment and $1 million minimum net worth. Most franchisees finance a portion of the equipment and use SBA-eligible financing for the build-out.",
+      "p3Title":  "Lender network",
+      "p3Text":   "We work with a network of laundromat-friendly lenders who understand the unit economics of the WaveMAX model and can structure financing accordingly.",
+      "p4Title":  "Full pro forma",
+      "p4Text":   "During discovery, we walk you through sources and uses of capital, projected ramp curve, debt service coverage, and a clear picture of your monthly cash flow in years one and two."
+    },
+    "support": {
+      "eyebrow":  "What you get",
+      "title":    "Real support, from day one.",
+      "lede":     "When you award a WaveMAX franchise, you don't just buy a brand name. You get the full operating system, the people, and the infrastructure of a national franchise team.",
+      "t1Title":  "Site Selection",
+      "t1Text":   "Real estate playbooks, demographic analysis, lease negotiation support, and brand-approved location standards before sign-off.",
+      "t2Title":  "Equipment & Build-Out",
+      "t2Text":   "National Electrolux partnership pricing, store layout design, equipment installation, signage and branding.",
+      "t3Title":  "Training Programs",
+      "t3Text":   "Classroom and on-site training, operations manual, attendant training programs, and KPI dashboard onboarding.",
+      "t4Title":  "Marketing Support",
+      "t4Text":   "Launch-ready advertising, local SEO, review systems, social media playbooks, and ongoing campaign support.",
+      "t5Title":  "Operations Coaching",
+      "t5Text":   "Ongoing hands-on coaching, monthly KPI reviews, regional meetings, and direct access to leadership.",
+      "t6Title":  "Owner Network",
+      "t6Text":   "A thriving network of 75+ active franchise owners already solving the problems you're about to face."
+    },
+    "faq": {
+      "eyebrow": "Common questions",
+      "title":   "Frequently asked questions.",
+      "q1": "How much does it cost to buy a WaveMAX laundromat franchise?",
+      "a1": "Total investment ranges from $1 million to $1.5 million depending on location, build-out, and equipment. Minimum liquidity is $400,000 with a $1 million net worth requirement. Most franchisees use SBA financing for a portion of the build-out and equipment.",
+      "q2": "How long does the application process take?",
+      "a2": "Our franchise discovery process typically takes 60–120 days from initial conversation to franchise award, depending on how quickly you complete each phase. We move at the pace of the qualified candidate, not the sales calendar.",
+      "q3": "Can I open multiple WaveMAX locations?",
+      "a3": "Yes. WaveMAX is built for multi-unit ownership with structured area development agreements and growth incentives for qualified operators. Many of our most successful franchisees scale from one to multiple locations.",
+      "q4": "Do I need laundromat experience?",
+      "a4": "No prior laundromat experience is required. Our training program, operations manual, and ongoing coaching are designed to take qualified business owners from zero to operational confidence. What we look for is operating discipline and coachability.",
+      "q5": "What ongoing fees does WaveMAX charge?",
+      "a5": "WaveMAX charges a royalty fee on gross sales and a marketing fund contribution. Specific fee percentages, payment terms, and any ancillary fees are detailed in our Franchise Disclosure Document, which we share early in the discovery process.",
+      "q6": "What happens if it isn't the right fit?",
+      "a6": "You walk away. We expect that of qualified candidates and we expect that of ourselves. Better to find out in week 2 than in year 2. The owners who make it all the way through the discovery process are the ones who genuinely belong in the system."
+    },
+    "cta": {
+      "eyebrow":      "Ready when you are",
+      "title":        "Start the conversation.",
+      "lede":         "Tell us about yourself and we'll send the FDD and walk you through step 01. No high-pressure sales calls. Most operators take 60–120 days from first call to lease signed.",
+      "btnPrimary":   "Apply now",
+      "btnSecondary": "Read the franchise overview"
+    }
+  },
+
   "common": {
     "ctaLearnMore": "Learn more",
     "ctaGetGuide": "Get the Investment Guide",

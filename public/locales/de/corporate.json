@@ -604,6 +604,107 @@
       "btnSecondary": "Franchisenehmer werden"
     }
   },
+  "become": {
+    "hero": {
+      "eyebrow": "Franchisenehmer werden",
+      "title1": "Wie Sie eine",
+      "title2": "WaveMAX®",
+      "title3": "Wäscherei-Franchise erwerben.",
+      "sub": "Ein klarer, strukturierter 6-Schritte-Prozess vom ersten Gespräch bis zur Eröffnung — gestützt auf reale Systeme, transparente Zahlen und ein Team, das es bereits über 75-mal getan hat.",
+      "ctaPrimary": "Sehen Sie, ob Sie qualifiziert sind",
+      "ctaSecondary": "Die 6 Schritte ansehen"
+    },
+    "path": {
+      "eyebrow": "Der Weg nach vorn",
+      "title": "Vom Recherchierenden zum Franchise-Eigentümer.",
+      "p1": "Der Erwerb einer WaveMAX-Wäscherei-Franchise ist eine der größten finanziellen Entscheidungen, die Sie in Ihrer Karriere treffen werden. Unser Franchise-Discovery-Prozess ist darauf ausgelegt, Ihnen die Zeit, die Daten und den direkten Zugang zu geben, die Sie brauchen, um diese Entscheidung mit Vertrauen zu treffen — und uns die Möglichkeit zu geben, zu beurteilen, ob Sie zu unserer Marke passen.",
+      "p2": "Die meisten Wäscherei-Franchise-Angebote, die Sie prüfen werden, sind um einen transaktionalen Verkaufspitch herum aufgebaut: ein redegewandter Franchise-Vertriebler, ein durchgestylter Pitch-Deck und Druck, vor Quartalsende zu unterschreiben. So ist es bei uns nicht.",
+      "p3": "Wir bewegen uns im Tempo des qualifizierten Kandidaten, nicht im Tempo des Vertriebskalenders. Wir erwarten, dass Sie mit bestehenden Eigentümern sprechen. Wir erwarten, dass Sie unsere firmeneigene Filiale besuchen. Und wir erwarten, dass Sie sich zurückziehen, wenn es nicht passt. Das Ergebnis ist ein Prozess, der typischerweise 60–120 Tage vom ersten Gespräch bis zur Vergabe dauert — und ein Franchise-System, in dem die, die es bis zum Ende schaffen, zu den stärksten Betreibern der Branche gehören."
+    },
+    "qual": {
+      "eyebrow": "Qualifikationen",
+      "title": "Passen Sie zu WaveMAX?",
+      "lede": "Wir sind bewusst selektiv, an wen wir Territorien vergeben. Markenintegrität zählt, und jeder Eigentümer spiegelt den WaveMAX-Standard wider. Dies sind Mindestanforderungen — keine Wunschziele. Wir machen hier keine Kompromisse.",
+      "q1Label": "Min. Liquidität",
+      "q1Text": "Verfügbares Kapital für die Investition, damit Ihre Filiale für langfristigen Erfolg positioniert ist.",
+      "q2Label": "Min. Reinvermögen",
+      "q2Text": "Nachgewiesene finanzielle Tragfähigkeit, um Ausbau und Anlaufphase souverän zu meistern.",
+      "q3Label": "Pro Woche (Eigentümer)",
+      "q3Text": "Semi-absentee Modell — etwa 10 Stunden pro Woche in der Filiale für Personal und KPIs.",
+      "q4Label": "Coachbare Mentalität",
+      "q4Text": "Bereit, bewährte Systeme zu befolgen, bevor Sie sie verbessern. Langfristig denkende Operatoren, keine Schnellverwerter."
+    },
+    "steps": {
+      "eyebrow": "Der Weg",
+      "title": "Sechs Schritte zum eigenen Wäscherei-Geschäft.",
+      "lede": "Ein klarer Weg, der Ihnen hilft, eine fundierte Entscheidung zu treffen — und uns hilft, mit den richtigen Betreibern zu kooperieren.",
+      "s1Title": "Erstgespräch",
+      "s1Text": "Ein 30-minütiges Einführungsgespräch, um Ihre Ziele, Ihren Wunschmarkt, Ihre finanzielle Situation und Ihren Zeitplan kennenzulernen. Wir beantworten Ihre ersten Fragen, teilen Eckzahlen und entscheiden gemeinsam, ob es sinnvoll ist weiterzugehen.",
+      "s2Title": "Discovery & FDD-Prüfung",
+      "s2Text": "Sie erhalten unser Franchise Disclosure Document. Prüfen Sie das Modell, die Finanzen, die Support-Struktur, die Royalty-Gebühren, die Territorialrechte und die Item-19-Zahlen im Detail. Nehmen Sie sich so viel Zeit, wie Sie brauchen.",
+      "s3Title": "Validierungsgespräche",
+      "s3Text": "Sprechen Sie direkt mit aktuellen WaveMAX-Franchisenehmern. Fragen Sie alles. Erfahren Sie, wie reales Eigentum aussieht — die Erfolge, die Überraschungen, die Lehren. Diese Gespräche werden nicht von uns vorgegeben.",
+      "s4Title": "Discovery Day",
+      "s4Text": "Besuchen Sie unsere firmeneigene Filiale, treffen Sie das Führungsteam, gehen Sie die Abläufe von Anfang bis Ende durch und sehen Sie das Modell in Aktion. Ihre Chance, alles Gelesene zu validieren.",
+      "s5Title": "Vergabe & Standortwahl",
+      "s5Text": "Unterschreiben Sie den Franchisevertrag, erhalten Sie Ihr Territorium und beginnen Sie die disziplinierte Standortwahl mit unserem Immobilienteam. Wir helfen Ihnen, einen Standort zu finden, der den WaveMAX-Standards entspricht.",
+      "s6Title": "Bau, Schulung & Eröffnung",
+      "s6Text": "Bau-Koordination, Geräteinstallation, Personalrekrutierung und -schulung, Marketing-Launch-Playbook und große Eröffnung — gefolgt von laufender operativer Unterstützung während des Hochlaufs."
+    },
+    "invest": {
+      "eyebrow": "Die Zahlen",
+      "title": "Was kostet der Erwerb einer WaveMAX®?",
+      "lede": "Die Gesamtinvestition für eine WaveMAX-Wäscherei-Franchise liegt typischerweise zwischen $1M und $1,5M, abhängig von Ihrem Markt, Immobilienkosten, Bauumfang und Geräteausstattung. Diese Spanne deckt alles ab, was zur Eröffnung erforderlich ist.",
+      "p1Title": "Was enthalten ist",
+      "p1Text": "Franchisegebühren, Mietvertrag und Ausbau, alle gewerblichen Electrolux-Geräte, Beschilderung und Branding, Technologie und POS, Eröffnungsbestand sowie Pre-Opening-Marketing.",
+      "p2Title": "Was erforderlich ist",
+      "p2Text": "Mindestens $400,000 an liquiden Mitteln für die Investition und ein Mindest-Reinvermögen von $1,000,000. Die meisten Franchisenehmer finanzieren einen Teil der Geräte und nutzen SBA-fähige Finanzierung für den Ausbau.",
+      "p3Title": "Kreditgeber-Netzwerk",
+      "p3Text": "Wir arbeiten mit einem Netzwerk wäscherei-affiner Kreditgeber, die die Stückkostenökonomie des WaveMAX-Modells verstehen und die Finanzierung entsprechend strukturieren können.",
+      "p4Title": "Vollständige Pro forma",
+      "p4Text": "Während der Discovery führen wir Sie durch Mittelherkunft und -verwendung, die prognostizierte Hochlaufkurve, die Schuldendienstdeckung und ein klares Bild Ihres monatlichen Cashflows in Jahr eins und zwei."
+    },
+    "support": {
+      "eyebrow": "Was Sie erhalten",
+      "title": "Echte Unterstützung, vom ersten Tag an.",
+      "lede": "Wenn Ihnen eine WaveMAX-Franchise vergeben wird, kaufen Sie nicht nur einen Markennamen. Sie erhalten das vollständige Betriebssystem, die Mitarbeiter und die Infrastruktur eines nationalen Franchise-Teams.",
+      "t1Title": "Standortwahl",
+      "t1Text": "Immobilien-Playbooks, demografische Analyse, Unterstützung bei Mietvertragsverhandlungen und markengeprüfte Standortstandards vor der Unterzeichnung.",
+      "t2Title": "Geräte & Ausbau",
+      "t2Text": "Konditionen aus der nationalen Electrolux-Partnerschaft, Filiallayout-Design, Geräteinstallation, Beschilderung und Branding.",
+      "t3Title": "Schulungsprogramme",
+      "t3Text": "Klassenraum- und Vor-Ort-Schulungen, Operations-Handbuch, Schulungsprogramme für Mitarbeiter und Onboarding ins KPI-Dashboard.",
+      "t4Title": "Marketing-Unterstützung",
+      "t4Text": "Launch-fertige Werbung, lokales SEO, Bewertungssysteme, Social-Media-Playbooks und laufende Kampagnenunterstützung.",
+      "t5Title": "Operatives Coaching",
+      "t5Text": "Laufendes Hands-on-Coaching, monatliche KPI-Reviews, regionale Treffen und direkter Zugang zur Geschäftsleitung.",
+      "t6Title": "Eigentümer-Netzwerk",
+      "t6Text": "Ein lebendiges Netzwerk von über 75 aktiven Franchisenehmern, die bereits die Probleme lösen, denen Sie sich gleich stellen werden."
+    },
+    "faq": {
+      "eyebrow": "Häufige Fragen",
+      "title": "Häufig gestellte Fragen.",
+      "q1": "Was kostet der Erwerb einer WaveMAX-Wäscherei-Franchise?",
+      "a1": "Die Gesamtinvestition liegt zwischen $1M und $1,5M, abhängig von Standort, Ausbau und Geräten. Die Mindestliquidität beträgt $400,000 bei einem geforderten Reinvermögen von $1,000,000. Die meisten Franchisenehmer nutzen SBA-Finanzierung für einen Teil des Ausbaus und der Geräte.",
+      "q2": "Wie lange dauert der Bewerbungsprozess?",
+      "a2": "Unser Franchise-Discovery-Prozess dauert typischerweise 60–120 Tage vom ersten Gespräch bis zur Franchise-Vergabe, abhängig davon, wie schnell Sie jede Phase abschließen. Wir bewegen uns im Tempo des qualifizierten Kandidaten, nicht im Vertriebskalender.",
+      "q3": "Kann ich mehrere WaveMAX-Standorte eröffnen?",
+      "a3": "Ja. WaveMAX ist auf Multi-Unit-Eigentum ausgelegt — mit strukturierten Area-Development-Vereinbarungen und Wachstumsanreizen für qualifizierte Betreiber. Viele unserer erfolgreichsten Franchisenehmer skalieren von einem auf mehrere Standorte.",
+      "q4": "Brauche ich Erfahrung im Wäscherei-Geschäft?",
+      "a4": "Vorerfahrung im Wäscherei-Geschäft ist nicht erforderlich. Unser Schulungsprogramm, das Operations-Handbuch und das laufende Coaching sind darauf ausgelegt, qualifizierte Unternehmer von null zu operativer Souveränität zu führen. Worauf wir achten: operative Disziplin und Coachbarkeit.",
+      "q5": "Welche laufenden Gebühren erhebt WaveMAX?",
+      "a5": "WaveMAX erhebt eine Royalty-Gebühr auf den Bruttoumsatz und einen Beitrag zum Marketingfonds. Genaue Prozentsätze, Zahlungsbedingungen und etwaige Nebengebühren sind in unserem Franchise Disclosure Document detailliert, das wir früh im Discovery-Prozess teilen.",
+      "q6": "Was passiert, wenn es nicht passt?",
+      "a6": "Sie ziehen sich zurück. Wir erwarten das von qualifizierten Kandidaten, und wir erwarten es von uns selbst. Besser in Woche 2 als in Jahr 2 herauszufinden. Die Eigentümer, die den gesamten Discovery-Prozess durchlaufen, sind diejenigen, die wirklich ins System gehören."
+    },
+    "cta": {
+      "eyebrow": "Bereit, wenn Sie es sind",
+      "title": "Starten Sie das Gespräch.",
+      "lede": "Erzählen Sie uns von sich, und wir senden Ihnen das FDD und führen Sie durch Schritt 01. Keine Druck-Verkaufsanrufe. Die meisten Betreiber benötigen 60–120 Tage vom ersten Anruf bis zur Mietvertragsunterzeichnung.",
+      "btnPrimary": "Jetzt bewerben",
+      "btnSecondary": "Franchise-Übersicht lesen"
+    }
+  },
   "common": {
     "ctaLearnMore": "Mehr erfahren",
     "ctaGetGuide": "Investitionsleitfaden anfordern",
