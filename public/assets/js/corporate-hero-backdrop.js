@@ -12,18 +12,17 @@
 (function () {
   'use strict';
 
-  // Curated showcase storefront pool — only verified-existent URLs.
-  // (Exteriors only — keep interiors out so the hero always reads as
-  // "outside the store" rather than "inside.")
+  // Curated showcase storefront pool — verified visually as exterior
+  // shots only. Corporate's "hero-" filename convention is inconsistent
+  // (kent-wa/hero-2 and omaha/hero-3 are actually interior shots of
+  // washers and dryers). The list below is the audited subset.
   const POOL = [
     'https://wavemaxlaundry.com/wp-content/uploads/locations/jacksonville-fl/hero-1.jpg',
     'https://wavemaxlaundry.com/wp-content/uploads/locations/jacksonville-fl/hero-3.jpg',
     'https://wavemaxlaundry.com/wp-content/uploads/locations/kent-wa/hero-1.jpg',
-    'https://wavemaxlaundry.com/wp-content/uploads/locations/kent-wa/hero-2.jpg',
     'https://wavemaxlaundry.com/wp-content/uploads/locations/kent-wa/hero-3.jpg',
     'https://wavemaxlaundry.com/wp-content/uploads/locations/omaha/hero-1.jpg',
-    'https://wavemaxlaundry.com/wp-content/uploads/locations/omaha/hero-2.jpg',
-    'https://wavemaxlaundry.com/wp-content/uploads/locations/omaha/hero-3.jpg'
+    'https://wavemaxlaundry.com/wp-content/uploads/locations/omaha/hero-2.jpg'
   ];
 
   // Default gradient overlay, kept consistent across pages so the existing
