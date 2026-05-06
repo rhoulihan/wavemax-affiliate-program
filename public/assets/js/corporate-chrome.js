@@ -103,8 +103,14 @@
               <a class="wmlnav-b1-cta" href="/why-invest-in-wavemax/" data-i18n="chrome.b1.item19">Item 19: $471K avg gross →</a>
             </div>
             <div class="wmlnav-b1-right">
-              <!-- lang switcher moved into b2-right so it forms the 3rd cell
-                   when b2 wraps to a 3-column row at narrow widths -->
+              <div class="wm-lang-switcher" id="wm-lang" aria-expanded="false">
+                <button type="button" class="wm-lang-btn" aria-haspopup="true" aria-label="Choose language">
+                  <span class="wm-lang-flag wm-flag-en" aria-hidden="true"></span>
+                  <span class="wm-lang-current-label">EN</span>
+                  <svg class="wm-lang-arrow" viewBox="0 0 9 6" aria-hidden="true"><path d="M0.5 1L4.5 5L8.5 1" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </button>
+                <div class="wm-lang-menu" role="menu"></div>
+              </div>
             </div>
           </div>
         </div>
@@ -119,14 +125,6 @@
             <div class="wmlnav-b2-right">
               <a href="/become-a-franchisee/" class="wmlnav-btn-out" data-i18n="chrome.b2.becomeFranchisee">Learn More</a>
               <button type="button" class="wmlnav-btn-sol" data-action="open-locations" data-i18n="chrome.b2.findLocation">Locations</button>
-              <div class="wm-lang-switcher" id="wm-lang" aria-expanded="false">
-                <button type="button" class="wm-lang-btn" aria-haspopup="true" aria-label="Choose language">
-                  <span class="wm-lang-flag wm-flag-en" aria-hidden="true"></span>
-                  <span class="wm-lang-current-label">EN</span>
-                  <svg class="wm-lang-arrow" viewBox="0 0 9 6" aria-hidden="true"><path d="M0.5 1L4.5 5L8.5 1" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                </button>
-                <div class="wm-lang-menu" role="menu"></div>
-              </div>
             </div>
           </div>
         </div>
