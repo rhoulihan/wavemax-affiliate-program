@@ -96,39 +96,45 @@
   }
 
   function wireSwitcher() {
-    const switcher = document.getElementById('wm-lang');
-    if (!switcher) return;
-    const menu = switcher.querySelector('.wm-lang-menu');
-    if (menu) populateMenu(menu);
-    updateSwitcherDisplay(switcher);
+    // There can be multiple switchers on the page (desktop b2-right + mobile
+    // wmv3-actions). Wire each one. CSS hides the inactive one based on
+    // viewport, but both stay in the DOM so the lang menu works in either
+    // breakpoint.
+    const switchers = Array.prototype.slice.call(document.querySelectorAll('.wm-lang-switcher'));
+    if (!switchers.length) return;
 
-    // Toggle on click of the button.
-    switcher.addEventListener('click', (e) => {
-      const item = e.target.closest('.wm-lang-item');
-      if (item) {
-        const lang = item.getAttribute('data-lang');
-        if (lang && SUPPORTED.indexOf(lang) >= 0 && lang !== currentLang) {
-          setLang(lang);
+    switchers.forEach((switcher, idx) => {
+      const menu = switcher.querySelector('.wm-lang-menu');
+      if (menu) populateMenu(menu);
+      updateSwitcherDisplay(switcher);
+
+      switcher.addEventListener('click', (e) => {
+        const item = e.target.closest('.wm-lang-item');
+        if (item) {
+          const lang = item.getAttribute('data-lang');
+          if (lang && SUPPORTED.indexOf(lang) >= 0 && lang !== currentLang) {
+            setLang(lang);
+          }
+          switcher.setAttribute('aria-expanded', 'false');
+          return;
         }
-        switcher.setAttribute('aria-expanded', 'false');
-        return;
-      }
-      const btn = e.target.closest('.wm-lang-btn');
-      if (btn) {
-        const open = switcher.getAttribute('aria-expanded') === 'true';
-        switcher.setAttribute('aria-expanded', String(!open));
-      }
+        const btn = e.target.closest('.wm-lang-btn');
+        if (btn) {
+          const open = switcher.getAttribute('aria-expanded') === 'true';
+          switcher.setAttribute('aria-expanded', String(!open));
+        }
+      });
     });
 
-    // Click outside closes.
+    // Click outside any switcher closes them all.
     document.addEventListener('click', (e) => {
-      if (!e.target.closest || !e.target.closest('#wm-lang')) {
-        switcher.setAttribute('aria-expanded', 'false');
+      if (!e.target.closest || !e.target.closest('.wm-lang-switcher')) {
+        switchers.forEach((s) => s.setAttribute('aria-expanded', 'false'));
       }
     });
 
     document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') switcher.setAttribute('aria-expanded', 'false');
+      if (e.key === 'Escape') switchers.forEach((s) => s.setAttribute('aria-expanded', 'false'));
     });
   }
 
@@ -139,8 +145,8 @@
     fetchDict(lang).then((d) => {
       dict = d || {};
       applyTranslations();
-      const switcher = document.getElementById('wm-lang');
-      if (switcher) updateSwitcherDisplay(switcher);
+      // Update all switchers' display (desktop + mobile)
+      document.querySelectorAll('.wm-lang-switcher').forEach((s) => updateSwitcherDisplay(s));
     });
   }
 

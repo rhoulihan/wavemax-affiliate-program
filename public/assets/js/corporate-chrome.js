@@ -192,6 +192,21 @@
           </a>
         </div>
 
+        <!-- Mobile language switcher — second instance of .wm-lang-switcher
+             on the page; corporate-i18n.js wires every instance. CSS hides
+             the desktop one (in wmlnav-b2-right) below 900px and shows
+             this one. -->
+        <div class="wmv3-lang">
+          <div class="wm-lang-switcher" aria-expanded="false">
+            <button type="button" class="wm-lang-btn" aria-haspopup="true" aria-label="Choose language">
+              <span class="wm-lang-flag wm-flag-en" aria-hidden="true"></span>
+              <span class="wm-lang-current-label">EN</span>
+              <svg class="wm-lang-arrow" viewBox="0 0 9 6" aria-hidden="true"><path d="M0.5 1L4.5 5L8.5 1" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <div class="wm-lang-menu" role="menu"></div>
+          </div>
+        </div>
+
         <div class="wmv3-actions">
           <a href="/become-a-franchisee/" class="wmv3-btn wmv3-btn-out" data-i18n="chrome.b2.becomeFranchisee">Learn More</a>
           <button type="button" class="wmv3-btn wmv3-btn-sol" data-action="open-locations" data-i18n="chrome.b2.findLocation">Locations</button>
