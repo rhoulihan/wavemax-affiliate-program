@@ -27,24 +27,54 @@ const https = require('https');
 
 const REPO_ROOT  = path.join(__dirname, '..', '..');
 const DATA_DIR   = path.join(REPO_ROOT, 'public', 'data', 'franchises');
+const PUBLIC_DIR = path.join(REPO_ROOT, 'public');
 const OUTPUT_DIR = path.join(REPO_ROOT, 'public', 'assets', 'images', 'locations');
 
-const URL_PATTERN = /https:\/\/wavemaxlaundry\.com\/wp-content\/uploads\/locations\/([^"\s]+)/g;
+// Match (a) the original corporate URL form and (b) the post-migration
+// helper-call form `wmLocationImage('austin-tx/hero-3.jpg')` so the script
+// keeps finding new images even after URLs have been flipped to local paths.
+const CORPORATE_URL_PATTERN = /https:\/\/wavemaxlaundry\.com\/wp-content\/uploads\/locations\/([^"\s)']+)/g;
+const HELPER_CALL_PATTERN   = /wmLocationImage\(\s*['"]([^'"]+)['"]\s*\)/g;
 
 const FORCE = process.argv.includes('--force');
 const LIMIT_ARG = process.argv.find((a) => a.startsWith('--limit='));
 const LIMIT = LIMIT_ARG ? parseInt(LIMIT_ARG.split('=')[1], 10) : Infinity;
 
+function walk(dir, exts) {
+  const out = [];
+  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+    if (entry.name.startsWith('.') || entry.name === 'node_modules') continue;
+    const full = path.join(dir, entry.name);
+    if (entry.isDirectory()) out.push(...walk(full, exts));
+    else if (exts.some((e) => entry.name.endsWith(e))) out.push(full);
+  }
+  return out;
+}
+
 function collectUrls() {
-  const files = fs.readdirSync(DATA_DIR).filter((f) => f.endsWith('.json'));
   const urls = new Set();
-  for (const f of files) {
+
+  // 1. Scan franchise registry JSON files for legacy corporate URLs.
+  for (const f of fs.readdirSync(DATA_DIR).filter((f) => f.endsWith('.json'))) {
     const text = fs.readFileSync(path.join(DATA_DIR, f), 'utf8');
     let m;
-    while ((m = URL_PATTERN.exec(text)) !== null) {
+    while ((m = CORPORATE_URL_PATTERN.exec(text)) !== null) {
       urls.add('https://wavemaxlaundry.com/wp-content/uploads/locations/' + m[1]);
     }
   }
+
+  // 2. Scan JS + HTML for `wmLocationImage('<path>')` helper calls.
+  // Catches per-page hero pools (e.g., corporate-hero-backdrop.js) that
+  // reference slugs not present in the franchise registry — like the
+  // Jacksonville HQ flagship photos.
+  for (const f of walk(PUBLIC_DIR, ['.js', '.html'])) {
+    const text = fs.readFileSync(f, 'utf8');
+    let m;
+    while ((m = HELPER_CALL_PATTERN.exec(text)) !== null) {
+      urls.add('https://wavemaxlaundry.com/wp-content/uploads/locations/' + m[1]);
+    }
+  }
+
   return Array.from(urls).sort();
 }
 
