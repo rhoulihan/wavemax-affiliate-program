@@ -219,6 +219,83 @@
     }
   },
 
+  "about": {
+    "hero": {
+      "eyebrow": "About",
+      "title1": "Cleaner. Safer.",
+      "title2": "Faster.",
+      "sub": "WaveMAX Laundry is a national franchise network on a mission to deliver the gold standard in laundry service. Founded in 2012 by Mike Roberts, headquartered in Jacksonville, Florida, and operated under AU Hydro LLC dba WaveMAX Laundry.",
+      "ctaPrimary": "Explore the franchise",
+      "ctaSecondary": "Contact us"
+    },
+    "facts": {
+      "founded":   "Founded",
+      "locations": "Locations & growing",
+      "owners":    "Franchise owners",
+      "hq":        "HQ in Jacksonville"
+    },
+    "story": {
+      "eyebrow": "Our story",
+      "title":   "Built to modernize an industry stuck in the past.",
+      "p1": "WaveMAX was founded in 2012 by Mike Roberts in Jacksonville, Florida. After two decades building successful businesses across multiple industries, Mike became fascinated with the laundromat industry's stability and cash flow potential — and equally struck by how outdated the average laundromat had become as a customer experience.",
+      "p2": "The thesis behind WaveMAX: laundry is a steady, recession-resistant business, but most laundromats run as broken legacy operations — neglected equipment, poor lighting, no staffing, no systems. Modernize the design, professionalize the operations, and franchise the playbook, and the result is a category-defining experience that customers actually choose, not just settle for.",
+      "p3": "Today the system operates as AU Hydro LLC dba WaveMAX Laundry, with 75+ open locations and a growing network of independent franchise owners across the United States."
+    },
+    "quote": {
+      "text": "I founded WaveMAX with a simple mission: to help entrepreneurs build profitable, sustainable laundromat businesses that deliver superior returns while enhancing their lifestyle rather than consuming it.",
+      "role": "Founder & CEO, WaveMAX Laundry"
+    },
+    "awards": {
+      "eyebrow": "Awards & recognition",
+      "title":   "Independently verified.",
+      "lede":    "WaveMAX is one of the few laundromat franchises ranked on Entrepreneur's annual Franchise 500 — the industry's most rigorous independent benchmark of franchise system quality, growth, financial strength, and stability.",
+      "a1Name": "#1 Laundromat Franchise",
+      "a1Role": "Entrepreneur Franchise 500 · 2026",
+      "a1Bio":  "Ranked #1 in the laundromat category on Entrepreneur's 2026 Franchise 500 list.",
+      "a2Name": "Franchise 500",
+      "a2Role": "Entrepreneur · 2026",
+      "a2Bio":  "Ranked #485 overall across all franchise systems and industries on Entrepreneur's 2026 Franchise 500.",
+      "a3Name": "Franchise 500",
+      "a3Role": "Entrepreneur · 2024",
+      "a3Bio":  "Ranked #416 overall on Entrepreneur's 2024 Franchise 500 — moved up to #485 in 2026 alongside the system's expansion."
+    },
+    "team": {
+      "eyebrow": "Leadership",
+      "title":   "The team behind the brand.",
+      "lede":    "WaveMAX is led by a small team of operators who have been running and scaling the business since 2012. Brand integrity, franchisee outcomes, and operational discipline are the standards every decision is measured against.",
+      "mrRole": "Founder & Chief Executive Officer",
+      "mrBio":  "Mike founded WaveMAX in 2012 after two decades building successful businesses across multiple industries. He leads brand strategy, franchisee development, and the long-term vision for the system.",
+      "shRole": "Chief Financial Officer · Managing Partner",
+      "shBio":  "Sheila has been a Managing Partner since the company's founding in 2012. Previously the President of Learning Time Academy, she leads finance, accounting, and capital planning for the franchise system.",
+      "bhRole": "Franchise Development",
+      "bhBio":  "Brittany leads candidate intake and the franchise discovery process — from the first conversation through FDD review, Discovery Day, and award. The front door for prospective owners considering WaveMAX."
+    },
+    "values": {
+      "eyebrow": "What we stand for",
+      "title":   "A national network. One operating standard.",
+      "lede":    "Every WaveMAX is independently owned and operated, but the system runs on a shared set of operating standards. These values shape both the customer experience inside the store and the long-term partnership we build with each owner.",
+      "v1Title": "Cleaner.",
+      "v1Text":  "Modern equipment, attended floors, advanced sanitation in equipped stores. The customer should never have to wonder whether the machine is clean enough to use.",
+      "v2Title": "Safer.",
+      "v2Text":  "Bright stores, attended hours, and disciplined site selection that puts WaveMAX locations in neighborhoods that read as safe to families running errands at night.",
+      "v3Title": "Faster.",
+      "v3Text":  "High-extraction commercial machines move loads through faster than home machines or typical laundromats. Less waiting, more done.",
+      "v4Title": "Brand integrity.",
+      "v4Text":  "We are intentionally selective about who we award territories to. Every owner reflects the WaveMAX standard in their market.",
+      "v5Title": "Owner outcomes first.",
+      "v5Text":  "The success metric for any decision is whether it builds franchisee cash flow over the long term — not short-term royalty extraction.",
+      "v6Title": "Operating discipline.",
+      "v6Text":  "Site selection, equipment, training, marketing, and operations all run on documented playbooks. Repeatable across markets, not bespoke."
+    },
+    "cta": {
+      "eyebrow":     "Want to learn more?",
+      "title":       "Two ways to take the next step.",
+      "lede":        "If you're a prospective franchisee, start with the franchise overview. If you're a customer, journalist, or partner with a different question, the contact page has the right channel.",
+      "btnPrimary":  "Explore the franchise",
+      "btnSecondary": "Contact us"
+    }
+  },
+
   "common": {
     "ctaLearnMore": "Learn more",
     "ctaGetGuide": "Get the Investment Guide",

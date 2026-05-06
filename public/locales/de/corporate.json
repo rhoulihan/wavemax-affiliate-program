@@ -219,6 +219,83 @@
     }
   },
 
+  "about": {
+    "hero": {
+      "eyebrow": "Über uns",
+      "title1": "Sauberer. Sicherer.",
+      "title2": "Schneller.",
+      "sub": "WaveMAX Laundry ist ein landesweites Franchise-Netzwerk mit dem Auftrag, den Goldstandard im Wäscheservice zu liefern. 2012 von Mike Roberts gegründet, mit Hauptsitz in Jacksonville, Florida, betrieben unter AU Hydro LLC dba WaveMAX Laundry.",
+      "ctaPrimary": "Franchise erkunden",
+      "ctaSecondary": "Kontakt"
+    },
+    "facts": {
+      "founded":   "Gegründet",
+      "locations": "Standorte & wachsend",
+      "owners":    "Franchise-Eigentümer",
+      "hq":        "Hauptsitz in Jacksonville"
+    },
+    "story": {
+      "eyebrow": "Unsere Geschichte",
+      "title":   "Entwickelt, um eine in der Vergangenheit verharrende Branche zu modernisieren.",
+      "p1": "WaveMAX wurde 2012 von Mike Roberts in Jacksonville, Florida, gegründet. Nach zwei Jahrzehnten, in denen er erfolgreiche Unternehmen in mehreren Branchen aufgebaut hatte, faszinierten Mike die Stabilität und das Cashflow-Potenzial der Waschsalon-Branche — und ebenso, wie veraltet der durchschnittliche Waschsalon als Kundenerlebnis geworden war.",
+      "p2": "Die These hinter WaveMAX: Wäsche ist ein stabiles, rezessionsresistentes Geschäft, doch die meisten Waschsalons werden als marode Altanlagen betrieben — vernachlässigte Ausstattung, schlechte Beleuchtung, kein Personal, keine Systeme. Modernisieren Sie das Design, professionalisieren Sie den Betrieb und franchisen Sie das Playbook — das Ergebnis ist ein kategorieprägendes Erlebnis, das Kunden aktiv wählen, statt sich damit abzufinden.",
+      "p3": "Heute wird das System als AU Hydro LLC dba WaveMAX Laundry betrieben, mit 75+ geöffneten Standorten und einem wachsenden Netzwerk unabhängiger Franchise-Eigentümer in den Vereinigten Staaten."
+    },
+    "quote": {
+      "text": "Ich gründete WaveMAX mit einem einfachen Auftrag: Unternehmern dabei zu helfen, profitable, nachhaltige Waschsalon-Geschäfte aufzubauen, die überlegene Renditen liefern und ihren Lebensstil bereichern, statt ihn zu verzehren.",
+      "role": "Gründer & CEO, WaveMAX Laundry"
+    },
+    "awards": {
+      "eyebrow": "Auszeichnungen & Anerkennung",
+      "title":   "Unabhängig verifiziert.",
+      "lede":    "WaveMAX gehört zu den wenigen Waschsalon-Franchises, die in Entrepreneurs jährlicher Franchise 500 gelistet sind — der branchenweit anspruchsvollste unabhängige Maßstab für Qualität, Wachstum, Finanzkraft und Stabilität von Franchise-Systemen.",
+      "a1Name": "#1 Waschsalon-Franchise",
+      "a1Role": "Entrepreneur Franchise 500 · 2026",
+      "a1Bio":  "Platz #1 in der Waschsalon-Kategorie auf Entrepreneurs Franchise 500 (2026).",
+      "a2Name": "Franchise 500",
+      "a2Role": "Entrepreneur · 2026",
+      "a2Bio":  "Platz #485 insgesamt über alle Franchise-Systeme und Branchen hinweg auf Entrepreneurs Franchise 500 (2026).",
+      "a3Name": "Franchise 500",
+      "a3Role": "Entrepreneur · 2024",
+      "a3Bio":  "Platz #416 insgesamt auf Entrepreneurs Franchise 500 (2024) — Aufstieg auf #485 im Jahr 2026 parallel zum Wachstum des Systems."
+    },
+    "team": {
+      "eyebrow": "Führung",
+      "title":   "Das Team hinter der Marke.",
+      "lede":    "WaveMAX wird von einem kleinen Team von Betreibern geführt, die das Geschäft seit 2012 leiten und skalieren. Markenintegrität, Franchisenehmer-Erfolg und operative Disziplin sind die Maßstäbe, an denen jede Entscheidung gemessen wird.",
+      "mrRole": "Gründer & Chief Executive Officer",
+      "mrBio":  "Mike gründete WaveMAX 2012, nachdem er zwei Jahrzehnte lang erfolgreiche Unternehmen in verschiedenen Branchen aufgebaut hatte. Er leitet Markenstrategie, Franchisenehmer-Entwicklung und die langfristige Vision des Systems.",
+      "shRole": "Chief Financial Officer · Managing Partner",
+      "shBio":  "Sheila ist seit der Unternehmensgründung 2012 Managing Partner. Zuvor Präsidentin von Learning Time Academy, leitet sie Finanzen, Buchhaltung und Kapitalplanung des Franchise-Systems.",
+      "bhRole": "Franchise-Entwicklung",
+      "bhBio":  "Brittany leitet die Kandidaten-Aufnahme und den Franchise-Discovery-Prozess — vom ersten Gespräch über die FDD-Prüfung und den Discovery Day bis zur Vergabe. Die Anlaufstelle für Interessenten, die WaveMAX in Betracht ziehen."
+    },
+    "values": {
+      "eyebrow": "Wofür wir stehen",
+      "title":   "Ein landesweites Netzwerk. Ein Betriebsstandard.",
+      "lede":    "Jede WaveMAX wird unabhängig betrieben, doch das System läuft auf gemeinsamen Betriebsstandards. Diese Werte prägen sowohl das Kundenerlebnis im Laden als auch die langfristige Partnerschaft, die wir mit jedem Eigentümer aufbauen.",
+      "v1Title": "Sauberer.",
+      "v1Text":  "Moderne Ausstattung, betreute Filialen, fortschrittliche Hygiene in entsprechend ausgestatteten Standorten. Kunden sollen nie zweifeln, ob die Maschine sauber genug ist.",
+      "v2Title": "Sicherer.",
+      "v2Text":  "Helle Filialen, betreute Öffnungszeiten und disziplinierte Standortwahl, die WaveMAX-Standorte in Nachbarschaften platziert, in denen sich Familien auch abends sicher fühlen.",
+      "v3Title": "Schneller.",
+      "v3Text":  "Industrie-Maschinen mit hoher Schleuderwirkung verarbeiten Ladungen schneller als Heimgeräte oder typische Waschsalons. Weniger Warten, mehr erledigt.",
+      "v4Title": "Markenintegrität.",
+      "v4Text":  "Wir wählen bewusst aus, an wen wir Gebiete vergeben. Jeder Eigentümer repräsentiert den WaveMAX-Standard in seinem Markt.",
+      "v5Title": "Eigentümer-Erfolg zuerst.",
+      "v5Text":  "Maßstab jeder Entscheidung ist, ob sie den Cashflow des Franchisenehmers langfristig stärkt — nicht kurzfristige Lizenzgebühren-Maximierung.",
+      "v6Title": "Operative Disziplin.",
+      "v6Text":  "Standortwahl, Ausstattung, Schulung, Marketing und Betrieb laufen alle nach dokumentierten Playbooks. Marktübergreifend wiederholbar, nicht maßgeschneidert."
+    },
+    "cta": {
+      "eyebrow":     "Mehr erfahren?",
+      "title":       "Zwei Wege zum nächsten Schritt.",
+      "lede":        "Wenn Sie Franchise-Interessent sind, beginnen Sie mit dem Franchise-Überblick. Als Kunde, Journalist oder Partner mit anderem Anliegen finden Sie auf der Kontaktseite den richtigen Kanal.",
+      "btnPrimary":  "Franchise erkunden",
+      "btnSecondary": "Kontakt"
+    }
+  },
+
   "common": {
     "ctaLearnMore": "Mehr erfahren",
     "ctaGetGuide": "Investitionsleitfaden anfordern",
