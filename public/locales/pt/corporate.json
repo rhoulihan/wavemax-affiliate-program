@@ -219,6 +219,83 @@
     }
   },
 
+  "about": {
+    "hero": {
+      "eyebrow": "Sobre",
+      "title1": "Mais Limpa. Mais Segura.",
+      "title2": "Mais Rápida.",
+      "sub": "A WaveMAX Laundry é uma rede nacional de franquias com a missão de entregar o padrão-ouro em serviços de lavanderia. Fundada em 2012 por Mike Roberts, com sede em Jacksonville, Florida, e operada pela AU Hydro LLC dba WaveMAX Laundry.",
+      "ctaPrimary": "Conheça a franquia",
+      "ctaSecondary": "Fale conosco"
+    },
+    "facts": {
+      "founded":   "Fundada",
+      "locations": "Unidades e crescendo",
+      "owners":    "Proprietários de franquia",
+      "hq":        "Sede em Jacksonville, FL"
+    },
+    "story": {
+      "eyebrow": "Nossa história",
+      "title":   "Construída para modernizar uma indústria parada no tempo.",
+      "p1": "A WaveMAX foi fundada em 2012 por Mike Roberts em Jacksonville, Florida. Após duas décadas construindo negócios bem-sucedidos em diversos setores, Mike se interessou pela estabilidade e pelo potencial de fluxo de caixa do setor de lavanderias — e ficou igualmente impressionado com o quão desatualizada a lavanderia média havia se tornado como experiência para o cliente.",
+      "p2": "A tese por trás da WaveMAX: lavanderia é um negócio estável e resistente a recessão, mas a maioria das lavanderias opera como operações legadas e quebradas — equipamentos negligenciados, iluminação ruim, sem equipe, sem sistemas. Modernize o design, profissionalize as operações e franquie o playbook, e o resultado é uma experiência que define a categoria e que os clientes realmente escolhem, em vez de apenas se contentar.",
+      "p3": "Hoje o sistema opera como AU Hydro LLC dba WaveMAX Laundry, com mais de 75 unidades abertas e uma rede crescente de proprietários de franquia independentes em todos os Estados Unidos."
+    },
+    "quote": {
+      "text": "Fundei a WaveMAX com uma missão simples: ajudar empreendedores a construir negócios de lavanderia lucrativos e sustentáveis que entreguem retornos superiores enquanto enriquecem seu estilo de vida em vez de consumi-lo.",
+      "role": "Fundador e CEO, WaveMAX Laundry"
+    },
+    "awards": {
+      "eyebrow": "Prêmios e reconhecimento",
+      "title":   "Verificada de forma independente.",
+      "lede":    "A WaveMAX é uma das poucas franquias de lavanderia classificadas no Franchise 500 anual da Entrepreneur — o benchmark independente mais rigoroso do setor para qualidade, crescimento, força financeira e estabilidade do sistema de franquia.",
+      "a1Name": "#1 Franquia de Lavanderia",
+      "a1Role": "Entrepreneur Franchise 500 · 2026",
+      "a1Bio":  "Classificada em #1 na categoria de lavanderia na lista Franchise 500 2026 da Entrepreneur.",
+      "a2Name": "Franchise 500",
+      "a2Role": "Entrepreneur · 2026",
+      "a2Bio":  "Classificada em #485 no geral entre todos os sistemas de franquia e setores no Franchise 500 2026 da Entrepreneur.",
+      "a3Name": "Franchise 500",
+      "a3Role": "Entrepreneur · 2024",
+      "a3Bio":  "Classificada em #416 no geral no Franchise 500 2024 da Entrepreneur — subiu para #485 em 2026 acompanhando a expansão do sistema."
+    },
+    "team": {
+      "eyebrow": "Liderança",
+      "title":   "A equipe por trás da marca.",
+      "lede":    "A WaveMAX é liderada por uma equipe pequena de operadores que vêm gerenciando e escalando o negócio desde 2012. Integridade da marca, resultados dos franqueados e disciplina operacional são os padrões pelos quais cada decisão é medida.",
+      "mrRole": "Fundador e CEO",
+      "mrBio":  "Mike fundou a WaveMAX em 2012 após duas décadas construindo negócios bem-sucedidos em diversos setores. Ele lidera a estratégia de marca, o desenvolvimento de franqueados e a visão de longo prazo do sistema.",
+      "shRole": "Diretora Financeira · Sócia-Gestora",
+      "shBio":  "Sheila é Sócia-Gestora desde a fundação da empresa em 2012. Anteriormente Presidente da Learning Time Academy, ela lidera finanças, contabilidade e planejamento de capital do sistema de franquia.",
+      "bhRole": "Desenvolvimento de Franquia",
+      "bhBio":  "Brittany lidera a triagem de candidatos e o processo de descoberta da franquia — desde a primeira conversa até a revisão do FDD, o Discovery Day e a aprovação. A porta de entrada para proprietários em potencial que consideram a WaveMAX."
+    },
+    "values": {
+      "eyebrow": "O que defendemos",
+      "title":   "Uma rede nacional. Um padrão operacional.",
+      "lede":    "Cada WaveMAX é de propriedade e operação independentes, mas o sistema funciona com base em um conjunto compartilhado de padrões operacionais. Esses valores moldam tanto a experiência do cliente dentro da loja quanto a parceria de longo prazo que construímos com cada proprietário.",
+      "v1Title": "Mais Limpa.",
+      "v1Text":  "Equipamentos modernos, pisos atendidos, sanitização avançada nas lojas equipadas. O cliente nunca deve ter que se perguntar se a máquina está limpa o suficiente para usar.",
+      "v2Title": "Mais Segura.",
+      "v2Text":  "Lojas iluminadas, horários atendidos e seleção disciplinada de pontos que coloca as unidades WaveMAX em bairros que parecem seguros para famílias fazendo tarefas à noite.",
+      "v3Title": "Mais Rápida.",
+      "v3Text":  "Máquinas comerciais de alta extração processam cargas mais rápido do que máquinas domésticas ou lavanderias típicas. Menos espera, mais coisas resolvidas.",
+      "v4Title": "Integridade da marca.",
+      "v4Text":  "Somos intencionalmente seletivos sobre a quem concedemos territórios. Cada proprietário reflete o padrão WaveMAX em seu mercado.",
+      "v5Title": "Resultado do proprietário em primeiro lugar.",
+      "v5Text":  "A métrica de sucesso para qualquer decisão é se ela constrói o fluxo de caixa do franqueado no longo prazo — não a extração de royalties no curto prazo.",
+      "v6Title": "Disciplina operacional.",
+      "v6Text":  "Seleção de ponto, equipamentos, treinamento, marketing e operações funcionam todos com playbooks documentados. Replicáveis em diferentes mercados, não personalizados."
+    },
+    "cta": {
+      "eyebrow":     "Quer saber mais?",
+      "title":       "Duas formas de dar o próximo passo.",
+      "lede":        "Se você é um candidato a franqueado, comece pela visão geral da franquia. Se você é cliente, jornalista ou parceiro com outra pergunta, a página de contato tem o canal certo.",
+      "btnPrimary":  "Conheça a franquia",
+      "btnSecondary": "Fale conosco"
+    }
+  },
+
   "common": {
     "ctaLearnMore": "Saiba mais",
     "ctaGetGuide": "Obter o Guia de Investimento",
