@@ -130,12 +130,12 @@
   },
   "images": {
     "hero": [
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/charlotte-nc/hero-1.jpg"
+      "https://wavemax.promo/assets/images/locations/charlotte-nc/hero-1.jpg"
     ],
     "interior": [
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/charlotte-nc/interior-1.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/charlotte-nc/interior-2.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/charlotte-nc/interior-3.jpg"
+      "https://wavemax.promo/assets/images/locations/charlotte-nc/interior-1.jpg",
+      "https://wavemax.promo/assets/images/locations/charlotte-nc/interior-2.jpg",
+      "https://wavemax.promo/assets/images/locations/charlotte-nc/interior-3.jpg"
     ],
     "owner": [],
     "landmarks": [
@@ -160,7 +160,7 @@
         "alt": "Mint Museum in uptown Charlotte, North Carolina — Charlotte"
       }
     ],
-    "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/charlotte-nc/hero-1.jpg",
+    "ogImage": "https://wavemax.promo/assets/images/locations/charlotte-nc/hero-1.jpg",
     "ogImageAlt": "WaveMAX Charlotte NC storefront",
     "mapPreview": ""
   },

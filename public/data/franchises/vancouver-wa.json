@@ -130,13 +130,13 @@
   },
   "images": {
     "hero": [
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/vancouver-wa/hero-1.jpg"
+      "https://wavemax.promo/assets/images/locations/vancouver-wa/hero-1.jpg"
     ],
     "interior": [
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/vancouver-wa/interior-1.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/vancouver-wa/interior-2.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/vancouver-wa/interior-3.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/vancouver-wa/interior-4.jpg"
+      "https://wavemax.promo/assets/images/locations/vancouver-wa/interior-1.jpg",
+      "https://wavemax.promo/assets/images/locations/vancouver-wa/interior-2.jpg",
+      "https://wavemax.promo/assets/images/locations/vancouver-wa/interior-3.jpg",
+      "https://wavemax.promo/assets/images/locations/vancouver-wa/interior-4.jpg"
     ],
     "owner": [],
     "landmarks": [
@@ -161,7 +161,7 @@
         "alt": "Fort Vancouver National Historic Site in 2021 37 — Vancouver"
       }
     ],
-    "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/vancouver-wa/hero-1.jpg",
+    "ogImage": "https://wavemax.promo/assets/images/locations/vancouver-wa/hero-1.jpg",
     "ogImageAlt": "WaveMAX Vancouver WA storefront",
     "mapPreview": ""
   },

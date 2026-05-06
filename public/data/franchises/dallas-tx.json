@@ -130,17 +130,17 @@
   },
   "images": {
     "hero": [
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/dallas-tx/hero-1.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/dallas-tx/hero-2.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/dallas-tx/hero-3.jpg"
+      "https://wavemax.promo/assets/images/locations/dallas-tx/hero-1.jpg",
+      "https://wavemax.promo/assets/images/locations/dallas-tx/hero-2.jpg",
+      "https://wavemax.promo/assets/images/locations/dallas-tx/hero-3.jpg"
     ],
     "interior": [
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/dallas-tx/interior-1.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/dallas-tx/interior-2.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/dallas-tx/interior-3.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/dallas-tx/interior-4.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/dallas-tx/interior-5.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/dallas-tx/interior-6.jpg"
+      "https://wavemax.promo/assets/images/locations/dallas-tx/interior-1.jpg",
+      "https://wavemax.promo/assets/images/locations/dallas-tx/interior-2.jpg",
+      "https://wavemax.promo/assets/images/locations/dallas-tx/interior-3.jpg",
+      "https://wavemax.promo/assets/images/locations/dallas-tx/interior-4.jpg",
+      "https://wavemax.promo/assets/images/locations/dallas-tx/interior-5.jpg",
+      "https://wavemax.promo/assets/images/locations/dallas-tx/interior-6.jpg"
     ],
     "owner": [],
     "landmarks": [
@@ -165,7 +165,7 @@
         "alt": "Dallas County Courthouse - Old Red — Dallas"
       }
     ],
-    "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/dallas-tx/hero-1.jpg",
+    "ogImage": "https://wavemax.promo/assets/images/locations/dallas-tx/hero-1.jpg",
     "ogImageAlt": "WaveMAX Dallas TX storefront",
     "mapPreview": ""
   },

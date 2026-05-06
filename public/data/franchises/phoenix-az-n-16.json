@@ -122,17 +122,17 @@
   },
   "images": {
     "hero": [
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/phoenix-az-n-16/hero-1.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/phoenix-az-n-16/hero-2.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/phoenix-az-n-16/hero-3.jpg"
+      "https://wavemax.promo/assets/images/locations/phoenix-az-n-16/hero-1.jpg",
+      "https://wavemax.promo/assets/images/locations/phoenix-az-n-16/hero-2.jpg",
+      "https://wavemax.promo/assets/images/locations/phoenix-az-n-16/hero-3.jpg"
     ],
     "interior": [
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/phoenix-az-n-16/interior-1.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/phoenix-az-n-16/interior-2.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/phoenix-az-n-16/interior-3.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/phoenix-az-n-16/interior-4.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/phoenix-az-n-16/interior-5.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/phoenix-az-n-16/interior-6.jpg"
+      "https://wavemax.promo/assets/images/locations/phoenix-az-n-16/interior-1.jpg",
+      "https://wavemax.promo/assets/images/locations/phoenix-az-n-16/interior-2.jpg",
+      "https://wavemax.promo/assets/images/locations/phoenix-az-n-16/interior-3.jpg",
+      "https://wavemax.promo/assets/images/locations/phoenix-az-n-16/interior-4.jpg",
+      "https://wavemax.promo/assets/images/locations/phoenix-az-n-16/interior-5.jpg",
+      "https://wavemax.promo/assets/images/locations/phoenix-az-n-16/interior-6.jpg"
     ],
     "owner": [],
     "landmarks": [
@@ -157,7 +157,7 @@
         "alt": "Ethnic Origins in Phoenix — Phoenix"
       }
     ],
-    "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/phoenix-az-n-16/hero-1.jpg",
+    "ogImage": "https://wavemax.promo/assets/images/locations/phoenix-az-n-16/hero-1.jpg",
     "ogImageAlt": "WaveMAX Phoenix AZ N 16th storefront",
     "mapPreview": ""
   },

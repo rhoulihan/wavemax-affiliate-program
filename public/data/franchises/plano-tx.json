@@ -130,15 +130,15 @@
   },
   "images": {
     "hero": [
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/plano-tx/hero-1.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/plano-tx/hero-2.jpg"
+      "https://wavemax.promo/assets/images/locations/plano-tx/hero-1.jpg",
+      "https://wavemax.promo/assets/images/locations/plano-tx/hero-2.jpg"
     ],
     "interior": [
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/plano-tx/interior-2.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/plano-tx/interior-3.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/plano-tx/interior-4.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/plano-tx/interior-5.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/plano-tx/interior-6.jpg"
+      "https://wavemax.promo/assets/images/locations/plano-tx/interior-2.jpg",
+      "https://wavemax.promo/assets/images/locations/plano-tx/interior-3.jpg",
+      "https://wavemax.promo/assets/images/locations/plano-tx/interior-4.jpg",
+      "https://wavemax.promo/assets/images/locations/plano-tx/interior-5.jpg",
+      "https://wavemax.promo/assets/images/locations/plano-tx/interior-6.jpg"
     ],
     "owner": [],
     "landmarks": [
@@ -163,7 +163,7 @@
         "alt": "Plano October 2015 37 (Municipal Center) — Plano"
       }
     ],
-    "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/plano-tx/hero-1.jpg",
+    "ogImage": "https://wavemax.promo/assets/images/locations/plano-tx/hero-1.jpg",
     "ogImageAlt": "WaveMAX Plano TX storefront",
     "mapPreview": ""
   },

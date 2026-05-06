@@ -130,17 +130,17 @@
   },
   "images": {
     "hero": [
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/bedford-tx/hero-1.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/bedford-tx/hero-2.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/bedford-tx/hero-3.jpg"
+      "https://wavemax.promo/assets/images/locations/bedford-tx/hero-1.jpg",
+      "https://wavemax.promo/assets/images/locations/bedford-tx/hero-2.jpg",
+      "https://wavemax.promo/assets/images/locations/bedford-tx/hero-3.jpg"
     ],
     "interior": [
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/bedford-tx/interior-1.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/bedford-tx/interior-2.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/bedford-tx/interior-3.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/bedford-tx/interior-4.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/bedford-tx/interior-5.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/bedford-tx/interior-6.jpg"
+      "https://wavemax.promo/assets/images/locations/bedford-tx/interior-1.jpg",
+      "https://wavemax.promo/assets/images/locations/bedford-tx/interior-2.jpg",
+      "https://wavemax.promo/assets/images/locations/bedford-tx/interior-3.jpg",
+      "https://wavemax.promo/assets/images/locations/bedford-tx/interior-4.jpg",
+      "https://wavemax.promo/assets/images/locations/bedford-tx/interior-5.jpg",
+      "https://wavemax.promo/assets/images/locations/bedford-tx/interior-6.jpg"
     ],
     "owner": [],
     "landmarks": [
@@ -149,7 +149,7 @@
         "alt": "BedfordSchool1 (1 of 1) — Bedford"
       }
     ],
-    "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/bedford-tx/hero-1.jpg",
+    "ogImage": "https://wavemax.promo/assets/images/locations/bedford-tx/hero-1.jpg",
     "ogImageAlt": "WaveMAX Bedford TX storefront",
     "mapPreview": ""
   },

@@ -122,17 +122,17 @@
   },
   "images": {
     "hero": [
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/durham-nc/hero-1.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/durham-nc/hero-2.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/durham-nc/hero-3.jpg"
+      "https://wavemax.promo/assets/images/locations/durham-nc/hero-1.jpg",
+      "https://wavemax.promo/assets/images/locations/durham-nc/hero-2.jpg",
+      "https://wavemax.promo/assets/images/locations/durham-nc/hero-3.jpg"
     ],
     "interior": [
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/durham-nc/interior-1.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/durham-nc/interior-2.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/durham-nc/interior-3.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/durham-nc/interior-4.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/durham-nc/interior-5.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/durham-nc/interior-6.jpg"
+      "https://wavemax.promo/assets/images/locations/durham-nc/interior-1.jpg",
+      "https://wavemax.promo/assets/images/locations/durham-nc/interior-2.jpg",
+      "https://wavemax.promo/assets/images/locations/durham-nc/interior-3.jpg",
+      "https://wavemax.promo/assets/images/locations/durham-nc/interior-4.jpg",
+      "https://wavemax.promo/assets/images/locations/durham-nc/interior-5.jpg",
+      "https://wavemax.promo/assets/images/locations/durham-nc/interior-6.jpg"
     ],
     "owner": [],
     "landmarks": [
@@ -157,7 +157,7 @@
         "alt": "Duke Memorial United Methodist Church, Durham, NC (49140492242) — Durham"
       }
     ],
-    "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/durham-nc/hero-1.jpg",
+    "ogImage": "https://wavemax.promo/assets/images/locations/durham-nc/hero-1.jpg",
     "ogImageAlt": "WaveMAX Durham NC storefront",
     "mapPreview": ""
   },

@@ -130,17 +130,17 @@
   },
   "images": {
     "hero": [
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/wyoming-mi/hero-1.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/wyoming-mi/hero-2.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/wyoming-mi/hero-3.jpg"
+      "https://wavemax.promo/assets/images/locations/wyoming-mi/hero-1.jpg",
+      "https://wavemax.promo/assets/images/locations/wyoming-mi/hero-2.jpg",
+      "https://wavemax.promo/assets/images/locations/wyoming-mi/hero-3.jpg"
     ],
     "interior": [
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/wyoming-mi/interior-1.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/wyoming-mi/interior-2.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/wyoming-mi/interior-3.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/wyoming-mi/interior-4.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/wyoming-mi/interior-5.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/wyoming-mi/interior-6.jpg"
+      "https://wavemax.promo/assets/images/locations/wyoming-mi/interior-1.jpg",
+      "https://wavemax.promo/assets/images/locations/wyoming-mi/interior-2.jpg",
+      "https://wavemax.promo/assets/images/locations/wyoming-mi/interior-3.jpg",
+      "https://wavemax.promo/assets/images/locations/wyoming-mi/interior-4.jpg",
+      "https://wavemax.promo/assets/images/locations/wyoming-mi/interior-5.jpg",
+      "https://wavemax.promo/assets/images/locations/wyoming-mi/interior-6.jpg"
     ],
     "owner": [],
     "landmarks": [
@@ -165,7 +165,7 @@
         "alt": "Wyoming High School — Wyoming"
       }
     ],
-    "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/wyoming-mi/hero-1.jpg",
+    "ogImage": "https://wavemax.promo/assets/images/locations/wyoming-mi/hero-1.jpg",
     "ogImageAlt": "WaveMAX Wyoming MI storefront",
     "mapPreview": ""
   },

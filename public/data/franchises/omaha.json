@@ -130,17 +130,17 @@
   },
   "images": {
     "hero": [
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/omaha/hero-1.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/omaha/hero-2.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/omaha/hero-3.jpg"
+      "https://wavemax.promo/assets/images/locations/omaha/hero-1.jpg",
+      "https://wavemax.promo/assets/images/locations/omaha/hero-2.jpg",
+      "https://wavemax.promo/assets/images/locations/omaha/hero-3.jpg"
     ],
     "interior": [
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/omaha/interior-1.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/omaha/interior-2.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/omaha/interior-3.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/omaha/interior-4.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/omaha/interior-5.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/omaha/interior-6.jpg"
+      "https://wavemax.promo/assets/images/locations/omaha/interior-1.jpg",
+      "https://wavemax.promo/assets/images/locations/omaha/interior-2.jpg",
+      "https://wavemax.promo/assets/images/locations/omaha/interior-3.jpg",
+      "https://wavemax.promo/assets/images/locations/omaha/interior-4.jpg",
+      "https://wavemax.promo/assets/images/locations/omaha/interior-5.jpg",
+      "https://wavemax.promo/assets/images/locations/omaha/interior-6.jpg"
     ],
     "owner": [],
     "landmarks": [
@@ -165,7 +165,7 @@
         "alt": "Omaha-Night-10th-Capitol-Spencer-Hession — Omaha"
       }
     ],
-    "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/omaha/hero-1.jpg",
+    "ogImage": "https://wavemax.promo/assets/images/locations/omaha/hero-1.jpg",
     "ogImageAlt": "WaveMAX Omaha storefront",
     "mapPreview": ""
   },

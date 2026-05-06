@@ -130,14 +130,14 @@
   },
   "images": {
     "hero": [
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/st-paul-mn/hero-1.jpg"
+      "https://wavemax.promo/assets/images/locations/st-paul-mn/hero-1.jpg"
     ],
     "interior": [
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/st-paul-mn/interior-1.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/st-paul-mn/interior-2.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/st-paul-mn/interior-3.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/st-paul-mn/interior-4.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/st-paul-mn/interior-5.jpg"
+      "https://wavemax.promo/assets/images/locations/st-paul-mn/interior-1.jpg",
+      "https://wavemax.promo/assets/images/locations/st-paul-mn/interior-2.jpg",
+      "https://wavemax.promo/assets/images/locations/st-paul-mn/interior-3.jpg",
+      "https://wavemax.promo/assets/images/locations/st-paul-mn/interior-4.jpg",
+      "https://wavemax.promo/assets/images/locations/st-paul-mn/interior-5.jpg"
     ],
     "owner": [],
     "landmarks": [
@@ -162,7 +162,7 @@
         "alt": "Como Park Zoo and Conservatory - 15 — St. Paul"
       }
     ],
-    "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/st-paul-mn/hero-1.jpg",
+    "ogImage": "https://wavemax.promo/assets/images/locations/st-paul-mn/hero-1.jpg",
     "ogImageAlt": "WaveMAX St Paul MN storefront",
     "mapPreview": ""
   },

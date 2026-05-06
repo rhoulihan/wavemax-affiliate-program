@@ -130,12 +130,12 @@
   },
   "images": {
     "hero": [
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/tempe-az-broadway/hero-1.webp"
+      "https://wavemax.promo/assets/images/locations/tempe-az-broadway/hero-1.webp"
     ],
     "interior": [
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/tempe-az-broadway/interior-1.webp",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/tempe-az-broadway/interior-2.webp",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/tempe-az-broadway/interior-3.webp"
+      "https://wavemax.promo/assets/images/locations/tempe-az-broadway/interior-1.webp",
+      "https://wavemax.promo/assets/images/locations/tempe-az-broadway/interior-2.webp",
+      "https://wavemax.promo/assets/images/locations/tempe-az-broadway/interior-3.webp"
     ],
     "owner": [],
     "landmarks": [
@@ -160,7 +160,7 @@
         "alt": "\"A Mountain,\" Hayden Butte, Tempe, AZ 2013 - panoramio — Tempe"
       }
     ],
-    "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/tempe-az-broadway/hero-1.webp",
+    "ogImage": "https://wavemax.promo/assets/images/locations/tempe-az-broadway/hero-1.webp",
     "ogImageAlt": "WaveMAX Tempe, AZ Broadway storefront",
     "mapPreview": ""
   },

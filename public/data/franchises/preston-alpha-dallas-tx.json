@@ -131,16 +131,16 @@
   },
   "images": {
     "hero": [
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/preston-alpha-dallas-tx/hero-1.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/preston-alpha-dallas-tx/hero-2.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/preston-alpha-dallas-tx/hero-3.jpg"
+      "https://wavemax.promo/assets/images/locations/preston-alpha-dallas-tx/hero-1.jpg",
+      "https://wavemax.promo/assets/images/locations/preston-alpha-dallas-tx/hero-2.jpg",
+      "https://wavemax.promo/assets/images/locations/preston-alpha-dallas-tx/hero-3.jpg"
     ],
     "interior": [
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/preston-alpha-dallas-tx/interior-1.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/preston-alpha-dallas-tx/interior-2.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/preston-alpha-dallas-tx/interior-3.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/preston-alpha-dallas-tx/interior-4.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/preston-alpha-dallas-tx/interior-5.jpg"
+      "https://wavemax.promo/assets/images/locations/preston-alpha-dallas-tx/interior-1.jpg",
+      "https://wavemax.promo/assets/images/locations/preston-alpha-dallas-tx/interior-2.jpg",
+      "https://wavemax.promo/assets/images/locations/preston-alpha-dallas-tx/interior-3.jpg",
+      "https://wavemax.promo/assets/images/locations/preston-alpha-dallas-tx/interior-4.jpg",
+      "https://wavemax.promo/assets/images/locations/preston-alpha-dallas-tx/interior-5.jpg"
     ],
     "owner": [],
     "landmarks": [
@@ -165,7 +165,7 @@
         "alt": "Dallas County Courthouse - Old Red — Dallas"
       }
     ],
-    "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/preston-alpha-dallas-tx/hero-1.jpg",
+    "ogImage": "https://wavemax.promo/assets/images/locations/preston-alpha-dallas-tx/hero-1.jpg",
     "ogImageAlt": "WaveMAX Preston & Alpha Dallas, TX storefront",
     "mapPreview": ""
   },

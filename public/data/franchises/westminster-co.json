@@ -130,14 +130,14 @@
   },
   "images": {
     "hero": [
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/westminster-co/hero-1.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/westminster-co/hero-2.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/westminster-co/hero-3.jpg"
+      "https://wavemax.promo/assets/images/locations/westminster-co/hero-1.jpg",
+      "https://wavemax.promo/assets/images/locations/westminster-co/hero-2.jpg",
+      "https://wavemax.promo/assets/images/locations/westminster-co/hero-3.jpg"
     ],
     "interior": [
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/westminster-co/interior-1.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/westminster-co/interior-5.webp",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/westminster-co/interior-6.webp"
+      "https://wavemax.promo/assets/images/locations/westminster-co/interior-1.jpg",
+      "https://wavemax.promo/assets/images/locations/westminster-co/interior-5.webp",
+      "https://wavemax.promo/assets/images/locations/westminster-co/interior-6.webp"
     ],
     "owner": [],
     "landmarks": [
@@ -150,7 +150,7 @@
         "alt": "Westminster CO Historic Place — Westminster"
       }
     ],
-    "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/westminster-co/hero-1.jpg",
+    "ogImage": "https://wavemax.promo/assets/images/locations/westminster-co/hero-1.jpg",
     "ogImageAlt": "WaveMAX Westminster CO storefront",
     "mapPreview": ""
   },

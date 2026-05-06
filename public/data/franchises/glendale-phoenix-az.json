@@ -130,15 +130,15 @@
   },
   "images": {
     "hero": [
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/glendale-phoenix-az/hero-1.jpg"
+      "https://wavemax.promo/assets/images/locations/glendale-phoenix-az/hero-1.jpg"
     ],
     "interior": [
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/glendale-phoenix-az/interior-1.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/glendale-phoenix-az/interior-2.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/glendale-phoenix-az/interior-3.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/glendale-phoenix-az/interior-4.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/glendale-phoenix-az/interior-5.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/glendale-phoenix-az/interior-6.jpg"
+      "https://wavemax.promo/assets/images/locations/glendale-phoenix-az/interior-1.jpg",
+      "https://wavemax.promo/assets/images/locations/glendale-phoenix-az/interior-2.jpg",
+      "https://wavemax.promo/assets/images/locations/glendale-phoenix-az/interior-3.jpg",
+      "https://wavemax.promo/assets/images/locations/glendale-phoenix-az/interior-4.jpg",
+      "https://wavemax.promo/assets/images/locations/glendale-phoenix-az/interior-5.jpg",
+      "https://wavemax.promo/assets/images/locations/glendale-phoenix-az/interior-6.jpg"
     ],
     "owner": [],
     "landmarks": [
@@ -163,7 +163,7 @@
         "alt": "Ethnic Origins in Phoenix — Phoenix"
       }
     ],
-    "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/glendale-phoenix-az/hero-1.jpg",
+    "ogImage": "https://wavemax.promo/assets/images/locations/glendale-phoenix-az/hero-1.jpg",
     "ogImageAlt": "WaveMAX Phoenix AZ N 35th storefront",
     "mapPreview": ""
   },

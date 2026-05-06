@@ -122,17 +122,17 @@
   },
   "images": {
     "hero": [
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/thecolony/hero-1.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/thecolony/hero-2.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/thecolony/hero-3.jpg"
+      "https://wavemax.promo/assets/images/locations/thecolony/hero-1.jpg",
+      "https://wavemax.promo/assets/images/locations/thecolony/hero-2.jpg",
+      "https://wavemax.promo/assets/images/locations/thecolony/hero-3.jpg"
     ],
     "interior": [
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/thecolony/interior-1.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/thecolony/interior-2.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/thecolony/interior-3.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/thecolony/interior-4.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/thecolony/interior-5.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/thecolony/interior-6.jpg"
+      "https://wavemax.promo/assets/images/locations/thecolony/interior-1.jpg",
+      "https://wavemax.promo/assets/images/locations/thecolony/interior-2.jpg",
+      "https://wavemax.promo/assets/images/locations/thecolony/interior-3.jpg",
+      "https://wavemax.promo/assets/images/locations/thecolony/interior-4.jpg",
+      "https://wavemax.promo/assets/images/locations/thecolony/interior-5.jpg",
+      "https://wavemax.promo/assets/images/locations/thecolony/interior-6.jpg"
     ],
     "owner": [],
     "landmarks": [
@@ -141,7 +141,7 @@
         "alt": "City Of The Colony Logo — The Colony"
       }
     ],
-    "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/thecolony/hero-1.jpg",
+    "ogImage": "https://wavemax.promo/assets/images/locations/thecolony/hero-1.jpg",
     "ogImageAlt": "WaveMAX The Colony TX storefront",
     "mapPreview": ""
   },

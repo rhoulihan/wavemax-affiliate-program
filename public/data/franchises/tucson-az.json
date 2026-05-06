@@ -130,17 +130,17 @@
   },
   "images": {
     "hero": [
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/tucson-az/hero-1.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/tucson-az/hero-2.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/tucson-az/hero-3.jpg"
+      "https://wavemax.promo/assets/images/locations/tucson-az/hero-1.jpg",
+      "https://wavemax.promo/assets/images/locations/tucson-az/hero-2.jpg",
+      "https://wavemax.promo/assets/images/locations/tucson-az/hero-3.jpg"
     ],
     "interior": [
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/tucson-az/interior-1.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/tucson-az/interior-2.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/tucson-az/interior-3.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/tucson-az/interior-4.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/tucson-az/interior-5.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/tucson-az/interior-6.jpg"
+      "https://wavemax.promo/assets/images/locations/tucson-az/interior-1.jpg",
+      "https://wavemax.promo/assets/images/locations/tucson-az/interior-2.jpg",
+      "https://wavemax.promo/assets/images/locations/tucson-az/interior-3.jpg",
+      "https://wavemax.promo/assets/images/locations/tucson-az/interior-4.jpg",
+      "https://wavemax.promo/assets/images/locations/tucson-az/interior-5.jpg",
+      "https://wavemax.promo/assets/images/locations/tucson-az/interior-6.jpg"
     ],
     "owner": [],
     "landmarks": [
@@ -165,7 +165,7 @@
         "alt": "Tucson May 2019 38 (2nd Street) — Tucson"
       }
     ],
-    "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/tucson-az/hero-1.jpg",
+    "ogImage": "https://wavemax.promo/assets/images/locations/tucson-az/hero-1.jpg",
     "ogImageAlt": "WaveMAX Tucson AZ storefront",
     "mapPreview": ""
   },

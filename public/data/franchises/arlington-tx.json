@@ -131,17 +131,17 @@
   },
   "images": {
     "hero": [
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/arlington-tx/hero-1.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/arlington-tx/hero-2.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/arlington-tx/hero-3.jpg"
+      "https://wavemax.promo/assets/images/locations/arlington-tx/hero-1.jpg",
+      "https://wavemax.promo/assets/images/locations/arlington-tx/hero-2.jpg",
+      "https://wavemax.promo/assets/images/locations/arlington-tx/hero-3.jpg"
     ],
     "interior": [
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/arlington-tx/interior-1.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/arlington-tx/interior-2.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/arlington-tx/interior-3.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/arlington-tx/interior-4.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/arlington-tx/interior-5.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/arlington-tx/interior-6.jpg"
+      "https://wavemax.promo/assets/images/locations/arlington-tx/interior-1.jpg",
+      "https://wavemax.promo/assets/images/locations/arlington-tx/interior-2.jpg",
+      "https://wavemax.promo/assets/images/locations/arlington-tx/interior-3.jpg",
+      "https://wavemax.promo/assets/images/locations/arlington-tx/interior-4.jpg",
+      "https://wavemax.promo/assets/images/locations/arlington-tx/interior-5.jpg",
+      "https://wavemax.promo/assets/images/locations/arlington-tx/interior-6.jpg"
     ],
     "owner": [],
     "landmarks": [
@@ -166,7 +166,7 @@
         "alt": "Arlington April 2019 17 (Arlington City Council Chamber) — Arlington"
       }
     ],
-    "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/arlington-tx/hero-1.jpg",
+    "ogImage": "https://wavemax.promo/assets/images/locations/arlington-tx/hero-1.jpg",
     "ogImageAlt": "WaveMAX Arlington TX storefront",
     "mapPreview": ""
   },

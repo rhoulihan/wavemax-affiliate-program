@@ -130,16 +130,16 @@
   },
   "images": {
     "hero": [
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/oklahoma-city-ok/hero-1.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/oklahoma-city-ok/hero-2.jpg"
+      "https://wavemax.promo/assets/images/locations/oklahoma-city-ok/hero-1.jpg",
+      "https://wavemax.promo/assets/images/locations/oklahoma-city-ok/hero-2.jpg"
     ],
     "interior": [
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/oklahoma-city-ok/interior-1.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/oklahoma-city-ok/interior-2.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/oklahoma-city-ok/interior-3.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/oklahoma-city-ok/interior-4.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/oklahoma-city-ok/interior-5.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/oklahoma-city-ok/interior-6.jpg"
+      "https://wavemax.promo/assets/images/locations/oklahoma-city-ok/interior-1.jpg",
+      "https://wavemax.promo/assets/images/locations/oklahoma-city-ok/interior-2.jpg",
+      "https://wavemax.promo/assets/images/locations/oklahoma-city-ok/interior-3.jpg",
+      "https://wavemax.promo/assets/images/locations/oklahoma-city-ok/interior-4.jpg",
+      "https://wavemax.promo/assets/images/locations/oklahoma-city-ok/interior-5.jpg",
+      "https://wavemax.promo/assets/images/locations/oklahoma-city-ok/interior-6.jpg"
     ],
     "owner": [],
     "landmarks": [
@@ -164,7 +164,7 @@
         "alt": "Oklahoma City National Memorial at Christmas — Oklahoma City"
       }
     ],
-    "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/oklahoma-city-ok/hero-1.jpg",
+    "ogImage": "https://wavemax.promo/assets/images/locations/oklahoma-city-ok/hero-1.jpg",
     "ogImageAlt": "WaveMAX Oklahoma City OK storefront",
     "mapPreview": ""
   },

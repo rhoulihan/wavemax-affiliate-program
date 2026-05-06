@@ -130,17 +130,17 @@
   },
   "images": {
     "hero": [
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/houston-tx/hero-1.webp",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/houston-tx/hero-2.webp",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/houston-tx/hero-3.webp"
+      "https://wavemax.promo/assets/images/locations/houston-tx/hero-1.webp",
+      "https://wavemax.promo/assets/images/locations/houston-tx/hero-2.webp",
+      "https://wavemax.promo/assets/images/locations/houston-tx/hero-3.webp"
     ],
     "interior": [
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/houston-tx/interior-1.webp",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/houston-tx/interior-2.webp",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/houston-tx/interior-3.webp",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/houston-tx/interior-4.webp",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/houston-tx/interior-5.webp",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/houston-tx/interior-6.webp"
+      "https://wavemax.promo/assets/images/locations/houston-tx/interior-1.webp",
+      "https://wavemax.promo/assets/images/locations/houston-tx/interior-2.webp",
+      "https://wavemax.promo/assets/images/locations/houston-tx/interior-3.webp",
+      "https://wavemax.promo/assets/images/locations/houston-tx/interior-4.webp",
+      "https://wavemax.promo/assets/images/locations/houston-tx/interior-5.webp",
+      "https://wavemax.promo/assets/images/locations/houston-tx/interior-6.webp"
     ],
     "owner": [],
     "landmarks": [
@@ -165,7 +165,7 @@
         "alt": "EthiopianchurchHoustoncanemont — Houston"
       }
     ],
-    "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/houston-tx/hero-1.webp",
+    "ogImage": "https://wavemax.promo/assets/images/locations/houston-tx/hero-1.webp",
     "ogImageAlt": "WaveMAX Houston TX storefront",
     "mapPreview": ""
   },
