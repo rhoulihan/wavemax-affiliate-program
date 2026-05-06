@@ -431,21 +431,23 @@
     background: #1e72ba;
     padding: 16px 12px 8px;
     text-align: center;
+    position: relative;
   }
   .wmv3-logo a { display: inline-block; }
   .wmv3-logo img { max-height: 56px; width: auto; display: block; }
 
-  /* 4-cell action row: Learn More | Locations | burger | lang switcher */
+  /* 3-cell action row: Learn More | Locations | burger */
   .wmv3-actions {
     background: #1e72ba;
     padding: 12px 12px 16px;
-    display: grid;
-    grid-template-columns: 1fr 1fr auto auto;
+    display: flex;
     align-items: center;
+    justify-content: center;
     gap: 8px;
   }
   .wmv3-btn {
-    width: 100%;
+    flex: 1;
+    max-width: 140px;
     padding: 9px 10px;
     border-radius: 999px;
     font-size: 12px;
@@ -462,11 +464,12 @@
   .wmv3-btn-out { background: transparent; color: #fff; border: 1.5px solid #fff; }
   .wmv3-btn-sol { background: #29b6d4; color: #fff; border: 1.5px solid #29b6d4; }
 
-  /* Mobile lang switcher inside wmv3-actions — compact pill matching the
-     visual weight of the burger; full menu still drops on click. */
+  /* Mobile lang switcher anchored upper-right of the logo row. Compact
+     pill; full menu drops on click. */
   .wmv3-lang-switcher {
-    position: relative;
-    justify-self: end;
+    position: absolute;
+    top: 12px;
+    right: 12px;
   }
   .wmv3-lang-switcher .wm-lang-btn {
     background: transparent;
