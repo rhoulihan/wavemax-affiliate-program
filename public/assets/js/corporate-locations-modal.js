@@ -100,19 +100,11 @@
   }
 
   function init() {
-    const overlay = document.getElementById('locModal');
-    if (!overlay) return;
-
-    const list           = document.getElementById('locList');
-    const search         = document.getElementById('locSearch');
-    const status         = document.getElementById('modalStatus');
-    const statusText     = document.getElementById('modalStatusText');
-    const actions        = document.getElementById('locActions');
-    const selectedName   = document.getElementById('locSelectedName');
-    const selectedAddr   = document.getElementById('locSelectedAddr');
-    const directionsLink = document.getElementById('locActionDirections');
-    const visitLink      = document.getElementById('locActionVisit');
-    const mapEl          = document.getElementById('locMap');
+    // Lazy-resolved DOM refs — corporate-chrome.js injects the modal
+    // markup, but its DOMContentLoaded listener may run AFTER ours
+    // (defer scripts run in document order). So we don't snapshot
+    // element references at init time; we query at open() time.
+    function $(id) { return document.getElementById(id); }
 
     let map = null;
     let markersBySlug = new Map();
@@ -121,6 +113,12 @@
     let selectedSlug = null;
 
     function open() {
+      const overlay = $('locModal');
+      const search  = $('locSearch');
+      if (!overlay) {
+        console.warn('[locModal] modal markup not found in DOM');
+        return;
+      }
       overlay.setAttribute('aria-hidden', 'false');
       overlay.classList.add('open');
       document.body.style.overflow = 'hidden';
@@ -129,6 +127,8 @@
       if (search) search.focus();
     }
     function close() {
+      const overlay = $('locModal');
+      if (!overlay) return;
       overlay.setAttribute('aria-hidden', 'true');
       overlay.classList.remove('open');
       document.body.style.overflow = '';
@@ -137,8 +137,10 @@
     async function initialize() {
       if (initialized) return;
       initialized = true;
+      const status = $('modalStatus');
+      const statusText = $('modalStatusText');
       try {
-        if (status) { status.hidden = false; statusText.textContent = 'Loading franchises…'; }
+        if (status) { status.hidden = false; if (statusText) statusText.textContent = 'Loading franchises…'; }
         const [google, fs] = await Promise.all([loadGoogleMaps(), loadFranchises()]);
         franchises = fs;
         if (status) status.hidden = true;
@@ -146,11 +148,12 @@
         renderMap(google, franchises);
       } catch (err) {
         console.error('[locModal] init failed', err);
-        if (status) { status.hidden = false; statusText.textContent = 'Could not load franchise list — please try again.'; }
+        if (status) { status.hidden = false; if (statusText) statusText.textContent = 'Could not load franchise list — please try again.'; }
       }
     }
 
     function renderTiles(items) {
+      const list = $('locList');
       if (!list) return;
       list.innerHTML = '';
       const byState = new Map();
@@ -184,6 +187,7 @@
     }
 
     function renderMap(google, items) {
+      const mapEl = $('locMap');
       if (!mapEl || !google) return;
       const bounds = new google.maps.LatLngBounds();
       let hasPoints = false;
@@ -230,6 +234,13 @@
       selectedSlug = slug;
       const f = data.franchise;
 
+      const selectedName   = $('locSelectedName');
+      const selectedAddr   = $('locSelectedAddr');
+      const directionsLink = $('locActionDirections');
+      const visitLink      = $('locActionVisit');
+      const actions        = $('locActions');
+      const list           = $('locList');
+
       if (selectedName) selectedName.textContent = f.city || f.slug;
       if (selectedAddr) selectedAddr.textContent = f.address || '';
       if (directionsLink && f.mapsUrl) directionsLink.href = f.mapsUrl;
@@ -237,7 +248,6 @@
       if (visitLink) visitLink.href = '/' + encodeURIComponent(slug) + '/';
       if (actions) actions.hidden = false;
 
-      // Highlight active tile
       Array.from((list || document).querySelectorAll('.modal-tile')).forEach((t) => {
         t.classList.toggle('is-active', t.dataset.slug === slug);
       });
@@ -248,41 +258,43 @@
       }
     }
 
-    // Search filters tiles. Map markers stay; only the list filters.
-    if (search) {
-      search.addEventListener('input', () => {
-        const q = search.value.trim().toLowerCase();
-        if (!q) { renderTiles(franchises); return; }
-        const filtered = franchises.filter((f) => {
-          const stateFull = (US_STATE_NAMES[f.state] || '').toLowerCase();
-          return [f.city, f.state, stateFull, f.zip, f.address]
-            .filter(Boolean)
-            .map((s) => String(s).toLowerCase())
-            .some((s) => s.includes(q));
-        });
-        renderTiles(filtered);
+    // Search input is delegated through document so we don't need a
+    // hard reference to the element at init time.
+    document.addEventListener('input', (e) => {
+      if (!e.target || e.target.id !== 'locSearch') return;
+      const q = e.target.value.trim().toLowerCase();
+      if (!q) { renderTiles(franchises); return; }
+      const filtered = franchises.filter((f) => {
+        const stateFull = (US_STATE_NAMES[f.state] || '').toLowerCase();
+        return [f.city, f.state, stateFull, f.zip, f.address]
+          .filter(Boolean)
+          .map((s) => String(s).toLowerCase())
+          .some((s) => s.includes(q));
       });
-    }
+      renderTiles(filtered);
+    });
 
-    // Wire global click handlers
+    // Wire global click handlers (run regardless of whether modal
+    // markup exists yet — open() resolves the overlay lazily).
     document.addEventListener('click', (e) => {
       const t = e.target;
       if (!t || !t.closest) return;
 
-      // Open from anything with [data-locmodal-open] OR [data-action="open-locations"]
       if (t.closest('[data-locmodal-open], [data-action="open-locations"]')) {
         e.preventDefault();
         open();
         return;
       }
-      // Close
       if (t.closest('[data-locmodal-close]')) { e.preventDefault(); close(); return; }
-      // Backdrop click closes (click on overlay but not on box)
-      if (t === overlay) { close(); return; }
+
+      const overlay = $('locModal');
+      if (overlay && t === overlay) close();
     });
 
     document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && overlay.classList.contains('open')) close();
+      if (e.key !== 'Escape') return;
+      const overlay = $('locModal');
+      if (overlay && overlay.classList.contains('open')) close();
     });
   }
 
