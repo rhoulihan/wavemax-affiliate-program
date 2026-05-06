@@ -524,6 +524,86 @@
       "btnSecondary": "Obter o guia de investimento"
     }
   },
+  "tour": {
+    "hero": {
+      "eyebrow": "Tour virtual",
+      "title1": "Entre em uma",
+      "title2": "WaveMAX.",
+      "sub": "Fotografias de toda a rede WaveMAX — nossa loja-modelo de Jacksonville, de propriedade da empresa, a loja de Kent WA destacada na vitrine de equipamentos corporativa e a unidade de Omaha apresentada na série de tour de loja WaveMAX. Frota Electrolux moderna, lounge do cliente, Wi-Fi gratuito, atendente de plantão, interior de varejo com marca. A loja onde você gostaria de estar — não aquela onde precisa estar.",
+      "ctaPrimary": "Encontrar uma localização",
+      "ctaSecondary": "Construa uma você mesmo"
+    },
+    "philo": {
+      "eyebrow": "Filosofia da marca",
+      "title": "Limpo é uma sensação, não um item de checklist.",
+      "lede": "A maioria das lavanderias compete por preço por carga. A WaveMAX compete pela experiência. Cada decisão de design — da temperatura da iluminação ao acabamento do piso e ao treinamento da equipe — é deliberada. O trabalho não é lavar roupa; é fazer o cliente passar por três concorrentes para chegar até nós.",
+      "t1Title": "Iluminado, não fluorescente",
+      "t1Text": "Iluminação LED com correção de cor que valoriza tons de pele e aparece bem na câmera do celular. Os clientes postam fotos da visita. Isso é marketing gratuito.",
+      "t2Title": "Silencioso, não industrial",
+      "t2Text": "As máquinas Electrolux soft-mount modernas funcionam visivelmente mais silenciosas do que os equipamentos legados de fixação rígida. A loja não é um chão de fábrica — é um lugar para se estar.",
+      "t3Title": "Espaçoso, não apertado",
+      "t3Text": "Corredores largos, mesas de dobragem generosas, espaço dedicado para carrinhos e altura ergonômica de carga. As pessoas voltam às lojas que respeitam seu tempo e sua dignidade.",
+      "t4Title": "Com marca, não genérico",
+      "t4Text": "Paleta consistente, sinalização, uniformes de atendentes e sistema de sinalização em cada WaveMAX. A marca é o fosso competitivo — desconhecidos sabem onde estão entrando.",
+      "t5Title": "Conectado, não isolado",
+      "t5Text": "Wi-Fi gratuito, assentos próprios para trabalhar, carregamento em cada bloco. O ciclo de lavagem de 90-minute vira tempo produtivo — e não tempo morto.",
+      "t6Title": "Atendido, não desassistido",
+      "t6Text": "Um atendente de plantão durante o horário publicado. Ajuda humana real, demonstrações de máquina para iniciantes, recepção de WDF no balcão. O oposto de qualquer lavanderia a moedas em que você já esteve."
+    },
+    "fl": {
+      "eyebrow": "Três localizações em destaque",
+      "title": "Mesma marca. Mesmo manual. Três lojas reais.",
+      "lede": "As fotografias desta galeria vêm de três localizações WaveMAX que o corporativo fotografou extensivamente para marketing. Cada WaveMAX é construída segundo a mesma especificação de marca — mas estas três são as que apresentamos publicamente porque estão polidas, completas e são representativas de como a marca deve aparecer em qualquer mercado.",
+      "jaxBadge": "Loja-modelo",
+      "jaxText": "Loja-modelo de propriedade da empresa. A loja de referência e a unidade cujos números de fluxo de caixa do Item 19 estão publicados em nosso FDD. A referência de \"é assim que uma WaveMAX deve ser\".",
+      "kentBadge": "Vitrine de equipamentos",
+      "kentText": "Loja-vitrine de equipamentos do corporativo — a unidade usada nas fotografias da página de equipamentos do site corporativo. Frota Electrolux moderna, interior de varejo com marca, estação de atendente.",
+      "omahaBadge": "Tour de loja",
+      "omahaText": "Apresentada na série de marketing de tour de loja WaveMAX. Exterior em grande angular, lounge do cliente, área operacional — um retrato completo de como a marca se executa fora da loja-modelo."
+    },
+    "gallery": {
+      "eyebrow": "Dentro da rede",
+      "title": "Lojas WaveMAX reais. Fotografias reais.",
+      "lede": "Fotografias sem encenação de toda a rede WaveMAX. Sem renderizações, sem olho-de-peixe, sem gradação de cor de hora dourada. O que você vê é o que cada cliente vê ao atravessar a porta — e o padrão segundo o qual cada WaveMAX é construída.",
+      "tag1": "Jacksonville · Loja-modelo",
+      "tagJax": "Jacksonville",
+      "tagKent": "Kent WA",
+      "tagOmaha": "Omaha",
+      "cap1": "Frota de lavadoras Electrolux — piso principal",
+      "cap2": "Linha de secadoras de grande formato",
+      "cap3": "Vitrine de equipamentos — Kent WA",
+      "cap4": "Mesas de dobragem e área de trabalho",
+      "cap5": "Lounge do cliente — Omaha",
+      "cap6": "Balcão de entrega Lavar-Secar-Dobrar",
+      "cap7": "Exterior da loja-modelo — fachada com marca",
+      "cap8": "Fachada iluminada — Kent WA",
+      "cap9": "Exterior em grande angular — Omaha",
+      "cap10": "Interior com marca — Kent WA",
+      "cap11": "Interior amplo — Jacksonville",
+      "cap12": "Área operacional — Omaha"
+    },
+    "fleet": {
+      "eyebrow": "A frota",
+      "title": "Electrolux moderna. Programada para desempenho.",
+      "lede": "Nosso pacote de equipamentos é uma escolha deliberada — soft-mount, extração de alta G, controladores programáveis, diagnóstico online e peças e serviço negociados pelo corporativo. O resultado: ciclos mais rápidos, menor custo de utilidades por libra e manutenção previsível.",
+      "s1Label": "Carga completa — da lavagem à secagem",
+      "s1Text": "A extração de alta G remove mais água no lado da lavagem, então as secadoras rodam mais rápido. O tempo de rotatividade do cliente cai drasticamente frente às lavadoras legadas de carga superior + secadoras de baixa G.",
+      "s2Label": "Força de extração (lojas premium)",
+      "s2Text": "Lojas WaveMAX de nível premium contam com extração 450G — as roupas saem quase secas. Reduz tempo de secagem, custo de energia e desgaste dos tecidos.",
+      "s3Label": "Máquinas de grande formato",
+      "s3Text": "As lojas premium incluem unidades de grande formato de 80lb — edredons, sacos de dormir, rouparia de restaurante e cargas comerciais de coleta em um único ciclo.",
+      "s4Label": "Linha de sanitização (selecionadas)",
+      "s4Text": "Lojas selecionadas contam com linhas equipadas com sanitização UV para clientes médicos, de academia e hospitalidade que exigem processamento em grau sanitizante.",
+      "disclaimer": "O pacote de equipamentos e os recursos específicos da loja variam por localização — alegações de equipamentos premium (extração 450G, grande formato 80lb, sanitização UV) só aparecem nas páginas de lojas onde se verificou que o equipamento está instalado."
+    },
+    "cta": {
+      "eyebrow": "Dê o próximo passo",
+      "title": "Veja pessoalmente — ou construa a próxima.",
+      "lede": "Encontre a WaveMAX mais próxima e visite-a. Ou — se você está esperando por uma categoria que ainda não foi profissionalizada — inicie a conversa sobre ser dono de uma.",
+      "btnPrimary": "Encontrar uma localização",
+      "btnSecondary": "Seja franqueado"
+    }
+  },
   "common": {
     "ctaLearnMore": "Saiba mais",
     "ctaGetGuide": "Obter o Guia de Investimento",
