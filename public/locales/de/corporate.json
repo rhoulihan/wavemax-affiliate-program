@@ -296,6 +296,57 @@
     }
   },
 
+  "testimonials": {
+    "hero": {
+      "eyebrow": "Erfahrungsberichte",
+      "title1": "Echte Eigentümer.",
+      "title2": "Echte Ergebnisse.",
+      "sub": "WaveMAX ist ein Netzwerk von 100+ unabhängigen Franchise-Eigentümern in den Vereinigten Staaten. Hören Sie von einigen von ihnen — Gebietsvertreter und Multi-Unit-Betreiber, die schildern, wie WaveMAX-Eigentum innerhalb des Systems tatsächlich aussieht.",
+      "ctaPrimary": "Franchise erkunden",
+      "ctaSecondary": "Qualifikation prüfen"
+    },
+    "band": {
+      "locations": "Geöffnete Standorte",
+      "owners":    "Franchise-Eigentümer",
+      "rank":      "Waschsalon-Franchise · 2026",
+      "avgGross":  "Durchschn. Brutto · FDD 2024"
+    },
+    "cards": {
+      "eyebrow": "Aus dem Netzwerk",
+      "title":   "Hören Sie direkt von WaveMAX-Eigentümern.",
+      "lede":    "Jeder der unten gezeigten Franchisenehmer ist ein echter WaveMAX-Eigentümer mit aktiver Rolle im Netzwerk. Die Zitate stammen von ihnen, mit Name und Gebiet ausgewiesen.",
+      "slQuote": "WaveMAX gibt Einzelpersonen die Möglichkeit, ein Geschäft zu betreiben und sich gleichzeitig auf andere Aspekte des Lebens zu konzentrieren. Innerhalb des WaveMAX-Rahmens zu arbeiten und gleichzeitig dem Traum vom semi-absenten Geschäft eine eigene Note zu verleihen, ist die perfekte Formel. WaveMAX hat es geschafft, eine archaische Branche durch Technologie, Marketing, Gebietsanalysen und kontinuierliche operative Verbesserungen zu modernisieren und der Konkurrenz voraus zu sein.",
+      "slRole":  "Gebietsvertreterin & Filialinhaberin · Gaithersburg, MD",
+      "caQuote": "Ich habe mich für WaveMAX entschieden, weil ich die einzigartige Chance sah, etwas in die Waschsalon-Branche zu bringen, was sie dringend brauchte: professionelles Management, operative Strukturen und einen höheren Qualitätsstandard. In den letzten sieben bis acht Jahren habe ich erlebt, wie diese Vision Wirklichkeit wurde. Was mich am meisten begeistert, ist, wohin wir gehen — gezielt zu skalieren und es gemeinsam aufzubauen.",
+      "caRole":  "Gebietsvertreter & Betreiber · DFW / East TX",
+      "pkQuote": "WaveMAX hat das Kundenerlebnis wirklich transformiert, indem es eine sichere, zuverlässige und einladende Umgebung geschaffen hat, der Menschen vertrauen und zu der sie zurückkehren. Die Waschsalon-Branche wurde historisch von unabhängigen, münzbetriebenen Betrieben dominiert — schlecht gewartet, inkonsistent besetzt und ohne jede Markenidentität. WaveMAX wurde gezielt als skalierbares Franchise-System aufgebaut, um genau das zu beheben.",
+      "pkRole":  "Gebietsdirektor · Georgia & Tennessee",
+      "shQuote": "Als erster WaveMAX-Franchisenehmer war ich dabei, als die Marke noch ihre Identität fand. Die Disziplin, die dieses Team bei Standortwahl, Ausstattung und Betrieb an den Tag legt, ist das, was WaveMAX von jedem anderen Waschsalon unterscheidet, den ich gesehen habe. Ich habe buchstäblich das Buch dazu geschrieben — SHIFT Happens.",
+      "shRole":  "Director of Operations · Erster WaveMAX-Franchisenehmer · Gebietsvertreter N. California / Nevada · Autor von SHIFT Happens"
+    },
+    "live": {
+      "eyebrow":    "Live-Kundenbewertungen",
+      "title":      "Von Kunden im gesamten Netzwerk.",
+      "lede":       "Dies sind 5-Sterne-Google-Bewertungen, die live aus WaveMAX-Standorten im ganzen Land gezogen werden. Echte Kunden, echte Bewertungen, automatisch aktualisiert — keine kuratierten Marketing-Auszüge.",
+      "loading":    "Kundenbewertungen werden geladen…",
+      "error":      "Netzwerk-Bewertungen konnten gerade nicht geladen werden. Bitte in einigen Minuten erneut aktualisieren.",
+      "attrPrefix": "Bewertungen über",
+      "attrSuffix": "· alle 6 Stunden aktualisiert · Stichprobe aus mehreren WaveMAX-Standorten"
+    },
+    "callout": {
+      "eyebrow":      "Unabhängig verifizierbar",
+      "title":        "Unsere Zahlen, nicht nur unsere Zitate.",
+      "lede":         "Eigentümer-Geschichten sind Teil des Bildes, aber nicht das ganze Bild. WaveMAX veröffentlicht verifizierbare Item-19-Kennzahlen in unserem Franchise Disclosure Document, und das Kundenerlebnis jeder Filiale spiegelt sich in Live-Google-Bewertungen wider — keine handverlesenen Auszüge.",
+      "item1":        "FDD Item 19 (2024): 471.201 $ durchschn. Bruttoumsatz, 436.114 $ Median, 713.934 $ Top-Performer — Stichprobe von 50 operativen Filialen",
+      "item2":        "Jacksonville-Flaggschiff: 217.762 $ Netto-Cashflow / 113.074 $ Nettoeinkommen (mit voller Geräte-Finanzierung)",
+      "item3":        "Berichtete EBITDA-Spanne: 25–35 % im gesamten System",
+      "item4":        "Live-Kundenbewertungen: Bewertungen jedes WaveMAX-Standorts werden live aus Google Places eingespielt — das Erlebnis, das Ihre Kunden tatsächlich haben werden",
+      "item5":        "Markenbekanntheit: #1 Waschsalon-Franchise auf Entrepreneurs Franchise 500 (2026), #485 insgesamt im Jahr 2026 (von #416 im Jahr 2024)",
+      "btnPrimary":   "Investitionsdaten ansehen",
+      "btnSecondary": "Franchise erkunden"
+    }
+  },
+
   "common": {
     "ctaLearnMore": "Mehr erfahren",
     "ctaGetGuide": "Investitionsleitfaden anfordern",
