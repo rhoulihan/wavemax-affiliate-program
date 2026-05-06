@@ -123,7 +123,7 @@
               </a>
             </div>
             <div class="wmlnav-b2-right">
-              <a href="/become-a-franchisee/" class="wmlnav-btn-out" data-i18n="chrome.b2.becomeFranchisee">Learn More</a>
+              <a href="/become-a-franchisee/" class="wmlnav-btn-out" aria-label="Learn more about becoming a WaveMAX franchisee" data-i18n="chrome.b2.becomeFranchisee">Learn More</a>
               <button type="button" class="wmlnav-btn-sol" data-action="open-locations" data-i18n="chrome.b2.findLocation">Locations</button>
             </div>
           </div>
@@ -205,7 +205,7 @@
 
         <!-- 3-cell action row: Learn More | Locations | burger -->
         <div class="wmv3-actions">
-          <a href="/become-a-franchisee/" class="wmv3-btn wmv3-btn-out" data-i18n="chrome.b2.becomeFranchisee">Learn More</a>
+          <a href="/become-a-franchisee/" class="wmv3-btn wmv3-btn-out" aria-label="Learn more about becoming a WaveMAX franchisee" data-i18n="chrome.b2.becomeFranchisee">Learn More</a>
           <button type="button" class="wmv3-btn wmv3-btn-sol" data-action="open-locations" data-i18n="chrome.b2.findLocation">Locations</button>
           <button type="button" class="wmv3-burger" id="wmv3-burger" aria-label="Open menu" aria-expanded="false"><span></span><span></span><span></span></button>
         </div>
