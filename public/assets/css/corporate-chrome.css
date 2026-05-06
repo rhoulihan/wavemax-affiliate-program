@@ -27,45 +27,6 @@
 .wm-bc-host-current { color: #333; font-weight: 600; }
 
 /* ============================================================
-   B2 RESPONSIVE — at intermediate widths the logo + buttons can
-   crowd. Wrap the .wmlnav-b2-inner so the logo sits on its own row
-   (full-width bg, centered) and the buttons collapse into a 3-cell
-   table-like row underneath, each control centered in its cell.
-   The 3 cells: Learn More · Locations · the lang switcher (lifted
-   up from b1-right at narrow widths).
-   ============================================================ */
-@media (max-width: 1024px) {
-  #wmlnav-wrap .wmlnav-b2 .wmlnav-inner {
-    flex-direction: column !important;
-    gap: 12px !important;
-    padding: 12px 24px !important;
-    align-items: stretch !important;
-  }
-  #wmlnav-wrap .wmlnav-b2-logo {
-    display: flex !important;
-    justify-content: center !important;
-  }
-  #wmlnav-wrap .wmlnav-b2-right {
-    display: grid !important;
-    grid-template-columns: repeat(3, 1fr) !important;
-    gap: 10px !important;
-    align-items: center !important;
-    justify-items: center !important;
-    width: 100% !important;
-  }
-  #wmlnav-wrap .wmlnav-b2-right .wmlnav-btn-out,
-  #wmlnav-wrap .wmlnav-b2-right .wmlnav-btn-sol {
-    width: 100% !important;
-    text-align: center !important;
-    padding: 9px 12px !important;
-  }
-  /* Lift the lang switcher into the 3rd b2 cell at narrow widths.
-     The original placement in b1-right is hidden; we re-render the
-     switcher inside b2-right via a small JS hook in corporate-chrome.js
-     (see #wm-lang move-on-resize). */
-}
-
-/* ============================================================
    B1 UTILITY STRIP — long translations (DE / PT) need a tighter
    font; the Item 19 CTA was getting clipped against the lang
    switcher on the right. Move the CTA into b1-left as the
