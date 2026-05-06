@@ -480,7 +480,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@500;600;700;800&display=swap" rel="stylesheet">
 
   <!-- MHR-faithful chrome stylesheets -->
-  <link rel="stylesheet" href="/assets/css/wavemax-mhr-chrome.css?v=20260504">
+  <link rel="stylesheet" href="/assets/css/wavemax-mhr-chrome.css?v=20260506b">
   <link rel="stylesheet" href="/assets/css/wavemax-mhr-modal.css?v=20260505e">
 
   <!-- Demo-only host page styles (external for CSP compliance) -->
@@ -644,6 +644,17 @@
     <a href="/franchise/" class="wmv3-btn wmv3-btn-out" data-i18n="chrome.franchise">Franchise</a>
     <button type="button" class="wmv3-btn wmv3-btn-sol" data-locmodal-open data-i18n="chrome.locations">Locations</button>
     <button type="button" class="wmv3-burger" id="wmv3-burger" aria-label="Open menu" aria-expanded="false" data-i18n-attr='{"aria-label":"chrome.menu"}'><span></span><span></span><span></span></button>
+    <!-- Mobile lang switcher — second .wm-lang-switcher instance; the
+         desktop one lives in wmlnav-b1-right (id="wm-lang"). austin-host-mock.js
+         iterates every .wm-lang-switcher so both stay in sync. -->
+    <div class="wm-lang-switcher wmv3-lang-switcher" aria-expanded="false">
+      <button type="button" class="wm-lang-btn" aria-haspopup="true" aria-label="Choose language">
+        <span class="wm-lang-flag wm-flag-en" aria-hidden="true"></span>
+        <span class="wm-lang-current-label">EN</span>
+        <svg class="wm-lang-arrow" viewBox="0 0 9 6" aria-hidden="true"><path d="M0.5 1L4.5 5L8.5 1" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <div class="wm-lang-menu" role="menu"></div>
+    </div>
   </div>
 
   <nav class="wmv3-drawer" id="wmv3-drawer" aria-label="Mobile menu">
@@ -854,7 +865,7 @@
 
 <!-- Bridge + chrome wiring (CSP-clean external scripts) -->
 <script src="/assets/js/parent-iframe-bridge-v3.js?v=20260504d"></script>
-<script src="/assets/js/austin-host-mock.js?v=20260505l"></script>
+<script src="/assets/js/austin-host-mock.js?v=20260506a"></script>
 
 <!--
   ════════════════════════════════════════════════════════════════════

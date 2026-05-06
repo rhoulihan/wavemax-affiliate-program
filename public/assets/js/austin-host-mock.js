@@ -84,75 +84,73 @@
 
   /* ---------- Language switcher ---------- */
 
-  // Module-level helpers used by both initLanguageSwitcher() and the
-  // delegated document-level click handler below. Pulling them out of the
-  // function closure means a delegated click works even if the inner
-  // initLanguageSwitcher call had a problem attaching its own listener.
-  function _langOpen()  { const r = document.getElementById('wm-lang'); const m = r?.querySelector('.wm-lang-menu'); if (!r || !m) return; r.setAttribute('aria-expanded', 'true');  m.classList.add('wm-lang-menu--open'); }
-  function _langClose() { const r = document.getElementById('wm-lang'); const m = r?.querySelector('.wm-lang-menu'); if (!r || !m) return; r.setAttribute('aria-expanded', 'false'); m.classList.remove('wm-lang-menu--open'); }
-  function _langToggle() { const r = document.getElementById('wm-lang'); if (!r) return; r.getAttribute('aria-expanded') === 'true' ? _langClose() : _langOpen(); }
+  // The page may render multiple .wm-lang-switcher instances (desktop
+  // wmlnav-b1-right + mobile wmv3-actions). Operate on every instance
+  // so both stay in sync — CSS hides whichever doesn't match the
+  // viewport, but their state is shared.
+  function _langRoots() { return Array.from(document.querySelectorAll('.wm-lang-switcher')); }
+  function _langOpen()  { _langRoots().forEach(r => { const m = r.querySelector('.wm-lang-menu'); if (m) { r.setAttribute('aria-expanded', 'true'); m.classList.add('wm-lang-menu--open'); } }); }
+  function _langClose() { _langRoots().forEach(r => { const m = r.querySelector('.wm-lang-menu'); if (m) { r.setAttribute('aria-expanded', 'false'); m.classList.remove('wm-lang-menu--open'); } }); }
+  function _langToggle() {
+    const roots = _langRoots(); if (!roots.length) return;
+    const isOpen = roots.some(r => r.getAttribute('aria-expanded') === 'true');
+    isOpen ? _langClose() : _langOpen();
+  }
 
   function initLanguageSwitcher() {
-    const root = document.getElementById('wm-lang');
-    if (!root) return;
-    const btn = root.querySelector('.wm-lang-btn');
-    const menu = root.querySelector('.wm-lang-menu');
-    if (!btn || !menu) return;
-
+    const roots = _langRoots();
+    if (!roots.length) return;
     const available = (window.LOCATION_DATA?.i18n?.languagesAvailable) || ['en', 'es'];
-    menu.innerHTML = '';
 
-    LANGUAGES.forEach(lang => {
-      const item = document.createElement('button');
-      item.type = 'button';
-      item.className = 'wm-lang-item';
-      item.setAttribute('data-lang', lang.code);
+    roots.forEach(root => {
+      const menu = root.querySelector('.wm-lang-menu');
+      if (!menu) return;
+      menu.innerHTML = '';
 
-      item.appendChild(flagSpan(lang.flagClass));
+      LANGUAGES.forEach(lang => {
+        const item = document.createElement('button');
+        item.type = 'button';
+        item.className = 'wm-lang-item';
+        item.setAttribute('data-lang', lang.code);
 
-      const label = document.createElement('span');
-      label.textContent = lang.label;
-      item.appendChild(label);
+        item.appendChild(flagSpan(lang.flagClass));
 
-      if (!available.includes(lang.code)) {
-        item.classList.add('wm-lang-item--unavailable');
-        item.disabled = true;
-        item.title = 'Available on iframe-wrapped pages only';
-      }
-      menu.appendChild(item);
+        const label = document.createElement('span');
+        label.textContent = lang.label;
+        item.appendChild(label);
+
+        if (!available.includes(lang.code)) {
+          item.classList.add('wm-lang-item--unavailable');
+          item.disabled = true;
+          item.title = 'Available on iframe-wrapped pages only';
+        }
+        menu.appendChild(item);
+      });
     });
 
     refreshActiveLanguage();
   }
 
-  // Document-level event delegation for the language switcher. This
-  // pattern is immune to DOM replacement / re-render of the chrome
-  // because the listener is attached to document, not to the button —
-  // every click is routed through here regardless of whether the button
-  // was re-mounted after init. Two reasons we hit this path on prod:
-  //   1. An earlier closure-based listener attached to btn was being
-  //      orphaned (suspected DOM re-mount inside data-binding pass).
-  //   2. Hardens against any future re-render that swaps chrome nodes.
+  // Document-level event delegation — immune to DOM re-render and works
+  // for any/all .wm-lang-switcher instances on the page.
   document.addEventListener('click', (e) => {
-    const root = document.getElementById('wm-lang');
-    if (!root) return;
-
-    // Click inside the toggle button → flip menu open state.
-    if (e.target.closest('.wm-lang-btn')) {
-      _langToggle();
-      return;
-    }
-    // Click on a menu item → set language and close.
+    const insideSwitcher = e.target.closest('.wm-lang-switcher');
+    // Menu item click: set language + close.
     const item = e.target.closest('.wm-lang-item');
-    if (item && root.contains(item)) {
+    if (item && insideSwitcher) {
       if (item.disabled) return;
       const code = item.getAttribute('data-lang');
       if (code) setLanguage(code);
       _langClose();
       return;
     }
-    // Click outside the switcher → close menu.
-    if (!root.contains(e.target)) _langClose();
+    // Toggle button click: flip menu open state.
+    if (insideSwitcher && e.target.closest('.wm-lang-btn')) {
+      _langToggle();
+      return;
+    }
+    // Click outside any switcher: close menus.
+    if (!insideSwitcher) _langClose();
   });
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape') _langClose(); });
 
@@ -171,19 +169,18 @@
     const active = localStorage.getItem(LANGUAGE_KEY) || 'en';
     const current = LANGUAGES.find(l => l.code === active) || LANGUAGES[0];
 
-    // Replace the trigger flag with a freshly-built one (cleanest swap;
-    // the static markup only contains a placeholder flag).
-    const btn = $('#wm-lang .wm-lang-btn');
-    if (btn) {
-      const oldFlag = btn.querySelector('.wm-lang-flag, .wm-lang-current-flag');
-      if (oldFlag) oldFlag.replaceWith(flagSpan(current.flagClass));
-    }
-    const btnLabel = $('#wm-lang .wm-lang-current-label');
-    if (btnLabel) btnLabel.textContent = current.short;
+    _langRoots().forEach(root => {
+      const btn = root.querySelector('.wm-lang-btn');
+      if (btn) {
+        const oldFlag = btn.querySelector('.wm-lang-flag, .wm-lang-current-flag');
+        if (oldFlag) oldFlag.replaceWith(flagSpan(current.flagClass));
+      }
+      const btnLabel = root.querySelector('.wm-lang-current-label');
+      if (btnLabel) btnLabel.textContent = current.short;
 
-    // Mark the active item in the menu
-    $$('#wm-lang .wm-lang-item').forEach(item => {
-      item.setAttribute('aria-selected', item.getAttribute('data-lang') === active ? 'true' : 'false');
+      root.querySelectorAll('.wm-lang-item').forEach(item => {
+        item.setAttribute('aria-selected', item.getAttribute('data-lang') === active ? 'true' : 'false');
+      });
     });
   }
 
@@ -875,14 +872,27 @@
 
   /* ---------- Mobile drawer (wmv3) ---------- */
 
+  // Delegated burger handler — survives any chrome re-render. Direct
+  // burger.addEventListener was occasionally orphaned on Windows Chrome
+  // (same root cause we hit with the lang switcher).
   function initMobileDrawer() {
-    const burger = document.getElementById('wmv3-burger');
-    const drawer = document.getElementById('wmv3-drawer');
-    if (!burger || !drawer) return;
-    burger.addEventListener('click', () => {
-      const open = burger.classList.toggle('is-open');
-      drawer.classList.toggle('is-open', open);
-      burger.setAttribute('aria-expanded', String(open));
+    document.addEventListener('click', (e) => {
+      const burger = e.target.closest('#wmv3-burger');
+      if (burger) {
+        const drawer = document.getElementById('wmv3-drawer');
+        const open = !burger.classList.contains('is-open');
+        burger.classList.toggle('is-open', open);
+        burger.setAttribute('aria-expanded', String(open));
+        if (drawer) drawer.classList.toggle('is-open', open);
+        return;
+      }
+      // Tapping a drawer link closes the drawer (link still navigates).
+      if (e.target.closest('#wmv3-drawer a')) {
+        const drawer = document.getElementById('wmv3-drawer');
+        const burger2 = document.getElementById('wmv3-burger');
+        if (drawer)  drawer.classList.remove('is-open');
+        if (burger2) { burger2.classList.remove('is-open'); burger2.setAttribute('aria-expanded', 'false'); }
+      }
     });
   }
 
