@@ -7,7 +7,7 @@
  * (franchise-host.html), so corporate and per-store pages share one visual
  * identity. Picks up styling from wavemax-mhr-chrome.css. The b1 utility
  * strip shows brand context (awards / location count) instead of a single
- * store's hours; b2 (logo + "Find a Location" CTA) and b3 (nav) match
+ * store's hours; b2 (logo + "Locations" CTA) and b3 (nav) match
  * exactly. Footer continues to use wmcc-foot- classes from corporate-chrome.css.
  */
 (function () {
@@ -21,7 +21,7 @@
     { href: '/franchise/',                  label: 'Home',                  key: 'chrome.nav.home' },
     { label: 'Franchise', key: 'chrome.nav.franchise', items: [
       { href: '/franchise/',                  label: 'Overview',              key: 'chrome.nav.overview' },
-      { href: '/become-a-franchisee/',        label: 'Become a Franchisee',   key: 'chrome.nav.becomeFranchisee' },
+      { href: '/become-a-franchisee/',        label: 'Learn More',   key: 'chrome.nav.becomeFranchisee' },
       { href: '/why-invest-in-wavemax/',      label: 'Why Invest in WaveMAX', key: 'chrome.nav.whyInvest' },
       { href: '/laundromat-investment-guide/', label: 'Investment Guide',     key: 'chrome.nav.investmentGuide' },
       { href: '/wavemax-vs-zombiemat/',       label: 'WaveMAX vs Zombiemat',  key: 'chrome.nav.vsZombiemat' }
@@ -38,7 +38,7 @@
       heading: 'Franchise', headingKey: 'chrome.footer.headingFranchise',
       links: [
         { href: '/franchise/',                   label: 'Overview',              key: 'chrome.footer.linkOverview' },
-        { href: '/become-a-franchisee/',         label: 'Become a Franchisee',   key: 'chrome.footer.linkBecome' },
+        { href: '/become-a-franchisee/',         label: 'Learn More',   key: 'chrome.footer.linkBecome' },
         { href: '/why-invest-in-wavemax/',       label: 'Why Invest',            key: 'chrome.footer.linkWhy' },
         { href: '/laundromat-investment-guide/', label: 'Investment Guide',      key: 'chrome.footer.linkGuide' },
         { href: '/wavemax-vs-zombiemat/',        label: 'vs Zombiemat',          key: 'chrome.footer.linkVs' }
@@ -103,14 +103,8 @@
               <a class="wmlnav-b1-cta" href="/why-invest-in-wavemax/" data-i18n="chrome.b1.item19">Item 19: $471K avg gross →</a>
             </div>
             <div class="wmlnav-b1-right">
-              <div class="wm-lang-switcher" id="wm-lang" aria-expanded="false">
-                <button type="button" class="wm-lang-btn" aria-haspopup="true" aria-label="Choose language">
-                  <span class="wm-lang-flag wm-flag-en" aria-hidden="true"></span>
-                  <span class="wm-lang-current-label">EN</span>
-                  <svg class="wm-lang-arrow" viewBox="0 0 9 6" aria-hidden="true"><path d="M0.5 1L4.5 5L8.5 1" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                </button>
-                <div class="wm-lang-menu" role="menu"></div>
-              </div>
+              <!-- lang switcher moved into b2-right so it forms the 3rd cell
+                   when b2 wraps to a 3-column row at narrow widths -->
             </div>
           </div>
         </div>
@@ -123,8 +117,16 @@
               </a>
             </div>
             <div class="wmlnav-b2-right">
-              <a href="/become-a-franchisee/" class="wmlnav-btn-out" data-i18n="chrome.b2.becomeFranchisee">Become a Franchisee</a>
-              <button type="button" class="wmlnav-btn-sol" data-action="open-locations" data-i18n="chrome.b2.findLocation">Find a Location</button>
+              <a href="/become-a-franchisee/" class="wmlnav-btn-out" data-i18n="chrome.b2.becomeFranchisee">Learn More</a>
+              <button type="button" class="wmlnav-btn-sol" data-action="open-locations" data-i18n="chrome.b2.findLocation">Locations</button>
+              <div class="wm-lang-switcher" id="wm-lang" aria-expanded="false">
+                <button type="button" class="wm-lang-btn" aria-haspopup="true" aria-label="Choose language">
+                  <span class="wm-lang-flag wm-flag-en" aria-hidden="true"></span>
+                  <span class="wm-lang-current-label">EN</span>
+                  <svg class="wm-lang-arrow" viewBox="0 0 9 6" aria-hidden="true"><path d="M0.5 1L4.5 5L8.5 1" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </button>
+                <div class="wm-lang-menu" role="menu"></div>
+              </div>
             </div>
           </div>
         </div>
@@ -191,8 +193,8 @@
         </div>
 
         <div class="wmv3-actions">
-          <a href="/become-a-franchisee/" class="wmv3-btn wmv3-btn-out" data-i18n="chrome.b2.becomeFranchisee">Become a Franchisee</a>
-          <button type="button" class="wmv3-btn wmv3-btn-sol" data-action="open-locations" data-i18n="chrome.b2.findLocation">Find a Location</button>
+          <a href="/become-a-franchisee/" class="wmv3-btn wmv3-btn-out" data-i18n="chrome.b2.becomeFranchisee">Learn More</a>
+          <button type="button" class="wmv3-btn wmv3-btn-sol" data-action="open-locations" data-i18n="chrome.b2.findLocation">Locations</button>
           <button type="button" class="wmv3-burger" id="wmv3-burger" aria-label="Open menu" aria-expanded="false"><span></span><span></span><span></span></button>
         </div>
 
@@ -283,7 +285,7 @@
 
   /* ---------- INTERACTIONS ----------
    * The wmlnav-drop dropdown is pure CSS hover; no JS interaction needed
-   * for that. We only wire the "Find a Location" CTA — for now it falls
+   * for that. We only wire the "Locations" CTA — for now it falls
    * through to corporate's locations index. When the cross-corporate
    * locations modal lands, this becomes a no-redirect modal pop. */
   function wireInteractions() {
@@ -330,7 +332,7 @@
         <div class="modal-box modal-box--with-map" role="document">
           <div class="modal-header">
             <div class="modal-header-text">
-              <h3 id="locModalTitle">Find a Location</h3>
+              <h3 id="locModalTitle">Locations</h3>
               <p id="modalSubtitle">Pick a location to zoom the map. Then visit the site, or get directions.</p>
             </div>
             <button class="modal-close" aria-label="Close" data-locmodal-close>✕</button>
