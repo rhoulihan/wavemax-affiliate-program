@@ -122,17 +122,17 @@
   },
   "images": {
     "hero": [
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/louisville-ky/hero-1.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/louisville-ky/hero-2.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/louisville-ky/hero-3.jpg"
+      "https://wavemax.promo/assets/images/locations/louisville-ky/hero-1.jpg",
+      "https://wavemax.promo/assets/images/locations/louisville-ky/hero-2.jpg",
+      "https://wavemax.promo/assets/images/locations/louisville-ky/hero-3.jpg"
     ],
     "interior": [
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/louisville-ky/interior-1.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/louisville-ky/interior-2.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/louisville-ky/interior-3.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/louisville-ky/interior-4.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/louisville-ky/interior-5.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/louisville-ky/interior-6.jpg"
+      "https://wavemax.promo/assets/images/locations/louisville-ky/interior-1.jpg",
+      "https://wavemax.promo/assets/images/locations/louisville-ky/interior-2.jpg",
+      "https://wavemax.promo/assets/images/locations/louisville-ky/interior-3.jpg",
+      "https://wavemax.promo/assets/images/locations/louisville-ky/interior-4.jpg",
+      "https://wavemax.promo/assets/images/locations/louisville-ky/interior-5.jpg",
+      "https://wavemax.promo/assets/images/locations/louisville-ky/interior-6.jpg"
     ],
     "owner": [],
     "landmarks": [
@@ -157,7 +157,7 @@
         "alt": "Louisville City Hall, HABS KY-143-9 — Louisville"
       }
     ],
-    "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/louisville-ky/hero-1.jpg",
+    "ogImage": "https://wavemax.promo/assets/images/locations/louisville-ky/hero-1.jpg",
     "ogImageAlt": "WaveMAX Louisville KY storefront",
     "mapPreview": ""
   },

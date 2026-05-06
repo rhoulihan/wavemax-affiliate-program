@@ -122,10 +122,10 @@
   },
   "images": {
     "hero": [
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/lakewood-co/hero-1.jpg"
+      "https://wavemax.promo/assets/images/locations/lakewood-co/hero-1.jpg"
     ],
     "interior": [
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/lakewood-co/interior-1.jpg"
+      "https://wavemax.promo/assets/images/locations/lakewood-co/interior-1.jpg"
     ],
     "owner": [],
     "landmarks": [
@@ -142,7 +142,7 @@
         "alt": "Red Rocks Community College Main Entrance, Lakewood, Colorado — Lakewood"
       }
     ],
-    "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/lakewood-co/hero-1.jpg",
+    "ogImage": "https://wavemax.promo/assets/images/locations/lakewood-co/hero-1.jpg",
     "ogImageAlt": "WaveMAX Lakewood CO storefront",
     "mapPreview": ""
   },

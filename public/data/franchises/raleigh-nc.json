@@ -122,12 +122,12 @@
   },
   "images": {
     "hero": [
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/raleigh-nc/hero-1.jpg"
+      "https://wavemax.promo/assets/images/locations/raleigh-nc/hero-1.jpg"
     ],
     "interior": [
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/raleigh-nc/interior-1.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/raleigh-nc/interior-2.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/raleigh-nc/interior-3.jpg"
+      "https://wavemax.promo/assets/images/locations/raleigh-nc/interior-1.jpg",
+      "https://wavemax.promo/assets/images/locations/raleigh-nc/interior-2.jpg",
+      "https://wavemax.promo/assets/images/locations/raleigh-nc/interior-3.jpg"
     ],
     "owner": [],
     "landmarks": [
@@ -152,7 +152,7 @@
         "alt": "Downtown, Raleigh, NC, USA -- 9 November 2013 (panoramio.com) — Raleigh"
       }
     ],
-    "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/raleigh-nc/hero-1.jpg",
+    "ogImage": "https://wavemax.promo/assets/images/locations/raleigh-nc/hero-1.jpg",
     "ogImageAlt": "WaveMAX Raleigh NC storefront",
     "mapPreview": ""
   },

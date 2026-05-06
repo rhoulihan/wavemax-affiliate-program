@@ -122,17 +122,17 @@
   },
   "images": {
     "hero": [
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/fort-worth-tx/hero-1.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/fort-worth-tx/hero-2.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/fort-worth-tx/hero-3.jpg"
+      "https://wavemax.promo/assets/images/locations/fort-worth-tx/hero-1.jpg",
+      "https://wavemax.promo/assets/images/locations/fort-worth-tx/hero-2.jpg",
+      "https://wavemax.promo/assets/images/locations/fort-worth-tx/hero-3.jpg"
     ],
     "interior": [
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/fort-worth-tx/interior-1.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/fort-worth-tx/interior-2.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/fort-worth-tx/interior-3.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/fort-worth-tx/interior-4.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/fort-worth-tx/interior-5.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/fort-worth-tx/interior-6.jpg"
+      "https://wavemax.promo/assets/images/locations/fort-worth-tx/interior-1.jpg",
+      "https://wavemax.promo/assets/images/locations/fort-worth-tx/interior-2.jpg",
+      "https://wavemax.promo/assets/images/locations/fort-worth-tx/interior-3.jpg",
+      "https://wavemax.promo/assets/images/locations/fort-worth-tx/interior-4.jpg",
+      "https://wavemax.promo/assets/images/locations/fort-worth-tx/interior-5.jpg",
+      "https://wavemax.promo/assets/images/locations/fort-worth-tx/interior-6.jpg"
     ],
     "owner": [],
     "landmarks": [
@@ -157,7 +157,7 @@
         "alt": "Fort Worth Cultural District June 2016 13 (Kimbell Art Museum) — Fort Worth"
       }
     ],
-    "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/fort-worth-tx/hero-1.jpg",
+    "ogImage": "https://wavemax.promo/assets/images/locations/fort-worth-tx/hero-1.jpg",
     "ogImageAlt": "WaveMAX Fort Worth TX storefront",
     "mapPreview": ""
   },

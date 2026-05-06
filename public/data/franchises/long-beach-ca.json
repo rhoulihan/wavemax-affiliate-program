@@ -122,15 +122,15 @@
   },
   "images": {
     "hero": [
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/long-beach-ca/hero-1.jpg"
+      "https://wavemax.promo/assets/images/locations/long-beach-ca/hero-1.jpg"
     ],
     "interior": [
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/long-beach-ca/interior-1.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/long-beach-ca/interior-2.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/long-beach-ca/interior-3.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/long-beach-ca/interior-4.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/long-beach-ca/interior-5.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/long-beach-ca/interior-6.jpg"
+      "https://wavemax.promo/assets/images/locations/long-beach-ca/interior-1.jpg",
+      "https://wavemax.promo/assets/images/locations/long-beach-ca/interior-2.jpg",
+      "https://wavemax.promo/assets/images/locations/long-beach-ca/interior-3.jpg",
+      "https://wavemax.promo/assets/images/locations/long-beach-ca/interior-4.jpg",
+      "https://wavemax.promo/assets/images/locations/long-beach-ca/interior-5.jpg",
+      "https://wavemax.promo/assets/images/locations/long-beach-ca/interior-6.jpg"
     ],
     "owner": [],
     "landmarks": [
@@ -155,7 +155,7 @@
         "alt": "Downtown Long Beach — Long Beach"
       }
     ],
-    "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/long-beach-ca/hero-1.jpg",
+    "ogImage": "https://wavemax.promo/assets/images/locations/long-beach-ca/hero-1.jpg",
     "ogImageAlt": "WaveMAX Long Beach CA storefront",
     "mapPreview": ""
   },

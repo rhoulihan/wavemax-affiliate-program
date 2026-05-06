@@ -130,17 +130,17 @@
   },
   "images": {
     "hero": [
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/mesa-az-west-main/hero-1.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/mesa-az-west-main/hero-2.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/mesa-az-west-main/hero-3.jpg"
+      "https://wavemax.promo/assets/images/locations/mesa-az-west-main/hero-1.jpg",
+      "https://wavemax.promo/assets/images/locations/mesa-az-west-main/hero-2.jpg",
+      "https://wavemax.promo/assets/images/locations/mesa-az-west-main/hero-3.jpg"
     ],
     "interior": [
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/mesa-az-west-main/interior-1.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/mesa-az-west-main/interior-2.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/mesa-az-west-main/interior-3.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/mesa-az-west-main/interior-4.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/mesa-az-west-main/interior-5.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/mesa-az-west-main/interior-6.jpg"
+      "https://wavemax.promo/assets/images/locations/mesa-az-west-main/interior-1.jpg",
+      "https://wavemax.promo/assets/images/locations/mesa-az-west-main/interior-2.jpg",
+      "https://wavemax.promo/assets/images/locations/mesa-az-west-main/interior-3.jpg",
+      "https://wavemax.promo/assets/images/locations/mesa-az-west-main/interior-4.jpg",
+      "https://wavemax.promo/assets/images/locations/mesa-az-west-main/interior-5.jpg",
+      "https://wavemax.promo/assets/images/locations/mesa-az-west-main/interior-6.jpg"
     ],
     "owner": [],
     "landmarks": [
@@ -161,7 +161,7 @@
         "alt": "Mesa-Mesa Arizona Temple-1919 — Mesa"
       }
     ],
-    "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/mesa-az-west-main/hero-1.jpg",
+    "ogImage": "https://wavemax.promo/assets/images/locations/mesa-az-west-main/hero-1.jpg",
     "ogImageAlt": "WaveMAX Mesa AZ West Main storefront",
     "mapPreview": ""
   },

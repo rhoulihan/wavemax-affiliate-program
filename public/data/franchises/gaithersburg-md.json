@@ -122,15 +122,15 @@
   },
   "images": {
     "hero": [
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/gaithersburg-md/hero-1.webp"
+      "https://wavemax.promo/assets/images/locations/gaithersburg-md/hero-1.webp"
     ],
     "interior": [
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/kent-wa/interior-1.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/kent-wa/interior-2.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/kent-wa/interior-3.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/kent-wa/interior-4.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/kent-wa/interior-5.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/kent-wa/interior-6.jpg"
+      "https://wavemax.promo/assets/images/locations/kent-wa/interior-1.jpg",
+      "https://wavemax.promo/assets/images/locations/kent-wa/interior-2.jpg",
+      "https://wavemax.promo/assets/images/locations/kent-wa/interior-3.jpg",
+      "https://wavemax.promo/assets/images/locations/kent-wa/interior-4.jpg",
+      "https://wavemax.promo/assets/images/locations/kent-wa/interior-5.jpg",
+      "https://wavemax.promo/assets/images/locations/kent-wa/interior-6.jpg"
     ],
     "owner": [],
     "landmarks": [
@@ -155,7 +155,7 @@
         "alt": "TRAIN WRECK next to Route 355 near Gaithersburg, MD in 1973 just past Montgomery College in Rockville — Gaithersburg"
       }
     ],
-    "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/gaithersburg-md/hero-1.webp",
+    "ogImage": "https://wavemax.promo/assets/images/locations/gaithersburg-md/hero-1.webp",
     "ogImageAlt": "WaveMAX Gaithersburg MD storefront",
     "mapPreview": ""
   },

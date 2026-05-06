@@ -122,10 +122,10 @@
   },
   "images": {
     "hero": [
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/temple-tx-olaf-dr/hero-1.webp"
+      "https://wavemax.promo/assets/images/locations/temple-tx-olaf-dr/hero-1.webp"
     ],
     "interior": [
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/temple-tx-olaf-dr/interior-1.webp"
+      "https://wavemax.promo/assets/images/locations/temple-tx-olaf-dr/interior-1.webp"
     ],
     "owner": [],
     "landmarks": [
@@ -142,7 +142,7 @@
         "alt": "Scott-white-hospital-temple — Temple"
       }
     ],
-    "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/temple-tx-olaf-dr/hero-1.webp",
+    "ogImage": "https://wavemax.promo/assets/images/locations/temple-tx-olaf-dr/hero-1.webp",
     "ogImageAlt": "WaveMAX Temple TX Olaf Dr storefront",
     "mapPreview": ""
   },

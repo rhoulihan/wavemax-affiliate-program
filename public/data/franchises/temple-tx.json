@@ -122,12 +122,12 @@
   },
   "images": {
     "hero": [
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/temple-tx/hero-1.webp"
+      "https://wavemax.promo/assets/images/locations/temple-tx/hero-1.webp"
     ],
     "interior": [
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/temple-tx/interior-1.webp",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/temple-tx/interior-2.webp",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/temple-tx/interior-3.webp"
+      "https://wavemax.promo/assets/images/locations/temple-tx/interior-1.webp",
+      "https://wavemax.promo/assets/images/locations/temple-tx/interior-2.webp",
+      "https://wavemax.promo/assets/images/locations/temple-tx/interior-3.webp"
     ],
     "owner": [],
     "landmarks": [
@@ -144,7 +144,7 @@
         "alt": "Scott-white-hospital-temple — Temple"
       }
     ],
-    "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/temple-tx/hero-1.webp",
+    "ogImage": "https://wavemax.promo/assets/images/locations/temple-tx/hero-1.webp",
     "ogImageAlt": "WaveMAX Temple TX storefront",
     "mapPreview": ""
   },

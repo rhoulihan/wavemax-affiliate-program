@@ -122,11 +122,11 @@
   },
   "images": {
     "hero": [
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/new-orleans-la/hero-1.jpg"
+      "https://wavemax.promo/assets/images/locations/new-orleans-la/hero-1.jpg"
     ],
     "interior": [
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/new-orleans-la/interior-2.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/new-orleans-la/interior-3.jpg"
+      "https://wavemax.promo/assets/images/locations/new-orleans-la/interior-2.jpg",
+      "https://wavemax.promo/assets/images/locations/new-orleans-la/interior-3.jpg"
     ],
     "owner": [],
     "landmarks": [
@@ -151,7 +151,7 @@
         "alt": "Archives nationales d’outre-mer - Louisiane - Adrien de Pauger - 1724 - 001 — New Orleans"
       }
     ],
-    "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/new-orleans-la/hero-1.jpg",
+    "ogImage": "https://wavemax.promo/assets/images/locations/new-orleans-la/hero-1.jpg",
     "ogImageAlt": "WaveMAX New Orleans LA storefront",
     "mapPreview": ""
   },

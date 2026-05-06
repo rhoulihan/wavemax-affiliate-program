@@ -130,12 +130,12 @@
   },
   "images": {
     "hero": [
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/saint-petersburg-fl/hero-1.webp"
+      "https://wavemax.promo/assets/images/locations/saint-petersburg-fl/hero-1.webp"
     ],
     "interior": [
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/saint-petersburg-fl/interior-1.webp",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/saint-petersburg-fl/interior-2.webp",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/saint-petersburg-fl/interior-3.webp"
+      "https://wavemax.promo/assets/images/locations/saint-petersburg-fl/interior-1.webp",
+      "https://wavemax.promo/assets/images/locations/saint-petersburg-fl/interior-2.webp",
+      "https://wavemax.promo/assets/images/locations/saint-petersburg-fl/interior-3.webp"
     ],
     "owner": [],
     "landmarks": [
@@ -160,7 +160,7 @@
         "alt": "S. H. Kress and Co. Building (St. Petersburg, Florida) — St. Petersburg"
       }
     ],
-    "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/saint-petersburg-fl/hero-1.webp",
+    "ogImage": "https://wavemax.promo/assets/images/locations/saint-petersburg-fl/hero-1.webp",
     "ogImageAlt": "WaveMAX Saint Petersburg, FL storefront",
     "mapPreview": ""
   },

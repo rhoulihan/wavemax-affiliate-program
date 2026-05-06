@@ -122,17 +122,17 @@
   },
   "images": {
     "hero": [
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/inkster-mi/hero-1.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/inkster-mi/hero-2.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/inkster-mi/hero-3.jpg"
+      "https://wavemax.promo/assets/images/locations/inkster-mi/hero-1.jpg",
+      "https://wavemax.promo/assets/images/locations/inkster-mi/hero-2.jpg",
+      "https://wavemax.promo/assets/images/locations/inkster-mi/hero-3.jpg"
     ],
     "interior": [
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/inkster-mi/interior-1.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/inkster-mi/interior-2.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/inkster-mi/interior-3.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/inkster-mi/interior-4.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/inkster-mi/interior-5.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/inkster-mi/interior-6.jpg"
+      "https://wavemax.promo/assets/images/locations/inkster-mi/interior-1.jpg",
+      "https://wavemax.promo/assets/images/locations/inkster-mi/interior-2.jpg",
+      "https://wavemax.promo/assets/images/locations/inkster-mi/interior-3.jpg",
+      "https://wavemax.promo/assets/images/locations/inkster-mi/interior-4.jpg",
+      "https://wavemax.promo/assets/images/locations/inkster-mi/interior-5.jpg",
+      "https://wavemax.promo/assets/images/locations/inkster-mi/interior-6.jpg"
     ],
     "owner": [],
     "landmarks": [
@@ -153,7 +153,7 @@
         "alt": "Metro Detroit by Sentinel-2, 2021-09-06 (big version) — Inkster"
       }
     ],
-    "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/inkster-mi/hero-1.jpg",
+    "ogImage": "https://wavemax.promo/assets/images/locations/inkster-mi/hero-1.jpg",
     "ogImageAlt": "WaveMAX Inkster MI storefront",
     "mapPreview": ""
   },

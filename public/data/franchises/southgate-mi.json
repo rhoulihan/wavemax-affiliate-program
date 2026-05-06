@@ -131,17 +131,17 @@
   },
   "images": {
     "hero": [
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/southgate-mi/hero-1.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/southgate-mi/hero-2.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/southgate-mi/hero-3.jpg"
+      "https://wavemax.promo/assets/images/locations/southgate-mi/hero-1.jpg",
+      "https://wavemax.promo/assets/images/locations/southgate-mi/hero-2.jpg",
+      "https://wavemax.promo/assets/images/locations/southgate-mi/hero-3.jpg"
     ],
     "interior": [
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/southgate-mi/interior-1.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/southgate-mi/interior-2.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/southgate-mi/interior-3.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/southgate-mi/interior-4.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/southgate-mi/interior-5.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/southgate-mi/interior-6.jpg"
+      "https://wavemax.promo/assets/images/locations/southgate-mi/interior-1.jpg",
+      "https://wavemax.promo/assets/images/locations/southgate-mi/interior-2.jpg",
+      "https://wavemax.promo/assets/images/locations/southgate-mi/interior-3.jpg",
+      "https://wavemax.promo/assets/images/locations/southgate-mi/interior-4.jpg",
+      "https://wavemax.promo/assets/images/locations/southgate-mi/interior-5.jpg",
+      "https://wavemax.promo/assets/images/locations/southgate-mi/interior-6.jpg"
     ],
     "owner": [],
     "landmarks": [
@@ -166,7 +166,7 @@
         "alt": "Metro Detroit by Sentinel-2, 2021-09-06 (big version) — Southgate"
       }
     ],
-    "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/southgate-mi/hero-1.jpg",
+    "ogImage": "https://wavemax.promo/assets/images/locations/southgate-mi/hero-1.jpg",
     "ogImageAlt": "WaveMAX Southgate, MI storefront",
     "mapPreview": ""
   },

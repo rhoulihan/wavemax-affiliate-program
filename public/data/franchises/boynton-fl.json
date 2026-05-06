@@ -130,17 +130,17 @@
   },
   "images": {
     "hero": [
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/boynton-fl/hero-1.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/boynton-fl/hero-2.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/boynton-fl/hero-3.jpg"
+      "https://wavemax.promo/assets/images/locations/boynton-fl/hero-1.jpg",
+      "https://wavemax.promo/assets/images/locations/boynton-fl/hero-2.jpg",
+      "https://wavemax.promo/assets/images/locations/boynton-fl/hero-3.jpg"
     ],
     "interior": [
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/boynton-fl/interior-1.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/boynton-fl/interior-2.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/boynton-fl/interior-3.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/boynton-fl/interior-4.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/boynton-fl/interior-5.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/boynton-fl/interior-6.jpg"
+      "https://wavemax.promo/assets/images/locations/boynton-fl/interior-1.jpg",
+      "https://wavemax.promo/assets/images/locations/boynton-fl/interior-2.jpg",
+      "https://wavemax.promo/assets/images/locations/boynton-fl/interior-3.jpg",
+      "https://wavemax.promo/assets/images/locations/boynton-fl/interior-4.jpg",
+      "https://wavemax.promo/assets/images/locations/boynton-fl/interior-5.jpg",
+      "https://wavemax.promo/assets/images/locations/boynton-fl/interior-6.jpg"
     ],
     "owner": [],
     "landmarks": [
@@ -157,7 +157,7 @@
         "alt": "Boynton Beach, Florida — Boynton Beach"
       }
     ],
-    "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/boynton-fl/hero-1.jpg",
+    "ogImage": "https://wavemax.promo/assets/images/locations/boynton-fl/hero-1.jpg",
     "ogImageAlt": "WaveMAX Boynton Beach FL storefront",
     "mapPreview": ""
   },

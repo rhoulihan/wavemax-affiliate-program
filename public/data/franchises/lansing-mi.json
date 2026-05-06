@@ -130,15 +130,15 @@
   },
   "images": {
     "hero": [
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/lansing-mi/hero-1.jpg"
+      "https://wavemax.promo/assets/images/locations/lansing-mi/hero-1.jpg"
     ],
     "interior": [
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/lansing-mi/interior-1.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/lansing-mi/interior-2.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/lansing-mi/interior-3.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/lansing-mi/interior-4.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/lansing-mi/interior-5.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/lansing-mi/interior-6.jpg"
+      "https://wavemax.promo/assets/images/locations/lansing-mi/interior-1.jpg",
+      "https://wavemax.promo/assets/images/locations/lansing-mi/interior-2.jpg",
+      "https://wavemax.promo/assets/images/locations/lansing-mi/interior-3.jpg",
+      "https://wavemax.promo/assets/images/locations/lansing-mi/interior-4.jpg",
+      "https://wavemax.promo/assets/images/locations/lansing-mi/interior-5.jpg",
+      "https://wavemax.promo/assets/images/locations/lansing-mi/interior-6.jpg"
     ],
     "owner": [],
     "landmarks": [
@@ -163,7 +163,7 @@
         "alt": "Lansing Potter Park Zoo Entrance from River Trail — Lansing"
       }
     ],
-    "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/lansing-mi/hero-1.jpg",
+    "ogImage": "https://wavemax.promo/assets/images/locations/lansing-mi/hero-1.jpg",
     "ogImageAlt": "WaveMAX Lansing MI storefront",
     "mapPreview": ""
   },

@@ -130,17 +130,17 @@
   },
   "images": {
     "hero": [
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/fargo-nd/hero-1.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/fargo-nd/hero-2.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/fargo-nd/hero-3.jpg"
+      "https://wavemax.promo/assets/images/locations/fargo-nd/hero-1.jpg",
+      "https://wavemax.promo/assets/images/locations/fargo-nd/hero-2.jpg",
+      "https://wavemax.promo/assets/images/locations/fargo-nd/hero-3.jpg"
     ],
     "interior": [
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/fargo-nd/interior-1.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/fargo-nd/interior-2.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/fargo-nd/interior-3.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/fargo-nd/interior-4.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/fargo-nd/interior-5.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/fargo-nd/interior-6.jpg"
+      "https://wavemax.promo/assets/images/locations/fargo-nd/interior-1.jpg",
+      "https://wavemax.promo/assets/images/locations/fargo-nd/interior-2.jpg",
+      "https://wavemax.promo/assets/images/locations/fargo-nd/interior-3.jpg",
+      "https://wavemax.promo/assets/images/locations/fargo-nd/interior-4.jpg",
+      "https://wavemax.promo/assets/images/locations/fargo-nd/interior-5.jpg",
+      "https://wavemax.promo/assets/images/locations/fargo-nd/interior-6.jpg"
     ],
     "owner": [],
     "landmarks": [
@@ -165,7 +165,7 @@
         "alt": "Fargo City Hall; May 8, 2024 — Fargo"
       }
     ],
-    "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/fargo-nd/hero-1.jpg",
+    "ogImage": "https://wavemax.promo/assets/images/locations/fargo-nd/hero-1.jpg",
     "ogImageAlt": "WaveMAX Fargo ND storefront",
     "mapPreview": ""
   },

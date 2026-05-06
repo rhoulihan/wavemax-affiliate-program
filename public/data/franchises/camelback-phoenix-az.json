@@ -131,10 +131,10 @@
   },
   "images": {
     "hero": [
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/camelback-phoenix-az/hero-1.webp"
+      "https://wavemax.promo/assets/images/locations/camelback-phoenix-az/hero-1.webp"
     ],
     "interior": [
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/camelback-phoenix-az/interior-1.webp"
+      "https://wavemax.promo/assets/images/locations/camelback-phoenix-az/interior-1.webp"
     ],
     "owner": [],
     "landmarks": [
@@ -159,7 +159,7 @@
         "alt": "Ethnic Origins in Phoenix — Phoenix"
       }
     ],
-    "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/camelback-phoenix-az/hero-1.webp",
+    "ogImage": "https://wavemax.promo/assets/images/locations/camelback-phoenix-az/hero-1.webp",
     "ogImageAlt": "WaveMAX Phoenix AZ Camelback storefront",
     "mapPreview": ""
   },

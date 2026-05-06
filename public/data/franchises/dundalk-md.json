@@ -130,13 +130,13 @@
   },
   "images": {
     "hero": [
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/dundalk-md/hero-1.jpg"
+      "https://wavemax.promo/assets/images/locations/dundalk-md/hero-1.jpg"
     ],
     "interior": [
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/dundalk-md/interior-1.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/dundalk-md/interior-2.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/dundalk-md/interior-3.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/dundalk-md/interior-4.jpg"
+      "https://wavemax.promo/assets/images/locations/dundalk-md/interior-1.jpg",
+      "https://wavemax.promo/assets/images/locations/dundalk-md/interior-2.jpg",
+      "https://wavemax.promo/assets/images/locations/dundalk-md/interior-3.jpg",
+      "https://wavemax.promo/assets/images/locations/dundalk-md/interior-4.jpg"
     ],
     "owner": [],
     "landmarks": [
@@ -149,7 +149,7 @@
         "alt": "DundalkElementary — Dundalk"
       }
     ],
-    "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/dundalk-md/hero-1.jpg",
+    "ogImage": "https://wavemax.promo/assets/images/locations/dundalk-md/hero-1.jpg",
     "ogImageAlt": "WaveMAX Dundalk MD storefront",
     "mapPreview": ""
   },

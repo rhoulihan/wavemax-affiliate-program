@@ -122,15 +122,15 @@
   },
   "images": {
     "hero": [
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/e-hampden-denver-co/hero-1.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/e-hampden-denver-co/hero-2.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/e-hampden-denver-co/hero-3.jpg"
+      "https://wavemax.promo/assets/images/locations/e-hampden-denver-co/hero-1.jpg",
+      "https://wavemax.promo/assets/images/locations/e-hampden-denver-co/hero-2.jpg",
+      "https://wavemax.promo/assets/images/locations/e-hampden-denver-co/hero-3.jpg"
     ],
     "interior": [
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/e-hampden-denver-co/interior-1.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/e-hampden-denver-co/interior-2.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/e-hampden-denver-co/interior-3.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/e-hampden-denver-co/interior-4.jpg"
+      "https://wavemax.promo/assets/images/locations/e-hampden-denver-co/interior-1.jpg",
+      "https://wavemax.promo/assets/images/locations/e-hampden-denver-co/interior-2.jpg",
+      "https://wavemax.promo/assets/images/locations/e-hampden-denver-co/interior-3.jpg",
+      "https://wavemax.promo/assets/images/locations/e-hampden-denver-co/interior-4.jpg"
     ],
     "owner": [],
     "landmarks": [
@@ -155,7 +155,7 @@
         "alt": "CU Denver Student Wellness Center and Student Commons Building on the Downtown Denver Campus  — Denver"
       }
     ],
-    "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/e-hampden-denver-co/hero-1.jpg",
+    "ogImage": "https://wavemax.promo/assets/images/locations/e-hampden-denver-co/hero-1.jpg",
     "ogImageAlt": "WaveMAX Denver CO E Hampden storefront",
     "mapPreview": ""
   },

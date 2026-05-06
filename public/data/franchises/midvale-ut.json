@@ -131,15 +131,15 @@
   },
   "images": {
     "hero": [
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/midvale-ut/hero-1.jpg"
+      "https://wavemax.promo/assets/images/locations/midvale-ut/hero-1.jpg"
     ],
     "interior": [
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/midvale-ut/interior-1.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/midvale-ut/interior-2.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/midvale-ut/interior-3.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/midvale-ut/interior-4.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/midvale-ut/interior-5.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/midvale-ut/interior-6.jpg"
+      "https://wavemax.promo/assets/images/locations/midvale-ut/interior-1.jpg",
+      "https://wavemax.promo/assets/images/locations/midvale-ut/interior-2.jpg",
+      "https://wavemax.promo/assets/images/locations/midvale-ut/interior-3.jpg",
+      "https://wavemax.promo/assets/images/locations/midvale-ut/interior-4.jpg",
+      "https://wavemax.promo/assets/images/locations/midvale-ut/interior-5.jpg",
+      "https://wavemax.promo/assets/images/locations/midvale-ut/interior-6.jpg"
     ],
     "owner": [],
     "landmarks": [
@@ -148,7 +148,7 @@
         "alt": "Bus stands at Midvale Center station, Jan 15 — Midvale"
       }
     ],
-    "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/midvale-ut/hero-1.jpg",
+    "ogImage": "https://wavemax.promo/assets/images/locations/midvale-ut/hero-1.jpg",
     "ogImageAlt": "WaveMAX Midvale UT storefront",
     "mapPreview": ""
   },

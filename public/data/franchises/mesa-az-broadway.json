@@ -131,11 +131,11 @@
   },
   "images": {
     "hero": [
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/mesa-az-broadway/hero-1.jpg"
+      "https://wavemax.promo/assets/images/locations/mesa-az-broadway/hero-1.jpg"
     ],
     "interior": [
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/mesa-az-broadway/interior-1.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/mesa-az-broadway/interior-2.jpg"
+      "https://wavemax.promo/assets/images/locations/mesa-az-broadway/interior-1.jpg",
+      "https://wavemax.promo/assets/images/locations/mesa-az-broadway/interior-2.jpg"
     ],
     "owner": [],
     "landmarks": [
@@ -156,7 +156,7 @@
         "alt": "Mesa-Mesa Arizona Temple-1919 — Mesa"
       }
     ],
-    "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/mesa-az-broadway/hero-1.jpg",
+    "ogImage": "https://wavemax.promo/assets/images/locations/mesa-az-broadway/hero-1.jpg",
     "ogImageAlt": "WaveMAX Mesa AZ Broadway storefront",
     "mapPreview": ""
   },

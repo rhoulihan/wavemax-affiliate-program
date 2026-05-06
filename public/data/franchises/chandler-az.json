@@ -131,10 +131,10 @@
   },
   "images": {
     "hero": [
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/chandler-az/hero-1.jpg"
+      "https://wavemax.promo/assets/images/locations/chandler-az/hero-1.jpg"
     ],
     "interior": [
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/chandler-az/interior-4.jpg"
+      "https://wavemax.promo/assets/images/locations/chandler-az/interior-4.jpg"
     ],
     "owner": [],
     "landmarks": [
@@ -159,7 +159,7 @@
         "alt": "Tumbleweed Christmas Tree Chandler Arizona — Chandler"
       }
     ],
-    "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/chandler-az/hero-1.jpg",
+    "ogImage": "https://wavemax.promo/assets/images/locations/chandler-az/hero-1.jpg",
     "ogImageAlt": "WaveMAX Chandler AZ storefront",
     "mapPreview": ""
   },

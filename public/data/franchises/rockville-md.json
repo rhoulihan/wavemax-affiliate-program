@@ -130,17 +130,17 @@
   },
   "images": {
     "hero": [
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/rockville-md/hero-1.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/rockville-md/hero-2.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/rockville-md/hero-3.jpg"
+      "https://wavemax.promo/assets/images/locations/rockville-md/hero-1.jpg",
+      "https://wavemax.promo/assets/images/locations/rockville-md/hero-2.jpg",
+      "https://wavemax.promo/assets/images/locations/rockville-md/hero-3.jpg"
     ],
     "interior": [
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/rockville-md/interior-1.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/rockville-md/interior-2.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/rockville-md/interior-3.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/rockville-md/interior-4.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/rockville-md/interior-5.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/rockville-md/interior-6.jpg"
+      "https://wavemax.promo/assets/images/locations/rockville-md/interior-1.jpg",
+      "https://wavemax.promo/assets/images/locations/rockville-md/interior-2.jpg",
+      "https://wavemax.promo/assets/images/locations/rockville-md/interior-3.jpg",
+      "https://wavemax.promo/assets/images/locations/rockville-md/interior-4.jpg",
+      "https://wavemax.promo/assets/images/locations/rockville-md/interior-5.jpg",
+      "https://wavemax.promo/assets/images/locations/rockville-md/interior-6.jpg"
     ],
     "owner": [],
     "landmarks": [
@@ -165,7 +165,7 @@
         "alt": "RockvilleMaryland-Northwest — Rockville"
       }
     ],
-    "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/rockville-md/hero-1.jpg",
+    "ogImage": "https://wavemax.promo/assets/images/locations/rockville-md/hero-1.jpg",
     "ogImageAlt": "WaveMAX Rockville, MD storefront",
     "mapPreview": ""
   },

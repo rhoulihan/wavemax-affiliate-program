@@ -122,17 +122,17 @@
   },
   "images": {
     "hero": [
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/jackson-keller-san-antonio-tx/hero-1.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/jackson-keller-san-antonio-tx/hero-2.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/jackson-keller-san-antonio-tx/hero-3.jpg"
+      "https://wavemax.promo/assets/images/locations/jackson-keller-san-antonio-tx/hero-1.jpg",
+      "https://wavemax.promo/assets/images/locations/jackson-keller-san-antonio-tx/hero-2.jpg",
+      "https://wavemax.promo/assets/images/locations/jackson-keller-san-antonio-tx/hero-3.jpg"
     ],
     "interior": [
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/jackson-keller-san-antonio-tx/interior-1.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/jackson-keller-san-antonio-tx/interior-2.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/jackson-keller-san-antonio-tx/interior-3.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/jackson-keller-san-antonio-tx/interior-4.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/jackson-keller-san-antonio-tx/interior-5.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/jackson-keller-san-antonio-tx/interior-6.jpg"
+      "https://wavemax.promo/assets/images/locations/jackson-keller-san-antonio-tx/interior-1.jpg",
+      "https://wavemax.promo/assets/images/locations/jackson-keller-san-antonio-tx/interior-2.jpg",
+      "https://wavemax.promo/assets/images/locations/jackson-keller-san-antonio-tx/interior-3.jpg",
+      "https://wavemax.promo/assets/images/locations/jackson-keller-san-antonio-tx/interior-4.jpg",
+      "https://wavemax.promo/assets/images/locations/jackson-keller-san-antonio-tx/interior-5.jpg",
+      "https://wavemax.promo/assets/images/locations/jackson-keller-san-antonio-tx/interior-6.jpg"
     ],
     "owner": [],
     "landmarks": [
@@ -157,7 +157,7 @@
         "alt": "San Antonio Botanical Garden Overlook View — San Antonio"
       }
     ],
-    "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/jackson-keller-san-antonio-tx/hero-1.jpg",
+    "ogImage": "https://wavemax.promo/assets/images/locations/jackson-keller-san-antonio-tx/hero-1.jpg",
     "ogImageAlt": "WaveMAX San Antonio TX Jackson Keller storefront",
     "mapPreview": ""
   },

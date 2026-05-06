@@ -26,11 +26,12 @@
   'use strict';
 
   // === The single switch ===
-  // To migrate off wavemaxlaundry.com (Phase C of the independence sweep),
-  // change this line to (e.g.) 'https://cdn.wavemax.promo/locations' after
-  // mirroring the per-franchise images to that origin. Every consumer of
-  // window.WM_LOCATION_IMAGE_BASE picks up the new value automatically.
-  window.WM_LOCATION_IMAGE_BASE = 'https://wavemaxlaundry.com/wp-content/uploads/locations';
+  // Per-franchise photos are now served from this origin's local mirror at
+  // /assets/images/locations/{slug}/{file}. To repoint at a CDN later
+  // (or back to a corporate origin), change this one line. The companion
+  // build script `scripts/franchise-build/mirror-location-images.js`
+  // refreshes the mirror from whatever upstream is currently authoritative.
+  window.WM_LOCATION_IMAGE_BASE = '/assets/images/locations';
 
   // Brand assets live in-repo. Exposed for symmetry so any consumer can
   // build URLs without hard-coding the path.

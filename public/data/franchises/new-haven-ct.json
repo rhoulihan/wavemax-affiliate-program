@@ -130,11 +130,11 @@
   },
   "images": {
     "hero": [
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/new-haven-ct/hero-1.jpg"
+      "https://wavemax.promo/assets/images/locations/new-haven-ct/hero-1.jpg"
     ],
     "interior": [
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/new-haven-ct/interior-1.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/new-haven-ct/interior-2.jpg"
+      "https://wavemax.promo/assets/images/locations/new-haven-ct/interior-1.jpg",
+      "https://wavemax.promo/assets/images/locations/new-haven-ct/interior-2.jpg"
     ],
     "owner": [],
     "landmarks": [
@@ -159,7 +159,7 @@
         "alt": "Front Street in New Haven CT — New Haven"
       }
     ],
-    "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/new-haven-ct/hero-1.jpg",
+    "ogImage": "https://wavemax.promo/assets/images/locations/new-haven-ct/hero-1.jpg",
     "ogImageAlt": "WaveMAX New Haven CT storefront",
     "mapPreview": ""
   },

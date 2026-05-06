@@ -122,10 +122,10 @@
   },
   "images": {
     "hero": [
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/denver-co/hero-1.jpg"
+      "https://wavemax.promo/assets/images/locations/denver-co/hero-1.jpg"
     ],
     "interior": [
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/denver-co/interior-1.jpg"
+      "https://wavemax.promo/assets/images/locations/denver-co/interior-1.jpg"
     ],
     "owner": [],
     "landmarks": [
@@ -150,7 +150,7 @@
         "alt": "CU Denver Student Wellness Center and Student Commons Building on the Downtown Denver Campus  — Denver"
       }
     ],
-    "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/denver-co/hero-1.jpg",
+    "ogImage": "https://wavemax.promo/assets/images/locations/denver-co/hero-1.jpg",
     "ogImageAlt": "WaveMAX Denver CO storefront",
     "mapPreview": ""
   },

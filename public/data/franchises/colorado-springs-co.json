@@ -122,20 +122,20 @@
   },
   "images": {
     "hero": [
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/colorado-springs-co/hero-1.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/colorado-springs-co/hero-2.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/colorado-springs-co/hero-3.jpg"
+      "https://wavemax.promo/assets/images/locations/colorado-springs-co/hero-1.jpg",
+      "https://wavemax.promo/assets/images/locations/colorado-springs-co/hero-2.jpg",
+      "https://wavemax.promo/assets/images/locations/colorado-springs-co/hero-3.jpg"
     ],
     "interior": [
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/colorado-springs-co/interior-1.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/colorado-springs-co/interior-2.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/colorado-springs-co/interior-3.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/colorado-springs-co/interior-4.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/colorado-springs-co/interior-5.jpg",
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/colorado-springs-co/interior-6.jpg"
+      "https://wavemax.promo/assets/images/locations/colorado-springs-co/interior-1.jpg",
+      "https://wavemax.promo/assets/images/locations/colorado-springs-co/interior-2.jpg",
+      "https://wavemax.promo/assets/images/locations/colorado-springs-co/interior-3.jpg",
+      "https://wavemax.promo/assets/images/locations/colorado-springs-co/interior-4.jpg",
+      "https://wavemax.promo/assets/images/locations/colorado-springs-co/interior-5.jpg",
+      "https://wavemax.promo/assets/images/locations/colorado-springs-co/interior-6.jpg"
     ],
     "owner": [
-      "https://wavemaxlaundry.com/wp-content/uploads/locations/colorado-springs-co/owners.jpg"
+      "https://wavemax.promo/assets/images/locations/colorado-springs-co/owners.jpg"
     ],
     "landmarks": [
       {
@@ -159,7 +159,7 @@
         "alt": "Nikola Tesla, with his equipment Wellcome M0014782 - restoration2 — Colorado Springs"
       }
     ],
-    "ogImage": "https://wavemaxlaundry.com/wp-content/uploads/locations/colorado-springs-co/hero-1.jpg",
+    "ogImage": "https://wavemax.promo/assets/images/locations/colorado-springs-co/hero-1.jpg",
     "ogImageAlt": "WaveMAX Colorado Springs CO storefront",
     "mapPreview": ""
   },
