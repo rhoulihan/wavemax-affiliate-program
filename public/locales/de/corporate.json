@@ -705,6 +705,83 @@
       "btnSecondary": "Franchise-Übersicht lesen"
     }
   },
+  "faqp": {
+    "hero": {
+      "eyebrow": "Häufig gestellte Fragen",
+      "title1":  "Häufige Fragen,",
+      "title2":  "klare Antworten.",
+      "sub":     "Alles, was Kandidaten während der Franchise-Discovery fragen — Investition, Prozess, Betrieb, Ausstattung, Multi-Unit-Eigentum, Exit-Wert. Falls Ihre Frage nicht dabei ist, gibt es das 30-minütige Sondierungsgespräch genau dafür."
+    },
+    "cats": {
+      "money":      "Geld",
+      "process":    "Prozess",
+      "operations": "Betrieb",
+      "equipment":  "Ausstattung",
+      "growth":     "Wachstum & Exit",
+      "about":      "Über WaveMAX"
+    },
+    "groups": {
+      "moneyHead":      "Geld",
+      "moneySub":       "Investitionsbereich, Qualifikation, Finanzierung und was Franchisenehmer tatsächlich verdienen.",
+      "processHead":    "Prozess",
+      "processSub":     "Discovery, FDD-Prüfung, Standortauswahl, Schulung, Eröffnung.",
+      "operationsHead": "Betrieb",
+      "operationsSub":  "Eigentümer-Einsatz, Personal, Kunden, Alltagsrealität.",
+      "equipmentHead":  "Ausstattung",
+      "equipmentSub":   "Maschinenpark-Spezifikationen, Premium-Stufen, was enthalten ist.",
+      "growthHead":     "Wachstum & Exit",
+      "growthSub":      "Multi-Unit-Pfad, Gebietsrechte, wie ein Verkauf aussieht.",
+      "aboutHead":      "Über WaveMAX",
+      "aboutSub":       "Gründung, Größe, Anerkennung, Hauptsitz."
+    },
+    "q": {
+      "q1":  "Wie hoch ist die Gesamtinvestition für die Eröffnung einer WaveMAX?",
+      "q2":  "Wie viel verdienen WaveMAX-Franchisenehmer tatsächlich?",
+      "q3":  "Wie funktioniert die Finanzierung?",
+      "q4":  "Wie lange ist die typische Amortisationszeit?",
+      "q5":  "Wie läuft der Discovery-Prozess ab?",
+      "q6":  "Wie lange vom ersten Gespräch bis zur Eröffnung?",
+      "q7":  "Hilft mir WaveMAX bei der Standortsuche?",
+      "q8":  "Was ist im Schulungsprogramm enthalten?",
+      "q9":  "Ist WaveMAX wirklich semi-absentee?",
+      "q10": "Wer sind Ihre Kernkunden?",
+      "q11": "Brauche ich Erfahrung im Wäscherei-Geschäft?",
+      "q12": "Welche Art von Ausstattung verwendet WaveMAX?",
+      "q13": "Warum gerade Electrolux?",
+      "q14": "Kann ich mehrere WaveMAX-Standorte eröffnen?",
+      "q15": "Wie hoch ist der Exit-Wert einer WaveMAX?",
+      "q16": "Wie groß ist WaveMAX heute?",
+      "q17": "Wer hat WaveMAX gegründet?",
+      "q18": "Wie fange ich an?"
+    },
+    "a": {
+      "a1":  "Laut FDD 2025 reicht die Gesamtinvestition von $356,455 am unteren Ende (kleinerer Markt, kleinerer Ausbau) bis $1,556,350 am oberen Ende (größerer Markt, Premium-Ausstattungspaket). Typische Ausbauten in Märkten mittlerer Größe liegen zwischen $1M und $1.5M. Für die Qualifikation suchen wir $400K an Liquidität; der Rest wird typischerweise SBA-finanziert. Sehen Sie die Why-Invest-Seite für die vollständigen Item-19-Details.",
+      "a2":  "Laut FDD-2025-Item-19-Offenlegung: Eine Stichprobe von 50 WaveMAX-Standorten, die das volle Jahr 2024 berichteten, erzielte einen durchschnittlichen Bruttoumsatz von $471,201, Median $436,114, Bestperformer $713,934. Das systemweit gemeldete EBITDA liegt bei 25–35%. Unser unternehmenseigener Jacksonville-Flagship-Store meldete für 2024 einen Netto-Cashflow von $217,762 und einen Nettogewinn von $113,074 (mit voller Geräte-Finanzierung). Vergangene Performance ist keine Garantie für künftige Ergebnisse — siehe FDD für vollständige Offenlegungen.",
+      "a3":  "WaveMAX ist SBA-fähig, und wir pflegen ein Netzwerk bevorzugter Kreditgeber, die mit der Marke und ihren Item-19-Ergebnissen vertraut sind. Die meisten Franchisenehmer finanzieren die Geräte vollständig und leisten 20–30% Eigenkapital für den Ausbau. Wir stellen die Verbindungen her und führen Sie während der Discovery durch den Kreditgeber-Prozess (Schritt 03 des Kaufprozesses).",
+      "a4":  "5–7 Jahre ist die typische Amortisationszeit im gesamten Franchise-System, getrieben durch 25–35% gemeldetes EBITDA und den Multi-Channel-Umsatzmix (Selbstbedienung + WDF + gewerbliche Routen + Lieferung). Stores mit höherem Umsatz in stärkeren Märkten haben kürzere Amortisationszeiten gemeldet; Item 19 des FDD enthält die vollständige Verteilung.",
+      "a5":  "Sechs Schritte: (1) erstes 30-minütiges Sondierungsgespräch, (2) FDD-Prüfung und unterschriebener Empfang, (3) Marktanalyse und Gebietsauswahl, (4) Discovery Day am Hauptsitz in Jacksonville, (5) Franchise-Vertrag, (6) Schulung, Standort-Ausbau und Eröffnung. Sehen Sie die Become-a-Franchisee-Seite für den schrittweisen Ablauf.",
+      "a6":  "Der typische Zeitplan beträgt 6–9 Monate vom ersten Gespräch bis zur Eröffnung. Das Tempo wird hauptsächlich durch Standortverfügbarkeit und Ausbau bestimmt; wenn ein Kandidat bereits einen Standort identifiziert und vorab genehmigt hat, verkürzt sich der Zeitplan. Das Schulungsprogramm selbst dauert mehrere Wochen.",
+      "a7":  "Ja. Die Standortauswahl ist die hebelstärkste Entscheidung in diesem Geschäft, und die Zentrale ist von Anfang an beteiligt. Wir prüfen demografische und Verkehrsdaten, validieren die Ausrichtung auf Arbeiterklasse-ZIP-Codes, führen Wettbewerber-Proximitätsanalysen durch und genehmigen Standorte vor jeder Mietvertragsunterzeichnung. Wir sagen Nein zu schlechten Standorten — auch wenn ein Kandidat bereits eine LOI eingereicht hat. Lieber 30 Tage verlieren, als den falschen Store zu bauen.",
+      "a8":  "Mehrwöchige Schulung am Hauptsitz in Jacksonville, die Operations-Playbook, Geräte-SOPs, Einstellung und Personal, Attendant-Management, Marketingfonds-Mechanik, gewerblichen Vertriebsprozess, Technologie-Stack und Reporting umfasst. Laufende Unterstützung geht nach der Eröffnung weiter — regionales Support-Netzwerk, Peer-Franchisenehmer-Community und direkter Zugang zum Operations-Team der Zentrale.",
+      "a9":  "Ja. Wir gestalten das Betriebsmodell rund um etwa 9 Stunden Eigentümer-Einsatz pro Woche — typischerweise 3 Tage pro Woche, 3 Stunden pro Tag. Der Store läuft mit Attendant-Personal während der ausgehängten Öffnungszeiten. Die meisten Franchisenehmer stellen anfänglich keinen dedizierten Manager ein; das Modell ist so strukturiert, dass Multi-Unit-Eigentümer ohne einen skalieren.",
+      "a10": "Blue-Collar-Familien aus der Arbeiterklasse, die Wäschereien aus Notwendigkeit nutzen, nicht aus Luxus. Die Kundenbasis ist über jeden Konjunkturzyklus stabil. Wir bedienen außerdem gewerbliche Konten auf der B2B-Seite: Arztpraxen, Hotellerie (Hotels und Airbnb-Gastgeber), Fitnessstudios und Gesundheitsclubs, Restaurants und Handwerksbetriebe. Der Multi-Channel-Umsatzmix ist Teil dessen, warum das Modell funktioniert.",
+      "a11": "Nein. Das Schulungsprogramm setzt keine vorherige Wäscherei- oder Einzelhandelserfahrung voraus. Wir suchen fähige Betreiber mit verfügbarem Kapital und der Bereitschaft, einem System zu folgen. Branchenhintergrund spielt keine Rolle; operative Disziplin schon.",
+      "a12": "Moderner Electrolux-Soft-Mount-Maschinenpark mit programmierbaren Steuerungen, Online-Diagnostik und High-G-Extraktion für schnellere Zyklen (volle Ladung in <45 Minuten). Premium-Stores umfassen 450G-Extraktion, 80lb-Großformat-Maschinen für Bettdecken / Restaurant-Wäsche / gewerbliche Abholungen sowie UV-sanitisierte Linien für Kunden aus Medizin und Hotellerie. Ausstattungspaket und store-spezifische Premium-Merkmale variieren je nach Standort und genehmigter Stufe.",
+      "a13": "Soft-Mount-Konstruktion (leiser, weniger Gebäudebelastung), High-G-Extraktion (schnellerer Zyklus, geringere Versorgungskosten pro Pfund), programmierbare Steuerungen (jeder Zyklus gleich), Online-Diagnostik (Fern-Fehlersuche, vorausschauende Wartung) und eine zentral verhandelte Teile- und Servicebeziehung. Die Gesamtkosten der Eigentümerschaft über 10 Jahre liegen deutlich unter denen klassischer Hard-Mount-Geräte.",
+      "a14": "Multi-Unit-Eigentum ist der Weg, den die meisten Franchisenehmer einschlagen. Betreiber mit einem cashflow-starken Store eröffnen typischerweise innerhalb von 18 Monaten den zweiten. Gebietsrechte und Area-Development-Anreize sind für qualifizierte Multi-Unit-Betreiber verfügbar. Die Playbooks für Standortauswahl, Schulung und Betrieb sind für Wiederholung ausgelegt — wir haben das System ausdrücklich gebaut, um Multi-Unit-Wachstum zu unterstützen, nicht es zu bekämpfen.",
+      "a15": "Eine WaveMAX wird als franchisiertes Cashflow-Geschäft verkauft — typischerweise als Vielfaches des EBITDA, mit Marken-Goodwill, etablierten wiederkehrenden WDF- und Gewerbe-Verträgen, übertragbarer Schulung und fortgesetzter Unternehmensunterstützung nach dem Verkauf. Das steht im scharfen Kontrast zum klassischen unabhängigen Waschsalon, der oft nur zum abgeschriebenen Wert seines Geräte-Pakets verkauft wird. Sehen Sie die WaveMAX-vs-Zombiemat-Seite für den strukturellen Unterschied.",
+      "a16": "75+ Stores und wachsend in den USA. WaveMAX wurde im Franchise 500 von Entrepreneur 2026 als #1 Wäscherei-Franchise eingestuft, mit einer Gesamtplatzierung von #485. 2024 lagen wir auf Platz #416.",
+      "a17": "WaveMAX wurde 2012 in Jacksonville, FL, von Mike Roberts gegründet. Die juristische Person ist AU Hydro LLC dba WaveMAX Laundry, mit Hauptsitz in 929 McDuff Ave S, Suite 107, Jacksonville, FL 32205. Sehen Sie die About-WaveMAX-Seite für die Gründungsgeschichte.",
+      "a18": "Fordern Sie das Investment Guide PDF an (per E-Mail zugestellt) oder vereinbaren Sie das erste 30-minütige Sondierungsgespräch. Das Gespräch ist der beste Weg, um zu wissen, ob WaveMAX zu Ihrer Situation passt — wir gehen Ihren Markt, Ihr Kapital, Ihren Zeitplan und die realistischen Zahlen durch."
+    },
+    "cta": {
+      "eyebrow":      "Noch Fragen?",
+      "title":        "Holen Sie sich den Investment Guide oder vereinbaren Sie das Gespräch.",
+      "lede":         "Der Investment Guide ist ein kostenloses PDF mit den FDD-Highlights, Item-19-Zahlen und dem vollständigen Discovery-Prozess. Oder gehen Sie direkt zum 30-minütigen Sondierungsgespräch.",
+      "btnPrimary":   "Investment Guide holen",
+      "btnSecondary": "Gespräch vereinbaren"
+    }
+  },
   "common": {
     "ctaLearnMore": "Mehr erfahren",
     "ctaGetGuide": "Investitionsleitfaden anfordern",

@@ -17,8 +17,6 @@
     if (slides.length < 2) return;
 
     let i = 0;
-    let timer = null;
-    let paused = false;
 
     function show(idx) {
       slides.forEach((img, k) => img.classList.toggle('is-active', k === idx));
@@ -28,25 +26,21 @@
       }
     }
 
+    // Pause via :hover (CSS, not event listeners). Avoids the bug where
+    // headless browsers / page-load cursor positions fire a stale
+    // mouseenter and never recover.
     function tick() {
-      if (paused) return;
+      try { if (card.matches(':hover')) return; } catch (_) {}
       i = (i + 1) % slides.length;
       show(i);
     }
-
-    function loop() {
-      timer = setInterval(tick, SLIDE_MS);
-    }
-
-    card.addEventListener('mouseenter', () => { paused = true; });
-    card.addEventListener('mouseleave', () => { paused = false; });
 
     // Don't auto-rotate if user prefers reduced motion.
     if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
       return;
     }
 
-    loop();
+    setInterval(tick, SLIDE_MS);
   }
 
   if (document.readyState === 'loading') {

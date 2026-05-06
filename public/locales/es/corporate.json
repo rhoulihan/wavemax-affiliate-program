@@ -705,6 +705,83 @@
       "btnSecondary": "Leer la visión general de la franquicia"
     }
   },
+  "faqp": {
+    "hero": {
+      "eyebrow": "Preguntas frecuentes",
+      "title1":  "Preguntas comunes,",
+      "title2":  "respuestas directas.",
+      "sub":     "Todo lo que los candidatos preguntan durante el descubrimiento de la franquicia: inversión, proceso, operaciones, equipos, propiedad multi-unidad y valor de salida. Si su pregunta no está aquí, la llamada exploratoria de 30 minutos existe precisamente para eso."
+    },
+    "cats": {
+      "money":      "Dinero",
+      "process":    "Proceso",
+      "operations": "Operaciones",
+      "equipment":  "Equipos",
+      "growth":     "Crecimiento y salida",
+      "about":      "Acerca de WaveMAX"
+    },
+    "groups": {
+      "moneyHead":      "Dinero",
+      "moneySub":       "Rango de inversión, calificación, financiamiento y lo que los franquiciados realmente ganan.",
+      "processHead":    "Proceso",
+      "processSub":     "Descubrimiento, revisión del FDD, selección de sitio, capacitación y apertura.",
+      "operationsHead": "Operaciones",
+      "operationsSub":  "Participación del propietario, personal, clientes, realidad diaria.",
+      "equipmentHead":  "Equipos",
+      "equipmentSub":   "Especificaciones de la flota, niveles premium, qué se incluye.",
+      "growthHead":     "Crecimiento y salida",
+      "growthSub":      "Camino multi-unidad, derechos de territorio, cómo se ve una venta.",
+      "aboutHead":      "Acerca de WaveMAX",
+      "aboutSub":       "Fundación, escala, reconocimiento, sede."
+    },
+    "q": {
+      "q1":  "¿Cuál es la inversión total para abrir una WaveMAX?",
+      "q2":  "¿Cuánto ganan realmente los franquiciados de WaveMAX?",
+      "q3":  "¿Cómo funciona el financiamiento?",
+      "q4":  "¿Cuál es el período típico de retorno de la inversión?",
+      "q5":  "¿Cuál es el proceso de descubrimiento?",
+      "q6":  "¿Cuánto tiempo pasa desde la primera llamada hasta la apertura?",
+      "q7":  "¿WaveMAX me ayudará a encontrar un sitio?",
+      "q8":  "¿Qué incluye el programa de capacitación?",
+      "q9":  "¿WaveMAX es realmente semi-ausente?",
+      "q10": "¿Quiénes son sus clientes principales?",
+      "q11": "¿Necesito experiencia en lavanderías?",
+      "q12": "¿Qué tipo de equipo utiliza WaveMAX?",
+      "q13": "¿Por qué Electrolux específicamente?",
+      "q14": "¿Puedo abrir múltiples ubicaciones WaveMAX?",
+      "q15": "¿Cuál es el valor de salida de una WaveMAX?",
+      "q16": "¿Qué tan grande es WaveMAX en este momento?",
+      "q17": "¿Quién fundó WaveMAX?",
+      "q18": "¿Cómo empiezo?"
+    },
+    "a": {
+      "a1":  "Según el FDD 2025, la inversión total varía desde $356,455 en el extremo bajo (mercado más pequeño, construcción más reducida) hasta $1,556,350 en el extremo alto (mercado más grande, paquete de equipo de nivel premium). Las construcciones típicas en mercados de nivel medio se ubican entre $1M y $1.5M. Buscamos $400K de liquidez para calificar; el saldo se financia típicamente mediante SBA. Consulte la página Por Qué Invertir para el detalle completo del Item 19.",
+      "a2":  "Según la divulgación del Item 19 del FDD 2025: una muestra de 50 tiendas WaveMAX que reportaron el año completo 2024 alcanzó un promedio bruto de $471,201, mediana de $436,114, mejor desempeño de $713,934. El EBITDA reportado en todo el sistema oscila entre 25–35%. Nuestra tienda insignia propiedad de la empresa en Jacksonville reportó en 2024 un flujo de caja neto de $217,762 y un ingreso neto de $113,074 (con financiamiento total del equipo). El desempeño pasado no es garantía de resultados futuros — consulte el FDD para las divulgaciones completas.",
+      "a3":  "WaveMAX es elegible para SBA y mantenemos una red de prestamistas preferidos familiarizados con la marca y sus resultados del Item 19. La mayoría de los franquiciados financian el equipo en su totalidad y aportan un 20–30% en la construcción. Hacemos las presentaciones y le guiamos por el proceso con el prestamista durante el descubrimiento (paso 03 del proceso de compra).",
+      "a4":  "5–7 años es el período típico de retorno de la inversión en todo el sistema de la franquicia, impulsado por un EBITDA reportado de 25–35% y la mezcla de ingresos multi-canal (autoservicio + WDF + rutas comerciales + entrega). Las tiendas de mayor volumen en mercados más fuertes han reportado retornos más rápidos; el Item 19 del FDD tiene la distribución completa.",
+      "a5":  "Seis pasos: (1) llamada exploratoria inicial de 30 minutos, (2) revisión del FDD y recibo firmado, (3) análisis de mercado y selección de territorio, (4) Día de Descubrimiento en la sede corporativa en Jacksonville, (5) acuerdo de franquicia, (6) capacitación, construcción del sitio y gran apertura. Consulte la página Ser Franquiciado para el detalle paso a paso.",
+      "a6":  "El cronograma típico es de 6–9 meses desde la llamada inicial hasta la gran apertura. El ritmo está impulsado principalmente por la disponibilidad del sitio y la construcción; si un candidato ya tiene un sitio identificado y preaprobado, el cronograma se comprime. El programa de capacitación en sí dura varias semanas.",
+      "a7":  "Sí. La selección del sitio es la decisión de mayor apalancamiento en este negocio y la corporación está involucrada desde el inicio. Revisamos datos demográficos y de tráfico, validamos la orientación de códigos postales de clase trabajadora, ejecutamos análisis de proximidad de competidores y aprobamos los sitios antes de cualquier firma de contrato de arrendamiento. Decimos no a los malos sitios — incluso a sitios donde un candidato ya ha presentado una LOI. Es mejor perder 30 días que construir la tienda equivocada.",
+      "a8":  "Capacitación de varias semanas en la sede corporativa en Jacksonville que cubre el manual de operaciones, los SOPs de equipos, contratación y dotación de personal, gestión de asistentes, mecánica del fondo de marketing, proceso de ventas comerciales, stack tecnológico y reportes. El soporte continuo continúa después de la apertura — red de soporte regional, comunidad de franquiciados pares y acceso directo al equipo de operaciones corporativo.",
+      "a9":  "Sí. Diseñamos el modelo operativo en torno a aproximadamente 9 horas por semana de participación del propietario — típicamente 3 días por semana, 3 horas por día. La tienda funciona con personal de asistentes durante las horas publicadas. La mayoría de los franquiciados no contratan un gerente dedicado inicialmente; el modelo está estructurado para que los propietarios multi-unidad escalen sin uno.",
+      "a10": "Familias de cuello azul, de clase trabajadora, que dependen de las lavanderías por necesidad, no por lujo. La base de clientes es estable a lo largo de cada ciclo económico. También atendemos cuentas comerciales en el lado B2B: oficinas médicas, hospitalidad (hoteles y anfitriones de Airbnb), gimnasios y clubes de salud, restaurantes y contratistas. La mezcla de ingresos multi-canal es parte de por qué funciona el modelo.",
+      "a11": "No. El programa de capacitación asume que no hay experiencia previa en lavanderías o retail. Buscamos operadores capaces con capital para desplegar y disposición para seguir un sistema. La trayectoria en la industria no importa; la disciplina operativa sí.",
+      "a12": "Flota moderna Electrolux de montaje suave con controladores programables, diagnósticos en línea y extracción de alta-G para ciclos más rápidos (carga completa terminada en <45 minutos). Las tiendas de nivel premium incluyen extracción de 450G, máquinas de gran formato de 80lb para edredones / lencería de restaurantes / recolecciones comerciales, y líneas equipadas con sanitización UV para clientes médicos y de hospitalidad. El paquete de equipo y las características premium específicas de la tienda varían según la ubicación y el nivel aprobado.",
+      "a13": "Construcción de montaje suave (más silenciosa, menos desgaste en el edificio), extracción de alta-G (ciclo más rápido, menor costo de servicios públicos por libra), controladores programables (cada ciclo igual), diagnósticos en línea (resolución remota de problemas, mantenimiento predictivo) y una relación de partes y servicio negociada por la corporación. El costo total de propiedad a lo largo de 10 años es significativamente menor que el de los equipos heredados de montaje rígido.",
+      "a14": "La propiedad multi-unidad es el camino que toman la mayoría de los franquiciados. Los operadores con una tienda con flujo de caja típicamente abren la segunda dentro de 18 meses. Hay derechos de territorio e incentivos de desarrollo de área disponibles para operadores multi-unidad calificados. Los manuales de selección de sitio, capacitación y operaciones están diseñados para repetirse — explícitamente construimos el sistema para apoyar el crecimiento multi-unidad, no para combatirlo.",
+      "a15": "Una WaveMAX se vende como un negocio franquiciado con flujo de caja — típicamente un múltiplo del EBITDA, con goodwill de marca, contratos recurrentes establecidos de WDF y comerciales, capacitación transferible al comprador y soporte corporativo continuo después de la venta. Eso contrasta marcadamente con la lavandería independiente heredada, que a menudo se vende por el valor depreciado de su paquete de equipos solamente. Consulte la página WaveMAX vs Zombiemat para la diferencia estructural.",
+      "a16": "Más de 75 tiendas y creciendo en todo Estados Unidos. WaveMAX fue clasificada como #1 franquicia de lavandería en el Franchise 500 de 2026 de Entrepreneur, con una clasificación general de #485. Fuimos clasificados #416 en general en 2024.",
+      "a17": "WaveMAX fue fundada en Jacksonville, FL, en 2012 por Mike Roberts. La entidad legal es AU Hydro LLC dba WaveMAX Laundry, con sede en 929 McDuff Ave S, Suite 107, Jacksonville, FL 32205. Consulte la página Acerca de WaveMAX para la historia fundacional.",
+      "a18": "Solicite el PDF de la Guía de Inversión (entregado por correo electrónico) o agende la llamada exploratoria inicial de 30 minutos. La llamada es la mejor forma de saber si WaveMAX es el ajuste correcto para su situación — recorreremos su mercado, capital, cronograma y los números realistas."
+    },
+    "cta": {
+      "eyebrow":      "¿Aún tiene preguntas?",
+      "title":        "Obtenga la Guía de Inversión o agende la llamada.",
+      "lede":         "La Guía de Inversión es un PDF gratuito con los aspectos destacados del FDD, las cifras del Item 19 y el proceso completo de descubrimiento. O vaya directamente a la llamada exploratoria de 30 minutos.",
+      "btnPrimary":   "Obtener la Guía de Inversión",
+      "btnSecondary": "Agendar la llamada"
+    }
+  },
   "common": {
     "ctaLearnMore": "Más información",
     "ctaGetGuide": "Obtener la Guía de Inversión",

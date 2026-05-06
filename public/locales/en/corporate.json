@@ -689,6 +689,84 @@
     }
   },
 
+  "faqp": {
+    "hero": {
+      "eyebrow": "Frequently Asked Questions",
+      "title1":  "Common questions,",
+      "title2":  "straight answers.",
+      "sub":     "Everything candidates ask during franchise discovery — investment, process, operations, equipment, multi-unit ownership, exit value. If your question isn't here, the 30-minute exploratory call exists for that."
+    },
+    "cats": {
+      "money":      "Money",
+      "process":    "Process",
+      "operations": "Operations",
+      "equipment":  "Equipment",
+      "growth":     "Growth & Exit",
+      "about":      "About WaveMAX"
+    },
+    "groups": {
+      "moneyHead":      "Money",
+      "moneySub":       "Investment range, qualification, financing, and what franchisees actually earn.",
+      "processHead":    "Process",
+      "processSub":     "Discovery, FDD review, site selection, training, opening.",
+      "operationsHead": "Operations",
+      "operationsSub":  "Owner involvement, staffing, customers, daily reality.",
+      "equipmentHead":  "Equipment",
+      "equipmentSub":   "Fleet specs, premium tiers, what's included.",
+      "growthHead":     "Growth & Exit",
+      "growthSub":      "Multi-unit pathway, territory rights, what a sale looks like.",
+      "aboutHead":      "About WaveMAX",
+      "aboutSub":       "Founding, scale, recognition, headquarters."
+    },
+    "q": {
+      "q1":  "What's the total investment to open a WaveMAX?",
+      "q2":  "How much do WaveMAX franchisees actually earn?",
+      "q3":  "How does financing work?",
+      "q4":  "What's the typical payback period?",
+      "q5":  "What's the discovery process?",
+      "q6":  "How long from first call to opening?",
+      "q7":  "Will WaveMAX help me find a site?",
+      "q8":  "What's included in the training program?",
+      "q9":  "Is WaveMAX really semi-absentee?",
+      "q10": "Who are your core customers?",
+      "q11": "Do I need laundromat experience?",
+      "q12": "What kind of equipment does WaveMAX use?",
+      "q13": "Why Electrolux specifically?",
+      "q14": "Can I open multiple WaveMAX locations?",
+      "q15": "What's the exit value of a WaveMAX?",
+      "q16": "How big is WaveMAX right now?",
+      "q17": "Who founded WaveMAX?",
+      "q18": "How do I get started?"
+    },
+    "a": {
+      "a1":  "Per the 2025 FDD, total investment ranges from $356,455 on the low end (smaller market, smaller buildout) to $1,556,350 on the high end (larger market, premium-tier equipment). Typical builds in mid-tier markets land $1M–$1.5M. We look for $400K of liquidity to qualify; the balance is typically SBA-financed. See the Why Invest page for the full Item 19 detail.",
+      "a2":  "Per the 2025 FDD Item 19 disclosure: a 50-store sample of WaveMAX locations reporting full-year 2024 grossed an average of $471,201, median $436,114, top performer $713,934. Reported EBITDA across the system runs 25–35%. Our company-owned Jacksonville flagship reported 2024 net cash flow of $217,762 and net income of $113,074 (with full equipment financing). Past performance is not a guarantee of future results — see the FDD for full disclosures.",
+      "a3":  "WaveMAX is SBA-eligible, and we maintain a network of preferred lenders familiar with the brand and its Item 19 results. Most franchisees finance equipment fully and put down 20–30% on the buildout. We make introductions and walk you through the lender process during discovery (step 03 of the buying process).",
+      "a4":  "5–7 years is the typical payback period across the franchise system, driven by 25–35% reported EBITDA and the multi-channel revenue mix (self-serve + WDF + commercial routes + delivery). Higher-volume stores in stronger markets have reported faster paybacks; the FDD Item 19 has the full distribution.",
+      "a5":  "Six steps: (1) initial 30-minute exploratory call, (2) FDD review and signed receipt, (3) market analysis and territory selection, (4) Discovery Day at corporate HQ in Jacksonville, (5) franchise agreement, (6) training, site buildout, and grand opening. See the Become a Franchisee page for the step-by-step detail.",
+      "a6":  "Typical timeline is 6–9 months from initial call to grand opening. The pace is mostly site-availability- and buildout-driven; if a candidate already has a site identified and pre-approved, the timeline compresses. The training program itself is multi-week.",
+      "a7":  "Yes. Site selection is the single highest-leverage decision in this business and corporate is involved from the start. We review demographic and traffic-count data, validate working-class ZIP-code targeting, run competitor-proximity analysis, and approve sites before any lease signing. We say no to bad sites — even sites a candidate has already submitted an LOI on. Better to lose 30 days than build the wrong store.",
+      "a8":  "Multi-week training at corporate HQ in Jacksonville covering operations playbook, equipment SOPs, hiring and staffing, attendant management, marketing fund mechanics, commercial sales process, technology stack, and reporting. Ongoing support continues post-opening — regional support network, peer franchisee community, and direct access to the corporate operations team.",
+      "a9":  "Yes. We design the operating model around about 9 hours per week of owner involvement — typically 3 days a week, 3 hours per day. The store runs on attendant staffing during posted hours. Most franchisees don't hire a dedicated manager initially; the model is structured so multi-unit owners scale without one.",
+      "a10": "Blue-collar, working-class families who rely on laundromats out of necessity, not luxury. The customer base is steady through every economic cycle. We also serve commercial accounts on the B2B side: medical offices, hospitality (hotels and Airbnb hosts), gyms and health clubs, restaurants, and contractors. The multi-channel revenue mix is part of why the model works.",
+      "a11": "No. The training program assumes no prior laundromat or retail experience. We're looking for capable operators with capital to deploy and a willingness to follow a system. Industry background doesn't matter; operational discipline does.",
+      "a12": "Modern Electrolux soft-mount fleet with programmable controllers, online diagnostics, and high-G extract for faster cycles (full load done in <45 minutes). Premium-tier stores include 450G extract, 80lb large-format machines for comforters / restaurant linens / commercial pickups, and UV-sanitization-equipped lines for medical and hospitality customers. Equipment package and store-specific premium features vary by location and approved tier.",
+      "a13": "Soft-mount construction (quieter, less wear on building), high-G extract (faster cycle, lower utility cost per pound), programmable controllers (every cycle the same), online diagnostics (remote troubleshooting, predictive maintenance), and a corporate-negotiated parts and service relationship. The total cost of ownership over 10 years is meaningfully lower than legacy hard-mount equipment.",
+      "a14": "Multi-unit ownership is the path most franchisees take. Operators with one cash-flowing store typically open their second within 18 months. Territory rights and area-development incentives are available for qualified multi-unit operators. The site selection, training, and operations playbooks are designed to be repeated — we explicitly built the system to support multi-unit growth, not fight it.",
+      "a15": "A WaveMAX sells as a franchised cash-flow business — typically a multiple of EBITDA, with brand goodwill, established recurring WDF and commercial contracts, training transferable to the buyer, and corporate support continuing post-sale. That contrasts sharply with the legacy independent laundromat, which often sells for the depreciated value of its equipment package alone. See the WaveMAX vs the Zombiemat page for the structural difference.",
+      "a16": "75+ stores and growing across the United States. WaveMAX was ranked #1 laundromat franchise on Entrepreneur's 2026 Franchise 500, with an overall ranking of #485. We were ranked #416 overall in 2024.",
+      "a17": "WaveMAX was founded in Jacksonville, FL, in 2012 by Mike Roberts. The legal entity is AU Hydro LLC dba WaveMAX Laundry, headquartered at 929 McDuff Ave S, Suite 107, Jacksonville, FL 32205. See the About WaveMAX page for the founding story.",
+      "a18": "Either request the Investment Guide PDF (delivered via email) or schedule the initial 30-minute exploratory call. The call is the single best way to know if WaveMAX is the right fit for your situation — we'll walk through your market, capital, timeline, and the realistic numbers."
+    },
+    "cta": {
+      "eyebrow":      "Still have questions?",
+      "title":        "Get the Investment Guide or schedule the call.",
+      "lede":         "The Investment Guide is a free PDF with the FDD highlights, Item 19 figures, and the full discovery process. Or jump straight to the 30-minute exploratory call.",
+      "btnPrimary":   "Get the Investment Guide",
+      "btnSecondary": "Schedule the call"
+    }
+  },
+
   "common": {
     "ctaLearnMore": "Learn more",
     "ctaGetGuide": "Get the Investment Guide",
