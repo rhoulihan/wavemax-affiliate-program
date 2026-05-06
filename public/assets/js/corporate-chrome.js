@@ -190,12 +190,16 @@
           </a>
         </div>
 
-        <!-- Mobile language switcher — second instance of .wm-lang-switcher
-             on the page; corporate-i18n.js wires every instance. CSS hides
-             the desktop one (in wmlnav-b2-right) below 900px and shows
-             this one. -->
-        <div class="wmv3-lang">
-          <div class="wm-lang-switcher" aria-expanded="false">
+        <!-- 4-cell action row: Learn More | Locations | burger | lang switcher.
+             The .wm-lang-switcher is the second instance on the page (the
+             other lives in wmlnav-b1-right for desktop); corporate-i18n.js
+             wires every instance. Both stay in DOM; CSS hides whichever
+             doesn't match the breakpoint. -->
+        <div class="wmv3-actions">
+          <a href="/become-a-franchisee/" class="wmv3-btn wmv3-btn-out" data-i18n="chrome.b2.becomeFranchisee">Learn More</a>
+          <button type="button" class="wmv3-btn wmv3-btn-sol" data-action="open-locations" data-i18n="chrome.b2.findLocation">Locations</button>
+          <button type="button" class="wmv3-burger" id="wmv3-burger" aria-label="Open menu" aria-expanded="false"><span></span><span></span><span></span></button>
+          <div class="wm-lang-switcher wmv3-lang-switcher" aria-expanded="false">
             <button type="button" class="wm-lang-btn" aria-haspopup="true" aria-label="Choose language">
               <span class="wm-lang-flag wm-flag-en" aria-hidden="true"></span>
               <span class="wm-lang-current-label">EN</span>
@@ -203,12 +207,6 @@
             </button>
             <div class="wm-lang-menu" role="menu"></div>
           </div>
-        </div>
-
-        <div class="wmv3-actions">
-          <a href="/become-a-franchisee/" class="wmv3-btn wmv3-btn-out" data-i18n="chrome.b2.becomeFranchisee">Learn More</a>
-          <button type="button" class="wmv3-btn wmv3-btn-sol" data-action="open-locations" data-i18n="chrome.b2.findLocation">Locations</button>
-          <button type="button" class="wmv3-burger" id="wmv3-burger" aria-label="Open menu" aria-expanded="false"><span></span><span></span><span></span></button>
         </div>
 
         <nav class="wmv3-drawer" id="wmv3-drawer" aria-label="Mobile menu">
