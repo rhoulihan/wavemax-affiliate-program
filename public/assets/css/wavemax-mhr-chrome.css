@@ -128,7 +128,7 @@
   flex-wrap:wrap !important;
 }
 #wmlnav-wrap #wmlnav-nav > a {
-  color:rgba(255,255,255,.85) !important;
+  color:#ffffff !important;
   font-size:13px !important;
   font-weight:400 !important;
   padding:14px 14px !important;
@@ -147,7 +147,7 @@
 
 #wmlnav-wrap .wmlnav-drop { position:relative !important; display:inline-block !important; }
 #wmlnav-wrap .wmlnav-drop > a {
-  color:rgba(255,255,255,.85) !important;
+  color:#ffffff !important;
   font-size:13px !important;
   font-weight:400 !important;
   padding:14px 14px !important;

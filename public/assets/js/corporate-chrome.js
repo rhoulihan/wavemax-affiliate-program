@@ -57,13 +57,12 @@
     {
       heading: 'Locations', headingKey: 'chrome.footer.headingLocations',
       links: [
-        { href: '#', dataAction: 'open-locations', label: 'Find a Store', key: 'chrome.footer.linkFindStore' },
-        { href: 'https://www.wavemaxlaundry.com/locations/', label: 'Full Location Map', key: 'chrome.footer.linkFullMap', external: true }
+        { href: '#', dataAction: 'open-locations', label: 'Find a Store', key: 'chrome.footer.linkFindStore' }
       ]
     }
   ];
 
-  const LOGO_URL   = 'https://www.wavemaxlaundry.com/wp-content/uploads/2026/03/logo-wavemax.png';
+  const LOGO_URL   = '/assets/images/brand/logo-wavemax.png';
   const HQ_ADDRESS = '929 McDuff Ave S, Suite 107';
   const HQ_CITY    = 'Jacksonville, FL 32205';
   const COPYRIGHT  = '© ' + (new Date()).getFullYear() + ' AU Hydro LLC dba WaveMAX Laundry. All rights reserved.';
@@ -103,7 +102,7 @@
               <a class="wmlnav-b1-cta" href="/why-invest-in-wavemax/" data-i18n="chrome.b1.item19">Item 19: $471K avg gross →</a>
             </div>
             <div class="wmlnav-b1-right">
-              <div class="wm-lang-switcher" id="wm-lang" aria-expanded="false">
+              <div class="wm-lang-switcher" id="wm-lang" role="combobox" aria-expanded="false" aria-haspopup="listbox" aria-label="Language selector">
                 <button type="button" class="wm-lang-btn" aria-haspopup="true" aria-label="Choose language">
                   <span class="wm-lang-flag wm-flag-en" aria-hidden="true"></span>
                   <span class="wm-lang-current-label">EN</span>
@@ -193,7 +192,7 @@
           <a href="/franchise/" aria-label="WaveMAX Laundry — Franchise home">
             <img src="${esc(LOGO_URL)}" alt="WaveMAX Laundry">
           </a>
-          <div class="wm-lang-switcher wmv3-lang-switcher" aria-expanded="false">
+          <div class="wm-lang-switcher wmv3-lang-switcher" role="combobox" aria-expanded="false" aria-haspopup="listbox" aria-label="Language selector">
             <button type="button" class="wm-lang-btn" aria-haspopup="true" aria-label="Choose language">
               <span class="wm-lang-flag wm-flag-en" aria-hidden="true"></span>
               <span class="wm-lang-current-label">EN</span>
@@ -255,7 +254,7 @@
   function buildFooter() {
     const cols = FOOTER_LINKS.map((col) => `
       <div class="wmcc-foot-col">
-        <h4 data-i18n="${esc(col.headingKey)}">${esc(col.heading)}</h4>
+        <h3 data-i18n="${esc(col.headingKey)}">${esc(col.heading)}</h3>
         <ul>
           ${col.links.map((l) => {
             const attrs = l.external

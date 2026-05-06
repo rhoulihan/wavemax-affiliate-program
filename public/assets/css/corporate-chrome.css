@@ -214,7 +214,7 @@ body.wmcc-mobile-open .wmcc-mobile { display: flex; }
 }
 @media (max-width: 640px) { .wmcc-foot-cols { grid-template-columns: 1fr 1fr; } }
 
-.wmcc-foot-col h4 {
+.wmcc-foot-col h3 {
   font-family: 'Poppins', sans-serif;
   font-size: 12px; font-weight: 800; color: #f5a623;
   text-transform: uppercase; letter-spacing: 1.8px;
