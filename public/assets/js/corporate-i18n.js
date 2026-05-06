@@ -25,7 +25,17 @@
   let currentLang = readLang();
 
   function readLang() {
+    // URL ?lang= takes precedence so hreflang alternates land on the
+    // correct locale even before the user has any localStorage state.
+    // We persist the URL choice into localStorage so subsequent
+    // navigation within the site keeps the same language.
     try {
+      const params = new URLSearchParams(window.location.search);
+      const fromUrl = params.get('lang');
+      if (fromUrl && SUPPORTED.indexOf(fromUrl) >= 0) {
+        try { localStorage.setItem(STORAGE, fromUrl); } catch (_) {}
+        return fromUrl;
+      }
       const saved = localStorage.getItem(STORAGE);
       if (saved && SUPPORTED.indexOf(saved) >= 0) return saved;
     } catch (_) { /* localStorage may be unavailable */ }
