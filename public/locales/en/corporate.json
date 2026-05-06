@@ -296,6 +296,57 @@
     }
   },
 
+  "testimonials": {
+    "hero": {
+      "eyebrow": "Testimonials",
+      "title1": "Real owners.",
+      "title2": "Real outcomes.",
+      "sub": "WaveMAX is a network of 100+ independent franchise owners across the United States. Hear from a handful of them — Area Reps and multi-unit operators sharing what WaveMAX ownership actually looks like inside the system.",
+      "ctaPrimary": "Explore the franchise",
+      "ctaSecondary": "See if you qualify"
+    },
+    "band": {
+      "locations": "Open locations",
+      "owners":    "Franchise owners",
+      "rank":      "Laundromat franchise · 2026",
+      "avgGross":  "Avg gross · 2024 FDD"
+    },
+    "cards": {
+      "eyebrow": "From the network",
+      "title":   "Hear from WaveMAX owners directly.",
+      "lede":    "Each of the franchisees below is a real WaveMAX owner with an active role in the network. Quotes are theirs, attributed by name and territory.",
+      "slQuote": "WaveMAX gives individuals the ability to operate a business, but also focus on other aspects of life. Operating within the WaveMAX framework, while still putting your own touch on your dream of owning a semi-absentee business, is the perfect formula. WaveMAX has figured out how to sophisticate an archaic industry through technology, marketing, area studies, and continued operational improvements to stay ahead of the competition.",
+      "slRole":  "Area Rep & Store Owner · Gaithersburg, MD",
+      "caQuote": "I chose to get involved with WaveMAX because I saw a unique opportunity to bring something the laundromat industry desperately needed: professional management, operational structure, and a higher standard of excellence. Over the last seven to eight years, I've seen this vision come to life. What excites me most is where we're going — scaling with intention and building it together.",
+      "caRole":  "Area Rep & Operator · DFW / East TX",
+      "pkQuote": "WaveMAX has truly transformed the customer experience by creating a safe, reliable, and welcoming environment that people trust and return to. The laundromat industry has historically been dominated by independent, coin-operated operations — poorly maintained, inconsistently staffed, and lacking any brand identity. WaveMAX was purpose-built as a scalable franchise system to fix that.",
+      "pkRole":  "Area Director · Georgia & Tennessee",
+      "shQuote": "As the first WaveMAX franchisee, I was there when the brand was figuring out what it wanted to be. The discipline this team has brought to site selection, equipment, and operations is what separates WaveMAX from every other laundromat I've seen. I literally wrote the book on it — SHIFT Happens.",
+      "shRole":  "Director of Operations · First WaveMAX Franchisee · Area Rep N. California / Nevada · Author of SHIFT Happens"
+    },
+    "live": {
+      "eyebrow":    "Live customer reviews",
+      "title":      "From customers across the network.",
+      "lede":       "These are 5-star Google reviews pulled live from WaveMAX locations across the country. Real customers, real reviews, refreshed automatically — not curated marketing excerpts.",
+      "loading":    "Loading customer reviews…",
+      "error":      "Couldn't load network reviews right now. Try refreshing in a few minutes.",
+      "attrPrefix": "Reviews via",
+      "attrSuffix": "· refreshed every 6 hours · sampled across multiple WaveMAX locations"
+    },
+    "callout": {
+      "eyebrow":      "Independently verifiable",
+      "title":        "Our numbers, not just our quotes.",
+      "lede":         "Owner stories are part of the picture, but they're not the whole picture. WaveMAX publishes verifiable Item 19 figures in our Franchise Disclosure Document, and each store's customer experience is reflected in live Google reviews — not cherry-picked excerpts.",
+      "item1":        "2024 FDD Item 19: $471,201 average gross revenue, $436,114 median, $713,934 top performer — sample of 50 operating stores",
+      "item2":        "Jacksonville flagship: $217,762 net cash flow / $113,074 net income (with full equipment financing)",
+      "item3":        "Reported EBITDA range: 25–35% across the system",
+      "item4":        "Live customer reviews: every WaveMAX location's reviews are surfaced live from Google Places — the experience your customers will actually have",
+      "item5":        "Brand recognition: ranked #1 laundromat franchise on Entrepreneur's 2026 Franchise 500, #485 overall in 2026 (up from #416 in 2024)",
+      "btnPrimary":   "See the investment data",
+      "btnSecondary": "Explore the franchise"
+    }
+  },
+
   "common": {
     "ctaLearnMore": "Learn more",
     "ctaGetGuide": "Get the Investment Guide",

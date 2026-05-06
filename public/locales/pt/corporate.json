@@ -296,6 +296,57 @@
     }
   },
 
+  "testimonials": {
+    "hero": {
+      "eyebrow": "Depoimentos",
+      "title1": "Proprietários reais.",
+      "title2": "Resultados reais.",
+      "sub": "A WaveMAX é uma rede de mais de 100 proprietários de franquias independentes em todos os Estados Unidos. Ouça alguns deles — Representantes de Área e operadores de múltiplas unidades compartilhando como é, na prática, ser dono de uma WaveMAX dentro do sistema.",
+      "ctaPrimary": "Conheça a franquia",
+      "ctaSecondary": "Veja se você se qualifica"
+    },
+    "band": {
+      "locations": "Unidades abertas",
+      "owners":    "Proprietários de franquia",
+      "rank":      "Franquia de lavanderia · 2026",
+      "avgGross":  "Bruto médio · FDD 2024"
+    },
+    "cards": {
+      "eyebrow": "Da rede",
+      "title":   "Ouça diretamente dos proprietários WaveMAX.",
+      "lede":    "Cada um dos franqueados abaixo é um proprietário real da WaveMAX com papel ativo na rede. As citações são deles, atribuídas por nome e território.",
+      "slQuote": "A WaveMAX dá às pessoas a capacidade de operar um negócio e, ao mesmo tempo, focar em outros aspectos da vida. Operar dentro da estrutura da WaveMAX, mantendo seu toque pessoal no sonho de ter um negócio semipresencial, é a fórmula perfeita. A WaveMAX descobriu como sofisticar uma indústria arcaica por meio de tecnologia, marketing, estudos de área e melhorias operacionais contínuas para se manter à frente da concorrência.",
+      "slRole":  "Representante de Área e Proprietária de Loja · Gaithersburg, MD",
+      "caQuote": "Escolhi me envolver com a WaveMAX porque vi uma oportunidade única de trazer algo que o setor de lavanderias precisava desesperadamente: gestão profissional, estrutura operacional e um padrão mais alto de excelência. Nos últimos sete a oito anos, vi essa visão ganhar vida. O que mais me empolga é para onde estamos indo — escalando com intenção e construindo isso juntos.",
+      "caRole":  "Representante de Área e Operador · DFW / East TX",
+      "pkQuote": "A WaveMAX realmente transformou a experiência do cliente, criando um ambiente seguro, confiável e acolhedor em que as pessoas confiam e ao qual retornam. O setor de lavanderias historicamente foi dominado por operações independentes, com pagamento em moedas — mal mantidas, com equipe inconsistente e sem qualquer identidade de marca. A WaveMAX foi criada com um propósito específico: ser um sistema de franquia escalável para resolver isso.",
+      "pkRole":  "Diretor de Área · Georgia & Tennessee",
+      "shQuote": "Como o primeiro franqueado WaveMAX, eu estava lá quando a marca ainda estava descobrindo o que queria ser. A disciplina que esta equipe trouxe para a seleção de pontos, equipamentos e operações é o que diferencia a WaveMAX de qualquer outra lavanderia que já vi. Eu literalmente escrevi o livro sobre isso — SHIFT Happens.",
+      "shRole":  "Diretor de Operações · Primeiro Franqueado WaveMAX · Representante de Área N. California / Nevada · Autor de SHIFT Happens"
+    },
+    "live": {
+      "eyebrow":    "Avaliações de clientes ao vivo",
+      "title":      "De clientes em toda a rede.",
+      "lede":       "Estas são avaliações 5 estrelas no Google obtidas ao vivo de unidades WaveMAX em todo o país. Clientes reais, avaliações reais, atualizadas automaticamente — não trechos de marketing curados.",
+      "loading":    "Carregando avaliações de clientes…",
+      "error":      "Não foi possível carregar as avaliações da rede agora. Tente atualizar em alguns minutos.",
+      "attrPrefix": "Avaliações via",
+      "attrSuffix": "· atualizadas a cada 6 horas · amostradas em diversas unidades WaveMAX"
+    },
+    "callout": {
+      "eyebrow":      "Verificável de forma independente",
+      "title":        "Nossos números, não apenas nossas citações.",
+      "lede":         "Histórias dos proprietários fazem parte do quadro, mas não são o quadro inteiro. A WaveMAX publica números verificáveis no Item 19 do nosso Documento de Divulgação de Franquia, e a experiência do cliente em cada loja é refletida em avaliações ao vivo do Google — não em trechos selecionados a dedo.",
+      "item1":        "Item 19 do FDD 2024: $471.201 de receita bruta média, $436.114 de mediana, $713.934 do melhor desempenho — amostra de 50 lojas em operação",
+      "item2":        "Carro-chefe de Jacksonville: $217.762 de fluxo de caixa líquido / $113.074 de lucro líquido (com financiamento total de equipamentos)",
+      "item3":        "Faixa de EBITDA reportada: 25–35% em todo o sistema",
+      "item4":        "Avaliações de clientes ao vivo: as avaliações de cada unidade WaveMAX são exibidas ao vivo a partir do Google Places — a experiência que seus clientes terão de fato",
+      "item5":        "Reconhecimento da marca: classificada como #1 franquia de lavanderia no Franchise 500 2026 da Entrepreneur, #485 no geral em 2026 (subindo de #416 em 2024)",
+      "btnPrimary":   "Ver os dados de investimento",
+      "btnSecondary": "Conheça a franquia"
+    }
+  },
+
   "common": {
     "ctaLearnMore": "Saiba mais",
     "ctaGetGuide": "Obter o Guia de Investimento",
