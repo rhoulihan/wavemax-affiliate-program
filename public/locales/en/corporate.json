@@ -782,6 +782,123 @@
       "btnSecondary": "Schedule the call"
     }
   },
+
+  "contact": {
+    "hero": {
+      "eyebrow": "Contact",
+      "title1":  "Reach the team.",
+      "title2":  "No phone tree.",
+      "sub":     "Whether you're a prospective franchisee, a journalist on deadline, a vendor pitching a product, or a customer with a question — the message gets to a real person at our Jacksonville HQ. We typically respond within one business day."
+    },
+    "hq": {
+      "eyebrow":         "Corporate HQ",
+      "title":           "WaveMAX Laundry",
+      "meta":            "AU Hydro LLC dba WaveMAX Laundry",
+      "addressLabel":    "Mailing address",
+      "directions":      "Get directions →",
+      "franchiseLabel":  "Franchise development",
+      "franchiseHint":   "Or use the form — we route franchise inquiries automatically.",
+      "generalLabel":    "General inquiries",
+      "hoursLabel":      "Office hours",
+      "hoursText":       "Monday–Friday, 9:00 AM – 5:00 PM ET. After-hours messages are read the next business morning."
+    },
+    "form": {
+      "title":             "Send a message.",
+      "sub":               "Pick a topic, tell us how to reach you, and what's on your mind. We'll route it to the right person.",
+      "topicLabel":        "Topic",
+      "topicPlaceholder":  "Select a topic…",
+      "topicFranchise":    "Franchise inquiry",
+      "topicCustomer":     "Customer support",
+      "topicPress":        "Press / media",
+      "topicVendor":       "Vendor / partnership",
+      "topicGeneral":      "General question",
+      "firstNameLabel":    "First name",
+      "lastNameLabel":     "Last name",
+      "emailLabel":        "Email",
+      "phoneLabel":        "Phone (optional)",
+      "messageLabel":      "Message",
+      "submit":            "Send message"
+    }
+  },
+
+  "guide": {
+    "hero": {
+      "eyebrow": "Free PDF · Investment Guide",
+      "title1":  "Real numbers.",
+      "title2":  "Real path.",
+      "title3":  "No sales pitch.",
+      "sub":     "The WaveMAX Investment Guide is a comprehensive PDF covering the 2025 FDD Item 19 figures, the Jacksonville flagship cash-flow snapshot, the sources-and-uses of capital, financing structure, and the 6-step franchise discovery roadmap. Delivered by email — no high-pressure sales call."
+    },
+    "toc": {
+      "t1": "2024 Item 19 disclosure: $471,201 average gross, $436,114 median, $713,934 top performer (50-store sample)",
+      "t2": "Jacksonville flagship cash-flow snapshot: $217,762 net cash flow, $113,074 net income with full equipment financing",
+      "t3": "Sources and uses of capital, sample pro forma, debt service coverage",
+      "t4": "SBA-eligible lender introductions and the financing structure most franchisees use",
+      "t5": "6-step franchise discovery process from initial call to grand opening"
+    },
+    "form": {
+      "title":              "Get the guide.",
+      "sub":                "Tell us a little about yourself and we'll email the PDF within one business day.",
+      "firstNameLabel":     "First name",
+      "lastNameLabel":      "Last name",
+      "emailLabel":         "Email",
+      "phoneLabel":         "Phone",
+      "marketLabel":        "Market interest (optional)",
+      "marketPlaceholder":  "City, state, or region",
+      "timelineLabel":      "Timeline",
+      "timelinePlaceholder": "Select…",
+      "timeline_asap":      "As soon as possible",
+      "timeline_3months":   "Within 3 months",
+      "timeline_6months":   "Within 6 months",
+      "timeline_12months":  "Within 12 months",
+      "timeline_researching": "Just researching",
+      "capitalLabel":       "Liquid capital",
+      "capitalPlaceholder": "Select…",
+      "capital_under400k":  "Less than $400K",
+      "capital_400k":       "$400K – $750K",
+      "capital_750k":       "$750K – $1.5M",
+      "capital_over1_5m":   "More than $1.5M",
+      "submit":             "Send me the guide",
+      "disclaimer":         "By submitting, you agree to be contacted about the WaveMAX franchise opportunity. We don't share your information with third parties."
+    },
+    "thanks": {
+      "title":      "Request received.",
+      "p1":         "Your Investment Guide is on its way to your inbox. Check your email within the next business day.",
+      "p2":         "A member of our franchise development team will reach out to schedule the initial 30-minute exploratory call.",
+      "tokenLabel": "Reference:"
+    },
+    "what": {
+      "eyebrow":  "What's inside",
+      "title":    "An honest look at the WaveMAX numbers.",
+      "lede":     "No fluff, no AI-generated marketing copy. The Investment Guide is the same data we walk through during the FDD review phase of the discovery process — published up-front so you can evaluate the model on real terms.",
+      "p1Title":  "Item 19 figures",
+      "p1Text":   "2025 FDD disclosure: $471,201 average gross, $436,114 median, $713,934 top performer. 50-store sample reporting full-year 2024.",
+      "p2Title":  "Cash-flow snapshot",
+      "p2Text":   "Jacksonville company-owned flagship 2024: $217,762 net cash flow / $113,074 net income with full equipment financing.",
+      "p3Title":  "Sources & uses",
+      "p3Text":   "Total investment range $356K–$1.56M. How most franchisees split equity / SBA / equipment financing across the buildout.",
+      "p4Title":  "Lender network",
+      "p4Text":   "Preferred SBA-eligible lenders who already understand the WaveMAX unit economics. Direct introductions during discovery.",
+      "p5Title":  "6-step process",
+      "p5Text":   "Initial call → FDD review → market analysis → Discovery Day → franchise agreement → buildout & launch. Typical 6–9 month timeline.",
+      "p6Title":  "Personalized PDF",
+      "p6Text":   "Cover stamped with your name; reference token in the footer for cross-tracking. Sized for tablet or print."
+    },
+    "trust": {
+      "locations": "Open locations",
+      "avgGross":  "Avg gross · 2024 Item 19",
+      "ebitda":    "Reported EBITDA range",
+      "rank":      "Laundromat franchise · 2026"
+    },
+    "cta": {
+      "eyebrow":      "Prefer a conversation first?",
+      "title":        "Skip the PDF — start with the call.",
+      "lede":         "If you'd rather talk through the numbers with our franchise development team, the 30-minute exploratory call is a faster way to know if WaveMAX is the right fit for your situation.",
+      "btnPrimary":   "Schedule the call",
+      "btnSecondary": "See the full numbers"
+    }
+  },
+
   "common": {
     "ctaLearnMore": "Learn more",
     "ctaGetGuide": "Get the Investment Guide",

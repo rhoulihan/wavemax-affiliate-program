@@ -310,11 +310,58 @@
         // Don't preventDefault — let the link navigate
       }
 
-      if (t.closest('[data-action="open-locations"]')) {
-        e.preventDefault();
-        window.location.href = 'https://www.wavemaxlaundry.com/locations/';
-      }
+      // [data-action="open-locations"] is also handled by
+      // corporate-locations-modal.js (which opens the in-page modal).
+      // We deliberately do nothing here so the modal script wins.
     });
+  }
+
+  /* ---------- LOCATIONS MODAL MARKUP ----------
+   * Injected into <body> once. corporate-locations-modal.js wires up
+   * the open/close + map + tile rendering. The same #wm-locmod-* IDs
+   * are used by per-franchise host pages so the wavemax-mhr-modal.css
+   * styling applies as-is. */
+  function injectLocationsModal() {
+    if (document.getElementById('locModal')) return;
+    const div = document.createElement('div');
+    div.id = 'wm-corp-locmodal';
+    div.innerHTML = `
+      <div class="modal-overlay" id="locModal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="locModalTitle">
+        <div class="modal-box modal-box--with-map" role="document">
+          <div class="modal-header">
+            <div class="modal-header-text">
+              <h3 id="locModalTitle">Find a Location</h3>
+              <p id="modalSubtitle">Pick a location to zoom the map. Then visit the site, or get directions.</p>
+            </div>
+            <button class="modal-close" aria-label="Close" data-locmodal-close>✕</button>
+          </div>
+          <div class="modal-search">
+            <input type="text" id="locSearch" placeholder="🔍  Search by city, state or zip…" aria-label="Search locations">
+          </div>
+          <div class="modal-status" id="modalStatus" hidden>
+            <div class="spinner"></div>
+            <span id="modalStatusText">Loading franchises…</span>
+          </div>
+          <div class="modal-map" id="locMap" aria-label="Map of WaveMAX locations"></div>
+          <div class="modal-list" id="locList"></div>
+          <div class="modal-actions" id="locActions" hidden>
+            <div class="modal-actions-summary" id="locSelectedSummary">
+              <strong id="locSelectedName">—</strong>
+              <span id="locSelectedAddr">—</span>
+            </div>
+            <div class="modal-actions-buttons">
+              <a class="modal-action modal-action--secondary" id="locActionDirections" href="#" target="_blank" rel="noopener">
+                📍 Directions
+              </a>
+              <a class="modal-action modal-action--primary" id="locActionVisit" href="/">
+                Visit Site →
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(div);
   }
 
   function injectChrome() {
@@ -322,6 +369,7 @@
     const footerEl = document.getElementById('wm-corp-footer');
     if (headerEl) headerEl.innerHTML = buildHeader() + buildMobileHeader() + buildBreadcrumb();
     if (footerEl) footerEl.innerHTML = buildFooter();
+    injectLocationsModal();
 
     // Highlight the active nav item based on current path.
     const path = location.pathname.replace(/\/$/, '') || '/franchise';
