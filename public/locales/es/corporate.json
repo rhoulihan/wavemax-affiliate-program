@@ -604,6 +604,107 @@
       "btnSecondary": "Ser franquiciado"
     }
   },
+  "become": {
+    "hero": {
+      "eyebrow": "Sea franquiciado",
+      "title1": "Cómo comprar una",
+      "title2": "WaveMAX®",
+      "title3": "franquicia de lavandería.",
+      "sub": "Un proceso claro y estructurado de 6 pasos desde su primera conversación hasta el día de apertura — respaldado por sistemas reales, números transparentes y un equipo que lo ha hecho más de 75 veces.",
+      "ctaPrimary": "Vea si califica",
+      "ctaSecondary": "Ver los 6 pasos"
+    },
+    "path": {
+      "eyebrow": "El camino a seguir",
+      "title": "De investigador a propietario de franquicia.",
+      "p1": "Comprar una franquicia de lavandería WaveMAX es una de las decisiones financieras más grandes que tomará en su carrera. Nuestro proceso de descubrimiento de franquicia está diseñado para darle el tiempo, los datos y el acceso directo que necesita para tomar esa decisión con confianza — y para darnos la oportunidad de evaluar si usted es la persona adecuada para nuestra marca.",
+      "p2": "La mayoría de las oportunidades de franquicia de lavandería que evaluará están construidas en torno a un argumento de venta transaccional: un representante de franquicia de palabra fácil, una presentación pulida y la presión de firmar antes del cierre del trimestre. Esto no es eso.",
+      "p3": "Nos movemos al ritmo del candidato calificado, no al ritmo del calendario de ventas. Esperamos que hable con propietarios actuales. Esperamos que visite nuestra tienda propiedad de la empresa. Y esperamos que se retire si no es el ajuste correcto. El resultado es un proceso que típicamente toma 60–120 días desde la conversación inicial hasta la adjudicación — y un sistema de franquicia donde quienes lo completan se encuentran entre los operadores más fuertes de la industria."
+    },
+    "qual": {
+      "eyebrow": "Cualificaciones",
+      "title": "¿Es usted apto para WaveMAX?",
+      "lede": "Somos intencionalmente selectivos sobre a quién adjudicamos territorios. La integridad de la marca importa, y cada propietario refleja el estándar WaveMAX. Estos son mínimos — no metas aspiracionales. No los flexibilizamos.",
+      "q1Label": "Liquidez mín.",
+      "q1Text": "Efectivo disponible para inversión, para asegurar que su tienda quede bien posicionada para el éxito a largo plazo.",
+      "q2Label": "Patrimonio neto mín.",
+      "q2Text": "Capacidad financiera demostrada para enfrentar la construcción y la fase de arranque con confianza.",
+      "q3Label": "Por semana (propietario)",
+      "q3Text": "Modelo semi-ausente — alrededor de 10 hrs por semana en la tienda gestionando personal y KPI.",
+      "q4Label": "Mentalidad receptiva al coaching",
+      "q4Text": "Dispuesto a seguir sistemas probados antes de mejorarlos. Pensadores a largo plazo, no operadores que buscan ganancia rápida."
+    },
+    "steps": {
+      "eyebrow": "El camino",
+      "title": "Seis pasos hacia la propiedad de una lavandería.",
+      "lede": "Un camino claro diseñado para ayudarle a tomar una decisión informada — y para ayudarnos a asociarnos con los operadores correctos.",
+      "s1Title": "Conversación inicial",
+      "s1Text": "Una llamada introductoria de 30 minutos para conocer sus objetivos, mercado de interés, posición financiera y cronograma. Respondemos sus preguntas iniciales, compartimos cifras de alto nivel y decidimos juntos si tiene sentido continuar.",
+      "s2Title": "Descubrimiento y revisión del FDD",
+      "s2Text": "Reciba nuestro Documento de Divulgación de Franquicia. Revise el modelo, las finanzas, la estructura de soporte, las regalías, los derechos de territorio y los números del Item 19 en detalle. Tómese el tiempo que necesite.",
+      "s3Title": "Llamadas de validación",
+      "s3Text": "Hable directamente con franquiciados actuales de WaveMAX. Pregunte lo que sea. Conozca cómo es realmente la propiedad — los logros, las sorpresas, las lecciones. No guionizamos estas llamadas.",
+      "s4Title": "Día de Descubrimiento",
+      "s4Text": "Visite nuestra tienda propiedad de la empresa, conozca al equipo de liderazgo, recorra las operaciones de extremo a extremo y vea el modelo en acción. Es su oportunidad para validar todo lo que ha leído.",
+      "s5Title": "Adjudicación y selección de sitio",
+      "s5Text": "Firme el acuerdo de franquicia, reciba su territorio y comience la selección disciplinada de sitio con nuestro equipo de bienes raíces. Le ayudamos a encontrar una ubicación que cumpla con los estándares WaveMAX.",
+      "s6Title": "Construcción, capacitación y lanzamiento",
+      "s6Text": "Coordinación de la construcción, instalación de equipos, contratación y capacitación del personal, manual de lanzamiento de marketing y gran apertura — seguido de soporte operativo continuo durante el arranque."
+    },
+    "invest": {
+      "eyebrow": "Los números",
+      "title": "¿Cuánto cuesta comprar una WaveMAX®?",
+      "lede": "La inversión total para una franquicia de lavandería WaveMAX típicamente oscila entre $1M y $1.5M, dependiendo de su mercado, costos de bienes raíces, alcance de la construcción y configuración del equipo. Este rango cubre todo lo necesario para abrir las puertas.",
+      "p1Title": "Qué incluye",
+      "p1Text": "Cuotas de franquicia, arrendamiento y construcción, todo el equipo comercial Electrolux, señalización y branding, tecnología y POS, inventario de apertura y marketing pre-apertura.",
+      "p2Title": "Qué se requiere",
+      "p2Text": "Mínimo $400,000 en efectivo líquido para inversión y un patrimonio neto mínimo de $1,000,000. La mayoría de los franquiciados financia una porción del equipo y utiliza financiamiento elegible para SBA para la construcción.",
+      "p3Title": "Red de prestamistas",
+      "p3Text": "Trabajamos con una red de prestamistas amigables con las lavanderías que comprenden la economía por unidad del modelo WaveMAX y pueden estructurar el financiamiento en consecuencia.",
+      "p4Title": "Pro forma completo",
+      "p4Text": "Durante el descubrimiento, le mostramos las fuentes y usos del capital, la curva proyectada de arranque, la cobertura del servicio de la deuda y un panorama claro de su flujo de caja mensual en los años uno y dos."
+    },
+    "support": {
+      "eyebrow": "Lo que recibe",
+      "title": "Soporte real, desde el primer día.",
+      "lede": "Cuando se le adjudica una franquicia WaveMAX, no solo compra un nombre de marca. Recibe el sistema operativo completo, la gente y la infraestructura de un equipo nacional de franquicia.",
+      "t1Title": "Selección de sitio",
+      "t1Text": "Manuales de bienes raíces, análisis demográfico, soporte en la negociación del arrendamiento y estándares de ubicaciones aprobadas por la marca antes de firmar.",
+      "t2Title": "Equipo y construcción",
+      "t2Text": "Precios de la alianza nacional con Electrolux, diseño de la disposición de la tienda, instalación de equipos, señalización y branding.",
+      "t3Title": "Programas de capacitación",
+      "t3Text": "Capacitación en aula y en sitio, manual de operaciones, programas de capacitación para encargados e incorporación al panel de KPI.",
+      "t4Title": "Soporte de marketing",
+      "t4Text": "Publicidad lista para lanzamiento, SEO local, sistemas de reseñas, manuales de redes sociales y soporte continuo de campañas.",
+      "t5Title": "Coaching operativo",
+      "t5Text": "Coaching práctico continuo, revisiones mensuales de KPI, reuniones regionales y acceso directo al liderazgo.",
+      "t6Title": "Red de propietarios",
+      "t6Text": "Una próspera red de más de 75 franquiciados activos que ya están resolviendo los problemas que usted está a punto de enfrentar."
+    },
+    "faq": {
+      "eyebrow": "Preguntas comunes",
+      "title": "Preguntas frecuentes.",
+      "q1": "¿Cuánto cuesta comprar una franquicia de lavandería WaveMAX?",
+      "a1": "La inversión total oscila entre $1M y $1.5M, dependiendo de la ubicación, la construcción y el equipo. La liquidez mínima es de $400,000 con un requisito de patrimonio neto de $1,000,000. La mayoría de los franquiciados utiliza financiamiento SBA para una porción de la construcción y el equipo.",
+      "q2": "¿Cuánto tarda el proceso de solicitud?",
+      "a2": "Nuestro proceso de descubrimiento de franquicia típicamente toma 60–120 días desde la conversación inicial hasta la adjudicación de la franquicia, dependiendo de qué tan rápido complete cada fase. Nos movemos al ritmo del candidato calificado, no del calendario de ventas.",
+      "q3": "¿Puedo abrir múltiples ubicaciones WaveMAX?",
+      "a3": "Sí. WaveMAX está construida para la propiedad multi-unidad con acuerdos estructurados de desarrollo de área e incentivos de crecimiento para operadores calificados. Muchos de nuestros franquiciados más exitosos escalan de una a múltiples ubicaciones.",
+      "q4": "¿Necesito experiencia en lavanderías?",
+      "a4": "No se requiere experiencia previa en lavanderías. Nuestro programa de capacitación, manual de operaciones y coaching continuo están diseñados para llevar a propietarios calificados desde cero hasta la confianza operativa. Lo que buscamos es disciplina operativa y receptividad al coaching.",
+      "q5": "¿Qué cuotas continuas cobra WaveMAX?",
+      "a5": "WaveMAX cobra una regalía sobre las ventas brutas y una contribución al fondo de marketing. Los porcentajes específicos de las cuotas, los términos de pago y cualquier cuota auxiliar se detallan en nuestro Documento de Divulgación de Franquicia, que compartimos al inicio del proceso de descubrimiento.",
+      "q6": "¿Qué pasa si no es el ajuste correcto?",
+      "a6": "Se retira. Lo esperamos de los candidatos calificados y lo esperamos de nosotros mismos. Mejor descubrirlo en la semana 2 que en el año 2. Los propietarios que recorren todo el proceso de descubrimiento son los que genuinamente pertenecen al sistema."
+    },
+    "cta": {
+      "eyebrow": "Listos cuando lo esté",
+      "title": "Comience la conversación.",
+      "lede": "Cuéntenos sobre usted y le enviaremos el FDD y le guiaremos por el paso 01. Sin llamadas de venta de alta presión. La mayoría de los operadores toman 60–120 días desde la primera llamada hasta firmar el contrato de arrendamiento.",
+      "btnPrimary": "Postular ahora",
+      "btnSecondary": "Leer la visión general de la franquicia"
+    }
+  },
   "common": {
     "ctaLearnMore": "Más información",
     "ctaGetGuide": "Obtener la Guía de Inversión",
