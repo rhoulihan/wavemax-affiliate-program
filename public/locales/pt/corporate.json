@@ -705,6 +705,83 @@
       "btnSecondary": "Leia a visão geral da franquia"
     }
   },
+  "faqp": {
+    "hero": {
+      "eyebrow": "Perguntas frequentes",
+      "title1":  "Perguntas comuns,",
+      "title2":  "respostas diretas.",
+      "sub":     "Tudo o que os candidatos perguntam durante a descoberta da franquia — investimento, processo, operações, equipamentos, propriedade multi-unidade e valor de saída. Se sua pergunta não estiver aqui, a chamada exploratória de 30 minutos existe exatamente para isso."
+    },
+    "cats": {
+      "money":      "Dinheiro",
+      "process":    "Processo",
+      "operations": "Operações",
+      "equipment":  "Equipamentos",
+      "growth":     "Crescimento e saída",
+      "about":      "Sobre a WaveMAX"
+    },
+    "groups": {
+      "moneyHead":      "Dinheiro",
+      "moneySub":       "Faixa de investimento, qualificação, financiamento e o que os franqueados realmente ganham.",
+      "processHead":    "Processo",
+      "processSub":     "Descoberta, revisão do FDD, seleção de ponto, treinamento, abertura.",
+      "operationsHead": "Operações",
+      "operationsSub":  "Envolvimento do proprietário, equipe, clientes, realidade do dia a dia.",
+      "equipmentHead":  "Equipamentos",
+      "equipmentSub":   "Especificações da frota, níveis premium, o que está incluído.",
+      "growthHead":     "Crescimento e saída",
+      "growthSub":      "Caminho multi-unidade, direitos de território, como é uma venda.",
+      "aboutHead":      "Sobre a WaveMAX",
+      "aboutSub":       "Fundação, escala, reconhecimento, sede."
+    },
+    "q": {
+      "q1":  "Qual é o investimento total para abrir uma WaveMAX?",
+      "q2":  "Quanto os franqueados WaveMAX realmente ganham?",
+      "q3":  "Como funciona o financiamento?",
+      "q4":  "Qual é o período típico de payback?",
+      "q5":  "Qual é o processo de descoberta?",
+      "q6":  "Quanto tempo da primeira ligação até a abertura?",
+      "q7":  "A WaveMAX vai me ajudar a encontrar um ponto?",
+      "q8":  "O que está incluído no programa de treinamento?",
+      "q9":  "A WaveMAX é realmente semi-ausente?",
+      "q10": "Quem são seus principais clientes?",
+      "q11": "Preciso ter experiência em lavanderia?",
+      "q12": "Que tipo de equipamento a WaveMAX usa?",
+      "q13": "Por que Electrolux especificamente?",
+      "q14": "Posso abrir várias unidades WaveMAX?",
+      "q15": "Qual é o valor de saída de uma WaveMAX?",
+      "q16": "Qual é o tamanho da WaveMAX hoje?",
+      "q17": "Quem fundou a WaveMAX?",
+      "q18": "Como começo?"
+    },
+    "a": {
+      "a1":  "Conforme o FDD 2025, o investimento total varia de $356.455 na ponta inferior (mercado menor, construção menor) até $1.556.350 na ponta superior (mercado maior, pacote de equipamentos de nível premium). Construções típicas em mercados de nível médio ficam entre $1M e $1,5M. Buscamos $400K de liquidez para qualificar; o saldo é tipicamente financiado via SBA. Veja a página Por Que Investir para o detalhe completo do Item 19.",
+      "a2":  "Conforme a divulgação do Item 19 do FDD 2025: uma amostra de 50 lojas WaveMAX que reportaram o ano completo de 2024 atingiu uma média bruta de $471.201, mediana de $436.114, melhor desempenho de $713.934. O EBITDA reportado em todo o sistema fica entre 25–35%. Nossa loja-bandeira própria em Jacksonville reportou em 2024 fluxo de caixa líquido de $217.762 e lucro líquido de $113.074 (com financiamento total dos equipamentos). Desempenho passado não é garantia de resultados futuros — consulte o FDD para as divulgações completas.",
+      "a3":  "A WaveMAX é elegível ao SBA e mantemos uma rede de credores preferenciais familiarizados com a marca e seus resultados do Item 19. A maioria dos franqueados financia os equipamentos integralmente e dá entrada de 20–30% na construção. Fazemos as apresentações e te conduzimos pelo processo com o credor durante a descoberta (passo 03 do processo de compra).",
+      "a4":  "5–7 anos é o período típico de payback em todo o sistema da franquia, impulsionado por EBITDA reportado de 25–35% e pela mistura de receita multi-canal (autosserviço + WDF + rotas comerciais + entrega). Lojas de maior volume em mercados mais fortes reportaram paybacks mais rápidos; o Item 19 do FDD tem a distribuição completa.",
+      "a5":  "Seis passos: (1) chamada exploratória inicial de 30 minutos, (2) revisão do FDD e recibo assinado, (3) análise de mercado e seleção de território, (4) Discovery Day na sede corporativa em Jacksonville, (5) contrato de franquia, (6) treinamento, construção do ponto e grande inauguração. Veja a página Seja um Franqueado para o detalhe passo a passo.",
+      "a6":  "O cronograma típico é de 6–9 meses da chamada inicial até a grande inauguração. O ritmo é impulsionado principalmente pela disponibilidade do ponto e pela construção; se um candidato já tem um ponto identificado e pré-aprovado, o cronograma comprime. O programa de treinamento em si dura várias semanas.",
+      "a7":  "Sim. A seleção de ponto é a decisão de maior alavancagem neste negócio e a corporação está envolvida desde o início. Revisamos dados demográficos e de tráfego, validamos a segmentação por CEPs de classe trabalhadora, executamos análise de proximidade de concorrentes e aprovamos os pontos antes de qualquer assinatura de locação. Dizemos não a pontos ruins — mesmo a pontos onde o candidato já apresentou uma LOI. Melhor perder 30 dias do que construir a loja errada.",
+      "a8":  "Treinamento de várias semanas na sede corporativa em Jacksonville cobrindo manual de operações, SOPs de equipamentos, contratação e equipe, gestão de atendentes, mecânica do fundo de marketing, processo de vendas comerciais, stack de tecnologia e relatórios. O suporte contínuo continua após a abertura — rede de suporte regional, comunidade de franqueados pares e acesso direto à equipe corporativa de operações.",
+      "a9":  "Sim. Desenhamos o modelo operacional em torno de cerca de 9 horas por semana de envolvimento do proprietário — tipicamente 3 dias por semana, 3 horas por dia. A loja funciona com equipe de atendentes durante o horário publicado. A maioria dos franqueados não contrata um gerente dedicado inicialmente; o modelo é estruturado para que proprietários multi-unidade escalem sem um.",
+      "a10": "Famílias de operários, da classe trabalhadora, que dependem de lavanderias por necessidade, não por luxo. A base de clientes é estável em todos os ciclos econômicos. Também atendemos contas comerciais no lado B2B: consultórios médicos, hospitalidade (hotéis e anfitriões Airbnb), academias e clubes de saúde, restaurantes e empreiteiros. A mistura de receita multi-canal é parte do motivo pelo qual o modelo funciona.",
+      "a11": "Não. O programa de treinamento assume nenhuma experiência prévia em lavanderia ou varejo. Buscamos operadores capazes com capital para investir e disposição para seguir um sistema. A trajetória no setor não importa; a disciplina operacional sim.",
+      "a12": "Frota moderna Electrolux de montagem flexível com controladores programáveis, diagnóstico online e extração high-G para ciclos mais rápidos (carga completa em <45 minutos). Lojas de nível premium incluem extração 450G, máquinas de grande formato de 80lb para edredons / rouparia de restaurantes / coletas comerciais, e linhas equipadas com sanitização UV para clientes médicos e de hospitalidade. Pacote de equipamentos e recursos premium específicos da loja variam por localização e nível aprovado.",
+      "a13": "Construção de montagem flexível (mais silenciosa, menos desgaste no edifício), extração high-G (ciclo mais rápido, menor custo de utilities por libra), controladores programáveis (cada ciclo igual), diagnóstico online (solução de problemas remota, manutenção preditiva) e uma relação de peças e serviço negociada pela corporação. O custo total de propriedade ao longo de 10 anos é significativamente menor que o dos equipamentos legados de montagem rígida.",
+      "a14": "A propriedade multi-unidade é o caminho que a maioria dos franqueados toma. Operadores com uma loja com fluxo de caixa tipicamente abrem a segunda em 18 meses. Direitos de território e incentivos de desenvolvimento de área estão disponíveis para operadores multi-unidade qualificados. Os manuais de seleção de ponto, treinamento e operações são feitos para serem repetidos — construímos o sistema explicitamente para apoiar o crescimento multi-unidade, não combatê-lo.",
+      "a15": "Uma WaveMAX se vende como um negócio franqueado com fluxo de caixa — tipicamente um múltiplo do EBITDA, com goodwill de marca, contratos recorrentes estabelecidos de WDF e comerciais, treinamento transferível ao comprador e suporte corporativo continuando após a venda. Isso contrasta fortemente com a lavanderia independente legada, que muitas vezes se vende pelo valor depreciado apenas do seu pacote de equipamentos. Veja a página WaveMAX vs Zombiemat para a diferença estrutural.",
+      "a16": "75+ lojas e crescendo em todos os Estados Unidos. A WaveMAX foi classificada como #1 franquia de lavanderia no Franchise 500 da Entrepreneur 2026, com classificação geral de #485. Fomos classificados #416 no geral em 2024.",
+      "a17": "A WaveMAX foi fundada em Jacksonville, FL, em 2012 por Mike Roberts. A entidade legal é AU Hydro LLC dba WaveMAX Laundry, sediada em 929 McDuff Ave S, Suite 107, Jacksonville, FL 32205. Veja a página Sobre a WaveMAX para a história da fundação.",
+      "a18": "Solicite o PDF do Investment Guide (entregue por e-mail) ou agende a chamada exploratória inicial de 30 minutos. A chamada é a melhor forma de saber se a WaveMAX é o encaixe certo para sua situação — vamos percorrer seu mercado, capital, cronograma e os números realistas."
+    },
+    "cta": {
+      "eyebrow":      "Ainda tem dúvidas?",
+      "title":        "Obtenha o Investment Guide ou agende a chamada.",
+      "lede":         "O Investment Guide é um PDF gratuito com os destaques do FDD, números do Item 19 e o processo completo de descoberta. Ou vá direto à chamada exploratória de 30 minutos.",
+      "btnPrimary":   "Obter o Investment Guide",
+      "btnSecondary": "Agendar a chamada"
+    }
+  },
   "common": {
     "ctaLearnMore": "Saiba mais",
     "ctaGetGuide": "Obter o Guia de Investimento",
