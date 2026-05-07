@@ -142,6 +142,7 @@ exports.renderFranchisePage = (req, res, next) => {
     .replace(/\{\{CANONICAL_URL\}\}/g, escapeHtml(canonical))
     .replace(/\{\{INITIAL_IFRAME_SRC\}\}/g, escapeHtml(iframeSrc || ''))
     .replace(/\{\{SLUG\}\}/g,          escapeHtml(slug))
+    .replace(/\{\{CSP_NONCE\}\}/g,     escapeHtml(nonce))
     .replace(/<!-- \{\{FRANCHISE_DATA_INJECTION\}\} -->/, dataInjection);
 
   res.setHeader('Cache-Control', 'public, max-age=60');
