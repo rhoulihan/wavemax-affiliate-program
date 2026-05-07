@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="csp-nonce" content="">
+  <meta name="csp-nonce" content="{{CSP_NONCE}}">
 
   <!-- ════════════════════════════════════════════════════════════════════
        PRIMARY SEO META — modeled on https://wavemaxlaundry.com/austin-tx/
@@ -47,7 +47,7 @@
   <meta property="business:contact_data:postal_code" content="78753">
   <meta property="business:contact_data:country_name" content="United States">
   <meta property="business:contact_data:phone_number" content="+1-512-553-1674">
-  <meta property="business:contact_data:website" content="https://wavemax.promo/dev/austin-host-mock.html">
+  <meta property="business:contact_data:website" content="{{CANONICAL_URL}}">
   <meta property="place:location:latitude" content="30.3564789">
   <meta property="place:location:longitude" content="-97.6858016">
 
@@ -63,9 +63,9 @@
        carrying noindex so we don't fight ourselves on duplicate content. -->
   <link rel="canonical" href="{{CANONICAL_URL}}">
   <link rel="alternate" hreflang="en-US" href="{{CANONICAL_URL}}">
-  <link rel="alternate" hreflang="es"    href="https://wavemax.promo/dev/austin-host-mock.html?lang=es">
-  <link rel="alternate" hreflang="pt"    href="https://wavemax.promo/dev/austin-host-mock.html?lang=pt">
-  <link rel="alternate" hreflang="de"    href="https://wavemax.promo/dev/austin-host-mock.html?lang=de">
+  <link rel="alternate" hreflang="es"    href="{{CANONICAL_URL}}">
+  <link rel="alternate" hreflang="pt"    href="{{CANONICAL_URL}}">
+  <link rel="alternate" hreflang="de"    href="{{CANONICAL_URL}}">
   <link rel="alternate" hreflang="x-default" href="{{CANONICAL_URL}}">
 
   <!-- ════════════════════════════════════════════════════════════════════
@@ -94,7 +94,9 @@
          • connect-src += https://www.google-analytics.com https://*.google-analytics.com
          • img-src     += https://www.google-analytics.com
        ════════════════════════════════════════════════════════════════════ -->
-  <meta name="google-site-verification" content="REPLACE_WITH_FRANCHISE_SEARCH_CONSOLE_TOKEN">
+  <!-- google-site-verification meta intentionally absent until a real
+       token is issued. Do NOT ship a placeholder content="" — Search
+       Console treats that as an explicit (invalid) verification attempt. -->
 
   <!-- GA4 / gtag.js — uncomment and replace G-XXXXXXXXXX with the
        franchise's measurement ID. Leave commented out until the CSP
@@ -133,7 +135,7 @@
     "name": "WaveMAX Laundry Austin",
     "alternateName": "WaveMAX Austin",
     "description": "Self-service laundromat and wash-dry-fold drop-off serving North Austin. 42 Electrolux CompassPro 450G washers, 42 high-velocity dryers, hospital-grade UV-sanitized water, free WiFi, free parking, fully attended.",
-    "url": "https://wavemax.promo/dev/austin-host-mock.html",
+    "url": "{{CANONICAL_URL}}",
     "telephone": "+1-512-553-1674",
     "email": "no-reply@wavemax.promo",
     "image": [
@@ -223,7 +225,7 @@
     "@context": "https://schema.org",
     "@type": "WebSite",
     "name": "WaveMAX Austin TX",
-    "url": "https://wavemax.promo/dev/austin-host-mock.html",
+    "url": "{{CANONICAL_URL}}",
     "inLanguage": ["en", "es", "pt", "de"],
     "potentialAction": {
       "@type": "SearchAction",
@@ -239,7 +241,7 @@
     "itemListElement": [
       { "@type": "ListItem", "position": 1, "name": "Home",      "item": "https://www.wavemaxlaundry.com/" },
       { "@type": "ListItem", "position": 2, "name": "Locations", "item": "https://www.wavemaxlaundry.com/locations/" },
-      { "@type": "ListItem", "position": 3, "name": "Austin TX", "item": "https://wavemax.promo/dev/austin-host-mock.html" }
+      { "@type": "ListItem", "position": 3, "name": "Austin TX", "item": "{{CANONICAL_URL}}" }
     ]
   }
   </script>
@@ -261,7 +263,7 @@
     "subOrganization": {
       "@type": "LaundryOrDryCleaner",
       "name": "WaveMAX Laundry Austin",
-      "url": "https://wavemax.promo/dev/austin-host-mock.html",
+      "url": "{{CANONICAL_URL}}",
       "telephone": "+1-512-553-1674"
     }
   }
@@ -274,7 +276,7 @@
   {
     "@context": "https://schema.org",
     "@type": "Service",
-    "@id": "https://wavemax.promo/dev/austin-host-mock.html#wash-dry-fold",
+    "@id": "{{CANONICAL_URL}}#wash-dry-fold",
     "name": "Wash-Dry-Fold Drop-Off Laundry",
     "serviceType": "Laundry Service",
     "category": "Wash and Fold",
@@ -317,7 +319,7 @@
   {
     "@context": "https://schema.org",
     "@type": "Service",
-    "@id": "https://wavemax.promo/dev/austin-host-mock.html#self-service",
+    "@id": "{{CANONICAL_URL}}#self-service",
     "name": "Self-Service Laundromat",
     "serviceType": "Self-Service Laundry",
     "category": "Coin Laundry",
@@ -342,7 +344,7 @@
   {
     "@context": "https://schema.org",
     "@type": "Service",
-    "@id": "https://wavemax.promo/dev/austin-host-mock.html#commercial",
+    "@id": "{{CANONICAL_URL}}#commercial",
     "name": "Commercial Laundry Service",
     "serviceType": "Commercial Laundry",
     "description": "Recurring commercial laundry contracts for restaurants, salons, gyms, spas, short-term rentals, and small hospitality. Volume pricing on weekly or daily pickup-and-delivery.",
