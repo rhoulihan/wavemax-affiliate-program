@@ -366,7 +366,6 @@
   }
 
   function sendModalToParent(kind, body) {
-    if (!window.IframeBridge || !window.IframeBridge.sendToParent) return;
     const dict = getLangDict();
     const titleKey = kind === 'success' ? 'contact.modal.successTitle'
                    : kind === 'error'   ? 'contact.modal.errorTitle'
@@ -374,21 +373,107 @@
     const fallbackTitle = kind === 'success' ? 'Message sent'
                         : kind === 'error'   ? "Couldn't send message"
                         : 'Sending message…';
-    window.IframeBridge.sendToParent({
-      type: 'show-modal',
-      data: {
-        kind:  kind,
-        title: dict[titleKey] || fallbackTitle,
-        body:  body || '',
-        ok:    dict['contact.modal.ok'] || 'OK'
-      }
-    });
+    const payload = {
+      kind:  kind,
+      title: dict[titleKey] || fallbackTitle,
+      body:  body || '',
+      ok:    dict['contact.modal.ok'] || 'OK'
+    };
+    // Standalone mode: no host frame to render the modal — render
+    // it ourselves in the iframe's own document. Same UX as the
+    // bridge-rendered modal, scoped to this page's viewport.
+    if (window.parent === window) {
+      showInlineStatusModal(payload);
+      return;
+    }
+    if (window.IframeBridge && window.IframeBridge.sendToParent) {
+      window.IframeBridge.sendToParent({ type: 'show-modal', data: payload });
+    }
   }
 
   function hideModalOnParent() {
+    if (window.parent === window) {
+      hideInlineStatusModal();
+      return;
+    }
     if (window.IframeBridge && window.IframeBridge.sendToParent) {
       window.IframeBridge.sendToParent({ type: 'hide-modal' });
     }
+  }
+
+  /* ---------- Inline status modal (standalone mode) ----------
+   * Mirror of the parent-side bridge modal, rendered in the iframe's
+   * own document when there's no parent to talk to. Visual styling
+   * matches the bridge version — see .wm-status-modal* in
+   * austin-contact.css.
+   */
+  let _inlineModal = null;
+  function buildInlineModal() {
+    const root = document.createElement('div');
+    root.className = 'wm-status-modal';
+    root.setAttribute('hidden', '');
+    root.innerHTML =
+      '<div class="wm-status-modal-backdrop" data-status-modal-dismiss></div>' +
+      '<div class="wm-status-modal-card" role="dialog" aria-modal="true" aria-labelledby="wm-status-modal-title">' +
+        '<button type="button" class="wm-status-modal-close" data-status-modal-dismiss aria-label="Close">×</button>' +
+        '<div class="wm-status-modal-icon" data-status-modal-icon aria-hidden="true"></div>' +
+        '<h3 class="wm-status-modal-title" id="wm-status-modal-title" data-status-modal-title></h3>' +
+        '<p class="wm-status-modal-body" data-status-modal-body></p>' +
+        '<div class="wm-status-modal-actions">' +
+          '<button type="button" class="wm-status-modal-ok" data-status-modal-dismiss></button>' +
+        '</div>' +
+      '</div>';
+    document.body.appendChild(root);
+    root.addEventListener('click', (e) => {
+      if (e.target && e.target.closest && e.target.closest('[data-status-modal-dismiss]')) {
+        hideInlineStatusModal();
+      }
+    });
+    return root;
+  }
+  function showInlineStatusModal(data) {
+    if (!_inlineModal) _inlineModal = buildInlineModal();
+    const kind  = (data.kind === 'error') ? 'error'
+                : (data.kind === 'loading') ? 'loading'
+                : 'success';
+    _inlineModal.dataset.kind = kind;
+    _inlineModal.querySelector('[data-status-modal-title]').textContent = data.title || '';
+    _inlineModal.querySelector('[data-status-modal-body]').textContent  = data.body  || '';
+
+    const iconEl = _inlineModal.querySelector('[data-status-modal-icon]');
+    // Tear down any prior spinner so DOM nodes don't leak.
+    if (_inlineModal.__activeSpinner) {
+      try { _inlineModal.__activeSpinner.destroy(); } catch (_) { /* defensive */ }
+      _inlineModal.__activeSpinner = null;
+    }
+    if (kind === 'loading' && window.SwirlSpinner) {
+      iconEl.innerHTML = '';
+      const spinner = new window.SwirlSpinner({ size: 'default', speed: 'normal', container: iconEl });
+      spinner.show();
+      _inlineModal.__activeSpinner = spinner;
+    } else {
+      iconEl.innerHTML = (kind === 'success')
+        ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="12" cy="12" r="10"></circle><polyline points="7 12 11 16 17 9"></polyline></svg>'
+        : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="7" x2="12" y2="13"></line><circle cx="12" cy="17" r="0.6" fill="currentColor"></circle></svg>';
+    }
+
+    const closeBtn = _inlineModal.querySelector('.wm-status-modal-close');
+    const okBtn    = _inlineModal.querySelector('.wm-status-modal-ok');
+    const isLoading = (kind === 'loading');
+    if (closeBtn) closeBtn.hidden = isLoading;
+    if (okBtn) {
+      okBtn.hidden = isLoading;
+      okBtn.textContent = data.ok || 'OK';
+    }
+    _inlineModal.hidden = false;
+  }
+  function hideInlineStatusModal() {
+    if (!_inlineModal) return;
+    if (_inlineModal.__activeSpinner) {
+      try { _inlineModal.__activeSpinner.destroy(); } catch (_) {}
+      _inlineModal.__activeSpinner = null;
+    }
+    _inlineModal.hidden = true;
   }
 
   function getLangDict() {
