@@ -121,6 +121,17 @@
                     if (locationData) return; // host frame won the race; do nothing
                     locationData = data;
                     applyLocationDataBindings();
+                    // Belt-and-suspenders: also run the FranchisePage helpers
+                    // directly here, so {{contact.city}} placeholder substitution
+                    // and equipment gating happen even if a per-page init's
+                    // onLocationData listener is delayed, missing, or silently
+                    // throws. The per-page listeners run normally below for
+                    // pages that need page-specific work (SEO bundle, hero
+                    // rotator, etc.).
+                    if (window.FranchisePage) {
+                        try { window.FranchisePage.applyEquipment(data); } catch (e) {}
+                        try { window.FranchisePage.applyTextPlaceholders(data); } catch (e) {}
+                    }
                     locationDataListeners.forEach(fn => {
                         try { fn(data); }
                         catch (e) { console.error('[Iframe Bridge V2] location-data listener threw:', e); }
