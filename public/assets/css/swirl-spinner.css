@@ -14,21 +14,28 @@
     height: 100%;
 }
 
-/* Animate dots along elliptical path */
+/* Animate dots along elliptical path.
+ * !important is intentional: wavemax-theme.css has a global
+ * @media (prefers-reduced-motion: reduce) rule that nukes
+ * `animation-duration` to 0.01ms with !important on the universal
+ * selector. A loading spinner is functional feedback (status of an
+ * in-flight request), not decorative motion — users with
+ * reduced-motion preferences still need to see that something is
+ * happening. Override the global gate for the spinner specifically. */
 .swirl-dot1 {
-    animation: swirl-ellipticalOrbit1 2s linear infinite;
+    animation: swirl-ellipticalOrbit1 2s linear infinite !important;
 }
 
 .swirl-dot2 {
-    animation: swirl-ellipticalOrbit2 2s linear infinite;
+    animation: swirl-ellipticalOrbit2 2s linear infinite !important;
 }
 
 .swirl-dot3 {
-    animation: swirl-ellipticalOrbit3 2s linear infinite;
+    animation: swirl-ellipticalOrbit3 2s linear infinite !important;
 }
 
 .swirl-dot4 {
-    animation: swirl-ellipticalOrbit4 2s linear infinite;
+    animation: swirl-ellipticalOrbit4 2s linear infinite !important;
 }
 
 @keyframes swirl-ellipticalOrbit1 {
