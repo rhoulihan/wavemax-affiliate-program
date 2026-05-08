@@ -22,7 +22,7 @@
 
   <link rel="stylesheet" href="/assets/css/wavemax-theme.css?v=20260504">
   <link rel="stylesheet" href="/assets/css/wavemax-components.css?v=20260504">
-  <link rel="stylesheet" href="/assets/css/austin-contact.css?v=20260504">
+  <link rel="stylesheet" href="/assets/css/austin-contact.css?v=20260507a">
 </head>
 <body>
 
@@ -187,10 +187,27 @@
             <textarea name="message" required minlength="5" maxlength="2000" rows="12"></textarea>
           </label>
 
+          <!-- Honeypot field — bots fill it, humans never see it. The
+               server validator rejects any submission with _hp non-empty.
+               Visually hidden + autocomplete=off + tabindex=-1 + aria-hidden
+               so it isn't surfaced to keyboard or screen-reader users. -->
+          <div aria-hidden="true" style="position:absolute;left:-9999px;top:-9999px;width:1px;height:1px;overflow:hidden;">
+            <label>
+              Website (leave blank)
+              <input type="text" name="_hp" tabindex="-1" autocomplete="off" value="">
+            </label>
+          </div>
+
           <div class="wm-form-actions">
             <button type="submit" class="wm-btn wm-btn-cta">
               <span data-i18n="contact.form.submit">Send message</span>
             </button>
+            <p class="wm-form-consent">
+              <span data-i18n="contact.form.consentLead">By clicking Send Message, you agree that WaveMAX Austin (CRHS Enterprises LLC) may contact you in response to your inquiry. Your information is not shared. See our</span>
+              <a href="/privacy-policy.html" target="_blank" rel="noopener" data-i18n="contact.form.privacyPolicy">Privacy Policy</a>
+              <span data-i18n="contact.form.consentJoiner">and</span>
+              <a href="/terms-and-conditions.html" target="_blank" rel="noopener" data-i18n="contact.form.termsOfService">Terms of Service</a>.
+            </p>
           </div>
 
           <!-- Status surface — exactly one is shown at a time after submit.
@@ -282,7 +299,7 @@
   <script src="/assets/js/wm-image-config.js?v=20260506b"></script>
   <script src="/assets/js/iframe-bridge-v2.js?v=20260504"></script>
   <script src="/assets/js/franchise-page-helpers.js?v=20260505d"></script>
-  <script src="/assets/js/austin-contact-init.js?v=20260505g"></script>
+  <script src="/assets/js/austin-contact-init.js?v=20260507a"></script>
 
   <!-- ════════════════════════════════════════════════════════════════════
        Hibu Dynamic Phone Insertion (iframe scope) — same pattern as the

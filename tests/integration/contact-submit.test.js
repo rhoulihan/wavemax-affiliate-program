@@ -181,6 +181,68 @@ describe('POST /api/v1/contact/:slug', () => {
     expect(htmlBody).not.toMatch(/<script[^>]*>alert/i);
   });
 
+  // ── Anti-spam: honeypot + dwell-time gate ────────────────────────
+  // Both checks must (a) silently reject without leaking which check
+  // fired, (b) NOT send an email, (c) be transparent to honest clients
+  // (i.e., happy-path body — without the fields — still succeeds, and
+  // the fields filled correctly still succeed).
+
+  it('200 — honest body without anti-spam fields still succeeds (transparent)', async () => {
+    const res = await postContact(app, validBody());
+    expect(res.status).toBe(200);
+    expect(emailService.sendEmail).toHaveBeenCalledTimes(1);
+  });
+
+  it('200 — anti-spam fields filled correctly (empty _hp, _dt > 3000) succeed', async () => {
+    const body = validBody();
+    body._hp = '';
+    body._dt = 5000;
+    const res = await postContact(app, body);
+    expect(res.status).toBe(200);
+    expect(emailService.sendEmail).toHaveBeenCalledTimes(1);
+  });
+
+  it('400 — honeypot tripped (_hp non-empty) → silent reject, no email', async () => {
+    const body = validBody();
+    body._hp = 'http://spam.example/';
+    body._dt = 5000;
+    const res = await postContact(app, body);
+
+    expect(res.status).toBe(400);
+    expect(res.body.success).toBe(false);
+    // Must NOT leak which check fired
+    expect(res.body.message).not.toMatch(/honeypot|spam|_hp/i);
+    expect(res.body.message).toMatch(/could not send|try again/i);
+    expect(res.body.errors).toBeUndefined();
+    // Must NOT send the email
+    expect(emailService.sendEmail).not.toHaveBeenCalled();
+  });
+
+  it('400 — dwell-time too short (_dt < 3000) → silent reject, no email', async () => {
+    const body = validBody();
+    body._hp = '';
+    body._dt = 50; // 50ms — bot speed
+    const res = await postContact(app, body);
+
+    expect(res.status).toBe(400);
+    expect(res.body.success).toBe(false);
+    expect(res.body.message).not.toMatch(/quickly|dwell|_dt/i);
+    expect(res.body.message).toMatch(/could not send|try again/i);
+    expect(res.body.errors).toBeUndefined();
+    expect(emailService.sendEmail).not.toHaveBeenCalled();
+  });
+
+  it('400 — both anti-spam checks tripped → still silent reject, no email', async () => {
+    const body = validBody();
+    body._hp = 'spam.example';
+    body._dt = 50;
+    const res = await postContact(app, body);
+
+    expect(res.status).toBe(400);
+    expect(res.body.message).toMatch(/could not send|try again/i);
+    expect(emailService.sendEmail).not.toHaveBeenCalled();
+  });
+
   // The empty-email-or-missing-data 500 path was previously tested via
   // env-var manipulation; with LOCATION_DATA being the single source,
   // that path is exercised by the 404-unknown-slug test above (which

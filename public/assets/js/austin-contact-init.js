@@ -29,6 +29,10 @@
       'contact.form.message':       'How can we help?',
       'contact.form.submit':        'Send message',
       'contact.form.sending':       'Sending…',
+      'contact.form.consentLead':   'By clicking Send Message, you agree that WaveMAX Austin (CRHS Enterprises LLC) may contact you in response to your inquiry. Your information is not shared. See our',
+      'contact.form.consentJoiner': 'and',
+      'contact.form.privacyPolicy': 'Privacy Policy',
+      'contact.form.termsOfService':'Terms of Service',
       'contact.form.successDefault':"Your message has been sent — we'll be in touch shortly.",
       'contact.form.errorDefault':  'There was a problem sending your message. Please try again, or call us directly.',
       'contact.modal.successTitle': 'Message sent',
@@ -69,6 +73,10 @@
       'contact.form.message':       '¿En qué podemos ayudarle?',
       'contact.form.submit':        'Enviar mensaje',
       'contact.form.sending':       'Enviando…',
+      'contact.form.consentLead':   'Al hacer clic en Enviar mensaje, usted acepta que WaveMAX Austin (CRHS Enterprises LLC) pueda contactarlo en respuesta a su consulta. Su información no se comparte. Consulte nuestra',
+      'contact.form.consentJoiner': 'y los',
+      'contact.form.privacyPolicy': 'Política de Privacidad',
+      'contact.form.termsOfService':'Términos de Servicio',
       'contact.form.successDefault':'Su mensaje ha sido enviado — nos pondremos en contacto pronto.',
       'contact.form.errorDefault':  'Hubo un problema al enviar su mensaje. Inténtelo de nuevo o llámenos directamente.',
       'contact.modal.successTitle': 'Mensaje enviado',
@@ -109,6 +117,10 @@
       'contact.form.message':       'Como podemos ajudar?',
       'contact.form.submit':        'Enviar mensagem',
       'contact.form.sending':       'Enviando…',
+      'contact.form.consentLead':   'Ao clicar em Enviar mensagem, você concorda que a WaveMAX Austin (CRHS Enterprises LLC) pode entrar em contato em resposta à sua solicitação. Suas informações não são compartilhadas. Consulte nossa',
+      'contact.form.consentJoiner': 'e os',
+      'contact.form.privacyPolicy': 'Política de Privacidade',
+      'contact.form.termsOfService':'Termos de Serviço',
       'contact.form.successDefault':'Sua mensagem foi enviada — entraremos em contato em breve.',
       'contact.form.errorDefault':  'Houve um problema ao enviar sua mensagem. Tente novamente ou ligue diretamente.',
       'contact.modal.successTitle': 'Mensagem enviada',
@@ -149,6 +161,10 @@
       'contact.form.message':       'Wie können wir helfen?',
       'contact.form.submit':        'Nachricht senden',
       'contact.form.sending':       'Senden…',
+      'contact.form.consentLead':   'Mit dem Klick auf Nachricht senden stimmen Sie zu, dass WaveMAX Austin (CRHS Enterprises LLC) Sie als Antwort auf Ihre Anfrage kontaktieren darf. Ihre Daten werden nicht weitergegeben. Siehe unsere',
+      'contact.form.consentJoiner': 'und unsere',
+      'contact.form.privacyPolicy': 'Datenschutzerklärung',
+      'contact.form.termsOfService':'Nutzungsbedingungen',
       'contact.form.successDefault':'Ihre Nachricht wurde gesendet — wir melden uns in Kürze.',
       'contact.form.errorDefault':  'Beim Senden Ihrer Nachricht ist ein Problem aufgetreten. Bitte versuchen Sie es erneut oder rufen Sie uns direkt an.',
       'contact.modal.successTitle': 'Nachricht gesendet',
@@ -409,6 +425,12 @@
     if (document.__austinContactSubmitDelegated) return;
     document.__austinContactSubmitDelegated = true;
 
+    // Anti-spam: timestamp the moment the form first appears so we can
+    // measure dwell time before submit. Real users take ≥3s to fill the
+    // form; bots submit in <100ms. The server validator rejects below
+    // a 3000ms floor.
+    const formLoadedAt = Date.now();
+
     document.addEventListener('submit', async (e) => {
       const form = e.target && e.target.closest && e.target.closest('[data-contact-form]');
       if (!form) return;
@@ -419,12 +441,18 @@
       // and shows the swirl spinner while we round-trip to the API.
       sendModalToParent('loading', getLangDict()['contact.modal.loadingBody'] || "We're delivering your message — this usually takes a few seconds.");
 
+      const hpField = form.querySelector('input[name="_hp"]');
       const data = {
         firstName: form.firstName.value.trim(),
         lastName:  form.lastName.value.trim(),
         email:     form.email.value.trim(),
         phone:     form.phone.value.trim(),
-        message:   form.message.value.trim()
+        message:   form.message.value.trim(),
+        // Anti-spam pair: server rejects if _hp is non-empty (honeypot
+        // tripped) or _dt < 3000 (form filled too fast). Both fields
+        // pass through validators on the API side.
+        _hp:       hpField ? hpField.value : '',
+        _dt:       Date.now() - formLoadedAt
       };
 
       try {

@@ -32,6 +32,12 @@ function formatValidationErrors(result) {
   }));
 }
 
+// Anti-spam fields (honeypot + dwell-time). When validation fails
+// on either of these, we treat it as a silent spam reject — the
+// client gets a generic "could not send" message so the spammer
+// can't learn which check fired. The trip is logged internally.
+const ANTISPAM_FIELDS = new Set(['_hp', '_dt']);
+
 exports.submitContact = ControllerHelpers.asyncWrapper(async (req, res) => {
   const { slug } = req.params;
 
@@ -41,10 +47,25 @@ exports.submitContact = ControllerHelpers.asyncWrapper(async (req, res) => {
 
   const result = validationResult(req);
   if (!result.isEmpty()) {
+    const errors = formatValidationErrors(result);
+    const antispamTrip = errors.some((e) => ANTISPAM_FIELDS.has(e.field));
+    if (antispamTrip) {
+      logger.warn('Contact-form anti-spam trip', {
+        slug,
+        ip: req.ip,
+        fields: errors.filter((e) => ANTISPAM_FIELDS.has(e.field)).map((e) => e.field)
+      });
+      // Generic 400 — don't tell the spammer which check fired.
+      return ControllerHelpers.sendError(
+        res,
+        'Could not send your message — please try again later or call us directly.',
+        400
+      );
+    }
     return res.status(400).json({
       success: false,
       message: 'Validation failed',
-      errors: formatValidationErrors(result)
+      errors
     });
   }
 
