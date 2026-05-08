@@ -103,6 +103,31 @@
         if (config.enableAutoResize) {
             setupAutoResize();
         }
+
+        // Standalone-mode fallback. When this page is loaded as the top
+        // document (window.parent === window) — i.e. opened directly,
+        // not embedded in a host iframe — no parent will ever postMessage
+        // location-data, so every data-bound element (map iframe src,
+        // address text, phone, etc.) stays empty and the page looks
+        // half-rendered. Fetch the Austin franchise data ourselves and
+        // dispatch it locally as if it came from the parent. Austin is
+        // the default for direct review (`?slug=` query is currently
+        // ignored — the file is the canonical reference content).
+        if (window.parent === window) {
+            console.log('[Iframe Bridge V2] standalone mode — fetching Austin location data');
+            fetch('/data/franchises/austin-tx.json', { credentials: 'same-origin' })
+                .then(r => r.ok ? r.json() : Promise.reject(new Error('HTTP ' + r.status)))
+                .then(data => {
+                    if (locationData) return; // host frame won the race; do nothing
+                    locationData = data;
+                    applyLocationDataBindings();
+                    locationDataListeners.forEach(fn => {
+                        try { fn(data); }
+                        catch (e) { console.error('[Iframe Bridge V2] location-data listener threw:', e); }
+                    });
+                })
+                .catch(err => console.warn('[Iframe Bridge V2] standalone-mode location-data fetch failed:', err));
+        }
     }
 
     // Execute all global actions
