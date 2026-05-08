@@ -33,7 +33,24 @@ const validators = [
     .exists({ checkFalsy: true }).withMessage('Message is required')
     .bail()
     .isString().withMessage('Message must be a string')
-    .isLength({ min: 5, max: 2000 }).withMessage('Message must be between 5 and 2000 characters')
+    .isLength({ min: 5, max: 2000 }).withMessage('Message must be between 5 and 2000 characters'),
+
+  // Anti-spam pair (honeypot + dwell-time gate). The client puts these
+  // on every submission. If either trips, validation fails and the form
+  // is silently rejected — spammers don't learn which check fired.
+  //
+  //   _hp — visually-hidden honeypot field. Bots fill it; humans don't.
+  //         MUST be empty (or absent / not a string).
+  //   _dt — milliseconds the form was open before submit. Real users
+  //         take seconds to fill the form; scripted submitters fire in
+  //         <100ms. Floor: 3000ms.
+  body('_hp')
+    .optional()
+    .isString().withMessage('Invalid form state')
+    .isLength({ max: 0 }).withMessage('Spam check failed'),
+  body('_dt')
+    .optional()
+    .isInt({ min: 3000, max: 86400000 }).withMessage('Form submitted too quickly')
 ];
 
 router.post(

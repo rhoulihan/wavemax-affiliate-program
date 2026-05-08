@@ -274,12 +274,29 @@ body { background: var(--wm-bg-soft); }
 .wm-form-actions {
   margin-top: var(--wm-sp-2);
   display: flex;
-  justify-content: flex-end;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--wm-sp-2);
 }
-.wm-form-actions .wm-btn-cta { min-width: 180px; }
+.wm-form-actions .wm-btn-cta {
+  min-width: 180px;
+  align-self: flex-end;
+}
+.wm-form-consent {
+  margin: 0;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: #5a6677;
+  text-align: right;
+}
+.wm-form-consent a {
+  color: var(--wm-color-primary, #1a3f7a);
+  text-decoration: underline;
+}
+.wm-form-consent a:hover { text-decoration: none; }
 @media (max-width: 540px) {
-  .wm-form-actions { justify-content: stretch; }
-  .wm-form-actions .wm-btn-cta { width: 100%; min-width: 0; }
+  .wm-form-actions .wm-btn-cta { width: 100%; min-width: 0; align-self: stretch; }
+  .wm-form-consent { text-align: left; }
 }
 
 /* ---------- Status surfaces ---------- */
