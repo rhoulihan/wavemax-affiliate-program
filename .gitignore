@@ -220,6 +220,10 @@ docs/security/parent-site-user-testing-checklist.*
 docs/security/draft-23-20-notice-letter.*
 docs/security/lawyer-consultation-*
 docs/security/lawyer-intake-form-*
+docs/security/exhibit-*
+docs/security/NEW-SINCE-LAWYER-*
+docs/security/forensic-evidence/
+docs/security/mhr-iframe-embed-patch/
 docs/corporate-handoff/
 .playwright-mcp/
 about-hero-*.png
