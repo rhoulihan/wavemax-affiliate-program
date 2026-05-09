@@ -90,16 +90,19 @@
     const keywords = (seoBaseline.keywordsByPage && seoBaseline.keywordsByPage['/' + (spec.path.replace(/\/$/, '') || '')]) ||
                      seoBaseline.keywords || '';
     const localized = seoBaseline.localizedHeadlines || {};
+    const localizedDesc = seoBaseline.localizedDescriptions || {};
 
-    // Page-specific title + description templates. Default copy when the
-    // franchise hasn't supplied an aboutContent override or anything else.
+    // Page-specific title + description templates. Long, keyword-rich
+    // shape (~70-90 char titles, ~150 char descriptions) matching the
+    // server-side template in franchiseController.buildPageSeo so the
+    // client-side SEO update doesn't shorten what SSR shipped.
     const headlines = {
-      'landing':    { title: localized.landingTitle    || `${data.brand?.name || 'WaveMAX'} · ${data.contact?.city || ''} Laundromat`,           description: localized.landingSubtitle || `${data.brand?.name} at ${data.contact?.address}, ${data.contact?.city}, ${data.contact?.state}.` },
-      'wdf':        { title: localized.wdfTitle        || `Wash-Dry-Fold · ${data.brand?.name}`,                                                  description: `Drop-off wash-dry-fold laundry at ${data.brand?.name}. ${data.contact?.address}, ${data.contact?.city}.` },
-      'self-serve': { title: localized.selfServeTitle  || `Self-Serve Laundry · ${data.brand?.name}`,                                             description: `Self-serve laundry at ${data.brand?.name}. ${data.contact?.address}, ${data.contact?.city}.` },
-      'commercial': { title: localized.commercialTitle || `Commercial Laundry · ${data.brand?.name}`,                                             description: `Commercial laundry service for ${data.contact?.city} businesses.` },
-      'about-us':   { title: localized.aboutTitle      || `About ${data.brand?.name}`,                                                            description: `About ${data.brand?.name} — ${data.contact?.city}, ${data.contact?.state}.` },
-      'contact':    { title: localized.contactTitle    || `Contact ${data.brand?.name}`,                                                          description: `Contact ${data.brand?.name} at ${data.contact?.phone}.` }
+      'landing':    { title: localized.landingTitle    || `Laundromat in ${data.contact?.city}, ${data.contact?.state} | Self-Service & Wash-Dry-Fold | ${data.brand?.name}`, description: localizedDesc.landingDescription   || localized.landingSubtitle || `Top-rated laundromat in ${data.contact?.city}, ${data.contact?.state}. Self-service & wash-dry-fold drop-off at ${data.contact?.address}.` },
+      'wdf':        { title: localized.wdfTitle        || `Wash-Dry-Fold Laundry in ${data.contact?.city}, ${data.contact?.state} | Drop-Off Service | ${data.brand?.name}`,  description: localizedDesc.wdfDescription       || `Drop-off wash-dry-fold laundry in ${data.contact?.city}. Hospital-grade UV-sanitized water, eco-friendly detergent. ${data.brand?.name}.` },
+      'self-serve': { title: localized.selfServeTitle  || `Self-Service Laundromat in ${data.contact?.city}, ${data.contact?.state} | Commercial Washers | ${data.brand?.name}`, description: localizedDesc.selfServeDescription || `Self-serve laundromat in ${data.contact?.city} with commercial Electrolux washers up to 80lb. ${data.brand?.name} at ${data.contact?.address}.` },
+      'commercial': { title: localized.commercialTitle || `Commercial Laundry in ${data.contact?.city}, ${data.contact?.state} | Volume Pricing | ${data.brand?.name}`,        description: localizedDesc.commercialDescription || `Commercial laundry that scales with your ${data.contact?.city} business. Volume pricing tiers, same-day available. ${data.brand?.name}.` },
+      'about-us':   { title: localized.aboutTitle      || `About ${data.brand?.name} | Family-Owned ${data.contact?.city} Laundromat`,                                          description: localizedDesc.aboutDescription     || `${data.brand?.name} — family-owned ${data.contact?.city} laundromat at ${data.contact?.address}. Hospital-grade UV water, fully attended.` },
+      'contact':    { title: localized.contactTitle    || `Contact ${data.brand?.name} Laundromat | ${data.contact?.phone} | ${data.contact?.address}`,                          description: localizedDesc.contactDescription   || `Contact ${data.brand?.name}: call ${data.contact?.phone}, visit ${data.contact?.address}, ${data.contact?.city}, ${data.contact?.state}, or send a message.` }
     };
     const h = headlines[pageKey] || headlines['landing'];
 
