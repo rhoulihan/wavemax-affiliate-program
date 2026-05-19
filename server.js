@@ -443,6 +443,14 @@ app.use((req, res, next) => {
 app.use(passport.initialize());
 app.use(passport.session());
 
+// Location quarantine — lock deployment down to Austin + affiliate-program
+// app. Activated by env var QUARANTINE_NON_AUSTIN=true. Mounted here so it
+// runs before all route handlers and static middleware, redirecting any
+// non-Austin/non-app request to the corporate site (wavemaxlaundry.com).
+// No-op when the env var is unset/false.
+const locationQuarantine = require('./server/middleware/locationQuarantine');
+app.use(locationQuarantine);
+
 // Mount embed routes with CSP nonce support BEFORE static file serving
 const embedRoutes = require('./server/routes/embedRoutes');
 app.use('/', embedRoutes);
