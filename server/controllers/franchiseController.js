@@ -22,6 +22,7 @@ const path = require('path');
 const registry = require('../services/franchiseRegistryService');
 const equipmentProfileService = require('../services/equipmentProfileService');
 const logger = require('../utils/logger');
+const { isQuarantineEnabled, buildCorporateRedirect } = require('../config/quarantineConfig');
 
 const ROOT = path.resolve(__dirname, '../..');
 const HOST_TEMPLATE = path.join(ROOT, 'public/franchise-host.html');
@@ -149,6 +150,14 @@ function sanitizeForClient(data) {
 exports.renderFranchisePage = (req, res, next) => {
   const slug = req.params.slug;
   const page = req.params.page ? `/${req.params.page}` : '/';
+
+  // Defense-in-depth — the locationQuarantine middleware should catch
+  // non-Austin slugs before they reach this controller, but belt-and-
+  // suspenders in case the middleware is bypassed or this controller is
+  // invoked directly (e.g., from a future internal route).
+  if (isQuarantineEnabled() && slug !== 'austin-tx') {
+    return res.redirect(302, buildCorporateRedirect(req.originalUrl));
+  }
 
   if (!registry.getFranchise(slug)) return next();
 
