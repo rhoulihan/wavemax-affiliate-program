@@ -196,6 +196,17 @@ app.use((req, res, next) => {
     res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
   }
 
+  // Allow public static assets (images, CSS, JS, fonts, locales) to be
+  // embedded by pages on other origins. LOCATION_DATA holds absolute URLs
+  // pointing at wavemax.promo's /assets/ tree; without this the per-
+  // location domains (atxwashateria.com, etc.) fail with
+  // ERR_BLOCKED_BY_RESPONSE.NotSameOrigin even when the request itself
+  // returns 200. Helmet's default Cross-Origin-Resource-Policy is
+  // 'same-origin' so we override here for the asset path tree.
+  if (req.path.startsWith('/assets/') || req.path.startsWith('/locales/')) {
+    res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+  }
+
   next();
 });
 
