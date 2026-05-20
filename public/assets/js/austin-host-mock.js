@@ -607,7 +607,7 @@
       const e = getEls();
       e.overlay.setAttribute('aria-hidden', 'false');
       e.overlay.classList.add('open');
-      document.body.style.overflow = 'hidden';
+      document.body.classList.add('wm-noscroll'); // CSP-safe class-toggle (replaces inline el.style.overflow mutation)
       // Auto-select the current franchise on open so the action bar
       // shows immediately (operator can click Visit to confirm).
       if (!initialized) await initialize();
@@ -622,7 +622,7 @@
       const e = getEls();
       e.overlay.setAttribute('aria-hidden', 'true');
       e.overlay.classList.remove('open');
-      document.body.style.overflow = '';
+      document.body.classList.remove('wm-noscroll'); // CSP-safe class-toggle
     };
 
     async function initialize() {
@@ -872,19 +872,21 @@
       if (!ev.target || ev.target.id !== 'locSearch') return;
       const e = getEls();
       const q = ev.target.value.trim().toLowerCase();
+      // CSP-safe class-toggling (replaces inline el.style.display mutations
+      // so the host-chrome page can run under strict CSP, no 'unsafe-inline').
       e.list.querySelectorAll('.loc-card').forEach(card => {
         const haystack = card.getAttribute('data-loc-search') || (card.textContent || '').toLowerCase();
-        card.style.display = q && !haystack.includes(q) ? 'none' : '';
+        card.classList.toggle('wm-hidden', !!q && !haystack.includes(q));
       });
-      // Also hide section headers whose state has no visible cards
+      // Also hide section headers whose state has no visible cards.
       e.list.querySelectorAll('.loc-section-header').forEach(h => {
         let next = h.nextElementSibling;
         let anyVisible = false;
         while (next && !next.classList.contains('loc-section-header')) {
-          if (next.style.display !== 'none') { anyVisible = true; break; }
+          if (!next.classList.contains('wm-hidden')) { anyVisible = true; break; }
           next = next.nextElementSibling;
         }
-        h.style.display = anyVisible ? '' : 'none';
+        h.classList.toggle('wm-hidden', !anyVisible);
       });
     });
   }
