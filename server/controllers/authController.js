@@ -280,18 +280,13 @@ exports.administratorLogin = async (req, res) => {
  */
 exports.operatorAutoLogin = async (req, res) => {
   try {
-    // Get client IP address - handle proxy headers
-    let clientIp;
-    const forwardedFor = req.headers['x-forwarded-for'];
-    
-    if (forwardedFor) {
-      // Take the first IP if there are multiple (client, proxy1, proxy2, ...)
-      clientIp = forwardedFor.split(',')[0].trim();
-    } else {
-      clientIp = req.ip || req.connection.remoteAddress || req.socket.remoteAddress;
-    }
-    
-    const cleanIp = clientIp.replace(/^::ffff:/, ''); // Remove IPv6 prefix if present
+    // Use req.ip — Express normalizes X-Forwarded-For with
+    // `app.set('trust proxy', 1)` already configured at server startup,
+    // so this gives us the leftmost untrusted hop. The previous code read
+    // the raw X-Forwarded-For header and took [0], which is an attacker-
+    // controlled prefix — anyone behind a proxy could prepend a whitelisted
+    // IP and bypass the store-IP gate. APP-011 / prod-lockdown-2026-05-20.
+    const cleanIp = (req.ip || '').replace(/^::ffff:/, ''); // Remove IPv6 prefix if present
     
     logger.info('Auto-login attempt from IP:', cleanIp);
     
@@ -402,8 +397,17 @@ exports.operatorLogin = async (req, res) => {
       });
     }
 
-    // Verify PIN code
-    if (pinCode !== configuredPin) {
+    // Verify PIN code — constant-time compare to prevent timing
+    // side-channel inference. timingSafeEqual requires equal-length
+    // buffers, so length-mismatch is rejected up front (still constant-
+    // time within the equal-length path that matters). APP-010 /
+    // prod-lockdown-2026-05-20.
+    const crypto = require('crypto');
+    const submitted = Buffer.from(String(pinCode), 'utf8');
+    const expected = Buffer.from(configuredPin, 'utf8');
+    const pinMatches = submitted.length === expected.length &&
+                       crypto.timingSafeEqual(submitted, expected);
+    if (!pinMatches) {
       logLoginAttempt(false, 'operator', 'PIN', req, 'Invalid PIN');
       return res.status(401).json({
         success: false,
@@ -605,7 +609,14 @@ exports.forgotPassword = async (req, res) => {
       userType: req.body.userType,
       cryptoWrapper
     });
-    res.status(200).json({ success: true, message: 'Password reset email sent' });
+    // Intentionally generic: same response whether or not the email was
+    // registered. The service silently returns when the email doesn't
+    // match (no PasswordResetError thrown for the not-found case). APP-013
+    // / prod-lockdown-2026-05-20.
+    res.status(200).json({
+      success: true,
+      message: 'If an account with that email exists, a password reset link has been sent.'
+    });
   } catch (err) {
     if (err.isPasswordResetError) {
       return res.status(err.status).json({ success: false, message: err.message });

@@ -47,10 +47,14 @@ exports.authenticate = async (req, res, next) => {
                     req.socket.remoteAddress ||
                     req.ip;
     
-    // Verify token normally - no special handling for store IPs
+    // Verify token normally - no special handling for store IPs.
+    // Algorithm is pinned to HS256 (matches authTokenService.js which
+    // signs with the same default). Without this, a future jsonwebtoken
+    // version change or accidental package downgrade could re-enable the
+    // alg-confusion attack class. APP-008 / prod-lockdown-2026-05-20.
     let decoded;
     try {
-      decoded = jwt.verify(token, process.env.JWT_SECRET);
+      decoded = jwt.verify(token, process.env.JWT_SECRET, { algorithms: ['HS256'] });
     } catch (verifyError) {
       // Re-throw the error to be handled by the error handling block below
       throw verifyError;

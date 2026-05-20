@@ -1,0 +1,97 @@
+// Security headers regression suite.
+//
+// Locks in the baseline set of HTTP security headers produced by the
+// application so that future refactors can't silently drop one. Each
+// assertion below ties to a specific finding ID in
+// docs/security/prod-lockdown-2026-05-20.md — keep them in sync.
+
+const request = require('supertest');
+const app = require('../../server');
+
+describe('Security Headers (regression — prod-lockdown-2026-05-20)', () => {
+  // We probe a stable, public, no-auth path. /api/health is the simplest
+  // and exercises the middleware chain we care about (helmet + custom
+  // header middleware + CSP middleware).
+  const probe = () => request(app).get('/api/health');
+
+  describe('Helmet baseline', () => {
+    it('sets HSTS with 1y max-age + includeSubDomains + preload', async () => {
+      const r = await probe();
+      expect(r.headers['strict-transport-security']).toBe(
+        'max-age=31536000; includeSubDomains; preload'
+      );
+    });
+
+    it('sets Referrer-Policy to strict-origin-when-cross-origin (APP-002)', async () => {
+      const r = await probe();
+      // Previously 'same-origin' — tightened so cross-origin navigations
+      // send origin only (not full URL), with no leakage on HTTPS→HTTP
+      // downgrade.
+      expect(r.headers['referrer-policy']).toBe('strict-origin-when-cross-origin');
+    });
+
+    it('sets X-Content-Type-Options: nosniff', async () => {
+      const r = await probe();
+      expect(r.headers['x-content-type-options']).toBe('nosniff');
+    });
+
+    it('does not leak X-Powered-By', async () => {
+      const r = await probe();
+      expect(r.headers['x-powered-by']).toBeUndefined();
+    });
+  });
+
+  describe('Custom security headers', () => {
+    it('sets a deny-everything Permissions-Policy', async () => {
+      const r = await probe();
+      const pp = r.headers['permissions-policy'];
+      expect(pp).toBeDefined();
+      // Sensitive surfaces (camera/mic/geo/payment/usb) all gated to ()
+      expect(pp).toMatch(/geolocation=\(\)/);
+      expect(pp).toMatch(/camera=\(\)/);
+      expect(pp).toMatch(/microphone=\(\)/);
+      expect(pp).toMatch(/payment=\(\)/);
+    });
+
+    it('sets X-Permitted-Cross-Domain-Policies: none', async () => {
+      const r = await probe();
+      expect(r.headers['x-permitted-cross-domain-policies']).toBe('none');
+    });
+
+    it('sets X-Frame-Options: SAMEORIGIN (belt-and-suspenders with CSP frame-ancestors)', async () => {
+      const r = await probe();
+      expect(r.headers['x-frame-options']).toBe('SAMEORIGIN');
+    });
+
+    it('sets Cross-Origin-Opener-Policy: same-origin-allow-popups (APP-003)', async () => {
+      const r = await probe();
+      // 'same-origin-allow-popups' preserves OAuth popup flow (popup can
+      // postMessage back to opener) while preventing reverse window.opener
+      // abuse from cross-origin children.
+      expect(r.headers['cross-origin-opener-policy']).toBe('same-origin-allow-popups');
+    });
+  });
+
+  describe('CSP baseline', () => {
+    it('emits a Content-Security-Policy header on every response', async () => {
+      const r = await probe();
+      expect(r.headers['content-security-policy']).toBeDefined();
+    });
+
+    it("CSP includes object-src 'none'", async () => {
+      const r = await probe();
+      expect(r.headers['content-security-policy']).toMatch(/object-src 'none'/);
+    });
+
+    it("CSP includes base-uri 'self'", async () => {
+      const r = await probe();
+      expect(r.headers['content-security-policy']).toMatch(/base-uri 'self'/);
+    });
+
+    it("CSP frame-ancestors limits embedders to wavemaxlaundry.com + self", async () => {
+      const r = await probe();
+      const csp = r.headers['content-security-policy'];
+      expect(csp).toMatch(/frame-ancestors 'self' https:\/\/www\.wavemaxlaundry\.com https:\/\/wavemaxlaundry\.com/);
+    });
+  });
+});

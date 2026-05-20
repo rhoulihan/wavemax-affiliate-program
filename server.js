@@ -162,7 +162,12 @@ app.use(helmet({
   },
   xssFilter: true,
   noSniff: true,
-  referrerPolicy: { policy: 'same-origin' },
+  // 'strict-origin-when-cross-origin' is the modern default — sends full
+  // URL on same-origin, origin only on cross-origin HTTPS→HTTPS, nothing
+  // on HTTPS→HTTP downgrade. Tighter than the previous 'same-origin' which
+  // sent full URL (including query) to internal log sinks on same-origin
+  // navigation. APP-002 / prod-lockdown-2026-05-20.
+  referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
   // Remove frameguard to use CSP frame-ancestors instead
   frameguard: false,
   // Additional security headers
@@ -191,6 +196,14 @@ app.use((req, res, next) => {
   // embedding (wavemaxlaundry.com is already whitelisted via the CSP
   // frame-ancestors directive, which a browser will prefer over XFO).
   res.setHeader('X-Frame-Options', 'SAMEORIGIN');
+
+  // Cross-Origin-Opener-Policy. Helmet's default is 'same-origin' which
+  // would break the OAuth popup flow (popup needs to postMessage back to
+  // opener after provider returns). 'same-origin-allow-popups' keeps the
+  // opener-isolation against reverse window.opener abuse from cross-origin
+  // CHILD pages while still allowing same-origin popups to retain a
+  // reference. APP-003 / prod-lockdown-2026-05-20.
+  res.setHeader('Cross-Origin-Opener-Policy', 'same-origin-allow-popups');
 
   // Clear-Site-Data header for logout endpoints
   if (req.path.includes('/logout')) {
@@ -453,8 +466,16 @@ const sessionStore = process.env.NODE_ENV === 'test'
     touchAfter: 24 * 3600 // Lazy session update in seconds (24 hours)
   });
 
+// __Host- prefix in production: enforces Secure + Path=/ + no Domain
+// attribute, blocking sub-domain cookie injection. In dev/test we keep
+// the bare name because __Host- requires Secure which we only set in
+// prod. APP-009 / prod-lockdown-2026-05-20.
+const sessionCookieName = process.env.NODE_ENV === 'production'
+  ? '__Host-wavemax.sid'
+  : 'wavemax.sid';
+
 app.use(session({
-  name: 'wavemax.sid', // Explicit session cookie name
+  name: sessionCookieName,
   secret: process.env.SESSION_SECRET || process.env.JWT_SECRET || 'default-dev-secret',
   resave: false, // Don't resave session if unmodified
   saveUninitialized: true, // Changed to true to ensure sessions are created for CSRF
