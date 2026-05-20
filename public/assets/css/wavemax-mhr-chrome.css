@@ -784,6 +784,23 @@
 .wm-pgfooter-bottom a:hover { color: #ffffff; text-decoration: underline; }
 .wm-pgfooter-bottom-links { display: flex; gap: 24px; flex-wrap: wrap; }
 
+/* FA §12.2 legal-notice block — trademark attribution, license-pursuant statement, copyright */
+.wm-pgfooter-legal {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-width: 760px;
+}
+.wm-pgfooter-legal p {
+  margin: 0;
+  font-size: 0.78rem;
+  line-height: 1.45;
+  color: rgba(255,255,255,0.78);
+}
+.wm-pgfooter-tm,
+.wm-pgfooter-license { color: rgba(255,255,255,0.68); }
+.wm-pgfooter-copy { color: rgba(255,255,255,0.85); }
+
 /* ============================================================
    5. wm-map widget — CSS-only "map preview" with pin + location badge
    Lifted verbatim from MHR (rendered DOM).

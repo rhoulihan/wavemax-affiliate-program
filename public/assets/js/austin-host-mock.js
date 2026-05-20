@@ -246,6 +246,8 @@
       'chrome.footer.privacy':    'Privacy Policy',
       'chrome.footer.terms':      'Terms & Conditions',
       'chrome.footer.refBuild':   'Local-dev reference build (noindex)',
+      'chrome.footer.tmNotice':   'WaveMAX™ and the WaveMAX logo are trademarks of WaveMAX Franchise, LLC.',
+      'chrome.footer.licenseNotice': 'This location is independently owned and operated by CRHS Enterprises, LLC under a franchise license from WaveMAX Franchise, LLC.',
       'chrome.footer.copyright':  '© 2026 CRHS Enterprises, LLC. All rights reserved.',
 
       'chrome.modal.title':       'Find a Location',
@@ -309,6 +311,8 @@
       'chrome.footer.privacy':    'Política de Privacidad',
       'chrome.footer.terms':      'Términos y Condiciones',
       'chrome.footer.refBuild':   'Build de referencia local (noindex)',
+      'chrome.footer.tmNotice':   'WaveMAX™ y el logotipo de WaveMAX son marcas comerciales de WaveMAX Franchise, LLC.',
+      'chrome.footer.licenseNotice': 'Esta ubicación es de propiedad y operación independiente por CRHS Enterprises, LLC bajo una licencia de franquicia de WaveMAX Franchise, LLC.',
       'chrome.footer.copyright':  '© 2026 CRHS Enterprises, LLC. Todos los derechos reservados.',
 
       'chrome.modal.title':       'Buscar una Ubicación',
@@ -372,6 +376,8 @@
       'chrome.footer.privacy':    'Política de Privacidade',
       'chrome.footer.terms':      'Termos e Condições',
       'chrome.footer.refBuild':   'Build de referência local (noindex)',
+      'chrome.footer.tmNotice':   'WaveMAX™ e o logotipo WaveMAX são marcas registradas da WaveMAX Franchise, LLC.',
+      'chrome.footer.licenseNotice': 'Este local é de propriedade e operação independente da CRHS Enterprises, LLC sob uma licença de franquia da WaveMAX Franchise, LLC.',
       'chrome.footer.copyright':  '© 2026 CRHS Enterprises, LLC. Todos os direitos reservados.',
 
       'chrome.modal.title':       'Encontrar uma Localização',
@@ -435,6 +441,8 @@
       'chrome.footer.privacy':    'Datenschutzrichtlinie',
       'chrome.footer.terms':      'Geschäftsbedingungen',
       'chrome.footer.refBuild':   'Lokaler Referenz-Build (noindex)',
+      'chrome.footer.tmNotice':   'WaveMAX™ und das WaveMAX-Logo sind Marken der WaveMAX Franchise, LLC.',
+      'chrome.footer.licenseNotice': 'Dieser Standort wird unabhängig von CRHS Enterprises, LLC im Rahmen einer Franchiselizenz von WaveMAX Franchise, LLC betrieben.',
       'chrome.footer.copyright':  '© 2026 CRHS Enterprises, LLC. Alle Rechte vorbehalten.',
 
       'chrome.modal.title':       'Standort finden',
