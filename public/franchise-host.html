@@ -409,7 +409,6 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preconnect" href="https://upload.wikimedia.org">
-  <link rel="dns-prefetch" href="https://reports.hibu.com">
   <link rel="dns-prefetch" href="https://places.googleapis.com">
 
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@500;600;700;800&display=swap" rel="stylesheet">
@@ -828,21 +827,17 @@
 <!--
   ════════════════════════════════════════════════════════════════════
   HIBU DYNAMIC PHONE INSERTION — source-indexed call-tracking layer.
-  Loader pulls 1×<script> from reports.hibu.com (whitelisted in CSP
-  script-src), and the local init seeds the source-indexed number
-  map. Both files external — no inline-script CSP exception needed.
+  Self-hosted snapshot of reports.hibu.com/analytics/js/ybDynamicPhoneInsertion.js.
+  Refresh cron: /etc/cron.d/wavemax-hibu-refresh on the server runs
+  scripts/ops/refresh-hibu.sh every 12h to pull the upstream copy and
+  overwrite the local file in place. Log: /var/log/wavemax-hibu-refresh.log.
+  Self-hosting drops a third-party origin from the CSP (no more
+  https://reports.hibu.com in script-src) and removes one cross-origin
+  request from every page load. SRI is not needed because we control
+  the bytes; the CSP `'self'` allowlist is the integrity gate.
   ════════════════════════════════════════════════════════════════════
 -->
-<!-- Hibu's analytics CDN (reports.hibu.com) does NOT serve any CORS
-     response headers (no Access-Control-Allow-Origin), so we cannot
-     attach `integrity=` / `crossorigin="anonymous"` here — SRI requires
-     CORS, and a `crossorigin` attribute makes the browser do a CORS
-     check that Hibu's response will always fail, which blocks the
-     script from executing and leaves `ybFindPhNums` undefined.
-     We rely on the CSP `script-src https://reports.hibu.com` allowlist
-     to gate origin instead. Same security posture as every other page
-     in this app that loads Hibu. -->
-<script src="https://reports.hibu.com/analytics/js/ybDynamicPhoneInsertion.js"></script>
+<script src="/assets/vendor/ybDynamicPhoneInsertion.js?v=20260520"></script>
 <script src="/assets/js/austin-hibu-phone-swap.js?v=20260520"></script>
 </body>
 </html>
