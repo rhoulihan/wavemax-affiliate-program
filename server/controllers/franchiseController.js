@@ -205,20 +205,30 @@ exports.renderFranchisePage = (req, res, next) => {
   const hostHeader = String(req.hostname || req.headers.host || '').split(':')[0];
   const host = stripWww(hostHeader) || 'wavemax.promo';
   const domainOverride = getDomainSeoOverride(host);
-  const isLandingPage = page === '/';
 
-  // Apply domain overrides only on the landing page — the per-page SEO
-  // (wash-dry-fold, self-serve, commercial, etc.) already has tuned copy
-  // and the override is keyed to the apex query intent.
-  const title       = (domainOverride && isLandingPage) ? domainOverride.title       : seo.title;
-  const description = (domainOverride && isLandingPage) ? domainOverride.description : seo.description;
-  const heroH1      = (domainOverride && isLandingPage) ? domainOverride.h1          : seo.heroH1;
-  const keywords    = (domainOverride && isLandingPage) ? domainOverride.keywords    : ((data.seo && data.seo.keywords) || '');
+  // A request is on the domain's "apex experience" when the current page
+  // matches the domain's configured landingPath. atxwashdryfold.com's
+  // nginx rewrites / → /austin-tx/wash-dry-fold/ so its landingPath is
+  // '/wash-dry-fold', not '/'. The others are '/'.
+  const domainLandingPath = (domainOverride && domainOverride.landingPath) || '/';
+  const isApexForDomain   = !!domainOverride && page === domainLandingPath;
+
+  // Apply domain overrides only on the apex experience for that domain —
+  // sub-pages (e.g., atxwashateria.com/austin-tx/self-serve-laundry/) keep
+  // the page-level SEO computed by buildPageSeo() above.
+  const title       = isApexForDomain ? domainOverride.title       : seo.title;
+  const description = isApexForDomain ? domainOverride.description : seo.description;
+  const heroH1      = isApexForDomain ? domainOverride.h1          : seo.heroH1;
+  const keywords    = isApexForDomain ? domainOverride.keywords    : ((data.seo && data.seo.keywords) || '');
 
   // Self-canonical: each host ranks for itself, not for wavemax.promo.
-  // Path matches the slug/page contract the franchise router enforces.
+  // When we're serving the apex experience for a managed domain, canonical
+  // is the user-facing apex URL ('/'), NOT the internally-rewritten path
+  // — Google should index `atxwashdryfold.com/`, not /austin-tx/wash-dry-fold/.
   const canonicalHost = host || 'wavemax.promo';
-  const canonical = `https://${canonicalHost}/${slug}${page === '/' ? '/' : page + '/'}`;
+  const canonical = isApexForDomain
+    ? `https://${canonicalHost}/`
+    : `https://${canonicalHost}/${slug}${page === '/' ? '/' : page + '/'}`;
 
   // Per-domain JSON-LD identity. Without this, all four domains advertise
   // themselves as the same LocalBusiness ("WaveMAX Laundry Austin") and
@@ -240,7 +250,7 @@ exports.renderFranchisePage = (req, res, next) => {
   // schema on local queries; the visible block adds unique fingerprintable
   // text per domain to mitigate the duplicate-content signal across the
   // sister sites.
-  const faqEntries = (domainOverride && isLandingPage)
+  const faqEntries = isApexForDomain
     ? getDomainFaq(host)
     : [];
 
@@ -263,7 +273,7 @@ exports.renderFranchisePage = (req, res, next) => {
     ).join('') + '</dl>'
     : '';
 
-  const leadParagraph = (domainOverride && isLandingPage && domainOverride.leadParagraph)
+  const leadParagraph = (isApexForDomain && domainOverride.leadParagraph)
     ? domainOverride.leadParagraph
     : `${schemaName} — ${schemaDescription}`;
 
