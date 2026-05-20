@@ -834,23 +834,27 @@
   max-width: var(--wm-content-max);
   margin: 0 auto;
   padding: 0 var(--wm-sp-5);
+  /* Two-line stack, both lines horizontally centered: heading on line 1,
+     button row on line 2. flex-direction: column + align-items: center
+     replaces the previous row layout (text left / buttons right). */
   display: flex;
-  flex-wrap: wrap;
-  gap: var(--wm-sp-4);
+  flex-direction: column;
   align-items: center;
-  justify-content: space-between;
+  gap: var(--wm-sp-4);
 }
 
 .wm-cta-strip-text {
   font-size: var(--wm-fs-xl);
   font-weight: 600;
   margin: 0;
+  text-align: center;
 }
 
 .wm-cta-strip-actions {
   display: flex;
   gap: var(--wm-sp-3);
   flex-wrap: wrap;
+  justify-content: center;
 }
 
 /* CTA strip overrides for buttons placed inside the dark band */
