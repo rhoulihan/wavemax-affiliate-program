@@ -235,8 +235,12 @@ exports.adminOperationLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   skip: (req) => {
-    // Only apply to admin users
-    return !req.user || req.user.role !== 'admin';
+    // Only apply to authenticated administrators. The role string is
+    // 'administrator' per the Administrator model + token signer — using
+    // 'admin' here would skip for everyone (no user has that role string),
+    // making the limiter a no-op. Same twin-of-APP-006 pattern caught in
+    // the 2026-05-20 prod-lockdown re-audit as finding N-3.
+    return !req.user || req.user.role !== 'administrator';
   },
   store: createMongoStore(15 * 60 * 1000, 'admin_op')
 });
