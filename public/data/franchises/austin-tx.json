@@ -176,17 +176,17 @@
   },
   "images": {
     "hero": [
-      "https://wavemax.promo/assets/images/locations/austin-tx/hero-1.jpg",
-      "https://wavemax.promo/assets/images/locations/austin-tx/hero-2.jpg",
-      "https://wavemax.promo/assets/images/locations/austin-tx/hero-3.jpg"
+      "https://wavemax.promo/assets/images/locations/austin-tx/hero-1.jpg?v=20260520",
+      "https://wavemax.promo/assets/images/locations/austin-tx/hero-2.jpg?v=20260520",
+      "https://wavemax.promo/assets/images/locations/austin-tx/hero-3.jpg?v=20260520"
     ],
     "interior": [
-      "https://wavemax.promo/assets/images/locations/austin-tx/interior-1.jpg",
-      "https://wavemax.promo/assets/images/locations/austin-tx/interior-2.jpg",
-      "https://wavemax.promo/assets/images/locations/austin-tx/interior-3.jpg",
-      "https://wavemax.promo/assets/images/locations/austin-tx/interior-4.jpg",
-      "https://wavemax.promo/assets/images/locations/austin-tx/interior-5.jpg",
-      "https://wavemax.promo/assets/images/locations/austin-tx/interior-6.jpg"
+      "https://wavemax.promo/assets/images/locations/austin-tx/interior-1.jpg?v=20260520",
+      "https://wavemax.promo/assets/images/locations/austin-tx/interior-2.jpg?v=20260520",
+      "https://wavemax.promo/assets/images/locations/austin-tx/interior-3.jpg?v=20260520",
+      "https://wavemax.promo/assets/images/locations/austin-tx/interior-4.jpg?v=20260520",
+      "https://wavemax.promo/assets/images/locations/austin-tx/interior-5.jpg?v=20260520",
+      "https://wavemax.promo/assets/images/locations/austin-tx/interior-6.jpg?v=20260520"
     ],
     "owner": [],
     "landmarks": [
@@ -203,7 +203,7 @@
         "alt": "Austin skyline at evening"
       }
     ],
-    "ogImage": "https://wavemax.promo/assets/images/locations/austin-tx/hero-1.jpg",
+    "ogImage": "https://wavemax.promo/assets/images/locations/austin-tx/hero-1.jpg?v=20260520",
     "ogImageAlt": "WaveMAX Austin TX storefront",
     "mapPreview": ""
   },
