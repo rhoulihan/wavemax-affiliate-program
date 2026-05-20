@@ -19,7 +19,12 @@
             'https://www.wavemaxlaundry.com',
             'https://wavemaxlaundry.com',
             'https://wavemax.promo',
-            'https://affiliate.wavemax.promo'
+            'https://affiliate.wavemax.promo',
+            // Per-location domains that proxy the Austin franchise content
+            'https://atxwashateria.com',
+            'https://atxwashdryfold.com',
+            'https://runberglaundry.com',
+            'https://rundberglaundry.com'
         ],
         pageIdentifier: null,
         enableTranslation: true,
