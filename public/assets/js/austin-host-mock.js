@@ -807,8 +807,13 @@
       if (e.selectedName) e.selectedName.textContent = f.name;
       if (e.selectedAddr) e.selectedAddr.textContent = (f.address ? f.address + ' · ' : '') + f.city + ', ' + f.state;
       if (e.directionsLink) {
-        const q = encodeURIComponent([f.address, f.city, f.state, f.zip].filter(Boolean).join(' '));
-        e.directionsLink.href = `https://www.google.com/maps/dir/?api=1&destination=${q}`;
+        // Prefer destination_place_id when available — opens the Google Maps
+        // route with the full business profile card (photos, rating, hours)
+        // visible. Fall back to plain address geocoding otherwise.
+        const dest = f.name ? encodeURIComponent(f.name) :
+                     encodeURIComponent([f.address, f.city, f.state, f.zip].filter(Boolean).join(' '));
+        const placeIdParam = f.placeId ? `&destination_place_id=${encodeURIComponent(f.placeId)}` : '';
+        e.directionsLink.href = `https://www.google.com/maps/dir/?api=1&destination=${dest}${placeIdParam}`;
       }
       if (e.visitLink) e.visitLink.href = '/' + slug + '/';
       if (e.actions) e.actions.hidden = false;
