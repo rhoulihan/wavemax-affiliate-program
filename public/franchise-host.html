@@ -833,17 +833,16 @@
   map. Both files external — no inline-script CSP exception needed.
   ════════════════════════════════════════════════════════════════════
 -->
-<!-- SRI integrity hash for Hibu's unversioned analytics script. Hibu may
-     update the script content over time; when they do, the browser will
-     refuse to execute the updated script and dynamic phone insertion
-     will silently stop on this page. Re-compute the hash via:
-       curl -sS https://reports.hibu.com/analytics/js/ybDynamicPhoneInsertion.js \
-         | openssl dgst -sha384 -binary | base64
-     and update the integrity= attribute below. Tracked maintenance.
-     crossorigin="anonymous" is required for SRI on cross-origin scripts. -->
-<script src="https://reports.hibu.com/analytics/js/ybDynamicPhoneInsertion.js"
-        integrity="sha384-gXdgUsVVfk3ZRGnL4FDl/BWTVpNVI3NkkbaV0qV2hXxJ/u4lpmU/emLSKHJzKgME"
-        crossorigin="anonymous"></script>
+<!-- Hibu's analytics CDN (reports.hibu.com) does NOT serve any CORS
+     response headers (no Access-Control-Allow-Origin), so we cannot
+     attach `integrity=` / `crossorigin="anonymous"` here — SRI requires
+     CORS, and a `crossorigin` attribute makes the browser do a CORS
+     check that Hibu's response will always fail, which blocks the
+     script from executing and leaves `ybFindPhNums` undefined.
+     We rely on the CSP `script-src https://reports.hibu.com` allowlist
+     to gate origin instead. Same security posture as every other page
+     in this app that loads Hibu. -->
+<script src="https://reports.hibu.com/analytics/js/ybDynamicPhoneInsertion.js"></script>
 <script src="/assets/js/austin-hibu-phone-swap.js?v=20260520"></script>
 </body>
 </html>
