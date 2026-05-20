@@ -33,6 +33,79 @@ Two Phase-1 items remain — both Cloudflare-side, neither code:
 Phase 1 commits: `9be2c69` (app-layer + headers + security-headers test suite) + `c6e62cd` (M-13 quarantine filter) on `main`; pushed to `origin/main`; live on prod via `git pull && pm2 reload wavemax --update-env`. Nginx changes applied via SSH-side edit with backup at `/root/lockdown-backups/2026-05-20/`.
 
 Phase 1 task: #83 (closed). Phases 2-7: tasks #84-#89, all pending Rick's go-ahead per phase.
+
+---
+
+## Phase 2 closure note (2026-05-20T19:51Z)
+
+| Finding | Status | Verification |
+|:---|:---|:---|
+| **C-1 Mailcow admin direct exposure (CRITICAL)** | **CLOSED** | `mailcow.conf`: `HTTP_BIND=127.0.0.1`, `HTTPS_BIND=127.0.0.1`. `docker compose up -d --force-recreate nginx-mailcow` applied. External `curl https://158.62.198.7:8443/` returns HTTP_CODE=000 (connection refused). nmap reports `8080/tcp filtered`, `8443/tcp filtered`. `https://mail.wavemax.promo` continues to serve via nginx reverse-proxy at `https://localhost:8443`. |
+| **H-1 Origin IP accepts direct 80/443 (HIGH)** | **CLOSED** | UFW updated: per-Cloudflare-IPv4-range allow rules (14 ranges from `/ips-v4`) + per-IPv6-range (6 from `/ips-v6`) on ports 80 and 443. Explicit allow from 70.114.167.145 (Rick WSL) for admin testing. Wide-open `Nginx Full` rule deleted. Verified: iptables `ufw-user-input` chain shows the per-CF-range ACCEPT entries. Cloudflare-fronted requests continue to work; direct-from-WSL works; direct-from-arbitrary-IP rejected. |
+| **H-3 Origin IP leaked via DNS (mail.*, SPF)** | DEFENSE-IN-DEPTH (H-1 closes the practical exposure) | The leak itself is intrinsic to running mail on the same host (Cloudflare doesn't proxy SMTP). H-1's UFW rule renders the leak harmless for HTTP/HTTPS — origin IP now answers 80/443 to Cloudflare only. SMTP/IMAP/POP/SMTPS/IMAPS/POP3S on 25/465/587/143/993/110/995 continue to serve directly (no choice on a single-host topology). Long-term remediation: separate mail host with its own IP. |
+
+Operational additions:
+- Weekly Cloudflare-IP-refresh cron at `/etc/cron.weekly/refresh-cloudflare-ips` — pulls `/ips-v4` + `/ips-v6` each week, diffs against `/etc/cloudflare-firewall/ips-v4.txt`. On change: writes `.pending` files + logs an alert via `logger`. Does NOT auto-apply — manual review required to avoid outage risk from a transient `/ips-v4` corruption. Reviewing the alert in syslog is the SOP.
+- Backups: `/root/lockdown-backups/2026-05-20/phase2/mailcow.conf.bak`, `ufw-pre.txt`, `iptables-pre.txt`.
+
+Phase 2 task #84 closed.
+
+---
+
+## Phase 3 closure note (2026-05-20T19:58Z)
+
+| Finding | Status | Verification |
+|:---|:---|:---|
+| **H-4 SSH password auth + root login (HIGH)** | **CLOSED** | `/etc/ssh/sshd_config.d/00-lockdown-2026-05-20.conf` installed: `PasswordAuthentication no`, `PermitRootLogin prohibit-password`, `MaxAuthTries 3`, `LoginGraceTime 30s`, `ClientAliveInterval 300`, `ClientAliveCountMax 2`. Strong-only KEX/ciphers/MACs (drops hmac-sha1, CBC, dh-group1). Forwarding disabled (Agent/TCP/X11/Tunnel). Validated with `sshd -t`, reloaded (not restarted — existing sessions kept). Fresh key-based SSH from 70.114.167.145 confirmed working post-reload. |
+| **M-1 `ubuntu` user NOPASSWD:ALL + default shell** | DEFERRED | With password SSH disabled (H-4), the chained-via-ubuntu attack path is closed. Locking the `ubuntu` shell + dropping NOPASSWD is a secondary tightening — scheduled into Phase 6. |
+| **M-3 `83.136.182.60` root login 2026-05-04** | **N/A** | Confirmed as Rick's address per `AskUserQuestion` 2026-05-20T18:00Z. No incident. |
+| `service` + `support` keys (key audit) | **KEEP** | Rick clarified these are hosting-provider break-glass keys. Documented; left in authorized_keys. |
+
+Phase 3 task #85 closed.
+
+Backups: `/root/lockdown-backups/2026-05-20/phase3/{sshd_config.bak, sshd_config.d/}`. Revert with: `rm /etc/ssh/sshd_config.d/00-lockdown-2026-05-20.conf && systemctl reload sshd`.
+
+---
+
+## DNS hardening closure (L-9 + L-10, 2026-05-20T19:59Z)
+
+| Finding | Status | Verification |
+|:---|:---|:---|
+| **L-9 No CAA records on any zone** | **CLOSED** | 3 CAA records per zone on all four (rundberglaundry, atxwashdryfold, atxwashateria, wavemax.promo): `0 issue "letsencrypt.org"`, `0 issue "pki.goog"`, `0 iodef "mailto:rickh@wavemaxlaundry.com"`. Applied via Cloudflare API. `dig +short CAA <zone> @1.1.1.1` returns the new entries. |
+| **L-10 DNSSEC unsigned on all 4 zones** | **PARTIAL — pending registrar DS record** | DNSSEC enabled on Cloudflare side (status: `pending`). Each zone has a Key Tag 2371 / ECDSAP256SHA256 / SHA-256 DS record waiting to be added at the registrar. Identity Digital (wavemax.promo) and Ultahost (laundry domains) DS-record installation completes the chain. Once added, status flips to `active` and the trust path is complete. |
+
+DS records to add at the registrar (one per domain):
+
+```
+rundberglaundry.com.  3600 IN DS 2371 13 2 029FDAF30BEDC005FFEC163B159B238FB394A32C2D0B40C409F275B8642F259E
+atxwashdryfold.com.   3600 IN DS 2371 13 2 6FC75F84EEB02EC6D004E2362B7973E16A7A6BAB9A05B7C2BBE372C236C7C048
+atxwashateria.com.    3600 IN DS 2371 13 2 757E9642FCB67ACF58B6D5916D4F4081AD436DB715984DEB6722D5CB2B7DB1DC
+wavemax.promo.        3600 IN DS 2371 13 2 12F8C2FC888C554B140B0C3E1A8645143644C6A2018CD89B44947E7F739E63D8
+```
+
+Most registrars accept four-field form:
+- Key Tag: `2371`
+- Algorithm: `13` (ECDSAP256SHA256)
+- Digest Type: `2` (SHA-256)
+- Digest: (the 64-character hex string per domain above)
+
+Reminder: revoke the Cloudflare API token at `https://dash.cloudflare.com/profile/api-tokens` once Rick confirms registrar-side DS records are in place.
+
+---
+
+## Status snapshot
+
+| Phase | Task | Status |
+|:---|:---|:---|
+| 0 — recon | n/a | done |
+| 1 — quick wins | #83 | **done** + live |
+| 2 — mailcow + Cloudflare-only origin | #84 | **done** + live |
+| 3 — SSH hardening | #85 | **done** + live |
+| 4 — structural app (per-acct lockout, shared rate limiter, null-origin CORS) | #86 | pending |
+| 5 — secret rotation + .OLD cleanup | #87 | pending — full rotation including ENCRYPTION_KEY scheduled with maintenance window |
+| 6 — long-tail (pm2 non-root, auditd, registrar locks, ubuntu lockdown) | #88 | pending |
+| 7 — re-attack + audit-grade close-out | #89 | pending |
+| DNS — CAA + DNSSEC | embedded in #83 | **CAA done**, DNSSEC pending registrar DS records |
 **Method:** Three parallel passes — whitebox SSH audit, application-config audit, blackbox external probe (~45 requests, no exploitation). Cross-confirmed all critical findings from at least two of the three vantages.
 
 ---
