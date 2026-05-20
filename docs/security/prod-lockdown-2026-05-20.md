@@ -2,7 +2,37 @@
 
 **Scope:** wavemax.promo / rundberglaundry.com / atxwashdryfold.com / atxwashateria.com on origin `158.62.198.7`.
 **Trigger:** Rick — "go deep on pen testing our prod server… lock it down hard… no auditor finds anything worth more than a footnote."
-**Status:** Phase 0 (recon) complete. Phase 1+ awaits gating confirmation.
+**Status:** Phase 0 (recon) complete. **Phase 1 closed 2026-05-20T19:36Z — app-layer + nginx-edge changes deployed and verified live.** Phase 2-7 sequencing per the plan below.
+
+---
+
+## Phase 1 closure note (2026-05-20T19:36Z)
+
+| Finding | Status | Verification |
+|:---|:---|:---|
+| APP-002 referrer-policy strict-origin-when-cross-origin | LIVE | `curl -sI` returns `referrer-policy: strict-origin-when-cross-origin` |
+| APP-003 COOP same-origin-allow-popups | LIVE | `cross-origin-opener-policy: same-origin-allow-popups` |
+| APP-006 dead admin-role rate-limit skip | DEPLOYED | code change, no observable surface |
+| APP-007 RELAX_RATE_LIMITING startup assertion | DEPLOYED | emits loud warning if misconfigured |
+| APP-008 JWT verify pin `['HS256']` | DEPLOYED | code change; existing JWT flow unbroken |
+| APP-009 `__Host-wavemax.sid` session cookie in prod | LIVE | `Set-Cookie: __Host-wavemax.sid=…; HttpOnly; Secure; SameSite=None` |
+| APP-010 operator PIN `timingSafeEqual` | DEPLOYED | code change; valid-PIN test green |
+| APP-011 operator IP via `req.ip` | DEPLOYED | code change; X-Forwarded-For prepend no longer trusted |
+| APP-013 forgot-password uniform 200 | LIVE | unknown-email returns `{"success":true,"message":"If an account with that email exists, a password reset link has been sent."}` |
+| M-5 nginx `server_tokens off;` | LIVE | direct-origin Server header now `nginx` (no version) |
+| M-5 nginx TLS 1.0/1.1 dropped at http block | LIVE | `openssl s_client -tls1` returns "no protocols available" |
+| M-14 default vhost 444 on port 80 unknown Host | LIVE | direct-origin `curl … -H 'Host: x.example.com'` returns connection-close (HTTP_CODE=000) |
+| M-13 quarantine suspicious-path filter | LIVE | `/phpinfo.php` 302s to corporate `/` (root); `/dallas-tx/` still preserves path |
+| L-11 OCSP stapling | N/A — resolved upstream | Let's Encrypt + GTS removed OCSP responder URL from issued certs in 2025; stapling is a no-op at the CA layer |
+
+Two Phase-1 items remain — both Cloudflare-side, neither code:
+
+- **L-9 CAA records on all four zones.** Add `CAA 0 issue "letsencrypt.org"` and `CAA 0 issue "pki.goog"` to each of rundberglaundry.com / atxwashdryfold.com / atxwashateria.com / wavemax.promo via the Cloudflare DNS dashboard (or API). Pins which CAs may issue certs; prevents an attacker who compromises a registrar/DNS account from getting a cert through a different CA.
+- **L-10 DNSSEC enabled per zone.** Cloudflare → DNS → Settings → "Enable DNSSEC." Then add the DS record at the registrar (Ultahost for the laundry domains; Identity Digital for `.promo`). Prevents DNS cache-poisoning at intermediate resolvers.
+
+Phase 1 commits: `9be2c69` (app-layer + headers + security-headers test suite) + `c6e62cd` (M-13 quarantine filter) on `main`; pushed to `origin/main`; live on prod via `git pull && pm2 reload wavemax --update-env`. Nginx changes applied via SSH-side edit with backup at `/root/lockdown-backups/2026-05-20/`.
+
+Phase 1 task: #83 (closed). Phases 2-7: tasks #84-#89, all pending Rick's go-ahead per phase.
 **Method:** Three parallel passes — whitebox SSH audit, application-config audit, blackbox external probe (~45 requests, no exploitation). Cross-confirmed all critical findings from at least two of the three vantages.
 
 ---
