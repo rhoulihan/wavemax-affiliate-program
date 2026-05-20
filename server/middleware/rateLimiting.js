@@ -32,24 +32,20 @@ if (isRelaxed && process.env.NODE_ENV === 'production') {
 
 // Rate-limit store factory.
 //
-// HISTORY: previously returned a `rate-limit-mongo` MongoStore so the
-// limiters could share a counter across the PM2 cluster workers. That
-// package is unmaintained and pulls a vulnerable `underscore` chain
-// (6 high-severity CVEs as of 2026-05-20), so we removed the dependency.
-// Returning `undefined` here falls back to express-rate-limit's built-in
-// in-memory store, which is per-worker — meaning the configured `max`
-// is effectively multiplied by the cluster size in production.
+// Uses an in-house MongoDB-backed store (server/middleware/rateLimitMongoStore.js)
+// so all PM2 cluster workers share a single counter — without the
+// `rate-limit-mongo` package's vulnerable `underscore@1.12.1` chain.
+// Closes H-6 from prod-lockdown-2026-05-20.
 //
-// This is acceptable WHILE THE AFFILIATE PROGRAM IS OFFLINE: there's
-// no authenticated traffic the limiters guard, the public Austin
-// content pages aren't rate-limited (they don't go through these
-// middlewares), and Cloudflare provides upstream bot/burst protection.
-// WHEN THE AFFILIATE PROGRAM COMES BACK ONLINE, swap in a maintained
-// shared store before exposing the auth/registration/payment surfaces
-// publicly: `@express-rate-limit/mongo-store` is the official option,
-// `rate-limit-redis` if Redis joins the stack. The function signature
-// stays compatible so the swap is one-file.
-const createMongoStore = (_windowMs, _name) => undefined;
+// In test mode (`NODE_ENV=test`), Mongoose may not be connected when this
+// module loads. Returning `undefined` falls back to the package's default
+// in-memory store, which is fine for tests since `skipInTest` short-
+// circuits the limiter entirely.
+const MongoRateLimitStore = require('./rateLimitMongoStore');
+const createMongoStore = (windowMs, name) => {
+  if (isTest) return undefined;
+  return new MongoRateLimitStore({ windowMs, name });
+};
 
 // Helper to skip rate limiting in test environment
 const skipInTest = () => isTest;

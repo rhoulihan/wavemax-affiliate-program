@@ -73,6 +73,17 @@ exports.affiliateLogin = async (req, res) => {
       });
     }
 
+    // H-5: account-level lockout. Check BEFORE password verification so a
+    // locked account doesn't leak timing info via the PBKDF2 hash check.
+    // prod-lockdown-2026-05-20.
+    if (affiliate.isLocked) {
+      logLoginAttempt(false, 'affiliate', username, req, 'Account locked');
+      return res.status(403).json({
+        success: false,
+        message: 'Account is locked due to multiple failed login attempts. Please try again later.'
+      });
+    }
+
     // Verify password
     const isPasswordValid = encryptionUtil.verifyPassword(
       password,
@@ -81,6 +92,7 @@ exports.affiliateLogin = async (req, res) => {
     );
 
     if (!isPasswordValid) {
+      await affiliate.incLoginAttempts();
       logLoginAttempt(false, 'affiliate', username, req, 'Invalid password');
       return res.status(401).json({
         success: false,
@@ -88,9 +100,8 @@ exports.affiliateLogin = async (req, res) => {
       });
     }
 
-    // Update last login
-    affiliate.lastLogin = new Date();
-    await affiliate.save();
+    // Reset failed-attempt counter on success (also sets lastLogin)
+    await affiliate.resetLoginAttempts();
 
     // Generate token
     const token = generateToken({
@@ -530,6 +541,16 @@ exports.customerLogin = async (req, res) => {
       });
     }
 
+    // H-5: account-level lockout. Check BEFORE password verification.
+    // prod-lockdown-2026-05-20.
+    if (customer.isLocked) {
+      logLoginAttempt(false, 'customer', loginIdentifier, req, 'Account locked');
+      return res.status(403).json({
+        success: false,
+        message: 'Account is locked due to multiple failed login attempts. Please try again later.'
+      });
+    }
+
     // Verify password
     const isPasswordValid = encryptionUtil.verifyPassword(
       password,
@@ -538,6 +559,7 @@ exports.customerLogin = async (req, res) => {
     );
 
     if (!isPasswordValid) {
+      await customer.incLoginAttempts();
       logLoginAttempt(false, 'customer', loginIdentifier, req, 'Invalid password');
       return res.status(401).json({
         success: false,
@@ -545,9 +567,8 @@ exports.customerLogin = async (req, res) => {
       });
     }
 
-    // Update last login
-    customer.lastLogin = new Date();
-    await customer.save();
+    // Reset failed-attempt counter on success (also sets lastLogin)
+    await customer.resetLoginAttempts();
 
     // Find affiliate
     const affiliate = await Affiliate.findOne({ affiliateId: customer.affiliateId });

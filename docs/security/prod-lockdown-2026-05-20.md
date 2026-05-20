@@ -72,7 +72,7 @@ Backups: `/root/lockdown-backups/2026-05-20/phase3/{sshd_config.bak, sshd_config
 | Finding | Status | Verification |
 |:---|:---|:---|
 | **L-9 No CAA records on any zone** | **CLOSED** | 3 CAA records per zone on all four (rundberglaundry, atxwashdryfold, atxwashateria, wavemax.promo): `0 issue "letsencrypt.org"`, `0 issue "pki.goog"`, `0 iodef "mailto:rickh@wavemaxlaundry.com"`. Applied via Cloudflare API. `dig +short CAA <zone> @1.1.1.1` returns the new entries. |
-| **L-10 DNSSEC unsigned on all 4 zones** | **PARTIAL — pending registrar DS record** | DNSSEC enabled on Cloudflare side (status: `pending`). Each zone has a Key Tag 2371 / ECDSAP256SHA256 / SHA-256 DS record waiting to be added at the registrar. Identity Digital (wavemax.promo) and Ultahost (laundry domains) DS-record installation completes the chain. Once added, status flips to `active` and the trust path is complete. |
+| **L-10 DNSSEC unsigned on all 4 zones** | **SKIPPED — accepted residual risk** | Rick chose to skip the registrar-side DS record install (2026-05-20T20:15Z). Cloudflare-side DNSSEC remains enabled (status `pending` because no parent-zone DS to validate against), but the chain of trust is incomplete. Residual risk: DNS cache-poisoning at intermediate resolvers could redirect a small fraction of traffic. Mitigated by: (a) HSTS preload (browsers refuse non-CF certificates regardless of DNS), (b) UFW Cloudflare-only origin (the practical hijack-the-origin-IP attack is already closed), (c) CAA records limit which CAs can re-issue if a hijacker tries to obtain a fresh cert. Recommend revisiting if a state-actor threat model emerges. |
 
 DS records to add at the registrar (one per domain):
 
