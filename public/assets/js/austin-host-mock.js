@@ -807,13 +807,19 @@
       if (e.selectedName) e.selectedName.textContent = f.name;
       if (e.selectedAddr) e.selectedAddr.textContent = (f.address ? f.address + ' · ' : '') + f.city + ', ' + f.state;
       if (e.directionsLink) {
-        // Prefer destination_place_id when available — opens the Google Maps
-        // route with the full business profile card (photos, rating, hours)
-        // visible. Fall back to plain address geocoding otherwise.
+        // Use Google Maps "search" action with query_place_id so the user
+        // lands on the full business profile (photos, rating, reviews,
+        // hours, services) with a Directions button right there. This is
+        // the GBP profile view, not the minimal destination card the
+        // dir/ action shows. Falls back to address geocoding when no
+        // placeId is configured for the franchise.
         const dest = f.name ? encodeURIComponent(f.name) :
                      encodeURIComponent([f.address, f.city, f.state, f.zip].filter(Boolean).join(' '));
-        const placeIdParam = f.placeId ? `&destination_place_id=${encodeURIComponent(f.placeId)}` : '';
-        e.directionsLink.href = `https://www.google.com/maps/dir/?api=1&destination=${dest}${placeIdParam}`;
+        if (f.placeId) {
+          e.directionsLink.href = `https://www.google.com/maps/search/?api=1&query=${dest}&query_place_id=${encodeURIComponent(f.placeId)}`;
+        } else {
+          e.directionsLink.href = `https://www.google.com/maps/dir/?api=1&destination=${dest}`;
+        }
       }
       if (e.visitLink) e.visitLink.href = '/' + slug + '/';
       if (e.actions) e.actions.hidden = false;
