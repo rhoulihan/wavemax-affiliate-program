@@ -819,6 +819,36 @@
   display: flex;
   flex-direction: column;
 }
+
+/* Live Google-Maps embed inside the footer column (replaces the prior
+ * CSS-art mock which never showed actual map tiles). Sized to fit the
+ * footer column gracefully — taller than 240px feels cramped vs the
+ * other footer columns; shorter loses the orientation context. */
+#wm-map .wm-pgfooter-mapframe {
+  width: 100% !important;
+  height: 280px !important;
+  background: #f1f5f9 !important;
+  overflow: hidden !important;
+  display: block !important;
+  border-top: 2px solid #e2e8f0 !important;
+  border-bottom: 2px solid #e2e8f0 !important;
+}
+#wm-map .wm-pgfooter-mapframe iframe {
+  width: 100% !important;
+  height: 100% !important;
+  display: block !important;
+  border: 0 !important;
+}
+#wm-map .wm-pgfooter-mapbar {
+  padding: 1.25rem 1.5rem !important;
+  display: flex !important;
+  background: #ffffff !important;
+}
+#wm-map .wm-pgfooter-mapbar .wm-btn-primary,
+#wm-map .wm-pgfooter-mapbar .wm-btn-secondary {
+  width: 100% !important;
+  flex: 1 1 auto !important;
+}
 #wm-map .wm-map-visual {
   position: relative !important;
   width: 100% !important;
