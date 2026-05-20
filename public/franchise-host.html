@@ -452,7 +452,7 @@
      budget bots that don't see the iframe content's H1). The text
      is keyword-rich and city-anchored; the visible hero in the
      iframe content remains the user-facing headline. -->
-<h1 style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;">{{HERO_H1}}</h1>
+<h1 class="wm-sr-only">{{HERO_H1}}</h1>
 
 <!-- SSR-visible per-domain content for crawlers + AI Overviews. The
      visible chrome layout is unchanged (everything below is positioned
@@ -460,7 +460,7 @@
      opening paragraph, hyperlocal FAQ Q&A, and Speakable-marked NAP
      snippets per host. This is the single biggest dedup signal across
      sister domains — Google fingerprints first paragraph content. -->
-<section aria-label="About this location" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden;">
+<section aria-label="About this location" class="wm-sr-only">
   <p class="wm-domain-lead">{{LEAD_PARAGRAPH}}</p>
   <p class="wm-speakable-address">WaveMAX Austin is located at 825 East Rundberg Lane, Suite F1, Austin, Texas 78753.</p>
   <p class="wm-speakable-hours">Open every day from 7am to 10pm, 365 days a year. Last wash starts at 9pm.</p>
