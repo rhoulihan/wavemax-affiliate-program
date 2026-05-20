@@ -68,3 +68,35 @@ See [`docs/refactor/REFACTORING_PLAN.md`](../docs/refactor/REFACTORING_PLAN.md) 
 - God-controller splits (admin, auth, operator, order, customer)
 - RBAC middleware consolidation
 - Logging standardization
+
+---
+
+# Deferred — major dependency upgrades (open items, post-Phase-2)
+
+**Status as of 2026-05-20:** `npm audit` is clean (0 vulnerabilities). The bumps below are not security-driven; they're modernization to keep the dep graph from stagnating. Each is a major-version bump with documented breaking changes, so each needs its own PR with code review + targeted tests + at least one round of smoke testing on staging.
+
+**Prerequisite gate:** test suite must run clean without `--forceExit` (root `CLAUDE.md` rule). Today it doesn't (CSRF / order / marketing tests fail pre-existing — Phase-1 known drift). Until tests are green, dep bumps can't be safely verified.
+
+**Suggested order — lowest risk first, save highest-blast-radius for last:**
+
+| # | Package | Bump | Risk | What to review |
+|:---:|:---|:---|:---:|:---|
+| 1 | `dotenv` | 16 → 17 | low | warning behavior on missing vars; new `quiet: true` option to suppress; check `dotenv.config()` call sites |
+| 2 | `helmet` | 7 → 8 | medium | CORP / COEP defaults changed; review our manual CSP middleware in `server.js`; new `crossOriginEmbedderPolicy` default may affect iframe embed |
+| 3 | `express-rate-limit` | 7 → 8 | medium | `Store` interface changed (`init`, `prefix`, `localKeys`); also touches our `createMongoStore` swap when affiliate program comes back online |
+| 4 | `joi` | 17 → 18 | medium | `.required().messages(...)` re-validation across every schema in `server/middleware/sanitization.js` + every controller; dropped `.error()` legacy signature |
+| 5 | `connect-mongo` | 5 → 6 | medium | session-cookie encoding changed; existing sessions will invalidate (log all users out at deploy); review `MongoStore.create()` options shape |
+| 6 | `nodemailer` SMTP transport audit | 8 (already on) | low | already on 8.0.7; double-check Mailcow STARTTLS handshake + Brevo API-key path against the 7/8 transport refactor; no code changes expected but worth a manual deliverability test |
+| 7 | `uuid` | 9 → 14 | **high** | v14 is ESM-only — every `require('uuid')` becomes `await import('uuid')` or needs a CJS shim. Touch surface: ~20+ files generating affiliateId/customerId/orderId. Big refactor unless we add a `uuid-cjs-shim` indirection. |
+| 8 | `mongoose` | 8 → 9 | **high** | Every query, every `findOneAndUpdate`, every `populate`, every `.lean()`, every middleware hook. Highest blast radius in the codebase. Save for a dedicated sprint. Migration guide: review carefully. |
+| 9 | `express` | 4 → 5 | **highest** | Error-handling moves to promise-based by default; `req.body` parsing behavior changes; route parameter syntax has subtle changes; `res.redirect()` semantics tweaked; middleware signature for async handlers no longer needs `asyncWrapper`. Effectively its own multi-week project. Should NOT be combined with any other major bump in the same PR. |
+
+**Sub-tasks worth tracking independently:**
+
+- [ ] Replace `createMongoStore` no-op (currently returns `undefined` → in-memory store) with a maintained shared store (`@express-rate-limit/mongo-store` or `rate-limit-redis`) **before** re-enabling the affiliate-program auth surface publicly. Per-worker in-memory means rate limits are effectively 3× looser in production (3 PM2 workers).
+- [ ] Replace `imap` consumers (`imapEmailScanner`, `mark-emails-unread`) — already done 2026-05-20 (migrated to `imapflow`). Listed here for completeness; no further work needed.
+- [ ] Add CI gate that runs `npm test` + `npm audit --audit-level=high` on every PR — without this, drift comes back within months.
+- [ ] Stand up a staging environment (port 3001, separate Mongo db) so major dep bumps can be tested without touching prod. Today there is no staging — every dep bump is "test in production."
+- [ ] Add `npm outdated` to monthly maintenance checklist; review any package that's >12 months behind its latest semver-compatible release.
+
+**Reference:** the post-mortem of this maintenance pass (24 vulns → 0 in a single day) is in this todo's git history (commits `8956464` compression, `4fb2b52` nodemailer, `cd95298` imapflow, `bc56cf6` rate-limit-mongo, prior kernel reboot also same date). The bumps above are the items that were too high-risk to include in that same-day sweep.
