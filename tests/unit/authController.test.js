@@ -29,6 +29,11 @@ jest.mock('../../server/utils/auditLogger');
 jest.mock('jsonwebtoken');
 jest.mock('crypto');
 
+// Restore the real crypto.timingSafeEqual — the operator-PIN controller
+// uses it for constant-time comparison (APP-010 / prod-lockdown-2026-05-20).
+// All other crypto methods remain auto-mocked.
+crypto.timingSafeEqual = jest.requireActual('crypto').timingSafeEqual;
+
 describe('Auth Controller', () => {
   let req, res, next;
 
@@ -666,12 +671,14 @@ describe('Auth Controller', () => {
 
       expect(mockAffiliate.save).toHaveBeenCalled();
       expect(emailService.sendAffiliatePasswordResetEmail).toHaveBeenCalled();
-      expect(res.json).toHaveBeenCalledWith(
-        expectSuccessResponse(null, 'Password reset email sent')
-      );
+      // APP-013: generic 200 message regardless of email existence.
+      expect(res.json).toHaveBeenCalledWith({
+        success: true,
+        message: 'If an account with that email exists, a password reset link has been sent.'
+      });
     });
 
-    test('should handle non-existent email gracefully', async () => {
+    test('should handle non-existent email gracefully (APP-013: no user-enumeration)', async () => {
       req.body = { email: 'notfound@example.com', userType: 'customer' };
 
       Customer.findOne = createFindOneMock(null);
@@ -679,11 +686,35 @@ describe('Auth Controller', () => {
 
       await authController.forgotPassword(req, res, next);
 
-      // Should return 404 for non-existent email
-      expect(res.status).toHaveBeenCalledWith(404);
-      expect(res.json).toHaveBeenCalledWith(
-        expectErrorResponse('No account found with that email address')
-      );
+      // APP-013 / prod-lockdown-2026-05-20: do NOT signal email existence.
+      // Previously this returned 404 with "No account found ..." which
+      // gave any unauthenticated requester a user-enumeration primitive.
+      // The new behavior is a generic 200 — same response shape for any
+      // email, whether registered or not.
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.json).toHaveBeenCalledWith({
+        success: true,
+        message: 'If an account with that email exists, a password reset link has been sent.'
+      });
+    });
+
+    test('should also return generic 200 for known emails (APP-013 symmetry)', async () => {
+      req.body = { email: 'known@example.com', userType: 'affiliate' };
+      const mockAffiliate = {
+        _id: 'aff999',
+        email: 'known@example.com',
+        save: jest.fn().mockResolvedValue(true)
+      };
+      Affiliate.findOne = createFindOneMock(mockAffiliate);
+      Affiliate.findOne.mockResolvedValue(mockAffiliate);
+      emailService.sendAffiliatePasswordResetEmail = jest.fn().mockResolvedValue(true);
+
+      await authController.forgotPassword(req, res, next);
+
+      expect(res.json).toHaveBeenCalledWith({
+        success: true,
+        message: 'If an account with that email exists, a password reset link has been sent.'
+      });
     });
   });
 

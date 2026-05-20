@@ -58,12 +58,17 @@ async function forgotPassword({ email, userType, cryptoWrapper }) {
 
   const Model = MODEL_BY_USER_TYPE[userType];
   const user = await Model.findOne({ email });
+
+  // APP-013 / prod-lockdown-2026-05-20: do NOT signal whether the email
+  // exists. Previously this threw a 404, which let any unauthenticated
+  // requester probe email existence one POST at a time (a user-enumeration
+  // primitive). Now the caller always sees the service complete normally
+  // and returns a generic "if an account exists, we sent a link" message
+  // to the client. The internal log records the miss for debugging.
   if (!user) {
-    throw new PasswordResetError(
-      'not_found',
-      'No account found with that email address',
-      404
-    );
+    const logger = require('../utils/logger');
+    logger.info('forgotPassword: no account for email (silent)', { userType });
+    return;
   }
 
   const resetToken = cryptoWrapper.randomBytes(32).toString('hex');

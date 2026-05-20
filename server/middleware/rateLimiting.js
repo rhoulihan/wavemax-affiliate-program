@@ -15,6 +15,21 @@ const logger = require('../utils/logger');
 const isRelaxed = process.env.RELAX_RATE_LIMITING === 'true';
 const isTest = process.env.NODE_ENV === 'test';
 
+// Startup safety: refuse to silently run with relaxed rate limits in
+// production. If the process was started with RELAX_RATE_LIMITING=true
+// (e.g. leftover from a dev shell) AND NODE_ENV=production, emit a loud
+// warning to logs and stderr so it's caught immediately rather than
+// quietly leaving the auth/registration/payment surfaces 10× more
+// permissive than designed. APP-007 / prod-lockdown-2026-05-20.
+if (isRelaxed && process.env.NODE_ENV === 'production') {
+  const msg = 'SECURITY: RELAX_RATE_LIMITING=true with NODE_ENV=production. ' +
+              'Rate limits are 10x higher than designed. ' +
+              'Unset RELAX_RATE_LIMITING and restart immediately.';
+  logger.error(msg);
+  // eslint-disable-next-line no-console
+  process.stderr.write(`\n*** ${msg} ***\n\n`);
+}
+
 // Rate-limit store factory.
 //
 // HISTORY: previously returned a `rate-limit-mongo` MongoStore so the
@@ -97,8 +112,13 @@ exports.apiLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   skip: (req) => {
-    // Skip in test environment or for authenticated admin users
-    return skipInTest() || (req.user && req.user.role === 'admin');
+    // Skip in test environment only. The previous code also skipped for
+    // `req.user.role === 'admin'`, but the legitimate role string is
+    // 'administrator' (per server/models/Administrator.js + the token
+    // signing in authTokenService.js). The 'admin' branch was unreachable
+    // dead code that would have served as a bypass only for a forged token.
+    // APP-006 / prod-lockdown-2026-05-20.
+    return skipInTest();
   },
   store: createMongoStore(15 * 60 * 1000, 'api')
 });
