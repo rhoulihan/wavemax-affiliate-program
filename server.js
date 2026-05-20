@@ -325,20 +325,26 @@ app.use((req, res, next) => {
   
   // CSP3 quirk: when a nonce is present in a directive, `'unsafe-inline'`
   // is silently ignored for that directive — even for JS-driven inline
-  // style mutations like `el.style.display = 'block'`. The
-  // language-switcher dropdown toggles inline display, so for non-strict
-  // pages we skip the style-src nonce so the unsafe-inline fallback
-  // actually takes effect. Strict pages keep the nonce because they
-  // have no inline-style emitters and we want them locked down.
+  // style mutations like `el.style.display = 'block'`. The language
+  // switcher dropdown toggles inline display, and the self-hosted Hibu
+  // analytics loader rewrites body.innerHTML which forces the browser to
+  // re-evaluate every inline `style="..."` attribute against style-src.
+  // Both legitimately need inline styles. We keep the strict script-src
+  // (that's the XSS-relevant directive) but always allow 'unsafe-inline'
+  // on style-src — the CSS-injection threat model is materially weaker
+  // than JS injection, and gating styles by class-toggle would require
+  // forking Hibu's script.
   if (!skipNonce && nonce) {
     directives['script-src'].push(`'nonce-${nonce}'`);
-    if (useStrictCSP) directives['style-src'].push(`'nonce-${nonce}'`);
+    // Intentionally NOT adding the nonce to style-src: the CSP3 quirk
+    // above would then silently kill 'unsafe-inline' for styles.
   }
+  directives['style-src'].push("'unsafe-inline'");
 
-  // Add unsafe-inline for non-migrated pages
+  // Add unsafe-inline for non-migrated pages (script-src only — style-src
+  // is already permissive above).
   if (!useStrictCSP) {
     directives['script-src'].push("'unsafe-inline'");
-    directives['style-src'].push("'unsafe-inline'");
   }
   
   // Add upgrade-insecure-requests in production
