@@ -975,6 +975,14 @@
 #wm-map .wm-btn-secondary:hover { background-color: #f0f4fa !important; }
 
 /* ============================================================
+   CSP-safe utility classes — replace inline `el.style.x = y` mutations
+   so the host-chrome page can run under strict CSP (no 'unsafe-inline'
+   on style-src). Added 2026-05-20 as part of the SEC L-1/L-2 sweep.
+   ============================================================ */
+.wm-noscroll { overflow: hidden !important; }
+.wm-hidden   { display: none !important; }
+
+/* ============================================================
    SR-ONLY — off-screen accessibility / SEO H1 utility
    (mirrors the same class in wavemax-theme.css and corporate-chrome.css;
    added here so franchise-host.html, which only loads this stylesheet,

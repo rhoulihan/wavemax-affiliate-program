@@ -182,6 +182,16 @@ app.use((req, res, next) => {
   // X-Permitted-Cross-Domain-Policies
   res.setHeader('X-Permitted-Cross-Domain-Policies', 'none');
 
+  // X-Frame-Options — belt-and-suspenders alongside the CSP
+  // frame-ancestors directive (modern browsers honor frame-ancestors and
+  // ignore XFO, but XFO catches older browsers + legacy security
+  // scanners and observability tools that grade this control literally).
+  // SAMEORIGIN matches the CSP frame-ancestors allowlist semantics for
+  // the routes that aren't explicitly listed by the franchisor for
+  // embedding (wavemaxlaundry.com is already whitelisted via the CSP
+  // frame-ancestors directive, which a browser will prefer over XFO).
+  res.setHeader('X-Frame-Options', 'SAMEORIGIN');
+
   // Clear-Site-Data header for logout endpoints
   if (req.path.includes('/logout')) {
     res.setHeader('Clear-Site-Data', '"cache", "cookies", "storage"');
@@ -251,19 +261,24 @@ app.use((req, res, next) => {
                              req.path.endsWith('.html') &&
                              !req.path.includes('/examples/');
 
-  // NOTE on franchise-host (per-franchise /<slug>/<page> routes): NOT
-  // included in strict-CSP. The controller's data-injection script
-  // already carries a per-request nonce, but the page-level JS
-  // (language-switcher dropdown in austin-host-mock.js, locations-modal
-  // open/close) toggles styling via inline `el.style.x = y` mutations.
-  // The local CSP behavior we have historically observed treats those
-  // as inline-style for enforcement purposes when 'unsafe-inline' is
-  // absent. Switching franchise-host to strict requires refactoring
-  // those JS sites to class-toggling (tracked under SEC L-1/L-2).
-  // Adding franchise-host here pre-emptively would risk breaking the
-  // language switcher in production.
+  // Apply strict CSP to franchise-host renders (/<slug>/ and
+  // /<slug>/<page> routes served by franchiseController). Enabled
+  // 2026-05-20 after the SEC L-1/L-2 sweep replaced inline-style
+  // mutations in austin-host-mock.js (modal scroll lock + search
+  // filter) and corporate-locations-modal.js with the .wm-noscroll /
+  // .wm-hidden class-toggle utilities. The controller's
+  // FRANCHISE_DATA_INJECTION inline script already carries the
+  // per-request nonce. Pattern: single-segment slug or slug + page,
+  // lowercase + digits + hyphens, no dots (i.e. not a static-file
+  // request like .html or .js).
+  const isFranchiseHostPage = /^\/[a-z0-9][a-z0-9-]*(\/[a-z0-9][a-z0-9-]*)?\/?$/.test(req.path)
+                              && !req.path.startsWith('/api/')
+                              && !req.path.startsWith('/assets/')
+                              && !req.path.startsWith('/locales/')
+                              && !req.path.startsWith('/docs/')
+                              && !req.path.startsWith('/dev/');
 
-  const useStrictCSP = strictCSPPages.includes(req.path) || isDocumentationPage;
+  const useStrictCSP = strictCSPPages.includes(req.path) || isDocumentationPage || isFranchiseHostPage;
   
   // All embed pages now use nonces since embed-app.html was converted to CSP-compliant redirect to embed-app-v2.html
   const skipNonce = false;
@@ -366,11 +381,20 @@ const corsOptions = {
     if (allAllowedOrigins.indexOf(origin) !== -1) {
       callback(null, true);
     } else {
-      callback(new Error('Not allowed by CORS'));
+      // CORS rejection should be CLEAN — callback(null, false) makes the
+      // cors middleware respond 204/200 without CORS headers, leaving the
+      // browser to reject the cross-origin request itself. Throwing here
+      // surfaces as a 500 with a server stack trace in the JSON body,
+      // which (a) is the wrong HTTP semantic for a CORS rejection, and
+      // (b) leaks server-side paths + impl details via the error handler.
+      // The actual CORS protection is identical either way (no
+      // Access-Control-Allow-Origin returned), but the cleaner response
+      // is 204 with no body.
+      callback(null, false);
     }
   },
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'x-csrf-token', 'csrf-token', 'xsrf-token', 'x-xsrf-token'],
   maxAge: 86400 // 24 hours
 };
@@ -490,6 +514,39 @@ app.use(locationQuarantine);
 
 // Mount embed routes with CSP nonce support BEFORE static file serving
 const embedRoutes = require('./server/routes/embedRoutes');
+// .well-known/security.txt — RFC 9116 disclosure policy.
+// Explicit route because Express's serve-static ignores dotfiles by
+// default (and globally allowing dotfiles would expose other dot-paths
+// we don't want public).
+app.get('/.well-known/security.txt', (req, res) => {
+  res.type('text/plain').sendFile(path.join(__dirname, 'public', '.well-known', 'security.txt'));
+});
+
+// Explicit 404s for common sensitive-path probes — closes the
+// SPA-catch-all 302 leak the comparative audit flagged. Files are not
+// exposed either way (the catch-all redirects them into the SPA shell)
+// but the 302 leak gives an ambiguous "this site may be hiding
+// something" signal to scanners; a clean 404 is the industry-standard
+// response. List intentionally short — common scanner targets only;
+// not an exhaustive blocklist (defense in depth, not the security
+// boundary itself).
+const sensitiveProbePaths = [
+  '/.env', '/.env.local', '/.env.production',
+  '/.git', '/.git/config', '/.git/HEAD',
+  '/.svn', '/.svn/entries',
+  '/.DS_Store',
+  '/package.json', '/package-lock.json',
+  '/Dockerfile', '/docker-compose.yml',
+  '/composer.json', '/composer.lock',
+  '/yarn.lock'
+];
+app.use((req, res, next) => {
+  if (sensitiveProbePaths.includes(req.path)) {
+    return res.status(404).type('text/plain').send('Not Found');
+  }
+  next();
+});
+
 app.use('/', embedRoutes);
 
 

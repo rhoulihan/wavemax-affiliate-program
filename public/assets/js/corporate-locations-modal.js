@@ -121,7 +121,7 @@
       }
       overlay.setAttribute('aria-hidden', 'false');
       overlay.classList.add('open');
-      document.body.style.overflow = 'hidden';
+      document.body.classList.add('wm-noscroll'); // CSP-safe class-toggle
       if (!initialized) initialize();
       if (map) setTimeout(() => google.maps.event.trigger(map, 'resize'), 100);
       if (search) search.focus();
@@ -131,7 +131,7 @@
       if (!overlay) return;
       overlay.setAttribute('aria-hidden', 'true');
       overlay.classList.remove('open');
-      document.body.style.overflow = '';
+      document.body.classList.remove('wm-noscroll'); // CSP-safe class-toggle
     }
 
     async function initialize() {
