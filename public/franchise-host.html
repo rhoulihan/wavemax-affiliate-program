@@ -131,7 +131,7 @@
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
-    "@type": "LaundryOrDryCleaner",
+    "@type": "DryCleaningOrLaundry",
     "@id": "{{SCHEMA_ID}}",
     "name": "{{SCHEMA_NAME}}",
     "alternateName": "{{SCHEMA_ALTERNATE_NAME}}",
@@ -262,7 +262,7 @@
     "description": "WaveMAX Laundry is a network of premium self-service laundromats and wash-dry-fold drop-off centers across the United States.",
     "founder": { "@type": "Person", "name": "Mike Hagan" },
     "subOrganization": {
-      "@type": "LaundryOrDryCleaner",
+      "@type": "DryCleaningOrLaundry",
       "name": "WaveMAX Laundry Austin",
       "url": "{{CANONICAL_URL}}",
       "telephone": "+1-512-553-1674"
@@ -283,7 +283,7 @@
     "category": "Wash and Fold",
     "description": "Drop off laundry, pick it up clean and folded. Hospital-grade UV-sanitized water, eco-friendly hypoallergenic detergent, 10 lb minimum. Pickup-and-delivery available within service area.",
     "provider": {
-      "@type": "LaundryOrDryCleaner",
+      "@type": "DryCleaningOrLaundry",
       "name": "WaveMAX Laundry Austin",
       "telephone": "+1-512-553-1674",
       "address": {
@@ -326,7 +326,7 @@
     "category": "Coin Laundry",
     "description": "Open daily 7am to 10pm. 42 Electrolux CompassPro 450G commercial washers (20 lb to 80 lb capacity), 42 high-velocity dryers, hospital-grade UV-sanitized water, free WiFi, free parking, fully attended.",
     "provider": {
-      "@type": "LaundryOrDryCleaner",
+      "@type": "DryCleaningOrLaundry",
       "name": "WaveMAX Laundry Austin",
       "telephone": "+1-512-553-1674"
     },
@@ -350,103 +350,36 @@
     "serviceType": "Commercial Laundry",
     "description": "Recurring commercial laundry contracts for restaurants, salons, gyms, spas, short-term rentals, and small hospitality. Volume pricing on weekly or daily pickup-and-delivery.",
     "provider": {
-      "@type": "LaundryOrDryCleaner",
+      "@type": "DryCleaningOrLaundry",
       "name": "WaveMAX Laundry Austin",
       "telephone": "+1-512-553-1674"
     }
   }
   </script>
 
-  <!-- FAQ schema — eligible for "People Also Ask" and Q&A rich results.
-       Curated to Austin-specific questions; Google flags generic FAQ as
-       low-quality, so each answer references local details (hours,
-       address, equipment) that can't be copy-pasted across locations. -->
+  <!-- FAQ schema — per-domain Q&A curated to the host's target query intent.
+       FAQ rich-result snippets were deprecated in May 2026, but FAQPage
+       is still a primary signal for AI Overviews / SGE / Perplexity /
+       ChatGPT Search citations on local-business queries. Each domain
+       picks 6 Q&A from a hyperlocal pool keyed to its keyword target,
+       answers reference real local details (hours, address, equipment).
+       Generated server-side from server/config/domainSeoOverrides.js. -->
+  <!-- {{FAQ_PAGE_SCHEMA}} -->
+
+  <!-- Speakable schema — voice search + AI Overviews lift. Marks the
+       canonical factual sentences (hours, address, phone, price) so
+       voice assistants and AI summarizers cite them verbatim instead
+       of fabricating an answer. Per 2026 best practice, sentences are
+       <30 words and reference DOM elements by CSS selector. -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
-    "@type": "FAQPage",
-    "mainEntity": [
-      {
-        "@type": "Question",
-        "name": "What are the hours of WaveMAX Austin?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "WaveMAX Austin is open every day, 365 days a year, from 7am to 10pm. The last wash starts at 9pm so every cycle finishes before close."
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "Where is WaveMAX Austin located?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "WaveMAX Austin is at 825 E Rundberg Ln F1, Austin, TX 78753 — North Austin, just east of I-35 between the Rundberg and Braker exits. Free on-site parking."
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "How much does wash-dry-fold cost in Austin?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "Wash-dry-fold is $1.20 per pound with a 10 pound minimum. Drop off any time during open hours; we wash, dry, and fold and you pick up the same day for orders placed before 11am."
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "How much does self-service laundry cost?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "Self-service loads run from $2.75 (smallest washer) to $10.50 (largest 80 lb capacity washer). All wash cycles run about 20 minutes; high-velocity dryers run about 20 minutes. Pay by credit, debit, or laundry card."
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "Does WaveMAX Austin have free WiFi?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "Yes — free WiFi is available throughout the store, along with free parking, comfortable seating, and a fully attended floor."
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "Do you sanitize the water?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "Yes. Every washer at WaveMAX Austin runs through an Omni LUX hospital-grade UV water sanitization system. The same UV technology used in hospital laundries kills bacteria and viruses in the wash water before it touches your clothes."
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "Can I drop off laundry and come back later?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "Absolutely — that's our wash-dry-fold drop-off service. Drop off your laundry with the attendant; we'll wash, dry, and fold it. Same-day turnaround for orders placed before 11am, otherwise 24-hour."
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "Do you offer commercial laundry accounts?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "Yes. We service restaurants, salons, gyms, spas, short-term rentals, and small hospitality with weekly or daily pickup-and-delivery. Call (512) 553-1674 to set up a commercial account."
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "Do you accept credit cards?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "Yes — we accept all major credit cards, debit cards, and laundry cards. No cash needed for any service."
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "Is the laundromat wheelchair accessible?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "Yes. Our Austin store is fully wheelchair accessible — entrance, restroom, machines, and folding tables. Accessible parking is available immediately in front of the entry."
-        }
-      }
-    ]
+    "@type": "WebPage",
+    "url": "{{CANONICAL_URL}}",
+    "speakable": {
+      "@type": "SpeakableSpecification",
+      "cssSelector": [".wm-speakable-hours", ".wm-speakable-address", ".wm-speakable-phone", ".wm-speakable-price"]
+    }
   }
   </script>
 
@@ -520,6 +453,21 @@
      is keyword-rich and city-anchored; the visible hero in the
      iframe content remains the user-facing headline. -->
 <h1 style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;">{{HERO_H1}}</h1>
+
+<!-- SSR-visible per-domain content for crawlers + AI Overviews. The
+     visible chrome layout is unchanged (everything below is positioned
+     off-screen via the inline style), but the rendered DOM has a unique
+     opening paragraph, hyperlocal FAQ Q&A, and Speakable-marked NAP
+     snippets per host. This is the single biggest dedup signal across
+     sister domains — Google fingerprints first paragraph content. -->
+<section aria-label="About this location" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden;">
+  <p class="wm-domain-lead">{{LEAD_PARAGRAPH}}</p>
+  <p class="wm-speakable-address">WaveMAX Austin is located at 825 East Rundberg Lane, Suite F1, Austin, Texas 78753.</p>
+  <p class="wm-speakable-hours">Open every day from 7am to 10pm, 365 days a year. Last wash starts at 9pm.</p>
+  <p class="wm-speakable-phone">Call WaveMAX Austin at 512-553-1674.</p>
+  <p class="wm-speakable-price">Wash-dry-fold drop-off is $1.20 per pound with a 10-pound minimum. Self-service wash cycles run $2.75 to $10.50.</p>
+  {{FAQ_VISIBLE_BLOCK}}
+</section>
 
 <!--
   ════════════════════════════════════════════════════════════════════
