@@ -973,3 +973,20 @@
 }
 #wm-map .wm-btn-primary:hover { background-color: #15336a !important; border-color: #15336a !important; }
 #wm-map .wm-btn-secondary:hover { background-color: #f0f4fa !important; }
+
+/* ============================================================
+   SR-ONLY — off-screen accessibility / SEO H1 utility
+   (mirrors the same class in wavemax-theme.css and corporate-chrome.css;
+   added here so franchise-host.html, which only loads this stylesheet,
+   can use it without an extra <link>. Used to replace inline style="..."
+   off-screen positioning so strict CSP can drop 'unsafe-inline'.)
+   ============================================================ */
+.wm-sr-only {
+  position: absolute;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}

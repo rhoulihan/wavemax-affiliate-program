@@ -234,14 +234,35 @@ app.use((req, res, next) => {
     '/customer-dashboard-embed.html',
     '/forgot-password-embed.html',
     '/reset-password-embed.html',
-    '/site-page-content-only.html'
+    '/site-page-content-only.html',
+    // Austin franchisee content surfaces — embed pages have zero inline
+    // executable scripts after the 2026-05-20 sweep that converted the
+    // off-screen `style="position:absolute…"` attrs to .wm-sr-only.
+    '/austin-landing-v3-embed.html',
+    '/contact-embed.html',
+    '/wash-dry-fold-embed.html',
+    '/self-serve-laundry-embed.html',
+    '/commercial-embed.html',
+    '/about-us-embed.html'
   ];
-  
+
   // Apply strict CSP to documentation pages as well (but not examples)
-  const isDocumentationPage = req.path.startsWith('/docs/') && 
-                             req.path.endsWith('.html') && 
+  const isDocumentationPage = req.path.startsWith('/docs/') &&
+                             req.path.endsWith('.html') &&
                              !req.path.includes('/examples/');
-  
+
+  // NOTE on franchise-host (per-franchise /<slug>/<page> routes): NOT
+  // included in strict-CSP. The controller's data-injection script
+  // already carries a per-request nonce, but the page-level JS
+  // (language-switcher dropdown in austin-host-mock.js, locations-modal
+  // open/close) toggles styling via inline `el.style.x = y` mutations.
+  // The local CSP behavior we have historically observed treats those
+  // as inline-style for enforcement purposes when 'unsafe-inline' is
+  // absent. Switching franchise-host to strict requires refactoring
+  // those JS sites to class-toggling (tracked under SEC L-1/L-2).
+  // Adding franchise-host here pre-emptively would risk breaking the
+  // language switcher in production.
+
   const useStrictCSP = strictCSPPages.includes(req.path) || isDocumentationPage;
   
   // All embed pages now use nonces since embed-app.html was converted to CSP-compliant redirect to embed-app-v2.html
