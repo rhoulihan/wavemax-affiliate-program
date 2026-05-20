@@ -9,39 +9,32 @@
  */
 
 const rateLimit = require('express-rate-limit');
-const MongoStore = require('rate-limit-mongo');
 const logger = require('../utils/logger');
 
 // Check if rate limiting should be relaxed
 const isRelaxed = process.env.RELAX_RATE_LIMITING === 'true';
 const isTest = process.env.NODE_ENV === 'test';
 
-// MongoDB store for distributed rate limiting.
+// Rate-limit store factory.
 //
-// Each limiter MUST get its own collection. When two stacked limiters
-// share a collection AND key by the same value (e.g. req.ip), both
-// limiters' increments target the same row — express-rate-limit's
-// own validator detects double-counting and throws
-// ERR_ERL_DOUBLE_COUNT, which surfaces as 429s for legit users. Pass
-// a unique `name` for any limiter that runs alongside another on the
-// same route.
-const createMongoStore = (windowMs = 60 * 60 * 1000, name = 'default') => {
-  if (isTest) {
-    return undefined; // Use memory store for tests
-  }
-
-  try {
-    return new MongoStore({
-      uri: process.env.MONGODB_URI,
-      collectionName: `rate_limits_${name}`,
-      expireTimeMs: windowMs, // Match the window time
-      errorHandler: logger.error.bind(null, 'Rate limit store error:')
-    });
-  } catch (error) {
-    logger.error('Failed to create MongoDB rate limit store:', error);
-    return undefined; // Fall back to memory store
-  }
-};
+// HISTORY: previously returned a `rate-limit-mongo` MongoStore so the
+// limiters could share a counter across the PM2 cluster workers. That
+// package is unmaintained and pulls a vulnerable `underscore` chain
+// (6 high-severity CVEs as of 2026-05-20), so we removed the dependency.
+// Returning `undefined` here falls back to express-rate-limit's built-in
+// in-memory store, which is per-worker — meaning the configured `max`
+// is effectively multiplied by the cluster size in production.
+//
+// This is acceptable WHILE THE AFFILIATE PROGRAM IS OFFLINE: there's
+// no authenticated traffic the limiters guard, the public Austin
+// content pages aren't rate-limited (they don't go through these
+// middlewares), and Cloudflare provides upstream bot/burst protection.
+// WHEN THE AFFILIATE PROGRAM COMES BACK ONLINE, swap in a maintained
+// shared store before exposing the auth/registration/payment surfaces
+// publicly: `@express-rate-limit/mongo-store` is the official option,
+// `rate-limit-redis` if Redis joins the stack. The function signature
+// stays compatible so the swap is one-file.
+const createMongoStore = (_windowMs, _name) => undefined;
 
 // Helper to skip rate limiting in test environment
 const skipInTest = () => isTest;
