@@ -60,16 +60,84 @@ function isAllowed(pathname) {
   return ALLOWLIST.some((re) => re.test(pathname));
 }
 
+// Suspicious-path patterns. When a quarantined request matches one of
+// these, the redirect strips the path and lands on the corporate root
+// (not the original URL). Without the strip, anyone could construct
+// `https://rundberglaundry.com/<phishy-path>` and have it 302 to
+// `https://www.wavemaxlaundry.com/<phishy-path>` — a credible phishing
+// vector even though the destination host is legitimate. Filter is also
+// a cleanup signal: scanners hitting wp-admin/.env/.git get one harmless
+// hop to the corporate front door instead of an annoying log trail on the
+// corporate side. M-13 / prod-lockdown-2026-05-20.
+const SUSPICIOUS_PATTERNS = [
+  // Secret-file probes
+  /^\/\.env(\.|$)/,                       // .env, .env.local, .env.production
+  /^\/\.git(\/|$)/,                       // .git, .git/HEAD, .git/config
+  /^\/\.svn(\/|$)/,
+  /^\/\.aws(\/|$)/,
+  /^\/\.ssh(\/|$)/,
+  /^\/\.DS_Store$/,
+
+  // WordPress / common-CMS probes
+  /^\/wp-admin(\/|$)/,
+  /^\/wp-login\.php/,
+  /^\/wp-content(\/|$)/,
+  /^\/wp-includes(\/|$)/,
+  /^\/xmlrpc\.php/,
+  /^\/phpmyadmin(\/|$)/i,
+  /^\/pma(\/|$)/i,
+
+  // PHP / classic-app fingerprinting
+  /\.php(\?|$)/,
+  /\.asp(x)?(\?|$)/,
+  /\.jsp(\?|$)/,
+  /\.cgi(\?|$)/,
+  /^\/cgi-bin(\/|$)/,
+  /^\/phpinfo(\.|$)/,
+
+  // Server status / info endpoints
+  /^\/server-status(\/|$)/,
+  /^\/server-info(\/|$)/,
+
+  // OS / shell paths
+  /^\/cmd\.exe$/i,
+  /^\/etc\/passwd$/,
+  /^\/proc\/self(\/|$)/,
+
+  // Build-system / dependency manifests
+  /^\/Dockerfile$/,
+  /^\/docker-compose\.ya?ml$/,
+  /^\/package(-lock)?\.json$/,
+  /^\/composer(-lock)?\.json$/,
+  /^\/yarn\.lock$/,
+];
+
 /**
- * Build the corporate URL that a quarantined path redirects to. Preserves
- * the path and query string verbatim — the corporate site is responsible
- * for its own URL structure / 404s.
+ * Is this path a known scanner / phishing-friendly pattern?
+ * @param {string} pathname  req.path (no query string)
+ */
+function isSuspicious(pathname) {
+  return SUSPICIOUS_PATTERNS.some((re) => re.test(pathname));
+}
+
+/**
+ * Build the corporate URL that a quarantined path redirects to.
+ * Legitimate paths are preserved verbatim — the corporate site is
+ * responsible for its own URL structure / 404s. Suspicious paths
+ * (see SUSPICIOUS_PATTERNS) are stripped to the corporate root, so the
+ * domain can't be used to build phishing-friendly link chains. M-13
+ * / prod-lockdown-2026-05-20.
  *
  * @param {string} originalUrl  req.originalUrl (path + query)
  */
 function buildCorporateRedirect(originalUrl) {
   // originalUrl always starts with '/'; ensure no double slash.
   const tail = originalUrl.startsWith('/') ? originalUrl : '/' + originalUrl;
+  // Strip query string for the suspicion check (patterns target the path).
+  const pathOnly = tail.split('?')[0];
+  if (isSuspicious(pathOnly)) {
+    return `${CORPORATE_SITE_URL}/`;
+  }
   return `${CORPORATE_SITE_URL}${tail}`;
 }
 
@@ -83,8 +151,10 @@ function isQuarantineEnabled() {
 
 module.exports = {
   ALLOWLIST,
+  SUSPICIOUS_PATTERNS,
   CORPORATE_SITE_URL,
   isAllowed,
+  isSuspicious,
   buildCorporateRedirect,
   isQuarantineEnabled,
 };
