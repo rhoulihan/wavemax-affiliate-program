@@ -632,11 +632,22 @@
       const a = e.target && e.target.closest && e.target.closest('a[data-route]');
       if (!a) return;
       e.preventDefault();
-      const href = a.getAttribute('href');
+      // The legacy href format is `?route=/wash-dry-fold` (from the old
+      // embed-app-v2 SPA router). The franchise template uses path-based
+      // routing (/<slug>/<page>/), so we build the destination from
+      // data-route + the slug delivered via location-data. The literal
+      // ?route= href is ignored — falling back to it would just reload
+      // the host iframe at the same path with an unused query string,
+      // which is what users were reporting.
+      const route = a.getAttribute('data-route') || '';
+      const ld    = window.IframeBridge && window.IframeBridge.getLocationData && window.IframeBridge.getLocationData();
+      const slug  = (ld && ld.slug) || (_locationData && _locationData.slug) || 'austin-tx';
+      const cleanRoute = route.startsWith('/') ? route : '/' + route;
+      const targetPath = `/${slug}${cleanRoute}${cleanRoute.endsWith('/') ? '' : '/'}`;
       if (window.IframeBridge && window.IframeBridge.navigateParent) {
-        window.IframeBridge.navigateParent(href);
-      } else {
-        window.parent.location.href = href;
+        window.IframeBridge.navigateParent(targetPath);
+      } else if (window.parent) {
+        window.parent.location.href = targetPath;
       }
     });
   }

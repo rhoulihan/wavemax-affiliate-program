@@ -613,11 +613,19 @@
       const a = e.target && e.target.closest && e.target.closest('a[data-route]');
       if (!a) return;
       e.preventDefault();
-      const href = a.getAttribute('href');
+      // Build /<slug>/<route>/ from data-route + the slug delivered via
+      // location-data. The literal href="?route=..." legacy attribute is
+      // ignored — the franchise template uses path-based routing, so a
+      // ?route= query just reloads the same page (which was the bug).
+      const route = a.getAttribute('data-route') || '';
+      const ld    = window.IframeBridge && window.IframeBridge.getLocationData && window.IframeBridge.getLocationData();
+      const slug  = (ld && ld.slug) || 'austin-tx';
+      const cleanRoute = route.startsWith('/') ? route : '/' + route;
+      const targetPath = `/${slug}${cleanRoute}${cleanRoute.endsWith('/') ? '' : '/'}`;
       if (window.IframeBridge && window.IframeBridge.navigateParent) {
-        window.IframeBridge.navigateParent(href);
-      } else {
-        window.parent.location.href = href;
+        window.IframeBridge.navigateParent(targetPath);
+      } else if (window.parent) {
+        window.parent.location.href = targetPath;
       }
     });
   }
