@@ -42,6 +42,14 @@ const ALLOWLIST = [
   /^\/terms-of-service$/,
   /^\/terms-and-conditions$/,
   /^\/refund-policy$/,
+
+  // ── SEO crawl resources ──────────────────────────────────────────
+  // Per-host robots.txt and sitemap.xml emitted by server.js so each of
+  // the four per-location domains points search engines at its own URL
+  // set. Search crawlers (Googlebot, Bingbot) don't carry session cookies
+  // or whitelisted IPs, so these must be public.
+  /^\/robots\.txt$/,
+  /^\/sitemap\.xml$/,
 ];
 
 /**
