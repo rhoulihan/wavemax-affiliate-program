@@ -46,7 +46,7 @@
       country:      "US",
       addressLine2: "Austin, TX 78753",
       geo:          { lat: 30.3564789, lng: -97.6858016 },
-      mapsUrl:      "https://www.google.com/maps/dir/?api=1&destination=825+E+Rundberg+Ln+F1+Austin+TX+78753"
+      mapsUrl:      "https://www.google.com/maps/dir/?api=1&destination=WaveMAX%20Laundry%20Austin&destination_place_id=ChIJOUs5BpHJRIYRTjv0UotLg0o"
     },
     hours: {
       open:     "07:00",
