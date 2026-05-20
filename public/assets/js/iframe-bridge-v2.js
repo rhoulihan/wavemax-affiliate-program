@@ -441,20 +441,26 @@
     }
 
     function updateHeight() {
-        // Measure CONTENT height only. Do NOT include
-        // documentElement.clientHeight here — that returns the iframe's
-        // current rendered viewport (i.e., whatever height the parent
-        // last set on iframe.style.height). Including it in Math.max
-        // produced a ratchet effect on viewport shrinks:
-        // mobile → desktop, content reflows from 3000px to 1500px, but
-        // clientHeight is still 3000 (the iframe element hasn't shrunk
-        // yet), so Math.max returns 3000 — iframe never reports the
-        // smaller height, parent never shrinks, white space sits above
-        // the host page footer.
+        // Measure CONTENT height only. Do NOT include any of
+        //   documentElement.clientHeight   (the iframe's current viewport)
+        //   documentElement.scrollHeight   (max of content + viewport,
+        //                                   because <html> stretches to
+        //                                   fill the viewport when content
+        //                                   is shorter — so this returns
+        //                                   the iframe's outer height,
+        //                                   not the content's)
+        // Both of those ratchet to the parent's last-set iframe.style.height
+        // and prevent shrink on viewport widening (mobile → desktop):
+        // content reflows to 2000px but docEl.scrollHeight stays at the
+        // last mobile-tall 3500px because the iframe element hasn't been
+        // resized yet — Math.max keeps returning 3500, parent never
+        // shrinks, white space sits above the host page footer.
+        //
+        // body.scrollHeight + body.offsetHeight + docEl.offsetHeight all
+        // reflect natural content box height regardless of viewport.
         const height = Math.max(
             document.body.scrollHeight,
             document.body.offsetHeight,
-            document.documentElement.scrollHeight,
             document.documentElement.offsetHeight
         );
 
