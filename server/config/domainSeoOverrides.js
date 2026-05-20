@@ -82,6 +82,10 @@ const FAQ_POOL = {
 const OVERRIDES = {
   // ── rundberglaundry.com — primary target: "wavemax austin" ────────
   'rundberglaundry.com': {
+    // Which page the apex (/) actually serves. Nginx rewrites apex on each
+    // domain to a slug page; the controller compares against this to decide
+    // whether to apply the override (since req.path no longer says "/").
+    landingPath: '/',
     title: 'WaveMAX Austin Laundromat at Rundberg | Self-Service & Wash-Dry-Fold',
     description: 'WaveMAX Austin\'s Rundberg location — North Austin\'s premier laundromat. Self-service & wash-dry-fold drop-off. 825 E Rundberg Ln. Open daily 7am–10pm.',
     h1: 'WaveMAX Austin — Rundberg\'s Laundromat',
@@ -96,6 +100,8 @@ const OVERRIDES = {
 
   // ── atxwashdryfold.com — primary target: "wash dry fold austin" ──
   'atxwashdryfold.com': {
+    // Apex deep-links to /austin-tx/wash-dry-fold/ via nginx rewrite.
+    landingPath: '/wash-dry-fold',
     title: 'Wash-Dry-Fold Austin | Drop-Off Laundry $1.20/lb | ATX Wash Dry Fold',
     description: 'Austin\'s best wash-dry-fold drop-off laundry service. Drop off, we wash, dry, and fold. $1.20/lb. Hospital-grade UV-sanitized water. Open daily 7am–10pm.',
     h1: 'Austin\'s Wash-Dry-Fold Drop-Off Laundry',
@@ -110,6 +116,7 @@ const OVERRIDES = {
 
   // ── atxwashateria.com — primary target: "austin washateria" ──────
   'atxwashateria.com': {
+    landingPath: '/',
     title: 'ATX Washateria | Modern Austin Laundromat | WaveMAX Austin',
     description: 'ATX Washateria — Austin\'s modern laundromat. Self-service, wash-dry-fold, commercial. 42 Electrolux washers, hospital-grade UV water. Open daily 7am–10pm.',
     h1: 'ATX Washateria — North Austin\'s Modern Laundromat',
@@ -124,6 +131,7 @@ const OVERRIDES = {
 
   // ── runberglaundry.com — primary target: "rundberg laundry" ──────
   'runberglaundry.com': {
+    landingPath: '/',
     title: 'Rundberg Laundry | North Austin Laundromat at Rundberg Lane | WaveMAX',
     description: 'Rundberg Laundry by WaveMAX — North Austin\'s premier laundromat at 825 E Rundberg Ln. Self-service, wash-dry-fold, commercial. Open daily 7am–10pm.',
     h1: 'Rundberg Laundry — North Austin\'s Premier Laundromat',
