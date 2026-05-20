@@ -815,6 +815,11 @@
 #wm-map {
   background: #ffffff;
   width: 100%;
+  /* Fill the parent .wm-pgfooter-map cell — the grid stretches all cells
+     to match the tallest column, so this lets the mapframe expand to
+     match the Contact/Local-Links columns automatically without
+     hardcoding a height. */
+  height: 100%;
   font-family: sans-serif;
   display: flex;
   flex-direction: column;
@@ -826,11 +831,15 @@
  * other footer columns; shorter loses the orientation context. */
 #wm-map .wm-pgfooter-mapframe {
   width: 100% !important;
-  /* 360px -> 450px (+25%) per user request — extends the map past the
-     adjacent column heights, taking advantage of the freed Call Us bar
-     space + a bit more vertical real estate to make the embed legible
-     on desktop. No top border now that there's no element above it. */
-  height: 450px !important;
+  /* Dynamic fill — flex: 1 makes the mapframe consume whatever vertical
+     space remains in the cell after the .wm-pgfooter-mapbar (All
+     Locations button) takes its content height + 20px padding above
+     and below. min-height: 0 is required so the flex item can shrink
+     below its natural content size when the column is short.
+     min-height: 240px is a floor so the embed stays usable when the
+     other footer columns happen to be tiny (e.g., narrow mobile). */
+  flex: 1 1 auto !important;
+  min-height: 240px !important;
   background: #f1f5f9 !important;
   overflow: hidden !important;
   display: block !important;
@@ -843,9 +852,13 @@
   border: 0 !important;
 }
 #wm-map .wm-pgfooter-mapbar {
-  padding: 1.25rem 1.5rem !important;
+  /* Exact 20px above + 20px below the All Locations button per spec;
+     horizontal padding stays at 1.5rem to align with the rest of the
+     footer card's gutter. */
+  padding: 20px 1.5rem !important;
   display: flex !important;
   background: #ffffff !important;
+  flex-shrink: 0 !important;
 }
 #wm-map .wm-pgfooter-mapbar .wm-btn-primary,
 #wm-map .wm-pgfooter-mapbar .wm-btn-secondary {
