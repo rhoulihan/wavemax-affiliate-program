@@ -23,7 +23,7 @@ const registry = require('../services/franchiseRegistryService');
 const equipmentProfileService = require('../services/equipmentProfileService');
 const logger = require('../utils/logger');
 const { isQuarantineEnabled, buildCorporateRedirect } = require('../config/quarantineConfig');
-const { getOverride: getDomainSeoOverride, getSameAs: getDomainSameAs, stripWww } = require('../config/domainSeoOverrides');
+const { getOverride: getDomainSeoOverride, getSameAs: getDomainSameAs, stripWww, getFaq: getDomainFaq } = require('../config/domainSeoOverrides');
 
 const ROOT = path.resolve(__dirname, '../..');
 const HOST_TEMPLATE = path.join(ROOT, 'public/franchise-host.html');
@@ -235,6 +235,38 @@ exports.renderFranchisePage = (req, res, next) => {
   ];
   const schemaSameAsJson = JSON.stringify(sameAsList);
 
+  // Per-domain FAQ Q&A — emit both the FAQPage JSON-LD and a hidden
+  // SSR-visible Q&A block. AI Overviews / SGE / Perplexity cite FAQPage
+  // schema on local queries; the visible block adds unique fingerprintable
+  // text per domain to mitigate the duplicate-content signal across the
+  // sister sites.
+  const faqEntries = (domainOverride && isLandingPage)
+    ? getDomainFaq(host)
+    : [];
+
+  const faqPageSchema = faqEntries.length > 0
+    ? '<script type="application/ld+json">' + escapeJsonForScript({
+      '@context': 'https://schema.org',
+      '@type': 'FAQPage',
+      '@id': `https://${canonicalHost}/#faq`,
+      mainEntity: faqEntries.map((f) => ({
+        '@type': 'Question',
+        name: f.q,
+        acceptedAnswer: { '@type': 'Answer', text: f.a }
+      }))
+    }) + '</script>'
+    : '';
+
+  const faqVisibleBlock = faqEntries.length > 0
+    ? '<dl>' + faqEntries.map((f) =>
+      `<dt>${escapeHtml(f.q)}</dt><dd>${escapeHtml(f.a)}</dd>`
+    ).join('') + '</dl>'
+    : '';
+
+  const leadParagraph = (domainOverride && isLandingPage && domainOverride.leadParagraph)
+    ? domainOverride.leadParagraph
+    : `${schemaName} — ${schemaDescription}`;
+
   // Inline data block — replaces the two scripts (places-config + static
   // host-mock-data.js) the dev demo loads. Single source of truth: the
   // franchise's JSON file. Falls back to the corporate Places key in env
@@ -274,6 +306,9 @@ exports.renderFranchisePage = (req, res, next) => {
     .replace(/\{\{SCHEMA_DESCRIPTION\}\}/g,     escapeJsonForScript(schemaDescription).slice(1, -1))
     .replace(/\{\{SCHEMA_ID\}\}/g,              escapeJsonForScript(schemaId).slice(1, -1))
     .replace(/"sameAs":\s*\[[^\]]*\]/g,         `"sameAs": ${schemaSameAsJson}`)
+    .replace(/\{\{LEAD_PARAGRAPH\}\}/g,         escapeHtml(leadParagraph))
+    .replace(/<!-- \{\{FAQ_PAGE_SCHEMA\}\} -->/, faqPageSchema)
+    .replace(/\{\{FAQ_VISIBLE_BLOCK\}\}/g,      faqVisibleBlock)
     .replace(/<!-- \{\{FRANCHISE_DATA_INJECTION\}\} -->/, dataInjection);
 
   res.setHeader('Cache-Control', 'public, max-age=60');
