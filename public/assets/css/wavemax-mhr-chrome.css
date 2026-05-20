@@ -826,11 +826,14 @@
  * other footer columns; shorter loses the orientation context. */
 #wm-map .wm-pgfooter-mapframe {
   width: 100% !important;
-  height: 280px !important;
+  /* Bumped from 280 -> 360 after the Call Us bar above the map was
+     removed — fills the column height that the bar used to occupy so
+     the map column matches the Contact and Local-Links columns at
+     desktop. No top border now that there's no element above it. */
+  height: 360px !important;
   background: #f1f5f9 !important;
   overflow: hidden !important;
   display: block !important;
-  border-top: 2px solid #e2e8f0 !important;
   border-bottom: 2px solid #e2e8f0 !important;
 }
 #wm-map .wm-pgfooter-mapframe iframe {

@@ -414,7 +414,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@500;600;700;800&display=swap" rel="stylesheet">
 
   <!-- MHR-faithful chrome stylesheets -->
-  <link rel="stylesheet" href="/assets/css/wavemax-mhr-chrome.css?v=20260506e">
+  <link rel="stylesheet" href="/assets/css/wavemax-mhr-chrome.css?v=20260520f">
   <link rel="stylesheet" href="/assets/css/wavemax-mhr-modal.css?v=20260505e">
 
   <!-- Demo-only host page styles (external for CSP compliance) -->
@@ -723,19 +723,13 @@
       </div>
     </div>
 
-    <!-- Col 2: Call Us · Live Google Map · All Locations.
+    <!-- Col 2: Live Google Map · All Locations.
          Same map embed as the /contact page (LOCATION_DATA.contact.mapsEmbedUrl)
          so the address pin actually renders. The map label inside the embed
-         is itself a link to the full Google Maps profile — no separate
-         "Get Directions" button needed. -->
+         is itself a link to the full Google Maps profile — Get Directions
+         and Call buttons live inside that profile, no need to duplicate. -->
     <div class="wm-pgfooter-map">
       <div id="wm-map">
-        <div class="wm-pgfooter-mapbar wm-pgfooter-mapbar--top">
-          <a class="wm-btn-primary"
-             data-bind="contact.phoneTel" data-bind-attr="href"
-             href="tel:+15125531674"
-             data-i18n="chrome.footer.callUs">Call Us</a>
-        </div>
         <div class="wm-pgfooter-mapframe">
           <iframe
             title="Map to this WaveMAX location"
