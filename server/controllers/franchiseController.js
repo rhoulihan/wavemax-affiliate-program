@@ -23,6 +23,7 @@ const registry = require('../services/franchiseRegistryService');
 const equipmentProfileService = require('../services/equipmentProfileService');
 const logger = require('../utils/logger');
 const { isQuarantineEnabled, buildCorporateRedirect } = require('../config/quarantineConfig');
+const { getOverride: getDomainSeoOverride, getSameAs: getDomainSameAs, stripWww } = require('../config/domainSeoOverrides');
 
 const ROOT = path.resolve(__dirname, '../..');
 const HOST_TEMPLATE = path.join(ROOT, 'public/franchise-host.html');
@@ -194,10 +195,45 @@ exports.renderFranchisePage = (req, res, next) => {
   // block when present, else falls back to a structured template that bakes
   // city, state, brand, and primary keyword into a Google-friendly shape.
   const seo = buildPageSeo(data, page, slug);
-  const title       = seo.title;
-  const description = seo.description;
-  const heroH1      = seo.heroH1;
-  const canonical = `https://wavemax.promo/${slug}${page === '/' ? '/' : page + '/'}`;
+
+  // Per-domain SEO overrides — the 4 per-location domains each target a
+  // distinct query intent. When the request comes in on one of them, we
+  // override title/description/H1/schema with values tuned for that intent
+  // and self-canonical so each domain ranks independently. Hits on
+  // wavemax.promo (and any unmapped host) fall through to the page-level
+  // defaults computed by buildPageSeo() above.
+  const hostHeader = String(req.hostname || req.headers.host || '').split(':')[0];
+  const host = stripWww(hostHeader) || 'wavemax.promo';
+  const domainOverride = getDomainSeoOverride(host);
+  const isLandingPage = page === '/';
+
+  // Apply domain overrides only on the landing page — the per-page SEO
+  // (wash-dry-fold, self-serve, commercial, etc.) already has tuned copy
+  // and the override is keyed to the apex query intent.
+  const title       = (domainOverride && isLandingPage) ? domainOverride.title       : seo.title;
+  const description = (domainOverride && isLandingPage) ? domainOverride.description : seo.description;
+  const heroH1      = (domainOverride && isLandingPage) ? domainOverride.h1          : seo.heroH1;
+  const keywords    = (domainOverride && isLandingPage) ? domainOverride.keywords    : ((data.seo && data.seo.keywords) || '');
+
+  // Self-canonical: each host ranks for itself, not for wavemax.promo.
+  // Path matches the slug/page contract the franchise router enforces.
+  const canonicalHost = host || 'wavemax.promo';
+  const canonical = `https://${canonicalHost}/${slug}${page === '/' ? '/' : page + '/'}`;
+
+  // Per-domain JSON-LD identity. Without this, all four domains advertise
+  // themselves as the same LocalBusiness ("WaveMAX Laundry Austin") and
+  // Google consolidates them into one. Each managed host gets its own
+  // schema name + @id + alternateName + sameAs (the other 3 domains).
+  const schemaName        = (domainOverride && domainOverride.schemaName)        || 'WaveMAX Laundry Austin';
+  const schemaAlternate   = (domainOverride && domainOverride.schemaAlternateName) || 'WaveMAX Austin';
+  const schemaDescription = (domainOverride && domainOverride.schemaDescription) || 'Self-service laundromat and wash-dry-fold drop-off serving North Austin. 42 Electrolux CompassPro 450G washers, 42 high-velocity dryers, hospital-grade UV-sanitized water, free WiFi, free parking, fully attended.';
+  const schemaId          = `https://${canonicalHost}/${slug}/#localbusiness`;
+  // sameAs cross-links the four per-location domains + the corporate site.
+  const sameAsList = [
+    ...getDomainSameAs(host),
+    'https://www.wavemaxlaundry.com/austin-tx/'
+  ];
+  const schemaSameAsJson = JSON.stringify(sameAsList);
 
   // Inline data block — replaces the two scripts (places-config + static
   // host-mock-data.js) the dev demo loads. Single source of truth: the
@@ -227,11 +263,17 @@ exports.renderFranchisePage = (req, res, next) => {
   html = html
     .replace(/\{\{TITLE\}\}/g,         escapeHtml(title))
     .replace(/\{\{DESCRIPTION\}\}/g,   escapeHtml(description))
+    .replace(/\{\{KEYWORDS\}\}/g,      escapeHtml(keywords))
     .replace(/\{\{HERO_H1\}\}/g,       escapeHtml(heroH1))
     .replace(/\{\{CANONICAL_URL\}\}/g, escapeHtml(canonical))
     .replace(/\{\{INITIAL_IFRAME_SRC\}\}/g, escapeHtml(iframeSrc || ''))
     .replace(/\{\{SLUG\}\}/g,          escapeHtml(slug))
     .replace(/\{\{CSP_NONCE\}\}/g,     escapeHtml(nonce))
+    .replace(/\{\{SCHEMA_NAME\}\}/g,            escapeJsonForScript(schemaName).slice(1, -1))
+    .replace(/\{\{SCHEMA_ALTERNATE_NAME\}\}/g,  escapeJsonForScript(schemaAlternate).slice(1, -1))
+    .replace(/\{\{SCHEMA_DESCRIPTION\}\}/g,     escapeJsonForScript(schemaDescription).slice(1, -1))
+    .replace(/\{\{SCHEMA_ID\}\}/g,              escapeJsonForScript(schemaId).slice(1, -1))
+    .replace(/"sameAs":\s*\[[^\]]*\]/g,         `"sameAs": ${schemaSameAsJson}`)
     .replace(/<!-- \{\{FRANCHISE_DATA_INJECTION\}\} -->/, dataInjection);
 
   res.setHeader('Cache-Control', 'public, max-age=60');

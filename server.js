@@ -750,6 +750,71 @@ app.get('/', (req, res) => {
   });
 });
 
+// Per-hostname robots.txt and sitemap.xml. Each managed host serves its
+// own — required for self-canonical multi-domain SEO. Hosts that aren't
+// in the override map fall back to a generic robots that allows everything
+// and points to wavemax.promo's sitemap.
+app.get('/robots.txt', (req, res) => {
+  const host = (req.hostname || 'wavemax.promo').toLowerCase().replace(/^www\./, '');
+  res.type('text/plain');
+  res.setHeader('Cache-Control', 'public, max-age=3600');
+  res.send(
+    `User-agent: *\n` +
+    `Allow: /\n` +
+    `Disallow: /api/\n` +
+    `Disallow: /admin/\n` +
+    `Disallow: /embed-app-v2.html\n` +
+    `Disallow: /monitoring/\n` +
+    `\n` +
+    `Sitemap: https://${host}/sitemap.xml\n`
+  );
+});
+
+app.get('/sitemap.xml', (req, res) => {
+  const host = (req.hostname || 'wavemax.promo').toLowerCase().replace(/^www\./, '');
+  const { isManagedHost } = require('./server/config/domainSeoOverrides');
+  const now = new Date().toISOString().slice(0, 10);
+
+  // Per-location domains have only their apex landing as a canonical URL.
+  // wavemax.promo gets the full per-page Austin tree (it's the legacy
+  // canonical with all the indexed history).
+  const urls = [];
+  if (host === 'wavemax.promo' || !isManagedHost(host)) {
+    urls.push(
+      { loc: 'https://wavemax.promo/austin-tx/',                    priority: '1.0' },
+      { loc: 'https://wavemax.promo/austin-tx/wash-dry-fold/',      priority: '0.9' },
+      { loc: 'https://wavemax.promo/austin-tx/self-serve-laundry/', priority: '0.9' },
+      { loc: 'https://wavemax.promo/austin-tx/commercial/',         priority: '0.8' },
+      { loc: 'https://wavemax.promo/austin-tx/about-us/',           priority: '0.7' },
+      { loc: 'https://wavemax.promo/austin-tx/contact/',            priority: '0.7' }
+    );
+  } else if (host === 'atxwashdryfold.com') {
+    // Apex deep-links to the WDF page — list it as canonical.
+    urls.push(
+      { loc: `https://${host}/`,                            priority: '1.0' },
+      { loc: `https://${host}/austin-tx/wash-dry-fold/`,    priority: '0.9' }
+    );
+  } else {
+    // rundberglaundry.com, atxwashateria.com, runberglaundry.com — apex
+    // routes to /austin-tx/, but the user-visible URL is the apex.
+    urls.push(
+      { loc: `https://${host}/`, priority: '1.0' }
+    );
+  }
+
+  res.type('application/xml');
+  res.setHeader('Cache-Control', 'public, max-age=3600');
+  const body = [
+    '<?xml version="1.0" encoding="UTF-8"?>',
+    '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
+    ...urls.map(({ loc, priority }) => (
+      `  <url><loc>${loc}</loc><lastmod>${now}</lastmod><priority>${priority}</priority></url>`
+    )),
+    '</urlset>'
+  ].join('\n');
+  res.send(body);
+});
+
 // Direct routes for legal pages (for Google and external access)
 app.get('/terms-of-service', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'terms-and-conditions.html'));
