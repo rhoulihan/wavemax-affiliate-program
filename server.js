@@ -510,10 +510,15 @@ app.use(passport.session());
 // non-Austin/non-app request to the corporate site (wavemaxlaundry.com).
 // No-op when the env var is unset/false.
 const locationQuarantine = require('./server/middleware/locationQuarantine');
-app.use(locationQuarantine);
 
-// Mount embed routes with CSP nonce support BEFORE static file serving
-const embedRoutes = require('./server/routes/embedRoutes');
+// IMPORTANT ORDERING — these two handlers must run BEFORE
+// locationQuarantine. The quarantine middleware redirects any request
+// it doesn't recognize as Austin/app content to www.wavemaxlaundry.com.
+// Without an explicit short-circuit for these paths, our security.txt
+// route and sensitive-path 404 handler are bypassed and the responses
+// turn into 302s back to the franchisor's domain (which itself 404s,
+// producing the broken-redirect chain the comparative audit flagged).
+
 // .well-known/security.txt — RFC 9116 disclosure policy.
 // Explicit route because Express's serve-static ignores dotfiles by
 // default (and globally allowing dotfiles would expose other dot-paths
@@ -522,14 +527,10 @@ app.get('/.well-known/security.txt', (req, res) => {
   res.type('text/plain').sendFile(path.join(__dirname, 'public', '.well-known', 'security.txt'));
 });
 
-// Explicit 404s for common sensitive-path probes — closes the
-// SPA-catch-all 302 leak the comparative audit flagged. Files are not
-// exposed either way (the catch-all redirects them into the SPA shell)
-// but the 302 leak gives an ambiguous "this site may be hiding
-// something" signal to scanners; a clean 404 is the industry-standard
-// response. List intentionally short — common scanner targets only;
-// not an exhaustive blocklist (defense in depth, not the security
-// boundary itself).
+// Explicit 404s for common sensitive-path probes — closes the 302 leak
+// the comparative audit flagged. Files are not exposed either way; this
+// just produces the clean response semantic scanners and audit tools
+// expect. List intentionally short — common scanner targets only.
 const sensitiveProbePaths = [
   '/.env', '/.env.local', '/.env.production',
   '/.git', '/.git/config', '/.git/HEAD',
@@ -546,6 +547,12 @@ app.use((req, res, next) => {
   }
   next();
 });
+
+// NOW the quarantine — runs after the two early-route handlers above.
+app.use(locationQuarantine);
+
+// Mount embed routes with CSP nonce support BEFORE static file serving
+const embedRoutes = require('./server/routes/embedRoutes');
 
 app.use('/', embedRoutes);
 
