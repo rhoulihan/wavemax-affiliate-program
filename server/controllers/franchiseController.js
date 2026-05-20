@@ -151,15 +151,19 @@ exports.renderFranchisePage = (req, res, next) => {
   const slug = req.params.slug;
   const page = req.params.page ? `/${req.params.page}` : '/';
 
+  // Not a registered franchise? Fall through so other routes (legal,
+  // health, static, etc.) can handle the request. The /:slug route is
+  // greedy and catches any single-segment path like /privacy-policy.
+  if (!registry.getFranchise(slug)) return next();
+
   // Defense-in-depth — the locationQuarantine middleware should catch
-  // non-Austin slugs before they reach this controller, but belt-and-
-  // suspenders in case the middleware is bypassed or this controller is
-  // invoked directly (e.g., from a future internal route).
+  // non-Austin franchises before they reach this controller, but belt-
+  // and-suspenders in case the middleware is bypassed or this controller
+  // is invoked directly. Only fires for KNOWN franchises (other slugs
+  // already returned next() above).
   if (isQuarantineEnabled() && slug !== 'austin-tx') {
     return res.redirect(302, buildCorporateRedirect(req.originalUrl));
   }
-
-  if (!registry.getFranchise(slug)) return next();
 
   const resolution = registry.resolvePage(slug, page);
   if (resolution.kind === 'notfound') {
