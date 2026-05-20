@@ -230,3 +230,8 @@ about-hero-*.png
 
 # Claude Code runtime lock files
 .claude/scheduled_tasks.lock
+
+# Playwright MCP server screenshot outputs that occasionally land in repo root
+mhr-payment-*.png
+*.playwright-mcp-screenshot.png
+.playwright-mcp/
