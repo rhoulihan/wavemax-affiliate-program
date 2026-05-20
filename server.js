@@ -398,8 +398,15 @@ const corsOptions = {
 
     const allAllowedOrigins = [...allowedOrigins, ...wavemaxDomains];
 
-    // Allow requests with no origin (like mobile apps or Postman)
-    if (!origin) return callback(null, true);
+    // H-7 / prod-lockdown-2026-05-20: previously this branch returned
+    // callback(null, true), admitting any null-origin request (curl,
+    // Postman, server-to-server) with credentials:true cookie clearance.
+    // The only legitimate consumers of /api are browsers (allowlisted via
+    // wavemaxDomains) and authenticated bots that present a JWT — neither
+    // depends on permissive null-origin CORS. Reject by default; explicit
+    // server-to-server callers can identify themselves by other means
+    // (mTLS, signed webhook, allowlisted IP).
+    if (!origin) return callback(null, false);
 
     if (allAllowedOrigins.indexOf(origin) !== -1) {
       callback(null, true);

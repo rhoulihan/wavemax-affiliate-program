@@ -102,6 +102,12 @@ const affiliateSchema = new mongoose.Schema({
   isActive: { type: Boolean, default: true },
   dateRegistered: { type: Date, default: Date.now },
   lastLogin: Date,
+  // H-5 per-account login lockout (mirrors Administrator). Five failed
+  // password attempts in any window → 2-hour lock. Resets on success.
+  // Closes the credential-stuffing-via-rotating-IPs path the per-IP
+  // rate limiter alone doesn't catch. prod-lockdown-2026-05-20.
+  loginAttempts: { type: Number, default: 0 },
+  lockUntil: Date,
   // Social media account connections
   socialAccounts: {
     google: {
@@ -454,6 +460,35 @@ affiliateSchema.methods.validateScheduleChange = async function(date, timeSlot) 
 
 // Create index for date exceptions for faster queries
 affiliateSchema.index({ 'availabilitySchedule.dateExceptions.date': 1 });
+
+// ── H-5 account lockout (mirrors Administrator) ────────────────────────
+affiliateSchema.virtual('isLocked').get(function() {
+  return !!(this.lockUntil && this.lockUntil > Date.now());
+});
+
+affiliateSchema.methods.incLoginAttempts = function() {
+  // Lock has expired → reset to a fresh count of 1
+  if (this.lockUntil && this.lockUntil < Date.now()) {
+    return this.updateOne({
+      $set: { loginAttempts: 1 },
+      $unset: { lockUntil: 1 }
+    });
+  }
+  const updates = { $inc: { loginAttempts: 1 } };
+  const maxAttempts = 5;
+  const lockTime = 2 * 60 * 60 * 1000; // 2 hours
+  if (this.loginAttempts + 1 >= maxAttempts && !this.isLocked) {
+    updates.$set = { lockUntil: new Date(Date.now() + lockTime) };
+  }
+  return this.updateOne(updates);
+};
+
+affiliateSchema.methods.resetLoginAttempts = function() {
+  return this.updateOne({
+    $set: { loginAttempts: 0, lastLogin: new Date() },
+    $unset: { lockUntil: 1 }
+  });
+};
 
 // Create model
 const Affiliate = mongoose.model('Affiliate', affiliateSchema);

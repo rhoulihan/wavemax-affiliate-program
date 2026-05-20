@@ -78,6 +78,12 @@ const customerSchema = new mongoose.Schema({
   isActive: { type: Boolean, default: true },
   registrationDate: { type: Date, default: Date.now },
   lastLogin: Date,
+  // H-5 per-account login lockout (mirrors Administrator + Affiliate).
+  // Five failed password attempts in any window → 2-hour lock. Resets on
+  // success. Closes the credential-stuffing-via-rotating-IPs path.
+  // prod-lockdown-2026-05-20.
+  loginAttempts: { type: Number, default: 0 },
+  lockUntil: Date,
   // Language preference for communications
   languagePreference: {
     type: String,
@@ -94,6 +100,34 @@ const customerSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 // No longer need encryption middleware as payment data is not stored
+
+// ── H-5 account lockout (mirrors Administrator + Affiliate) ────────────
+customerSchema.virtual('isLocked').get(function() {
+  return !!(this.lockUntil && this.lockUntil > Date.now());
+});
+
+customerSchema.methods.incLoginAttempts = function() {
+  if (this.lockUntil && this.lockUntil < Date.now()) {
+    return this.updateOne({
+      $set: { loginAttempts: 1 },
+      $unset: { lockUntil: 1 }
+    });
+  }
+  const updates = { $inc: { loginAttempts: 1 } };
+  const maxAttempts = 5;
+  const lockTime = 2 * 60 * 60 * 1000; // 2 hours
+  if (this.loginAttempts + 1 >= maxAttempts && !this.isLocked) {
+    updates.$set = { lockUntil: new Date(Date.now() + lockTime) };
+  }
+  return this.updateOne(updates);
+};
+
+customerSchema.methods.resetLoginAttempts = function() {
+  return this.updateOne({
+    $set: { loginAttempts: 0, lastLogin: new Date() },
+    $unset: { lockUntil: 1 }
+  });
+};
 
 // Create model
 const Customer = mongoose.model('Customer', customerSchema);
