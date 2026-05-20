@@ -441,10 +441,19 @@
     }
 
     function updateHeight() {
+        // Measure CONTENT height only. Do NOT include
+        // documentElement.clientHeight here — that returns the iframe's
+        // current rendered viewport (i.e., whatever height the parent
+        // last set on iframe.style.height). Including it in Math.max
+        // produced a ratchet effect on viewport shrinks:
+        // mobile → desktop, content reflows from 3000px to 1500px, but
+        // clientHeight is still 3000 (the iframe element hasn't shrunk
+        // yet), so Math.max returns 3000 — iframe never reports the
+        // smaller height, parent never shrinks, white space sits above
+        // the host page footer.
         const height = Math.max(
             document.body.scrollHeight,
             document.body.offsetHeight,
-            document.documentElement.clientHeight,
             document.documentElement.scrollHeight,
             document.documentElement.offsetHeight
         );
