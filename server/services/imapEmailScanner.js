@@ -1,9 +1,18 @@
 /**
  * IMAP Email Scanner Service
- * Connects to payments@wavemax.promo mailbox via IMAP to read payment emails
+ *
+ * Connects to payments@wavemax.promo via IMAP to read inbound payment-
+ * confirmation emails (Venmo / PayPal / CashApp). Backing client is
+ * `imapflow` — a maintained, promise-based replacement for the previous
+ * `imap` package, which had been unmaintained since 2018 and pulled an
+ * ancient `utf7` dep chain with 4 high-severity CVEs.
+ *
+ * Public API is unchanged for callers (paymentEmailScanner.js,
+ * orderController.js): `connect()`, `getUnreadEmails()`, `markAsRead(uid)`,
+ * `moveToFolder(uid, folderName)`, `disconnect()`.
  */
 
-const Imap = require('imap');
+const { ImapFlow } = require('imapflow');
 const { simpleParser } = require('mailparser');
 const SystemConfig = require('../models/SystemConfig');
 const logger = require('../utils/logger');
@@ -11,272 +20,175 @@ const { decrypt } = require('../utils/encryption');
 
 class IMAPEmailScanner {
   constructor() {
-    this.imap = null;
+    this.client = null;
     this.connected = false;
   }
 
   /**
-   * Initialize IMAP connection
+   * Initialize IMAP connection.
+   * @returns {Promise<boolean>} true on success, false if not configured.
    */
   async connect() {
     try {
-      // Get mailbox credentials from SystemConfig
       const host = await SystemConfig.getValue('imap_host', 'localhost');
-      const port = parseInt(await SystemConfig.getValue('imap_port', '993'));
+      const port = parseInt(await SystemConfig.getValue('imap_port', '993'), 10);
       const user = await SystemConfig.getValue('payment_notification_email', 'payments@wavemax.promo');
-      
-      // Get encrypted password
+
       const encryptedPassword = await SystemConfig.getValue('payment_email_password', '');
       if (!encryptedPassword) {
         logger.warn('Payment email password not configured');
         return false;
       }
-      
+
       const password = decrypt(encryptedPassword);
-      
-      // Create IMAP connection with correct settings for Mailcow/Dovecot
-      this.imap = new Imap({
-        user: user,
-        password: password,
-        host: host,
-        port: port,
-        tls: port === 993, // Use TLS for port 993
-        tlsOptions: {
-          rejectUnauthorized: false, // Accept self-signed certificates
-          servername: host // Important for TLS
+
+      this.client = new ImapFlow({
+        host,
+        port,
+        secure: port === 993,
+        auth: { user, pass: password },
+        // Mailcow/Dovecot can ship a self-signed cert — accept it, but
+        // still send SNI so the server can pick the right cert.
+        tls: {
+          rejectUnauthorized: false,
+          servername: host
         },
-        authTimeout: 10000,
-        connTimeout: 10000
-        // debug: logger.info // Uncomment for debugging
+        logger: false  // we route significant events through Winston ourselves
       });
-      
-      return new Promise((resolve, reject) => {
-        this.imap.once('ready', () => {
-          logger.info('IMAP connection established');
-          this.connected = true;
-          resolve(true);
-        });
-        
-        this.imap.once('error', (err) => {
-          logger.error('IMAP connection error:', err.message);
-          reject(err);
-        });
-        
-        this.imap.once('end', () => {
-          logger.info('IMAP connection ended');
-          this.connected = false;
-        });
-        
-        this.imap.connect();
+
+      // Surface unexpected protocol errors (network drop, server bounce).
+      this.client.on('error', (err) => {
+        logger.error('IMAP client error:', { message: err.message });
+        this.connected = false;
       });
+
+      await this.client.connect();
+      this.connected = true;
+      logger.info('IMAP connection established');
+      return true;
     } catch (error) {
-      logger.error('Error connecting to IMAP:', error);
+      logger.error('Error connecting to IMAP:', { message: error.message });
+      this.connected = false;
       return false;
     }
   }
 
   /**
-   * Fetch unread emails from inbox
+   * Fetch unread emails from INBOX. Messages are NOT marked seen here —
+   * the caller decides when to flag them (after successful processing).
+   * @returns {Promise<Array<Object>>} parsed email objects.
    */
   async getUnreadEmails() {
     if (!this.connected) {
-      const connected = await this.connect();
-      if (!connected) return [];
+      const ok = await this.connect();
+      if (!ok) return [];
     }
-    
-    return new Promise((resolve, reject) => {
-      const emails = [];
-      
-      this.imap.openBox('INBOX', false, (err, box) => {
-        if (err) {
-          logger.error('Error opening inbox:', err);
-          reject(err);
-          return;
+
+    const lock = await this.client.getMailboxLock('INBOX');
+    const emails = [];
+
+    try {
+      // imapflow's search returns UIDs by default. Empty array if no match.
+      const uids = await this.client.search({ seen: false }, { uid: true });
+      if (!uids || uids.length === 0) {
+        logger.info('No unread emails found');
+        return emails;
+      }
+      logger.info(`Found ${uids.length} unread emails`);
+
+      // Fetch raw RFC822 source so mailparser can do the full multipart
+      // walk + HTML/text extraction. Iterating with for-await releases
+      // backpressure correctly on large mailboxes.
+      for await (const msg of this.client.fetch(uids, {
+        uid: true,
+        flags: true,
+        source: true,
+        envelope: true
+      })) {
+        try {
+          const parsed = await simpleParser(msg.source);
+
+          const emailData = {
+            seqno: msg.seq,
+            uid: msg.uid,
+            flags: Array.from(msg.flags || []),
+            headers: {},
+            from: parsed.from?.text || '',
+            fromAddress: parsed.from?.value?.[0]?.address || '',
+            subject: parsed.subject || '',
+            date: parsed.date || new Date(),
+            messageId: parsed.messageId || '',
+            text: parsed.text || '',
+            html: parsed.html || ''
+          };
+
+          emails.push(emailData);
+          logger.info(`Parsed message uid=${msg.uid} subject="${emailData.subject}" from="${emailData.fromAddress}"`);
+        } catch (parseErr) {
+          logger.error(`Error parsing message uid=${msg.uid}:`, { message: parseErr.message });
         }
-        
-        // Search for unseen messages
-        this.imap.search(['UNSEEN'], (err, results) => {
-          if (err) {
-            logger.error('Error searching emails:', err);
-            reject(err);
-            return;
-          }
-          
-          if (!results || results.length === 0) {
-            logger.info('No unread emails found');
-            resolve([]);
-            return;
-          }
-          
-          logger.info(`Found ${results.length} unread emails`);
-          
-          // Track messages being processed
-          let messagesExpected = results.length;
-          let messagesProcessed = 0;
-          
-          // Fetch the emails
-          const fetch = this.imap.fetch(results, {
-            bodies: '',
-            markSeen: false // Don't mark as read yet
-          });
-          
-          fetch.on('message', (msg, seqno) => {
-            logger.info(`Processing message ${seqno}`);
-            let emailData = {
-              seqno: seqno,
-              uid: null,
-              headers: {},
-              text: '',
-              html: ''
-            };
-            
-            let bodyParsed = false;
-            let messageEnded = false;
-            
-            msg.on('body', (stream, info) => {
-              logger.info(`Parsing body for message ${seqno}`);
-              simpleParser(stream, (err, parsed) => {
-                if (err) {
-                  logger.error('Error parsing email:', err);
-                  bodyParsed = true;
-                  messagesProcessed++;
-                  return;
-                }
-                
-                logger.info(`Parsed email - Subject: ${parsed.subject}, From: ${parsed.from?.text}`);
-                
-                emailData.from = parsed.from?.text || '';
-                emailData.subject = parsed.subject || '';
-                emailData.date = parsed.date || new Date();
-                emailData.text = parsed.text || '';
-                emailData.html = parsed.html || '';
-                emailData.messageId = parsed.messageId || '';
-                
-                // Extract sender email
-                if (parsed.from && parsed.from.value && parsed.from.value[0]) {
-                  emailData.fromAddress = parsed.from.value[0].address;
-                }
-                
-                bodyParsed = true;
-                
-                // If message has already ended, add to emails now
-                if (messageEnded) {
-                  emails.push(emailData);
-                  messagesProcessed++;
-                  logger.info(`Added email ${seqno} to array (delayed). Total: ${emails.length}`);
-                  
-                  // Check if all messages are processed
-                  if (messagesProcessed === messagesExpected) {
-                    logger.info(`All ${messagesExpected} messages processed. Resolving with ${emails.length} emails`);
-                    resolve(emails);
-                  }
-                }
-              });
-            });
-            
-            msg.once('attributes', (attrs) => {
-              emailData.uid = attrs.uid;
-              emailData.flags = attrs.flags;
-              logger.info(`Got attributes for message ${seqno}: UID=${attrs.uid}`);
-            });
-            
-            msg.once('end', () => {
-              logger.info(`Message ${seqno} ended`);
-              messageEnded = true;
-              
-              // If body is already parsed, add to emails now
-              if (bodyParsed) {
-                emails.push(emailData);
-                messagesProcessed++;
-                logger.info(`Added email ${seqno} to array. Total: ${emails.length}`);
-                
-                // Check if all messages are processed
-                if (messagesProcessed === messagesExpected) {
-                  logger.info(`All ${messagesExpected} messages processed. Resolving with ${emails.length} emails`);
-                  resolve(emails);
-                }
-              }
-            });
-          });
-          
-          fetch.once('error', (err) => {
-            logger.error('Fetch error:', err);
-            reject(err);
-          });
-          
-          fetch.once('end', () => {
-            logger.info(`Fetch ended. Waiting for ${messagesExpected} messages to be processed...`);
-            
-            // If no messages were expected, resolve immediately
-            if (messagesExpected === 0) {
-              resolve(emails);
-            }
-          });
-        });
-      });
-    });
+      }
+
+      logger.info(`Returning ${emails.length} parsed emails`);
+      return emails;
+    } finally {
+      lock.release();
+    }
   }
 
   /**
-   * Mark an email as read
+   * Mark a message as read (adds the \Seen flag).
+   * @param {number} uid
+   * @returns {Promise<boolean>}
    */
   async markAsRead(uid) {
     if (!this.connected) return false;
-    
-    return new Promise((resolve, reject) => {
-      this.imap.addFlags(uid, ['\\Seen'], (err) => {
-        if (err) {
-          logger.error('Error marking email as read:', err);
-          resolve(false);
-        } else {
-          logger.info(`Marked email ${uid} as read`);
-          resolve(true);
-        }
-      });
-    });
+
+    const lock = await this.client.getMailboxLock('INBOX');
+    try {
+      await this.client.messageFlagsAdd({ uid }, ['\\Seen'], { uid: true });
+      logger.info(`Marked email ${uid} as read`);
+      return true;
+    } catch (err) {
+      logger.error('Error marking email as read:', { message: err.message, uid });
+      return false;
+    } finally {
+      lock.release();
+    }
   }
 
   /**
-   * Move email to a folder
+   * Move a message to a destination folder (copy + expunge under the hood).
+   * @param {number} uid
+   * @param {string} folderName
+   * @returns {Promise<boolean>}
    */
   async moveToFolder(uid, folderName) {
     if (!this.connected) return false;
-    
-    return new Promise((resolve, reject) => {
-      // First copy to the target folder
-      this.imap.copy(uid, folderName, (err) => {
-        if (err) {
-          logger.error(`Error copying email to ${folderName}:`, err);
-          resolve(false);
-          return;
-        }
-        
-        // Then mark as deleted in current folder
-        this.imap.addFlags(uid, ['\\Deleted'], (err) => {
-          if (err) {
-            logger.error('Error marking email as deleted:', err);
-            resolve(false);
-          } else {
-            // Expunge to actually delete
-            this.imap.expunge((err) => {
-              if (err) {
-                logger.error('Error expunging:', err);
-              }
-              logger.info(`Moved email ${uid} to ${folderName}`);
-              resolve(true);
-            });
-          }
-        });
-      });
-    });
+
+    const lock = await this.client.getMailboxLock('INBOX');
+    try {
+      await this.client.messageMove({ uid }, folderName, { uid: true });
+      logger.info(`Moved email ${uid} to ${folderName}`);
+      return true;
+    } catch (err) {
+      logger.error(`Error moving email ${uid} to ${folderName}:`, { message: err.message });
+      return false;
+    } finally {
+      lock.release();
+    }
   }
 
   /**
-   * Disconnect from IMAP server
+   * Gracefully close the IMAP connection.
    */
-  disconnect() {
-    if (this.imap && this.connected) {
-      this.imap.end();
+  async disconnect() {
+    if (this.client && this.connected) {
+      try {
+        await this.client.logout();
+      } catch (err) {
+        // logout() throws if the socket is already gone — ignorable.
+      }
       this.connected = false;
     }
   }
