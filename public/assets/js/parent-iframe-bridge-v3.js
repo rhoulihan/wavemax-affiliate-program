@@ -33,7 +33,12 @@
   const DEV_HOST_PATTERN = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/;
   const ALLOWED_ORIGINS = [
     'https://wavemax.promo',
-    'https://affiliate.wavemax.promo'
+    'https://affiliate.wavemax.promo',
+    // Per-location domains that proxy the Austin franchise content
+    'https://atxwashateria.com',
+    'https://atxwashdryfold.com',
+    'https://runberglaundry.com',
+    'https://rundberglaundry.com'
   ];
 
   let iframe = null;
