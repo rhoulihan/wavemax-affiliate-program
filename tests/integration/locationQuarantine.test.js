@@ -246,6 +246,95 @@ describe('Location quarantine middleware', () => {
         expect(response.status).toBe(302);
         expect(response.headers.location).toBe(`${CORPORATE}/testimonials/`);
       });
+    });
+
+    // ── M-13: suspicious paths get redirected to corporate ROOT, not  ──
+    //    path-preserved. Prevents phishing-friendly construction of links
+    //    like https://rundberglaundry.com/<your-bank-login> →
+    //    https://www.wavemaxlaundry.com/<your-bank-login>.
+    //    prod-lockdown-2026-05-20 finding M-13.
+    //
+    //    Note: some paths (e.g. /.env, /.git/HEAD, /package.json,
+    //    /Dockerfile) are caught EARLIER by the explicit sensitive-path
+    //    404 handler in server.js (mounted before locationQuarantine).
+    //    Those return 404 outright, which is strictly more secure than
+    //    302→root. The patterns below are the ones that fall through to
+    //    quarantine and exercise the new isSuspicious() filter.
+    describe('Suspicious paths redirect to corporate root (M-13)', () => {
+      const quarantineRouted = [
+        '/.aws/credentials',
+        '/.ssh/id_rsa',
+        '/wp-admin',
+        '/wp-admin/admin-ajax.php',
+        '/wp-login.php',
+        '/wp-content/uploads/shell.php',
+        '/phpinfo.php',
+        '/phpmyadmin/index.php',
+        '/server-status',
+        '/server-info',
+        '/xmlrpc.php',
+        '/cgi-bin/test.cgi',
+        '/cmd.exe',
+        '/etc/passwd',
+        '/some/path/login.php',
+        '/admin.asp',
+        '/login.jsp',
+      ];
+
+      quarantineRouted.forEach((path) => {
+        it(`redirects ${path} to corporate ROOT (no path preservation)`, async () => {
+          const response = await request(app).get(path).redirects(0);
+          expect(response.status).toBe(302);
+          expect(response.headers.location).toBe(`${CORPORATE}/`);
+        });
+      });
+
+      // Sanity: paths handled by the earlier explicit-404 handler return
+      // 404 instead of redirecting at all (independent of quarantine
+      // state but exercised here for completeness).
+      const explicitly404 = [
+        '/.env',
+        '/.env.local',
+        '/.env.production',
+        '/.git/HEAD',
+        '/.git/config',
+        '/.svn/entries',
+        '/.DS_Store',
+        '/Dockerfile',
+        '/docker-compose.yml',
+        '/package.json',
+        '/package-lock.json',
+        '/composer.json',
+        '/yarn.lock',
+      ];
+
+      explicitly404.forEach((path) => {
+        it(`returns 404 for ${path} (sensitive-path probe handler)`, async () => {
+          const response = await request(app).get(path).redirects(0);
+          expect(response.status).toBe(404);
+        });
+      });
+    });
+
+    describe('Legitimate non-Austin paths still preserve (M-13 negative)', () => {
+      // Confirm the new filter doesn't break the existing path-preserving
+      // behavior for legitimate not-this-franchise navigations.
+      const preserveCases = [
+        ['/dallas-tx/', `${CORPORATE}/dallas-tx/`],
+        ['/dallas-tx/wash-dry-fold/', `${CORPORATE}/dallas-tx/wash-dry-fold/`],
+        ['/about/', `${CORPORATE}/about/`],
+        ['/franchise/', `${CORPORATE}/franchise/`],
+        ['/faq/', `${CORPORATE}/faq/`],
+        ['/contact/', `${CORPORATE}/contact/`],
+      ];
+
+      preserveCases.forEach(([input, expected]) => {
+        it(`preserves ${input}`, async () => {
+          const response = await request(app).get(input).redirects(0);
+          expect(response.status).toBe(302);
+          expect(response.headers.location).toBe(expected);
+        });
+      });
 
       it('redirects /virtual-tour/ to corporate', async () => {
         const response = await request(app).get('/virtual-tour/').redirects(0);
