@@ -101,11 +101,25 @@ Reminder: revoke the Cloudflare API token at `https://dash.cloudflare.com/profil
 | 1 — quick wins | #83 | **done** + live |
 | 2 — mailcow + Cloudflare-only origin | #84 | **done** + live |
 | 3 — SSH hardening | #85 | **done** + live |
-| 4 — structural app (per-acct lockout, shared rate limiter, null-origin CORS) | #86 | pending |
+| 4 — structural app (per-acct lockout, shared rate limiter, null-origin CORS) | #86 | **done** + live |
 | 5 — secret rotation + .OLD cleanup | #87 | pending — full rotation including ENCRYPTION_KEY scheduled with maintenance window |
 | 6 — long-tail (pm2 non-root, auditd, registrar locks, ubuntu lockdown) | #88 | pending |
 | 7 — re-attack + audit-grade close-out | #89 | pending |
-| DNS — CAA + DNSSEC | embedded in #83 | **CAA done**, DNSSEC pending registrar DS records |
+| DNS — CAA + DNSSEC | embedded in #83 | **CAA done**, DNSSEC SKIPPED (accepted residual risk) |
+
+---
+
+## Phase 4 closure note (2026-05-20T20:32Z)
+
+| Finding | Status | Verification |
+|:---|:---|:---|
+| **H-5 Affiliate + Customer per-account lockout** | **CLOSED** | Both models now have `loginAttempts` / `lockUntil` / `isLocked` virtual / `incLoginAttempts()` / `resetLoginAttempts()` mirroring Administrator. Controllers check `isLocked` before password verification (avoids PBKDF2 timing leak). 5 failed → 2h lock; success resets. `tests/integration/accountLockout.test.js` covers both roles end-to-end. |
+| **H-6 Shared rate-limit store across PM2 cluster** | **CLOSED** | `server/middleware/rateLimitMongoStore.js` — in-house MongoDB-backed store using the existing Mongoose connection. TTL index `_expiresAt` purges expired counters. Avoids the `rate-limit-mongo` package's vulnerable underscore@1.12.1 dep. Wired into `createMongoStore()` for all non-test environments. 4× cluster-multiplication on configured limits eliminated. `tests/unit/rateLimitMongoStore.test.js` — 6/6. |
+| **H-7 Null-origin CORS rejection** | **CLOSED** | `server.js corsOptions.origin`: requests with no Origin header now return `callback(null, false)` instead of `(null, true)`. Verified live: `curl -X OPTIONS` with no Origin returns no `Access-Control-*` headers. Allowlisted browser domains continue to work; JWT-bearing API consumers unaffected. |
+| **M-11 socialToken JWT in redirect URL** | DEFERRED to its own commit | Requires coordinated OAuth-completion + frontend-consumer refactor (httpOnly cookie or POST-back). Lower-impact than the H-tier items; scheduled into the Phase 5/6 sweep. |
+| **M-12 CSP `'unsafe-inline'` cleanup on non-migrated pages** | TRACKED at task #53 | Pre-existing backlog item. Continues independently. |
+
+Phase 4 task #86 closed.
 **Method:** Three parallel passes — whitebox SSH audit, application-config audit, blackbox external probe (~45 requests, no exploitation). Cross-confirmed all critical findings from at least two of the three vantages.
 
 ---
