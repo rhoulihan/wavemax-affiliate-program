@@ -7,7 +7,9 @@ jest.mock('../../server/models/AccessWhitelist', () => ({
   updateOne: jest.fn(() => Promise.resolve({})),
 }));
 jest.mock('../../server/models/AccessClick', () => ({ create: jest.fn(() => Promise.resolve({})) }));
+jest.mock('dns', () => ({ promises: { reverse: jest.fn(), resolve4: jest.fn(), resolve6: jest.fn() } }));
 
+const dns = require('dns').promises;
 const { hashPassword } = require('../../server/utils/encryption');
 const AccessWhitelist = require('../../server/models/AccessWhitelist');
 const AccessClick = require('../../server/models/AccessClick');
@@ -34,6 +36,7 @@ describe('accessGate middleware', () => {
     AccessWhitelist.findOne.mockReturnValue({ lean: () => Promise.resolve(null) });
     AccessWhitelist.updateOne.mockResolvedValue({});
     AccessClick.create.mockResolvedValue({});
+    accessGate._botCache.clear();
   });
   afterAll(() => { delete process.env.ACCESS_GATE_ENABLED; });
 
@@ -106,5 +109,51 @@ describe('accessGate middleware', () => {
     await accessGate(req, res, next);
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.send.mock.calls[0][0]).toContain('Enter password');
+  });
+
+  it('passes a verified Googlebot IP without recording a click', async () => {
+    dns.reverse.mockResolvedValue(['crawl-66-249-66-1.googlebot.com']);
+    dns.resolve4.mockResolvedValue(['66.249.66.1']);
+    const req = mkReq({ ip: '66.249.66.1', headers: { 'user-agent': 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)' } });
+    const res = mkRes(); const next = jest.fn();
+    await accessGate(req, res, next);
+    expect(next).toHaveBeenCalled();
+    expect(AccessClick.create).not.toHaveBeenCalled();
+  });
+
+  it('caches a verified Googlebot IP (second hit does not re-query DNS)', async () => {
+    dns.reverse.mockResolvedValue(['crawl-66-249-66-1.googlebot.com']);
+    dns.resolve4.mockResolvedValue(['66.249.66.1']);
+    const mk = () => mkReq({ ip: '66.249.66.1', headers: { 'user-agent': 'Googlebot/2.1' } });
+    await accessGate(mk(), mkRes(), jest.fn());
+    await accessGate(mk(), mkRes(), jest.fn());
+    expect(dns.reverse).toHaveBeenCalledTimes(1);
+  });
+
+  it('blocks a spoofed Googlebot UA whose reverse DNS is not Google', async () => {
+    dns.reverse.mockResolvedValue(['host.evil.example']);
+    const req = mkReq({ ip: '203.0.113.99', headers: { 'user-agent': 'Googlebot/2.1' } });
+    const res = mkRes(); const next = jest.fn();
+    await accessGate(req, res, next);
+    expect(next).not.toHaveBeenCalled();
+    expect(res.status).toHaveBeenCalledWith(401);
+  });
+
+  it('blocks Googlebot UA when forward-confirm does not match the IP', async () => {
+    dns.reverse.mockResolvedValue(['crawl.googlebot.com']);
+    dns.resolve4.mockResolvedValue(['8.8.8.8']);
+    const req = mkReq({ ip: '203.0.113.100', headers: { 'user-agent': 'Googlebot/2.1' } });
+    const res = mkRes(); const next = jest.fn();
+    await accessGate(req, res, next);
+    expect(next).not.toHaveBeenCalled();
+    expect(res.status).toHaveBeenCalledWith(401);
+  });
+
+  it('does not perform DNS for a normal browser UA (non-whitelisted → landing)', async () => {
+    const req = mkReq({ ip: '203.0.113.101', headers: { 'user-agent': 'Mozilla/5.0 (Windows NT 10.0)' } });
+    const res = mkRes(); const next = jest.fn();
+    await accessGate(req, res, next);
+    expect(dns.reverse).not.toHaveBeenCalled();
+    expect(res.status).toHaveBeenCalledWith(401);
   });
 });
