@@ -481,7 +481,16 @@ const sessionStore = process.env.NODE_ENV === 'test'
   ? undefined // Use default MemoryStore for tests
   : MongoStore.create({
     mongoUrl: process.env.MONGODB_URI,
-    touchAfter: 24 * 3600 // Lazy session update in seconds (24 hours)
+    touchAfter: 24 * 3600, // Lazy session update in seconds (24 hours)
+    // Purge expired sessions with a periodic deleteMany rather than a Mongo
+    // TTL index. The Oracle ADB MongoDB API rejects TTL index creation unless
+    // the schema holds CREATE JOB, and connect-mongo's default
+    // autoRemove:'native' throws an unhandled rejection on connect there
+    // (crash-loops startup). 'interval' performs cleanup with a plain query
+    // Oracle supports; session validity is also enforced on read via the
+    // `expires` field, so correctness never depended on the TTL sweep.
+    autoRemove: 'interval',
+    autoRemoveInterval: 10 // minutes
   });
 
 // __Host- prefix in production: enforces Secure + Path=/ + no Domain
