@@ -58,6 +58,13 @@ app.use((req, res, next) => {
 
 // Define MongoDB connection options
 const mongoOptions = {
+  // Do NOT auto-build schema indexes on connect. The Oracle Autonomous DB
+  // MongoDB API rejects 2dsphere (geospatial) and TTL index builds, so an
+  // autoIndex pass would throw on the Affiliate serviceLocation 2dsphere
+  // index at startup. Indexes are managed explicitly (the migration creates
+  // the Oracle-compatible set). Disabling autoIndex is also standard practice
+  // for production regardless of backend.
+  autoIndex: false,
   // TLS enforced everywhere except local dev. Set MONGODB_TLS=false to
   // disable (e.g. plain local mongod that doesn't speak TLS).
   ...(process.env.MONGODB_TLS === 'false'
