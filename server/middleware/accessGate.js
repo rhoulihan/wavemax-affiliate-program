@@ -12,6 +12,7 @@
 // unlocks in the PM2 cluster); a periodic refresh reconciles drift. Click
 // logging is best-effort and never blocks a request.
 
+const dns = require('dns').promises;
 const { verifyPassword } = require('../utils/encryption');
 const logger = require('../utils/logger');
 const AccessGate = require('../models/AccessGate');
@@ -19,6 +20,40 @@ const AccessWhitelist = require('../models/AccessWhitelist');
 const AccessClick = require('../models/AccessClick');
 
 const cache = { ready: false, salt: null, hash: null, ips: new Map() }; // ip -> { trackClicks }
+
+// Verified Google-crawler cache: ip -> { ok, exp }. Spares a DNS round-trip on
+// every crawler request. Positives are long-lived; negatives expire quickly so
+// a real crawler recovers fast from a transient DNS failure (and a spoofer's
+// negative result isn't pinned for long).
+const botCache = new Map();
+const BOT_TTL_OK = 7 * 24 * 60 * 60 * 1000;
+const BOT_TTL_NEG = 10 * 60 * 1000;
+
+// Cheap UA pre-filter for Google's indexing/inspection crawlers — only these
+// trigger the (more expensive) reverse-DNS check. A spoofed UA still fails it.
+const GOOGLE_UA_RE = /(googlebot|storebot-google|google-inspectiontool|googleother|google-site-verification)/i;
+const GOOGLE_HOST_RE = /\.(googlebot|google|googleusercontent)\.com$/i;
+
+// Authoritative Googlebot verification (Google's documented method): reverse-DNS
+// the client IP, require a Google-owned hostname, then forward-confirm that the
+// hostname resolves back to the same IP. Result is cached per IP.
+async function isVerifiedGoogle(ip) {
+  if (!ip) return false;
+  const now = Date.now();
+  const hit = botCache.get(ip);
+  if (hit && hit.exp > now) return hit.ok;
+  let ok = false;
+  try {
+    const hosts = await dns.reverse(ip);
+    const host = (hosts || []).find((h) => GOOGLE_HOST_RE.test(h));
+    if (host) {
+      const fwd = ip.includes(':') ? await dns.resolve6(host) : await dns.resolve4(host);
+      ok = Array.isArray(fwd) && fwd.includes(ip);
+    }
+  } catch (_) { ok = false; }
+  botCache.set(ip, { ok, exp: now + (ok ? BOT_TTL_OK : BOT_TTL_NEG) });
+  return ok;
+}
 
 async function loadCache() {
   try {
@@ -157,6 +192,14 @@ async function accessGate(req, res, next) {
     return next();
   }
 
+  // Verified Google crawlers bypass the gate so the site stays indexable while
+  // private. UA is a cheap pre-filter; reverse-DNS + forward-confirm is the
+  // authoritative check (spoofed UAs fail it). Crawler hits are not click-logged.
+  const ua = req.headers['user-agent'] || '';
+  if (GOOGLE_UA_RE.test(ua) && await isVerifiedGoogle(ip)) {
+    return next();
+  }
+
   // Not whitelisted → branded landing page.
   return res.status(401).type('html').send(landingPage(null, req.method === 'GET' ? req.originalUrl : '/'));
 }
@@ -165,4 +208,5 @@ module.exports = accessGate;
 module.exports.loadCache = loadCache;
 module.exports.startCacheRefresh = startCacheRefresh;
 module.exports._cache = cache; // exposed for tests
+module.exports._botCache = botCache; // exposed for tests
 module.exports._landingPage = landingPage;
