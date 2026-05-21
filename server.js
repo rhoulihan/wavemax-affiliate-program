@@ -81,6 +81,11 @@ if (process.env.NODE_ENV !== 'test') {
     .then(async () => {
       logger.info('Connected to MongoDB');
 
+      // Warm the access-gate whitelist/password cache + start periodic refresh.
+      const gate = require('./server/middleware/accessGate');
+      gate.loadCache().then(() => gate.startCacheRefresh())
+        .catch((e) => logger.error('Access gate cache init failed:', e.message));
+
       // Initialize system configuration defaults
       try {
         const SystemConfig = require('./server/models/SystemConfig');
@@ -461,6 +466,14 @@ app.use(sanitizeRequest); // Sanitize all inputs for XSS prevention
 
 // Compression for all responses
 app.use(compression());
+
+// Access gate — password-protects ALL web traffic to the Express-served
+// domains unless the client IP is whitelisted. No-op unless
+// ACCESS_GATE_ENABLED=true, so it deploys dark; mounted here so it fronts
+// every route and has body+cookie parsing (above) for the password POST,
+// but runs before the API rate limiter and session creation.
+const accessGate = require('./server/middleware/accessGate');
+app.use(accessGate);
 
 // Rate limiting for API endpoints
 // Import centralized rate limiting configuration
