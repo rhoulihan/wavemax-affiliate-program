@@ -53,6 +53,21 @@ describe('Error Handler Middleware', () => {
       });
     });
 
+    it('delegates to next(err) without re-sending when headers were already sent', () => {
+      // Regression for the 2026-05-21 apex-`/?fbclid=` outage: when a handler
+      // errors after the response has started, errorHandler must NOT call
+      // res.json() again (that throws ERR_HTTP_HEADERS_SENT and escalates to
+      // an uncaughtException). It must delegate to Express's finalhandler.
+      const error = new Error('boom after response started');
+      res.headersSent = true;
+
+      errorHandler(error, req, res, next);
+
+      expect(next).toHaveBeenCalledWith(error);
+      expect(res.status).not.toHaveBeenCalled();
+      expect(res.json).not.toHaveBeenCalled();
+    });
+
     it('should handle custom status codes', () => {
       const error = new Error('Custom error');
       error.statusCode = 418;

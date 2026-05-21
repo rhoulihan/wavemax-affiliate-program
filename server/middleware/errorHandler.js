@@ -120,6 +120,16 @@ const errorHandler = (err, req, res, next) => {
     })
   };
 
+  // If the response has already started, we cannot send another one.
+  // Delegate to Express's built-in finalhandler (via next(err)), which
+  // aborts the connection cleanly. Without this guard, calling res.json()
+  // here throws ERR_HTTP_HEADERS_SENT, which then escalates to an
+  // uncaughtException and can leak the socket / wedge the worker — the
+  // failure mode behind the 2026-05-21 apex-`/?fbclid=` outage.
+  if (res.headersSent) {
+    return next(err);
+  }
+
   // Send error response
   res.status(statusCode).json(errorResponse);
 };
