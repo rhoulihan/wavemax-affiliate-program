@@ -1001,23 +1001,12 @@ app.use('*', (req, res) => {
   });
 });
 
+// Central error handler (server/middleware/errorHandler.js). This is the
+// single, final error-handling middleware. A second duplicate handler used
+// to live here; with errorHandler already responding, the duplicate only
+// ever ran when errorHandler itself threw ERR_HTTP_HEADERS_SENT, producing a
+// second throw and escalating to an uncaughtException. Removed 2026-05-21.
 app.use(errorHandler);
-
-// Error handling middleware
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-
-  const statusCode = err.statusCode || 500;
-  const message = err.message || 'Internal Server Error';
-
-  res.status(statusCode).json({
-    success: false,
-    error: {
-      message,
-      ...(process.env.NODE_ENV !== 'production' && { stack: err.stack })
-    }
-  });
-});
 
 // Start server (skip in test environment)
 if (process.env.NODE_ENV !== 'test') {
