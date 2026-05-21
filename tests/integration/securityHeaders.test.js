@@ -93,5 +93,27 @@ describe('Security Headers (regression — prod-lockdown-2026-05-20)', () => {
       const csp = r.headers['content-security-policy'];
       expect(csp).toMatch(/frame-ancestors 'self' https:\/\/www\.wavemaxlaundry\.com https:\/\/wavemaxlaundry\.com/);
     });
+
+    // Hibu Social retargeting — Meta Pixel (marketing chrome only). The
+    // pixel loader (connect.facebook.net/en_US/fbevents.js) must be in
+    // script-src, and fbevents.js beacons to www.facebook.com/tr (covered
+    // by connect-src + img-src). These assertions lock the allowlist so a
+    // future CSP refactor can't silently break call/ad tracking.
+    it('CSP script-src allows the Meta Pixel loader (connect.facebook.net)', async () => {
+      const r = await probe();
+      const csp = r.headers['content-security-policy'];
+      const scriptSrc = csp.split(';').find((d) => d.trim().startsWith('script-src'));
+      expect(scriptSrc).toContain('https://connect.facebook.net');
+    });
+
+    it('CSP connect-src + img-src allow the Meta Pixel beacon (www.facebook.com)', async () => {
+      const r = await probe();
+      const csp = r.headers['content-security-policy'];
+      const connectSrc = csp.split(';').find((d) => d.trim().startsWith('connect-src'));
+      const imgSrc = csp.split(';').find((d) => d.trim().startsWith('img-src'));
+      expect(connectSrc).toContain('https://connect.facebook.net');
+      expect(connectSrc).toContain('https://www.facebook.com');
+      expect(imgSrc).toContain('https://www.facebook.com');
+    });
   });
 });
