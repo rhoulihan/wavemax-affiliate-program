@@ -293,6 +293,15 @@ systemConfigSchema.statics.initializeDefaults = async function() {
       isPublic: true
     },
     {
+      key: 'access_gate_enabled',
+      value: false,
+      defaultValue: false,
+      description: 'Master switch for the site access gate (password/email preview gate + non-whitelisted -> corporate redirect). When false, all traffic is routed locally on every domain.',
+      category: 'system',
+      dataType: 'boolean',
+      isPublic: false
+    },
+    {
       key: 'system_timezone',
       value: 'America/Chicago',
       defaultValue: 'America/Chicago',

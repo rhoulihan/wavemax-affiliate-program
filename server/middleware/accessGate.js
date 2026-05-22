@@ -15,8 +15,9 @@
 // follow GET but don't submit forms), so a scanner can't burn the token or
 // whitelist its own IP.
 //
-// Enabled only when ACCESS_GATE_ENABLED=true, so it can be deployed dark,
-// seeded, verified, then switched on without risk of self-lockout.
+// Enabled only when the SystemConfig key `access_gate_enabled` is true (a
+// runtime toggle, no redeploy). It can be deployed dark, seeded, verified, then
+// switched on — and flipped back off to route all traffic locally — at runtime.
 //
 // Resilience: an in-memory cache serves the hot path with no per-request DB
 // read; a cache miss falls back to a single DB lookup (covers cross-worker
@@ -32,8 +33,13 @@ const AccessGate = require('../models/AccessGate');
 const AccessWhitelist = require('../models/AccessWhitelist');
 const AccessClick = require('../models/AccessClick');
 const AccessRequest = require('../models/AccessRequest');
+const SystemConfig = require('../models/SystemConfig');
 
-const cache = { ready: false, salt: null, hash: null, ips: new Map() }; // ip -> { trackClicks }
+// `enabled` is the master switch, loaded from the SystemConfig key
+// `access_gate_enabled` (runtime-toggleable, no redeploy). Defaults false so an
+// unreadable/uninitialized config fails OPEN (route locally), never locking the
+// whole network out of every domain.
+const cache = { ready: false, enabled: false, salt: null, hash: null, ips: new Map() }; // ip -> { trackClicks }
 
 const TOKEN_TTL_MS = 60 * 60 * 1000;          // emailed link valid for 60 minutes
 const SEND_THROTTLE_MS = 60 * 1000;           // min interval between link emails per IP
@@ -87,13 +93,14 @@ async function isVerifiedGoogle(ip) {
 
 async function loadCache() {
   try {
+    cache.enabled = (await SystemConfig.getValue('access_gate_enabled', false)) === true;
     const gate = await AccessGate.findOne({ key: 'gate' }).lean();
     const wl = await AccessWhitelist.find({}, { ip: 1, trackClicks: 1 }).lean();
     cache.salt = gate ? gate.salt : null;
     cache.hash = gate ? gate.hash : null;
     cache.ips = new Map(wl.map((w) => [w.ip, { trackClicks: w.trackClicks !== false }]));
     cache.ready = true;
-    logger.info(`Access gate cache loaded: ${cache.ips.size} whitelisted IP(s); password ${cache.hash ? 'set' : 'NOT set'}`);
+    logger.info(`Access gate cache loaded: ${cache.enabled ? 'ENABLED' : 'disabled'}; ${cache.ips.size} whitelisted IP(s); password ${cache.hash ? 'set' : 'NOT set'}`);
   } catch (e) {
     logger.error('Access gate cache load failed:', e.message);
   }
@@ -368,7 +375,7 @@ async function handleGate(req, res, ip) {
 }
 
 async function accessGate(req, res, next) {
-  if (process.env.ACCESS_GATE_ENABLED !== 'true') return next();
+  if (!cache.enabled) return next();
   const ip = clientIp(req);
 
   // The gate's own endpoints — handled regardless of whitelist so a not-yet-
