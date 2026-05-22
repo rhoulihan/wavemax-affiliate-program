@@ -9,6 +9,7 @@ const accessRequestSchema = new mongoose.Schema({
   token: { type: String, required: true, unique: true },
   email: { type: String, required: true },
   next: { type: String, default: '/' },
+  requestIp: { type: String },   // IP that submitted the form (cluster-global send throttle)
   createdAt: { type: Date, default: Date.now },
   expiresAt: { type: Date, required: true },
   used: { type: Boolean, default: false },

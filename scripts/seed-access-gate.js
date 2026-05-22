@@ -36,6 +36,7 @@ const ADMIN_IP = process.env.ADMIN_IP || process.argv[2];
   await mk(AccessWhitelist, { ip: 1 }, { unique: true }, 'AccessWhitelist.ip');
   await mk(AccessClick, { ip: 1, ts: -1 }, {}, 'AccessClick.ip_ts');
   await mk(AccessRequest, { token: 1 }, { unique: true }, 'AccessRequest.token');
+  await mk(AccessRequest, { requestIp: 1, createdAt: -1 }, {}, 'AccessRequest.requestIp_createdAt');
 
   // 3) seed admin IP — whitelisted, NOT click-tracked ("this IP")
   if (ADMIN_IP) {

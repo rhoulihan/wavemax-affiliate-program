@@ -38,7 +38,6 @@ const cache = { ready: false, salt: null, hash: null, ips: new Map() }; // ip ->
 const TOKEN_TTL_MS = 60 * 60 * 1000;          // emailed link valid for 60 minutes
 const SEND_THROTTLE_MS = 60 * 1000;           // min interval between link emails per IP
 const GATE_FROM = '"WaveMAX" <admin@rundberglaundry.com>';
-const sendThrottle = new Map();               // ip -> last successful send (ms)
 
 const emailValid = (e) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(e || '').trim());
 const safeNext = (n) => (n && String(n).startsWith('/') ? String(n) : '/');
@@ -170,6 +169,7 @@ function sentPage() {
     <img class="logo" src="/assets/images/brand/logo-wavemax.png" alt="WaveMAX">
     <h1>Check your email</h1>
     <p class="sub">We've sent a preview link to your email address. Open it and click <strong>Enter the site</strong> to continue. The link expires in 60 minutes.</p>
+    <p class="sub" style="color:#fcd34d"><strong>Don't see it?</strong> Check your spam or promotions folder and mark it "Not spam".</p>
     <a class="link" href="/__gate">Use a different email</a>
   </div>`);
 }
@@ -277,20 +277,20 @@ async function handleGate(req, res, ip) {
     if (!emailValid(email)) {
       return res.status(400).type('html').send(landingPage('Please enter a valid email address.', next, ''));
     }
-    const last = sendThrottle.get(ip);
-    if (last && Date.now() - last < SEND_THROTTLE_MS) {
-      return res.redirect('/__gate/sent'); // a link was emailed very recently
-    }
+    // Cluster-global throttle: skip resending if this IP requested a link very
+    // recently. Checked in the DB so all PM2 workers share the window.
+    const since = new Date(Date.now() - SEND_THROTTLE_MS);
+    const recent = await AccessRequest.findOne({ requestIp: ip, createdAt: { $gte: since } }).lean().catch(() => null);
+    if (recent) return res.redirect('/__gate/sent');
     const token = crypto.randomBytes(32).toString('hex');
     try {
       await AccessRequest.create({
-        token, email, next: safeNext(next),
+        token, email, next: safeNext(next), requestIp: ip,
         createdAt: new Date(), expiresAt: new Date(Date.now() + TOKEN_TTL_MS), used: false
       });
       const host = req.headers['x-forwarded-host'] || req.headers.host;
       const link = `https://${host}/__gate/confirm?token=${token}`;
       await sendEmail(email, 'Your WaveMAX preview link', confirmEmailHtml(link), GATE_FROM);
-      sendThrottle.set(ip, Date.now());
     } catch (e) {
       logger.error('Access gate link email failed:', e.message);
       return res.status(500).type('html').send(landingPage('We could not send the email. Please try again.', next, email));
@@ -347,5 +347,4 @@ module.exports.loadCache = loadCache;
 module.exports.startCacheRefresh = startCacheRefresh;
 module.exports._cache = cache; // exposed for tests
 module.exports._botCache = botCache; // exposed for tests
-module.exports._sendThrottle = sendThrottle; // exposed for tests
 module.exports._landingPage = landingPage;
