@@ -49,7 +49,6 @@ describe('accessGate middleware', () => {
     AccessRequest.updateOne.mockResolvedValue({});
     sendEmail.mockResolvedValue({ messageId: 'x' });
     accessGate._botCache.clear();
-    accessGate._sendThrottle.clear();
   });
   afterAll(() => { delete process.env.ACCESS_GATE_ENABLED; });
 
@@ -112,10 +111,21 @@ describe('accessGate middleware', () => {
     expect(created.email).toBe('user@example.com');
     expect(created.token).toEqual(expect.any(String));
     expect(created.next).toBe('/orders');
+    expect(created.requestIp).toBe('7.7.7.7'); // captured for the cluster-global throttle
     expect(sendEmail).toHaveBeenCalledTimes(1);
     expect(sendEmail.mock.calls[0][3]).toContain('admin@rundberglaundry.com'); // From override
     expect(sendEmail.mock.calls[0][2]).toContain('/__gate/confirm?token='); // link with token param
     expect(AccessWhitelist.updateOne).not.toHaveBeenCalled(); // not whitelisted yet
+    expect(res.redirect).toHaveBeenCalledWith('/__gate/sent');
+  });
+
+  it('skips resending when the same IP requested a link within the throttle window (cluster-global)', async () => {
+    AccessRequest.findOne.mockReturnValue({ lean: () => Promise.resolve({ token: 'recent', createdAt: new Date() }) });
+    const req = mkReq({ method: 'POST', path: '/__gate', ip: '7.7.7.7', headers: { host: 'x' }, body: { email: 'user@example.com', password: 'correct-horse' } });
+    const res = mkRes(); const next = jest.fn();
+    await accessGate(req, res, next);
+    expect(AccessRequest.create).not.toHaveBeenCalled();
+    expect(sendEmail).not.toHaveBeenCalled();
     expect(res.redirect).toHaveBeenCalledWith('/__gate/sent');
   });
 
