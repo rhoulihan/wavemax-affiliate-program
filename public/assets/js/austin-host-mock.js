@@ -616,7 +616,10 @@
       // display:none to flex (modal opens). The resize event refits the
       // bounds we computed at init.
       if (map) setTimeout(() => google.maps.event.trigger(map, 'resize'), 100);
-      e.search?.focus();
+      // Only autofocus the search box on devices with a fine pointer (desktop).
+      // On touch devices, focusing would pop the on-screen keyboard on open.
+      const coarsePointer = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
+      if (!coarsePointer) e.search?.focus();
     };
     const close = () => {
       const e = getEls();
