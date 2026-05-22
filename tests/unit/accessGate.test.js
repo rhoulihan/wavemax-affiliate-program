@@ -13,6 +13,7 @@ jest.mock('../../server/models/AccessRequest', () => ({
   updateOne: jest.fn(() => Promise.resolve({})),
 }));
 jest.mock('../../server/services/email/transport', () => ({ sendEmail: jest.fn(() => Promise.resolve({ messageId: 'x' })) }));
+jest.mock('../../server/models/SystemConfig', () => ({ getValue: jest.fn(() => Promise.resolve(false)) }));
 jest.mock('dns', () => ({ promises: { reverse: jest.fn(), resolve4: jest.fn(), resolve6: jest.fn() } }));
 
 const dns = require('dns').promises;
@@ -38,7 +39,7 @@ describe('accessGate middleware', () => {
   const { salt, hash } = hashPassword('correct-horse');
   beforeEach(() => {
     jest.clearAllMocks();
-    process.env.ACCESS_GATE_ENABLED = 'true';
+    accessGate._cache.enabled = true;
     accessGate._cache.salt = salt;
     accessGate._cache.hash = hash;
     accessGate._cache.ips = new Map();
@@ -51,14 +52,22 @@ describe('accessGate middleware', () => {
     sendEmail.mockResolvedValue({ messageId: 'x' });
     accessGate._botCache.clear();
   });
-  afterAll(() => { delete process.env.ACCESS_GATE_ENABLED; });
-
-  it('is a no-op when ACCESS_GATE_ENABLED is not true', async () => {
-    process.env.ACCESS_GATE_ENABLED = 'false';
+  it('is a no-op when the gate is disabled (access_gate_enabled=false)', async () => {
+    accessGate._cache.enabled = false;
     const req = mkReq(); const res = mkRes(); const next = jest.fn();
     await accessGate(req, res, next);
     expect(next).toHaveBeenCalled();
     expect(res.send).not.toHaveBeenCalled();
+  });
+
+  it('loadCache drives cache.enabled from the access_gate_enabled SystemConfig flag', async () => {
+    const SystemConfig = require('../../server/models/SystemConfig');
+    SystemConfig.getValue.mockResolvedValueOnce(true);
+    await accessGate.loadCache();
+    expect(accessGate._cache.enabled).toBe(true);
+    SystemConfig.getValue.mockResolvedValueOnce(false);
+    await accessGate.loadCache();
+    expect(accessGate._cache.enabled).toBe(false);
   });
 
   it('lets exempt paths through (logo) without whitelist', async () => {
