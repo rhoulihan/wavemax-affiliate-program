@@ -124,7 +124,10 @@
       document.body.classList.add('wm-noscroll'); // CSP-safe class-toggle
       if (!initialized) initialize();
       if (map) setTimeout(() => google.maps.event.trigger(map, 'resize'), 100);
-      if (search) search.focus();
+      // Only autofocus the search box on devices with a fine pointer (desktop).
+      // On touch devices, focusing would pop the on-screen keyboard on open.
+      const coarsePointer = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
+      if (search && !coarsePointer) search.focus();
     }
     function close() {
       const overlay = $('locModal');
