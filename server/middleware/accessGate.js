@@ -39,6 +39,14 @@ const TOKEN_TTL_MS = 60 * 60 * 1000;          // emailed link valid for 60 minut
 const SEND_THROTTLE_MS = 60 * 1000;           // min interval between link emails per IP
 const GATE_FROM = '"WaveMAX" <admin@rundberglaundry.com>';
 
+// Preview routing (temporary "for now" state): every gated host bounces
+// non-whitelisted, non-crawler traffic to the corporate Austin page EXCEPT the
+// shareable preview path, which shows the gate so invited people can request
+// access. crhsent.com is the open public site and is never gated or redirected.
+const NON_GATED_HOSTS = ['crhsent.com', 'www.crhsent.com'];
+const PREVIEW_PATH_PREFIX = '/austin-tx';
+const PREVIEW_CORPORATE_URL = 'https://wavemaxlaundry.com/austin-tx/';
+
 const emailValid = (e) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(e || '').trim());
 const safeNext = (n) => (n && String(n).startsWith('/') ? String(n) : '/');
 const tokenExpired = (ar) => !ar.expiresAt || new Date(ar.expiresAt).getTime() < Date.now();
@@ -101,6 +109,10 @@ function startCacheRefresh() {
 
 function clientIp(req) {
   return String(req.headers['cf-connecting-ip'] || req.ip || '').trim();
+}
+
+function reqHost(req) {
+  return String(req.headers['x-forwarded-host'] || req.headers.host || '').toLowerCase().split(':')[0].trim();
 }
 
 // Paths always allowed through, even for non-whitelisted IPs: the gate's own
@@ -314,6 +326,9 @@ async function accessGate(req, res, next) {
 
   if (isExempt(req.path)) return next();
 
+  // crhsent.com is the open public site — never gated or redirected.
+  if (NON_GATED_HOSTS.includes(reqHost(req))) return next();
+
   // Hot path: in-memory whitelist hit.
   let entry = cache.ips.get(ip);
   // Cache miss → single DB lookup (covers an unlock that happened on another
@@ -330,15 +345,19 @@ async function accessGate(req, res, next) {
     return next();
   }
 
-  // Verified Google crawlers bypass the gate so the site stays indexable while
-  // private. UA is a cheap pre-filter; reverse-DNS + forward-confirm is the
-  // authoritative check (spoofed UAs fail it). Crawler hits are not click-logged.
+  // Verified Google crawlers bypass the gate AND the preview redirect so search
+  // sees all real content on every path. UA is a cheap pre-filter; reverse-DNS +
+  // forward-confirm is authoritative (spoofed UAs fail it). Not click-logged.
   const ua = req.headers['user-agent'] || '';
   if (GOOGLE_UA_RE.test(ua) && await isVerifiedGoogle(ip)) {
     return next();
   }
 
-  // Not whitelisted → branded landing page.
+  // Non-whitelisted, non-crawler on a gated host: bounce to the corporate Austin
+  // page, except the shareable /austin-tx/ preview path which shows the gate.
+  if (!req.path.startsWith(PREVIEW_PATH_PREFIX)) {
+    return res.redirect(302, PREVIEW_CORPORATE_URL);
+  }
   return res.status(401).type('html').send(landingPage(null, req.method === 'GET' ? req.originalUrl : '/'));
 }
 
