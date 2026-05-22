@@ -50,8 +50,10 @@ function createTransport() {
  * Send an HTML email to `to`.
  * Attachments are not supported — upstream mail policy blocks them; images
  * must be referenced by URL.
+ * @param {string} [fromOverride] - full From header (e.g. '"WaveMAX" <admin@x>').
+ *   Requires the SMTP login to be permitted to send as that address.
  */
-async function sendEmail(to, subject, html) {
+async function sendEmail(to, subject, html, fromOverride) {
   if (!to) {
     throw new Error('No recipient email address provided');
   }
@@ -59,7 +61,7 @@ async function sendEmail(to, subject, html) {
   logger.info('[sendEmail] Sending email to:', to);
   const transporter = createTransport();
 
-  const from = `"WaveMAX Laundry" <${process.env.EMAIL_FROM || process.env.EMAIL_USER || 'noreply@wavemax.promo'}>`;
+  const from = fromOverride || `"WaveMAX Laundry" <${process.env.EMAIL_FROM || process.env.EMAIL_USER || 'noreply@wavemax.promo'}>`;
   const mailOptions = { from, to, subject, html };
 
   try {

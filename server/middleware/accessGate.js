@@ -1,8 +1,19 @@
 // Site access gate: password-protects all web traffic to the Express-served
 // domains unless the client IP is whitelisted. No username — a single shared
-// password (PBKDF2-hashed in the AccessGate collection) unlocks an IP, which
-// is then recorded in AccessWhitelist. Whitelisted IPs (except the seeded
-// admin IP) have their traffic logged to AccessClick.
+// password (PBKDF2-hashed in the AccessGate collection).
+//
+// Unlock is a double-opt-in magic-link flow that captures a verified email:
+//   1. Landing form takes email + password → POST /__gate.
+//   2. Correct password → a single-use token (the URL parameter) is stored in
+//      AccessRequest, associated with the submitted email, and a link is
+//      emailed (from admin@rundberglaundry.com). Browser is redirected to a
+//      "check your email" page. No IP is whitelisted yet.
+//   3. The emailed link → GET /__gate/confirm?token=… shows an "Enter site"
+//      page; the button POSTs the token. POST verifies the token↔email, then
+//      whitelists the clicking IP (recorded in AccessWhitelist with the email).
+// The GET→POST confirm step defeats mail-provider link prefetch (scanners
+// follow GET but don't submit forms), so a scanner can't burn the token or
+// whitelist its own IP.
 //
 // Enabled only when ACCESS_GATE_ENABLED=true, so it can be deployed dark,
 // seeded, verified, then switched on without risk of self-lockout.
@@ -12,14 +23,26 @@
 // unlocks in the PM2 cluster); a periodic refresh reconciles drift. Click
 // logging is best-effort and never blocks a request.
 
+const crypto = require('crypto');
 const dns = require('dns').promises;
 const { verifyPassword } = require('../utils/encryption');
 const logger = require('../utils/logger');
+const { sendEmail } = require('../services/email/transport');
 const AccessGate = require('../models/AccessGate');
 const AccessWhitelist = require('../models/AccessWhitelist');
 const AccessClick = require('../models/AccessClick');
+const AccessRequest = require('../models/AccessRequest');
 
 const cache = { ready: false, salt: null, hash: null, ips: new Map() }; // ip -> { trackClicks }
+
+const TOKEN_TTL_MS = 60 * 60 * 1000;          // emailed link valid for 60 minutes
+const SEND_THROTTLE_MS = 60 * 1000;           // min interval between link emails per IP
+const GATE_FROM = '"WaveMAX" <admin@rundberglaundry.com>';
+const sendThrottle = new Map();               // ip -> last successful send (ms)
+
+const emailValid = (e) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(e || '').trim());
+const safeNext = (n) => (n && String(n).startsWith('/') ? String(n) : '/');
+const tokenExpired = (ar) => !ar.expiresAt || new Date(ar.expiresAt).getTime() < Date.now();
 
 // Verified Google-crawler cache: ip -> { ok, exp }. Spares a DNS round-trip on
 // every crawler request. Positives are long-lived; negatives expire quickly so
@@ -97,9 +120,8 @@ function esc(s) {
   return String(s || '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 }
 
-function landingPage(error, nextUrl) {
-  const next = esc(nextUrl && nextUrl.startsWith('/') ? nextUrl : '/');
-  const err = error ? `<p class="err">${esc(error)}</p>` : '';
+// Shared chrome for all gate pages (landing / sent / confirm / error).
+function pageShell(cardHtml) {
   return `<!DOCTYPE html>
 <html lang="en"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
@@ -114,31 +136,84 @@ function landingPage(error, nextUrl) {
     border-radius:14px;padding:36px 30px;text-align:center}
   .logo{height:48px;margin-bottom:22px}
   h1{font-size:18px;font-weight:600;margin-bottom:6px}
-  p.sub{font-size:14px;color:#bcd3ff;margin-bottom:22px}
-  input[type=password]{width:100%;padding:13px 14px;border-radius:8px;border:1px solid rgba(255,255,255,.25);
+  p.sub{font-size:14px;color:#bcd3ff;margin-bottom:22px;line-height:1.5}
+  input{width:100%;padding:13px 14px;border-radius:8px;border:1px solid rgba(255,255,255,.25);
     background:rgba(255,255,255,.95);color:#0f172a;font-size:15px;margin-bottom:14px}
   button{width:100%;padding:13px;border:0;border-radius:8px;background:#2563eb;color:#fff;
     font-size:15px;font-weight:600;cursor:pointer}
   button:hover{background:#1e3a8a}
+  a.link{color:#bcd3ff;font-size:13px}
   .err{color:#fca5a5;font-size:13px;margin-bottom:12px}
 </style></head>
-<body>
-  <form class="card" method="POST" action="/__gate" autocomplete="off">
-    <img class="logo" src="/assets/images/brand/logo-wavemax.png" alt="WaveMAX">
-    <h1>Enter password to proceed</h1>
-    <p class="sub">This site is currently private.</p>
-    ${err}
-    <input type="password" name="password" placeholder="Password" autofocus required>
-    <input type="hidden" name="next" value="${next}">
-    <button type="submit">Enter</button>
-  </form>
-</body></html>`;
+<body>${cardHtml}</body></html>`;
 }
 
-async function addToWhitelist(ip) {
+function landingPage(error, nextUrl, email) {
+  const next = esc(safeNext(nextUrl));
+  const err = error ? `<p class="err">${esc(error)}</p>` : '';
+  return pageShell(`
+  <form class="card" method="POST" action="/__gate" autocomplete="off">
+    <img class="logo" src="/assets/images/brand/logo-wavemax.png" alt="WaveMAX">
+    <h1>Request access to preview</h1>
+    <p class="sub">This site is currently private. Enter your email and the access password and we'll send you a preview link.</p>
+    ${err}
+    <input type="email" name="email" placeholder="Email address" value="${esc(email)}" autocomplete="off" autofocus required>
+    <input type="password" name="password" placeholder="Access password" autocomplete="off" required>
+    <input type="hidden" name="next" value="${next}">
+    <button type="submit">Send me a link</button>
+  </form>`);
+}
+
+function sentPage() {
+  return pageShell(`
+  <div class="card">
+    <img class="logo" src="/assets/images/brand/logo-wavemax.png" alt="WaveMAX">
+    <h1>Check your email</h1>
+    <p class="sub">We've sent a preview link to your email address. Open it and click <strong>Enter the site</strong> to continue. The link expires in 60 minutes.</p>
+    <a class="link" href="/__gate">Use a different email</a>
+  </div>`);
+}
+
+function confirmPage(token, nextUrl) {
+  return pageShell(`
+  <form class="card" method="POST" action="/__gate/confirm" autocomplete="off">
+    <img class="logo" src="/assets/images/brand/logo-wavemax.png" alt="WaveMAX">
+    <h1>You're verified</h1>
+    <p class="sub">Click below to unlock the site preview from this device.</p>
+    <input type="hidden" name="token" value="${esc(token)}">
+    <input type="hidden" name="next" value="${esc(safeNext(nextUrl))}">
+    <button type="submit">Enter the site</button>
+  </form>`);
+}
+
+function confirmErrorPage() {
+  return pageShell(`
+  <div class="card">
+    <img class="logo" src="/assets/images/brand/logo-wavemax.png" alt="WaveMAX">
+    <h1>Link expired or already used</h1>
+    <p class="sub">This preview link is no longer valid. Request a fresh one and we'll email you a new link.</p>
+    <a class="link" href="/__gate">Request a new link</a>
+  </div>`);
+}
+
+function confirmEmailHtml(link) {
+  const safeLink = esc(link);
+  return `<div style="font-family:Arial,Helvetica,sans-serif;max-width:480px;margin:0 auto;padding:24px;color:#0f172a">
+  <img src="https://wavemax.promo/assets/images/brand/logo-wavemax.png" alt="WaveMAX" style="height:40px;margin-bottom:16px">
+  <h2 style="font-size:18px;margin:0 0 8px">Your site preview link</h2>
+  <p style="font-size:14px;line-height:1.5;color:#334155">Click below to unlock access to the site preview from this device. This link expires in 60 minutes.</p>
+  <p style="margin:22px 0"><a href="${safeLink}" style="background:#2563eb;color:#fff;text-decoration:none;padding:12px 22px;border-radius:8px;font-weight:600;display:inline-block">Enter the site</a></p>
+  <p style="font-size:12px;color:#64748b;word-break:break-all">If the button doesn't work, paste this link into your browser:<br>${safeLink}</p>
+  <p style="font-size:12px;color:#94a3b8;margin-top:16px">If you didn't request this, you can safely ignore this email.</p>
+</div>`;
+}
+
+async function whitelistIp(ip, email) {
+  const set = { lastSeenAt: new Date() };
+  if (email) set.email = email;
   await AccessWhitelist.updateOne(
     { ip },
-    { $set: { lastSeenAt: new Date() }, $setOnInsert: { ip, addedAt: new Date(), addedVia: 'password', trackClicks: true } },
+    { $set: set, $setOnInsert: { ip, addedAt: new Date(), addedVia: 'email-link', trackClicks: true } },
     { upsert: true }
   );
   cache.ips.set(ip, { trackClicks: true });
@@ -156,22 +231,85 @@ function recordClick(req, ip) {
   }).catch(() => {});
 }
 
+// Handles the gate's own endpoints (/__gate, /__gate/sent, /__gate/confirm),
+// reachable regardless of whitelist so a not-yet-unlocked visitor can request
+// and confirm access.
+async function handleGate(req, res, ip) {
+  // POST /__gate/confirm — verify the token↔email, then whitelist this IP.
+  if (req.path === '/__gate/confirm' && req.method === 'POST') {
+    const token = (req.body && req.body.token) || '';
+    const ar = token ? await AccessRequest.findOne({ token }).lean().catch(() => null) : null;
+    if (ar && ar.used && ar.usedIp === ip) return res.redirect(safeNext(ar.next));
+    if (!ar || ar.used || tokenExpired(ar)) {
+      return res.status(400).type('html').send(confirmErrorPage());
+    }
+    try {
+      await whitelistIp(ip, ar.email);
+      await AccessRequest.updateOne({ token }, { $set: { used: true, usedAt: new Date(), usedIp: ip } });
+    } catch (e) { logger.error('Access gate confirm failed:', e.message); }
+    return res.redirect(safeNext(ar.next));
+  }
+
+  // GET /__gate/confirm — validate the emailed token, then show the confirm button.
+  if (req.path === '/__gate/confirm') {
+    const token = (req.query && req.query.token) || '';
+    const ar = token ? await AccessRequest.findOne({ token }).lean().catch(() => null) : null;
+    if (ar && ar.used && ar.usedIp === ip) return res.redirect(safeNext(ar.next));
+    if (!ar || ar.used || tokenExpired(ar)) {
+      return res.status(400).type('html').send(confirmErrorPage());
+    }
+    return res.status(200).type('html').send(confirmPage(token, ar.next));
+  }
+
+  // GET /__gate/sent — "check your email" confirmation.
+  if (req.path === '/__gate/sent') {
+    return res.status(200).type('html').send(sentPage());
+  }
+
+  // POST /__gate — verify password + email, then email a single-use link.
+  if (req.path === '/__gate' && req.method === 'POST') {
+    const pw = (req.body && req.body.password) || '';
+    const email = ((req.body && req.body.email) || '').trim();
+    const next = req.body && req.body.next;
+    if (!cache.hash || !verifyPassword(pw, cache.salt, cache.hash)) {
+      return res.status(401).type('html').send(landingPage('Incorrect password.', next, email));
+    }
+    if (!emailValid(email)) {
+      return res.status(400).type('html').send(landingPage('Please enter a valid email address.', next, ''));
+    }
+    const last = sendThrottle.get(ip);
+    if (last && Date.now() - last < SEND_THROTTLE_MS) {
+      return res.redirect('/__gate/sent'); // a link was emailed very recently
+    }
+    const token = crypto.randomBytes(32).toString('hex');
+    try {
+      await AccessRequest.create({
+        token, email, next: safeNext(next),
+        createdAt: new Date(), expiresAt: new Date(Date.now() + TOKEN_TTL_MS), used: false
+      });
+      const host = req.headers['x-forwarded-host'] || req.headers.host;
+      const link = `https://${host}/__gate/confirm?token=${token}`;
+      await sendEmail(email, 'Your WaveMAX preview link', confirmEmailHtml(link), GATE_FROM);
+      sendThrottle.set(ip, Date.now());
+    } catch (e) {
+      logger.error('Access gate link email failed:', e.message);
+      return res.status(500).type('html').send(landingPage('We could not send the email. Please try again.', next, email));
+    }
+    return res.redirect('/__gate/sent');
+  }
+
+  // GET /__gate — landing form.
+  return res.status(200).type('html').send(landingPage(null, req.query && req.query.next));
+}
+
 async function accessGate(req, res, next) {
   if (process.env.ACCESS_GATE_ENABLED !== 'true') return next();
   const ip = clientIp(req);
 
-  // The gate's own endpoint (GET landing / POST password) — handled regardless of whitelist.
-  if (req.path === '/__gate') {
-    if (req.method === 'POST') {
-      const pw = (req.body && req.body.password) || '';
-      if (cache.hash && verifyPassword(pw, cache.salt, cache.hash)) {
-        try { await addToWhitelist(ip); } catch (e) { logger.error('Access gate whitelist add failed:', e.message); }
-        const dest = req.body.next && String(req.body.next).startsWith('/') ? req.body.next : '/';
-        return res.redirect(dest);
-      }
-      return res.status(401).type('html').send(landingPage('Incorrect password.', req.body && req.body.next));
-    }
-    return res.status(200).type('html').send(landingPage(null, req.query.next));
+  // The gate's own endpoints — handled regardless of whitelist so a not-yet-
+  // unlocked visitor can request and confirm access.
+  if (req.path === '/__gate' || req.path.startsWith('/__gate/')) {
+    return handleGate(req, res, ip);
   }
 
   if (isExempt(req.path)) return next();
@@ -209,4 +347,5 @@ module.exports.loadCache = loadCache;
 module.exports.startCacheRefresh = startCacheRefresh;
 module.exports._cache = cache; // exposed for tests
 module.exports._botCache = botCache; // exposed for tests
+module.exports._sendThrottle = sendThrottle; // exposed for tests
 module.exports._landingPage = landingPage;

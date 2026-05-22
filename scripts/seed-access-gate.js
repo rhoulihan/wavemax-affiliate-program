@@ -9,6 +9,7 @@ const { hashPassword } = require('../server/utils/encryption');
 const AccessGate = require('../server/models/AccessGate');
 const AccessWhitelist = require('../server/models/AccessWhitelist');
 const AccessClick = require('../server/models/AccessClick');
+const AccessRequest = require('../server/models/AccessRequest');
 
 const PASSWORD = process.env.ACCESS_GATE_PASSWORD;
 const ADMIN_IP = process.env.ADMIN_IP || process.argv[2];
@@ -34,6 +35,7 @@ const ADMIN_IP = process.env.ADMIN_IP || process.argv[2];
   await mk(AccessGate, { key: 1 }, { unique: true }, 'AccessGate.key');
   await mk(AccessWhitelist, { ip: 1 }, { unique: true }, 'AccessWhitelist.ip');
   await mk(AccessClick, { ip: 1, ts: -1 }, {}, 'AccessClick.ip_ts');
+  await mk(AccessRequest, { token: 1 }, { unique: true }, 'AccessRequest.token');
 
   // 3) seed admin IP — whitelisted, NOT click-tracked ("this IP")
   if (ADMIN_IP) {
