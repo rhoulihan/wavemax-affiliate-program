@@ -1,0 +1,28 @@
+// Unit test for the From override added to the email transport.
+jest.mock('nodemailer', () => ({ createTransport: jest.fn() }));
+jest.mock('../../server/utils/logger', () => ({ info: jest.fn(), error: jest.fn(), warn: jest.fn(), debug: jest.fn() }));
+
+const nodemailer = require('nodemailer');
+const { sendEmail } = require('../../server/services/email/transport');
+
+describe('email transport — From override', () => {
+  let sendMail;
+  beforeEach(() => {
+    jest.clearAllMocks();
+    sendMail = jest.fn().mockResolvedValue({ messageId: 'm1' });
+    nodemailer.createTransport.mockReturnValue({ sendMail });
+    process.env.EMAIL_PROVIDER = 'smtp';
+    process.env.EMAIL_FROM = 'no-reply@wavemax.promo';
+  });
+
+  it('uses the fromOverride argument verbatim when provided', async () => {
+    await sendEmail('to@example.com', 'Subj', '<p>hi</p>', '"WaveMAX" <admin@rundberglaundry.com>');
+    expect(sendMail).toHaveBeenCalledTimes(1);
+    expect(sendMail.mock.calls[0][0].from).toBe('"WaveMAX" <admin@rundberglaundry.com>');
+  });
+
+  it('falls back to the default From when no override is given', async () => {
+    await sendEmail('to@example.com', 'Subj', '<p>hi</p>');
+    expect(sendMail.mock.calls[0][0].from).toContain('no-reply@wavemax.promo');
+  });
+});
