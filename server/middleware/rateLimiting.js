@@ -61,6 +61,10 @@ exports.authLimiter = rateLimit({
   },
   standardHeaders: true,
   legacyHeaders: false,
+  // Don't throw ERR_ERL_DOUBLE_COUNT into the request (it surfaced on the
+  // Oracle-backed store and was escalating to unhandledRejection → worker
+  // crash-loop). The count may be off by one in rare cases; that's acceptable.
+  validate: { singleCount: false },
   skipSuccessfulRequests: true,
   skip: skipInTest,
   store: createMongoStore(15 * 60 * 1000, 'auth')
@@ -77,6 +81,10 @@ exports.passwordResetLimiter = rateLimit({
   },
   standardHeaders: true,
   legacyHeaders: false,
+  // Don't throw ERR_ERL_DOUBLE_COUNT into the request (it surfaced on the
+  // Oracle-backed store and was escalating to unhandledRejection → worker
+  // crash-loop). The count may be off by one in rare cases; that's acceptable.
+  validate: { singleCount: false },
   skipSuccessfulRequests: true,
   skip: skipInTest,
   store: createMongoStore(60 * 60 * 1000, 'pwreset')
@@ -93,6 +101,10 @@ exports.registrationLimiter = rateLimit({
   },
   standardHeaders: true,
   legacyHeaders: false,
+  // Don't throw ERR_ERL_DOUBLE_COUNT into the request (it surfaced on the
+  // Oracle-backed store and was escalating to unhandledRejection → worker
+  // crash-loop). The count may be off by one in rare cases; that's acceptable.
+  validate: { singleCount: false },
   skip: skipInTest,
   store: createMongoStore(60 * 60 * 1000, 'register')
 });
@@ -107,6 +119,10 @@ exports.apiLimiter = rateLimit({
   },
   standardHeaders: true,
   legacyHeaders: false,
+  // Don't throw ERR_ERL_DOUBLE_COUNT into the request (it surfaced on the
+  // Oracle-backed store and was escalating to unhandledRejection → worker
+  // crash-loop). The count may be off by one in rare cases; that's acceptable.
+  validate: { singleCount: false },
   skip: (req) => {
     // Skip in test environment only. The previous code also skipped for
     // `req.user.role === 'admin'`, but the legitimate role string is
@@ -130,6 +146,10 @@ exports.sensitiveOperationLimiter = rateLimit({
   },
   standardHeaders: true,
   legacyHeaders: false,
+  // Don't throw ERR_ERL_DOUBLE_COUNT into the request (it surfaced on the
+  // Oracle-backed store and was escalating to unhandledRejection → worker
+  // crash-loop). The count may be off by one in rare cases; that's acceptable.
+  validate: { singleCount: false },
   skip: skipInTest,
   keyGenerator: (req) => {
     // Rate limit by user ID if authenticated, otherwise by IP
@@ -150,6 +170,10 @@ exports.contactFormBurstLimiter = rateLimit({
   },
   standardHeaders: true,
   legacyHeaders: false,
+  // Don't throw ERR_ERL_DOUBLE_COUNT into the request (it surfaced on the
+  // Oracle-backed store and was escalating to unhandledRejection → worker
+  // crash-loop). The count may be off by one in rare cases; that's acceptable.
+  validate: { singleCount: false },
   skip: skipInTest,
   keyGenerator: (req) => req.ip,
   store: createMongoStore(30 * 1000, 'contact_burst')
@@ -170,6 +194,10 @@ exports.contactFormLimiter = rateLimit({
   },
   standardHeaders: true,
   legacyHeaders: false,
+  // Don't throw ERR_ERL_DOUBLE_COUNT into the request (it surfaced on the
+  // Oracle-backed store and was escalating to unhandledRejection → worker
+  // crash-loop). The count may be off by one in rare cases; that's acceptable.
+  validate: { singleCount: false },
   skip: skipInTest,
   keyGenerator: (req) => req.ip,
   store: createMongoStore(60 * 60 * 1000, 'contact_hourly')
@@ -186,6 +214,10 @@ exports.emailVerificationLimiter = rateLimit({
   },
   standardHeaders: true,
   legacyHeaders: false,
+  // Don't throw ERR_ERL_DOUBLE_COUNT into the request (it surfaced on the
+  // Oracle-backed store and was escalating to unhandledRejection → worker
+  // crash-loop). The count may be off by one in rare cases; that's acceptable.
+  validate: { singleCount: false },
   keyGenerator: (req) => {
     // Rate limit by email or user ID
     return req.body.email || (req.user && req.user.id) || req.ip;
@@ -203,6 +235,10 @@ exports.oauthCallbackLimiter = rateLimit({
   },
   standardHeaders: true,
   legacyHeaders: false,
+  // Don't throw ERR_ERL_DOUBLE_COUNT into the request (it surfaced on the
+  // Oracle-backed store and was escalating to unhandledRejection → worker
+  // crash-loop). The count may be off by one in rare cases; that's acceptable.
+  validate: { singleCount: false },
   store: createMongoStore(15 * 60 * 1000, 'oauth')
 });
 
@@ -217,6 +253,10 @@ exports.fileUploadLimiter = rateLimit({
   },
   standardHeaders: true,
   legacyHeaders: false,
+  // Don't throw ERR_ERL_DOUBLE_COUNT into the request (it surfaced on the
+  // Oracle-backed store and was escalating to unhandledRejection → worker
+  // crash-loop). The count may be off by one in rare cases; that's acceptable.
+  validate: { singleCount: false },
   keyGenerator: (req) => {
     // Rate limit by user ID if authenticated, otherwise by IP
     return req.user ? `user_${req.user.id}` : req.ip;
@@ -234,6 +274,10 @@ exports.adminOperationLimiter = rateLimit({
   },
   standardHeaders: true,
   legacyHeaders: false,
+  // Don't throw ERR_ERL_DOUBLE_COUNT into the request (it surfaced on the
+  // Oracle-backed store and was escalating to unhandledRejection → worker
+  // crash-loop). The count may be off by one in rare cases; that's acceptable.
+  validate: { singleCount: false },
   skip: (req) => {
     // Only apply to authenticated administrators. The role string is
     // 'administrator' per the Administrator model + token signer — using
@@ -256,6 +300,10 @@ exports.adminLoginLimiter = rateLimit({
   },
   standardHeaders: true,
   legacyHeaders: false,
+  // Don't throw ERR_ERL_DOUBLE_COUNT into the request (it surfaced on the
+  // Oracle-backed store and was escalating to unhandledRejection → worker
+  // crash-loop). The count may be off by one in rare cases; that's acceptable.
+  validate: { singleCount: false },
   skipSuccessfulRequests: true,
   skip: skipInTest,
   keyGenerator: (req) => {
@@ -271,6 +319,10 @@ exports.createCustomLimiter = (options) => {
   const defaults = {
     standardHeaders: true,
     legacyHeaders: false,
+  // Don't throw ERR_ERL_DOUBLE_COUNT into the request (it surfaced on the
+  // Oracle-backed store and was escalating to unhandledRejection → worker
+  // crash-loop). The count may be off by one in rare cases; that's acceptable.
+  validate: { singleCount: false },
     store: createMongoStore(options.windowMs || 15 * 60 * 1000, options.name || 'custom'),
     message: {
       success: false,
