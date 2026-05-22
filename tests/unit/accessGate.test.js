@@ -29,6 +29,7 @@ const mkRes = () => {
   res.type = jest.fn(() => res);
   res.send = jest.fn(() => res);
   res.redirect = jest.fn(() => res);
+  res.locals = { cspNonce: 'test-nonce' };
   return res;
 };
 const mkReq = (over = {}) => ({ method: 'GET', path: '/', originalUrl: '/', headers: {}, query: {}, body: {}, ip: '9.9.9.9', ...over });
@@ -97,6 +98,22 @@ describe('accessGate middleware', () => {
     await accessGate(req, res, next);
     expect(next).not.toHaveBeenCalled();
     expect(res.redirect).toHaveBeenCalledWith(302, 'https://wavemaxlaundry.com/austin-tx/');
+  });
+
+  it('redirects a rewritten bare-root request to corporate via X-Original-URI', async () => {
+    // nginx rewrote / -> /austin-tx/ but X-Original-URI preserves the true root.
+    const req = mkReq({ ip: '8.8.8.8', path: '/austin-tx/', originalUrl: '/austin-tx/', headers: { host: 'rundberglaundry.com', 'x-original-uri': '/' } });
+    const res = mkRes(); const next = jest.fn();
+    await accessGate(req, res, next);
+    expect(res.redirect).toHaveBeenCalledWith(302, 'https://wavemaxlaundry.com/austin-tx/');
+  });
+
+  it('shows the gate when X-Original-URI is the real /austin-tx/ preview path', async () => {
+    const req = mkReq({ ip: '8.8.8.8', path: '/austin-tx/', originalUrl: '/austin-tx/', headers: { host: 'rundberglaundry.com', 'x-original-uri': '/austin-tx/' } });
+    const res = mkRes(); const next = jest.fn();
+    await accessGate(req, res, next);
+    expect(res.status).toHaveBeenCalledWith(401);
+    expect(res.send.mock.calls[0][0]).toContain('name="email"');
   });
 
   it('redirects non-whitelisted traffic on every gated host the same way', async () => {
@@ -194,6 +211,17 @@ describe('accessGate middleware', () => {
     expect(res.send.mock.calls[0][0]).toContain('Send me a link');
   });
 
+  it('renders the swirl spinner + a nonce-bound submit handler on the landing form', async () => {
+    const req = mkReq({ ip: '8.8.8.8', path: '/austin-tx/', originalUrl: '/austin-tx/', headers: { host: 'rundberglaundry.com' } });
+    const res = mkRes(); const next = jest.fn();
+    await accessGate(req, res, next);
+    const html = res.send.mock.calls[0][0];
+    expect(html).toContain('id="gate-spinner"');
+    expect(html).toContain('swirl-dot1');
+    expect(html).toContain('<script nonce="test-nonce">');
+    expect(html).toContain('data-spinner=');
+  });
+
   it('GET /__gate/sent shows the check-your-email page', async () => {
     const req = mkReq({ path: '/__gate/sent', ip: '9.3.3.3' }); const res = mkRes(); const next = jest.fn();
     await accessGate(req, res, next);
@@ -262,7 +290,7 @@ describe('accessGate middleware', () => {
 
   it('blocks a spoofed Googlebot UA whose reverse DNS is not Google', async () => {
     dns.reverse.mockResolvedValue(['host.evil.example']);
-    const req = mkReq({ ip: '203.0.113.99', path: '/austin-tx/', headers: { 'user-agent': 'Googlebot/2.1' } });
+    const req = mkReq({ ip: '203.0.113.99', path: '/austin-tx/', originalUrl: '/austin-tx/', headers: { 'user-agent': 'Googlebot/2.1' } });
     const res = mkRes(); const next = jest.fn();
     await accessGate(req, res, next);
     expect(next).not.toHaveBeenCalled();
@@ -272,7 +300,7 @@ describe('accessGate middleware', () => {
   it('blocks Googlebot UA when forward-confirm does not match the IP', async () => {
     dns.reverse.mockResolvedValue(['crawl.googlebot.com']);
     dns.resolve4.mockResolvedValue(['8.8.8.8']);
-    const req = mkReq({ ip: '203.0.113.100', path: '/austin-tx/', headers: { 'user-agent': 'Googlebot/2.1' } });
+    const req = mkReq({ ip: '203.0.113.100', path: '/austin-tx/', originalUrl: '/austin-tx/', headers: { 'user-agent': 'Googlebot/2.1' } });
     const res = mkRes(); const next = jest.fn();
     await accessGate(req, res, next);
     expect(next).not.toHaveBeenCalled();
@@ -280,7 +308,7 @@ describe('accessGate middleware', () => {
   });
 
   it('does not perform DNS for a normal browser UA (non-whitelisted → landing on preview path)', async () => {
-    const req = mkReq({ ip: '203.0.113.101', path: '/austin-tx/', headers: { 'user-agent': 'Mozilla/5.0 (Windows NT 10.0)' } });
+    const req = mkReq({ ip: '203.0.113.101', path: '/austin-tx/', originalUrl: '/austin-tx/', headers: { 'user-agent': 'Mozilla/5.0 (Windows NT 10.0)' } });
     const res = mkRes(); const next = jest.fn();
     await accessGate(req, res, next);
     expect(dns.reverse).not.toHaveBeenCalled();

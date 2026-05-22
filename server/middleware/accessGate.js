@@ -131,8 +131,34 @@ function esc(s) {
   return String(s || '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 }
 
-// Shared chrome for all gate pages (landing / sent / confirm / error).
-function pageShell(cardHtml) {
+// Branded swirl spinner — same SVG + elliptical-orbit animation as the app's
+// public/assets/css/swirl-spinner.css, inlined because the gate page loads
+// before any IP is whitelisted (external assets wouldn't pass the gate).
+const SWIRL_SVG = `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+      <ellipse cx="50" cy="50" rx="48" ry="35" fill="#2563eb" opacity="0.9"/>
+      <ellipse cx="50" cy="50" rx="40" ry="28" fill="#3b82f6"/>
+      <path d="M 35 50 Q 50 35, 65 50 Q 60 60, 50 62 Q 40 60, 35 50 Z" fill="#1e40af" opacity="0.6"/>
+      <circle class="swirl-dot1" cx="30" cy="45" r="4" fill="white"/>
+      <circle class="swirl-dot2" cx="70" cy="45" r="4" fill="white"/>
+      <circle class="swirl-dot3" cx="30" cy="55" r="3" fill="white"/>
+      <circle class="swirl-dot4" cx="70" cy="55" r="3" fill="white"/>
+    </svg>`;
+
+// Shared chrome for all gate pages (landing / sent / confirm / error). When a
+// CSP nonce is supplied, a nonce-bound handler reveals the swirl spinner the
+// instant a form is submitted (the email request and the "enter the site" click).
+function pageShell(cardHtml, nonce) {
+  const spinnerScript = nonce ? `<script nonce="${nonce}">
+(function(){
+  var ov=document.getElementById('gate-spinner'), msg=document.getElementById('gate-spinner-msg');
+  document.querySelectorAll('form.card').forEach(function(f){
+    f.addEventListener('submit',function(){
+      var m=f.getAttribute('data-spinner'); if(m&&msg){msg.textContent=m;}
+      if(ov){ov.classList.add('show');}
+    });
+  });
+})();
+</script>` : '';
   return `<!DOCTYPE html>
 <html lang="en"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
@@ -155,15 +181,37 @@ function pageShell(cardHtml) {
   button:hover{background:#1e3a8a}
   a.link{color:#bcd3ff;font-size:13px}
   .err{color:#fca5a5;font-size:13px;margin-bottom:12px}
+  /* WaveMAX swirl spinner — revealed on form submit */
+  .swirl-spinner{width:120px;height:120px;display:inline-block;position:relative;background:#fff;border-radius:50%;padding:14px;box-shadow:0 10px 34px rgba(0,0,0,.4)}
+  .swirl-spinner svg{width:100%;height:100%}
+  .swirl-dot1{animation:swirl-o1 2s linear infinite}
+  .swirl-dot2{animation:swirl-o2 2s linear infinite}
+  .swirl-dot3{animation:swirl-o3 2s linear infinite}
+  .swirl-dot4{animation:swirl-o4 2s linear infinite}
+  @keyframes swirl-o1{0%{transform:translate(0,0)}25%{transform:translate(20px,-8px)}50%{transform:translate(0,-16px)}75%{transform:translate(-20px,-8px)}100%{transform:translate(0,0)}}
+  @keyframes swirl-o2{0%{transform:translate(0,-16px)}25%{transform:translate(-20px,-8px)}50%{transform:translate(0,0)}75%{transform:translate(20px,-8px)}100%{transform:translate(0,-16px)}}
+  @keyframes swirl-o3{0%{transform:translate(0,0)}25%{transform:translate(20px,8px)}50%{transform:translate(0,16px)}75%{transform:translate(-20px,8px)}100%{transform:translate(0,0)}}
+  @keyframes swirl-o4{0%{transform:translate(0,16px)}25%{transform:translate(-20px,8px)}50%{transform:translate(0,0)}75%{transform:translate(20px,8px)}100%{transform:translate(0,16px)}}
+  #gate-spinner{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;
+    background:rgba(8,18,40,.82);backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px);
+    opacity:0;visibility:hidden;transition:opacity .3s ease;z-index:9999}
+  #gate-spinner.show{opacity:1;visibility:visible}
+  #gate-spinner .msg{color:#fff;font-size:15px;font-weight:600;letter-spacing:.2px}
 </style></head>
-<body>${cardHtml}</body></html>`;
+<body>${cardHtml}
+<div id="gate-spinner" aria-hidden="true">
+  <div class="swirl-spinner">${SWIRL_SVG}</div>
+  <div class="msg" id="gate-spinner-msg">Working…</div>
+</div>
+${spinnerScript}
+</body></html>`;
 }
 
-function landingPage(error, nextUrl, email) {
+function landingPage(error, nextUrl, email, nonce) {
   const next = esc(safeNext(nextUrl));
   const err = error ? `<p class="err">${esc(error)}</p>` : '';
   return pageShell(`
-  <form class="card" method="POST" action="/__gate" autocomplete="off">
+  <form class="card" method="POST" action="/__gate" autocomplete="off" data-spinner="Sending your preview link…">
     <img class="logo" src="/assets/images/brand/logo-wavemax.png" alt="WaveMAX">
     <h1>Request access to preview</h1>
     <p class="sub">This site is currently private. Enter your email and the access password and we'll send you a preview link.</p>
@@ -172,10 +220,10 @@ function landingPage(error, nextUrl, email) {
     <input type="password" name="password" placeholder="Access password" autocomplete="off" required>
     <input type="hidden" name="next" value="${next}">
     <button type="submit">Send me a link</button>
-  </form>`);
+  </form>`, nonce);
 }
 
-function sentPage() {
+function sentPage(nonce) {
   return pageShell(`
   <div class="card">
     <img class="logo" src="/assets/images/brand/logo-wavemax.png" alt="WaveMAX">
@@ -183,40 +231,44 @@ function sentPage() {
     <p class="sub">We've sent a preview link to your email address. Open it and click <strong>Enter the site</strong> to continue. The link expires in 60 minutes.</p>
     <p class="sub" style="color:#fcd34d"><strong>Don't see it?</strong> Check your spam or promotions folder and mark it "Not spam".</p>
     <a class="link" href="/__gate">Use a different email</a>
-  </div>`);
+  </div>`, nonce);
 }
 
-function confirmPage(token, nextUrl) {
+function confirmPage(token, nextUrl, nonce) {
   return pageShell(`
-  <form class="card" method="POST" action="/__gate/confirm" autocomplete="off">
+  <form class="card" method="POST" action="/__gate/confirm" autocomplete="off" data-spinner="Entering the site…">
     <img class="logo" src="/assets/images/brand/logo-wavemax.png" alt="WaveMAX">
     <h1>You're verified</h1>
     <p class="sub">Click below to unlock the site preview from this device.</p>
     <input type="hidden" name="token" value="${esc(token)}">
     <input type="hidden" name="next" value="${esc(safeNext(nextUrl))}">
     <button type="submit">Enter the site</button>
-  </form>`);
+  </form>`, nonce);
 }
 
-function confirmErrorPage() {
+function confirmErrorPage(nonce) {
   return pageShell(`
   <div class="card">
     <img class="logo" src="/assets/images/brand/logo-wavemax.png" alt="WaveMAX">
     <h1>Link expired or already used</h1>
     <p class="sub">This preview link is no longer valid. Request a fresh one and we'll email you a new link.</p>
     <a class="link" href="/__gate">Request a new link</a>
-  </div>`);
+  </div>`, nonce);
 }
 
 function confirmEmailHtml(link) {
   const safeLink = esc(link);
-  return `<div style="font-family:Arial,Helvetica,sans-serif;max-width:480px;margin:0 auto;padding:24px;color:#0f172a">
-  <img src="https://wavemax.promo/assets/images/brand/logo-wavemax.png" alt="WaveMAX" style="height:40px;margin-bottom:16px">
-  <h2 style="font-size:18px;margin:0 0 8px">Your site preview link</h2>
-  <p style="font-size:14px;line-height:1.5;color:#334155">Click below to unlock access to the site preview from this device. This link expires in 60 minutes.</p>
-  <p style="margin:22px 0"><a href="${safeLink}" style="background:#2563eb;color:#fff;text-decoration:none;padding:12px 22px;border-radius:8px;font-weight:600;display:inline-block">Enter the site</a></p>
-  <p style="font-size:12px;color:#64748b;word-break:break-all">If the button doesn't work, paste this link into your browser:<br>${safeLink}</p>
-  <p style="font-size:12px;color:#94a3b8;margin-top:16px">If you didn't request this, you can safely ignore this email.</p>
+  return `<div style="font-family:Arial,Helvetica,sans-serif;max-width:480px;margin:0 auto;color:#0f172a">
+  <div style="background:#1e3a8a;text-align:center;padding:22px;border-radius:10px 10px 0 0">
+    <img src="https://wavemax.promo/assets/images/brand/logo-wavemax.png" alt="WaveMAX" style="height:40px">
+  </div>
+  <div style="padding:28px 24px;border:1px solid #e5e7eb;border-top:0;border-radius:0 0 10px 10px">
+    <h2 style="font-size:18px;margin:0 0 8px">Your site preview link</h2>
+    <p style="font-size:14px;line-height:1.5;color:#334155">Click below to unlock access to the site preview from this device. This link expires in 60 minutes.</p>
+    <p style="margin:22px 0"><a href="${safeLink}" style="background:#2563eb;color:#fff;text-decoration:none;padding:12px 22px;border-radius:8px;font-weight:600;display:inline-block">Enter the site</a></p>
+    <p style="font-size:12px;color:#64748b;word-break:break-all">If the button doesn't work, paste this link into your browser:<br>${safeLink}</p>
+    <p style="font-size:12px;color:#94a3b8;margin-top:16px">If you didn't request this, you can safely ignore this email.</p>
+  </div>
 </div>`;
 }
 
@@ -247,13 +299,14 @@ function recordClick(req, ip) {
 // reachable regardless of whitelist so a not-yet-unlocked visitor can request
 // and confirm access.
 async function handleGate(req, res, ip) {
+  const nonce = (res.locals && res.locals.cspNonce) || '';
   // POST /__gate/confirm — verify the token↔email, then whitelist this IP.
   if (req.path === '/__gate/confirm' && req.method === 'POST') {
     const token = (req.body && req.body.token) || '';
     const ar = token ? await AccessRequest.findOne({ token }).lean().catch(() => null) : null;
     if (ar && ar.used && ar.usedIp === ip) return res.redirect(safeNext(ar.next));
     if (!ar || ar.used || tokenExpired(ar)) {
-      return res.status(400).type('html').send(confirmErrorPage());
+      return res.status(400).type('html').send(confirmErrorPage(nonce));
     }
     try {
       await whitelistIp(ip, ar.email);
@@ -268,14 +321,14 @@ async function handleGate(req, res, ip) {
     const ar = token ? await AccessRequest.findOne({ token }).lean().catch(() => null) : null;
     if (ar && ar.used && ar.usedIp === ip) return res.redirect(safeNext(ar.next));
     if (!ar || ar.used || tokenExpired(ar)) {
-      return res.status(400).type('html').send(confirmErrorPage());
+      return res.status(400).type('html').send(confirmErrorPage(nonce));
     }
-    return res.status(200).type('html').send(confirmPage(token, ar.next));
+    return res.status(200).type('html').send(confirmPage(token, ar.next, nonce));
   }
 
   // GET /__gate/sent — "check your email" confirmation.
   if (req.path === '/__gate/sent') {
-    return res.status(200).type('html').send(sentPage());
+    return res.status(200).type('html').send(sentPage(nonce));
   }
 
   // POST /__gate — verify password + email, then email a single-use link.
@@ -284,10 +337,10 @@ async function handleGate(req, res, ip) {
     const email = ((req.body && req.body.email) || '').trim();
     const next = req.body && req.body.next;
     if (!cache.hash || !verifyPassword(pw, cache.salt, cache.hash)) {
-      return res.status(401).type('html').send(landingPage('Incorrect password.', next, email));
+      return res.status(401).type('html').send(landingPage('Incorrect password.', next, email, nonce));
     }
     if (!emailValid(email)) {
-      return res.status(400).type('html').send(landingPage('Please enter a valid email address.', next, ''));
+      return res.status(400).type('html').send(landingPage('Please enter a valid email address.', next, '', nonce));
     }
     // Cluster-global throttle: skip resending if this IP requested a link very
     // recently. Checked in the DB so all PM2 workers share the window.
@@ -305,13 +358,13 @@ async function handleGate(req, res, ip) {
       await sendEmail(email, 'Your WaveMAX preview link', confirmEmailHtml(link), GATE_FROM);
     } catch (e) {
       logger.error('Access gate link email failed:', e.message);
-      return res.status(500).type('html').send(landingPage('We could not send the email. Please try again.', next, email));
+      return res.status(500).type('html').send(landingPage('We could not send the email. Please try again.', next, email, nonce));
     }
     return res.redirect('/__gate/sent');
   }
 
   // GET /__gate — landing form.
-  return res.status(200).type('html').send(landingPage(null, req.query && req.query.next));
+  return res.status(200).type('html').send(landingPage(null, req.query && req.query.next, '', nonce));
 }
 
 async function accessGate(req, res, next) {
@@ -353,12 +406,17 @@ async function accessGate(req, res, next) {
     return next();
   }
 
-  // Non-whitelisted, non-crawler on a gated host: bounce to the corporate Austin
-  // page, except the shareable /austin-tx/ preview path which shows the gate.
-  if (!req.path.startsWith(PREVIEW_PATH_PREFIX)) {
+  // Non-whitelisted, non-crawler on a gated host. Decide off the ORIGINAL
+  // request path (X-Original-URI, set by nginx before its root→/austin-tx/
+  // rewrite — falls back to originalUrl when not behind nginx): the bare domain
+  // root bounces to corporate, while only the shareable /austin-tx/ preview
+  // path shows the gate. Whitelisted users already returned next() above, so
+  // they still see the franchise content at the root.
+  const originalPath = String(req.headers['x-original-uri'] || req.originalUrl || req.path).split('?')[0];
+  if (!originalPath.startsWith(PREVIEW_PATH_PREFIX)) {
     return res.redirect(302, PREVIEW_CORPORATE_URL);
   }
-  return res.status(401).type('html').send(landingPage(null, req.method === 'GET' ? req.originalUrl : '/'));
+  return res.status(401).type('html').send(landingPage(null, req.method === 'GET' ? req.originalUrl : '/', '', (res.locals && res.locals.cspNonce) || ''));
 }
 
 module.exports = accessGate;
