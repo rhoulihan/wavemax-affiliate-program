@@ -82,12 +82,49 @@ describe('accessGate middleware', () => {
     expect(AccessClick.create).not.toHaveBeenCalled();
   });
 
-  it('serves the landing page (401) for a non-whitelisted GET', async () => {
-    const req = mkReq({ ip: '8.8.8.8', originalUrl: '/dashboard' }); const res = mkRes(); const next = jest.fn();
+  it('serves the gate landing (401) for a non-whitelisted GET on the preview path', async () => {
+    const req = mkReq({ ip: '8.8.8.8', path: '/austin-tx/', originalUrl: '/austin-tx/', headers: { host: 'rundberglaundry.com' } });
+    const res = mkRes(); const next = jest.fn();
     await accessGate(req, res, next);
     expect(next).not.toHaveBeenCalled();
     expect(res.status).toHaveBeenCalledWith(401);
     expect(res.send.mock.calls[0][0]).toContain('name="email"');
+  });
+
+  it('redirects non-whitelisted, non-preview traffic to the corporate Austin page', async () => {
+    const req = mkReq({ ip: '8.8.8.8', path: '/', originalUrl: '/', headers: { host: 'rundberglaundry.com' } });
+    const res = mkRes(); const next = jest.fn();
+    await accessGate(req, res, next);
+    expect(next).not.toHaveBeenCalled();
+    expect(res.redirect).toHaveBeenCalledWith(302, 'https://wavemaxlaundry.com/austin-tx/');
+  });
+
+  it('redirects non-whitelisted traffic on every gated host the same way', async () => {
+    for (const host of ['runberglaundry.com', 'atxwashdryfold.com', 'atxwashateria.com', 'wavemax.promo']) {
+      const req = mkReq({ ip: '8.8.8.8', path: '/', originalUrl: '/', headers: { host } });
+      const res = mkRes(); const next = jest.fn();
+      await accessGate(req, res, next);
+      expect(res.redirect).toHaveBeenCalledWith(302, 'https://wavemaxlaundry.com/austin-tx/');
+    }
+  });
+
+  it('lets crhsent.com through without gating or redirecting (open public site)', async () => {
+    const req = mkReq({ ip: '8.8.8.8', path: '/', originalUrl: '/', headers: { host: 'crhsent.com' } });
+    const res = mkRes(); const next = jest.fn();
+    await accessGate(req, res, next);
+    expect(next).toHaveBeenCalled();
+    expect(res.redirect).not.toHaveBeenCalled();
+    expect(res.status).not.toHaveBeenCalledWith(401);
+  });
+
+  it('lets a verified Googlebot see all content (no redirect) on a non-preview path', async () => {
+    dns.reverse.mockResolvedValue(['crawl-66-249-66-1.googlebot.com']);
+    dns.resolve4.mockResolvedValue(['66.249.66.1']);
+    const req = mkReq({ ip: '66.249.66.1', path: '/', originalUrl: '/', headers: { host: 'rundberglaundry.com', 'user-agent': 'Googlebot/2.1' } });
+    const res = mkRes(); const next = jest.fn();
+    await accessGate(req, res, next);
+    expect(next).toHaveBeenCalled();
+    expect(res.redirect).not.toHaveBeenCalled();
   });
 
   it('uses the real client IP from CF-Connecting-IP', async () => {
@@ -225,7 +262,7 @@ describe('accessGate middleware', () => {
 
   it('blocks a spoofed Googlebot UA whose reverse DNS is not Google', async () => {
     dns.reverse.mockResolvedValue(['host.evil.example']);
-    const req = mkReq({ ip: '203.0.113.99', headers: { 'user-agent': 'Googlebot/2.1' } });
+    const req = mkReq({ ip: '203.0.113.99', path: '/austin-tx/', headers: { 'user-agent': 'Googlebot/2.1' } });
     const res = mkRes(); const next = jest.fn();
     await accessGate(req, res, next);
     expect(next).not.toHaveBeenCalled();
@@ -235,15 +272,15 @@ describe('accessGate middleware', () => {
   it('blocks Googlebot UA when forward-confirm does not match the IP', async () => {
     dns.reverse.mockResolvedValue(['crawl.googlebot.com']);
     dns.resolve4.mockResolvedValue(['8.8.8.8']);
-    const req = mkReq({ ip: '203.0.113.100', headers: { 'user-agent': 'Googlebot/2.1' } });
+    const req = mkReq({ ip: '203.0.113.100', path: '/austin-tx/', headers: { 'user-agent': 'Googlebot/2.1' } });
     const res = mkRes(); const next = jest.fn();
     await accessGate(req, res, next);
     expect(next).not.toHaveBeenCalled();
     expect(res.status).toHaveBeenCalledWith(401);
   });
 
-  it('does not perform DNS for a normal browser UA (non-whitelisted → landing)', async () => {
-    const req = mkReq({ ip: '203.0.113.101', headers: { 'user-agent': 'Mozilla/5.0 (Windows NT 10.0)' } });
+  it('does not perform DNS for a normal browser UA (non-whitelisted → landing on preview path)', async () => {
+    const req = mkReq({ ip: '203.0.113.101', path: '/austin-tx/', headers: { 'user-agent': 'Mozilla/5.0 (Windows NT 10.0)' } });
     const res = mkRes(); const next = jest.fn();
     await accessGate(req, res, next);
     expect(dns.reverse).not.toHaveBeenCalled();
