@@ -957,11 +957,15 @@ app.get('/robots.txt', (req, res) => {
   res.type('text/plain');
   res.setHeader('Cache-Control', 'public, max-age=3600');
   res.send(
+    // NOTE: do NOT Disallow /embed-app-v2.html — the franchise host pages render
+    // their real content inside an iframe pointed at that route. Blocking it left
+    // Googlebot able to crawl only the thin host shell, never the content a
+    // visitor actually sees. It carries no inbound links and is in no sitemap, so
+    // it won't index standalone; allowing it lets crawlers render the full page.
     `User-agent: *\n` +
     `Allow: /\n` +
     `Disallow: /api/\n` +
     `Disallow: /admin/\n` +
-    `Disallow: /embed-app-v2.html\n` +
     `Disallow: /monitoring/\n` +
     `\n` +
     `Sitemap: https://${host}/sitemap.xml\n`
