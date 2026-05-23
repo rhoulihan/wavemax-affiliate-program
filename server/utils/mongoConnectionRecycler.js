@@ -65,13 +65,18 @@ function startConnectionRecycler(opts = {}) {
     }
   }
 
+  // First recycle fires after a FULL interval plus the per-worker stagger —
+  // NEVER at startup. Connections are fresh at boot (nothing to recycle), and an
+  // immediate close would race connection-time initialization (initializeDefaults,
+  // callback pool) and the raw-driver stores. The stagger keeps workers apart.
   const offset = (instance * staggerMs) % intervalMs;
+  const firstDelayMs = intervalMs + offset;
   let timer = null;
   const startTimer = setTimeoutFn(() => {
     recycleOnce();
     timer = setIntervalFn(recycleOnce, intervalMs);
     if (timer && typeof timer.unref === 'function') timer.unref();
-  }, offset);
+  }, firstDelayMs);
   if (startTimer && typeof startTimer.unref === 'function') startTimer.unref();
 
   return {

@@ -47,7 +47,7 @@ describe('mongoConnectionRecycler', () => {
     expect(errs.length).toBe(1);
   });
 
-  test('staggers the first run by worker instance (instance * staggerMs)', () => {
+  test('first run fires after a full interval + per-worker stagger (never at startup)', () => {
     const mongoose = makeMongoose();
     let scheduledDelay = null;
     startConnectionRecycler({
@@ -56,7 +56,8 @@ describe('mongoConnectionRecycler', () => {
       setTimeoutFn: (fn, ms) => { scheduledDelay = ms; },
       setIntervalFn: () => {}
     });
-    expect(scheduledDelay).toBe(2000);
+    // intervalMs (600000) + instance*staggerMs (2*1000) — NOT 0, so no startup race.
+    expect(scheduledDelay).toBe(602000);
   });
 
   test('throws if mongoose or uri is missing', () => {
