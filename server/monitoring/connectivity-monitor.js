@@ -75,18 +75,22 @@ SERVICES.forEach(service => {
 /**
  * Check MongoDB connectivity
  */
-async function checkMongoDB(service) {
+async function checkMongoDB(service) { // eslint-disable-line no-unused-vars
   const startTime = Date.now();
   try {
-    // Try to connect to MongoDB
-    const testConnection = mongoose.createConnection(service.url, {
-      serverSelectionTimeoutMS: MONITORING_CONFIG.timeout,
-      socketTimeoutMS: MONITORING_CONFIG.timeout,
-    });
-
-    await testConnection.asPromise();
-    await testConnection.close();
-
+    // Health-check via the EXISTING pooled connection — do NOT open a new one.
+    // The previous version called mongoose.createConnection()+close() every cycle,
+    // which on the Oracle ADB loadBalanced endpoint meant a fresh `hello` handshake
+    // + PLAIN `saslStart` auth every 60s per worker (the connection churn / poor
+    // pooling Oracle flagged). A ping on the live connection costs no new connection.
+    if (!mongoose.connection || mongoose.connection.readyState !== 1) {
+      return {
+        success: false,
+        error: `mongoose not connected (readyState ${mongoose.connection ? mongoose.connection.readyState : 'n/a'})`,
+        responseTime: Date.now() - startTime,
+      };
+    }
+    await mongoose.connection.db.admin().ping();
     return {
       success: true,
       responseTime: Date.now() - startTime,
@@ -367,6 +371,7 @@ module.exports = {
   getMonitoringStatus,
   getMonitoringDashboard,
   checkService,
+  checkMongoDB,
   runMonitoringCycle,
   SERVICES,
   monitoringData,

@@ -73,11 +73,10 @@ const mongoOptions = {
   // the Oracle-compatible set). Disabling autoIndex is also standard practice
   // for production regardless of backend.
   autoIndex: false,
-  // Cap idle connection lifetime so the pool recycles continuously. The Oracle
-  // ADB MongoDB-API intermittently corrupts long-lived pooled connections (the
-  // "cursor is missing" error); freshly-opened connections never fail. The
-  // periodic recycler (below) additionally resets connections that stay busy.
-  maxIdleTimeMS: parseInt(process.env.MONGO_MAX_IDLE_MS || '60000', 10),
+  // No maxIdleTimeMS: keep pooled connections alive and REUSED. Oracle's command
+  // logs (2026-05-23) showed the app reconstructs connections far too often (poor
+  // pooling — ~1 hello+saslStart handshake per few queries); idle-churning made it
+  // worse, so we let the driver maintain a steady-state pool instead.
   // Emit command-monitoring events so the Oracle-cursor diagnostics can capture
   // the exact malformed find/getMore replies (missing the cursor envelope) for
   // the Oracle support case. Disable with ORACLE_DIAG=false once we have enough.
@@ -97,20 +96,6 @@ if (process.env.NODE_ENV !== 'test') {
   mongoose.connect(process.env.MONGODB_URI, mongoOptions)
     .then(async () => {
       logger.info('Connected to MongoDB');
-
-      // Periodic per-worker connection reset (staggered across PM2 instances) to
-      // clear degraded long-lived Oracle-ADB connections that maxIdleTimeMS
-      // misses (continuously-busy connections). Guarded; never crashes a worker.
-      try {
-        const { startConnectionRecycler } = require('./server/utils/mongoConnectionRecycler');
-        startConnectionRecycler({
-          mongoose,
-          uri: process.env.MONGODB_URI,
-          options: mongoOptions,
-          intervalMs: parseInt(process.env.MONGO_RECYCLE_INTERVAL_MS || String(30 * 60 * 1000), 10),
-          logger
-        });
-      } catch (e) { logger.error('Connection recycler start failed:', e.message); }
 
       // Oracle ADB cursor-error diagnostics capture (for the Oracle support case).
       // Records each malformed find/getMore reply (missing the cursor envelope) to
@@ -545,12 +530,10 @@ const sessionStore = process.env.NODE_ENV === 'test'
   ? undefined // Use default MemoryStore for tests
   : MongoStore.create({
     mongoUrl: process.env.MONGODB_URI,
-    // connect-mongo runs its OWN MongoClient pool. Cap idle connection lifetime
-    // here too so its session-lookup pool recycles like the mongoose one (Oracle
-    // ADB long-lived-connection "cursor is missing" mitigation). The cursor-retry
-    // shim also covers this pool via the shared driver prototype.
+    // connect-mongo runs its OWN MongoClient pool. Keep its connections pooled
+    // (no idle churn) + enable command monitoring so the Oracle diagnostics capture
+    // the sessions.findOne malformed replies (where 100% of the cursor errors are).
     mongoOptions: {
-      maxIdleTimeMS: parseInt(process.env.MONGO_MAX_IDLE_MS || '60000', 10),
       monitorCommands: process.env.ORACLE_DIAG !== 'false'
     },
     touchAfter: 24 * 3600, // Lazy session update in seconds (24 hours)
