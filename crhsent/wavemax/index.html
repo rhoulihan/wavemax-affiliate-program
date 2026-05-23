@@ -445,6 +445,25 @@
         <p class="chart-cap">Both sites sit behind Cloudflare's edge — but only the CRHS deployment adds a true load balancer in front of two live data centers and an enterprise database tier. The platform's Cloudflare is a cache in front of one shared box.</p>
 
         <div class="perfbars" style="margin-top:22px">
+          <h3>Server response time — where the infrastructure actually shows</h3>
+          <div class="ptitle">Shorter is better. Time to first byte, measured the same hour (May 23 2026). A <em>cached</em> page is easy for anyone to serve fast — the real test is how quickly the server answers when the page <strong>can't</strong> be cached: a booking, a form, a customer's account.</div>
+          <div class="legend"><span><i class="o"></i>Your CRHS site</span><span><i class="t"></i>MHR / GoDaddy WordPress</span></div>
+          <div class="pb-row">
+            <div class="pb-metric"><span>Your CRHS site — every page rendered <strong>live</strong></span><span class="win">~2× faster origin</span></div>
+            <div class="pb-bar ours" style="width:50%">0.20 s</div>
+          </div>
+          <div class="pb-row">
+            <div class="pb-metric"><span>MHR — page served from edge <em>cache</em></span></div>
+            <div class="pb-bar theirs" style="width:52%">0.21 s</div>
+          </div>
+          <div class="pb-row">
+            <div class="pb-metric"><span>MHR — dynamic page, cache bypassed (real origin)</span></div>
+            <div class="pb-bar theirs" style="width:100%">0.40 s</div>
+          </div>
+          <p class="pb-foot">Your CRHS pages are <strong>never cached — every request is rendered fresh from the server</strong> and still match MHR's <em>cached</em> page. The moment the content has to be dynamic, the GoDaddy shared-WordPress origin is about twice as slow. That's the dedicated compute and the Exadata database tier doing their job.</p>
+        </div>
+
+        <div class="perfbars" style="margin-top:22px">
           <h3>What a public lookup shows — verify it yourself</h3>
           <div class="ptitle">Run <code>dig +short &lt;domain&gt;</code> then <code>whois</code> the IP. Here's what comes back, today.</div>
           <table class="cmp" style="margin-top:10px">
