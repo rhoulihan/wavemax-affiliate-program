@@ -78,6 +78,10 @@ const mongoOptions = {
   // "cursor is missing" error); freshly-opened connections never fail. The
   // periodic recycler (below) additionally resets connections that stay busy.
   maxIdleTimeMS: parseInt(process.env.MONGO_MAX_IDLE_MS || '60000', 10),
+  // Emit command-monitoring events so the Oracle-cursor diagnostics can capture
+  // the exact malformed find/getMore replies (missing the cursor envelope) for
+  // the Oracle support case. Disable with ORACLE_DIAG=false once we have enough.
+  monitorCommands: process.env.ORACLE_DIAG !== 'false',
   // TLS enforced everywhere except local dev. Set MONGODB_TLS=false to
   // disable (e.g. plain local mongod that doesn't speak TLS).
   ...(process.env.MONGODB_TLS === 'false'
@@ -107,6 +111,24 @@ if (process.env.NODE_ENV !== 'test') {
           logger
         });
       } catch (e) { logger.error('Connection recycler start failed:', e.message); }
+
+      // Oracle ADB cursor-error diagnostics capture (for the Oracle support case).
+      // Records each malformed find/getMore reply (missing the cursor envelope) to
+      // logs/oracle-cursor-diagnostics.log with the command shape, backend node, and
+      // connection age. Read-only, PII-free. Disable with ORACLE_DIAG=false.
+      if (process.env.ORACLE_DIAG !== 'false') {
+        try {
+          const { installOracleDiagnostics, fileWriter } = require('./server/utils/mongoOracleDiagnostics');
+          const write = fileWriter(path.join(__dirname, 'logs', 'oracle-cursor-diagnostics.log'));
+          installOracleDiagnostics({ client: mongoose.connection.getClient(), label: 'mongoose', write, logger });
+          // connect-mongo runs its own MongoClient — attach to it too once ready.
+          if (sessionStore && sessionStore.client) {
+            Promise.resolve(sessionStore.client)
+              .then((cm) => { if (cm && typeof cm.on === 'function') installOracleDiagnostics({ client: cm, label: 'connect-mongo', write, logger }); })
+              .catch(() => {});
+          }
+        } catch (e) { logger.error('Oracle diagnostics init failed:', e.message); }
+      }
 
       // Warm the access-gate whitelist/password cache + start periodic refresh.
       const gate = require('./server/middleware/accessGate');
@@ -525,7 +547,10 @@ const sessionStore = process.env.NODE_ENV === 'test'
     // here too so its session-lookup pool recycles like the mongoose one (Oracle
     // ADB long-lived-connection "cursor is missing" mitigation). The cursor-retry
     // shim also covers this pool via the shared driver prototype.
-    mongoOptions: { maxIdleTimeMS: parseInt(process.env.MONGO_MAX_IDLE_MS || '60000', 10) },
+    mongoOptions: {
+      maxIdleTimeMS: parseInt(process.env.MONGO_MAX_IDLE_MS || '60000', 10),
+      monitorCommands: process.env.ORACLE_DIAG !== 'false'
+    },
     touchAfter: 24 * 3600, // Lazy session update in seconds (24 hours)
     // Purge expired sessions with a periodic deleteMany rather than a Mongo
     // TTL index. The Oracle ADB MongoDB API rejects TTL index creation unless
