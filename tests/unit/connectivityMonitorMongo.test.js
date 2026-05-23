@@ -28,10 +28,17 @@ describe('connectivity monitor — MongoDB health check', () => {
     expect(mockMongoose.createConnection).not.toHaveBeenCalled(); // the whole point
   });
 
-  test('reports failure when mongoose is not connected — still no new connection', async () => {
+  test('reports failure when mongoose is not connected (readyState 0)', async () => {
     mockMongoose.connection.readyState = 0;
     const r = await checkMongoDB({ url: 'mongodb://x/db' });
     expect(r.success).toBe(false);
+    expect(mockMongoose.createConnection).not.toHaveBeenCalled();
+  });
+
+  test('does NOT false-alarm during the connecting window (readyState 2)', async () => {
+    mockMongoose.connection.readyState = 2; // connecting — transient startup state
+    const r = await checkMongoDB({ url: 'mongodb://x/db' });
+    expect(r.success).toBe(true); // not an outage → no "down" alert
     expect(mockMongoose.createConnection).not.toHaveBeenCalled();
   });
 

@@ -83,10 +83,16 @@ async function checkMongoDB(service) { // eslint-disable-line no-unused-vars
     // which on the Oracle ADB loadBalanced endpoint meant a fresh `hello` handshake
     // + PLAIN `saslStart` auth every 60s per worker (the connection churn / poor
     // pooling Oracle flagged). A ping on the live connection costs no new connection.
-    if (!mongoose.connection || mongoose.connection.readyState !== 1) {
+    const readyState = mongoose.connection ? mongoose.connection.readyState : 0;
+    if (readyState === 2) {
+      // Connecting (e.g. the brief startup window before the pool is ready) — this
+      // is not an outage, so don't raise a false "down" alert; the next cycle pings.
+      return { success: true, responseTime: Date.now() - startTime };
+    }
+    if (readyState !== 1) {
       return {
         success: false,
-        error: `mongoose not connected (readyState ${mongoose.connection ? mongoose.connection.readyState : 'n/a'})`,
+        error: `mongoose not connected (readyState ${readyState})`,
         responseTime: Date.now() - startTime,
       };
     }
