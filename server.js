@@ -121,11 +121,13 @@ if (process.env.NODE_ENV !== 'test') {
           const { installOracleDiagnostics, fileWriter } = require('./server/utils/mongoOracleDiagnostics');
           const write = fileWriter(path.join(__dirname, 'logs', 'oracle-cursor-diagnostics.log'));
           installOracleDiagnostics({ client: mongoose.connection.getClient(), label: 'mongoose', write, logger });
-          // connect-mongo runs its own MongoClient — attach to it too once ready.
-          if (sessionStore && sessionStore.client) {
-            Promise.resolve(sessionStore.client)
+          // connect-mongo runs its own MongoClient (connect-mongo 5 exposes it as
+          // `clientP`, a Promise<MongoClient>). 100% of observed cursor errors are on
+          // its sessions.findOne, so this is the attach that actually matters.
+          if (sessionStore && sessionStore.clientP) {
+            Promise.resolve(sessionStore.clientP)
               .then((cm) => { if (cm && typeof cm.on === 'function') installOracleDiagnostics({ client: cm, label: 'connect-mongo', write, logger }); })
-              .catch(() => {});
+              .catch((e) => logger.error('Oracle diagnostics (connect-mongo) attach failed:', e.message));
           }
         } catch (e) { logger.error('Oracle diagnostics init failed:', e.message); }
       }
