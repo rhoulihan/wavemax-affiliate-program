@@ -42,6 +42,28 @@
     };
   });
 
+  // 5. innerHTML / outerHTML / insertAdjacentHTML (recreates child iframes with
+  //    NO src-set and NO appendChild — the remaining uninstrumented vector)
+  function logHTMLWrite(where, target, val) {
+    var hadIframe = false;
+    try { hadIframe = !!(target.querySelector && target.querySelector('#wavemax-iframe')); } catch (e) {}
+    var newHasIframe = typeof val === 'string' && val.indexOf('wavemax-iframe') !== -1;
+    if (hadIframe || newHasIframe) {
+      console.log(TAG, where + ' on <' + (target.tagName || '?') + ' class="' + (target.className || '') + '" id="' + (target.id || '') + '"> hadIframe=' + hadIframe + ' newHasIframe=' + newHasIframe + '\n' + new Error().stack);
+    }
+  }
+  ['innerHTML', 'outerHTML'].forEach(function (prop) {
+    var desc = Object.getOwnPropertyDescriptor(Element.prototype, prop);
+    if (!desc || !desc.set) return;
+    Object.defineProperty(Element.prototype, prop, {
+      configurable: true,
+      get: function () { return desc.get.call(this); },
+      set: function (v) { logHTMLWrite(prop + ' =', this, v); return desc.set.call(this, v); }
+    });
+  });
+  var iah = Element.prototype.insertAdjacentHTML;
+  Element.prototype.insertAdjacentHTML = function (pos, val) { logHTMLWrite('insertAdjacentHTML', this, val); return iah.apply(this, arguments); };
+
   // 4. load-event counter (attach ASAP)
   var n = 0, attached = false;
   function attach() {
