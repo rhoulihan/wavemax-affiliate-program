@@ -128,9 +128,13 @@ if (process.env.NODE_ENV !== 'test') {
         await SystemConfig.initializeDefaults();
         logger.info('System configuration defaults initialized');
 
-        const paymentVerificationJob = require('./server/jobs/paymentVerificationJob');
-        await paymentVerificationJob.start();
-        logger.info('Payment verification job started');
+        // Background (cron) jobs run on ONE instance only in an HA / multi-box
+        // deployment — gated by RUN_BACKGROUND_JOBS so a second box doesn't
+        // double-execute payment verification / reminder emails. Set
+        // RUN_BACKGROUND_JOBS='true' on exactly one (leader) instance.
+        // See docs/ops/HA-PHASE1-WEB.md.
+        const { startBackgroundJobs } = require('./server/jobs/scheduler');
+        await startBackgroundJobs();
       } catch (error) {
         logger.error('Error initializing system config:', { error: error.message });
       }
