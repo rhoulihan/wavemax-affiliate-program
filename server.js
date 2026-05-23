@@ -41,7 +41,10 @@ const PORT = process.env.PORT || 3000;
 const logger = require('./server/utils/logger');
 const passport = require('./server/config/passport-config');
 
-const MongoStore = require('connect-mongo');
+// connect-mongo v6 is ESM and exports the store as the default/named export;
+// `require('connect-mongo')` is now the module namespace, so reach for `.default`
+// (`.MongoStore`) to get the class with the static `.create()`.
+const MongoStore = require('connect-mongo').default;
 
 // Oracle ADB MongoDB-API resilience: transparently retry the intermittent
 // "BSON element cursor is missing" error on findOne (degraded long-lived
