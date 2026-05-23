@@ -46,14 +46,20 @@
   // only the DOM-write mechanism is made safe.
   window.ybFun_GenericFindAndReplaceNonJQuery = function (searchText, replacement, searchNode) {
     if (!searchText) return;
-    var find = String(searchText);
     var root = (searchNode && searchNode.nodeType === 1) ? searchNode : document.body;
     if (!root) return;
-    var rx = new RegExp(find.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g');
-    // 1) text nodes only, skipping script/style/iframe/noscript subtrees
+    // IMPORTANT: ybFun_CustomFindAndReplace passes searchText as a REGEX PATTERN —
+    // it builds every format variant, including the formatted display
+    // "\(512\)\s{0,}553-{0,1}\.{0,1}\s{0,}1674". Compile it as a regex (like the
+    // vendor's jQuery path does); do NOT escape it. Escaping was the bug that left
+    // the visible/formatted numbers un-swapped while only the raw tel: form changed.
+    var rx, testRx;
+    try { rx = new RegExp(searchText, 'g'); testRx = new RegExp(searchText); }
+    catch (e) { return; }
+    // 1) text nodes (the visible number), skipping script/style/iframe/noscript
     var walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
       acceptNode: function (n) {
-        if (!n.nodeValue || n.nodeValue.indexOf(find) === -1) return NodeFilter.FILTER_REJECT;
+        if (!n.nodeValue || !testRx.test(n.nodeValue)) return NodeFilter.FILTER_REJECT;
         for (var p = n.parentNode; p && p !== root.parentNode; p = p.parentNode) {
           var t = p.nodeName;
           if (t === 'SCRIPT' || t === 'STYLE' || t === 'IFRAME' || t === 'NOSCRIPT') return NodeFilter.FILTER_REJECT;
@@ -64,13 +70,17 @@
     var hits = [], node;
     while ((node = walker.nextNode())) hits.push(node);
     hits.forEach(function (t) { t.nodeValue = t.nodeValue.replace(rx, replacement); });
-    // 2) the call-tracking link itself (tel: href / data-phone)
-    try {
-      root.querySelectorAll('a[href*="' + find + '"], [data-phone*="' + find + '"]').forEach(function (el) {
-        if (el.hasAttribute('href')) el.setAttribute('href', el.getAttribute('href').replace(rx, replacement));
-        if (el.hasAttribute('data-phone')) el.setAttribute('data-phone', el.getAttribute('data-phone').replace(rx, replacement));
-      });
-    } catch (e) { /* text-node pass already covered the visible number */ }
+    // 2) attributes (tel: href, data-phone, aria-label, value, …) — match the
+    //    vendor's full coverage, but NEVER touch the <iframe> element (re-parenting
+    //    or rewriting it reloads the embedded content — the original double-load bug).
+    var els = root.querySelectorAll('*');
+    Array.prototype.forEach.call(els, function (el) {
+      if (el.tagName === 'IFRAME' || !el.attributes) return;
+      for (var i = 0; i < el.attributes.length; i++) {
+        var a = el.attributes[i];
+        if (a.value && testRx.test(a.value)) el.setAttribute(a.name, a.value.replace(rx, replacement));
+      }
+    });
   };
 
   document.addEventListener('YextPhoneChangeEvent', yextPhoneChangeEventHandler, false);
