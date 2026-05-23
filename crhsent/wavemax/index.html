@@ -88,13 +88,16 @@
   @keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
   #tab-perf:checked ~ .tablist label[for="tab-perf"],
   #tab-seo:checked ~ .tablist label[for="tab-seo"],
-  #tab-sec:checked ~ .tablist label[for="tab-sec"]{color:var(--brand-d);background:var(--panel);border-color:var(--line);border-bottom-color:var(--panel)}
+  #tab-sec:checked ~ .tablist label[for="tab-sec"],
+  #tab-infra:checked ~ .tablist label[for="tab-infra"]{color:var(--brand-d);background:var(--panel);border-color:var(--line);border-bottom-color:var(--panel)}
   #tab-perf:checked ~ .panel-perf{display:block}
   #tab-seo:checked ~ .panel-seo{display:block}
   #tab-sec:checked ~ .panel-sec{display:block}
+  #tab-infra:checked ~ .panel-infra{display:block}
   #tab-perf:focus-visible ~ .tablist label[for="tab-perf"],
   #tab-seo:focus-visible ~ .tablist label[for="tab-seo"],
-  #tab-sec:focus-visible ~ .tablist label[for="tab-sec"]{outline:2px solid var(--brand);outline-offset:2px}
+  #tab-sec:focus-visible ~ .tablist label[for="tab-sec"],
+  #tab-infra:focus-visible ~ .tablist label[for="tab-infra"]{outline:2px solid var(--brand);outline-offset:2px}
 
   /* ---- performance: stat cards + comparative bars ---- */
   .perf-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin:4px 0 28px}
@@ -249,10 +252,12 @@
       <input type="radio" name="prooftab" id="tab-perf" class="tabradio" checked aria-label="Show performance">
       <input type="radio" name="prooftab" id="tab-seo" class="tabradio" aria-label="Show SEO">
       <input type="radio" name="prooftab" id="tab-sec" class="tabradio" aria-label="Show security and compliance">
+      <input type="radio" name="prooftab" id="tab-infra" class="tabradio" aria-label="Show infrastructure and reliability">
       <div class="tablist" role="tablist" aria-label="Proof">
         <label for="tab-perf" class="tab" role="tab">⚡ Performance</label>
         <label for="tab-seo" class="tab" role="tab">🔎 SEO</label>
         <label for="tab-sec" class="tab" role="tab">🔒 Security &amp; Compliance</label>
+        <label for="tab-infra" class="tab" role="tab">🏗️ Infrastructure</label>
       </div>
 
       <!-- ===================== PERFORMANCE PANEL ===================== -->
@@ -410,6 +415,54 @@
       <p><strong>This already happened.</strong> WaveMAX's current marketing partner published a review-gating control on <strong>every franchise page</strong> and left it live for weeks. It took a franchisee flagging the liability to get it pulled from the Austin page — and multiple more warnings before it came off the rest. Every operator wore that exposure the entire time.</p>
     </div>
       </div><!-- /panel-sec -->
+
+      <!-- ===================== INFRASTRUCTURE PANEL ===================== -->
+      <div class="panel panel-infra" role="tabpanel" aria-label="Infrastructure and reliability">
+        <div class="callout brand">
+          <h3>Where the marketing vendor hosts — and where I host your store</h3>
+          <p>A simple public lookup tells you what a website is built on. I ran one on the marketing partner's own site and on the corporate WaveMAX platform, then on my deployment. The vendor selling "enterprise digital infrastructure" runs its own marketing site — and the corporate platform — on <strong>GoDaddy shared WordPress hosting</strong>: one box, one data center, no failover. Your CRHS store runs on <strong>Oracle Cloud</strong>, load-balanced across <strong>two data centers</strong>, with the data on <strong>Oracle's Autonomous Database on Exadata</strong> — the enterprise platform large banks run. Every line below is verifiable with <code>dig</code> and <code>whois</code> from your own laptop.</p>
+        </div>
+
+        <div class="perf-stats">
+          <div class="perf-stat"><div class="n">2</div><div class="l">data centers with automatic failover (Phoenix + Dallas)</div></div>
+          <div class="perf-stat"><div class="n">0</div><div class="l">single points of failure in your stack</div></div>
+          <div class="perf-stat"><div class="n">Exadata</div><div class="l">the database tier — the platform Fortune-500 banks run on</div></div>
+          <div class="perf-stat"><div class="n">GoDaddy</div><div class="l">where the marketing vendor hosts its own site (shared WordPress)</div></div>
+        </div>
+
+        <table class="cmp">
+          <thead><tr><th>Infrastructure</th><th>Your CRHS site</th><th>MHR &amp; the WaveMAX platform</th></tr></thead>
+          <tbody>
+            <tr><td>Where it runs</td><td class="ours">✓ Oracle Cloud (OCI) — dedicated compute</td><td class="theirs">✗ GoDaddy shared WordPress (secureserver.net)</td></tr>
+            <tr><td>Data centers</td><td class="ours">✓ 2 — Phoenix primary + Dallas failover</td><td class="theirs">✗ 1</td></tr>
+            <tr><td>Load balancing</td><td class="ours">✓ Cloudflare Load Balancer — health-checked, session-pinned</td><td class="theirs">✗ none — single origin (CDN cache only)</td></tr>
+            <tr><td>If a server goes down</td><td class="ours">✓ traffic auto-shifts to the other data center, ~1 min, nobody paged</td><td class="theirs">✗ site is down until a human fixes it</td></tr>
+            <tr><td>Database tier</td><td class="ours">✓ Oracle Autonomous DB on Exadata — self-tuning, self-patching, dedicated</td><td class="theirs">✗ MySQL sharing the web box with other tenants</td></tr>
+            <tr><td>Encryption to the server</td><td class="ours">✓ end-to-end Full (strict) TLS + origin certs + HSTS preload</td><td class="theirs">✗ edge TLS only</td></tr>
+            <tr><td>Home-page weight</td><td class="ours">✓ 66 KB</td><td class="theirs">✗ 203 KB (3× heavier)</td></tr>
+          </tbody>
+        </table>
+        <p class="chart-cap">Both sites sit behind Cloudflare's edge — but only the CRHS deployment adds a true load balancer in front of two live data centers and an enterprise database tier. The platform's Cloudflare is a cache in front of one shared box.</p>
+
+        <div class="perfbars" style="margin-top:22px">
+          <h3>What a public lookup shows — verify it yourself</h3>
+          <div class="ptitle">Run <code>dig +short &lt;domain&gt;</code> then <code>whois</code> the IP. Here's what comes back, today.</div>
+          <table class="cmp" style="margin-top:10px">
+            <thead><tr><th>Domain</th><th>Resolves to</th><th>Hosted on</th></tr></thead>
+            <tbody>
+              <tr><td>mhrmarketing.com <span style="color:var(--soft)">(the marketing vendor)</span></td><td>160.153.0.197 → <em>host.secureserver.net</em></td><td class="theirs">GoDaddy.com, LLC — shared WordPress</td></tr>
+              <tr><td>wavemaxlaundry.com <span style="color:var(--soft)">(corporate platform)</span></td><td>160.153.0.155 → <em>host.secureserver.net</em></td><td class="theirs">GoDaddy.com, LLC — shared WordPress</td></tr>
+              <tr><td>rundberglaundry.com <span style="color:var(--soft)">(your CRHS store)</span></td><td>Cloudflare LB → Oracle Cloud</td><td class="ours">OCI Phoenix + Dallas failover · ADB on Exadata</td></tr>
+            </tbody>
+          </table>
+          <p class="pb-foot">Captured May 23 2026 with <code>dig</code>, <code>whois</code> and <code>curl</code> on public DNS and public responses — no insider access. The marketing partner that bills a monthly "digital infrastructure" fee runs its own site, and the corporate platform, on entry-level shared hosting.</p>
+        </div>
+
+        <div class="callout good">
+          <h3>Why this matters to your store</h3>
+          <p>If your website goes dark on a Saturday, you lose the bookings and the walk-ins that came with it. A single shared-hosting box has no backup — if it hiccups, your site is simply down. My deployment runs in two data centers behind an automatic load balancer: if one fails, traffic shifts to the other in about a minute, with nobody on call. Your customer data lives on Oracle's Autonomous Database on Exadata — the same enterprise platform large banks run — not a MySQL database sharing a box with hundreds of other WordPress sites. That's the difference between <em>"a website"</em> and infrastructure your business can actually depend on — at a fraction of what the basic package charges.</p>
+        </div>
+      </div><!-- /panel-infra -->
     </div><!-- /tabs -->
   </div>
 </section>
