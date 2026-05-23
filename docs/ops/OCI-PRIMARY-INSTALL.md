@@ -54,13 +54,20 @@ MongoNetworkError: Client network socket disconnected before secure TLS connecti
 > **APPEND — keep all existing entries** (e.g. the old box's IP) or you cut off the live site. (CLI: `oci db autonomous-database update --autonomous-database-id <ocid> --whitelisted-ips '[<existing...>, "<new-ip>"]'` — pass the *full* list; it replaces.)
 **Find the egress IP** the ADB sees: `curl ifconfig.me` on the box (for an OCI instance with a public IP it's that public IP).
 
-## 5. Start the app (after the ACL is fixed)  — TODO (blocked on §4)
+## 5. Start the app (after the ACL is fixed)  — ✅ DONE
 ```bash
-cd /var/www/wavemax/wavemax-affiliate-program && pm2 start ecosystem.config.js
-# confirm "Connected to MongoDB" in logs/, then:
-pm2 save && pm2 startup    # boot persistence
+cd /var/www/wavemax/wavemax-affiliate-program
+pm2 delete wavemax 2>/dev/null; pm2 start ecosystem.config.js   # clean slate clears any crash-loop counter
+pm2 save && pm2 startup    # boot persistence (TODO: run the printed sudo line)
 ```
-Note: `localhost:3000/health` returns **302** on plain HTTP (the app forces HTTPS via `X-Forwarded-Proto`); through nginx/Cloudflare (HTTPS) it's **200**.
+**Verify Mongo** — the success line goes to Winston (`logs/combined.log`), *not* pm2 stdout:
+```bash
+grep -E "Connected to MongoDB|Server running" logs/combined.log | tail
+```
+Confirmed 2026-05-23: 4 cluster workers online, `Connected to MongoDB`, `Oracle cursor diagnostics attached`, `Background jobs disabled` (correct — Ultahost stays the job leader).
+- **Health probe:** the app forces HTTPS, so plain HTTP redirects. Spoof the proxy header to test locally: `curl -H "X-Forwarded-Proto: https" http://localhost:3000/health` → `{"status":"UP",...}`. (`/api/health` path differs; `/health` is the simple liveness route.)
+- **Direct ADB reachability test** (isolates ACL from app): `openssl s_client -connect <db-host>:27017 -servername <db-host>` → expect `Verify return code: 0 (ok)`.
+- **Pre-existing finding (NOT OCI-specific):** `Cannot find module './server/services/dataRetentionService'` repeats in `error.log` — the file was deleted in `01645cd` but `server.js:161` still requires it; it's caught, so non-fatal, but the GDPR data-retention job never initializes. Present on the live Ultahost box too. Track + fix separately.
 
 ## 6. nginx + TLS (Cloudflare origin cert) — TODO
 Replicate the Ultahost server blocks; nginx `crhsent.com` root → repo `crhsent/`; install the Cloudflare Origin Certificate; proxy 443 → `localhost:3000`.
