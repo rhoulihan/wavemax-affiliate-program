@@ -28,6 +28,29 @@ function isCursorMissingError(err) {
   return /cursor.*is missing|BSON element .?cursor.? is missing/i.test(err.message || '');
 }
 
+// Describe a failing findOne for diagnosis WITHOUT logging filter values (which
+// can be PII — session ids, emails). Captures the collection, the filter's keys,
+// and the option shape (session/projection/sort/readPreference/etc.) so we can
+// pinpoint exactly which app code path triggers the Oracle-ADB cursor error.
+function describeFindOne(coll, args) {
+  let ns = 'unknown';
+  try { ns = (coll && (coll.namespace || coll.collectionName)) || 'unknown'; } catch (_) { /* ignore */ }
+  let filterKeys = [];
+  try { if (args[0] && typeof args[0] === 'object') filterKeys = Object.keys(args[0]); } catch (_) { /* ignore */ }
+  const opts = (args[1] && typeof args[1] === 'object') ? args[1] : {};
+  const optSummary = {
+    hasSession: !!opts.session,
+    inTransaction: !!(opts.session && typeof opts.session.inTransaction === 'function' && opts.session.inTransaction()),
+    readPreference: (opts.readPreference && (opts.readPreference.mode || opts.readPreference)) || undefined,
+    projection: opts.projection ? Object.keys(opts.projection) : undefined,
+    sort: opts.sort ? Object.keys(opts.sort) : undefined,
+    collation: !!opts.collation,
+    maxTimeMS: opts.maxTimeMS,
+    limit: opts.limit
+  };
+  return { ns, filterKeys, optSummary };
+}
+
 function wrapFindOne(original, { retries, backoffMs, logger }) {
   return async function patchedFindOne(...args) {
     let attempt = 0;
@@ -39,8 +62,8 @@ function wrapFindOne(original, { retries, backoffMs, logger }) {
         if (!isCursorMissingError(err) || attempt >= retries) throw err;
         attempt += 1;
         if (logger && logger.warn) {
-          const ns = (this && (this.namespace || this.collectionName)) || 'unknown';
-          logger.warn(`Mongo cursor-missing on findOne (${ns}); retry ${attempt}/${retries}`);
+          const d = describeFindOne(this, args);
+          logger.warn(`Mongo cursor-missing on findOne; retry ${attempt}/${retries} | ns=${d.ns} filterKeys=${JSON.stringify(d.filterKeys)} opts=${JSON.stringify(d.optSummary)}`);
         }
         // Small escalating backoff; the retry checks out a (likely healthy) connection.
         if (backoffMs > 0) await sleep(backoffMs * attempt);

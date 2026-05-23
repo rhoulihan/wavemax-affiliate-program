@@ -75,6 +75,22 @@ describe('mongoCursorRetry', () => {
       expect(c.calls).toBe(1);
     });
 
+    test('logs the failing collection + filter keys + option shape, but NOT filter values (PII-safe)', async () => {
+      const C = makeCollectionClass((n) => { if (n < 2) throw cursorErr(); return {}; });
+      const warns = [];
+      installCursorRetry({
+        Collection: C, retries: 2, backoffMs: 0,
+        logger: { info: () => {}, warn: (m) => warns.push(m), error: () => {} }
+      });
+      const c = new C();
+      await c.findOne({ _id: 'secret-session-id' }, { session: {}, projection: { a: 1 } });
+      expect(warns.length).toBe(1);
+      expect(warns[0]).toContain('ns=db.fake');
+      expect(warns[0]).toContain('filterKeys=["_id"]');
+      expect(warns[0]).toContain('hasSession');
+      expect(warns[0]).not.toContain('secret-session-id'); // never log filter values
+    });
+
     test('is idempotent — does not double-wrap the prototype', () => {
       const C = makeCollectionClass(() => ({}));
       expect(installCursorRetry({ Collection: C, retries: 1, backoffMs: 0 })).toBe(true);
