@@ -43,6 +43,14 @@ const passport = require('./server/config/passport-config');
 
 const MongoStore = require('connect-mongo');
 
+// Oracle ADB MongoDB-API resilience: transparently retry the intermittent
+// "BSON element cursor is missing" error on findOne (degraded long-lived
+// pooled connections). Patches the shared mongodb driver Collection prototype,
+// so it covers BOTH the mongoose pool and connect-mongo's own session-store
+// pool. Must run before any DB use. See server/utils/mongoCursorRetry.js.
+const { installCursorRetry } = require('./server/utils/mongoCursorRetry');
+installCursorRetry({ logger });
+
 app.set('trust proxy', 1);
 
 // Update logging statements
@@ -65,6 +73,11 @@ const mongoOptions = {
   // the Oracle-compatible set). Disabling autoIndex is also standard practice
   // for production regardless of backend.
   autoIndex: false,
+  // Cap idle connection lifetime so the pool recycles continuously. The Oracle
+  // ADB MongoDB-API intermittently corrupts long-lived pooled connections (the
+  // "cursor is missing" error); freshly-opened connections never fail. The
+  // periodic recycler (below) additionally resets connections that stay busy.
+  maxIdleTimeMS: parseInt(process.env.MONGO_MAX_IDLE_MS || '60000', 10),
   // TLS enforced everywhere except local dev. Set MONGODB_TLS=false to
   // disable (e.g. plain local mongod that doesn't speak TLS).
   ...(process.env.MONGODB_TLS === 'false'
@@ -80,6 +93,20 @@ if (process.env.NODE_ENV !== 'test') {
   mongoose.connect(process.env.MONGODB_URI, mongoOptions)
     .then(async () => {
       logger.info('Connected to MongoDB');
+
+      // Periodic per-worker connection reset (staggered across PM2 instances) to
+      // clear degraded long-lived Oracle-ADB connections that maxIdleTimeMS
+      // misses (continuously-busy connections). Guarded; never crashes a worker.
+      try {
+        const { startConnectionRecycler } = require('./server/utils/mongoConnectionRecycler');
+        startConnectionRecycler({
+          mongoose,
+          uri: process.env.MONGODB_URI,
+          options: mongoOptions,
+          intervalMs: parseInt(process.env.MONGO_RECYCLE_INTERVAL_MS || String(30 * 60 * 1000), 10),
+          logger
+        });
+      } catch (e) { logger.error('Connection recycler start failed:', e.message); }
 
       // Warm the access-gate whitelist/password cache + start periodic refresh.
       const gate = require('./server/middleware/accessGate');
@@ -494,6 +521,11 @@ const sessionStore = process.env.NODE_ENV === 'test'
   ? undefined // Use default MemoryStore for tests
   : MongoStore.create({
     mongoUrl: process.env.MONGODB_URI,
+    // connect-mongo runs its OWN MongoClient pool. Cap idle connection lifetime
+    // here too so its session-lookup pool recycles like the mongoose one (Oracle
+    // ADB long-lived-connection "cursor is missing" mitigation). The cursor-retry
+    // shim also covers this pool via the shared driver prototype.
+    mongoOptions: { maxIdleTimeMS: parseInt(process.env.MONGO_MAX_IDLE_MS || '60000', 10) },
     touchAfter: 24 * 3600, // Lazy session update in seconds (24 hours)
     // Purge expired sessions with a periodic deleteMany rather than a Mongo
     // TTL index. The Oracle ADB MongoDB API rejects TTL index creation unless
