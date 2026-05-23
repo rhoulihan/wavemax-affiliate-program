@@ -11,7 +11,7 @@ Two instances, failover coordinated by Cloudflare, *all services* failover:
 ---
 
 ## Current state (single VPS — the SPOF we're removing)
-Inspected on the Ultahost VPS Professional box:
+Inspected on the Ultahost VPS Professional box (host A — **Ultahost Dallas, TX** DC):
 - **Virtualization: KVM** (full virt) → DRBD is feasible (needs a kernel module install; `drbd` not currently loaded).
 - **3 vCPU, 3.8 GB RAM** — **sufficient** (ClamAV + Solr disabled; ~1.9 GB available, ~1 GB Mailcow stack, no swap thrashing — see verified RAM note below).
 - **75 GB disk, 51 GB free, single ext4 partition (`sda1`), NO LVM, no spare partition** → a DRBD backing device must be carved/added.
@@ -37,7 +37,7 @@ Inspected on the Ultahost VPS Professional box:
                               │ DRBD primary│   │ DRBD secondary     │     (DRBD replicates)
                               └──────┬──────┘   └────────┬───────────┘
                                      └────── Oracle ADB ─┘  (shared; unchanged)
-                            (+ small 3rd "witness" VPS for cluster quorum — see split-brain)
+                            (no witness VPS — Cloudflare is the mail-failover arbiter; see split-brain)
 ```
 Both boxes run the **full stack**; web is active/active, mail is active/passive (only the DRBD-primary node runs Mailcow).
 
@@ -57,7 +57,10 @@ Both boxes run the **full stack**; web is active/active, mail is active/passive 
 **Why not Cloudflare-proxied:** Cloudflare's proxy is HTTP(S) only — **SMTP/IMAP/POP3 do not pass through it**, and any mail DNS record must be **grey-cloud (DNS-only)**. Spectrum *can* TCP-proxy SMTP but is a paid/Enterprise feature with MX/IP-match caveats → **not recommended here**. So mail failover is **DNS-health-based**, not proxied.
 
 - **DRBD** replicates the Mailcow data volume (vmail, mysql, redis, rspamd, acme/certs) between **primary (DRBD primary, mounted, Mailcow up)** and **secondary (DRBD secondary, replicating, Mailcow down)**.
-  - **Backing device:** there's no LVM/spare partition today. **Recommended: add a small dedicated second disk (5–10 GB) to each VPS** for the DRBD resource (Mailcow data is only ~776 MB, so 10 GB is generous). Cleaner than repartitioning the live root or a loop file. *Confirm Ultahost can attach an extra block device.*
+  - **Backing device — no need to request more storage or repartition.** The 75 GB disk's root ext4 (`sda1`) spans the whole disk (no unallocated space), so three options:
+    1. **Loop-file (recommended given the constraints):** a ~5–10 GB image on the existing root fs (51 GB free), attached via `losetup` and used as the DRBD backing device. **No new storage, no repartition, no downtime;** overhead negligible at ~776 MB data / low mail volume. Re-attach on boot via a small systemd unit *before* DRBD starts (on both boxes).
+    2. **Dedicated 2nd disk:** cleanest/most robust raw block device, but requires provisioning extra Ultahost storage.
+    3. **Repartition root:** ❌ NOT recommended — means **shrinking the mounted root ext4** (can't be done online) → a **rescue-mode boot** with downtime + brick risk on the live prod box.
 - **Cluster manager: Pacemaker + Corosync** — promotes DRBD, starts/stops the Mailcow containers, and (optionally) manages the mail service, as one resource group, with **fencing to prevent split-brain** (two nodes both mounting the volume = corruption).
 - **Cloudflare/DNS failover for the mail hostname** (`mail.wavemax.promo`, `mail.rundberglaundry.com`, `mail.crhsent.com`):
   - A **DNS-only** Cloudflare LB record with a **TCP health monitor** on a mail port (e.g., 465/587/993) and **failover/priority steering** (primary pool → standby pool) → CF returns the standby IP when the primary mail port stops answering.
@@ -132,20 +135,19 @@ manages the local DRBD-promote + Mailcow start/stop, driven by the CF verdict + 
 - **Different DC (more resilient):** WAN latency makes synchronous DRBD slow for mail writes → use **async (Protocol A)**, accepting a few seconds of replication lag (small RPO). *Pick based on whether DC-failure survival matters more than zero mail-RPO.*
 
 ## Cost (verify current)
-- **2nd Ultahost VPS** (match/upsize current; ideally a different DC) + an **extra block device** per VPS for DRBD.
-- Optional **3rd tiny witness VPS** (quorum only — can be the smallest tier).
+- **2nd Ultahost VPS in Los Angeles** (same tier — **no RAM upsize**; different region from the Dallas host A, and the closest US region to the Phoenix ADB). **No extra block device** (loop-file DRBD backing) and **no witness VPS** (Cloudflare is the arbiter).
 - **Cloudflare Load Balancing** from **$5/mo** + usage; a second (DNS-only) LB for mail may add a little. Confirm in the CF dashboard.
 - ~~RAM upsize~~ — **not needed** (current tier verified sufficient; ClamAV/Solr disabled).
 
 ## Open items to confirm before building
-1. Ultahost: a 2nd VPS (different DC?), an **extra block device** per VPS, and a small witness instance — all available?
+1. Ultahost: provision a 2nd VPS in **Los Angeles** (decided — different region from Dallas host A, closest US region to the Phoenix ADB). No extra block device needed (loop-file backing); no witness (Cloudflare arbiter). *Just confirm an LA VPS Professional is orderable.*
 2. ~~RAM tier~~ — **resolved: current 3.8 GB tier verified sufficient; no upsize** (ClamAV/Solr disabled; ~1 GB Mailcow + ~350 MB app, no swap thrashing).
 3. Same-DC (sync) vs cross-DC (async) DRBD.
-4. Fencing method (qdevice witness vs provider STONITH).
+4. Fencing: self-fence + guard interval is built in; optionally add a provider power-fence (STONITH) as a hung-node backstop — **does Ultahost expose a power/reboot API?**
 5. Acceptance of the **code change** to gate background jobs to one instance.
 
 ## Phased rollout
-- **Phase 0** — provision: 2nd VPS + extra disks + witness; install DRBD module + Pacemaker/Corosync; confirm Ultahost capabilities.
+- **Phase 0** — provision the LA VPS; create the loop-file DRBD backing device on each box; install the DRBD module + Pacemaker/Corosync.
 - **Phase 1 (web HA)** — deploy app to box 2; identical secrets; gate background jobs; Cloudflare LB pool + affinity + `/api/health` monitor; **test:** kill box-1 app → traffic shifts, sessions survive.
 - **Phase 2 (mail replication)** — DRBD on the extra disks; Pacemaker resource group (DRBD promote + Mailcow start/stop); **test:** manual promotion/failover on the standby.
 - **Phase 3 (mail failover routing)** — DNS-only CF LB + TCP monitor + dual MX + low TTL; SPF (both IPs) + PTR + DKIM replication; **test:** stop primary Mailcow → mail routes to standby, sends/receives cleanly.
