@@ -44,6 +44,13 @@ This codebase is mid-refactor. Canonical documents:
 - Translation files: `public/locales/{lang}/common.json`.
 - English is the fallback; don't let it mask missing translations in production copy.
 
+### Quality bar — Lighthouse (release gate)
+
+- **Every user-facing page targets as close to 100 as possible across all four Lighthouse categories — Performance, Accessibility, Best Practices, SEO — on BOTH mobile and desktop.** This is table stakes for a properly governed AI-built app, not a stretch goal.
+- A user-facing page change isn't "done" until measured on mobile **and** desktop; any regression from the prior measured state must be fixed or explained.
+- Full procedure, the exact `npx lighthouse` commands, the per-category playbook, and the deploy/cache gotchas (bump `?v=` on changed assets; `pm2 reload` after a server-rendered template change; measure with a `?lh=<ts>` cache-buster) live in [`docs/development/LIGHTHOUSE-QUALITY-BAR.md`](docs/development/LIGHTHOUSE-QUALITY-BAR.md).
+- This standard applies to the marketing/sales pages too (e.g. the crhsent landing page), not just the app.
+
 ### Security
 
 - `keys/`, `temp/`, `secure/`, `*.pem`, `*.key` — never committed.
