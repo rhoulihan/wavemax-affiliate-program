@@ -1,7 +1,7 @@
   :root{
     --ink:#0f172a; --ink2:#334155; --soft:#64748b; --line:#e2e8f0;
     --bg:#ffffff; --panel:#f8fafc; --brand:#2563eb; --brand-d:#1e3a8a;
-    --good:#16a34a; --bad:#dc2626; --warn:#c2410c;
+    --good:#15803d; --bad:#dc2626; --warn:#c2410c; /* #15803d = 5.0:1 on white (was #16a34a 3.3:1, failed AA). Bar gradients use literal greens, unaffected. */
   }
   *{box-sizing:border-box;margin:0;padding:0}
   html{scroll-behavior:smooth}
@@ -9,6 +9,9 @@
   .wrap{max-width:1040px;margin:0 auto;padding:0 22px}
   a{color:var(--brand);text-decoration:none}
   a:hover{text-decoration:underline}
+  /* In-content links must be distinguishable by more than color (WCAG 1.4.1):
+     underline links inside running text. Buttons/nav/footer keep their styling. */
+  .sub a,.card a,p.lede a,table.cmp a{text-decoration:underline}
   h1,h2,h3{line-height:1.2;letter-spacing:-0.01em}
   .eyebrow{font-size:13px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--brand)}
   .btn{display:inline-flex;align-items:center;gap:8px;background:var(--brand);color:#fff;font-weight:700;font-size:16px;padding:14px 26px;border-radius:8px;border:1px solid var(--brand);box-shadow:0 2px 8px rgba(37,99,235,.25);transition:transform .1s,background .15s}

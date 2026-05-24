@@ -7,6 +7,9 @@
 <title>Enterprise Web &amp; SEO for WaveMAX Owners — $500/mo flat | CRHS Enterprises</title>
 <meta name="description" content="Done-for-you local web presence, SEO, and hosting for WaveMAX franchise owners — built by a fellow owner. One flat $500/month rate, all-inclusive, no upsells.">
 <meta name="csp-nonce" content="{{CSP_NONCE}}">
+<!-- Same-origin favicon so the browser never requests the default /favicon.ico,
+     which 302-redirects to wavemaxlaundry.com and trips CSP img-src 'self'. -->
+<link rel="icon" type="image/svg+xml" href="/wavemax/favicon.svg">
 <link rel="stylesheet" href="/wavemax/styles.css">
 </head>
 <body>
@@ -91,11 +94,11 @@
       <input type="radio" name="prooftab" id="tab-seo" class="tabradio" aria-label="Show SEO">
       <input type="radio" name="prooftab" id="tab-sec" class="tabradio" aria-label="Show security and compliance">
       <input type="radio" name="prooftab" id="tab-infra" class="tabradio" aria-label="Show infrastructure and reliability">
-      <div class="tablist" role="tablist" aria-label="Proof">
-        <label for="tab-perf" class="tab" role="tab">⚡ Performance</label>
-        <label for="tab-seo" class="tab" role="tab">🔎 SEO</label>
-        <label for="tab-sec" class="tab" role="tab">🔒 Security &amp; Compliance</label>
-        <label for="tab-infra" class="tab" role="tab">🏗️ Infrastructure</label>
+      <div class="tablist">
+        <label for="tab-perf" class="tab">⚡ Performance</label>
+        <label for="tab-seo" class="tab">🔎 SEO</label>
+        <label for="tab-sec" class="tab">🔒 Security &amp; Compliance</label>
+        <label for="tab-infra" class="tab">🏗️ Infrastructure</label>
       </div>
 
       <!-- ===================== PERFORMANCE PANEL ===================== -->
