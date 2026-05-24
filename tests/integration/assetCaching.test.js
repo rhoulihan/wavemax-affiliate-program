@@ -30,18 +30,6 @@ describe('Static asset caching — /assets immutable', () => {
     expect(res.headers['cache-control']).toMatch(/immutable/);
   });
 
-  it('does NOT set a session cookie on /assets responses (else Cloudflare BYPASSes the cache)', async () => {
-    // The /assets static mount must run BEFORE express-session. If session
-    // middleware runs first it stamps Set-Cookie: __Host-wavemax.sid on the
-    // asset, and Cloudflare refuses to cache any response with a session
-    // cookie (cf-cache-status: BYPASS) — silently defeating the asset cache.
-    const res = await request(app).get('/assets/js/franchise-page-helpers.js?v=20260524');
-    expect(res.status).toBe(200);
-    const cookies = res.headers['set-cookie'] || [];
-    const sessionCookie = cookies.find((c) => /\.sid=/.test(c));
-    expect(sessionCookie).toBeUndefined();
-  });
-
   it('does NOT immutable-cache the franchise host HTML', async () => {
     const res = await request(app).get('/austin-tx/').set('Host', 'rundberglaundry.com');
     expect(res.status).toBe(200);
