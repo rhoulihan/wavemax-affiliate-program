@@ -299,6 +299,21 @@
         <p class="chart-cap">Passive, reproducible measurement of public pages — Google's PageSpeed Insights and any browser's developer tools show the same. Captured May 2026; re-run it yourself any time.</p>
 
         <div class="perfbars" style="margin-top:22px">
+          <h3>Page build — the number Google actually ranks on</h3>
+          <div class="ptitle">Shorter is better. Time to build the page at the <strong>origin server</strong> with Cloudflare's cache bypassed (<code>cf-cache: MISS</code>) — the Austin page, 5 samples each, May 2026. A <em>cached</em> page is fast for anyone; this is what happens on a cache miss, which is exactly what real visitors and Googlebot hit.</div>
+          <div class="legend"><span><i class="o"></i>Your CRHS site</span><span><i class="t"></i>Corporate WaveMAX platform</span></div>
+          <div class="pb-row">
+            <div class="pb-metric"><span>Your CRHS site — live origin, <strong>every</strong> request</span><span class="win">~3× faster build</span></div>
+            <div class="pb-bar ours" style="width:29%">~0.2 s</div>
+          </div>
+          <div class="pb-row">
+            <div class="pb-metric"><span>Corporate platform — GoDaddy WordPress build</span></div>
+            <div class="pb-bar theirs" style="width:100%">~0.7 s</div>
+          </div>
+          <p class="pb-foot"><strong>This is the number Google ranks on — not the cached one.</strong> Google's page-experience signals (Core Web Vitals, led by LCP) are measured from <em>real users</em>, including everyone who lands on a cache miss, and that experience begins with the server's response time. Google also crawls slow servers less often, so fewer of your pages get seen. A platform that's only fast when cached is still judged on its ~0.7&nbsp;s origin build; ours answers live in ~0.2&nbsp;s on every request. Check it yourself: <code>curl -o /dev/null -w "%{time_starttransfer}\n" "https://&lt;site&gt;/austin-tx/?cb=$RANDOM"</code></p>
+        </div>
+
+        <div class="perfbars" style="margin-top:22px">
           <h3>Same story across the network</h3>
           <div class="ptitle">Total page weight — every WaveMAX platform page tested is 2–4½× heavier than your CRHS site.</div>
           <div class="legend"><span><i class="o"></i>Your CRHS site</span><span><i class="t"></i>Current WaveMAX platform</span></div>
