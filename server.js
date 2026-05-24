@@ -762,6 +762,23 @@ app.get('/dev/austin-host-mock.html', (req, res, next) => {
   res.redirect(301, `/austin-tx/${tail}${queryString ? '?' + queryString : ''}`);
 });
 
+// Performance: versioned static assets under /assets are immutable. They're
+// ?v=-cache-busted, so the bytes at any URL never change → a long immutable
+// Cache-Control lets Cloudflare serve them as clean edge HITs (~20ms) instead
+// of revalidating to the Phoenix origin every few hours (~0.2s, the slow
+// "images come in last" symptom). Placed here, AT the existing general-static
+// location (after session/CSP — NOT before it, which reordered middleware and
+// threw errors). Static asset responses don't carry the session cookie, so
+// there's no Cloudflare BYPASS to worry about; the immutable TTL simply
+// upgrades them from CF's 14400 revalidation to a long clean HIT.
+app.use('/assets', express.static(path.join(__dirname, 'public', 'assets'), {
+  immutable: true,
+  maxAge: '1y',
+  setHeaders: (res) => {
+    res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+  }
+}));
+
 // Serve static files in all environments
 app.use(express.static(path.join(__dirname, 'public')));
 
