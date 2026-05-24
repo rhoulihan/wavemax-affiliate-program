@@ -384,6 +384,31 @@
     return root;
   }
 
+  // Lazy-load swirl-spinner (CSS + JS) only when a 'loading' modal first needs
+  // it. The contact form is the only thing that shows a loading spinner, so
+  // home/marketing pages no longer download ~16KB they never use. Same-origin
+  // tags → script-src 'self' / style-src 'self' allow them without a nonce.
+  let swirlSpinnerReady = null;
+  function ensureSwirlSpinner() {
+    if (window.SwirlSpinner) return Promise.resolve();
+    if (swirlSpinnerReady) return swirlSpinnerReady;
+    swirlSpinnerReady = new Promise((resolve) => {
+      if (!document.querySelector('link[data-swirl-css]')) {
+        const link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = '/assets/css/swirl-spinner.css?v=20260508a';
+        link.setAttribute('data-swirl-css', '');
+        document.head.appendChild(link);
+      }
+      const s = document.createElement('script');
+      s.src = '/assets/js/swirl-spinner.js?v=20260504';
+      s.onload = () => resolve();
+      s.onerror = () => resolve(); // graceful: modal just shows no swirl
+      document.head.appendChild(s);
+    });
+    return swirlSpinnerReady;
+  }
+
   function showStatusModal(data) {
     if (!modalEl) modalEl = buildStatusModal();
     const kind  = (data.kind === 'error') ? 'error'
@@ -402,11 +427,21 @@
 
     // Icon: swirl spinner for loading, check/alert SVG otherwise.
     const iconEl = modalEl.querySelector('[data-status-modal-icon]');
-    if (kind === 'loading' && window.SwirlSpinner) {
+    if (kind === 'loading') {
+      // Tear down any prior spinner so we don't leak DOM nodes/timers.
+      if (modalEl.__activeSpinner) {
+        try { modalEl.__activeSpinner.destroy(); } catch (_) { /* defensive */ }
+        modalEl.__activeSpinner = null;
+      }
       iconEl.innerHTML = '';
-      const spinner = new window.SwirlSpinner({ size: 'default', speed: 'normal', container: iconEl });
-      spinner.show();
-      modalEl.__activeSpinner = spinner;
+      ensureSwirlSpinner().then(() => {
+        // The server may have already responded (kind flipped off 'loading')
+        // by the time the lazy script lands — only mount if still loading.
+        if (modalEl.dataset.kind !== 'loading' || !window.SwirlSpinner) return;
+        const spinner = new window.SwirlSpinner({ size: 'default', speed: 'normal', container: iconEl });
+        spinner.show();
+        modalEl.__activeSpinner = spinner;
+      });
     } else {
       // Tear down any prior spinner so we don't leak DOM nodes.
       if (modalEl.__activeSpinner) {

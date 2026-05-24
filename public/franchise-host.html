@@ -403,13 +403,13 @@
   }
   </script>
 
-  <!-- Performance: pre-resolve DNS + open TCP/TLS to the hosts we hit on
-       first paint (fonts, images, Hibu loader, store photos). Saves
-       150-300ms on a cold connection. -->
+  <!-- Performance: pre-resolve DNS + open TCP/TLS to the font host we hit on
+       first paint. Saves 150-300ms on a cold connection. Removed two stale
+       hints: upload.wikimedia.org (landmark images are local WebP now) and
+       places.googleapis.com (reviews come from our cached /api endpoint, not
+       the client). -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="preconnect" href="https://upload.wikimedia.org">
-  <link rel="dns-prefetch" href="https://places.googleapis.com">
 
   <!-- Fonts loaded non-render-blocking (media=print, flipped to all by
        css-async.js). display=swap keeps text visible in the system fallback
@@ -425,14 +425,12 @@
   <!-- Demo-only host page styles (external for CSP compliance) -->
   <link rel="stylesheet" href="/assets/css/austin-host-mock.css?v=20260504">
 
-  <!-- Swirl-spinner assets — used by the parent-side status modal during
-       async work (e.g. contact-form submission). Loaded on the host so
-       the spinner renders in the parent viewport, not inside the iframe. -->
-  <link rel="stylesheet" href="/assets/css/swirl-spinner.css?v=20260508a" media="print" data-async-css>
-  <!-- Flips the media=print (non-render-blocking) stylesheets above to
+  <!-- Flips the media=print (non-render-blocking) font stylesheet above to
        media=all once parsed. CSP-safe — no inline handler. -->
   <script src="/assets/js/css-async.js?v=20260524a" defer></script>
-  <script src="/assets/js/swirl-spinner.js?v=20260504" defer></script>
+  <!-- swirl-spinner is intentionally NOT loaded here. Only the contact form's
+       parent loading-modal needs it, so parent-iframe-bridge-v3.js lazy-loads
+       it on first use — keeping ~16KB off home/marketing pages entirely. -->
 
   <!-- Centralized image-base config — exposes window.wmLocationImage for
        per-franchise location URL resolution. Loaded before any consumer. -->
@@ -828,7 +826,7 @@
 </div>
 
 <!-- Bridge + chrome wiring (CSP-clean external scripts) -->
-<script src="/assets/js/parent-iframe-bridge-v3.js?v=20260520" defer></script>
+<script src="/assets/js/parent-iframe-bridge-v3.js?v=20260524a" defer></script>
 <script src="/assets/js/austin-host-mock.js?v=20260522a" defer></script>
 
 <!-- Lazy-load the footer Google Maps embed (IntersectionObserver facade) so
