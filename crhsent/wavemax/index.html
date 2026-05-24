@@ -10,7 +10,7 @@
 <!-- Same-origin favicon so the browser never requests the default /favicon.ico,
      which 302-redirects to wavemaxlaundry.com and trips CSP img-src 'self'. -->
 <link rel="icon" type="image/svg+xml" href="/wavemax/favicon.svg">
-<link rel="stylesheet" href="/wavemax/styles.css?v=20260524a">
+<link rel="stylesheet" href="/wavemax/styles.css?v=20260524b">
 </head>
 <body>
 
@@ -133,17 +133,15 @@
         <table class="cmp">
           <thead><tr><th>Measured on the Austin page</th><th>Your CRHS site</th><th>Current WaveMAX platform</th></tr></thead>
           <tbody>
-            <tr><td>First byte from the server</td><td class="ours">✓ ~0.2 s</td><td class="theirs">✗ ~0.4–0.9 s</td></tr>
-            <tr><td>First content on screen</td><td class="ours">✓ 0.39 s</td><td class="theirs">✗ 1.36 s</td></tr>
-            <tr><td>Page ready to use</td><td class="ours">✓ 0.34 s</td><td class="theirs">✗ 1.45 s</td></tr>
-            <tr><td>Fully loaded</td><td class="ours">✓ 0.85 s</td><td class="theirs">✗ 2.50 s</td></tr>
-            <tr><td>HTML document size</td><td class="ours">✓ 66 KB</td><td class="theirs">✗ 429 KB</td></tr>
-            <tr><td>Total page weight</td><td class="ours">✓ 1.76 MB</td><td class="theirs">✗ 4.51 MB</td></tr>
-            <tr><td>Extra redirect hops</td><td class="ours">✓ none</td><td class="theirs">✗ 1 on every page</td></tr>
+            <tr><td>First byte from the server</td><td class="ours">✓ ~0.2 s</td><td class="theirs">✗ ~0.7–0.9 s</td></tr>
+            <tr><td>First content appears (FCP)</td><td class="ours">✓ 0.4 s</td><td class="theirs">✗ 1.9 s</td></tr>
+            <tr><td>Largest content appears (LCP)</td><td class="ours">✓ 0.5 s</td><td class="theirs">✗ 3.1 s</td></tr>
+            <tr><td>HTML document size</td><td class="ours">✓ 66 KB</td><td class="theirs">✗ 437 KB</td></tr>
+            <tr><td>Total page weight</td><td class="ours">✓ 0.98 MB</td><td class="theirs">✗ 4.51 MB</td></tr>
             <tr><td>Browser errors on load</td><td class="ours">✓ 0</td><td class="theirs">✗ 1</td></tr>
           </tbody>
         </table>
-        <p class="chart-cap">Passive, reproducible measurement of public pages — Google's PageSpeed Insights and any browser's developer tools show the same. Captured May 2026; re-run it yourself any time.</p>
+        <p class="chart-cap">Passive, reproducible measurement of public pages — first byte via <code>curl</code>, FCP/LCP from Chrome's built-in Lighthouse (DevTools, desktop), sizes and errors from the browser's network and console panels. Captured May 2026; re-run it yourself any time.</p>
 
         <div class="perfbars mt-22">
           <h3>Page build — the number Google actually ranks on</h3>
@@ -162,13 +160,13 @@
 
         <div class="perfbars mt-22">
           <h3>Same story across the network</h3>
-          <div class="ptitle">Total page weight — every WaveMAX platform page tested is 2–4½× heavier than your CRHS site.</div>
+          <div class="ptitle">Total page weight — every WaveMAX platform page tested is 2× to nearly 5× heavier than your CRHS site.</div>
           <div class="legend"><span><i class="o"></i>Your CRHS site</span><span><i class="t"></i>Current WaveMAX platform</span></div>
-          <div class="pb-row"><div class="pb-metric"><span>Your CRHS site — Austin</span></div><div class="pb-bar ours w-39">1.76 MB</div></div>
+          <div class="pb-row"><div class="pb-metric"><span>Your CRHS site — Austin</span></div><div class="pb-bar ours w-22">0.98 MB</div></div>
           <div class="pb-row"><div class="pb-metric"><span>WaveMAX platform — Austin</span></div><div class="pb-bar theirs w-100">4.51 MB</div></div>
-          <div class="pb-row"><div class="pb-metric"><span>WaveMAX platform — Charlotte</span></div><div class="pb-bar theirs w-75">3.40 MB</div></div>
-          <div class="pb-row"><div class="pb-metric"><span>WaveMAX platform — Franchise page</span></div><div class="pb-bar theirs w-49">2.19 MB</div></div>
-          <p class="pb-foot">The franchisor's franchise-recruitment page alone loads 28 separate scripts and 23 stylesheets. Heaviness is built into the platform, not specific to any one store.</p>
+          <div class="pb-row"><div class="pb-metric"><span>WaveMAX platform — Charlotte</span></div><div class="pb-bar theirs w-64">2.90 MB</div></div>
+          <div class="pb-row"><div class="pb-metric"><span>WaveMAX platform — Franchise page</span></div><div class="pb-bar theirs w-52">2.35 MB</div></div>
+          <p class="pb-foot">The franchisor's franchise-recruitment page alone loads 41 separate scripts and 21 stylesheets. Heaviness is built into the platform, not specific to any one store.</p>
         </div>
 
         <div class="callout good">
