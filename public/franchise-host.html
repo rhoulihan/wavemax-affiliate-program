@@ -522,7 +522,7 @@
     <div class="wmlnav-inner">
       <div class="wmlnav-b2-logo">
         <a id="wmlnav-logo-link" href="/{{SLUG}}/" aria-label="WaveMAX Austin home">
-          <img decoding="async" src="/assets/images/brand/logo-wavemax.png" alt="WaveMAX Laundry">
+          <img decoding="async" src="/assets/images/brand/logo-wavemax.png" alt="WaveMAX Laundry" width="395" height="90">
         </a>
       </div>
       <div class="wmlnav-b2-right">
@@ -601,7 +601,7 @@
        iterates every .wm-lang-switcher so both stay in sync. -->
   <div class="wmv3-logo">
     <a href="/{{SLUG}}/" aria-label="WaveMAX Austin home">
-      <img src="/assets/images/brand/logo-wavemax.png" alt="WaveMAX Laundry">
+      <img src="/assets/images/brand/logo-wavemax.png" alt="WaveMAX Laundry" width="395" height="90">
     </a>
     <div class="wm-lang-switcher wmv3-lang-switcher" role="combobox" aria-expanded="false" aria-haspopup="listbox" aria-label="Language selector">
       <button type="button" class="wm-lang-btn" aria-haspopup="true" aria-label="Choose language">
@@ -820,8 +820,8 @@
 </div>
 
 <!-- Bridge + chrome wiring (CSP-clean external scripts) -->
-<script src="/assets/js/parent-iframe-bridge-v3.js?v=20260520"></script>
-<script src="/assets/js/austin-host-mock.js?v=20260522a"></script>
+<script src="/assets/js/parent-iframe-bridge-v3.js?v=20260520" defer></script>
+<script src="/assets/js/austin-host-mock.js?v=20260522a" defer></script>
 
 <!-- Lazy-load the footer Google Maps embed (IntersectionObserver facade) so
      its ~20 Maps requests stay off the first-paint critical path. CSP-clean. -->
@@ -840,8 +840,8 @@
   the bytes; the CSP `'self'` allowlist is the integrity gate.
   ════════════════════════════════════════════════════════════════════
 -->
-<script src="/assets/vendor/ybDynamicPhoneInsertion.js?v=20260520"></script>
-<script src="/assets/js/austin-hibu-phone-swap.js?v=20260523b"></script>
+<script src="/assets/vendor/ybDynamicPhoneInsertion.js?v=20260520" defer></script>
+<script src="/assets/js/austin-hibu-phone-swap.js?v=20260523b" defer></script>
 
 <!--
   ════════════════════════════════════════════════════════════════════
@@ -857,7 +857,7 @@
   "Do Not Sell or Share" path; GPC honored.
   ════════════════════════════════════════════════════════════════════
 -->
-<script src="/assets/js/austin-fb-pixel.js?v=20260521"></script>
+<script src="/assets/js/austin-fb-pixel.js?v=20260521" defer></script>
 <noscript><img height="1" width="1" style="display:none" alt="" src="https://www.facebook.com/tr?id=1787020035321730&amp;ev=PageView&amp;noscript=1"></noscript>
 </body>
 </html>

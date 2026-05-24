@@ -531,8 +531,7 @@
       // after it (1-slide lookahead, so the following transition is ready too)
       // — have started loading before they're displayed.
       const ensure = (el) => { if (el && el.dataset && el.dataset.src) { el.src = el.dataset.src; delete el.dataset.src; } };
-      ensure(imgs[nextIdx]);
-      ensure(imgs[(nextIdx + 1) % imgs.length]);
+      ensure(imgs[nextIdx]);   // load the slide we're rotating TO, only now
       imgs[activeIdx].classList.remove('is-active');
       imgs[nextIdx].classList.add('is-active');
       schedule();
@@ -635,9 +634,9 @@
       img.referrerPolicy = 'no-referrer';
       rotator.appendChild(img);
     });
-    // Preload slot #2 so the first transition (6s in) never flashes.
-    const second = rotator.children[1];
-    if (second && second.dataset.src) { second.src = second.dataset.src; delete second.dataset.src; }
+    // No preload: only the first (visible) image loads now, so "page load
+    // complete" fires as soon as it's ready. Every other slide loads only when
+    // the rotator rotates to it (see initHeroRotator → step → ensure).
   }
 
   /* ---------- Cross-frame nav for tab CTAs ----------
@@ -732,8 +731,14 @@
       }
     });
 
-    // Fetch reviews after a short delay so the bridge has time to settle
-    setTimeout(loadReviews, 250);
+    // Defer reviews until AFTER the load event (then on idle) so the fetch +
+    // avatar images never block "page load complete" — the reviews are below
+    // the fold and don't affect first paint.
+    const deferReviews = () => ('requestIdleCallback' in window
+      ? requestIdleCallback(loadReviews, { timeout: 3000 })
+      : setTimeout(loadReviews, 1200));
+    if (document.readyState === 'complete') deferReviews();
+    else window.addEventListener('load', deferReviews, { once: true });
 
     // Re-render the empty-state link if language changes (it's localized)
     window.addEventListener('language-changed', () => {
