@@ -103,7 +103,7 @@
             </div>
             <div class="wmlnav-b1-right">
               <div class="wm-lang-switcher" id="wm-lang" role="combobox" aria-expanded="false" aria-haspopup="listbox" aria-label="Language selector">
-                <button type="button" class="wm-lang-btn" aria-haspopup="true" aria-label="Choose language">
+                <button type="button" class="wm-lang-btn" aria-haspopup="true">
                   <span class="wm-lang-flag wm-flag-en" aria-hidden="true"></span>
                   <span class="wm-lang-current-label">EN</span>
                   <svg class="wm-lang-arrow" viewBox="0 0 9 6" aria-hidden="true"><path d="M0.5 1L4.5 5L8.5 1" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -193,7 +193,7 @@
             <img src="${esc(LOGO_URL)}" alt="WaveMAX Laundry">
           </a>
           <div class="wm-lang-switcher wmv3-lang-switcher" role="combobox" aria-expanded="false" aria-haspopup="listbox" aria-label="Language selector">
-            <button type="button" class="wm-lang-btn" aria-haspopup="true" aria-label="Choose language">
+            <button type="button" class="wm-lang-btn" aria-haspopup="true">
               <span class="wm-lang-flag wm-flag-en" aria-hidden="true"></span>
               <span class="wm-lang-current-label">EN</span>
               <svg class="wm-lang-arrow" viewBox="0 0 9 6" aria-hidden="true"><path d="M0.5 1L4.5 5L8.5 1" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>

@@ -462,7 +462,10 @@
   }
   .wmv3-btn svg { width: 14px; height: 14px; }
   .wmv3-btn-out { background: transparent; color: #fff; border: 1.5px solid #fff; }
-  .wmv3-btn-sol { background: #29b6d4; color: #fff; border: 1.5px solid #29b6d4; }
+  /* Darker cyan (same ~193deg hue as brand --wm-accent #29b6d4) so white text
+     clears WCAG AA: #fff on #0e7490 = 5.36:1 (was 2.4:1 on #29b6d4). Scoped to
+     this CTA only — the brand accent variable is untouched. */
+  .wmv3-btn-sol { background: #0e7490; color: #fff; border: 1.5px solid #0e7490; }
 
   /* Mobile lang switcher anchored upper-right of the logo row. Compact
      pill; full menu drops on click. */
