@@ -21,6 +21,26 @@
 
   const SITE_ROOT = 'https://wavemax.promo';
 
+  /* ---------- Same-origin image normalization ----------
+   * Per-franchise image data carries ABSOLUTE https://wavemax.promo/... URLs.
+   * The host page, however, is served from the franchise's own domain (e.g.
+   * rundberglaundry.com). A browser-rendered <img>/background using the
+   * absolute wavemax.promo URL fetches it cross-domain, gets a 301 to the
+   * serving domain, and re-fetches it same-origin — a wasted round-trip per
+   * image. relativizeAssetUrl strips the wavemax.promo host so the browser
+   * loads the asset directly from whatever domain the page is on.
+   *
+   * IMPORTANT: only use this for BROWSER-RENDERED images (hero watermark,
+   * gallery/rotator). Crawler-facing SEO fields (og:image, twitter:image,
+   * JSON-LD image) MUST stay absolute — bots don't know the serving domain —
+   * so ogImage()/buildSeo() deliberately do NOT call this. External hosts
+   * (e.g. Wikimedia landmarks) are left untouched.
+   */
+  function relativizeAssetUrl(url) {
+    if (!url || typeof url !== 'string') return '';
+    return url.replace(/^https?:\/\/(?:www\.)?wavemax\.promo(?=\/)/i, '');
+  }
+
   // Map pageKey → URL segment + page-specific copy seeds.
   const PAGE_SPEC = {
     'landing':     { path: '',                       service: 'Laundromat'           },
@@ -43,10 +63,12 @@
   }
 
   function heroUrl(data) {
-    return data?.images?.hero?.[0] || '';
+    // Browser-rendered hero background → load same-origin.
+    return relativizeAssetUrl(data?.images?.hero?.[0] || '');
   }
 
   function ogImage(data) {
+    // Crawler-facing → MUST stay absolute. Do not relativize.
     return data?.images?.ogImage || data?.images?.hero?.[0] || '';
   }
 
@@ -317,6 +339,7 @@
     businessId,
     pageUrl,
     heroUrl,
-    ogImage
+    ogImage,
+    relativizeAssetUrl
   };
 })();

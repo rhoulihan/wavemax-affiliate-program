@@ -605,13 +605,23 @@
     }
     if (slots.length === 0) return;
 
+    // Same-origin normalization: store interior photos carry absolute
+    // wavemax.promo URLs in the registry, but the page is served from the
+    // franchise's own domain. Relativizing avoids a cross-domain 301 round-
+    // trip per image. External landmark URLs (Wikimedia) and already-relative
+    // local paths pass through untouched. SEO/OG images are unaffected (they
+    // come from buildSeo, which keeps them absolute).
+    const relativize = (window.FranchisePage && window.FranchisePage.relativizeAssetUrl)
+      ? window.FranchisePage.relativizeAssetUrl
+      : (u) => u;
+
     // Render — replace children atomically so re-binding from a later
     // location-data event doesn't double-up.
     rotator.innerHTML = '';
     slots.forEach((slot, idx) => {
       const img = document.createElement('img');
       img.className = 'wm-hero-rotator-img' + (idx === 0 ? ' is-active' : '');
-      img.src = slot.url;
+      img.src = relativize(slot.url);
       img.alt = slot.alt;
       img.loading = idx === 0 ? 'eager' : 'lazy';
       img.referrerPolicy = 'no-referrer';

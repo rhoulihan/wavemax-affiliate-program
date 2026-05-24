@@ -228,6 +228,18 @@ Every dataset that drives the site is regenerable from scripts:
 
 ---
 
+## 9. Performance Optimization (2026-05-24)
+
+Page-load pass on the franchise pages (diagnosed ~93 requests on the franchise homepage; document/origin were fast, payload was the problem):
+
+- ✅ Location images load **same-origin** (was: absolute `wavemax.promo` URLs → cross-domain 301 → re-fetch). `relativizeAssetUrl()` in franchise-page-helpers.js; og:image / twitter:image / JSON-LD kept absolute for crawlers.
+- ✅ Static `/assets` served **immutable, 1-year** (origin) + Cloudflare Browser Cache TTL flipped to *Respect Existing Headers* on all 6 web zones (was a blanket 4h override forcing edge revalidation).
+- ✅ Google Maps embed **lazy-loaded** (IntersectionObserver facade, CSP-clean) — ~20 Maps requests off the first-paint path.
+- ✅ Austin landmark photos **localized + optimized** to WebP (were 1280px Wikimedia originals).
+- ✅ Google Fonts consolidated to one canonical request; host-page/franchise-default asset double-load + `wm-image-config.js` version skew de-duplicated.
+
+---
+
 ## Tracking
 
 This file is updated as items ship. Source: `docs/CORPORATE-REBUILD-CHECKLIST.md` in the wavemax-affiliate-program repo. Live status verifiable against `wavemax.promo`.

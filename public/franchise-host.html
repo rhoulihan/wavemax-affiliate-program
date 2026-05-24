@@ -731,9 +731,14 @@
     <div class="wm-pgfooter-map">
       <div id="wm-map">
         <div class="wm-pgfooter-mapframe">
+          <!-- Map is lazy-loaded by franchise-map-lazy.js: the embed URL is
+               resolved from LOCATION_DATA.contact.mapsEmbedUrl and attached to
+               src only when the footer scrolls near the viewport. This keeps
+               the ~20 Google Maps JS/tile requests off the first-paint path.
+               (Was data-bind src — eagerly fetched on load.) -->
           <iframe
             title="Map to this WaveMAX location"
-            data-bind="contact.mapsEmbedUrl" data-bind-attr="src"
+            data-map-src-bind="contact.mapsEmbedUrl"
             src=""
             loading="lazy"
             referrerpolicy="no-referrer-when-downgrade"
@@ -817,6 +822,10 @@
 <!-- Bridge + chrome wiring (CSP-clean external scripts) -->
 <script src="/assets/js/parent-iframe-bridge-v3.js?v=20260520"></script>
 <script src="/assets/js/austin-host-mock.js?v=20260522a"></script>
+
+<!-- Lazy-load the footer Google Maps embed (IntersectionObserver facade) so
+     its ~20 Maps requests stay off the first-paint critical path. CSP-clean. -->
+<script src="/assets/js/franchise-map-lazy.js?v=20260524" defer></script>
 
 <!--
   ════════════════════════════════════════════════════════════════════
