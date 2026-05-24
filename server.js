@@ -73,6 +73,13 @@ const mongoOptions = {
   // the Oracle-compatible set). Disabling autoIndex is also standard practice
   // for production regardless of backend.
   autoIndex: false,
+  // Cap the pool — this app is lightweight and does NOT need many connections.
+  // The driver default maxPoolSize is 100; across cluster workers and multiple
+  // hosts that floods the Oracle ADB's connection capacity, and on a connection
+  // reset (e.g. an ADB ACL change) it becomes a storm of failed re-auths
+  // (ORA-03113 ~170/min until a pool refresh). A small steady pool is plenty.
+  maxPoolSize: 5,
+  minPoolSize: 2,
   // No maxIdleTimeMS: keep pooled connections alive and REUSED. Oracle's command
   // logs (2026-05-23) showed the app reconstructs connections far too often (poor
   // pooling — ~1 hello+saslStart handshake per few queries); idle-churning made it
@@ -566,6 +573,9 @@ const sessionStore = process.env.NODE_ENV === 'test'
     // (no idle churn) + enable command monitoring so the Oracle diagnostics capture
     // the sessions.findOne malformed replies (where 100% of the cursor errors are).
     mongoOptions: {
+      // connect-mongo has its OWN pool — cap it too (sessions are infrequent).
+      maxPoolSize: 3,
+      minPoolSize: 1,
       monitorCommands: process.env.ORACLE_DIAG !== 'false'
     },
     touchAfter: 24 * 3600, // Lazy session update in seconds (24 hours)
