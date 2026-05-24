@@ -15,19 +15,38 @@
  */
 (function () {
   'use strict';
-  /* eslint-disable */
-  !function (f, b, e, v, n, t, s) {
-    if (f.fbq) return;
-    n = f.fbq = function () {
-      n.callMethod ? n.callMethod.apply(n, arguments) : n.queue.push(arguments);
-    };
-    if (!f._fbq) f._fbq = n;
-    n.push = n; n.loaded = !0; n.version = '2.0'; n.queue = [];
-    t = b.createElement(e); t.async = !0; t.src = v;
-    s = b.getElementsByTagName(e)[0]; s.parentNode.insertBefore(t, s);
-  }(window, document, 'script', 'https://connect.facebook.net/en_US/fbevents.js');
+  function loadPixel() {
+    /* eslint-disable */
+    !function (f, b, e, v, n, t, s) {
+      if (f.fbq) return;
+      n = f.fbq = function () {
+        n.callMethod ? n.callMethod.apply(n, arguments) : n.queue.push(arguments);
+      };
+      if (!f._fbq) f._fbq = n;
+      n.push = n; n.loaded = !0; n.version = '2.0'; n.queue = [];
+      t = b.createElement(e); t.async = !0; t.src = v;
+      s = b.getElementsByTagName(e)[0]; s.parentNode.insertBefore(t, s);
+    }(window, document, 'script', 'https://connect.facebook.net/en_US/fbevents.js');
 
-  fbq('init', '1787020035321730');
-  fbq('track', 'PageView');
-  /* eslint-enable */
+    fbq('init', '1787020035321730');
+    fbq('track', 'PageView');
+    /* eslint-enable */
+  }
+
+  // Defer the pixel until the page is interactive. fbevents.js (~100KB, mostly
+  // unused on a landing page) + its beacons otherwise keep the network busy
+  // through TTI/Speed Index. Loading it after `load` (on idle) fires the same
+  // PageView for retargeting without competing with the critical render.
+  function schedulePixel() {
+    if ('requestIdleCallback' in window) {
+      requestIdleCallback(loadPixel, { timeout: 4000 });
+    } else {
+      setTimeout(loadPixel, 2500);
+    }
+  }
+  if (document.readyState === 'complete') {
+    schedulePixel();
+  } else {
+    window.addEventListener('load', schedulePixel, { once: true });
+  }
 })();
