@@ -527,6 +527,12 @@
       }
       if (activeIdx < 0) activeIdx = 0;
       const nextIdx = (activeIdx + 1) % imgs.length;
+      // Just-in-time lazy load: ensure the slide about to show — and the one
+      // after it (1-slide lookahead, so the following transition is ready too)
+      // — have started loading before they're displayed.
+      const ensure = (el) => { if (el && el.dataset && el.dataset.src) { el.src = el.dataset.src; delete el.dataset.src; } };
+      ensure(imgs[nextIdx]);
+      ensure(imgs[(nextIdx + 1) % imgs.length]);
       imgs[activeIdx].classList.remove('is-active');
       imgs[nextIdx].classList.add('is-active');
       schedule();
@@ -615,12 +621,23 @@
     slots.forEach((slot, idx) => {
       const img = document.createElement('img');
       img.className = 'wm-hero-rotator-img' + (idx === 0 ? ' is-active' : '');
-      img.src = slot.url;
+      // Lazy rotator: only the first (visible) image loads on initial paint.
+      // The rest carry their URL in data-src and are fetched just-in-time as
+      // the rotator advances (see initHeroRotator). Browser loading="lazy" is
+      // useless here — all rotator images stack at one spot, so the browser
+      // treats them all as in-viewport and would eagerly load every one.
+      if (idx === 0) {
+        img.src = slot.url;
+      } else {
+        img.dataset.src = slot.url;
+      }
       img.alt = slot.alt;
-      img.loading = idx === 0 ? 'eager' : 'lazy';
       img.referrerPolicy = 'no-referrer';
       rotator.appendChild(img);
     });
+    // Preload slot #2 so the first transition (6s in) never flashes.
+    const second = rotator.children[1];
+    if (second && second.dataset.src) { second.src = second.dataset.src; delete second.dataset.src; }
   }
 
   /* ---------- Cross-frame nav for tab CTAs ----------
