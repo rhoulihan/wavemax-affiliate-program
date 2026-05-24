@@ -279,11 +279,11 @@
       <div class="panel panel-infra" role="tabpanel" aria-label="Infrastructure and reliability">
         <div class="callout brand">
           <h3>Where the marketing vendor hosts — and where I host your store</h3>
-          <p>A simple public lookup tells you what a website is built on. I ran one on the marketing partner's own site and on the corporate WaveMAX platform, then on my deployment. The vendor selling "enterprise digital infrastructure" runs its own marketing site — and the corporate platform — on <strong>GoDaddy Managed WordPress hosting</strong>: one box, one data center, no failover. Your CRHS store runs on <strong>Oracle Cloud</strong>, load-balanced across <strong>two data centers</strong>, with the data on <strong>Oracle's Autonomous Database on Exadata</strong> — the enterprise platform large banks run. Every line below is verifiable with <code>dig</code> and <code>whois</code> from your own laptop.</p>
+          <p>A simple public lookup tells you what a website is built on. I ran one on the marketing partner's own site and on the corporate WaveMAX platform, then on my deployment. The vendor selling "enterprise digital infrastructure" runs its own marketing site — and the corporate platform — on <strong>GoDaddy Managed WordPress hosting</strong>: one box, one data center, no failover. Your CRHS store runs on <strong>Oracle Cloud</strong>, <strong>active-active across two independent data centers</strong> (separate Phoenix availability zones, co-located with the database for speed), with the data on <strong>Oracle's Autonomous Database on Exadata</strong> — the enterprise platform large banks run. Every line below is verifiable with <code>dig</code> and <code>whois</code> from your own laptop.</p>
         </div>
 
         <div class="perf-stats">
-          <div class="perf-stat"><div class="n">2</div><div class="l">data centers with automatic failover (Phoenix + Dallas)</div></div>
+          <div class="perf-stat"><div class="n">2</div><div class="l">data centers serving active-active (two Phoenix availability zones)</div></div>
           <div class="perf-stat"><div class="n">0</div><div class="l">single points of failure in your stack</div></div>
           <div class="perf-stat"><div class="n">Exadata</div><div class="l">the database tier — the platform Fortune-500 banks run on</div></div>
           <div class="perf-stat"><div class="n">GoDaddy</div><div class="l">where the marketing vendor hosts its own site (Managed WordPress)</div></div>
@@ -293,9 +293,9 @@
           <thead><tr><th>Infrastructure</th><th>Your CRHS site</th><th>MHR &amp; the WaveMAX platform</th></tr></thead>
           <tbody>
             <tr><td>Where it runs</td><td class="ours">✓ Oracle Cloud (OCI) — dedicated compute</td><td class="theirs">✗ GoDaddy Managed WordPress (secureserver.net)</td></tr>
-            <tr><td>Data centers</td><td class="ours">✓ 2 — Phoenix primary + Dallas failover</td><td class="theirs">✗ 1</td></tr>
-            <tr><td>Load balancing</td><td class="ours">✓ Cloudflare Load Balancer — health-checked, session-pinned</td><td class="theirs">✗ none — single origin (CDN cache only)</td></tr>
-            <tr><td>If a server goes down</td><td class="ours">✓ traffic auto-shifts to the other data center, ~1 min, nobody paged</td><td class="theirs">✗ site is down until a human fixes it</td></tr>
+            <tr><td>Data centers</td><td class="ours">✓ 2 — active-active across two Phoenix availability zones</td><td class="theirs">✗ 1</td></tr>
+            <tr><td>Load balancing</td><td class="ours">✓ Cloudflare Load Balancer — health-checked, active-active round-robin</td><td class="theirs">✗ none — single origin (CDN cache only)</td></tr>
+            <tr><td>If a server goes down</td><td class="ours">✓ the other data center is already serving — it just carries all traffic, automatically, nobody paged</td><td class="theirs">✗ site is down until a human fixes it</td></tr>
             <tr><td>Database tier</td><td class="ours">✓ Oracle Autonomous DB on Exadata — self-tuning, self-patching, dedicated</td><td class="theirs">✗ MySQL sharing the web box with other tenants</td></tr>
             <tr><td>Encryption to the server</td><td class="ours">✓ end-to-end Full (strict) TLS + origin certs + HSTS preload</td><td class="theirs">✗ edge TLS only</td></tr>
             <tr><td>Home-page weight</td><td class="ours">✓ 66 KB</td><td class="theirs">✗ 203 KB (3× heavier)</td></tr>
@@ -330,7 +330,7 @@
             <tbody>
               <tr><td>mhrmarketing.com <span class="c-soft">(the marketing vendor)</span></td><td>160.153.0.197 → <em>host.secureserver.net</em></td><td class="theirs">GoDaddy.com, LLC — Managed WordPress</td></tr>
               <tr><td>wavemaxlaundry.com <span class="c-soft">(corporate platform)</span></td><td>160.153.0.155 → <em>host.secureserver.net</em></td><td class="theirs">GoDaddy.com, LLC — Managed WordPress</td></tr>
-              <tr><td>rundberglaundry.com <span class="c-soft">(your CRHS store)</span></td><td>Cloudflare LB → Oracle Cloud</td><td class="ours">OCI Phoenix + Dallas failover · ADB on Exadata</td></tr>
+              <tr><td>rundberglaundry.com <span class="c-soft">(your CRHS store)</span></td><td>Cloudflare LB → Oracle Cloud</td><td class="ours">OCI Phoenix — 2 availability zones, active-active · ADB on Exadata</td></tr>
             </tbody>
           </table>
           <p class="pb-foot">Captured May 23 2026 with <code>dig</code>, <code>whois</code> and <code>curl</code> on public DNS and public responses — no insider access. The marketing partner that bills a monthly "digital infrastructure" fee runs its own site, and the corporate platform, on entry-level shared hosting.</p>
@@ -338,7 +338,7 @@
 
         <div class="callout good">
           <h3>Why this matters to your store</h3>
-          <p>If your website goes dark on a Saturday, you lose the bookings and the walk-ins that came with it. A single shared-hosting box has no backup — if it hiccups, your site is simply down. My deployment runs in two data centers behind an automatic load balancer: if one fails, traffic shifts to the other in about a minute, with nobody on call. Your customer data lives on Oracle's Autonomous Database on Exadata — the same enterprise platform large banks run — not a MySQL database sharing a box with hundreds of other WordPress sites. That's the difference between <em>"a website"</em> and infrastructure your business can actually depend on — at a fraction of what the basic package charges.</p>
+          <p>If your website goes dark on a Saturday, you lose the bookings and the walk-ins that came with it. A single shared-hosting box has no backup — if it hiccups, your site is simply down. My deployment runs active-active in two independent Phoenix data centers behind a load balancer — both serve your traffic at once, so if one fails the other simply carries all of it, automatically, with nobody on call. Your customer data lives on Oracle's Autonomous Database on Exadata — the same enterprise platform large banks run — not a MySQL database sharing a box with hundreds of other WordPress sites. That's the difference between <em>"a website"</em> and infrastructure your business can actually depend on — at a fraction of what the basic package charges.</p>
         </div>
         <button type="button" class="tab-next" data-to="#what-you-get">That's their stack. Here's what you'd get instead <span class="arr">↓</span></button>
       </div><!-- /panel-infra -->
