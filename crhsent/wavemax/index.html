@@ -6,157 +6,8 @@
 <meta name="robots" content="noindex, nofollow">
 <title>Enterprise Web &amp; SEO for WaveMAX Owners — $500/mo flat | CRHS Enterprises</title>
 <meta name="description" content="Done-for-you local web presence, SEO, and hosting for WaveMAX franchise owners — built by a fellow owner. One flat $500/month rate, all-inclusive, no upsells.">
-<style>
-  :root{
-    --ink:#0f172a; --ink2:#334155; --soft:#64748b; --line:#e2e8f0;
-    --bg:#ffffff; --panel:#f8fafc; --brand:#2563eb; --brand-d:#1e3a8a;
-    --good:#16a34a; --bad:#dc2626; --warn:#c2410c;
-  }
-  *{box-sizing:border-box;margin:0;padding:0}
-  html{scroll-behavior:smooth}
-  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;color:var(--ink);line-height:1.6;background:var(--bg)}
-  .wrap{max-width:1040px;margin:0 auto;padding:0 22px}
-  a{color:var(--brand);text-decoration:none}
-  a:hover{text-decoration:underline}
-  h1,h2,h3{line-height:1.2;letter-spacing:-0.01em}
-  .eyebrow{font-size:13px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--brand)}
-  .btn{display:inline-flex;align-items:center;gap:8px;background:var(--brand);color:#fff;font-weight:700;font-size:16px;padding:14px 26px;border-radius:8px;border:1px solid var(--brand);box-shadow:0 2px 8px rgba(37,99,235,.25);transition:transform .1s,background .15s}
-  .btn:hover{background:var(--brand-d);text-decoration:none;transform:translateY(-1px)}
-  .btn.ghost{background:#fff;color:var(--brand)}
-  section{padding:62px 0;border-top:1px solid var(--line)}
-
-  /* hero */
-  header.hero{background:linear-gradient(160deg,#0b1f43 0%,#16336b 55%,#1e3a8a 100%);color:#fff;padding:64px 0 58px;border:0}
-  header.hero .eyebrow{color:#9ec3ff}
-  header.hero h1{font-size:42px;font-weight:800;margin:12px 0 14px;max-width:18ch}
-  header.hero p.lede{font-size:19px;color:#dbe7ff;max-width:60ch;margin-bottom:10px}
-  header.hero .price{font-size:17px;color:#bcd3ff;margin:18px 0 26px}
-  header.hero .price b{color:#fff;font-size:22px}
-  .hero-actions{display:flex;gap:14px;flex-wrap:wrap}
-  .hero-note{margin-top:18px;font-size:13px;color:#9ec3ff}
-
-  /* stat band */
-  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-top:36px}
-  .stat{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.16);border-radius:10px;padding:16px 18px}
-  .stat .n{font-size:26px;font-weight:800;color:#fff}
-  .stat .l{font-size:12.5px;color:#bcd3ff;margin-top:2px}
-
-  h2.sec{font-size:30px;font-weight:800;margin-bottom:8px}
-  p.sub{font-size:17px;color:var(--ink2);max-width:66ch;margin-bottom:26px}
-
-  .chart-card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px}
-  .chart-card svg{width:100%;height:auto;display:block}
-  .chart-cap{font-size:14px;color:var(--soft);margin-top:12px}
-  .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px}
-  .chip{background:#eef2ff;color:var(--brand-d);border:1px solid #c7d2fe;border-radius:999px;padding:5px 12px;font-size:13px;font-weight:600}
-
-  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
-  .card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:22px}
-  .card h3{font-size:18px;margin-bottom:6px}
-  .card p{font-size:14.5px;color:var(--ink2)}
-  .card .ic{font-size:22px;margin-bottom:10px}
-
-  ul.checks{list-style:none;margin:8px 0}
-  ul.checks li{padding-left:28px;position:relative;margin-bottom:9px;font-size:15px;color:var(--ink2)}
-  ul.checks li:before{content:"✓";position:absolute;left:0;top:0;color:var(--good);font-weight:800}
-
-  table.cmp{width:100%;border-collapse:collapse;margin-top:8px;font-size:14.5px;background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden}
-  table.cmp th,table.cmp td{padding:11px 14px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
-  table.cmp thead th{background:var(--panel);font-size:13px;text-transform:uppercase;letter-spacing:.04em;color:var(--soft)}
-  table.cmp td.ours{color:var(--good);font-weight:600;white-space:nowrap}
-  table.cmp td.theirs{color:var(--bad);font-weight:600}
-  table.cmp tr:last-child td{border-bottom:0}
-  .yes{color:var(--good);font-weight:700}
-  .no{color:var(--bad);font-weight:700}
-  .callout{background:#fff7ed;border:1px solid #fed7aa;border-left:4px solid var(--warn);border-radius:8px;padding:16px 18px;margin-top:22px}
-  .callout h3{color:var(--warn);font-size:16px;margin-bottom:4px}
-  .callout p{font-size:14.5px;color:#7c2d12}
-  .callout.good{background:#f0fdf4;border-color:#bbf7d0;border-left-color:var(--good)}
-  .callout.good h3{color:var(--good)}
-  .callout.good p{color:#14532d}
-  .callout.brand{background:#eff6ff;border-color:#bfdbfe;border-left-color:var(--brand)}
-  .callout.brand h3{color:var(--brand-d)}
-  .callout.brand p{color:#1e3a5f}
-
-  /* ---- tabbed proof control ---- */
-  .tabs{position:relative}
-  .tabradio{position:absolute;width:1px;height:1px;opacity:0;overflow:hidden;clip:rect(0 0 0 0)}
-  .tablist{display:flex;gap:6px;border-bottom:2px solid var(--line);margin-bottom:28px;flex-wrap:wrap}
-  .tab{display:inline-flex;align-items:center;gap:8px;padding:13px 24px;font-weight:700;font-size:16px;color:var(--soft);cursor:pointer;border:1px solid transparent;border-bottom:none;border-radius:12px 12px 0 0;position:relative;top:2px;user-select:none;transition:color .15s,background .15s}
-  .tab:hover{color:var(--brand)}
-  .panel{display:none;animation:fade .28s ease}
-  .tab-next{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;margin-top:26px;padding:16px 22px;font-family:inherit;font-size:16px;font-weight:700;line-height:1.3;text-align:center;color:#fff;background:linear-gradient(160deg,#1e3a8a,#2563eb);border:none;border-radius:12px;cursor:pointer;transition:transform .12s ease,box-shadow .12s ease;box-shadow:0 4px 14px rgba(37,99,235,.25)}
-  .tab-next:hover{transform:translateY(-1px);box-shadow:0 8px 22px rgba(37,99,235,.34)}
-  .tab-next .arr{font-size:20px;line-height:1}
-  @keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
-  #tab-perf:checked ~ .tablist label[for="tab-perf"],
-  #tab-seo:checked ~ .tablist label[for="tab-seo"],
-  #tab-sec:checked ~ .tablist label[for="tab-sec"],
-  #tab-infra:checked ~ .tablist label[for="tab-infra"]{color:var(--brand-d);background:var(--panel);border-color:var(--line);border-bottom-color:var(--panel)}
-  #tab-perf:checked ~ .panel-perf{display:block}
-  #tab-seo:checked ~ .panel-seo{display:block}
-  #tab-sec:checked ~ .panel-sec{display:block}
-  #tab-infra:checked ~ .panel-infra{display:block}
-  #tab-perf:focus-visible ~ .tablist label[for="tab-perf"],
-  #tab-seo:focus-visible ~ .tablist label[for="tab-seo"],
-  #tab-sec:focus-visible ~ .tablist label[for="tab-sec"],
-  #tab-infra:focus-visible ~ .tablist label[for="tab-infra"]{outline:2px solid var(--brand);outline-offset:2px}
-
-  /* ---- performance: stat cards + comparative bars ---- */
-  .perf-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin:4px 0 28px}
-  .perf-stat{background:linear-gradient(160deg,#0b1f43,#1e3a8a);color:#fff;border-radius:12px;padding:18px 18px 16px}
-  .perf-stat .n{font-size:30px;font-weight:800;line-height:1;color:#7ee2a8}
-  .perf-stat .l{font-size:12.5px;color:#bcd3ff;margin-top:7px;line-height:1.35}
-  .perfbars{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:22px 24px;margin-bottom:22px}
-  .perfbars h3{font-size:16px;margin-bottom:4px}
-  .perfbars .ptitle{font-size:13px;color:var(--soft);margin-bottom:16px}
-  .legend{display:flex;gap:20px;flex-wrap:wrap;font-size:13px;color:var(--ink2);margin-bottom:18px}
-  .legend span{display:inline-flex;align-items:center;gap:7px;font-weight:600}
-  .legend i{width:13px;height:13px;border-radius:3px;display:inline-block}
-  .legend i.o{background:linear-gradient(90deg,#16a34a,#22c55e)}
-  .legend i.t{background:linear-gradient(90deg,#dc2626,#ef4444)}
-  .pb-row{margin-bottom:17px}
-  .pb-row:last-child{margin-bottom:0}
-  .pb-metric{font-size:14px;font-weight:700;color:var(--ink);margin-bottom:7px;display:flex;justify-content:space-between;gap:10px}
-  .pb-metric .win{color:var(--good);font-weight:800;font-size:13px;white-space:nowrap}
-  .pb-bar{height:27px;border-radius:6px;display:flex;align-items:center;justify-content:flex-end;padding:0 11px;color:#fff;font-size:12.5px;font-weight:700;white-space:nowrap;min-width:58px;margin-bottom:5px;box-shadow:inset 0 -2px 0 rgba(0,0,0,.13);transition:width .6s cubic-bezier(.2,.7,.3,1)}
-  .pb-bar.ours{background:linear-gradient(90deg,#16a34a,#22c55e)}
-  .pb-bar.theirs{background:linear-gradient(90deg,#dc2626,#ef4444)}
-  .pb-foot{font-size:12.5px;color:var(--soft);margin-top:15px}
-  @media (max-width:760px){
-    .perf-stats{grid-template-columns:repeat(2,1fr)}
-    .tab{padding:11px 16px;font-size:15px}
-  }
-
-  .price-card{background:linear-gradient(160deg,#0b1f43,#1e3a8a);color:#fff;border-radius:16px;padding:34px;text-align:center;max-width:560px;margin:0 auto}
-  .price-card .amt{font-size:52px;font-weight:800;line-height:1}
-  .price-card .amt span{font-size:20px;font-weight:600;color:#bcd3ff}
-  .price-card ul{list-style:none;margin:22px 0;text-align:left;display:inline-block}
-  .price-card ul li{padding-left:26px;position:relative;margin-bottom:8px;color:#e7eefc;font-size:15px}
-  .price-card ul li:before{content:"✓";position:absolute;left:0;color:#7ee2a8;font-weight:800}
-
-  .founder{display:grid;grid-template-columns:1fr;gap:14px}
-  .founder p{font-size:15.5px;color:var(--ink2);margin-bottom:6px}
-  .founder .name{font-weight:800;font-size:20px;color:var(--ink)}
-  .founder .role{color:var(--soft);font-size:14px;margin-bottom:10px}
-
-  .final{background:var(--panel);text-align:center}
-  .final h2{font-size:30px;font-weight:800;margin-bottom:8px}
-  .final p{font-size:17px;color:var(--ink2);max-width:60ch;margin:0 auto 24px}
-
-  footer{background:#0b1f43;color:#9ec3ff;padding:30px 0;border:0;font-size:13px}
-  footer .wrap{display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center}
-  footer a{color:#dbe7ff}
-  .disc{font-size:12px;color:#7f9bd0;margin-top:8px;max-width:80ch}
-
-  @media (max-width:760px){
-    header.hero h1{font-size:32px}
-    .stats{grid-template-columns:repeat(2,1fr)}
-    .grid3{grid-template-columns:1fr}
-    table.cmp{font-size:13px}
-    section{padding:46px 0}
-  }
-</style>
+<meta name="csp-nonce" content="{{CSP_NONCE}}">
+<link rel="stylesheet" href="/wavemax/styles.css">
 </head>
 <body>
 
@@ -211,18 +62,18 @@
   </div>
 </section>
 
-<section id="verify" style="background:var(--panel)">
+<section id="verify" class="bg-panel">
   <div class="wrap">
     <div class="eyebrow">Proof you can verify yourself</div>
     <h2 class="sec">Don't take my word for it. Run the checks yourself.</h2>
     <p class="sub">Everything below is publicly verifiable — speed, SEO, and security alike. Run any page through Google PageSpeed Insights or a free scanner like <a href="https://securityheaders.com" target="_blank" rel="noopener">securityheaders.com</a> and compare for yourself. Here's how my deployment stacks up against the current WaveMAX platform — measured the same way, on public responses, no insider access required.</p>
 
-    <div class="callout brand" style="margin-bottom:22px">
+    <div class="callout brand mb-22">
       <h3>"Fast, secure, found on Google" — the basic package's own promise</h3>
       <p>The marketing platform WaveMAX operators are placed on bills a required <strong>$300/mo "Website Foundation"</strong> and advertises it as <em>"your digital infrastructure — fast, secure, found on Google, and always current"</em> — itemized as SEO, Security &amp; Malware Protection, Performance Optimization, Multi-Language Translation, and ongoing maintenance. I checked every one of those claims that can be verified on the live pages. Here's the scorecard; the tabs below are the receipts.</p>
     </div>
 
-    <table class="cmp" style="margin-bottom:14px">
+    <table class="cmp mb-14">
       <thead><tr><th>Promised in the $300/mo basic package</th><th>Actually delivered on the live pages?</th></tr></thead>
       <tbody>
         <tr><td>🔎 "Found on Google" — <strong>SEO</strong></td><td class="theirs">✗ breadcrumb-only markup; no local-business schema on any franchise page sampled</td></tr>
@@ -233,7 +84,7 @@
         <tr><td>🖥️ <strong>Website hosting</strong></td><td class="ours">✓ delivered — the one piece that works</td></tr>
       </tbody>
     </table>
-    <div style="background:linear-gradient(160deg,#0b1f43,#1e3a8a);color:#fff;border-radius:14px;padding:24px 30px;margin:0 0 28px;text-align:center;font-size:16px;line-height:1.65"><strong style="color:#fff">Of everything the basic package promises, the one piece that actually works is the hosting.</strong> The features that grow and protect a local store — being found, being fast, being secure — aren't there. A properly generated, modern AI-built site delivers all of them by default. The three tabs below are the receipts.</div>
+    <div class="takeaway"><strong class="c-white">Of everything the basic package promises, the one piece that actually works is the hosting.</strong> The features that grow and protect a local store — being found, being fast, being secure — aren't there. A properly generated, modern AI-built site delivers all of them by default. The three tabs below are the receipts.</div>
 
     <div class="tabs" id="prooftabs">
       <input type="radio" name="prooftab" id="tab-perf" class="tabradio" checked aria-label="Show performance">
@@ -249,7 +100,7 @@
 
       <!-- ===================== PERFORMANCE PANEL ===================== -->
       <div class="panel panel-perf" role="tabpanel" aria-label="Performance">
-        <p class="sub" style="margin-top:2px">Same Austin page, same Cloudflare network — these are the numbers a real browser sees, on our <strong>current Oracle Cloud (OCI)</strong> deployment. Run it through <a href="https://pagespeed.web.dev/" target="_blank" rel="noopener">Google PageSpeed Insights</a> yourself.</p>
+        <p class="sub mt-2">Same Austin page, same Cloudflare network — these are the numbers a real browser sees, on our <strong>current Oracle Cloud (OCI)</strong> deployment. Run it through <a href="https://pagespeed.web.dev/" target="_blank" rel="noopener">Google PageSpeed Insights</a> yourself.</p>
 
         <div class="perf-stats">
           <div class="perf-stat"><div class="n">3.5×</div><div class="l">faster to first paint</div></div>
@@ -265,23 +116,23 @@
 
           <div class="pb-row">
             <div class="pb-metric"><span>First content on screen</span><span class="win">3.5× faster</span></div>
-            <div class="pb-bar ours" style="width:28.6%">0.39 s</div>
-            <div class="pb-bar theirs" style="width:100%">1.36 s</div>
+            <div class="pb-bar ours w-286">0.39 s</div>
+            <div class="pb-bar theirs w-100">1.36 s</div>
           </div>
           <div class="pb-row">
             <div class="pb-metric"><span>Fully loaded</span><span class="win">2.9× faster</span></div>
-            <div class="pb-bar ours" style="width:34%">0.85 s</div>
-            <div class="pb-bar theirs" style="width:100%">2.50 s</div>
+            <div class="pb-bar ours w-34">0.85 s</div>
+            <div class="pb-bar theirs w-100">2.50 s</div>
           </div>
           <div class="pb-row">
             <div class="pb-metric"><span>Web page size (HTML)</span><span class="win">6.5× smaller</span></div>
-            <div class="pb-bar ours" style="width:15.4%">66 KB</div>
-            <div class="pb-bar theirs" style="width:100%">429 KB</div>
+            <div class="pb-bar ours w-154">66 KB</div>
+            <div class="pb-bar theirs w-100">429 KB</div>
           </div>
           <div class="pb-row">
             <div class="pb-metric"><span>Total downloaded</span><span class="win">2.6× lighter</span></div>
-            <div class="pb-bar ours" style="width:39%">1.76 MB</div>
-            <div class="pb-bar theirs" style="width:100%">4.51 MB</div>
+            <div class="pb-bar ours w-39">1.76 MB</div>
+            <div class="pb-bar theirs w-100">4.51 MB</div>
           </div>
           <p class="pb-foot">Measured in Chrome (desktop) and with curl, May 2026, on the live Austin pages — the CRHS site served from its <strong>current Oracle Cloud (OCI)</strong> deployment (server response re-confirmed at ~0.2&nbsp;s after the migration). Page weight is host-independent. "Web page size" is the raw, uncompressed HTML document — the part Google fetches first.</p>
         </div>
@@ -301,29 +152,29 @@
         </table>
         <p class="chart-cap">Passive, reproducible measurement of public pages — Google's PageSpeed Insights and any browser's developer tools show the same. Captured May 2026; re-run it yourself any time.</p>
 
-        <div class="perfbars" style="margin-top:22px">
+        <div class="perfbars mt-22">
           <h3>Page build — the number Google actually ranks on</h3>
           <div class="ptitle">Shorter is better. Time to build the page at the <strong>origin server</strong> with Cloudflare's cache bypassed (<code>cf-cache: MISS</code>) — the Austin page, 5 samples each, May 2026. A <em>cached</em> page is fast for anyone; this is what happens on a cache miss, which is exactly what real visitors and Googlebot hit.</div>
           <div class="legend"><span><i class="o"></i>Your CRHS site</span><span><i class="t"></i>Corporate WaveMAX platform</span></div>
           <div class="pb-row">
             <div class="pb-metric"><span>Your CRHS site — live origin, <strong>every</strong> request</span><span class="win">~3× faster build</span></div>
-            <div class="pb-bar ours" style="width:29%">~0.2 s</div>
+            <div class="pb-bar ours w-29">~0.2 s</div>
           </div>
           <div class="pb-row">
             <div class="pb-metric"><span>Corporate platform — GoDaddy WordPress build</span></div>
-            <div class="pb-bar theirs" style="width:100%">~0.7 s</div>
+            <div class="pb-bar theirs w-100">~0.7 s</div>
           </div>
           <p class="pb-foot"><strong>This is the number Google ranks on — not the cached one.</strong> Google's page-experience signals (Core Web Vitals, led by LCP) are measured from <em>real users</em>, including everyone who lands on a cache miss, and that experience begins with the server's response time. Google also crawls slow servers less often, so fewer of your pages get seen. A platform that's only fast when cached is still judged on its ~0.7&nbsp;s origin build; ours answers live in ~0.2&nbsp;s on every request. Check it yourself: <code>curl -o /dev/null -w "%{time_starttransfer}\n" "https://&lt;site&gt;/austin-tx/?cb=$RANDOM"</code></p>
         </div>
 
-        <div class="perfbars" style="margin-top:22px">
+        <div class="perfbars mt-22">
           <h3>Same story across the network</h3>
           <div class="ptitle">Total page weight — every WaveMAX platform page tested is 2–4½× heavier than your CRHS site.</div>
           <div class="legend"><span><i class="o"></i>Your CRHS site</span><span><i class="t"></i>Current WaveMAX platform</span></div>
-          <div class="pb-row"><div class="pb-metric"><span>Your CRHS site — Austin</span></div><div class="pb-bar ours" style="width:39%">1.76 MB</div></div>
-          <div class="pb-row"><div class="pb-metric"><span>WaveMAX platform — Austin</span></div><div class="pb-bar theirs" style="width:100%">4.51 MB</div></div>
-          <div class="pb-row"><div class="pb-metric"><span>WaveMAX platform — Charlotte</span></div><div class="pb-bar theirs" style="width:75%">3.40 MB</div></div>
-          <div class="pb-row"><div class="pb-metric"><span>WaveMAX platform — Franchise page</span></div><div class="pb-bar theirs" style="width:49%">2.19 MB</div></div>
+          <div class="pb-row"><div class="pb-metric"><span>Your CRHS site — Austin</span></div><div class="pb-bar ours w-39">1.76 MB</div></div>
+          <div class="pb-row"><div class="pb-metric"><span>WaveMAX platform — Austin</span></div><div class="pb-bar theirs w-100">4.51 MB</div></div>
+          <div class="pb-row"><div class="pb-metric"><span>WaveMAX platform — Charlotte</span></div><div class="pb-bar theirs w-75">3.40 MB</div></div>
+          <div class="pb-row"><div class="pb-metric"><span>WaveMAX platform — Franchise page</span></div><div class="pb-bar theirs w-49">2.19 MB</div></div>
           <p class="pb-foot">The franchisor's franchise-recruitment page alone loads 28 separate scripts and 23 stylesheets. Heaviness is built into the platform, not specific to any one store.</p>
         </div>
 
@@ -354,15 +205,15 @@
           <div class="legend"><span><i class="o"></i>Your CRHS site</span><span><i class="t"></i>WaveMAX platform pages</span></div>
           <div class="pb-row">
             <div class="pb-metric"><span>Your CRHS site</span><span class="win">full local-business set</span></div>
-            <div class="pb-bar ours" style="width:100%">23 types</div>
+            <div class="pb-bar ours w-100">23 types</div>
           </div>
           <div class="pb-row">
             <div class="pb-metric"><span>WaveMAX — Austin (the tuned one)</span></div>
-            <div class="pb-bar theirs" style="width:30%">7 types</div>
+            <div class="pb-bar theirs w-30">7 types</div>
           </div>
           <div class="pb-row">
             <div class="pb-metric"><span>WaveMAX — typical franchise page</span></div>
-            <div class="pb-bar theirs" style="width:9%">2 types</div>
+            <div class="pb-bar theirs w-9">2 types</div>
           </div>
           <p class="pb-foot">Your CRHS page ships the full local-business schema — DryCleaningOrLaundry (LocalBusiness), geo-coordinates, opening hours, services, offers, parking &amp; amenities, organization and reviews. Across the franchise network the location pages carry only breadcrumb markup; the Austin page is the lone outlier (7 types), and only because earlier tuning survived there.</p>
         </div>
@@ -389,7 +240,7 @@
 
       <!-- ===================== SECURITY PANEL ===================== -->
       <div class="panel panel-sec" role="tabpanel" aria-label="Security and compliance">
-        <p class="sub" style="margin-top:2px">Point a free scanner like <a href="https://securityheaders.com" target="_blank" rel="noopener">securityheaders.com</a> at any site and compare. Here's how my deployment scores against the same industry-standard controls — measured on public responses, no insider access required.</p>
+        <p class="sub mt-2">Point a free scanner like <a href="https://securityheaders.com" target="_blank" rel="noopener">securityheaders.com</a> at any site and compare. Here's how my deployment scores against the same industry-standard controls — measured on public responses, no insider access required.</p>
 
     <table class="cmp">
       <thead><tr><th>Industry-standard control</th><th>Your CRHS deployment</th><th>Current WaveMAX platform</th></tr></thead>
@@ -449,38 +300,38 @@
         </table>
         <p class="chart-cap">Both sites sit behind Cloudflare's edge — but only the CRHS deployment adds a true load balancer in front of two live data centers and an enterprise database tier. The platform's Cloudflare is a cache in front of one shared box.</p>
 
-        <div class="perfbars" style="margin-top:22px">
+        <div class="perfbars mt-22">
           <h3>Server response time — consistency is the real tell</h3>
           <div class="ptitle">Shorter is better — but the story here is <strong>consistency</strong>. Time to first byte, measured May 23 2026. A page served from Cloudflare's <em>cache</em> is fast for anyone; the test that matters is the <strong>origin server</strong>, when the page can't be cached — a booking, a form, a customer's account.</div>
           <div class="legend"><span><i class="o"></i>Your CRHS site</span><span><i class="t"></i>MHR / GoDaddy origin</span></div>
           <div class="pb-row">
             <div class="pb-metric"><span>Your CRHS site — every page rendered <strong>live</strong>, never cached</span><span class="win">steady ~0.2 s</span></div>
-            <div class="pb-bar ours" style="width:18%">~0.2 s</div>
+            <div class="pb-bar ours w-18">~0.2 s</div>
           </div>
           <div class="pb-row">
             <div class="pb-metric"><span>MHR — page from edge <em>cache</em></span></div>
-            <div class="pb-bar theirs" style="width:18%">~0.2 s</div>
+            <div class="pb-bar theirs w-18">~0.2 s</div>
           </div>
           <div class="pb-row">
             <div class="pb-metric"><span>MHR — GoDaddy origin (cache bypassed), <strong>best</strong> we saw</span></div>
-            <div class="pb-bar theirs" style="width:14%">0.15 s</div>
+            <div class="pb-bar theirs w-14">0.15 s</div>
           </div>
           <div class="pb-row">
-            <div class="pb-metric"><span>MHR — GoDaddy origin (cache bypassed), <strong>worst</strong> we saw</span><span class="win" style="background:#fde2e2;color:#b42318">5–6× slower</span></div>
-            <div class="pb-bar theirs" style="width:100%">1.15 s</div>
+            <div class="pb-metric"><span>MHR — GoDaddy origin (cache bypassed), <strong>worst</strong> we saw</span><span class="win win-bad">5–6× slower</span></div>
+            <div class="pb-bar theirs w-100">1.15 s</div>
           </div>
           <p class="pb-foot">Your CRHS pages are <strong>never cached — every request is rendered fresh</strong> and hold a steady ~0.2 s. MHR's pages are fast only when Cloudflare serves them from cache; on a cache miss the GoDaddy origin swung from 0.15 s to over 1.1 s <em>in the same session</em> — the unpredictability of multi-tenant hosting. Dedicated compute and the Exadata database tier are what keep your origin steady.</p>
         </div>
 
-        <div class="perfbars" style="margin-top:22px">
+        <div class="perfbars mt-22">
           <h3>What a public lookup shows — verify it yourself</h3>
           <div class="ptitle">Run <code>dig +short &lt;domain&gt;</code> then <code>whois</code> the IP. Here's what comes back, today.</div>
-          <table class="cmp" style="margin-top:10px">
+          <table class="cmp mt-10">
             <thead><tr><th>Domain</th><th>Resolves to</th><th>Hosted on</th></tr></thead>
             <tbody>
-              <tr><td>mhrmarketing.com <span style="color:var(--soft)">(the marketing vendor)</span></td><td>160.153.0.197 → <em>host.secureserver.net</em></td><td class="theirs">GoDaddy.com, LLC — Managed WordPress</td></tr>
-              <tr><td>wavemaxlaundry.com <span style="color:var(--soft)">(corporate platform)</span></td><td>160.153.0.155 → <em>host.secureserver.net</em></td><td class="theirs">GoDaddy.com, LLC — Managed WordPress</td></tr>
-              <tr><td>rundberglaundry.com <span style="color:var(--soft)">(your CRHS store)</span></td><td>Cloudflare LB → Oracle Cloud</td><td class="ours">OCI Phoenix + Dallas failover · ADB on Exadata</td></tr>
+              <tr><td>mhrmarketing.com <span class="c-soft">(the marketing vendor)</span></td><td>160.153.0.197 → <em>host.secureserver.net</em></td><td class="theirs">GoDaddy.com, LLC — Managed WordPress</td></tr>
+              <tr><td>wavemaxlaundry.com <span class="c-soft">(corporate platform)</span></td><td>160.153.0.155 → <em>host.secureserver.net</em></td><td class="theirs">GoDaddy.com, LLC — Managed WordPress</td></tr>
+              <tr><td>rundberglaundry.com <span class="c-soft">(your CRHS store)</span></td><td>Cloudflare LB → Oracle Cloud</td><td class="ours">OCI Phoenix + Dallas failover · ADB on Exadata</td></tr>
             </tbody>
           </table>
           <p class="pb-foot">Captured May 23 2026 with <code>dig</code>, <code>whois</code> and <code>curl</code> on public DNS and public responses — no insider access. The marketing partner that bills a monthly "digital infrastructure" fee runs its own site, and the corporate platform, on entry-level shared hosting.</p>
@@ -496,7 +347,7 @@
   </div>
 </section>
 
-<section id="what-you-get" style="scroll-margin-top:18px">
+<section id="what-you-get" class="scroll-anchor">
   <div class="wrap">
     <div class="eyebrow">What you get</div>
     <h2 class="sec">A complete local web presence — done for you</h2>
@@ -512,8 +363,8 @@
   </div>
 </section>
 
-<section style="background:var(--panel)">
-  <div class="wrap" style="display:grid;grid-template-columns:1fr;gap:26px">
+<section class="bg-panel">
+  <div class="wrap price-grid">
     <div>
       <div class="eyebrow">Honest pricing</div>
       <h2 class="sec">$500/month. Everything. How is that even possible?</h2>
@@ -564,18 +415,6 @@
   </div>
 </footer>
 
-<script>
-(function(){
-  function go(el){ if(el){ el.scrollIntoView({behavior:'smooth', block:'start'}); } }
-  var tabs = document.getElementById('prooftabs');
-  document.querySelectorAll('.tab-next').forEach(function(b){
-    b.addEventListener('click', function(){
-      var tab = b.getAttribute('data-tab'), to = b.getAttribute('data-to');
-      if (tab){ var r = document.getElementById(tab); if (r){ r.checked = true; } go(tabs); }
-      else if (to){ go(document.querySelector(to)); }
-    });
-  });
-})();
-</script>
+<script src="/wavemax/app.js"></script>
 <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script></body>
 </html>
