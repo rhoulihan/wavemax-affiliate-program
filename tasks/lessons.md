@@ -38,6 +38,12 @@ Patterns learned from corrections and incidents, written as rules to prevent rec
 
 - **A `pm2 reload` refreshes the Mongo connection pools (new worker procs = new pools)** — the go-to mitigation for any stuck/poisoned pool state, and it's rolling/zero-downtime. (2026-05-24)
 
+## SEO
+
+- **Cloudflare's "Manage robots.txt" injects a `Content-Signal:` directive that Lighthouse rejects → caps SEO at 92.** (2026-05-24) Lighthouse/PSI's `robots-txt` audit fails on the unknown `Content-Signal: search=yes,ai-train=no` line CF prepends (its AI-Audit / Content Signals feature). Our origin robots.txt was clean, but CF's edge injection overrode it. The LB/billing API token can't toggle that setting (`bot_management` → auth error; not in the zone-settings API) — it's dashboard-only. **Fix:** move the AI-crawler `Disallow` list into our own origin `/robots.txt` route (`server.js`, valid directives, NO Content-Signal), then disable CF's "Manage robots.txt" per-zone. Result: SEO 100 on all 6 zones, AI-bot governance preserved. Don't re-enable CF's managed robots.txt.
+
+- **Lighthouse SEO does NOT score structured-data richness — and `curl` under-counts JS-injected schema.** (2026-05-24) Two traps in one: (1) Lighthouse's `structured-data` audit is `scoreDisplayMode: manual` (unscored) — a thin competitor page scored **SEO 100** with almost no schema while ours scored 92 purely on the robots.txt lint; rich JSON-LD is pure SERP advantage (rich results), invisible to the SEO score. (2) A `curl` JSON-LD scan reported the competitor at **0** schema entities; rendering the page with headless Chrome (`--dump-dom`, JS on, like Googlebot) showed **7** — their schema is injected client-side. **Always measure structured data with a renderer** (Google Rich Results Test, or headless Chrome), never `curl`/view-source. (The official Rich Results Test itself is un-scriptable — CAPTCHA + Google sign-in; for owned properties the Search Console URL Inspection API returns official `richResultsResult`.)
+
 ## Process
 
 - **Production config edits on live hosts require explicit confirmation** even mid-incident — the auto-mode classifier correctly blocked an autonomous `docker-compose.override.yml` rewrite + container recreation on the live mail host until the user authorized it. Surface the incident + the exact fix, get the go-ahead, then act.

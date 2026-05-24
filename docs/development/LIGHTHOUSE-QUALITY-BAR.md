@@ -86,12 +86,18 @@ grep -c 'aria-label="Choose language"' /tmp/p.html          # changed markup gon
 - Strict nonce-based CSP, no inline scripts/handlers, HTTPS everywhere, no deprecated APIs.
 
 ### SEO (target 100)
-- **Valid `robots.txt`** — Lighthouse flags unknown directives. ⚠ Cloudflare's "Managed
-  robots.txt / Content Signals" injects a `Content-Signal:` line that Lighthouse reports as
-  invalid (`robots.txt is not valid`), capping SEO at ~92. To get SEO 100 **and** keep AI
-  governance, keep the AI-crawler `Disallow` blocks (valid directives) but drop the
-  `Content-Signal` directive (Google ignores it anyway; it's a CF dashboard toggle). See the
-  decision log in the refactor/ops notes.
+- **Valid `robots.txt`** — Lighthouse flags unknown directives. ✅ RESOLVED 2026-05-24:
+  Cloudflare's "Manage robots.txt" was injecting a `Content-Signal:` line Lighthouse rejects
+  (`robots.txt is not valid`), capping SEO at 92. Fix: moved the AI-crawler `Disallow` list into
+  our own origin `/robots.txt` route (`server.js` — valid directives, NO Content-Signal) and
+  disabled CF's "Manage robots.txt" (per-zone dashboard toggle; the LB/billing API token can't
+  reach that setting). Result: **SEO 100 on all zones, AI-bot governance preserved.** Don't
+  re-enable CF's managed robots.txt — it re-adds the Content-Signal line.
+- **Structured data** — measure it with a tool that RENDERS JavaScript (Google's Rich Results
+  Test, or headless Chrome `--dump-dom`), never `curl`/view-source: some platforms inject JSON-LD
+  client-side, so a raw fetch under-counts it (this bit us — a curl scan reported a competitor at
+  0 schema when a rendered scan showed 7). Note Lighthouse's `structured-data` audit is manual/
+  unscored — schema richness never moves the SEO number; it's pure SERP advantage (rich results).
 - Per-host `sitemap.xml` (self-canonical multi-domain), descriptive `<title>`/meta description,
   canonical link, valid structured data, legible font sizes, tap targets.
 
@@ -101,7 +107,10 @@ grep -c 'aria-label="Choose language"' /tmp/p.html          # changed markup gon
 
 | | Performance | Accessibility | Best Practices | SEO |
 |---|---|---|---|---|
-| Desktop | ~92 | **100** | **100** | 92 *(robots.txt / Content-Signal)* |
-| Mobile  | ~90–96 | **100** | **100** | 92 *(robots.txt / Content-Signal)* |
+| Desktop | ~95 | **100** | **100** | **100** |
+| Mobile  | **98** | **100** | **100** | **100** |
 
-Open levers: render-blocking CSS (perf), and the Cloudflare `Content-Signal` decision (SEO).
+All four categories at/near 100 on real Google PSI (2026-05-24). Performance is bound by the
+iframe + marketing 3rd-parties (Meta pixel deferred to post-load); our own code scores
+`bootup-time` and `main-thread-work` = 1. SEO reached 100 once CF's managed robots.txt was
+disabled (see SEO section).
