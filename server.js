@@ -762,23 +762,6 @@ app.get('/dev/austin-host-mock.html', (req, res, next) => {
   res.redirect(301, `/austin-tx/${tail}${queryString ? '?' + queryString : ''}`);
 });
 
-// Performance: versioned static assets under /assets are immutable. Every
-// asset URL is cache-busted with a ?v= query string, so a content change ships
-// a brand-new URL — the bytes at any given URL never change. Serving them with
-// `Cache-Control: public, max-age=31536000, immutable` lets Cloudflare (and the
-// browser) hold them at the edge for a year with no origin revalidation
-// round-trip on each page load. /assets contains only css/js/images/fonts/
-// vendor — no HTML — so immutable is safe here. HTML is served by route
-// handlers (franchiseController, embed routes) with their own short-lived
-// Cache-Control and is unaffected by this mount.
-app.use('/assets', express.static(path.join(__dirname, 'public', 'assets'), {
-  immutable: true,
-  maxAge: '1y',
-  setHeaders: (res) => {
-    res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
-  }
-}));
-
 // Serve static files in all environments
 app.use(express.static(path.join(__dirname, 'public')));
 

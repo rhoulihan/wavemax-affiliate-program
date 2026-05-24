@@ -18,7 +18,7 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="/assets/css/wavemax-theme.css?v=20260504">
   <link rel="stylesheet" href="/assets/css/wavemax-components.css?v=20260520i">
@@ -141,13 +141,9 @@
                every franchise gets its own pinned map without per-page
                authoring. Title attribute is bound to brand.name + address
                so screen readers announce the right store. -->
-          <!-- Lazy-loaded by franchise-map-lazy.js — embed URL resolved from
-               LOCATION_DATA.contact.mapsEmbedUrl and attached to src only when
-               the map nears the viewport, keeping Google Maps requests off the
-               first-paint path. (Was data-bind src — eagerly fetched.) -->
           <iframe
             title="Map to this WaveMAX location"
-            data-map-src-bind="contact.mapsEmbedUrl"
+            data-bind="contact.mapsEmbedUrl" data-bind-attr="src"
             src=""
             loading="lazy"
             referrerpolicy="no-referrer-when-downgrade"
@@ -308,11 +304,8 @@
 
   <script src="/assets/js/wm-image-config.js?v=20260506b"></script>
   <script src="/assets/js/iframe-bridge-v2.js?v=20260520c"></script>
-  <script src="/assets/js/franchise-page-helpers.js?v=20260524"></script>
+  <script src="/assets/js/franchise-page-helpers.js?v=20260508c"></script>
   <script src="/assets/js/austin-contact-init.js?v=20260508a"></script>
-  <!-- Lazy-load the map embed (IntersectionObserver facade) — keeps Google
-       Maps requests off the first-paint path. CSP-clean. -->
-  <script src="/assets/js/franchise-map-lazy.js?v=20260524"></script>
 
   <!-- ════════════════════════════════════════════════════════════════════
        Hibu Dynamic Phone Insertion (iframe scope) — same pattern as the

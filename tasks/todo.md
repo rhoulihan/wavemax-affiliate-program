@@ -100,16 +100,3 @@ See [`docs/refactor/REFACTORING_PLAN.md`](../docs/refactor/REFACTORING_PLAN.md) 
 - [ ] Add `npm outdated` to monthly maintenance checklist; review any package that's >12 months behind its latest semver-compatible release.
 
 **Reference:** the post-mortem of this maintenance pass (24 vulns → 0 in a single day) is in this todo's git history (commits `8956464` compression, `4fb2b52` nodemailer, `cd95298` imapflow, `bc56cf6` rate-limit-mongo, prior kernel reboot also same date). The bumps above are the items that were too high-risk to include in that same-day sweep.
-
----
-
-# Franchise page-load performance optimization (2026-05-24)
-
-Repo-only. No deploy/commit/push. Strict TDD, CSP-clean.
-
-- [x] Fix 1 — same-origin browser images (relativizeAssetUrl helper; hero+rotator relative; og/JSON-LD absolute)
-- [x] Fix 2 — immutable Cache-Control on /assets (dedicated express.static mount)
-- [x] Fix 3 — lazy-load Google Maps embed (franchise-map-lazy.js IntersectionObserver facade)
-- [x] Fix 4 — localized+optimized 3 Wikimedia landmarks → austin-tx/landmarks/*.webp
-- [x] Fix 5 — fonts consolidated to one canonical URL; wm-image-config.js ?v= skew fixed
-- [x] New perf test suites pass (25/25). NOTE: mongodb-memory-server fails to start in this WSL sandbox, which fails DB-backed suites (cspHelper, emailServiceHelpers, orderControllerUncovered, paymentRoutes) on the clean HEAD baseline too — zero failed assertions, purely an env flake; lead should run `npm test` in CI / a real Mongo env.
