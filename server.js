@@ -1026,6 +1026,23 @@ app.get('/robots.txt', (req, res) => {
   res.type('text/plain');
   res.setHeader('Cache-Control', 'public, max-age=3600');
   res.send(
+    // AI / LLM crawlers — disallowed (training + scraping). This mirrors the
+    // block list Cloudflare's "Manage robots.txt" used to inject, kept here
+    // in-repo and under our control. Crucially this carries NO `Content-Signal:`
+    // directive — that line (a Cloudflare Content Signals addition) is an
+    // unknown directive Lighthouse flags as "robots.txt is not valid", capping
+    // SEO at 92. Standard `User-agent`/`Disallow` directives are valid, so
+    // governance is preserved while SEO scores 100. (Disable CF's "Manage
+    // robots.txt" so this origin file is served, not CF's injected one.)
+    `User-agent: Amazonbot\nDisallow: /\n\n` +
+    `User-agent: Applebot-Extended\nDisallow: /\n\n` +
+    `User-agent: Bytespider\nDisallow: /\n\n` +
+    `User-agent: CCBot\nDisallow: /\n\n` +
+    `User-agent: ClaudeBot\nDisallow: /\n\n` +
+    `User-agent: CloudflareBrowserRenderingCrawler\nDisallow: /\n\n` +
+    `User-agent: Google-Extended\nDisallow: /\n\n` +
+    `User-agent: GPTBot\nDisallow: /\n\n` +
+    `User-agent: meta-externalagent\nDisallow: /\n\n` +
     // NOTE: do NOT Disallow /embed-app-v2.html — the franchise host pages render
     // their real content inside an iframe pointed at that route. Blocking it left
     // Googlebot able to crawl only the thin host shell, never the content a
