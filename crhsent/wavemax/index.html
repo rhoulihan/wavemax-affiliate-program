@@ -420,20 +420,20 @@
       <div class="panel panel-infra" role="tabpanel" aria-label="Infrastructure and reliability">
         <div class="callout brand">
           <h3>Where the marketing vendor hosts — and where I host your store</h3>
-          <p>A simple public lookup tells you what a website is built on. I ran one on the marketing partner's own site and on the corporate WaveMAX platform, then on my deployment. The vendor selling "enterprise digital infrastructure" runs its own marketing site — and the corporate platform — on <strong>GoDaddy shared WordPress hosting</strong>: one box, one data center, no failover. Your CRHS store runs on <strong>Oracle Cloud</strong>, load-balanced across <strong>two data centers</strong>, with the data on <strong>Oracle's Autonomous Database on Exadata</strong> — the enterprise platform large banks run. Every line below is verifiable with <code>dig</code> and <code>whois</code> from your own laptop.</p>
+          <p>A simple public lookup tells you what a website is built on. I ran one on the marketing partner's own site and on the corporate WaveMAX platform, then on my deployment. The vendor selling "enterprise digital infrastructure" runs its own marketing site — and the corporate platform — on <strong>GoDaddy Managed WordPress hosting</strong>: one box, one data center, no failover. Your CRHS store runs on <strong>Oracle Cloud</strong>, load-balanced across <strong>two data centers</strong>, with the data on <strong>Oracle's Autonomous Database on Exadata</strong> — the enterprise platform large banks run. Every line below is verifiable with <code>dig</code> and <code>whois</code> from your own laptop.</p>
         </div>
 
         <div class="perf-stats">
           <div class="perf-stat"><div class="n">2</div><div class="l">data centers with automatic failover (Phoenix + Dallas)</div></div>
           <div class="perf-stat"><div class="n">0</div><div class="l">single points of failure in your stack</div></div>
           <div class="perf-stat"><div class="n">Exadata</div><div class="l">the database tier — the platform Fortune-500 banks run on</div></div>
-          <div class="perf-stat"><div class="n">GoDaddy</div><div class="l">where the marketing vendor hosts its own site (shared WordPress)</div></div>
+          <div class="perf-stat"><div class="n">GoDaddy</div><div class="l">where the marketing vendor hosts its own site (Managed WordPress)</div></div>
         </div>
 
         <table class="cmp">
           <thead><tr><th>Infrastructure</th><th>Your CRHS site</th><th>MHR &amp; the WaveMAX platform</th></tr></thead>
           <tbody>
-            <tr><td>Where it runs</td><td class="ours">✓ Oracle Cloud (OCI) — dedicated compute</td><td class="theirs">✗ GoDaddy shared WordPress (secureserver.net)</td></tr>
+            <tr><td>Where it runs</td><td class="ours">✓ Oracle Cloud (OCI) — dedicated compute</td><td class="theirs">✗ GoDaddy Managed WordPress (secureserver.net)</td></tr>
             <tr><td>Data centers</td><td class="ours">✓ 2 — Phoenix primary + Dallas failover</td><td class="theirs">✗ 1</td></tr>
             <tr><td>Load balancing</td><td class="ours">✓ Cloudflare Load Balancer — health-checked, session-pinned</td><td class="theirs">✗ none — single origin (CDN cache only)</td></tr>
             <tr><td>If a server goes down</td><td class="ours">✓ traffic auto-shifts to the other data center, ~1 min, nobody paged</td><td class="theirs">✗ site is down until a human fixes it</td></tr>
@@ -445,22 +445,26 @@
         <p class="chart-cap">Both sites sit behind Cloudflare's edge — but only the CRHS deployment adds a true load balancer in front of two live data centers and an enterprise database tier. The platform's Cloudflare is a cache in front of one shared box.</p>
 
         <div class="perfbars" style="margin-top:22px">
-          <h3>Server response time — where the infrastructure actually shows</h3>
-          <div class="ptitle">Shorter is better. Time to first byte, measured the same hour (May 23 2026). A <em>cached</em> page is easy for anyone to serve fast — the real test is how quickly the server answers when the page <strong>can't</strong> be cached: a booking, a form, a customer's account.</div>
-          <div class="legend"><span><i class="o"></i>Your CRHS site</span><span><i class="t"></i>MHR / GoDaddy WordPress</span></div>
+          <h3>Server response time — consistency is the real tell</h3>
+          <div class="ptitle">Shorter is better — but the story here is <strong>consistency</strong>. Time to first byte, measured May 23 2026. A page served from Cloudflare's <em>cache</em> is fast for anyone; the test that matters is the <strong>origin server</strong>, when the page can't be cached — a booking, a form, a customer's account.</div>
+          <div class="legend"><span><i class="o"></i>Your CRHS site</span><span><i class="t"></i>MHR / GoDaddy origin</span></div>
           <div class="pb-row">
-            <div class="pb-metric"><span>Your CRHS site — every page rendered <strong>live</strong></span><span class="win">~2× faster origin</span></div>
-            <div class="pb-bar ours" style="width:50%">0.20 s</div>
+            <div class="pb-metric"><span>Your CRHS site — every page rendered <strong>live</strong>, never cached</span><span class="win">steady ~0.2 s</span></div>
+            <div class="pb-bar ours" style="width:18%">~0.2 s</div>
           </div>
           <div class="pb-row">
-            <div class="pb-metric"><span>MHR — page served from edge <em>cache</em></span></div>
-            <div class="pb-bar theirs" style="width:52%">0.21 s</div>
+            <div class="pb-metric"><span>MHR — page from edge <em>cache</em></span></div>
+            <div class="pb-bar theirs" style="width:18%">~0.2 s</div>
           </div>
           <div class="pb-row">
-            <div class="pb-metric"><span>MHR — dynamic page, cache bypassed (real origin)</span></div>
-            <div class="pb-bar theirs" style="width:100%">0.40 s</div>
+            <div class="pb-metric"><span>MHR — GoDaddy origin (cache bypassed), <strong>best</strong> we saw</span></div>
+            <div class="pb-bar theirs" style="width:14%">0.15 s</div>
           </div>
-          <p class="pb-foot">Your CRHS pages are <strong>never cached — every request is rendered fresh from the server</strong> and still match MHR's <em>cached</em> page. The moment the content has to be dynamic, the GoDaddy shared-WordPress origin is about twice as slow. That's the dedicated compute and the Exadata database tier doing their job.</p>
+          <div class="pb-row">
+            <div class="pb-metric"><span>MHR — GoDaddy origin (cache bypassed), <strong>worst</strong> we saw</span><span class="win" style="background:#fde2e2;color:#b42318">5–6× slower</span></div>
+            <div class="pb-bar theirs" style="width:100%">1.15 s</div>
+          </div>
+          <p class="pb-foot">Your CRHS pages are <strong>never cached — every request is rendered fresh</strong> and hold a steady ~0.2 s. MHR's pages are fast only when Cloudflare serves them from cache; on a cache miss the GoDaddy origin swung from 0.15 s to over 1.1 s <em>in the same session</em> — the unpredictability of multi-tenant hosting. Dedicated compute and the Exadata database tier are what keep your origin steady.</p>
         </div>
 
         <div class="perfbars" style="margin-top:22px">
@@ -469,8 +473,8 @@
           <table class="cmp" style="margin-top:10px">
             <thead><tr><th>Domain</th><th>Resolves to</th><th>Hosted on</th></tr></thead>
             <tbody>
-              <tr><td>mhrmarketing.com <span style="color:var(--soft)">(the marketing vendor)</span></td><td>160.153.0.197 → <em>host.secureserver.net</em></td><td class="theirs">GoDaddy.com, LLC — shared WordPress</td></tr>
-              <tr><td>wavemaxlaundry.com <span style="color:var(--soft)">(corporate platform)</span></td><td>160.153.0.155 → <em>host.secureserver.net</em></td><td class="theirs">GoDaddy.com, LLC — shared WordPress</td></tr>
+              <tr><td>mhrmarketing.com <span style="color:var(--soft)">(the marketing vendor)</span></td><td>160.153.0.197 → <em>host.secureserver.net</em></td><td class="theirs">GoDaddy.com, LLC — Managed WordPress</td></tr>
+              <tr><td>wavemaxlaundry.com <span style="color:var(--soft)">(corporate platform)</span></td><td>160.153.0.155 → <em>host.secureserver.net</em></td><td class="theirs">GoDaddy.com, LLC — Managed WordPress</td></tr>
               <tr><td>rundberglaundry.com <span style="color:var(--soft)">(your CRHS store)</span></td><td>Cloudflare LB → Oracle Cloud</td><td class="ours">OCI Phoenix + Dallas failover · ADB on Exadata</td></tr>
             </tbody>
           </table>
