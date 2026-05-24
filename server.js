@@ -285,6 +285,24 @@ app.use((req, res, next) => {
   next();
 });
 
+// Performance: serve versioned /assets BEFORE the session + CSP middleware.
+// Assets are ?v=-cache-busted, so `Cache-Control: public, max-age=31536000,
+// immutable` is safe. Serving them ahead of express-session avoids stamping a
+// Set-Cookie (session id) + a session-store write on every static-asset
+// request. The cross-origin headers assets need (CORP, parent-bridge CORS) are
+// already set by the security-headers middleware above. /assets is css/js/
+// images/fonts/vendor only (no HTML, no auth), so skipping session/CSP/body-
+// parsing for it is safe and faster. (NOTE: Cloudflare Browser-Cache-TTL is
+// left at its prior value, so the browser-facing max-age is still governed by
+// CF; this change is about dropping the per-asset session cookie/DB write.)
+app.use('/assets', express.static(path.join(__dirname, 'public', 'assets'), {
+  immutable: true,
+  maxAge: '1y',
+  setHeaders: (res) => {
+    res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+  }
+}));
+
 // Manual CSP implementation with nonce support
 app.use((req, res, next) => {
   const nonce = res.locals.cspNonce;
