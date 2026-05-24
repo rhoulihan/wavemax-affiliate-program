@@ -682,6 +682,16 @@ app.get('/.well-known/security.txt', (req, res) => {
   res.type('text/plain').sendFile(path.join(__dirname, 'public', '.well-known', 'security.txt'));
 });
 
+// Favicon — serve the brand icon directly. Must run BEFORE locationQuarantine:
+// without it, /favicon.ico falls through to the quarantine redirect (302 to
+// www.wavemaxlaundry.com/favicon.ico), which then trips CSP img-src 'self' in
+// every embedded page and iframe whose document declares no favicon. Serving a
+// same-origin icon here kills that console error site-wide in one place.
+app.get('/favicon.ico', (req, res) => {
+  res.set('Cache-Control', 'public, max-age=86400');
+  res.type('image/png').sendFile(path.join(__dirname, 'public', 'assets', 'images', 'brand', 'favicon-32x32.png'));
+});
+
 // Explicit 404s for common sensitive-path probes — closes the 302 leak
 // the comparative audit flagged. Files are not exposed either way; this
 // just produces the clean response semantic scanners and audit tools
