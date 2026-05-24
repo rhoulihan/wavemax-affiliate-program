@@ -22,7 +22,11 @@ Patterns learned from corrections and incidents, written as rules to prevent rec
 
 - **Prefer data-level relative paths over a client-side URL-rewrite regex.** Same-origin gallery images: storing `/assets/...` relative URLs in the franchise data (og/JSON-LD are hardcoded-absolute in the template, so SEO is unaffected) is simpler and lower-risk than a `relativizeAssetUrl()` regex stripping the host at render time.
 
-- **Don't reorder the /assets static mount ahead of the session/CSP/embed middleware on this app without diagnosing — it threw errors** (cause undiagnosed; reverted). The marginal win (no per-asset session cookie/store-write) wasn't worth it given CF already edge-caches assets.
+- **Don't reorder the /assets static mount ahead of the session/CSP/embed middleware on this app — it throws errors** (cause undiagnosed; reverted twice). To get immutable `/assets` caching, add the mount AT the existing general-static location (AFTER session) with `Cache-Control: public, max-age=31536000, immutable`. Static asset GETs don't modify the session, so prod responses carry no session cookie and CF caches them fine — the immutable TTL upgrades them from CF's `max-age=14400` REVALIDATED (~0.2s origin round-trip) to a clean edge `HIT` (~20ms). This is what fixed "images load last and slow" on the franchise landing. (2026-05-24)
+
+- **Versioned images: convert to WebP + lazy-load the rotator.** hero/interior JPEGs (1360×1020, 220–540KB) → WebP q82 (−46%). For a stacked image rotator, `loading="lazy"` is useless (all images count as in-viewport); instead set `src` only on the first slide and carry the rest in `data-src`, loading them just-in-time on advance with a 1-slide lookahead. Cut initial gallery load from ~9 images (~4MB) to ~3 (~0.8MB). (2026-05-24)
+
+- **CF Load Balancer `session_affinity: cookie` adds a `__cflb` cookie that BYPASSes cache on the response that SETS it** (a brand-new visitor's first asset request). With a single active pool (failover-only fallback) affinity is pointless — consider `session_affinity: none` to let first-ever loads cache cleanly. The token has no Cache-Purge or Cache-Rules permission (billing/rules scope), so CF cache config beyond settings must be done in the dashboard.
 
 ## Process
 
