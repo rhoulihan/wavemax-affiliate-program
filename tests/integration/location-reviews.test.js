@@ -6,6 +6,12 @@ const axios = require('axios');
 const request = require('supertest');
 const googleReviewsService = require('../../server/services/googleReviewsService');
 
+// placeId now resolves from the franchise registry (single source of truth),
+// not an env var. Mock the registry so the test controls the value rather than
+// reading the real austin-tx.json.
+jest.mock('../../server/services/franchiseRegistryService');
+const registry = require('../../server/services/franchiseRegistryService');
+
 const PLACE_ID = 'ChIJtest_austin_place_id';
 
 const mockGoogleResponse = {
@@ -62,6 +68,9 @@ describe('GET /api/v1/location/:slug/reviews', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     googleReviewsService.__clearCache();
+    registry.getFranchise.mockImplementation(
+      (slug) => (slug === 'austin-tx' ? { google: { placeId: PLACE_ID } } : null)
+    );
   });
 
   it('returns 5★-filtered reviews for a known slug', async () => {

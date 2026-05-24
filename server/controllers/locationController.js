@@ -1,5 +1,6 @@
 const ControllerHelpers = require('../utils/controllerHelpers');
 const googleReviewsService = require('../services/googleReviewsService');
+const registry = require('../services/franchiseRegistryService');
 const logger = require('../utils/logger');
 
 const LOCATIONS = {
@@ -8,16 +9,22 @@ const LOCATIONS = {
   }
 };
 
+// Resolve the Google Place ID for a slug. Single source of truth is the
+// franchise registry (public/data/franchises/<slug>.json → google.placeId —
+// the exact value the page/client already uses for its Places call), so the
+// cached endpoint and the page can never drift. Falls back to a per-location
+// env override (legacy) if the registry has none.
 function resolvePlaceId(slug) {
+  const fromRegistry = registry.getFranchise(slug)?.google?.placeId;
+  if (fromRegistry) return fromRegistry;
   const loc = LOCATIONS[slug];
-  if (!loc) return null;
-  return process.env[loc.placeIdEnv] || null;
+  return (loc && process.env[loc.placeIdEnv]) || null;
 }
 
 exports.getReviews = ControllerHelpers.asyncWrapper(async (req, res) => {
   const { slug } = req.params;
 
-  if (!LOCATIONS[slug]) {
+  if (!LOCATIONS[slug] && !registry.getFranchise(slug)) {
     return ControllerHelpers.sendError(res, `Unknown location: ${slug}`, 404);
   }
 
@@ -56,5 +63,9 @@ exports.getReviews = ControllerHelpers.asyncWrapper(async (req, res) => {
     limit: cappedLimit
   });
 
+  // Reviews change slowly; let the browser/edge cache the response so repeat
+  // visits skip even the server round-trip. The service itself caches the
+  // upstream Google Places call for 24h.
+  res.set('Cache-Control', 'public, max-age=3600');
   return ControllerHelpers.sendSuccess(res, { data });
 });

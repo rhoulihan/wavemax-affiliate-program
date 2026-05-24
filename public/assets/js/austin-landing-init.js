@@ -386,39 +386,43 @@
     const googleLink = document.getElementById('wm-reviews-google-link');
     if (!container) return;
 
-    const { apiKey, placeId } = getReviewsConfig();
+    const { placeId } = getReviewsConfig();
+    let slug = null;
+    try {
+      slug = window.parent?.LOCATION_DATA?.slug
+           || window.IframeBridge?.getLocationData?.()?.slug
+           || window.LOCATION_DATA?.slug
+           || null;
+    } catch (_) { /* cross-origin parent — ignore */ }
 
-    if (!apiKey || !placeId) {
+    if (!slug) {
       renderReviewsEmpty(container, {});
       return;
     }
 
-    if (googleLink) {
+    if (googleLink && placeId) {
       googleLink.setAttribute('href', `https://www.google.com/maps/place/?q=place_id:${placeId}`);
     }
 
     try {
-      const url = `https://places.googleapis.com/v1/places/${encodeURIComponent(placeId)}` +
-                  `?fields=reviews,rating,userRatingCount`;
-      const res = await fetch(url, {
-        headers: {
-          'X-Goog-Api-Key': apiKey,
-          'X-Goog-FieldMask': 'reviews,rating,userRatingCount'
-        }
-      });
-      if (!res.ok) throw new Error('places_api_' + res.status);
-      const data = await res.json();
+      // Cached server endpoint instead of a live browser→Google Places call on
+      // every load: googleReviewsService caches the upstream call for 24h and
+      // the response is browser/edge-cacheable. Reviews come back already
+      // shaped (same fields buildReviewCard expects), 5-star filtered, capped.
+      const res = await fetch(`/api/v1/location/${encodeURIComponent(slug)}/reviews?minRating=5&limit=3`,
+        { credentials: 'same-origin' });
+      if (!res.ok) throw new Error('reviews_api_' + res.status);
+      const json = await res.json();
+      const reviews = (json.data && json.data.reviews) || [];
+      const attributionHref = (json.data && json.data.attributionHref) || googleLink?.getAttribute('href');
 
-      const all = (data.reviews || []).map(shapeGoogleReview);
-      const fiveStars = all.filter(r => r.rating >= 5).slice(0, 3);
-
-      if (fiveStars.length === 0) {
-        renderReviewsEmpty(container, { attributionHref: googleLink?.getAttribute('href') });
+      if (reviews.length === 0) {
+        renderReviewsEmpty(container, { attributionHref });
         return;
       }
 
       container.innerHTML = '';
-      fiveStars.forEach(r => container.appendChild(buildReviewCard(r)));
+      reviews.slice(0, 3).forEach(r => container.appendChild(buildReviewCard(r)));
     } catch (err) {
       console.warn('[austin-landing] reviews fetch failed:', err.message);
       renderReviewsEmpty(container, { attributionHref: googleLink?.getAttribute('href') });
