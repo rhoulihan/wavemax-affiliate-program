@@ -14,6 +14,16 @@ Patterns learned from corrections and incidents, written as rules to prevent rec
 
 - **mailcow API from the docker host is seen as the bridge gateway IP** (`172.22.1.1`), not `127.0.0.1`. An API key's `allow_from` must include `172.22.1.1` (or `skip_ip_check=1`) for host-side curl to work. The `api` table column is `access` (enum ro/rw), not `rw`.
 
+## Performance / caching
+
+- **Cloudflare "Browser Cache TTL: Respect Existing Headers" un-caches HTML that a fixed TTL was force-caching.** (2026-05-24) The franchise zones ran Browser-Cache-TTL=14400, which made Cloudflare edge-cache even the *HTML* host/iframe pages (they carry a session cookie + short/no-cache headers). Flipping to "respect existing headers" so the immutable asset header would pass through ALSO stopped CF caching those HTML pages → every page load became a live Phoenix origin round-trip → site-wide "snappy before, slow now." The origin tested fast the whole time (idle host, ~20ms local render); the regression was purely the CF edge no longer serving HTML from cache. **Rule:** before flipping Browser-Cache-TTL to respect-existing, confirm the HTML pages have a deliberate cache story (they didn't — they relied on the blunt 14400 force-cache). Assets cache fine under 14400 too, so the flip bought little and cost much.
+
+- **Re-apply a bundled optimization ONE change at a time when it's reported as a regression.** A 6-in-1 perf commit was reported as slower; reverting the whole thing restored "snappy," but only re-applying each piece individually (lazy-maps, local landmarks, same-origin images, font-dedupe, …) with user verification after each isolated the culprit (the CF flip) and surfaced a second issue (the /assets-before-session middleware reorder threw errors). My headless before/after numbers were ~the same in both states and did NOT capture the real regression — the user's eyes did. Trust the user's experience over synthetic page-load numbers.
+
+- **Prefer data-level relative paths over a client-side URL-rewrite regex.** Same-origin gallery images: storing `/assets/...` relative URLs in the franchise data (og/JSON-LD are hardcoded-absolute in the template, so SEO is unaffected) is simpler and lower-risk than a `relativizeAssetUrl()` regex stripping the host at render time.
+
+- **Don't reorder the /assets static mount ahead of the session/CSP/embed middleware on this app without diagnosing — it threw errors** (cause undiagnosed; reverted). The marginal win (no per-asset session cookie/store-write) wasn't worth it given CF already edge-caches assets.
+
 ## Process
 
 - **Production config edits on live hosts require explicit confirmation** even mid-incident — the auto-mode classifier correctly blocked an autonomous `docker-compose.override.yml` rewrite + container recreation on the live mail host until the user authorized it. Surface the incident + the exact fix, get the go-ahead, then act.
