@@ -301,26 +301,22 @@
         <p class="chart-cap">Both sites sit behind Cloudflare's edge — but only the CRHS deployment adds a true load balancer in front of two live data centers and an enterprise database tier. The platform's Cloudflare is a cache in front of one shared box.</p>
 
         <div class="perfbars mt-22">
-          <h3>Server response time — consistency is the real tell</h3>
-          <div class="ptitle">Shorter is better — but the story here is <strong>consistency</strong>. Time to first byte, measured May 23 2026. A page served from Cloudflare's <em>cache</em> is fast for anyone; the test that matters is the <strong>origin server</strong>, when the page can't be cached — a booking, a form, a customer's account.</div>
+          <h3>Server response time — the origin is the real test</h3>
+          <div class="ptitle">Shorter is better. Time to first byte, 12 cache-busted samples (May 2026). A page from Cloudflare's <em>cache</em> is fast for anyone; the test that matters is the <strong>origin server</strong>, when the page can't be cached — a booking, a form, a customer's account, or Googlebot.</div>
           <div class="legend"><span><i class="o"></i>Your CRHS site</span><span><i class="t"></i>MHR / GoDaddy origin</span></div>
           <div class="pb-row">
-            <div class="pb-metric"><span>Your CRHS site — every page rendered <strong>live</strong>, never cached</span><span class="win">steady ~0.2 s</span></div>
-            <div class="pb-bar ours w-18">~0.2 s</div>
+            <div class="pb-metric"><span>Your CRHS site — live origin, <strong>every</strong> request</span><span class="win">steady ~0.2 s</span></div>
+            <div class="pb-bar ours w-25">~0.2 s</div>
           </div>
           <div class="pb-row">
             <div class="pb-metric"><span>MHR — page from edge <em>cache</em></span></div>
-            <div class="pb-bar theirs w-18">~0.2 s</div>
+            <div class="pb-bar theirs w-25">~0.2 s</div>
           </div>
           <div class="pb-row">
-            <div class="pb-metric"><span>MHR — GoDaddy origin (cache bypassed), <strong>best</strong> we saw</span></div>
-            <div class="pb-bar theirs w-14">0.15 s</div>
+            <div class="pb-metric"><span>MHR — GoDaddy origin, cache bypassed</span><span class="win win-bad">~4× slower</span></div>
+            <div class="pb-bar theirs w-100">~0.8 s</div>
           </div>
-          <div class="pb-row">
-            <div class="pb-metric"><span>MHR — GoDaddy origin (cache bypassed), <strong>worst</strong> we saw</span><span class="win win-bad">5–6× slower</span></div>
-            <div class="pb-bar theirs w-100">1.15 s</div>
-          </div>
-          <p class="pb-foot">Your CRHS pages are <strong>never cached — every request is rendered fresh</strong> and hold a steady ~0.2 s. MHR's pages are fast only when Cloudflare serves them from cache; on a cache miss the GoDaddy origin swung from 0.15 s to over 1.1 s <em>in the same session</em> — the unpredictability of multi-tenant hosting. Dedicated compute and the Exadata database tier are what keep your origin steady.</p>
+          <p class="pb-foot">Your CRHS pages are <strong>never cached — every request is rendered live</strong> and hold a steady ~0.2 s. MHR's pages are fast only when Cloudflare serves them from cache; on a cache miss the GoDaddy origin came back at <strong>~0.8 s every time</strong> (12 of 12 samples, 0.65–0.92 s) — about 4× slower. Dedicated compute and the Exadata database tier are what keep your origin fast on every hit.</p>
         </div>
 
         <div class="perfbars mt-22">
