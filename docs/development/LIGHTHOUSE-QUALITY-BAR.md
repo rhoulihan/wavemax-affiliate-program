@@ -48,6 +48,9 @@ grep -c 'aria-label="Choose language"' /tmp/p.html          # changed markup gon
 
 ## Deploy procedure (so the fix actually reaches users)
 
+0. **If you edited a minified-source asset** (anything listed in `scripts/build-assets.js`), run
+   `npm run build:assets` and commit the regenerated `.min` files — `git pull` only ships what's
+   committed; the boxes don't run the build.
 1. **Bump `?v=` on any changed `/assets/*` file.** Static assets are served `immutable,
    max-age=1y`; without a new query string, the old copy is served from the browser/CF edge
    forever. Bump the stamp in **every** referencing page (`grep -rl`).
@@ -72,6 +75,18 @@ grep -c 'aria-label="Choose language"' /tmp/p.html          # changed markup gon
   `loading="lazy"` / IntersectionObserver — everything counts as in-viewport).
 - **Caching:** `/assets/*` immutable 1y (bump `?v=`); HTML short-lived (`max-age=60`); let
   Cloudflare edge-cache cleanly (no `Set-Cookie` on asset responses).
+- **Minify our own CSS/JS** — `npm run build:assets` (terser + csso) emits `.min.css`/`.min.js`
+  siblings for the assets on the indexable critical path; reference the `.min` file in the page(s)
+  that load it and keep the readable source authoritative (edit source → `npm run build:assets` →
+  commit both). The generated files carry a "GENERATED" banner — never hand-edit them. Manifest +
+  scope live in `scripts/build-assets.js`. Note: post-Brotli the wire saving is small — this
+  mainly clears Lighthouse's "Minify CSS/JavaScript" lines.
+- **Accepted third-party warnings — don't chase these.** The Hibu/Meta retargeting pixel
+  (`connect.facebook.net/.../fbevents.js`) and the Cloudflare Insights beacon are third-party:
+  their `unused-javascript`, `legacy-javascript`, and short `cache-TTL` flags (~180 KiB on mobile)
+  can't be minified or re-cached by us. The pixel is intentional marketing (deferred to post-load,
+  disclosed in the privacy policy with opt-out) — confirmed keep (2026-05-24). The only lever is
+  removing them, which we won't.
 
 ### Accessibility (target 100)
 - **Contrast ≥ 4.5:1** (normal text). White-on-brand-cyan `#29b6d4` is only 2.4:1 — use the

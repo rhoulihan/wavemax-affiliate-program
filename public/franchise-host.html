@@ -373,8 +373,12 @@
   <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@500;600;700;800&display=swap"></noscript>
 
   <!-- MHR-faithful chrome stylesheets -->
-  <link rel="stylesheet" href="/assets/css/wavemax-mhr-chrome.css?v=20260524a">
-  <link rel="stylesheet" href="/assets/css/wavemax-mhr-modal.css?v=20260505e">
+  <link rel="stylesheet" href="/assets/css/wavemax-mhr-chrome.min.css?v=20260524a">
+  <!-- Modal styles are not needed for first paint (dialogs are user-triggered,
+       always after DOMContentLoaded), so load them non-render-blocking via the
+       same media=print + css-async.js swap used for the fonts. -->
+  <link rel="stylesheet" href="/assets/css/wavemax-mhr-modal.css?v=20260505e" media="print" data-async-css>
+  <noscript><link rel="stylesheet" href="/assets/css/wavemax-mhr-modal.css?v=20260505e"></noscript>
 
   <!-- Demo-only host page styles (external for CSP compliance) -->
   <link rel="stylesheet" href="/assets/css/austin-host-mock.css?v=20260504">
@@ -780,8 +784,8 @@
 </div>
 
 <!-- Bridge + chrome wiring (CSP-clean external scripts) -->
-<script src="/assets/js/parent-iframe-bridge-v3.js?v=20260524a" defer></script>
-<script src="/assets/js/austin-host-mock.js?v=20260522a" defer></script>
+<script src="/assets/js/parent-iframe-bridge-v3.min.js?v=20260524a" defer></script>
+<script src="/assets/js/austin-host-mock.min.js?v=20260522a" defer></script>
 
 <!-- Lazy-load the footer Google Maps embed (IntersectionObserver facade) so
      its ~20 Maps requests stay off the first-paint critical path. CSP-clean. -->

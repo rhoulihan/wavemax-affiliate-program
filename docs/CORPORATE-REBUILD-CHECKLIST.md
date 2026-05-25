@@ -236,6 +236,14 @@ Every dataset that drives the site is regenerable from scripts:
 
 ---
 
+## 10. Franchise-page mobile Lighthouse pass (2026-05-24)
+
+- ✅ Render-blocking trimmed — modal CSS moved off the critical path (async `media=print` + `css-async.js` swap), matching the fonts.
+- ✅ Minify build added — `npm run build:assets` (terser + csso) emits `.min.css`/`.min.js` for the 7 assets on the rundberglaundry landing critical path (host template + `/franchise-default/landing.html`); refs switched to `.min`, readable sources kept authoritative. Clears Lighthouse "Minify CSS/JavaScript". See `scripts/build-assets.js` + `docs/development/LIGHTHOUSE-QUALITY-BAR.md`.
+- 📌 Accepted (won't fix) — the Hibu/Meta retargeting pixel + Cloudflare Insights beacon are third-party; their unused-JS / legacy-JS / short-cache-TTL flags (~180 KiB) can't be minified or re-cached by us. Pixel is intentional marketing (deferred, disclosed, opt-out) — confirmed keep.
+
+---
+
 ## Tracking
 
 This file is updated as items ship. Source: `docs/CORPORATE-REBUILD-CHECKLIST.md` in the wavemax-affiliate-program repo. Live status verifiable against `wavemax.promo`.
