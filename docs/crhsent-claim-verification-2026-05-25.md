@@ -71,9 +71,11 @@ These numbers were captured via the **PageSpeed Insights API** (`pagespeedonline
 - **Platform — wavemaxlaundry.com/austin-tx** (analysis `s3gp0elj96`, 2026-05-25; corroborates the API's mobile 59 / desktop 83 — the UI run is slow/timeout-prone *because* the page is so heavy, which is itself the point):
   - Mobile: https://pagespeed.web.dev/analysis/https-wavemaxlaundry-com-austin-tx/s3gp0elj96?form_factor=mobile
   - Desktop: https://pagespeed.web.dev/analysis/https-wavemaxlaundry-com-austin-tx/s3gp0elj96?form_factor=desktop
+- **Platform home — wavemaxlaundry.com** (analysis `tp2sfwhlzf`, 2026-05-25; corroborates the API's mobile 9 / desktop 35, mobile LCP 15.9 s):
+  - Mobile: https://pagespeed.web.dev/analysis/https-wavemaxlaundry-com/tp2sfwhlzf?form_factor=mobile
+  - Desktop: https://pagespeed.web.dev/analysis/https-wavemaxlaundry-com/tp2sfwhlzf?form_factor=desktop
 
 **Run to capture (open → runs a fresh analysis → produces its own share link):**
-- **Platform home — wavemaxlaundry.com:** https://pagespeed.web.dev/report?url=https%3A%2F%2Fwww.wavemaxlaundry.com%2F
 - **Marketing vendor — mhrmarketing.com:** https://pagespeed.web.dev/report?url=https%3A%2F%2Fwww.mhrmarketing.com%2F
 
 *Next re-audit recommended on any material change to either site, and before any new external sharing of the page.*
