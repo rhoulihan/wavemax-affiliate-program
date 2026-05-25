@@ -598,6 +598,19 @@ const sessionCookieName = process.env.NODE_ENV === 'production'
   ? '__Host-wavemax.sid'
   : 'wavemax.sid';
 
+// Liveness probe — handled BEFORE the session middleware so the Cloudflare
+// Load Balancer health monitor (~11/sec, ~99% of origin traffic) does NOT mint
+// a session per check. Leaving it after session re-bloats the ADB session store
+// (the 2026-05-25 incident). saveUninitialized stays on for real page/API
+// requests (click-tracking); only this probe opts out of session creation.
+app.get('/health', (req, res) => {
+  res.status(200).json({
+    status: 'UP',
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV || 'development'
+  });
+});
+
 app.use(session({
   name: sessionCookieName,
   secret: process.env.SESSION_SECRET || process.env.JWT_SECRET || 'default-dev-secret',
@@ -986,13 +999,8 @@ app.get('/admin/*', (req, res, next) => {
 });
 
 // Health check endpoint
-app.get('/health', (req, res) => {
-  res.status(200).json({
-    status: 'UP',
-    timestamp: new Date().toISOString(),
-    environment: process.env.NODE_ENV || 'development'
-  });
-});
+// (/health is defined earlier, before the session middleware, so health-check
+// traffic doesn't create sessions.)
 
 // API documentation endpoint
 app.get('/api/docs', (req, res) => {
