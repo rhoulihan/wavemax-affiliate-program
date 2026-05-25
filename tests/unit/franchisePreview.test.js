@@ -188,8 +188,12 @@ describe('franchisePreview gated route + unlock (Phase 2)', () => {
     });
     const res = mockRes();
     await franchisePreview(req, res, jest.fn());
-    expect(res.body).toContain('Your private preview');
+    // Now renders the localized franchise-host preview (Phase 3).
+    expect(res.body).toContain('window.LOCATION_DATA');
     expect(res.body).toContain('WaveMAX Austin');
+    expect(res.body).toContain('/franchise-default/landing.html');
+    expect(res.body).toContain('noindex');
+    expect(res.body).toContain('PRIVATE PREVIEW');
   });
 
   it('unlock with the wrong password re-shows the form, sets no cookie', async () => {

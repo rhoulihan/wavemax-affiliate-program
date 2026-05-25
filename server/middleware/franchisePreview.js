@@ -22,6 +22,8 @@ const { hashPassword, verifyPassword } = require('../utils/encryption');
 const { DISCLAIMER_VERSION } = require('../config/franchisePreviewCopy');
 const { sign: signUnlock, verify: verifyUnlock, COOKIE_NAME, UNLOCK_TTL_MS } = require('../utils/previewUnlockCookie');
 const pages = require('../services/franchisePreviewPages');
+const gbpToLocationData = require('../services/gbpToLocationData');
+const previewRender = require('../services/franchisePreviewRender');
 const logger = require('../utils/logger');
 
 const PREVIEW_HOSTS = new Set(['crhsent.com', 'www.crhsent.com']);
@@ -172,7 +174,16 @@ async function handleGatedPage(req, res) {
   const cookieVal = req.cookies ? req.cookies[COOKIE_NAME] : null;
   if (verifyUnlock(cookieVal, token)) {
     res.type('html');
-    return res.send(pages.buildPreviewPage(doc));
+    // Render the localized franchise-host preview from the cached GBP data.
+    // Fall back to the basic GBP-facts page if the rich render throws.
+    try {
+      const data = gbpToLocationData(doc.gbpData || {}, { slug: doc.locationSlug });
+      const nonce = res.locals && res.locals.cspNonce;
+      return res.send(previewRender.renderPreviewHost(data, { nonce, slug: doc.locationSlug }));
+    } catch (e) {
+      logger.error('Franchise preview: host render failed, using basic page', { error: e.message });
+      return res.send(pages.buildPreviewPage(doc));
+    }
   }
   res.type('html');
   return res.send(pages.buildUnlockPage({ businessName: doc.businessName, token }));
