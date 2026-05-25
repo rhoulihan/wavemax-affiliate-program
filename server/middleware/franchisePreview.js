@@ -25,6 +25,7 @@ const pages = require('../services/franchisePreviewPages');
 const gbpToLocationData = require('../services/gbpToLocationData');
 const previewRender = require('../services/franchisePreviewRender');
 const logger = require('../utils/logger');
+const { logAuditEvent, AuditEvents } = require('../utils/auditLogger');
 
 const PREVIEW_HOSTS = new Set(['crhsent.com', 'www.crhsent.com']);
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -157,6 +158,7 @@ async function handleRequest(req, res) {
     logger.error('Franchise preview: email send failed', { error: e.message, email });
     return res.status(502).json({ ok: false, code: 'EMAIL_FAILED' });
   }
+  logAuditEvent(AuditEvents.PREVIEW_REQUESTED, { email, slug, placeId: details.placeId }, req);
   logger.info('Franchise preview requested', { email, slug, placeId: details.placeId });
   return res.json({ ok: true });
 }
@@ -209,6 +211,7 @@ async function handleUnlock(req, res) {
     return res.send(pages.buildUnlockPage({ businessName: doc.businessName, token, error: 'Please confirm you are authorized for this business.' }));
   }
   if (!verifyPassword(String(body.password || ''), doc.passwordSalt, doc.passwordHash)) {
+    logAuditEvent(AuditEvents.PREVIEW_UNLOCK_FAILED, { slug: doc.locationSlug, reason: 'bad_password' }, req);
     res.type('html');
     return res.send(pages.buildUnlockPage({ businessName: doc.businessName, token, error: 'Incorrect password. Check the email we sent you.' }));
   }
@@ -221,6 +224,7 @@ async function handleUnlock(req, res) {
     maxAge: UNLOCK_TTL_MS,
     path: '/'
   });
+  logAuditEvent(AuditEvents.PREVIEW_UNLOCKED, { slug: doc.locationSlug, placeId: doc.placeId }, req);
   logger.info('Franchise preview unlocked', { slug: doc.locationSlug, placeId: doc.placeId });
   return res.redirect(303, `/${doc.locationSlug}?key=${token}`);
 }
