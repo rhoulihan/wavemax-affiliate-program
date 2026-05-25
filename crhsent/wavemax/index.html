@@ -10,7 +10,12 @@
 <!-- Same-origin favicon so the browser never requests the default /favicon.ico,
      which 302-redirects to wavemaxlaundry.com and trips CSP img-src 'self'. -->
 <link rel="icon" type="image/svg+xml" href="/wavemax/favicon.svg">
-<link rel="stylesheet" href="/wavemax/styles.css?v=20260525b">
+<link rel="stylesheet" href="/wavemax/styles.css?v=20260525c">
+<!-- Cloudflare Turnstile site key for the self-serve preview modal. The Turnstile
+     script is lazy-loaded by app.js only when the modal opens (keeps page fast).
+     TODO(launch): replace the test key below (always-passes) with the real site
+     key from the Cloudflare dashboard, and set TURNSTILE_SECRET_KEY in the env. -->
+<meta name="turnstile-sitekey" content="1x00000000000000000000AA">
 </head>
 <body>
 
@@ -21,7 +26,7 @@
     <p class="lede">Enterprise-grade hosting, local SEO, and a fast, secure website tuned for <em>your</em> store — built and run by an owner who does this for a living.</p>
     <p class="price">One flat rate: <b>$500/month</b>, all-inclusive. No setup fee. No upsells. No dark-pattern subscription page.</p>
     <div class="hero-actions">
-      <a class="btn" href="#book">Book a 1-hour onboarding call</a>
+      <a class="btn" href="#book" data-preview-open>See it for yourself</a>
       <a class="btn ghost" href="#proof">See the search data</a>
     </div>
     <p class="hero-note">Everything I build for you is the same stack I run for my own WaveMAX store. I'm motivated to make it work — because it's working for me.</p>
@@ -376,7 +381,7 @@
         <li>Enterprise security posture, built in</li>
         <li>No setup fee · no upsell · no dark-pattern checkout</li>
       </ul>
-      <div><a class="btn ghost" href="#book">Book your onboarding call</a></div>
+      <div><a class="btn ghost" href="#book" data-preview-open>See it for yourself</a></div>
     </div>
   </div>
 </section>
@@ -394,9 +399,9 @@
 
 <section class="final" id="book">
   <div class="wrap">
-    <h2>Let's build your local lifeline.</h2>
-    <p>Book a no-pressure, 1-hour onboarding call. We'll walk your market, your competition, and exactly what your store's site should do — then I'll build it.</p>
-    <a class="btn" href="/cdn-cgi/l/email-protection#2140454c484f6142534952444f550f424e4c1e5254434b4442551c764057446c607904131156444304131104131704131172646e041311c3a1b50413114e4f434e405345484f4604131142404d4d07404c511a434e45581c69480413117348424a041362041311680413164c04131140041311764057446c60790413114e564f4453041311484f5544534452554445041311484f0413115549440413110413151411110413674c4e04131156444304131104131704131172646e041311524453574842440f0413116c5804131152554e53440413114d4e424055484e4f041260041311">Email <span class="__cf_email__" data-cfemail="5c3d383135321c3f2e342f393228723f3331">[email&#160;protected]</span> to book →</a>
+    <h2>See your store's site — before you decide.</h2>
+    <p>No call required to start. Tell me which WaveMAX location is yours and I'll send you a private, working preview of what your local site could look like — built on the same enterprise stack I run for my own store. Like what you see? The 1-hour onboarding call is where we make it yours.</p>
+    <a class="btn" href="#book" data-preview-open>See it for yourself →</a>
   </div>
 </section>
 </div><!-- /#offer-reveal -->
@@ -411,6 +416,59 @@
   </div>
 </footer>
 
-<script src="/wavemax/app.js?v=20260525b"></script>
+<!-- Franchise self-serve preview modal. CSP-safe: no inline scripts/styles;
+     behavior in app.js, styling in styles.css. Attestation copy is kept in sync
+     with server/config/franchisePreviewCopy.js (DISCLAIMER_VERSION 2026-05-25-draft). -->
+<div class="pv-modal" id="preview-modal" role="dialog" aria-modal="true" aria-labelledby="pv-title" aria-hidden="true">
+  <div class="pv-backdrop" data-preview-close></div>
+  <div class="pv-dialog" role="document">
+    <button class="pv-close" type="button" data-preview-close aria-label="Close">&times;</button>
+    <h2 id="pv-title">See it for yourself</h2>
+    <p class="pv-reminder">As the franchisee, you hold the right to market your own location online — by continuing you are confirming that you are authorized to make this decision.</p>
+
+    <!-- Step 1: find the business -->
+    <div class="pv-step" data-step="1">
+      <label for="pv-gbp">Paste your Google Business Profile link</label>
+      <input id="pv-gbp" type="url" inputmode="url" autocomplete="off" placeholder="https://maps.app.goo.gl/…">
+      <p class="pv-help">On Google Maps, open your business, tap <strong>Share</strong>, and copy the link.</p>
+      <button class="btn" type="button" id="pv-find">Find my business</button>
+      <p class="pv-error" id="pv-find-error" hidden></p>
+      <div class="pv-fallback" id="pv-fallback" hidden>
+        <label for="pv-text">Couldn't find it from the link — enter your business name and city</label>
+        <input id="pv-text" type="text" autocomplete="off" placeholder="WaveMAX Laundry, Austin TX">
+        <button class="btn ghost" type="button" id="pv-find-text">Search</button>
+      </div>
+    </div>
+
+    <!-- Step 2: confirm + request -->
+    <div class="pv-step" data-step="2" hidden>
+      <div class="pv-found">
+        <div class="pv-found-name" id="pv-found-name"></div>
+        <div class="pv-found-addr" id="pv-found-addr"></div>
+      </div>
+      <button class="pv-link" type="button" id="pv-back">Not your business? Search again</button>
+      <label for="pv-email">Your email</label>
+      <input id="pv-email" type="email" autocomplete="email" placeholder="you@yourbusiness.com">
+      <label class="pv-check">
+        <input type="checkbox" id="pv-attest">
+        <span>I am an authorized representative of this business, and I authorize CRHS Enterprises, LLC to temporarily host marketing preview content for this franchise location on my behalf.</span>
+      </label>
+      <p class="pv-fine">Your preview is private, hosted temporarily by CRHS Enterprises, LLC, and is never published publicly. <em>Draft terms — pending final review.</em></p>
+      <div class="cf-turnstile" id="pv-turnstile"></div>
+      <button class="btn" type="button" id="pv-submit">Send me my preview link</button>
+      <p class="pv-error" id="pv-submit-error" hidden></p>
+    </div>
+
+    <!-- Step 3: done -->
+    <div class="pv-step" data-step="3" hidden>
+      <div class="pv-done" aria-hidden="true">✓</div>
+      <h3>Check your email</h3>
+      <p>We sent a private preview link and password to <strong id="pv-sent-email"></strong>. The link stays active — open it anytime to unlock your store's preview for an hour.</p>
+      <button class="btn" type="button" data-preview-close>Done</button>
+    </div>
+  </div>
+</div>
+
+<script src="/wavemax/app.js?v=20260525c"></script>
 <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script></body>
 </html>

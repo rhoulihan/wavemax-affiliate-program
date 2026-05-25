@@ -376,7 +376,11 @@ app.use((req, res, next) => {
       // Hibu Social retargeting — Meta Pixel loader (connect.facebook.net/
       // en_US/fbevents.js), injected by public/assets/js/austin-fb-pixel.js.
       // Marketing chrome only (franchise-host.html), never the app pages.
-      'https://connect.facebook.net'
+      'https://connect.facebook.net',
+      // Cloudflare Turnstile (franchise self-serve preview modal on crhsent.com):
+      // loads its api.js + challenge widget from this origin. Lazy-loaded by the
+      // modal, so it only costs weight when a franchisee opens the preview form.
+      'https://challenges.cloudflare.com'
     ],
     'style-src': [
       "'self'",
@@ -390,7 +394,7 @@ app.use((req, res, next) => {
     'font-src': ["'self'", 'https://cdnjs.cloudflare.com', 'https://cdn.jsdelivr.net', 'https://fonts.gstatic.com'],
     'object-src': ["'none'"],
     'media-src': ["'self'"],
-    'frame-src': ["'self'", 'https://www.google.com', 'https://maps.google.com', 'https://my.matterport.com'],
+    'frame-src': ["'self'", 'https://www.google.com', 'https://maps.google.com', 'https://my.matterport.com', 'https://challenges.cloudflare.com'],
     'form-action': ["'self'", 'https://safepay.paymentlogistics.net'],
     'frame-ancestors': ["'self'", 'https://www.wavemaxlaundry.com', 'https://wavemaxlaundry.com'],
     'base-uri': ["'self'"],
