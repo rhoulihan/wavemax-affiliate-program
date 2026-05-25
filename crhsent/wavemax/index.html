@@ -11,11 +11,11 @@
      which 302-redirects to wavemaxlaundry.com and trips CSP img-src 'self'. -->
 <link rel="icon" type="image/svg+xml" href="/wavemax/favicon.svg">
 <link rel="stylesheet" href="/wavemax/styles.css?v=20260525c">
-<!-- Cloudflare Turnstile site key for the self-serve preview modal. The Turnstile
-     script is lazy-loaded by app.js only when the modal opens (keeps page fast).
-     TODO(launch): replace the test key below (always-passes) with the real site
-     key from the Cloudflare dashboard, and set TURNSTILE_SECRET_KEY in the env. -->
-<meta name="turnstile-sitekey" content="1x00000000000000000000AA">
+<!-- Cloudflare Turnstile site key (public) for the self-serve preview modal. The
+     Turnstile script is lazy-loaded by app.js only when the modal opens (keeps the
+     page fast). The matching TURNSTILE_SECRET_KEY lives in the server env (never
+     committed); the feature stays dark until FRANCHISE_PREVIEW_ENABLED=true. -->
+<meta name="turnstile-sitekey" content="0x4AAAAAADWJlE-nnx52TMyd">
 </head>
 <body>
 
