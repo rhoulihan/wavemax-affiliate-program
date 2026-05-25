@@ -562,7 +562,7 @@ app.use('/api/', apiLimiter);
 const session = require('express-session');
 
 // Calculate maxAge once to ensure consistency
-const sessionMaxAge = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+const sessionMaxAge = 10 * 60 * 1000; // 10 minutes — inactivity TTL (extended on activity via touchAfter). Was 24h, which let CF load-balancer health-check sessions (~11/sec, one per request via saveUninitialized) pile to ~2M on ADB, which never runs a TTL sweep.
 
 // Configure session store based on environment
 const sessionStore = process.env.NODE_ENV === 'test'
@@ -578,7 +578,7 @@ const sessionStore = process.env.NODE_ENV === 'test'
       minPoolSize: 1,
       monitorCommands: process.env.ORACLE_DIAG !== 'false'
     },
-    touchAfter: 24 * 3600, // Lazy session update in seconds (24 hours)
+    touchAfter: 60, // seconds — re-save an active session at most once/min so the 10-min TTL is inactivity-based (a busy user isn't dropped mid-session), without writing on every request
     // Purge expired sessions with a periodic deleteMany rather than a Mongo
     // TTL index. The Oracle ADB MongoDB API rejects TTL index creation unless
     // the schema holds CREATE JOB, and connect-mongo's default
@@ -587,7 +587,7 @@ const sessionStore = process.env.NODE_ENV === 'test'
     // Oracle supports; session validity is also enforced on read via the
     // `expires` field, so correctness never depended on the TTL sweep.
     autoRemove: 'interval',
-    autoRemoveInterval: 10 // minutes
+    autoRemoveInterval: 2 // minutes — purge expired sessions fast (ADB runs no TTL sweep, so this deleteMany is the only cleanup)
   });
 
 // __Host- prefix in production: enforces Secure + Path=/ + no Domain

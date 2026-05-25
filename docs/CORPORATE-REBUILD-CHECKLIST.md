@@ -243,6 +243,10 @@ Every dataset that drives the site is regenerable from scripts:
 - ✅ Minify build added — `npm run build:assets` (terser + csso) emits `.min.css`/`.min.js` for the 7 assets on the rundberglaundry landing critical path (host template + `/franchise-default/landing.html`); refs switched to `.min`, readable sources kept authoritative. Clears Lighthouse "Minify CSS/JavaScript". See `scripts/build-assets.js` + `docs/development/LIGHTHOUSE-QUALITY-BAR.md`.
 - 📌 Accepted (won't fix) — the Hibu/Meta retargeting pixel + Cloudflare Insights beacon are third-party; their unused-JS / legacy-JS / short-cache-TTL flags (~180 KiB) can't be minified or re-cached by us. Pixel is intentional marketing (deferred, disclosed, opt-out) — confirmed keep.
 
+## 11. Session-store bloat fix (2026-05-25)
+
+- ✅ Root-caused the "site degrades over time" slowness: `saveUninitialized:true` minted a session per request, the CF load-balancer health monitor hits `/health` ~11/sec, and Oracle ADB runs no TTL sweep — so with a 24h `sessionMaxAge` the `sessions` collection grew to **~2M docs**, dragging every request (and even Google PSI: 81→100 after purge). Fix: `sessionMaxAge` 24h → **10 min** (inactivity TTL via `touchAfter:60`), connect-mongo `autoRemoveInterval` 10 → **2 min**. Keeps click-tracking (session on every connection) but bounds the collection to ~7K. See `tasks/lessons.md`.
+
 ---
 
 ## Tracking
