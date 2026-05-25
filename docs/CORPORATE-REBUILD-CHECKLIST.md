@@ -246,6 +246,7 @@ Every dataset that drives the site is regenerable from scripts:
 ## 11. Session-store bloat fix (2026-05-25)
 
 - ✅ Root-caused the "site degrades over time" slowness: `saveUninitialized:true` minted a session per request, the CF load-balancer health monitor hits `/health` ~11/sec, and Oracle ADB runs no TTL sweep — so with a 24h `sessionMaxAge` the `sessions` collection grew to **~2M docs**, dragging every request (and even Google PSI: 81→100 after purge). Fix: `sessionMaxAge` 24h → **10 min** (inactivity TTL via `touchAfter:60`), connect-mongo `autoRemoveInterval` 10 → **2 min**. Keeps click-tracking (session on every connection) but bounds the collection to ~7K. See `tasks/lessons.md`.
+- ✅ Follow-up (2026-05-25): `/health` moved ahead of the session middleware so the ~11/sec CF load-balancer health checks (≈99% of origin traffic) mint **zero** sessions — the collection now holds only real-user sessions. `saveUninitialized:true` retained for real page/API requests. `X-Origin-Box` diagnostic header kept (owner may still need it).
 
 ---
 
