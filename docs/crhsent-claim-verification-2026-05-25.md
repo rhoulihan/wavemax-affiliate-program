@@ -74,8 +74,10 @@ These numbers were captured via the **PageSpeed Insights API** (`pagespeedonline
 - **Platform home — wavemaxlaundry.com** (analysis `tp2sfwhlzf`, 2026-05-25; corroborates the API's mobile 9 / desktop 35, mobile LCP 15.9 s):
   - Mobile: https://pagespeed.web.dev/analysis/https-wavemaxlaundry-com/tp2sfwhlzf?form_factor=mobile
   - Desktop: https://pagespeed.web.dev/analysis/https-wavemaxlaundry-com/tp2sfwhlzf?form_factor=desktop
+- **Marketing vendor — mhrmarketing.com** (analysis `yw5alru833`, 2026-05-25; corroborates the API's mobile 66 / desktop 92):
+  - Mobile: https://pagespeed.web.dev/analysis/https-mhrmarketing-com/yw5alru833?form_factor=mobile
+  - Desktop: https://pagespeed.web.dev/analysis/https-mhrmarketing-com/yw5alru833?form_factor=desktop
 
-**Run to capture (open → runs a fresh analysis → produces its own share link):**
-- **Marketing vendor — mhrmarketing.com:** https://pagespeed.web.dev/report?url=https%3A%2F%2Fwww.mhrmarketing.com%2F
+*All four sites now have persistent Google PSI share links (above), captured 2026-05-25.*
 
 *Next re-audit recommended on any material change to either site, and before any new external sharing of the page.*
