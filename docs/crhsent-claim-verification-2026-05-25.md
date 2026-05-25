@@ -62,9 +62,14 @@ Methods: Google PageSpeed Insights API (mobile + desktop), `curl` (headers, size
 
 ## Reproduce it yourself / shareable PageSpeed links
 
-These numbers were captured via the **PageSpeed Insights API** (`pagespeedonline/v5/runPagespeed`), which returns JSON but does **not** create a persistent shareable result URL — those `/analysis/<id>` links are only minted by the pagespeed.web.dev **web UI**. Open any link below to run a fresh analysis in the UI (it then produces its own shareable link), and toggle mobile/desktop there:
+These numbers were captured via the **PageSpeed Insights API** (`pagespeedonline/v5/runPagespeed`), which returns JSON but does **not** create a persistent shareable result URL — those `/analysis/<id>` links are only minted by the pagespeed.web.dev **web UI**.
 
-- **Ours — rundberglaundry.com:** https://pagespeed.web.dev/report?url=https%3A%2F%2Frundberglaundry.com%2F
+**Captured (persistent share links):**
+- **Ours — rundberglaundry.com** (analysis `0xcgxs4tyv`, 2026-05-25; corroborates the API's mobile 99 / desktop 98):
+  - Mobile: https://pagespeed.web.dev/analysis/https-rundberglaundry-com/0xcgxs4tyv?form_factor=mobile
+  - Desktop: https://pagespeed.web.dev/analysis/https-rundberglaundry-com/0xcgxs4tyv?form_factor=desktop
+
+**Run to capture (open → runs a fresh analysis → produces its own share link):**
 - **Platform — wavemaxlaundry.com/austin-tx:** https://pagespeed.web.dev/report?url=https%3A%2F%2Fwww.wavemaxlaundry.com%2Faustin-tx%2F
 - **Platform home — wavemaxlaundry.com:** https://pagespeed.web.dev/report?url=https%3A%2F%2Fwww.wavemaxlaundry.com%2F
 - **Marketing vendor — mhrmarketing.com:** https://pagespeed.web.dev/report?url=https%3A%2F%2Fwww.mhrmarketing.com%2F
