@@ -10,7 +10,7 @@
 <!-- Same-origin favicon so the browser never requests the default /favicon.ico,
      which 302-redirects to wavemaxlaundry.com and trips CSP img-src 'self'. -->
 <link rel="icon" type="image/svg+xml" href="/wavemax/favicon.svg">
-<link rel="stylesheet" href="/wavemax/styles.css?v=20260525a">
+<link rel="stylesheet" href="/wavemax/styles.css?v=20260525b">
 </head>
 <body>
 
@@ -174,6 +174,7 @@
           <p>Speed isn't vanity. Google treats page speed as a ranking factor, and every extra second of load time measurably costs you walk-in conversions on mobile. The current platform is a heavy WordPress build that ships a 400 KB+ page and dozens of scripts before a visitor sees anything. My sites are a lean, pre-built page on a global CDN — the same fast stack I run for my own Austin store. When your page loads in under a second, you keep the customer <em>and</em> you keep the ranking.</p>
         </div>
         <button type="button" class="tab-next" data-tab="tab-seo">Fast pages don't matter if Google can't find you — see the SEO gap <span class="arr">→</span></button>
+        <button type="button" class="reveal-offer">What do I actually get? <span class="arr">↓</span></button>
       </div>
 
       <!-- ===================== SEO PANEL ===================== -->
@@ -224,6 +225,7 @@
           <p>Local search is won by the page Google can <em>read</em>. The structured data above is exactly what tells Google your hours, your location, your services, your prices and your reviews — so you surface in the map pack and the "laundromat near me" cards that bring walk-ins. It's table-stakes for a local store, and it's the part a modern AI-built page nails by default. We build it on every page; across the network it's almost entirely absent. That's the difference an owner-operated, AI-driven build makes.</p>
         </div>
         <button type="button" class="tab-next" data-tab="tab-sec">Unfindable is bad. Unprotected is a liability — see the security audit <span class="arr">→</span></button>
+        <button type="button" class="reveal-offer">What do I actually get? <span class="arr">↓</span></button>
       </div>
 
       <!-- ===================== SECURITY PANEL ===================== -->
@@ -258,6 +260,7 @@
       <p><strong>This already happened.</strong> WaveMAX's current marketing partner published a review-gating control on <strong>every franchise page</strong> and left it live for weeks. It took a franchisee flagging the liability to get it pulled from the Austin page — and multiple more warnings before it came off the rest. Every operator wore that exposure the entire time.</p>
     </div>
         <button type="button" class="tab-next" data-tab="tab-infra">So what does it all actually run on? See the infrastructure <span class="arr">→</span></button>
+        <button type="button" class="reveal-offer">What do I actually get? <span class="arr">↓</span></button>
       </div><!-- /panel-sec -->
 
       <!-- ===================== INFRASTRUCTURE PANEL ===================== -->
@@ -325,12 +328,14 @@
           <h3>Why this matters to your store</h3>
           <p>If your website goes dark on a Saturday, you lose the bookings and the walk-ins that came with it. A single shared-hosting box has no backup — if it hiccups, your site is simply down. My deployment runs active-active in two independent Phoenix data centers behind a load balancer — both serve your traffic at once, so if one fails the other simply carries all of it, automatically, with nobody on call. Your customer data lives on Oracle's Autonomous Database on Exadata — the same enterprise platform large banks run — not a MySQL database sharing a box with hundreds of other WordPress sites. That's the difference between <em>"a website"</em> and infrastructure your business can actually depend on — at a fraction of what the basic package charges.</p>
         </div>
-        <button type="button" class="tab-next" data-to="#what-you-get">That's their stack. Here's what you'd get instead <span class="arr">↓</span></button>
+        <button type="button" class="reveal-offer">What do I actually get? <span class="arr">↓</span></button>
       </div><!-- /panel-infra -->
     </div><!-- /tabs -->
   </div>
 </section>
 
+<!-- Hidden until a "what do I get?" button in any proof tab reveals it (app.js focuses #what-you-get). -->
+<div id="offer-reveal" hidden>
 <section id="what-you-get" class="scroll-anchor">
   <div class="wrap">
     <div class="eyebrow">What you get</div>
@@ -391,6 +396,7 @@
     <a class="btn" href="/cdn-cgi/l/email-protection#2140454c484f6142534952444f550f424e4c1e5254434b4442551c764057446c607904131156444304131104131704131172646e041311c3a1b50413114e4f434e405345484f4604131142404d4d07404c511a434e45581c69480413117348424a041362041311680413164c04131140041311764057446c60790413114e564f4453041311484f5544534452554445041311484f0413115549440413110413151411110413674c4e04131156444304131104131704131172646e041311524453574842440f0413116c5804131152554e53440413114d4e424055484e4f041260041311">Email <span class="__cf_email__" data-cfemail="5c3d383135321c3f2e342f393228723f3331">[email&#160;protected]</span> to book →</a>
   </div>
 </section>
+</div><!-- /#offer-reveal -->
 
 <footer>
   <div class="wrap">
@@ -402,6 +408,6 @@
   </div>
 </footer>
 
-<script src="/wavemax/app.js"></script>
+<script src="/wavemax/app.js?v=20260525b"></script>
 <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script></body>
 </html>

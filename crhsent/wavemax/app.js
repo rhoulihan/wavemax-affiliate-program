@@ -9,4 +9,19 @@
       else if (to) { go(document.querySelector(to)); }
     });
   });
+
+  // "What do I actually get?" buttons: unhide the offer block (hidden by
+  // default) and focus the what-you-get section. CSP-safe (external, no inline).
+  document.querySelectorAll('.reveal-offer').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var wrap = document.getElementById('offer-reveal');
+      if (wrap) { wrap.hidden = false; }
+      var target = document.getElementById('what-you-get');
+      if (target) {
+        go(target);
+        target.setAttribute('tabindex', '-1');
+        target.focus({ preventScroll: true });
+      }
+    });
+  });
 })();

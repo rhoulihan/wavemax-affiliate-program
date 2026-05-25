@@ -82,6 +82,10 @@
   .tab-next{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;margin-top:26px;padding:16px 22px;font-family:inherit;font-size:16px;font-weight:700;line-height:1.3;text-align:center;color:#fff;background:linear-gradient(160deg,#1e3a8a,#2563eb);border:none;border-radius:12px;cursor:pointer;transition:transform .12s ease,box-shadow .12s ease;box-shadow:0 4px 14px rgba(37,99,235,.25)}
   .tab-next:hover{transform:translateY(-1px);box-shadow:0 8px 22px rgba(37,99,235,.34)}
   .tab-next .arr{font-size:20px;line-height:1}
+  .reveal-offer{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;margin-top:14px;padding:13px 20px;font-family:inherit;font-size:15px;font-weight:600;line-height:1.3;text-align:center;color:#1e40af;background:#fff;border:1.5px solid #c7d2fe;border-radius:12px;cursor:pointer;transition:background .12s ease,border-color .12s ease}
+  .reveal-offer:hover{background:#f5f8ff;border-color:#2563eb}
+  .reveal-offer .arr{font-size:18px;line-height:1}
+  [hidden]{display:none!important}
   @keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
   #tab-perf:checked ~ .tablist label[for="tab-perf"],
   #tab-seo:checked ~ .tablist label[for="tab-seo"],
