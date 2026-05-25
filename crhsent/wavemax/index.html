@@ -10,7 +10,7 @@
 <!-- Same-origin favicon so the browser never requests the default /favicon.ico,
      which 302-redirects to wavemaxlaundry.com and trips CSP img-src 'self'. -->
 <link rel="icon" type="image/svg+xml" href="/wavemax/favicon.svg">
-<link rel="stylesheet" href="/wavemax/styles.css?v=20260524b">
+<link rel="stylesheet" href="/wavemax/styles.css?v=20260524c">
 </head>
 <body>
 
@@ -106,7 +106,7 @@
         <p class="sub mt-2">Don't take my word for it — <strong>Google scores every page.</strong> Here's what <a href="https://pagespeed.web.dev/" target="_blank" rel="noopener">Google PageSpeed Insights</a> reports for each site today, measured on Google's own servers. Run all three yourself.</p>
 
         <div class="perf-stats">
-          <div class="perf-stat"><div class="n">100</div><div class="l">Google PSI performance — this CRHS page, mobile &amp; desktop</div></div>
+          <div class="perf-stat"><div class="n">100</div><div class="l">Google PSI performance — this CRHS sales page, mobile &amp; desktop</div></div>
           <div class="perf-stat"><div class="n">59</div><div class="l">Google PSI performance — the WaveMAX platform, on mobile</div></div>
           <div class="perf-stat"><div class="n">100</div><div class="l">accessibility — every CRHS page (the platform scores 77)</div></div>
           <div class="perf-stat"><div class="n">~0.2s</div><div class="l">origin response on every request — cache or not</div></div>
@@ -115,19 +115,19 @@
         <div class="perfbars">
           <h3>Google PageSpeed Insights — performance score, head to head</h3>
           <div class="ptitle"><strong>Higher is better</strong> (0–100) — Google's own score, captured May 2026 via Google's public PageSpeed API. Re-run any of them at pagespeed.web.dev.</div>
-          <div class="legend"><span><i class="o"></i>A CRHS site</span><span><i class="t"></i>WaveMAX platform — wavemaxlaundry.com/austin-tx</span></div>
+          <div class="legend"><span><i class="o"></i>CRHS store — rundberglaundry.com</span><span><i class="t"></i>WaveMAX platform — wavemaxlaundry.com/austin-tx</span></div>
 
           <div class="pb-row">
-            <div class="pb-metric"><span>Mobile — where most of your customers are</span><span class="win">96–100 vs 59</span></div>
-            <div class="pb-bar ours w-98">96–100</div>
+            <div class="pb-metric"><span>Mobile — where most of your customers are</span><span class="win">~90 vs 59</span></div>
+            <div class="pb-bar ours w-90">~90</div>
             <div class="pb-bar theirs w-59">59</div>
           </div>
           <div class="pb-row">
-            <div class="pb-metric"><span>Desktop</span><span class="win">high-90s vs 82</span></div>
-            <div class="pb-bar ours w-97">high-90s</div>
+            <div class="pb-metric"><span>Desktop</span><span class="win">~93 vs 82</span></div>
+            <div class="pb-bar ours w-93">~93</div>
             <div class="pb-bar theirs w-82">82</div>
           </div>
-          <p class="pb-foot">Scores from <strong>Google PageSpeed Insights</strong> (the public <code>pagespeedonline</code> API), May 2026. <strong>This very sales page scores a perfect 100 / 100</strong> (mobile / desktop); the CRHS store page at <code>rundberglaundry.com</code> scores in the high 90s; the corporate platform's Austin page scores <strong>59 on mobile</strong>, 82 on desktop. The CRHS build also takes <strong>100</strong> on accessibility (platform: 77) and <strong>100</strong> on best practices. Lab scores wobble a few points run to run — the gap doesn't. Run <code>rundberglaundry.com</code> and <code>wavemaxlaundry.com/austin-tx</code> at pagespeed.web.dev side by side.</p>
+          <p class="pb-foot">Scores from <strong>Google PageSpeed Insights</strong> (the public <code>pagespeedonline</code> API), May 2026. <strong>The CRHS sales page you're reading scores a perfect 100 / 100</strong> (mobile / desktop). The CRHS <strong>store</strong> at <code>rundberglaundry.com</code> — which carries a Meta retargeting pixel for the owner's advertising — still scores <strong>~90 on mobile and ~93 on desktop</strong>, versus the corporate platform's <strong>59 mobile / 82 desktop</strong>. In other words: <em>even with a marketing pixel loaded, the store page beats the platform's pixel-free score.</em> Both CRHS pages also take <strong>100</strong> on accessibility (platform: 77), best practices, and SEO. Lab scores wobble a few points run to run — the gap doesn't. Run <code>rundberglaundry.com</code> and <code>wavemaxlaundry.com/austin-tx</code> at pagespeed.web.dev side by side.</p>
         </div>
 
         <table class="cmp">
