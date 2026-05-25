@@ -550,6 +550,12 @@ app.use(compression());
 const accessGate = require('./server/middleware/accessGate');
 app.use(accessGate);
 
+// Franchise self-serve preview endpoints (crhsent.com host only). Deploys DARK —
+// a no-op unless FRANCHISE_PREVIEW_ENABLED=true. Mounted here so it has body +
+// cookie parsing (above) and runs BEFORE the location quarantine (which would
+// otherwise redirect these crhsent /__preview/* paths to the corporate site).
+app.use(require('./server/middleware/franchisePreview'));
+
 // Rate limiting for API endpoints
 // Import centralized rate limiting configuration
 const { apiLimiter } = require('./server/middleware/rateLimiting');
