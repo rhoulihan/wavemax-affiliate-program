@@ -30,4 +30,13 @@ describe('SEO — robots.txt crawlability of host-page content', () => {
     expect(res.text).toContain('<loc>https://rundberglaundry.com/</loc>');
     expect(res.text).toContain('<loc>https://rundberglaundry.com/austin-tx/wash-dry-fold/</loc>');
   });
+
+  it('sitemap.xml for atxwashdryfold is apex-only (its deep WDF page self-canonicals to the apex)', async () => {
+    const res = await request(app).get('/sitemap.xml').set('Host', 'atxwashdryfold.com');
+    expect(res.status).toBe(200);
+    expect(res.text).toContain('<loc>https://atxwashdryfold.com/</loc>');
+    // The deep page canonicals to the apex, so it must NOT appear in the sitemap
+    // (a non-canonical sitemap URL is what made GSC flag "Discovered - not indexed").
+    expect(res.text).not.toContain('/austin-tx/wash-dry-fold/');
+  });
 });

@@ -1097,11 +1097,12 @@ app.get('/sitemap.xml', (req, res) => {
       { loc: `https://${host}/austin-tx/contact/`,               priority: '0.7' }
     );
   } else if (host === 'atxwashdryfold.com') {
-    // Apex deep-links to the WDF page — list it as canonical.
-    urls.push(
-      { loc: `https://${host}/`,                            priority: '1.0' },
-      { loc: `https://${host}/austin-tx/wash-dry-fold/`,    priority: '0.9' }
-    );
+    // Apex-only. The deep WDF page (/austin-tx/wash-dry-fold/) self-canonicals
+    // to this apex — the apex *is* this domain's wash-dry-fold landing — so the
+    // sitemap must list only the canonical URL. Listing the deep page made
+    // Search Console report it "Discovered - currently not indexed": its
+    // canonical points away to the apex, so it was never going to index on its own.
+    urls.push({ loc: `https://${host}/`, priority: '1.0' });
   } else if (isManagedHost(host)) {
     // atxwashateria.com, runberglaundry.com — apex only.
     urls.push({ loc: `https://${host}/`, priority: '1.0' });
