@@ -18,8 +18,10 @@ const FranchisePreviewRequest = require('../models/FranchisePreviewRequest');
 const gbp = require('../services/gbpService');
 const { verifyTurnstile } = require('../utils/turnstile');
 const { sendPreviewUnlockEmail } = require('../services/franchisePreviewEmail');
-const { hashPassword } = require('../utils/encryption');
+const { hashPassword, verifyPassword } = require('../utils/encryption');
 const { DISCLAIMER_VERSION } = require('../config/franchisePreviewCopy');
+const { sign: signUnlock, verify: verifyUnlock, COOKIE_NAME, UNLOCK_TTL_MS } = require('../utils/previewUnlockCookie');
+const pages = require('../services/franchisePreviewPages');
 const logger = require('../utils/logger');
 
 const PREVIEW_HOSTS = new Set(['crhsent.com', 'www.crhsent.com']);
@@ -39,6 +41,19 @@ function resolveThrottled(ip) {
   arr.push(now);
   resolveHits.set(ip, arr);
   return arr.length > RESOLVE_MAX;
+}
+
+// In-memory brute-force guard for the unlock password (keyed by token+IP).
+const unlockHits = new Map();
+const UNLOCK_MAX = 10;
+const UNLOCK_WINDOW_MS = 15 * 60 * 1000;
+function unlockThrottled(key) {
+  if (unlockHits.size > 10000) unlockHits.clear();
+  const now = Date.now();
+  const arr = (unlockHits.get(key) || []).filter((t) => now - t < UNLOCK_WINDOW_MS);
+  arr.push(now);
+  unlockHits.set(key, arr);
+  return arr.length > UNLOCK_MAX;
 }
 
 function enabled() { return process.env.FRANCHISE_PREVIEW_ENABLED === 'true'; }
@@ -144,12 +159,74 @@ async function handleRequest(req, res) {
   return res.json({ ok: true });
 }
 
+// GET crhsent.com/<slug>?key=<token> — the gated preview route. 404s without a
+// valid key; shows the unlock (password) form unless a valid 1-hour cookie is
+// present, in which case it serves the preview.
+async function handleGatedPage(req, res) {
+  const token = String(req.query.key || '');
+  const doc = await FranchisePreviewRequest.findOne({ token, revokedAt: null });
+  if (!doc) {
+    res.status(404).type('html');
+    return res.send(pages.buildNoticePage('Preview link not found', 'This preview link is invalid or has been revoked. Please use the link from your email.'));
+  }
+  const cookieVal = req.cookies ? req.cookies[COOKIE_NAME] : null;
+  if (verifyUnlock(cookieVal, token)) {
+    res.type('html');
+    return res.send(pages.buildPreviewPage(doc));
+  }
+  res.type('html');
+  return res.send(pages.buildUnlockPage({ businessName: doc.businessName, token }));
+}
+
+// POST /__preview/unlock — native form submit from the unlock page. Validates the
+// password + re-attestation, then sets the 1-hour signed unlock cookie.
+async function handleUnlock(req, res) {
+  const ip = clientIp(req);
+  const body = req.body || {};
+  const token = String(body.key || '');
+  const doc = await FranchisePreviewRequest.findOne({ token, revokedAt: null });
+  if (!doc) {
+    res.status(404).type('html');
+    return res.send(pages.buildNoticePage('Preview link not found', 'This preview link is invalid or has been revoked.'));
+  }
+  if (unlockThrottled(`${token}:${ip}`)) {
+    res.status(429).type('html');
+    return res.send(pages.buildUnlockPage({ businessName: doc.businessName, token, error: 'Too many attempts. Please wait a few minutes and try again.' }));
+  }
+  if (body.attest !== 'yes') {
+    res.type('html');
+    return res.send(pages.buildUnlockPage({ businessName: doc.businessName, token, error: 'Please confirm you are authorized for this business.' }));
+  }
+  if (!verifyPassword(String(body.password || ''), doc.passwordSalt, doc.passwordHash)) {
+    res.type('html');
+    return res.send(pages.buildUnlockPage({ businessName: doc.businessName, token, error: 'Incorrect password. Check the email we sent you.' }));
+  }
+  doc.lastUnlockedAt = new Date();
+  await doc.save();
+  res.cookie(COOKIE_NAME, signUnlock(token), {
+    httpOnly: true,
+    sameSite: 'lax',
+    secure: process.env.NODE_ENV === 'production',
+    maxAge: UNLOCK_TTL_MS,
+    path: '/'
+  });
+  logger.info('Franchise preview unlocked', { slug: doc.locationSlug, placeId: doc.placeId });
+  return res.redirect(303, `/${doc.locationSlug}?key=${token}`);
+}
+
 function franchisePreview(req, res, next) {
-  if (!isPreviewHost(req) || req.method !== 'POST') return next();
-  if (!req.path.startsWith('/__preview/')) return next();
+  if (!isPreviewHost(req)) return next();
   if (!enabled()) return next(); // dark until FRANCHISE_PREVIEW_ENABLED=true
-  if (req.path === '/__preview/resolve') return handleResolve(req, res).catch(next);
-  if (req.path === '/__preview/request') return handleRequest(req, res).catch(next);
+  if (req.method === 'POST') {
+    if (req.path === '/__preview/resolve') return handleResolve(req, res).catch(next);
+    if (req.path === '/__preview/request') return handleRequest(req, res).catch(next);
+    if (req.path === '/__preview/unlock') return handleUnlock(req, res).catch(next);
+    return next();
+  }
+  // GET <slug>?key=<token> — the gated preview page (only when a key is present).
+  if (req.method === 'GET' && req.query && req.query.key) {
+    return handleGatedPage(req, res).catch(next);
+  }
   return next();
 }
 
