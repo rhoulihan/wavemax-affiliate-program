@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>WaveMAX corporate site — security &amp; code-quality audit (May 2026) | CRHS Enterprises</title>
+<meta name="description" content="A point-in-time audit of the WaveMAX corporate site's security posture, code quality, broken links, performance, and SEO — every finding reproducible from public sources with named open-source tools.">
+<meta name="csp-nonce" content="{{CSP_NONCE}}">
+<link rel="icon" type="image/svg+xml" href="/wavemax/favicon.svg">
+<link rel="stylesheet" href="/wavemax/styles.css?v=20260525e">
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="eyebrow">Public audit · May 26, 2026 · from a fellow owner</div>
+    <h1>WaveMAX corporate site — security &amp; code-quality audit</h1>
+    <p class="lede">A point-in-time scorecard of the franchisor's corporate platform — broken links, runtime errors, security headers, structured data, performance, the gap between what the mandated marketing vendor sells and what it ships. Every number below was measured with open-source tools on public URLs and is reproducible from your laptop.</p>
+    <p class="hero-note">If you're a WaveMAX franchisee on the required $300/month "Website Foundation," this is what the live pages do when you point a measuring tool at them. Every section names the tool and links to a free way to re-run it yourself.</p>
+    <div class="hero-actions">
+      <a class="btn ghost" href="/wavemax/">← Back to the offer</a>
+    </div>
+  </div>
+</header>
+
+<section id="contents">
+  <div class="wrap">
+    <h2 class="sec">What you'll find below</h2>
+    <ol style="font-size:15.5px;line-height:1.8;margin-left:18px">
+      <li><a href="#method">Methodology &amp; tools used</a></li>
+      <li><a href="#links">Broken anchor links on the franchise-conversion page</a></li>
+      <li><a href="#js">JavaScript crash on every page load — and why the menu won't close</a></li>
+      <li><a href="#html">HTML validity — 1,886 W3C errors across 4 franchise pages</a></li>
+      <li><a href="#sec">Security headers &amp; CORS — the OWASP-class misconfigurations</a></li>
+      <li><a href="#perf">Performance — Google PageSpeed Insights</a></li>
+      <li><a href="#seo">SEO — zero local-business schema across the network</a></li>
+      <li><a href="#priv">Privacy / OAuth / consumer disclosures — what's missing</a></li>
+      <li><a href="#brand">Brand &amp; license notices — §12.2 and copyright</a></li>
+      <li><a href="#mhr">Mandated-vendor claims vs measured delivery</a></li>
+      <li><a href="#summary">The composite picture</a></li>
+    </ol>
+  </div>
+</section>
+
+<section id="method">
+  <div class="wrap">
+    <h2 class="sec">1. Methodology &amp; tools</h2>
+    <p>Every finding is from <strong>open-source, vendor-neutral tools</strong> run against the live corporate site between May 19 and May 26, 2026. The tools, with the exact versions used:</p>
+    <ul class="checks">
+      <li><strong>linkinator 7.6.1</strong> (Google's broken-link crawler) — anchor link audit, JSON output.</li>
+      <li><strong>html-validate 11.4</strong> — W3C-aligned HTML validity (severity = error, not warnings).</li>
+      <li><strong>Playwright + headless Chrome 143</strong> — full page render, console + page-error capture with stack traces, HTTP response capture for every fetched resource.</li>
+      <li><strong>Google PageSpeed Insights</strong> — the public PSI API (Lighthouse scoring).</li>
+      <li><strong>curl + parallel xargs</strong> — bulk HTTP-status sweeps.</li>
+      <li><strong>Google's Rich Results Test</strong> — structured-data validation as Googlebot sees it (JavaScript-rendered).</li>
+    </ul>
+    <p>All HTTP fetches with <code>User-Agent: Mozilla/5.0</code>. Pages audited (the four English franchise-section pages enumerated from <code>wavemaxlaundry.com/sitemap_index.xml</code>): <code>/become-a-franchisee/</code>, <code>/laundromat-investment-guide/</code>, <code>/why-invest-in-wavemax/</code>, <code>/franchise/</code>. The broader security and SEO findings come from prior captures with the same tool class between 2026-05-19 and 2026-05-26.</p>
+  </div>
+</section>
+
+<section id="links">
+  <div class="wrap">
+    <h2 class="sec">2. Broken anchor links on the franchise-conversion page</h2>
+    <p>The first thing every visitor needs from a franchise site is for the navigation to actually work. linkinator 7.6.1 finds, on the franchise pages:</p>
+    <table class="cmp">
+      <thead><tr><th>Link</th><th>Status</th><th>Where it appears</th></tr></thead>
+      <tbody>
+        <tr><td><code>wavemaxlaundry.com/faqs/</code></td><td class="theirs">✗ 404</td><td>All 4 franchise pages — a network-wide dead anchor on the conversion path</td></tr>
+        <tr><td><code>http://contact/</code></td><td class="theirs">✗ malformed (status 0)</td><td>An unfilled placeholder URL never replaced with a real link</td></tr>
+        <tr><td><code>/wp-content/uploadsdata:image/gif;base64,…</code></td><td class="theirs">✗ 404</td><td>A base64 placeholder image concatenated with <code>/wp-content/uploads</code> as if it were a filename — broken lazy-load template</td></tr>
+      </tbody>
+    </table>
+    <p class="pb-foot"><strong>Verify it yourself:</strong> open <code>wavemaxlaundry.com/become-a-franchisee/</code>, open browser DevTools → Network, hard-reload, filter to <code>404</code>. Or in a terminal: <code>curl -sI https://wavemaxlaundry.com/faqs/</code> — you'll get the literal <code>HTTP/2 404</code> back.</p>
+  </div>
+</section>
+
+<section id="js">
+  <div class="wrap">
+    <h2 class="sec">3. JavaScript crash on every load — and why the menu won't close</h2>
+    <p>The franchise-conversion page throws an uncaught <code>TypeError</code> on every page load. Captured live in headless Chrome 143:</p>
+    <pre style="background:#f1f5f9;border:1px solid #e2e8f0;border-radius:8px;padding:12px 16px;font-size:13.5px;line-height:1.55;overflow-x:auto;color:#b42318;margin:10px 0 14px"><code>TypeError: $(...).on is not a function
+    at https://wavemaxlaundry.com/become-a-franchisee/:2295:19</code></pre>
+    <p>Line 2295 of the page itself contains an inline jQuery form binder:</p>
+    <pre style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:12px 16px;font-size:13.5px;line-height:1.55;overflow-x:auto;color:#0f172a;margin:10px 0 14px"><code>$('#formLaundry').on('submit', function(e) { ... });</code></pre>
+    <p>And the page loads jQuery <strong>twice</strong> — version 3.6.4 from <code>ajax.googleapis.com</code> at line 1655, and the WordPress-bundled 3.7.1 plus jquery-migrate at line 4200. That's a classic <code>$</code>-shadowing hazard that produces exactly the error above.</p>
+    <p><strong>The operational consequence.</strong> The form-submit handlers for the Laundry and Franchise lead forms never bind. And the same broken-<code>$</code> environment is the mechanism behind the user-visible behavior on the Franchise navigation: the menu's close handler — also a jQuery <code>.on()</code> binding in this theme — fails to attach. The menu opens; nothing closes it. The site is broken in a way the team running it could see in DevTools any time they reloaded the page.</p>
+    <p class="pb-foot"><strong>Verify it yourself:</strong> open <code>wavemaxlaundry.com/become-a-franchisee/</code>, open DevTools → Console, hard-reload. Watch for the red <code>$(...).on is not a function</code> error referencing line 2295 of the page itself. No external scripts; the bug is in the page's own HTML.</p>
+  </div>
+</section>
+
+<section id="html">
+  <div class="wrap">
+    <h2 class="sec">4. HTML validity — 1,886 W3C errors across 4 pages</h2>
+    <p>The <code>html-validate</code> validator (W3C-aligned) returns the following error counts (severity = error, not warnings) on the four English franchise pages:</p>
+    <table class="cmp">
+      <thead><tr><th>Page</th><th>Errors</th><th>Notable</th></tr></thead>
+      <tbody>
+        <tr><td><code>/become-a-franchisee/</code></td><td class="theirs">✗ 539</td><td>14 element-permitted-content violations</td></tr>
+        <tr><td><code>/laundromat-investment-guide/</code></td><td class="theirs">✗ 505</td><td>same template, same flaws</td></tr>
+        <tr><td><code>/why-invest-in-wavemax/</code></td><td class="theirs">✗ 448</td><td>same template</td></tr>
+        <tr><td><code>/franchise/</code></td><td class="theirs">✗ 394</td><td><strong>38 stray <code>&lt;/p&gt;</code></strong> end tags + 17 element-permitted-content</td></tr>
+      </tbody>
+    </table>
+    <p><strong>Template-level structural defects on every page</strong> — line numbers identical across all four pages, which is how you know it's a shared (broken) template, not isolated mistakes:</p>
+    <ul class="checks">
+      <li><code>&lt;style&gt;</code> blocks placed inside <code>&lt;body&gt;</code> (three per page; lines 969, 1088, 1195).</li>
+      <li><code>&lt;header&gt;</code> element nested inside another <code>&lt;header&gt;</code> (line 1252).</li>
+      <li>81–165 inline <code>style=""</code> attributes per page.</li>
+      <li>170–210 trailing-whitespace errors per page.</li>
+      <li>19–32 <code>&lt;script&gt;</code> tags missing the required <code>type</code> attribute.</li>
+    </ul>
+    <p>Individually trivial. Collectively, the signal of a hand-edited template no one validates.</p>
+    <p class="pb-foot"><strong>Verify it yourself:</strong> <code>curl https://wavemaxlaundry.com/franchise/ -o page.html &amp;&amp; npx html-validate page.html</code>. Or paste the rendered HTML into <a href="https://validator.w3.org/nu/" target="_blank" rel="noopener">validator.w3.org/nu/</a> — the W3C's own validator.</p>
+  </div>
+</section>
+
+<section id="sec">
+  <div class="wrap">
+    <h2 class="sec">5. Security headers &amp; CORS — the OWASP-class misconfigurations</h2>
+    <p>A passive (observation-only) audit of the live corporate site documents:</p>
+    <table class="cmp">
+      <thead><tr><th>Control</th><th>State on wavemaxlaundry.com</th></tr></thead>
+      <tbody>
+        <tr><td>CORS on <code>/wp-json/</code></td><td class="theirs">✗ Reflects an arbitrary <code>Origin</code> with <code>Access-Control-Allow-Credentials: true</code> — an OWASP-class misconfiguration, verified across 4 origins</td></tr>
+        <tr><td>Content-Security-Policy</td><td class="theirs">✗ Absent</td></tr>
+        <tr><td>Strict-Transport-Security (HSTS)</td><td class="theirs">✗ Absent</td></tr>
+        <tr><td>X-Frame-Options / frame-ancestors</td><td class="theirs">✗ Absent</td></tr>
+        <tr><td>X-Content-Type-Options</td><td class="theirs">✗ Absent</td></tr>
+        <tr><td>Referrer-Policy</td><td class="theirs">✗ Absent</td></tr>
+        <tr><td>Permissions-Policy</td><td class="theirs">✗ Absent</td></tr>
+        <tr><td>Custom POST <code>/wavemax/v1/inject-layout</code></td><td class="theirs">✗ No declared arguments; no rate limiting visible</td></tr>
+        <tr><td><code>postMessage</code> handler on the Austin location page</td><td class="theirs">✗ No <code>event.origin</code> validation</td></tr>
+      </tbody>
+    </table>
+    <p>This is the platform that markets <em>"Security &amp; Malware Protection"</em> in the mandated package.</p>
+    <p class="pb-foot"><strong>Verify it yourself:</strong> <code>curl -sI https://wavemaxlaundry.com/</code> and read the response headers. Or paste <code>wavemaxlaundry.com</code> into <a href="https://securityheaders.com/?q=wavemaxlaundry.com" target="_blank" rel="noopener">securityheaders.com</a> for the public scorecard.</p>
+  </div>
+</section>
+
+<section id="perf">
+  <div class="wrap">
+    <h2 class="sec">6. Performance — Google PageSpeed Insights</h2>
+    <p>From Google's free <strong>PageSpeed Insights</strong> (the public Lighthouse scoring service):</p>
+    <table class="cmp">
+      <thead><tr><th>Page</th><th>Mobile</th><th>Desktop</th></tr></thead>
+      <tbody>
+        <tr><td><code>wavemaxlaundry.com/</code> (corporate homepage)</td><td class="theirs">9</td><td class="theirs">35</td></tr>
+        <tr><td><code>wavemaxlaundry.com/austin-tx/</code> (location page)</td><td class="theirs">59</td><td class="theirs">83</td></tr>
+        <tr><td><code>mhrmarketing.com</code> (the marketing vendor's own site)</td><td class="theirs">66</td><td class="theirs">92</td></tr>
+        <tr><td><code>rundberglaundry.com</code> (CRHS, same Cloudflare stack)</td><td class="ours">99</td><td class="ours">98</td></tr>
+      </tbody>
+    </table>
+    <p>The starkest gap is on mobile: <strong>Largest Contentful Paint takes 14.4 seconds</strong> on the corporate Austin page; the CRHS comparison page on the same CDN renders LCP in <strong>1.8 seconds</strong> — about <strong>8× faster</strong>. Same edge, different origin and build.</p>
+    <p class="pb-foot"><strong>Verify it yourself:</strong> run <a href="https://pagespeed.web.dev/" target="_blank" rel="noopener">pagespeed.web.dev</a> on both <code>wavemaxlaundry.com</code> and <code>rundberglaundry.com</code> side by side.</p>
+  </div>
+</section>
+
+<section id="seo">
+  <div class="wrap">
+    <h2 class="sec">7. SEO — zero local-business schema across the network</h2>
+    <p>Google reads <strong>structured data (JSON-LD)</strong> on a laundromat page to decide whether the location belongs in the map pack, in "near me" results, in "laundromat in [city]" rich cards, and in the ★-rating cards. A passive rendered-DOM extraction on a 10-page sample of the corporate platform finds:</p>
+    <ul class="checks">
+      <li><strong>9 of 10 sampled franchise pages</strong> ship only <code>BreadcrumbList</code> + <code>ListItem</code> — <strong>zero local-business schema</strong>, zero review-star markup.</li>
+      <li>The lone outlier (the corporate Austin page) carries 7 JSON-LD types — a remnant of CRHS's prior tuning that survived the platform switch.</li>
+      <li>CRHS's own page on the same Cloudflare stack ships <strong>23 JSON-LD types</strong> including the complete local-business set (DryCleaningOrLaundry · hours · geo · services · ★ 4.8 from 48 reviews).</li>
+    </ul>
+    <p><strong>The 16-month Google Search Console export for <code>www.wavemaxlaundry.com/austin-tx/</code></strong> shows the consequence of shipping the platform with this gap: impressions fell from a 964/day pre-cutover average (1,427/day peak) to a <strong>32/day post-cutover floor — a 97.7% drop</strong>, below even the original 138/day launch baseline.</p>
+    <p class="pb-foot"><strong>Verify it yourself:</strong> point <a href="https://search.google.com/test/rich-results" target="_blank" rel="noopener">Google's Rich Results Test</a> at any franchise page on <code>wavemaxlaundry.com</code> and count the "Valid items" it reports. Compare with a CRHS page on the same tool.</p>
+  </div>
+</section>
+
+<section id="priv">
+  <div class="wrap">
+    <h2 class="sec">8. Privacy / OAuth / consumer disclosures</h2>
+    <p>A passive audit of the Privacy Policy and Terms of Service linked from every franchisee footer (six locations verified) finds them missing:</p>
+    <ul class="checks">
+      <li>OAuth-provider disclosures (Google / Facebook).</li>
+      <li>CCPA / CPRA language (California).</li>
+      <li>GDPR language.</li>
+      <li>COPPA language.</li>
+      <li>Retention-period statements.</li>
+      <li>Franchise Agreement §12.2 license-attribution markers.</li>
+    </ul>
+    <p>These gaps affect every franchisee on the platform, not only Austin — same template, same omissions, every location.</p>
+  </div>
+</section>
+
+<section id="brand">
+  <div class="wrap">
+    <h2 class="sec">9. Brand &amp; license notices — §12.2 and copyright</h2>
+    <p>Every franchisor-built corporate location page (verified across nine pages) ships with:</p>
+    <ul class="checks">
+      <li>An ownerless <em>"© 2026 All rights reserved"</em> — the franchisor doesn't even claim copyright in its own franchise content.</li>
+      <li>Credit to the third-party vendor MHR Marketing as the developer.</li>
+      <li>No ® or ™ on the WaveMAX mark inside the content body.</li>
+      <li>No Franchise Agreement §12.2 license attribution.</li>
+    </ul>
+  </div>
+</section>
+
+<section id="mhr">
+  <div class="wrap">
+    <h2 class="sec">10. The mandated $300/month "Website Foundation" — what's sold vs what's delivered</h2>
+    <p>From the franchisor's mandated marketing vendor's payment page (<code>mhrmarketing.com/payment/</code>):</p>
+    <table class="cmp">
+      <thead><tr><th>Sold as part of the required "Website Foundation" ($300/mo)</th><th>Measured on the live pages</th></tr></thead>
+      <tbody>
+        <tr><td>"Found on Google" / SEO</td><td class="theirs">Breadcrumb-only schema; zero local-business markup on 9 of 10 sampled pages</td></tr>
+        <tr><td>"Security &amp; Malware Protection"</td><td class="theirs">No CSP, no HSTS, no XCTO, no Referrer-Policy; CORS reflects-Origin with credentials</td></tr>
+        <tr><td>"Performance Monitoring &amp; Optimization"</td><td class="theirs">PSI mobile 9 on the corporate homepage; LCP 14.4 s on the Austin page</td></tr>
+        <tr><td>"Multi-Language Translation"</td><td class="theirs">Translated pages exist; the switcher control is force-hidden (<code>display:none&nbsp;!important</code>) on corporate pages so visitors cannot use it</td></tr>
+        <tr><td>Hosting</td><td class="ours">Genuinely delivered — Cloudflare in front of GoDaddy Managed WordPress</td></tr>
+      </tbody>
+    </table>
+    <p>The <strong>paid add-on tiers ($1,050 – $1,500 / month)</strong> sell <em>"Custom Location-Specific Posts."</em> A May 25, 2026 census of 62 franchise Facebook pages across 22 states found:</p>
+    <ul class="checks">
+      <li><strong>21 pages</strong> active with a shared MHR caption library — <em>"Laundry should not slow you down"</em> appeared on 7 pages in <strong>six different states</strong> (MD, TX, WA, CT, AZ, CO).</li>
+      <li><strong>39 pages</strong> with no post at all since the May 1 platform switch.</li>
+      <li><strong>2 pages</strong> with genuinely-unique content — neither shared anything with the MHR caption library, consistent with self-managed pages outside MHR's social service.</li>
+    </ul>
+    <p>(Recorded against interest: the corporate location pages themselves are populated with local store photos — 70 of 71. The website image build-out was done. The deficit is specific to the paid <em>social</em> product.)</p>
+  </div>
+</section>
+
+<section id="summary" class="bg-panel">
+  <div class="wrap">
+    <h2 class="sec">11. The composite picture</h2>
+    <p>Treated as a single corporate marketing surface — the URL franchisees are required to send prospects to — the platform delivers:</p>
+    <ul class="checks">
+      <li>A franchise-conversion page that <strong>crashes on every load</strong> and <strong>404s a network-wide link</strong>.</li>
+      <li><strong>Zero structured data</strong> for the local-search results that are the product of the SEO line item the package sells.</li>
+      <li><strong>Multiple OWASP-class security misconfigurations</strong> on a platform that markets "Security &amp; Malware Protection."</li>
+      <li>Performance <strong>~3× slower</strong> than the comparator built by one franchisee on the same CDN — <strong>8× slower mobile LCP</strong> on the Austin page.</li>
+      <li><strong>Zero franchise license attribution</strong>; no copyright claim in the franchisor's own content.</li>
+      <li><strong>Privacy / OAuth / consumer-disclosure gaps</strong> network-wide.</li>
+      <li><strong>Cross-state-identical "custom location-specific" posts</strong> on the third of franchise pages whose social feed it manages.</li>
+    </ul>
+    <p>Every finding is measured, named, and reproducible. Run the tools yourself.</p>
+    <p style="margin-top:18px"><a class="btn" href="/wavemax/">← Back to the offer</a></p>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div>© 2026 CRHS Enterprises, LLC. All rights reserved.</div>
+  </div>
+  <div class="wrap">
+    <p class="disc">CRHS Enterprises, LLC is an independent WaveMAX® franchisee offering web, hosting, and marketing services to other franchisees. This is an audit of publicly visible corporate-site behavior, captured between May 19 and May 26, 2026 with the open-source tools named in §1. Every finding is reproducible from the cited public sources and tool versions; CRHS is the comparator wherever the audit benchmarks against a known-good build, and the comparison reflects measurement at capture time. WaveMAX® and the WaveMAX logo are trademarks of WaveMAX Franchise, LLC. This page is not provided, endorsed, or required by WaveMAX Franchise, LLC.</p>
+  </div>
+</footer>
+
+</body>
+</html>
