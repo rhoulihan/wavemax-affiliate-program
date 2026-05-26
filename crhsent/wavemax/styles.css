@@ -134,7 +134,9 @@
   .price-card ul li{padding-left:26px;position:relative;margin-bottom:8px;color:#e7eefc;font-size:15px}
   .price-card ul li:before{content:"✓";position:absolute;left:0;color:#7ee2a8;font-weight:800}
 
-  .founder{display:grid;grid-template-columns:1fr;gap:14px}
+  .founder{display:grid;grid-template-columns:1fr;gap:18px;align-items:start}
+  @media (min-width:640px){.founder{grid-template-columns:260px 1fr;gap:30px}}
+  .founder .avatar{width:100%;max-width:280px;aspect-ratio:1/1;border-radius:14px;display:block;object-fit:cover;box-shadow:0 6px 22px rgba(15,23,42,.14)}
   .founder p{font-size:15.5px;color:var(--ink2);margin-bottom:6px}
   .founder .name{font-weight:800;font-size:20px;color:var(--ink)}
   .founder .role{color:var(--soft);font-size:14px;margin-bottom:10px}
