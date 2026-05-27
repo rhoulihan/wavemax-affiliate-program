@@ -183,11 +183,10 @@
     transform: translateY(0) scale(1);
     pointer-events: auto;
   }
-  .click-arrow {
-    opacity: 0;
-    transition: opacity 0.3s;
-  }
-  .click-arrow.revealed { opacity: 1; }
+  /* Click-here arrow reveal state — overrides on .revealed are below
+   * the layout rule so they win the cascade. Animation runs ONLY when
+   * .revealed; otherwise the keyframes would override opacity:0 and
+   * the arrow would be visible from page load. */
   .fake-schedule-pickup {
     background: linear-gradient(180deg, var(--wm-blue) 0%, var(--wm-blue-deep) 100%);
     color: white;
@@ -227,15 +226,20 @@
     display: flex;
     align-items: center;
     gap: 6px;
-    animation: pulse 0.9s ease-in-out infinite alternate;
+    opacity: 0;
+    transition: opacity 0.3s;
     text-shadow: 0 0 6px white, 0 0 6px white, 0 1px 2px white;
+  }
+  .click-arrow.revealed {
+    opacity: 1;
+    animation: pulse 0.9s ease-in-out infinite alternate;
   }
   .click-arrow .arrow-svg {
     width: 38px; height: 28px;
   }
   @keyframes pulse {
-    from { transform: translateX(0) scale(1); opacity: 0.8; }
-    to   { transform: translateX(-8px) scale(1.05); opacity: 1; }
+    from { transform: translateX(0) scale(1); opacity: 0.85; }
+    to   { transform: translateX(8px) scale(1.05); opacity: 1; }
   }
   .click-arrow.fading { animation: none; opacity: 0; transition: opacity 0.4s; }
 
@@ -595,6 +599,6 @@
   <p>This page is an educational demonstration of a publicly verifiable security finding on the franchisor's corporate site, captured 2026-05-26 with the open-source tools named in the full audit. The iframe shown above loads the franchisor's own page directly from its servers; no franchisor content is modified or hosted by CRHS. CRHS Enterprises, LLC is an independent WaveMAX® franchisee. WaveMAX® is a trademark of WaveMAX Franchise, LLC. This page is not provided, endorsed, or required by WaveMAX Franchise, LLC.</p>
 </footer>
 
-<script src="/wavemax/clickjacking-demo.js?v=20260526b"></script>
+<script src="/wavemax/clickjacking-demo.js?v=20260526c"></script>
 </body>
 </html>
