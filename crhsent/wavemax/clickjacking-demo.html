@@ -57,17 +57,33 @@
     margin: 0 auto 16px;
     font-size: 16px;
   }
+  /* Prominent back-nav buttons in the dark header — readable from any frame
+   * of the recording and easy to find when the visitor wants to back out. */
   .demo-header .header-links {
-    font-size: 14px;
-    color: #94a3b8;
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 4px;
   }
   .demo-header .header-links a {
-    color: #94a3b8;
+    color: white;
     text-decoration: none;
-    border-bottom: 1px dotted #475569;
-    margin: 0 10px;
+    background: rgba(255, 255, 255, 0.10);
+    border: 1px solid rgba(255, 255, 255, 0.30);
+    padding: 9px 16px;
+    border-radius: 999px;
+    font-weight: 600;
+    font-size: 13.5px;
+    letter-spacing: 0.01em;
+    display: inline-block;
+    transition: background 0.15s, border-color 0.15s, transform 0.1s;
   }
-  .demo-header .header-links a:hover { color: white; border-bottom-color: white; }
+  .demo-header .header-links a:hover {
+    background: rgba(255, 255, 255, 0.20);
+    border-color: rgba(255, 255, 255, 0.55);
+  }
+  .demo-header .header-links a:active { transform: translateY(1px); }
 
   /* Tabs */
   .demo-tabs {
@@ -447,7 +463,7 @@
   <p>The frame below is loading the real <code style="background:rgba(255,255,255,0.1);padding:1px 6px;border-radius:3px">wavemaxlaundry.com/austin-tx/</code> page directly from the franchisor's servers. Because the franchisor's platform sets no <code style="background:rgba(255,255,255,0.1);padding:1px 6px;border-radius:3px">X-Frame-Options</code> response header and no <code style="background:rgba(255,255,255,0.1);padding:1px 6px;border-radius:3px">Content-Security-Policy: frame-ancestors</code> directive, any third party can wrap any franchisee's page in a hostile overlay on any domain.</p>
   <div class="header-links">
     <a href="/wavemax/#clickjack-callout" data-back-to-offer>← Back to the offer</a>
-    <a href="/wavemax/security-audit.html">← Back to the full audit</a>
+    <a href="/wavemax/security-audit.html#demo-callout" data-back-to-audit>← Back to the full audit</a>
   </div>
 </header>
 
@@ -589,7 +605,7 @@
   <p>This page is an educational demonstration of a publicly verifiable security finding on the franchisor's corporate site, captured 2026-05-26 with the open-source tools named in the full audit. The iframe shown above loads the franchisor's own page directly from its servers; no franchisor content is modified or hosted by CRHS. CRHS Enterprises, LLC is an independent WaveMAX® franchisee. WaveMAX® is a trademark of WaveMAX Franchise, LLC. This page is not provided, endorsed, or required by WaveMAX Franchise, LLC.</p>
 </footer>
 
-<script src="/wavemax/clickjacking-demo.js?v=20260527c"></script>
-<script src="/wavemax/back-to-offer.js?v=20260527a"></script>
+<script src="/wavemax/clickjacking-demo.js?v=20260527d"></script>
+<script src="/wavemax/back-to-offer.js?v=20260527b"></script>
 </body>
 </html>

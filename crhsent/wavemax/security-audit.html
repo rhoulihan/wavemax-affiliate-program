@@ -134,10 +134,10 @@
       </tbody>
     </table>
     <p>This is the platform that markets <em>"Security &amp; Malware Protection"</em> in the mandated package.</p>
-    <div class="callout brand" style="margin:18px 0;background:#fef2f2;border-left:4px solid #dc2626;padding:14px 18px;border-radius:0 6px 6px 0">
+    <div class="callout brand" id="demo-callout" style="margin:18px 0;background:#fef2f2;border-left:4px solid #dc2626;padding:14px 18px;border-radius:0 6px 6px 0">
       <h3 style="margin:0 0 6px;color:#991b1b">See this exploited live</h3>
       <p style="margin:0 0 8px">The first three rows of the table above (CSP, HSTS, X-Frame-Options / frame-ancestors) together permit any third party to embed any franchisee's location page on any attacker-controlled domain with a hostile overlay. We built a watermarked, educational demonstration that loads the real <code>wavemaxlaundry.com/austin-tx/</code> page in an iframe and walks through the attack mechanics — including a side-by-side comparison with a properly-configured site the browser refuses to embed.</p>
-      <p style="margin:0"><a class="btn" href="/wavemax/clickjacking-demo.html">View the live clickjacking demonstration →</a></p>
+      <p style="margin:0"><a class="btn" id="demo-btn" href="/wavemax/clickjacking-demo.html">View the live clickjacking demonstration →</a></p>
     </div>
     <p class="pb-foot"><strong>Verify it yourself:</strong> <code>curl -sI https://wavemaxlaundry.com/</code> and read the response headers. Or paste <code>wavemaxlaundry.com</code> into <a href="https://securityheaders.com/?q=wavemaxlaundry.com" target="_blank" rel="noopener">securityheaders.com</a> for the public scorecard.</p>
   </div>
@@ -255,6 +255,6 @@
   </div>
 </footer>
 
-<script src="/wavemax/back-to-offer.js?v=20260527a"></script>
+<script src="/wavemax/back-to-offer.js?v=20260527b"></script>
 </body>
 </html>

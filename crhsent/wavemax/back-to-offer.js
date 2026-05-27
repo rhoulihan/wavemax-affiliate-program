@@ -1,41 +1,74 @@
-/* Smart "back to offer" link behavior.
+/* Smart back-navigation + hash-target focus for crhsent secondary pages.
  *
- * Used on the security-audit and clickjacking-demo pages. The link's href
- * carries an anchor pointing back at the originating callout on the main
- * offer page (e.g. /wavemax/#audit-callout), so a direct-URL visit lands
- * at the right place. But when the visitor arrived here by clicking
- * forward FROM the offer page, history.back() returns them to the exact
- * scroll position + tab state they had — better UX than re-loading the
- * offer page and scrolling to an anchor.
+ * Smart back: any <a data-back-to-offer> or <a data-back-to-audit> link
+ * inspects document.referrer. If the visitor arrived from the link's
+ * target path (the path component of the link's own href), use
+ * history.back() — preserves exact scroll + tab + JS state. Otherwise
+ * let the default href navigation (with anchor) take over.
  *
- * This script picks history.back() over the href when the document
- * referrer is the offer page (i.e. /wavemax/ root, not another secondary
- * page), and falls back to the href navigation otherwise.
+ * Hash-target focus: when this page loads with a URL hash matching a
+ * known callout (e.g. /wavemax/security-audit.html#demo-callout), scroll
+ * the callout into view and focus its primary button. So a visitor
+ * arriving from the clickjacking demo lands directly on the "View the
+ * live clickjacking demonstration →" button rather than having to scan
+ * the §5 security section.
  */
 (function () {
   'use strict';
 
-  function cameFromOfferPage() {
-    var ref = document.referrer || '';
-    if (!ref) return false;
-    try {
-      var u = new URL(ref);
-      // Same origin
-      if (u.origin !== window.location.origin) return false;
-      // Path under /wavemax/, but NOT one of the secondary pages
-      if (u.pathname === '/wavemax/' || u.pathname === '/wavemax') return true;
-      if (u.pathname === '/wavemax/index.html') return true;
-      return false;
-    } catch (e) { return false; }
+  function pathOf(url) {
+    try { return new URL(url, window.location.href).pathname; }
+    catch (e) { return ''; }
   }
 
-  document.querySelectorAll('[data-back-to-offer]').forEach(function (link) {
-    link.addEventListener('click', function (e) {
-      if (cameFromOfferPage() && history.length > 1) {
-        e.preventDefault();
-        history.back();
-      }
-      // else: let the default href (with anchor) navigate normally
-    });
+  function smartBackOnClick(e) {
+    var link = e.currentTarget;
+    var hrefPath = pathOf(link.getAttribute('href') || '');
+    if (!hrefPath) return;
+    var ref = document.referrer || '';
+    if (!ref) return;
+    var refPath;
+    try { refPath = new URL(ref).pathname; } catch (err) { return; }
+    var refOrigin;
+    try { refOrigin = new URL(ref).origin; } catch (err) { return; }
+    if (refOrigin !== window.location.origin) return;
+
+    // Normalize trailing-index for the offer-page root
+    var normalize = function (p) {
+      if (p === '/wavemax' || p === '/wavemax/' || p === '/wavemax/index.html') return '/wavemax/';
+      return p;
+    };
+    if (normalize(refPath) === normalize(hrefPath) && history.length > 1) {
+      e.preventDefault();
+      history.back();
+    }
+  }
+
+  document.querySelectorAll('[data-back-to-offer], [data-back-to-audit]').forEach(function (link) {
+    link.addEventListener('click', smartBackOnClick);
   });
+
+  // Hash-target focus: callout id -> id of the primary button inside it to focus
+  var focusMap = {
+    'demo-callout': 'demo-btn',
+  };
+  function handleHashFocus() {
+    var id = (location.hash || '').slice(1);
+    if (!id || !focusMap[id]) return;
+    var target = document.getElementById(id);
+    if (!target) return;
+    setTimeout(function () {
+      target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      var btn = document.getElementById(focusMap[id]);
+      if (btn) {
+        // After the smooth-scroll begins, focus the button. preventScroll
+        // so the focus doesn't fight the smooth-scroll animation.
+        setTimeout(function () {
+          try { btn.focus({ preventScroll: true }); } catch (e) { btn.focus(); }
+        }, 450);
+      }
+    }, 60);
+  }
+  handleHashFocus();
+  window.addEventListener('hashchange', handleHashFocus);
 })();
