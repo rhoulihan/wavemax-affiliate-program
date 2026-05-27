@@ -181,8 +181,8 @@
   .scroll-anchor{scroll-margin-top:18px}
   .price-grid{display:grid;grid-template-columns:1fr;gap:26px;align-items:start}
   @media (min-width:900px){
-    .price-grid{grid-template-columns:1fr 360px;gap:40px}
-    .price-grid > .price-card{margin:0;max-width:none;position:sticky;top:24px}
+    .price-grid{grid-template-columns:1fr 360px;gap:40px;align-items:center}
+    .price-grid > .price-card{margin:0;max-width:none}
   }
   .pb-metric .win.win-bad{background:#fde2e2;color:#b42318}
   .takeaway{background:linear-gradient(160deg,#0b1f43,#1e3a8a);color:#fff;border-radius:14px;padding:24px 30px;margin:0 0 28px;text-align:center;font-size:16px;line-height:1.65}
