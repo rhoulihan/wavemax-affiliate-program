@@ -141,7 +141,11 @@
   .founder .name{font-weight:800;font-size:20px;color:var(--ink)}
   .founder .role{color:var(--soft);font-size:14px;margin-bottom:10px}
   .credentials{margin-top:24px;padding-top:22px;border-top:1px solid var(--line)}
-  .credentials .eyebrow{margin-bottom:14px}
+  .credentials .eyebrow{margin-bottom:14px;text-align:center}
+  /* fit-content + margin:auto centers the whole block in the column;
+   * the tiles row sits at its natural width, and the bullet list inherits
+   * the same left edge (it's left-justified inside the centered block). */
+  .cred-content{width:fit-content;max-width:100%;margin:0 auto}
   .cred-stats{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:18px}
   .cred-stat{background:linear-gradient(160deg,#0b1f43,#1e3a8a);color:#fff;border-radius:10px;padding:12px 18px;display:flex;align-items:baseline;gap:10px;min-width:170px}
   .cred-stat .n{font-size:30px;font-weight:800;line-height:1;letter-spacing:-0.02em}

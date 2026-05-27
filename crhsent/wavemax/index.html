@@ -10,7 +10,7 @@
 <!-- Same-origin favicon so the browser never requests the default /favicon.ico,
      which 302-redirects to wavemaxlaundry.com and trips CSP img-src 'self'. -->
 <link rel="icon" type="image/svg+xml" href="/wavemax/favicon.svg">
-<link rel="stylesheet" href="/wavemax/styles.css?v=20260527f">
+<link rel="stylesheet" href="/wavemax/styles.css?v=20260527g">
 <!-- Cloudflare Turnstile site key (public) for the self-serve preview modal. The
      Turnstile script is lazy-loaded by app.js only when the modal opens (keeps the
      page fast). The matching TURNSTILE_SECRET_KEY lives in the server env (never
@@ -416,17 +416,19 @@
 
       <div class="credentials">
         <div class="eyebrow">My credentials</div>
-        <div class="cred-stats">
-          <div class="cred-stat"><span class="n">40</span><span class="l">years in tech</span></div>
-          <div class="cred-stat"><span class="n">9</span><span class="l">U.S. patents</span></div>
+        <div class="cred-content">
+          <div class="cred-stats">
+            <div class="cred-stat"><span class="n">40</span><span class="l">years in tech</span></div>
+            <div class="cred-stat"><span class="n">9</span><span class="l">U.S. patents</span></div>
+          </div>
+          <ul class="cred-titles">
+            <li><strong>Field CTO</strong> — Oracle AI Database <span class="cred-now">current</span></li>
+            <li><strong>Field CTO</strong> — MongoDB</li>
+            <li><strong>Worldwide Technical Leader, NoSQL Technology</strong> — AWS</li>
+            <li><strong>Founder, NoSQL Blackbelt Team</strong> — Amazon</li>
+            <li><strong>VP Engineering</strong> — Zenoss</li>
+          </ul>
         </div>
-        <ul class="cred-titles">
-          <li><strong>Field CTO</strong> — Oracle AI Database <span class="cred-now">current</span></li>
-          <li><strong>Field CTO</strong> — MongoDB</li>
-          <li><strong>Founder, NoSQL Blackbelt Team</strong> — Amazon</li>
-          <li><strong>Worldwide Technical Leader, NoSQL Technology</strong> — AWS</li>
-          <li><strong>VP Engineering</strong> — Zenoss</li>
-        </ul>
       </div>
     </div>
   </div>
