@@ -215,10 +215,11 @@
    * Layout: 'Click here' text on the left, arrow SVG on the right. */
   .click-arrow {
     position: absolute;
-    /* Aligned with the fake button at top:290px — arrow vertical center
-     * sits at ~305px to point straight at the button's vertical center. */
+    /* Aligned vertically with the fake button (top:290px); positioned
+     * further left so the arrowhead lands cleanly against the button's
+     * LEFT edge instead of overlapping into the middle of the button. */
     top: 295px;
-    right: 220px;
+    right: 250px;
     z-index: 30;
     pointer-events: none;
     color: var(--danger);
@@ -531,42 +532,23 @@
   <p style="margin-top:14px;font-size:14px;color:var(--muted)">CRHS Enterprises (the operator of WaveMAX Austin) is one independent franchisee speaking from one franchise location. The exposure documented here affects every franchisee location subject to the same franchisor platform configuration. If you operate a WaveMAX location and want to compare notes — or if you've experienced an impersonation incident already — get in touch.</p>
 </section>
 
-<!-- INTRO MODAL: shown on page load -->
+<!-- INTRO MODAL: shown on page load (combined intro + add-button explainer) -->
 <div class="modal-backdrop" id="intro-modal" role="dialog" aria-modal="true" aria-labelledby="intro-modal-title">
   <div class="modal intro">
     <div class="modal-eyebrow">Before you click anything</div>
     <h2 id="intro-modal-title">What you're about to see</h2>
     <p class="lede">The page below the watermark is the <em>real</em> WaveMAX Austin location page — loaded live from the franchisor's own servers, unmodified.</p>
-    <p>The reason it loads here, on a different domain (<code>crhsent.com</code>), is that the franchisor's platform serves <code>wavemaxlaundry.com</code> without the standard browser-enforced framing controls:</p>
+    <p>The reason it loads here on a different domain (<code>crhsent.com</code>) is that the franchisor's platform serves <code>wavemaxlaundry.com</code> without the standard browser-enforced framing controls:</p>
     <ul style="margin:8px 0 14px 22px">
       <li>No <code>X-Frame-Options</code> response header</li>
       <li>No <code>Content-Security-Policy: frame-ancestors</code> directive</li>
       <li>No <code>Permissions-Policy</code></li>
     </ul>
-    <p>An attacker on any domain — a phishing domain, a typosquat of "wavemax", a Facebook-ad landing page, anywhere — can embed any franchisee's location page exactly as you see it below, and overlay their own buttons and forms on top. To a customer, the visible content is genuinely WaveMAX. The interactive controls are the attacker's.</p>
+    <p>An attacker on any domain — a phishing domain, a typosquat of "wavemax", a Facebook-ad landing page, anywhere — can embed any franchisee's location page exactly as you see it below. The franchisor's content renders untouched (the attacker can't reach across origins to modify it); the buttons and forms layered on top are the attacker's, on the attacker's own page.</p>
     <div class="takeaway"><strong>Every WaveMAX-branded franchisee subpath at <code>wavemaxlaundry.com/&lt;city&gt;-&lt;state&gt;/</code> shares this exposure</strong> — whether or not the franchisee signed up for the marketing platform.</div>
-    <p>In a moment we'll point at a fake "Schedule a Pickup" button styled to match the WaveMAX brand. Austin doesn't actually offer pickup-and-delivery service — but a customer wouldn't know that. Click it to see how the attack proceeds.</p>
+    <p>When you dismiss this dialog, a "Schedule a Pickup" button will appear in the hero area of the page below — styled to match the WaveMAX brand, positioned where a primary call-to-action would naturally live. Austin doesn't actually offer pickup-and-delivery service, but a customer wouldn't know that — and even if they would, an attacker can pick any label that serves their goal: "Pay your bill," "Update your account," "Verify your identity," "Claim a refund," whatever. Click the button when you see it to learn what happens next.</p>
     <div class="modal-actions">
       <button id="dismiss-intro" type="button">Show me the attack →</button>
-    </div>
-  </div>
-</div>
-
-<!-- ADD-BUTTON MODAL: shown after intro is dismissed, BEFORE the button appears -->
-<div class="modal-backdrop" id="addbutton-modal" role="dialog" aria-modal="true" aria-labelledby="addbutton-modal-title">
-  <div class="modal intro">
-    <div class="modal-eyebrow">Watch the attacker work</div>
-    <h2 id="addbutton-modal-title">Now the attacker adds their bait</h2>
-    <p class="lede">The franchisor's page renders in the iframe untouched — the attacker can't modify it. What the attacker <em>can</em> do is overlay anything on top of it from their own page, on their own domain, with their own code.</p>
-    <p>When you dismiss this dialog, you'll see a "Schedule a Pickup" button appear in the upper-right corner of the franchisor's header area — styled to match the WaveMAX brand. Watch for:</p>
-    <ul style="margin:8px 0 14px 22px">
-      <li>The button styling: the gradient, the corner radius, the font weight — all chosen to feel native to WaveMAX. A customer reading the page would not notice that this control was added by anyone other than WaveMAX.</li>
-      <li>The position: top-right of the header strip, exactly where a primary call-to-action would live on a real laundry site.</li>
-      <li>The label: "Schedule a Pickup" is plausible. Austin doesn't actually offer pickup-and-delivery — but a customer wouldn't know that, and even if they would, the attacker can pick any label that serves their goal ("Pay your bill," "Update your account," "Verify your identity," "Claim a refund," whatever).</li>
-    </ul>
-    <p>Click "Add the button" and the bait appears. A short red arrow will flash next to it inviting the click — exactly the kind of attention-grabbing UI an attacker would build into their landing page.</p>
-    <div class="modal-actions">
-      <button id="add-button-btn" type="button">Add the button →</button>
     </div>
   </div>
 </div>
@@ -600,6 +582,6 @@
   <p>This page is an educational demonstration of a publicly verifiable security finding on the franchisor's corporate site, captured 2026-05-26 with the open-source tools named in the full audit. The iframe shown above loads the franchisor's own page directly from its servers; no franchisor content is modified or hosted by CRHS. CRHS Enterprises, LLC is an independent WaveMAX® franchisee. WaveMAX® is a trademark of WaveMAX Franchise, LLC. This page is not provided, endorsed, or required by WaveMAX Franchise, LLC.</p>
 </footer>
 
-<script src="/wavemax/clickjacking-demo.js?v=20260526g"></script>
+<script src="/wavemax/clickjacking-demo.js?v=20260526h"></script>
 </body>
 </html>

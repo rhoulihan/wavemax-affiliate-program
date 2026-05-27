@@ -3,16 +3,16 @@
  * Reveal sequence:
  *   1. Page loads. Watermark visible immediately. Iframe begins loading
  *      the real WaveMAX Austin page. Fake button is hidden. Arrow is hidden.
- *   2. After ~600ms: intro modal opens, explaining what's about to happen.
- *   3. User dismisses intro -> add-button modal opens, narrating that the
- *      attacker is about to inject the bait.
- *   4. User dismisses add-button modal -> the fake "Schedule a Pickup" button
- *      reveals with a fade-in + light scale animation (~550ms via CSS).
- *   5. Once the button is in place (after the reveal animation), the click
+ *   2. After ~600ms: combined intro modal opens (explains the demo AND
+ *      narrates what the visitor is about to watch — the bait being added).
+ *   3. User dismisses intro -> the fake "Schedule a Pickup" button reveals
+ *      with a fade-in + light scale animation (~550ms via CSS).
+ *   4. Once the button is in place (after the reveal animation), the click
  *      arrow appears and pulses to attract the click.
- *   6. User clicks the button -> attack modal explains the takeover, offers
- *      "See proper security" (switches to the rundberg tab) or "Close".
- *   7. Rundberg tab attempts to load rundberglaundry.com — browser blocks
+ *   5. User clicks the button -> attack modal explains the takeover (opens
+ *      scrolled to the top of its content), offers "See proper security"
+ *      (switches to the rundberg tab) or "Close".
+ *   6. Rundberg tab attempts to load rundberglaundry.com — browser blocks
  *      via X-Frame-Options + CSP frame-ancestors, and our protected-overlay
  *      panel renders on top with the explanation.
  */
@@ -22,10 +22,8 @@
   var $ = function (id) { return document.getElementById(id); };
 
   var introModal      = $('intro-modal');
-  var addbuttonModal  = $('addbutton-modal');
   var attackModal     = $('attack-modal');
   var dismissIntro    = $('dismiss-intro');
-  var addButtonBtn    = $('add-button-btn');
   var dismissAttack   = $('dismiss-attack');
   var showProtected   = $('show-protected-btn');
   var pickupBtnWrap   = document.querySelector('.fake-button-overlay');
@@ -43,8 +41,22 @@
     if (!el) return;
     el.classList.add('open');
     el.setAttribute('aria-hidden', 'false');
+    // Reset the modal's scroll position to the top so the user sees the
+    // heading first; otherwise a tall modal can open scrolled because of
+    // prior viewing state or focus-induced scrolling.
+    var modal = el.querySelector('.modal');
+    if (modal) modal.scrollTop = 0;
+    // Focus the first button for keyboard accessibility, but pass
+    // preventScroll so the focus call doesn't yank the modal-actions row
+    // (which lives at the bottom of the modal) into view and override the
+    // scrollTop=0 we just set.
     var firstBtn = el.querySelector('button');
-    if (firstBtn) { try { firstBtn.focus(); } catch (e) { /* ignore */ } }
+    if (firstBtn) {
+      try { firstBtn.focus({ preventScroll: true }); }
+      catch (e) {
+        try { firstBtn.focus(); } catch (e2) { /* ignore */ }
+      }
+    }
   }
   function closeModal(el) {
     if (!el) return;
@@ -58,17 +70,11 @@
     setTimeout(function () { openModal(introModal); }, 600);
   });
 
-  // 3. Intro dismissed -> open the add-button modal (NOT the button reveal yet).
-  dismissIntro.addEventListener('click', function () {
-    closeModal(introModal);
-    setTimeout(function () { openModal(addbuttonModal); }, 220);
-  });
-
-  // 4+5. Add-button dismissed -> reveal the button first, then the arrow.
+  // 3+4. Intro dismissed -> reveal the button first, then the arrow.
   //      Sequence the arrow ~750ms after the button starts revealing so
   //      the user clearly perceives "button appears, then arrow points to it".
-  addButtonBtn.addEventListener('click', function () {
-    closeModal(addbuttonModal);
+  dismissIntro.addEventListener('click', function () {
+    closeModal(introModal);
     setTimeout(function () {
       pickupBtnWrap.classList.add('revealed');
       setTimeout(function () { clickArrow.classList.add('revealed'); }, 750);
@@ -77,7 +83,7 @@
     }, 320);
   });
 
-  // 6. Fake "Schedule a Pickup" -> attack modal
+  // 5. Fake "Schedule a Pickup" -> attack modal
   pickupBtn.addEventListener('click', function (e) {
     e.preventDefault();
     e.stopPropagation();
@@ -97,16 +103,15 @@
   });
 
   // Close modal on Escape or backdrop click
-  [introModal, addbuttonModal, attackModal].forEach(function (m) {
+  [introModal, attackModal].forEach(function (m) {
     m.addEventListener('click', function (e) {
       if (e.target === m) closeModal(m);
     });
   });
   document.addEventListener('keydown', function (e) {
     if (e.key === 'Escape') {
-      if (introModal.classList.contains('open'))     closeModal(introModal);
-      if (addbuttonModal.classList.contains('open')) closeModal(addbuttonModal);
-      if (attackModal.classList.contains('open'))    closeModal(attackModal);
+      if (introModal.classList.contains('open'))  closeModal(introModal);
+      if (attackModal.classList.contains('open')) closeModal(attackModal);
     }
   });
 
