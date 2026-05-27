@@ -166,12 +166,11 @@
   /* Schedule a Pickup overlay button — styled to look like WaveMAX brand */
   .fake-button-overlay {
     position: absolute;
-    /* Positioned below the franchisor nav strip (Franchise / Location / etc.),
-     * centered horizontally under those right-side nav buttons.
-     * top: ~110px clears the franchisor utility-bar + main-nav stack;
-     * right: ~95px aligns the button center under the Franchise+Location pair. */
-    top: 110px;
-    right: 95px;
+    /* Positioned in the hero area below the franchisor nav strip,
+     * shifted right and down to sit centered under the Franchise+Location
+     * pair at a natural hero-CTA position rather than crowding the nav. */
+    top: 260px;
+    right: 70px;
     z-index: 25;
     opacity: 0;
     transform: translateY(-8px) scale(0.96);
@@ -214,10 +213,10 @@
   /* The "click here" arrow pointing to the fake button */
   .click-arrow {
     position: absolute;
-    /* Aligned with the fake button at top:110px — arrow vertical center
-     * sits at ~125px to point straight at the button's vertical center. */
-    top: 115px;
-    right: 245px;
+    /* Aligned with the fake button at top:260px — arrow vertical center
+     * sits at ~275px to point straight at the button's vertical center. */
+    top: 265px;
+    right: 220px;
     z-index: 30;
     pointer-events: none;
     color: var(--danger);
@@ -599,6 +598,6 @@
   <p>This page is an educational demonstration of a publicly verifiable security finding on the franchisor's corporate site, captured 2026-05-26 with the open-source tools named in the full audit. The iframe shown above loads the franchisor's own page directly from its servers; no franchisor content is modified or hosted by CRHS. CRHS Enterprises, LLC is an independent WaveMAX® franchisee. WaveMAX® is a trademark of WaveMAX Franchise, LLC. This page is not provided, endorsed, or required by WaveMAX Franchise, LLC.</p>
 </footer>
 
-<script src="/wavemax/clickjacking-demo.js?v=20260526c"></script>
+<script src="/wavemax/clickjacking-demo.js?v=20260526d"></script>
 </body>
 </html>
