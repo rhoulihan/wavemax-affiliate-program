@@ -140,6 +140,16 @@
   .founder p{font-size:15.5px;color:var(--ink2);margin-bottom:6px}
   .founder .name{font-weight:800;font-size:20px;color:var(--ink)}
   .founder .role{color:var(--soft);font-size:14px;margin-bottom:10px}
+  .credentials{margin-top:24px;padding-top:22px;border-top:1px solid var(--line)}
+  .credentials .eyebrow{margin-bottom:14px}
+  .cred-stats{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:18px}
+  .cred-stat{background:linear-gradient(160deg,#0b1f43,#1e3a8a);color:#fff;border-radius:10px;padding:12px 18px;display:flex;align-items:baseline;gap:10px;min-width:170px}
+  .cred-stat .n{font-size:30px;font-weight:800;line-height:1;letter-spacing:-0.02em}
+  .cred-stat .l{font-size:13.5px;color:#bcd3ff;font-weight:500}
+  .cred-titles{list-style:none;padding:0;margin:0;display:grid;gap:6px}
+  .cred-titles li{font-size:14.5px;color:var(--ink2);padding-left:20px;position:relative;line-height:1.5}
+  .cred-titles li:before{content:"›";position:absolute;left:0;top:-1px;color:var(--brand);font-weight:800;font-size:17px}
+  .cred-titles li strong{color:var(--ink);font-weight:700}
 
   .final{background:var(--panel);text-align:center}
   .final h2{font-size:30px;font-weight:800;margin-bottom:8px}
