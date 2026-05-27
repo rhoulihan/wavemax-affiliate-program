@@ -10,7 +10,7 @@
 <!-- Same-origin favicon so the browser never requests the default /favicon.ico,
      which 302-redirects to wavemaxlaundry.com and trips CSP img-src 'self'. -->
 <link rel="icon" type="image/svg+xml" href="/wavemax/favicon.svg">
-<link rel="stylesheet" href="/wavemax/styles.css?v=20260527i">
+<link rel="stylesheet" href="/wavemax/styles.css?v=20260527j">
 <!-- Cloudflare Turnstile site key (public) for the self-serve preview modal. The
      Turnstile script is lazy-loaded by app.js only when the modal opens (keeps the
      page fast). The matching TURNSTILE_SECRET_KEY lives in the server env (never
@@ -31,9 +31,9 @@
     <p class="hero-note">Everything I build for you is the same stack I run for my own WaveMAX store. I'm motivated to make it work — because it's working for me.</p>
 
     <div class="stats">
-      <div class="stat"><div class="n">1,427</div><div class="l">peak daily Google impressions, Austin store</div></div>
-      <div class="stat"><div class="n">230,806</div><div class="l">total impressions earned in 16 months</div></div>
-      <div class="stat"><div class="n">23/23</div><div class="l">industry-standard security controls passing</div></div>
+      <div class="stat"><div class="n">1,427</div><div class="l">peak daily Google impressions, Austin store<span class="asof">GSC export · 2026-05-20</span></div></div>
+      <div class="stat"><div class="n">230,806</div><div class="l">total impressions earned in 16 months<span class="asof">GSC export · 2026-05-20</span></div></div>
+      <div class="stat"><div class="n">23/23</div><div class="l">industry-standard security controls passing<span class="asof">Comparative audit · 2026-05-20</span></div></div>
       <div class="stat"><div class="n">$500</div><div class="l">flat per month — everything included</div></div>
     </div>
   </div>
@@ -110,8 +110,8 @@
         <p class="sub mt-2">Don't take my word for it — <strong>Google scores every page.</strong> Here's what <a href="https://pagespeed.web.dev/" target="_blank" rel="noopener">Google PageSpeed Insights</a> reports for each site today, measured on Google's own servers. Run all three yourself.</p>
 
         <div class="perf-stats">
-          <div class="perf-stat"><div class="n">100</div><div class="l">Google PSI performance — this CRHS sales page, mobile &amp; desktop</div></div>
-          <div class="perf-stat"><div class="n bad">59</div><div class="l">Google PSI performance — the WaveMAX platform, on mobile</div></div>
+          <div class="perf-stat"><div class="n">100</div><div class="l">Google PSI performance — this CRHS sales page, mobile &amp; desktop<span class="asof">PSI · 2026-05-25</span></div></div>
+          <div class="perf-stat"><div class="n bad">59</div><div class="l">Google PSI performance — the WaveMAX platform, on mobile<span class="asof">PSI · 2026-05-25</span></div></div>
           <div class="perf-stat"><div class="n">100</div><div class="l">accessibility — every CRHS page (the platform scores 77)</div></div>
           <div class="perf-stat"><div class="n">~0.2s</div><div class="l">origin response on every request — cache or not</div></div>
         </div>
@@ -272,7 +272,7 @@
 
     <div class="callout">
       <h3>The full security &amp; code-quality audit — published</h3>
-      <p>The bullets above are samples. The whole picture — the corporate site's <strong>broken anchor links on the franchise-conversion page</strong>, the <strong>JavaScript crash on every page load</strong> (which is what makes the "Become a Franchisee" navigation menu open and never close), <strong>1,886 W3C HTML errors across 4 franchise pages</strong>, the missing security headers and CORS misconfiguration, the network-wide zero-local-business-schema, the performance deficit, and the gap between the mandated $300/month "Website Foundation" claims and what's actually delivered — is laid out in one place, with every finding reproducible from the named open-source tools and public URLs.</p>
+      <p>The bullets above are samples. The whole picture — the corporate site's <strong>broken anchor links on the franchise-conversion page</strong>, the <strong>JavaScript crash on every page load</strong> (which is what makes the "Become a Franchisee" navigation menu open and never close), <strong>1,886 W3C HTML errors across 4 franchise pages</strong> <span class="asof">(franchise-section audit · 2026-05-26)</span>, the missing security headers and CORS misconfiguration <span class="asof">(security scan · 2026-05-22)</span>, the network-wide zero-local-business-schema <span class="asof">(SEO audit · 2026-05-23)</span>, the performance deficit, and the gap between the mandated $300/month "Website Foundation" claims and what's actually delivered <span class="asof">(claims-vs-delivered · 2026-05-23)</span> — is laid out in one place, with every finding reproducible from the named open-source tools and public URLs.</p>
       <p style="margin-top:10px"><a class="btn ghost" href="/wavemax/security-audit.html">Read the full audit →</a></p>
     </div>
 
@@ -373,7 +373,7 @@
       <div class="card"><div class="ic">🛠️</div><h3>"Just about anything"</h3><p>Call tracking, review funnels (done compliantly), booking flows, custom features — if you can imagine it, let's talk. I love this work.</p></div>
     </div>
     <div class="callout">
-      <p><strong>And here's the part a captive contract can't match: I have to earn this.</strong> The platform's required <strong>$300/mo "Website Foundation"</strong> is a no-bid fee — your store is handed to the vendor whether the work is any good or not, so there's no reason for them to invest. (Their own marketing site scores just <strong>66 on mobile</strong> in Google's PageSpeed Insights — they bill "Performance Optimization" and don't even do it for themselves.) Nobody hands your business to me. I keep it by being better every single month — and that's exactly why I will be.</p>
+      <p><strong>And here's the part a captive contract can't match: I have to earn this.</strong> The platform's required <strong>$300/mo "Website Foundation"</strong> is a no-bid fee — your store is handed to the vendor whether the work is any good or not, so there's no reason for them to invest. (Their own marketing site scores just <strong>66 on mobile</strong> in Google's PageSpeed Insights <span class="asof">(MHR vendor capture · 2026-05-23)</span> — they bill "Performance Optimization" and don't even do it for themselves.) Nobody hands your business to me. I keep it by being better every single month — and that's exactly why I will be.</p>
     </div>
   </div>
 </section>

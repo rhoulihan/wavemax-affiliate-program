@@ -156,6 +156,10 @@
   .cred-titles li strong{color:var(--ink);font-weight:700}
   .cred-titles .cred-now{display:inline-block;background:#dcfce7;color:#15803d;font-size:11px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;padding:2px 8px;border-radius:999px;margin-left:6px;vertical-align:1px}
   .th-asof{display:inline-block;margin-left:8px;font-size:11.5px;font-weight:500;color:var(--soft);letter-spacing:0.04em;text-transform:none;font-variant-numeric:tabular-nums}
+  /* Generic inline as-of marker — used next to any measured/factual claim so the
+   * measurement date is visible without a reader having to chase the source. */
+  .asof{display:inline-block;margin-left:6px;font-size:11.5px;font-weight:500;color:var(--soft);letter-spacing:0.02em;font-variant-numeric:tabular-nums;white-space:nowrap}
+  .stat .asof,.perf-stat .asof{display:block;margin-left:0;margin-top:6px;font-size:10.5px;color:#94a3b8;letter-spacing:0.04em;text-transform:uppercase;font-weight:600;opacity:0.85}
 
   .final{background:var(--panel);text-align:center}
   .final h2{font-size:30px;font-weight:800;margin-bottom:8px}
