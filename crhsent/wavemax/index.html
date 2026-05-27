@@ -270,13 +270,13 @@
       <p>And it isn't consistent: of <strong>62 franchise pages I checked, 39 had posted nothing at all since the May&nbsp;1 platform switch.</strong> Same flat fee, same "all-inclusive" promise — measured against what's actually on the pages. They're public; check it yourself.</p>
     </div>
 
-    <div class="callout">
+    <div class="callout" id="audit-callout">
       <h3>The full security &amp; code-quality audit — published</h3>
       <p>The bullets above are samples. The whole picture — the corporate site's <strong>broken anchor links on the franchise-conversion page</strong>, the <strong>JavaScript crash on every page load</strong> (which is what makes the "Become a Franchisee" navigation menu open and never close), <strong>1,886 W3C HTML errors across 4 franchise pages</strong> <span class="asof">(franchise-section audit · 2026-05-26)</span>, the missing security headers and CORS misconfiguration <span class="asof">(security scan · 2026-05-22)</span>, the network-wide zero-local-business-schema <span class="asof">(SEO audit · 2026-05-23)</span>, the performance deficit, and the gap between the mandated $300/month "Website Foundation" claims and what's actually delivered <span class="asof">(claims-vs-delivered · 2026-05-23)</span> — is laid out in one place, with every finding reproducible from the named open-source tools and public URLs.</p>
       <p style="margin-top:10px"><a class="btn ghost" href="/wavemax/security-audit.html">Read the full audit →</a></p>
     </div>
 
-    <div class="callout" style="background:#fef2f2;border-left:4px solid #dc2626">
+    <div class="callout" id="clickjack-callout" style="background:#fef2f2;border-left:4px solid #dc2626">
       <h3 style="color:#991b1b">Fellow WaveMAX franchisees: see what your customers see</h3>
       <p>The missing security headers in the audit above aren't an abstract finding. They mean <strong>any third party, on any domain, can embed your location's page from <code>wavemaxlaundry.com/&lt;your-city&gt;-&lt;your-state&gt;/</code> in a hostile overlay</strong> — whether or not you signed up for MHR. The page header, footer, branding, and content remain genuinely WaveMAX; the buttons and forms the attacker overlays are not. When the chargeback or customer complaint or AG filing arrives, your franchise's name is on the page the customer used.</p>
       <p>We built a watermarked, educational demonstration so you can see exactly what this looks like in your own browser — loading the real franchisor page in an iframe, overlaying a "Schedule a Pickup" button styled to match WaveMAX, and walking through the attack mechanics. Side-by-side comparison shows what proper security looks like: the browser refuses to embed a properly-configured site at all.</p>
@@ -506,6 +506,6 @@
   </div>
 </div>
 
-<script src="/wavemax/app.js?v=20260525c"></script>
+<script src="/wavemax/app.js?v=20260527a"></script>
 <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script></body>
 </html>

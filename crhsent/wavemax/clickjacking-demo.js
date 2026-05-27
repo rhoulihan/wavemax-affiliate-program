@@ -41,6 +41,9 @@
     if (!el) return;
     el.classList.add('open');
     el.setAttribute('aria-hidden', 'false');
+    // Lock background scroll so the page chrome behind the dimmer doesn't
+    // scroll when the user wheel/touches the modal.
+    document.body.classList.add('modal-open');
     // Reset the modal's scroll position to the top so the user sees the
     // heading first; otherwise a tall modal can open scrolled because of
     // prior viewing state or focus-induced scrolling.
@@ -62,6 +65,9 @@
     if (!el) return;
     el.classList.remove('open');
     el.setAttribute('aria-hidden', 'true');
+    // Only unlock body scroll when no other modal is still open.
+    var anyOpen = document.querySelector('.modal-backdrop.open');
+    if (!anyOpen) document.body.classList.remove('modal-open');
   }
 
   // 1+2. On load, show intro modal after a brief delay so the iframe
