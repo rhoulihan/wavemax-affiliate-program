@@ -562,7 +562,7 @@
     <ol>
       <li>Open a "Schedule a Pickup" form styled to match WaveMAX, collecting the customer's name, address, phone, email, and credit card.</li>
       <li>Submit the form to the attacker's payment processor. The transaction settles to the attacker's merchant account.</li>
-      <li>Issue a confirmation email from a lookalike <code>@wavemax-austin-pickup.com</code> address (the franchisor's domain has DMARC at <code>p=none</code>, so spoofed mail from the franchisor's own domain isn't even rejected by recipients' mail servers).</li>
+      <li>Issue a confirmation email from a lookalike <code>@wavemax-austin-pickup.com</code> address — a domain the attacker registers and configures themselves, with whatever email-authentication posture (SPF, DKIM, DMARC) they choose to make their mail land in the inbox rather than the spam folder. The attack does not depend on spoofing the franchisor's domain.</li>
       <li>The customer never receives service. Their card has been charged. The page they used had CRHS-Austin's name and the WaveMAX brand on it.</li>
     </ol>
     <div class="quoted">The chargeback, the complaint to the BBB, the state attorney general filing, and any consumer-class action name <strong>the franchisee whose name appeared on the page</strong> — CRHS-Austin — alongside WaveMAX Franchise LLC. The franchisee bears the brand-and-customer-trust risk. The franchisor's platform created the attack surface.</div>
@@ -582,6 +582,6 @@
   <p>This page is an educational demonstration of a publicly verifiable security finding on the franchisor's corporate site, captured 2026-05-26 with the open-source tools named in the full audit. The iframe shown above loads the franchisor's own page directly from its servers; no franchisor content is modified or hosted by CRHS. CRHS Enterprises, LLC is an independent WaveMAX® franchisee. WaveMAX® is a trademark of WaveMAX Franchise, LLC. This page is not provided, endorsed, or required by WaveMAX Franchise, LLC.</p>
 </footer>
 
-<script src="/wavemax/clickjacking-demo.js?v=20260526h"></script>
+<script src="/wavemax/clickjacking-demo.js?v=20260527a"></script>
 </body>
 </html>
