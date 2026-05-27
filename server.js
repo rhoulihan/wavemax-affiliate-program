@@ -351,7 +351,16 @@ app.use((req, res, next) => {
                               && !req.path.startsWith('/dev/');
 
   const useStrictCSP = strictCSPPages.includes(req.path) || isDocumentationPage || isFranchiseHostPage;
-  
+
+  // /wavemax/clickjacking-demo.html — the educational clickjacking demonstration
+  // page on crhsent.com. Its sole purpose is to load the franchisor's headerless
+  // wavemaxlaundry.com pages in an iframe (the entire point of the demo is to
+  // show that exactly this works because the franchisor's site doesn't set
+  // X-Frame-Options / CSP frame-ancestors). Standard frame-src doesn't include
+  // those origins; adding them here for this one route, not globally, keeps the
+  // strict frame-src on every other page intact.
+  const isClickjackingDemo = req.path === '/wavemax/clickjacking-demo.html';
+
   // All embed pages now use nonces since embed-app.html was converted to CSP-compliant redirect to embed-app-v2.html
   const skipNonce = false;
   
@@ -394,7 +403,11 @@ app.use((req, res, next) => {
     'font-src': ["'self'", 'https://cdnjs.cloudflare.com', 'https://cdn.jsdelivr.net', 'https://fonts.gstatic.com'],
     'object-src': ["'none'"],
     'media-src': ["'self'"],
-    'frame-src': ["'self'", 'https://www.google.com', 'https://maps.google.com', 'https://my.matterport.com', 'https://challenges.cloudflare.com'],
+    'frame-src': isClickjackingDemo
+      ? ["'self'", 'https://www.google.com', 'https://maps.google.com', 'https://my.matterport.com', 'https://challenges.cloudflare.com',
+         // Educational clickjacking demo only — see isClickjackingDemo comment above.
+         'https://www.wavemaxlaundry.com', 'https://wavemaxlaundry.com', 'https://rundberglaundry.com']
+      : ["'self'", 'https://www.google.com', 'https://maps.google.com', 'https://my.matterport.com', 'https://challenges.cloudflare.com'],
     'form-action': ["'self'", 'https://safepay.paymentlogistics.net'],
     'frame-ancestors': ["'self'", 'https://www.wavemaxlaundry.com', 'https://wavemaxlaundry.com'],
     'base-uri': ["'self'"],
