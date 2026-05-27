@@ -210,35 +210,40 @@
   .fake-schedule-pickup:active { transform: translateY(0); }
   .fake-schedule-pickup .arrow-right { font-size: 17px; }
 
-  /* The "click here" arrow pointing to the fake button */
+  /* The "click here" arrow pointing to the fake button — high-contrast
+   * pill so it's visible against any iframe content underneath. */
   .click-arrow {
     position: absolute;
     /* Aligned with the fake button at top:260px — arrow vertical center
      * sits at ~275px to point straight at the button's vertical center. */
-    top: 265px;
+    top: 263px;
     right: 220px;
     z-index: 30;
     pointer-events: none;
-    color: var(--danger);
+    color: white;
+    background: var(--danger);
     font-weight: 800;
-    font-size: 19px;
+    font-size: 17px;
+    letter-spacing: 0.02em;
+    padding: 8px 14px;
+    border-radius: 999px;
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
     opacity: 0;
     transition: opacity 0.3s;
-    text-shadow: 0 0 6px white, 0 0 6px white, 0 1px 2px white;
+    box-shadow: 0 4px 14px rgba(220, 38, 38, 0.45), 0 0 0 3px rgba(255, 255, 255, 0.85);
   }
   .click-arrow.revealed {
     opacity: 1;
     animation: pulse 0.9s ease-in-out infinite alternate;
   }
   .click-arrow .arrow-svg {
-    width: 38px; height: 28px;
+    width: 32px; height: 22px;
   }
   @keyframes pulse {
-    from { transform: translateX(0) scale(1); opacity: 0.85; }
-    to   { transform: translateX(8px) scale(1.05); opacity: 1; }
+    from { transform: translateX(0) scale(1); }
+    to   { transform: translateX(8px) scale(1.06); }
   }
   .click-arrow.fading { animation: none; opacity: 0; transition: opacity 0.4s; }
 
@@ -598,6 +603,6 @@
   <p>This page is an educational demonstration of a publicly verifiable security finding on the franchisor's corporate site, captured 2026-05-26 with the open-source tools named in the full audit. The iframe shown above loads the franchisor's own page directly from its servers; no franchisor content is modified or hosted by CRHS. CRHS Enterprises, LLC is an independent WaveMAX® franchisee. WaveMAX® is a trademark of WaveMAX Franchise, LLC. This page is not provided, endorsed, or required by WaveMAX Franchise, LLC.</p>
 </footer>
 
-<script src="/wavemax/clickjacking-demo.js?v=20260526d"></script>
+<script src="/wavemax/clickjacking-demo.js?v=20260526e"></script>
 </body>
 </html>

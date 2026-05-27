@@ -72,10 +72,8 @@
     setTimeout(function () {
       pickupBtnWrap.classList.add('revealed');
       setTimeout(function () { clickArrow.classList.add('revealed'); }, 750);
-      // arrow auto-fades after a while so it doesn't loop forever
-      setTimeout(function () {
-        clickArrow.classList.remove('revealed');
-      }, 18000);
+      // arrow stays visible+pulsing until the user clicks the fake button
+      // (the click handler removes .revealed). No auto-fade.
     }, 320);
   });
 
