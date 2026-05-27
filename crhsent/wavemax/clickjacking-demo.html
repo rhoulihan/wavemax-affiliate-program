@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Clickjacking demonstration · WaveMAX corporate security gap · CRHS Enterprises</title>
+<meta name="description" content="Live demonstration: any third party can embed any WaveMAX franchisee page in a hostile overlay because wavemaxlaundry.com sets no X-Frame-Options and no Content-Security-Policy frame-ancestors directive.">
+<meta name="csp-nonce" content="{{CSP_NONCE}}">
+<link rel="icon" type="image/svg+xml" href="/wavemax/favicon.svg">
+<style>
+  :root {
+    --wm-blue: #0099bb;
+    --wm-blue-deep: #006d8a;
+    --wm-blue-darker: #004a60;
+    --ink: #0f172a;
+    --muted: #475569;
+    --danger: #dc2626;
+    --safe: #15803d;
+    --bg: #f8fafc;
+    --line: #e2e8f0;
+  }
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    color: var(--ink);
+    background: var(--bg);
+    line-height: 1.55;
+    font-size: 15.5px;
+  }
+  a { color: var(--wm-blue-deep); }
+
+  /* Page header */
+  .demo-header {
+    background: linear-gradient(135deg, #0f172a, #1e293b);
+    color: white;
+    padding: 28px 24px 32px;
+    text-align: center;
+  }
+  .demo-header .eyebrow {
+    font-size: 12.5px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #94a3b8;
+    margin-bottom: 8px;
+  }
+  .demo-header h1 {
+    font-size: 30px;
+    margin: 4px 0 10px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+  .demo-header p {
+    color: #cbd5e1;
+    max-width: 760px;
+    margin: 0 auto 16px;
+    font-size: 16px;
+  }
+  .demo-header .header-links {
+    font-size: 14px;
+    color: #94a3b8;
+  }
+  .demo-header .header-links a {
+    color: #94a3b8;
+    text-decoration: none;
+    border-bottom: 1px dotted #475569;
+    margin: 0 10px;
+  }
+  .demo-header .header-links a:hover { color: white; border-bottom-color: white; }
+
+  /* Tabs */
+  .demo-tabs {
+    display: flex;
+    gap: 4px;
+    justify-content: center;
+    background: #1e293b;
+    padding: 0 24px 0;
+    border-bottom: 1px solid #334155;
+  }
+  .tab {
+    background: none;
+    border: none;
+    color: #94a3b8;
+    padding: 14px 22px;
+    font-size: 14.5px;
+    font-weight: 600;
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    transition: color 0.15s, border-color 0.15s;
+    font-family: inherit;
+  }
+  .tab:hover { color: white; }
+  .tab.tab-active {
+    color: white;
+    border-bottom-color: var(--wm-blue);
+  }
+  .tab-vulnerable.tab-active { border-bottom-color: var(--danger); }
+  .tab-protected.tab-active { border-bottom-color: var(--safe); }
+
+  /* Demo stage */
+  .demo-stage {
+    position: relative;
+    width: 100%;
+    max-width: 1280px;
+    margin: 0 auto;
+    background: white;
+    box-shadow: 0 4px 24px rgba(15, 23, 42, 0.08);
+  }
+  .demo-stage.hidden { display: none; }
+
+  /* The iframe holding the real franchisor site */
+  .iframe-wrap {
+    position: relative;
+    width: 100%;
+    height: 760px;
+    overflow: hidden;
+    background: #f1f5f9;
+  }
+  .iframe-wrap iframe {
+    width: 100%;
+    height: 100%;
+    border: 0;
+    display: block;
+  }
+
+  /* Diagonal watermark — ALWAYS visible above the iframe */
+  .watermark {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 8;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+  }
+  .watermark-band {
+    position: absolute;
+    width: 200%;
+    text-align: center;
+    color: rgba(220, 38, 38, 0.45);
+    font-weight: 900;
+    font-size: 28px;
+    letter-spacing: 0.04em;
+    transform: rotate(-22deg);
+    text-shadow: 0 0 8px rgba(255,255,255,0.4);
+    white-space: nowrap;
+    line-height: 2.3;
+  }
+  .watermark-corner {
+    position: absolute;
+    top: 12px; right: 12px;
+    background: rgba(220, 38, 38, 0.92);
+    color: white;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    padding: 6px 12px;
+    border-radius: 4px;
+    z-index: 35;
+    pointer-events: none;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  }
+
+  /* Schedule a Pickup overlay button — styled to look like WaveMAX brand */
+  .fake-button-overlay {
+    position: absolute;
+    top: 22px;
+    right: 80px;
+    z-index: 25;
+    opacity: 0;
+    transform: translateY(-8px) scale(0.96);
+    pointer-events: none;
+    transition: opacity 0.55s ease, transform 0.55s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .fake-button-overlay.revealed {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    pointer-events: auto;
+  }
+  .click-arrow {
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .click-arrow.revealed { opacity: 1; }
+  .fake-schedule-pickup {
+    background: linear-gradient(180deg, var(--wm-blue) 0%, var(--wm-blue-deep) 100%);
+    color: white;
+    border: none;
+    padding: 13px 26px;
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    border-radius: 4px;
+    cursor: pointer;
+    box-shadow: 0 4px 16px rgba(0, 109, 138, 0.35), inset 0 1px 0 rgba(255,255,255,0.2);
+    transition: transform 0.1s, box-shadow 0.15s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .fake-schedule-pickup:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 22px rgba(0, 109, 138, 0.45);
+  }
+  .fake-schedule-pickup:active { transform: translateY(0); }
+  .fake-schedule-pickup .arrow-right { font-size: 17px; }
+
+  /* The "click here" arrow pointing to the fake button */
+  .click-arrow {
+    position: absolute;
+    top: 30px;
+    right: 240px;
+    z-index: 30;
+    pointer-events: none;
+    color: var(--danger);
+    font-weight: 800;
+    font-size: 19px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    animation: pulse 0.9s ease-in-out infinite alternate;
+    text-shadow: 0 0 6px white, 0 0 6px white, 0 1px 2px white;
+  }
+  .click-arrow .arrow-svg {
+    width: 38px; height: 28px;
+  }
+  @keyframes pulse {
+    from { transform: translateX(0) scale(1); opacity: 0.8; }
+    to   { transform: translateX(-8px) scale(1.05); opacity: 1; }
+  }
+  .click-arrow.fading { animation: none; opacity: 0; transition: opacity 0.4s; }
+
+  /* Protected-stage overlay (rundberglaundry.com refuses to be framed) */
+  .protected-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(248, 250, 252, 0.96);
+    z-index: 20;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 40px;
+  }
+  .protected-shield {
+    font-size: 64px;
+    margin-bottom: 8px;
+  }
+  .protected-overlay h2 {
+    font-size: 26px;
+    color: var(--safe);
+    margin: 0 0 14px;
+    max-width: 720px;
+  }
+  .protected-overlay p {
+    max-width: 720px;
+    margin: 8px 0;
+    color: var(--ink);
+    font-size: 16px;
+  }
+  .protected-overlay code {
+    background: #ecfdf5;
+    color: #065f46;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 14px;
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  }
+  .protected-overlay .verify-it {
+    margin-top: 24px;
+    font-size: 13.5px;
+    color: var(--muted);
+    max-width: 720px;
+  }
+
+  /* Modal */
+  .modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.72);
+    backdrop-filter: blur(2px);
+    z-index: 1000;
+    display: grid;
+    place-items: center;
+    padding: 20px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+  }
+  .modal-backdrop.open {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .modal {
+    background: white;
+    border-radius: 10px;
+    padding: 32px 36px;
+    max-width: 640px;
+    width: 100%;
+    box-shadow: 0 24px 60px rgba(0,0,0,0.35);
+    max-height: 88vh;
+    overflow-y: auto;
+  }
+  .modal h2 {
+    margin: 0 0 16px;
+    font-size: 22px;
+    letter-spacing: -0.01em;
+  }
+  .modal .modal-eyebrow {
+    font-size: 11.5px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+  .modal.attack .modal-eyebrow { color: var(--danger); }
+  .modal.intro .modal-eyebrow  { color: var(--wm-blue-deep); }
+  .modal p { margin: 0 0 12px; color: var(--ink); }
+  .modal p.lede { font-size: 17px; line-height: 1.5; }
+  .modal ol {
+    padding-left: 22px;
+    margin: 8px 0 14px;
+  }
+  .modal ol li { margin: 4px 0; }
+  .modal .modal-actions {
+    margin-top: 22px;
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+  }
+  .modal button {
+    background: var(--wm-blue-deep);
+    color: white;
+    border: none;
+    padding: 11px 22px;
+    border-radius: 5px;
+    font-family: inherit;
+    font-size: 14.5px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .modal button:hover { background: var(--wm-blue-darker); }
+  .modal button.secondary {
+    background: white;
+    color: var(--ink);
+    border: 1px solid var(--line);
+  }
+  .modal button.secondary:hover { background: #f1f5f9; }
+  .modal .quoted {
+    background: #fef2f2;
+    border-left: 3px solid var(--danger);
+    padding: 10px 14px;
+    font-size: 14.5px;
+    margin: 12px 0;
+    border-radius: 0 5px 5px 0;
+  }
+  .modal .takeaway {
+    background: #fffbeb;
+    border-left: 3px solid #d97706;
+    padding: 12px 16px;
+    margin: 14px 0;
+    border-radius: 0 5px 5px 0;
+    font-size: 14.5px;
+  }
+
+  /* Explanation footer */
+  .explanation {
+    max-width: 1024px;
+    margin: 48px auto 32px;
+    padding: 0 24px;
+  }
+  .explanation h2 {
+    font-size: 22px;
+    margin: 0 0 12px;
+    color: var(--ink);
+  }
+  .explanation p {
+    color: var(--ink);
+    margin: 10px 0;
+  }
+  .explanation .verify {
+    background: #f0f9ff;
+    border-left: 3px solid var(--wm-blue);
+    padding: 14px 18px;
+    border-radius: 0 6px 6px 0;
+    margin: 18px 0;
+    font-size: 14.5px;
+  }
+  .explanation .verify code {
+    background: white;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 13px;
+  }
+
+  footer {
+    border-top: 1px solid var(--line);
+    padding: 28px 24px;
+    text-align: center;
+    color: var(--muted);
+    font-size: 13px;
+    margin-top: 32px;
+  }
+  footer p { margin: 6px 0; max-width: 900px; margin-left: auto; margin-right: auto; }
+
+  /* Small screens */
+  @media (max-width: 720px) {
+    .iframe-wrap { height: 560px; }
+    .fake-button-overlay { top: 14px; right: 12px; }
+    .fake-schedule-pickup { padding: 10px 16px; font-size: 13px; }
+    .click-arrow { display: none; }
+    .watermark-band { font-size: 18px; }
+    .demo-header h1 { font-size: 22px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="demo-header">
+  <div class="eyebrow">Live security demonstration</div>
+  <h1>Clickjacking the WaveMAX corporate site</h1>
+  <p>The frame below is loading the real <code style="background:rgba(255,255,255,0.1);padding:1px 6px;border-radius:3px">wavemaxlaundry.com/austin-tx/</code> page directly from the franchisor's servers. Because the franchisor's platform sets no <code style="background:rgba(255,255,255,0.1);padding:1px 6px;border-radius:3px">X-Frame-Options</code> response header and no <code style="background:rgba(255,255,255,0.1);padding:1px 6px;border-radius:3px">Content-Security-Policy: frame-ancestors</code> directive, any third party can wrap any franchisee's page in a hostile overlay on any domain.</p>
+  <div class="header-links">
+    <a href="/wavemax/">← Back to the offer</a>
+    <a href="/wavemax/security-audit.html">← Back to the full audit</a>
+  </div>
+</header>
+
+<nav class="demo-tabs" role="tablist">
+  <button class="tab tab-vulnerable tab-active" data-target="vulnerable" role="tab" aria-selected="true">⚠ Vulnerable: wavemaxlaundry.com/austin-tx/</button>
+  <button class="tab tab-protected" data-target="protected" role="tab" aria-selected="false">🛡 Protected: rundberglaundry.com</button>
+</nav>
+
+<!-- VULNERABLE STAGE: live WaveMAX Austin page wrapped in our overlay -->
+<section class="demo-stage" id="stage-vulnerable" role="tabpanel">
+  <div class="iframe-wrap">
+    <iframe id="vulnerable-frame" src="https://www.wavemaxlaundry.com/austin-tx/" title="wavemaxlaundry.com/austin-tx/ (the real WaveMAX Austin page) wrapped in a hostile overlay for educational demonstration" loading="lazy" referrerpolicy="no-referrer"></iframe>
+
+    <div class="watermark" aria-hidden="true">
+      <div class="watermark-band" style="top: 12%">EDUCATIONAL DEMONSTRATION · NOT A REAL WAVEMAX SITE · © CRHS</div>
+      <div class="watermark-band" style="top: 38%">EDUCATIONAL DEMONSTRATION · NOT A REAL WAVEMAX SITE · © CRHS</div>
+      <div class="watermark-band" style="top: 64%">EDUCATIONAL DEMONSTRATION · NOT A REAL WAVEMAX SITE · © CRHS</div>
+      <div class="watermark-band" style="top: 90%">EDUCATIONAL DEMONSTRATION · NOT A REAL WAVEMAX SITE · © CRHS</div>
+    </div>
+    <div class="watermark-corner">⚠ DEMO · © 2026 CRHS</div>
+
+    <div class="click-arrow" id="click-arrow" aria-hidden="true">
+      <svg class="arrow-svg" viewBox="0 0 60 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M2 15 L52 15 M42 5 L52 15 L42 25" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      </svg>
+      <span>Click here</span>
+    </div>
+
+    <div class="fake-button-overlay">
+      <button class="fake-schedule-pickup" id="schedule-pickup-btn" type="button">
+        Schedule a Pickup <span class="arrow-right">→</span>
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- PROTECTED STAGE: rundberglaundry.com — browser refuses to render in iframe -->
+<section class="demo-stage hidden" id="stage-protected" role="tabpanel">
+  <div class="iframe-wrap">
+    <iframe id="protected-frame" src="about:blank" title="rundberglaundry.com (protected — browser refuses to render in iframe)" loading="lazy" referrerpolicy="no-referrer"></iframe>
+    <div class="protected-overlay" id="protected-overlay">
+      <div class="protected-shield">🛡</div>
+      <h2>Browser refused to display rundberglaundry.com in this iframe</h2>
+      <p><code>rundberglaundry.com</code> sets <code>X-Frame-Options: SAMEORIGIN</code> and a strict Content-Security-Policy <code>frame-ancestors</code> directive. The browser enforces these headers by blocking the embed entirely — there is no overlay surface for an attacker to attach to.</p>
+      <p>This is one HTTP response header. CRHS's franchisee-built platform sets it. The franchisor's platform does not.</p>
+      <p class="verify-it">Verify it yourself: <code>curl -sI https://rundberglaundry.com/</code> — the response includes <code>x-frame-options: SAMEORIGIN</code>. Compare with <code>curl -sI https://www.wavemaxlaundry.com/</code> — no <code>X-Frame-Options</code>, no <code>Content-Security-Policy</code> header at all.</p>
+    </div>
+  </div>
+</section>
+
+<section class="explanation">
+  <h2>If you operate a WaveMAX location, here is what this means for you</h2>
+  <div style="background:#fef2f2;border-left:4px solid var(--danger);padding:18px 22px;border-radius:0 8px 8px 0;margin:14px 0 22px">
+    <p style="margin:0 0 10px;font-size:16px"><strong>Your franchise location's page on <code>wavemaxlaundry.com/&lt;your-city&gt;-&lt;your-state&gt;/</code> can be embedded by any third party, on any domain, today.</strong></p>
+    <p style="margin:0;font-size:15px">Whether or not you signed up for the MHR-built marketing platform, your location's subpath shares this exposure as long as it is hosted on the franchisor's current platform. An attacker does not need your credentials, your consent, or even your awareness. The page header, footer, branding, and content visible to a customer are genuinely WaveMAX. The interactive controls overlaid by the attacker are not. When the chargeback or complaint or lawsuit arrives, the name of the franchise location on the visible page is the name on the filing — yours.</p>
+  </div>
+
+  <h2 style="margin-top:30px">What you just saw</h2>
+  <p>An attacker can register any domain (for example <em>wavemax-austin-pickup.com</em> or <em>book-laundry-pickup.com</em>), point a single HTML file at it, and serve the same experience you just saw to anyone who clicks an ad, a phishing email, or a social link. The customer sees the real WaveMAX page in the body. They see a button styled to match WaveMAX. They click. The attacker now controls the rest of the flow — a fake scheduling form, a fake credit-card capture, a chargeback your franchise has to defend.</p>
+
+  <p><strong>This is enabled by a missing HTTP response header.</strong> The franchisor's platform sets none of the standard browser-enforced framing controls: no <code>X-Frame-Options</code>, no <code>Content-Security-Policy: frame-ancestors</code>, no <code>Permissions-Policy</code>. The fix is roughly one line of nginx, Apache, or WordPress configuration on the franchisor's side. CRHS has notified the franchisor's senior leadership of this exposure in writing on at least six dates beginning April 29, 2026.</p>
+
+  <h2 style="margin-top:30px">What franchisees can do right now</h2>
+  <ol style="font-size:15.5px;line-height:1.7">
+    <li><strong>Verify your own exposure.</strong> From a terminal: <code>curl -sI https://www.wavemaxlaundry.com/&lt;your-city&gt;-&lt;your-state&gt;/</code>. If the response does not include <code>X-Frame-Options</code> or a <code>Content-Security-Policy</code> header naming a <code>frame-ancestors</code> directive, your location page can be embedded by a third party today. (As of this writing, no franchisee location page tested includes either header.)</li>
+    <li><strong>Document the exposure for your own records.</strong> Save the raw HTTP response. The franchisor's platform configuration is not something a franchisee can remediate; it is the franchisor's responsibility, but the documentation is yours to keep.</li>
+    <li><strong>Notify the franchisor in writing.</strong> A single email to franchisor leadership requesting the response headers be set, with a copy preserved, is enough to put your franchise on the record as having raised the issue. Form language is available — contact CRHS if you'd like a template.</li>
+    <li><strong>Watch for impersonation.</strong> Set Google Alerts on your franchise location's name + "WaveMAX" + your city. If a typosquat domain appears, your customers may already be encountering it.</li>
+    <li><strong>Read the published audit and the takedown demand.</strong> Both are at the bottom of this page. The audit is the full security and code-quality scorecard. The takedown demand is what CRHS-Austin is sending to franchisor's CEO over this exposure and the broader pattern.</li>
+  </ol>
+
+  <div class="verify">
+    <strong>Reproduce it yourself in 60 seconds.</strong> Open the developer tools on this page. Inspect the iframe element above — its <code>src</code> is set to the real <code>https://www.wavemaxlaundry.com/austin-tx/</code>. Now create your own HTML file with one line: <code>&lt;iframe src="https://www.wavemaxlaundry.com/&lt;your-city&gt;-&lt;your-state&gt;/"&gt;&lt;/iframe&gt;</code>. Serve it on any domain you control, or open it locally. The real franchisor page will load. Try the same with <code>rundberglaundry.com</code> or any properly-configured site — the browser will refuse.
+  </div>
+
+  <p style="margin-top:30px"><strong>The §B finding in the CRHS takedown demand letter references this exact exposure.</strong> The full audit, with every finding stated alongside the open-source tool that produced it and a verify-it-yourself reproduction path, is at <a href="/wavemax/security-audit.html">crhsent.com/wavemax/security-audit.html</a>.</p>
+
+  <p style="margin-top:14px;font-size:14px;color:var(--muted)">CRHS Enterprises (the operator of WaveMAX Austin) is one independent franchisee speaking from one franchise location. The exposure documented here affects every franchisee location subject to the same franchisor platform configuration. If you operate a WaveMAX location and want to compare notes — or if you've experienced an impersonation incident already — get in touch.</p>
+</section>
+
+<!-- INTRO MODAL: shown on page load -->
+<div class="modal-backdrop" id="intro-modal" role="dialog" aria-modal="true" aria-labelledby="intro-modal-title">
+  <div class="modal intro">
+    <div class="modal-eyebrow">Before you click anything</div>
+    <h2 id="intro-modal-title">What you're about to see</h2>
+    <p class="lede">The page below the watermark is the <em>real</em> WaveMAX Austin location page — loaded live from the franchisor's own servers, unmodified.</p>
+    <p>The reason it loads here, on a different domain (<code>crhsent.com</code>), is that the franchisor's platform serves <code>wavemaxlaundry.com</code> without the standard browser-enforced framing controls:</p>
+    <ul style="margin:8px 0 14px 22px">
+      <li>No <code>X-Frame-Options</code> response header</li>
+      <li>No <code>Content-Security-Policy: frame-ancestors</code> directive</li>
+      <li>No <code>Permissions-Policy</code></li>
+    </ul>
+    <p>An attacker on any domain — a phishing domain, a typosquat of "wavemax", a Facebook-ad landing page, anywhere — can embed any franchisee's location page exactly as you see it below, and overlay their own buttons and forms on top. To a customer, the visible content is genuinely WaveMAX. The interactive controls are the attacker's.</p>
+    <div class="takeaway"><strong>Every WaveMAX-branded franchisee subpath at <code>wavemaxlaundry.com/&lt;city&gt;-&lt;state&gt;/</code> shares this exposure</strong> — whether or not the franchisee signed up for the marketing platform.</div>
+    <p>In a moment we'll point at a fake "Schedule a Pickup" button styled to match the WaveMAX brand. Austin doesn't actually offer pickup-and-delivery service — but a customer wouldn't know that. Click it to see how the attack proceeds.</p>
+    <div class="modal-actions">
+      <button id="dismiss-intro" type="button">Show me the attack →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD-BUTTON MODAL: shown after intro is dismissed, BEFORE the button appears -->
+<div class="modal-backdrop" id="addbutton-modal" role="dialog" aria-modal="true" aria-labelledby="addbutton-modal-title">
+  <div class="modal intro">
+    <div class="modal-eyebrow">Watch the attacker work</div>
+    <h2 id="addbutton-modal-title">Now the attacker adds their bait</h2>
+    <p class="lede">The franchisor's page renders in the iframe untouched — the attacker can't modify it. What the attacker <em>can</em> do is overlay anything on top of it from their own page, on their own domain, with their own code.</p>
+    <p>When you dismiss this dialog, you'll see a "Schedule a Pickup" button appear in the upper-right corner of the franchisor's header area — styled to match the WaveMAX brand. Watch for:</p>
+    <ul style="margin:8px 0 14px 22px">
+      <li>The button styling: the gradient, the corner radius, the font weight — all chosen to feel native to WaveMAX. A customer reading the page would not notice that this control was added by anyone other than WaveMAX.</li>
+      <li>The position: top-right of the header strip, exactly where a primary call-to-action would live on a real laundry site.</li>
+      <li>The label: "Schedule a Pickup" is plausible. Austin doesn't actually offer pickup-and-delivery — but a customer wouldn't know that, and even if they would, the attacker can pick any label that serves their goal ("Pay your bill," "Update your account," "Verify your identity," "Claim a refund," whatever).</li>
+    </ul>
+    <p>Click "Add the button" and the bait appears. A short red arrow will flash next to it inviting the click — exactly the kind of attention-grabbing UI an attacker would build into their landing page.</p>
+    <div class="modal-actions">
+      <button id="add-button-btn" type="button">Add the button →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ATTACK MODAL: shown on Schedule a Pickup click -->
+<div class="modal-backdrop" id="attack-modal" role="dialog" aria-modal="true" aria-labelledby="attack-modal-title">
+  <div class="modal attack">
+    <div class="modal-eyebrow">What just happened</div>
+    <h2 id="attack-modal-title">The attacker is now in control of the experience</h2>
+    <p class="lede">You clicked a button overlayed on top of the real WaveMAX Austin page. The visible page header, footer, branding, content, and even the URL preview when the page loaded are all genuinely WaveMAX. The button you clicked is not. From here, an attacker proceeds:</p>
+    <ol>
+      <li>Open a "Schedule a Pickup" form styled to match WaveMAX, collecting the customer's name, address, phone, email, and credit card.</li>
+      <li>Submit the form to the attacker's payment processor. The transaction settles to the attacker's merchant account.</li>
+      <li>Issue a confirmation email from a lookalike <code>@wavemax-austin-pickup.com</code> address (the franchisor's domain has DMARC at <code>p=none</code>, so spoofed mail from the franchisor's own domain isn't even rejected by recipients' mail servers).</li>
+      <li>The customer never receives service. Their card has been charged. The page they used had CRHS-Austin's name and the WaveMAX brand on it.</li>
+    </ol>
+    <div class="quoted">The chargeback, the complaint to the BBB, the state attorney general filing, and any consumer-class action name <strong>the franchisee whose name appeared on the page</strong> — CRHS-Austin — alongside WaveMAX Franchise LLC. The franchisee bears the brand-and-customer-trust risk. The franchisor's platform created the attack surface.</div>
+    <p>This exposure exists today for every franchisee location subject to the same platform configuration. The franchisor has been on written notice of it since April 29, 2026; the franchisor's Director of Operations acknowledged the substance in writing on April 30, 2026 with five specific remediation commitments; the platform cutover proceeded the next day with those commitments unexecuted in material part. The exposure remains live as of the date you are reading this.</p>
+    <div class="takeaway"><strong>The fix is one HTTP response header.</strong> See the next tab — <code>rundberglaundry.com</code> sets it, and the browser refuses to allow a hostile overlay at all.</div>
+    <div class="modal-actions">
+      <button id="show-protected-btn" type="button">See what proper security looks like →</button>
+      <button id="dismiss-attack" class="secondary" type="button">Close</button>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <p>© 2026 CRHS Enterprises, LLC. All rights reserved.</p>
+  <p>This page is an educational demonstration of a publicly verifiable security finding on the franchisor's corporate site, captured 2026-05-26 with the open-source tools named in the full audit. The iframe shown above loads the franchisor's own page directly from its servers; no franchisor content is modified or hosted by CRHS. CRHS Enterprises, LLC is an independent WaveMAX® franchisee. WaveMAX® is a trademark of WaveMAX Franchise, LLC. This page is not provided, endorsed, or required by WaveMAX Franchise, LLC.</p>
+</footer>
+
+<script src="/wavemax/clickjacking-demo.js?v=20260526a"></script>
+</body>
+</html>
