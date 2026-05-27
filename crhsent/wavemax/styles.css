@@ -141,7 +141,7 @@
   .founder .name{font-weight:800;font-size:20px;color:var(--ink)}
   .founder .role{color:var(--soft);font-size:14px;margin-bottom:10px}
   .credentials{margin-top:24px;padding-top:22px;border-top:1px solid var(--line)}
-  .credentials .eyebrow{margin-bottom:14px;text-align:center}
+  .credentials .eyebrow{margin-bottom:14px}
   /* fit-content + margin:auto centers the whole block in the column;
    * the tiles row sits at its natural width, and the bullet list inherits
    * the same left edge (it's left-justified inside the centered block). */
