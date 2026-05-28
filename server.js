@@ -457,33 +457,8 @@ app.use((req, res, next) => {
   next();
 });
 
-// ---- crhsent.com — first-class app page (strict CSP + per-request nonce) ----
-// Served through the app (not static nginx) so it gets the full security model:
-// nonce-based CSP (the /wavemax/ path matches isFranchiseHostPage -> strict),
-// HSTS, frame-ancestors, etc. HTML is nonce-injected via cspHelper; assets are
-// sent directly. Path-traversal guarded.
-const { readHTMLWithNonce: crhsentReadHTML } = require('./server/utils/cspHelper');
-const CRHSENT_ROOT = path.join(__dirname, 'crhsent');
-app.use(async (req, res, next) => {
-  const host = (req.hostname || '').toLowerCase().replace(/^www\./, '');
-  if (host !== 'crhsent.com') return next();
-  try {
-    let rel = decodeURIComponent(req.path);
-    if (rel.endsWith('/')) rel += 'index.html';
-    const full = path.normalize(path.join(CRHSENT_ROOT, rel));
-    if (full !== CRHSENT_ROOT && !full.startsWith(CRHSENT_ROOT + path.sep)) {
-      return res.status(403).end();
-    }
-    if (full.endsWith('.html')) {
-      const html = await crhsentReadHTML(full, res.locals.cspNonce);
-      res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
-      return res.type('html').send(html);
-    }
-    return res.sendFile(full, (err) => { if (err) next(); });
-  } catch (e) {
-    return next();
-  }
-});
+// NOTE: the crhsent.com host handler is mounted further down — AFTER the access
+// gate — so the gate can password-protect the CRHS content. See below.
 
 // CORS setup
 const corsOptions = {
@@ -566,6 +541,35 @@ app.use(compression());
 // but runs before the API rate limiter and session creation.
 const accessGate = require('./server/middleware/accessGate');
 app.use(accessGate);
+
+// ---- crhsent.com — first-class app page, mounted AFTER the access gate so the
+// gate fronts the CRHS content (gated when access_gate_enabled=true). Served
+// through the app (not static nginx) for the full security model: nonce-based
+// CSP (the /wavemax/ path matches isFranchiseHostPage -> strict), HSTS,
+// frame-ancestors, etc. HTML is nonce-injected via cspHelper; assets sent
+// directly. Path-traversal guarded. ----
+const { readHTMLWithNonce: crhsentReadHTML } = require('./server/utils/cspHelper');
+const CRHSENT_ROOT = path.join(__dirname, 'crhsent');
+app.use(async (req, res, next) => {
+  const host = (req.hostname || '').toLowerCase().replace(/^www\./, '');
+  if (host !== 'crhsent.com') return next();
+  try {
+    let rel = decodeURIComponent(req.path);
+    if (rel.endsWith('/')) rel += 'index.html';
+    const full = path.normalize(path.join(CRHSENT_ROOT, rel));
+    if (full !== CRHSENT_ROOT && !full.startsWith(CRHSENT_ROOT + path.sep)) {
+      return res.status(403).end();
+    }
+    if (full.endsWith('.html')) {
+      const html = await crhsentReadHTML(full, res.locals.cspNonce);
+      res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+      return res.type('html').send(html);
+    }
+    return res.sendFile(full, (err) => { if (err) next(); });
+  } catch (e) {
+    return next();
+  }
+});
 
 // Franchise self-serve preview endpoints (crhsent.com host only). Deploys DARK —
 // a no-op unless FRANCHISE_PREVIEW_ENABLED=true. Mounted here so it has body +

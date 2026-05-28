@@ -1,8 +1,12 @@
-// Site access gate: password-protects all web traffic to the Express-served
-// domains unless the client IP is whitelisted. No username — a single shared
-// password (PBKDF2-hashed in the AccessGate collection).
+// Site access gate: password-protects the CRHS content on crhsent.com (and
+// www.crhsent.com). Every OTHER Express-served host (wavemax.promo, the
+// embedded affiliate app, the per-location domains) passes through untouched.
+// Fully private: no search-crawler bypass, so gated content is not indexed.
+// No username — a single shared password (PBKDF2-hashed in the AccessGate
+// collection).
 //
-// Unlock is a double-opt-in magic-link flow that captures a verified email:
+// Unlock is a double-opt-in magic-link flow that captures a verified email
+// (so there is a record of who was given access):
 //   1. Landing form takes email + password → POST /__gate.
 //   2. Correct password → a single-use token (the URL parameter) is stored in
 //      AccessRequest, associated with the submitted email, and a link is
@@ -25,7 +29,6 @@
 // logging is best-effort and never blocks a request.
 
 const crypto = require('crypto');
-const dns = require('dns').promises;
 const { verifyPassword } = require('../utils/encryption');
 const logger = require('../utils/logger');
 const { sendEmail } = require('../services/email/transport');
@@ -45,51 +48,14 @@ const TOKEN_TTL_MS = 60 * 60 * 1000;          // emailed link valid for 60 minut
 const SEND_THROTTLE_MS = 60 * 1000;           // min interval between link emails per IP
 const GATE_FROM = '"WaveMAX" <admin@rundberglaundry.com>';
 
-// Preview routing (temporary "for now" state): every gated host bounces
-// non-whitelisted, non-crawler traffic to the corporate Austin page EXCEPT the
-// shareable preview path, which shows the gate so invited people can request
-// access. crhsent.com is the open public site and is never gated or redirected.
-const NON_GATED_HOSTS = ['crhsent.com', 'www.crhsent.com'];
-const PREVIEW_PATH_PREFIX = '/austin-tx';
-const PREVIEW_CORPORATE_URL = 'https://wavemaxlaundry.com/austin-tx/';
+// Only these hosts are gated. Every other Express-served host (wavemax.promo,
+// the embedded affiliate app, the per-location domains) passes through
+// untouched — the gate protects the CRHS content on crhsent.com only.
+const GATED_HOSTS = ['crhsent.com', 'www.crhsent.com'];
 
 const emailValid = (e) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(e || '').trim());
 const safeNext = (n) => (n && String(n).startsWith('/') ? String(n) : '/');
 const tokenExpired = (ar) => !ar.expiresAt || new Date(ar.expiresAt).getTime() < Date.now();
-
-// Verified Google-crawler cache: ip -> { ok, exp }. Spares a DNS round-trip on
-// every crawler request. Positives are long-lived; negatives expire quickly so
-// a real crawler recovers fast from a transient DNS failure (and a spoofer's
-// negative result isn't pinned for long).
-const botCache = new Map();
-const BOT_TTL_OK = 7 * 24 * 60 * 60 * 1000;
-const BOT_TTL_NEG = 10 * 60 * 1000;
-
-// Cheap UA pre-filter for Google's indexing/inspection crawlers — only these
-// trigger the (more expensive) reverse-DNS check. A spoofed UA still fails it.
-const GOOGLE_UA_RE = /(googlebot|storebot-google|google-inspectiontool|googleother|google-site-verification)/i;
-const GOOGLE_HOST_RE = /\.(googlebot|google|googleusercontent)\.com$/i;
-
-// Authoritative Googlebot verification (Google's documented method): reverse-DNS
-// the client IP, require a Google-owned hostname, then forward-confirm that the
-// hostname resolves back to the same IP. Result is cached per IP.
-async function isVerifiedGoogle(ip) {
-  if (!ip) return false;
-  const now = Date.now();
-  const hit = botCache.get(ip);
-  if (hit && hit.exp > now) return hit.ok;
-  let ok = false;
-  try {
-    const hosts = await dns.reverse(ip);
-    const host = (hosts || []).find((h) => GOOGLE_HOST_RE.test(h));
-    if (host) {
-      const fwd = ip.includes(':') ? await dns.resolve6(host) : await dns.resolve4(host);
-      ok = Array.isArray(fwd) && fwd.includes(ip);
-    }
-  } catch (_) { ok = false; }
-  botCache.set(ip, { ok, exp: now + (ok ? BOT_TTL_OK : BOT_TTL_NEG) });
-  return ok;
-}
 
 async function loadCache() {
   try {
@@ -218,10 +184,10 @@ function landingPage(error, nextUrl, email, nonce) {
   const next = esc(safeNext(nextUrl));
   const err = error ? `<p class="err">${esc(error)}</p>` : '';
   return pageShell(`
-  <form class="card" method="POST" action="/__gate" autocomplete="off" data-spinner="Sending your preview link…">
+  <form class="card" method="POST" action="/__gate" autocomplete="off" data-spinner="Sending your access link…">
     <img class="logo" src="/assets/images/brand/logo-wavemax.png" alt="WaveMAX">
-    <h1>Request access to preview</h1>
-    <p class="sub">This site is currently private. Enter your email and the access password and we'll send you a preview link.</p>
+    <h1>Request access</h1>
+    <p class="sub">This content is private. Enter your email and the access password and we'll email you an access link.</p>
     ${err}
     <input type="email" name="email" placeholder="Email address" value="${esc(email)}" autocomplete="off" autofocus required>
     <input type="password" name="password" placeholder="Access password" autocomplete="off" required>
@@ -235,7 +201,7 @@ function sentPage(nonce) {
   <div class="card">
     <img class="logo" src="/assets/images/brand/logo-wavemax.png" alt="WaveMAX">
     <h1>Check your email</h1>
-    <p class="sub">We've sent a preview link to your email address. Open it and click <strong>Enter the site</strong> to continue. The link expires in 60 minutes.</p>
+    <p class="sub">We've sent an access link to your email address. Open it and click <strong>Enter the site</strong> to continue. The link expires in 60 minutes.</p>
     <p class="sub" style="color:#fcd34d"><strong>Don't see it?</strong> Check your spam or promotions folder and mark it "Not spam".</p>
     <a class="link" href="/__gate">Use a different email</a>
   </div>`, nonce);
@@ -246,7 +212,7 @@ function confirmPage(token, nextUrl, nonce) {
   <form class="card" method="POST" action="/__gate/confirm" autocomplete="off" data-spinner="Entering the site…">
     <img class="logo" src="/assets/images/brand/logo-wavemax.png" alt="WaveMAX">
     <h1>You're verified</h1>
-    <p class="sub">Click below to unlock the site preview from this device.</p>
+    <p class="sub">Click below to unlock access to this site from this device.</p>
     <input type="hidden" name="token" value="${esc(token)}">
     <input type="hidden" name="next" value="${esc(safeNext(nextUrl))}">
     <button type="submit">Enter the site</button>
@@ -258,7 +224,7 @@ function confirmErrorPage(nonce) {
   <div class="card">
     <img class="logo" src="/assets/images/brand/logo-wavemax.png" alt="WaveMAX">
     <h1>Link expired or already used</h1>
-    <p class="sub">This preview link is no longer valid. Request a fresh one and we'll email you a new link.</p>
+    <p class="sub">This access link is no longer valid. Request a fresh one and we'll email you a new link.</p>
     <a class="link" href="/__gate">Request a new link</a>
   </div>`, nonce);
 }
@@ -270,8 +236,8 @@ function confirmEmailHtml(link) {
     <img src="https://wavemax.promo/assets/images/brand/logo-wavemax.png" alt="WaveMAX" style="height:40px">
   </div>
   <div style="padding:28px 24px;border:1px solid #e5e7eb;border-top:0;border-radius:0 0 10px 10px">
-    <h2 style="font-size:18px;margin:0 0 8px">Your site preview link</h2>
-    <p style="font-size:14px;line-height:1.5;color:#334155">Click below to unlock access to the site preview from this device. This link expires in 60 minutes.</p>
+    <h2 style="font-size:18px;margin:0 0 8px">Your site access link</h2>
+    <p style="font-size:14px;line-height:1.5;color:#334155">Click below to unlock access to this site from this device. This link expires in 60 minutes.</p>
     <p style="margin:22px 0"><a href="${safeLink}" style="background:#2563eb;color:#fff;text-decoration:none;padding:12px 22px;border-radius:8px;font-weight:600;display:inline-block">Enter the site</a></p>
     <p style="font-size:12px;color:#64748b;word-break:break-all">If the button doesn't work, paste this link into your browser:<br>${safeLink}</p>
     <p style="font-size:12px;color:#94a3b8;margin-top:16px">If you didn't request this, you can safely ignore this email.</p>
@@ -362,7 +328,7 @@ async function handleGate(req, res, ip) {
       });
       const host = req.headers['x-forwarded-host'] || req.headers.host;
       const link = `https://${host}/__gate/confirm?token=${token}`;
-      await sendEmail(email, 'Your WaveMAX preview link', confirmEmailHtml(link), GATE_FROM);
+      await sendEmail(email, 'Your WaveMAX access link', confirmEmailHtml(link), GATE_FROM);
     } catch (e) {
       logger.error('Access gate link email failed:', e.message);
       return res.status(500).type('html').send(landingPage('We could not send the email. Please try again.', next, email, nonce));
@@ -386,8 +352,8 @@ async function accessGate(req, res, next) {
 
   if (isExempt(req.path)) return next();
 
-  // crhsent.com is the open public site — never gated or redirected.
-  if (NON_GATED_HOSTS.includes(reqHost(req))) return next();
+  // Only crhsent.com is gated; every other host passes through untouched.
+  if (!GATED_HOSTS.includes(reqHost(req))) return next();
 
   // Hot path: in-memory whitelist hit.
   let entry = cache.ips.get(ip);
@@ -405,24 +371,8 @@ async function accessGate(req, res, next) {
     return next();
   }
 
-  // Verified Google crawlers bypass the gate AND the preview redirect so search
-  // sees all real content on every path. UA is a cheap pre-filter; reverse-DNS +
-  // forward-confirm is authoritative (spoofed UAs fail it). Not click-logged.
-  const ua = req.headers['user-agent'] || '';
-  if (GOOGLE_UA_RE.test(ua) && await isVerifiedGoogle(ip)) {
-    return next();
-  }
-
-  // Non-whitelisted, non-crawler on a gated host. Decide off the ORIGINAL
-  // request path (X-Original-URI, set by nginx before its root→/austin-tx/
-  // rewrite — falls back to originalUrl when not behind nginx): the bare domain
-  // root bounces to corporate, while only the shareable /austin-tx/ preview
-  // path shows the gate. Whitelisted users already returned next() above, so
-  // they still see the franchise content at the root.
-  const originalPath = String(req.headers['x-original-uri'] || req.originalUrl || req.path).split('?')[0];
-  if (!originalPath.startsWith(PREVIEW_PATH_PREFIX)) {
-    return res.redirect(302, PREVIEW_CORPORATE_URL);
-  }
+  // Non-whitelisted visitor on the gated host → show the access gate on every
+  // path (fully private: no crawler bypass, no redirect off to another site).
   return res.status(401).type('html').send(landingPage(null, req.method === 'GET' ? req.originalUrl : '/', '', (res.locals && res.locals.cspNonce) || ''));
 }
 
@@ -430,5 +380,4 @@ module.exports = accessGate;
 module.exports.loadCache = loadCache;
 module.exports.startCacheRefresh = startCacheRefresh;
 module.exports._cache = cache; // exposed for tests
-module.exports._botCache = botCache; // exposed for tests
 module.exports._landingPage = landingPage;
