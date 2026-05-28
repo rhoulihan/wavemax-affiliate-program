@@ -53,6 +53,8 @@
   ul.checks{list-style:none;margin:8px 0}
   ul.checks li{padding-left:28px;position:relative;margin-bottom:9px;font-size:15px;color:var(--ink2)}
   ul.checks li:before{content:"✓";position:absolute;left:0;top:0;color:var(--good);font-weight:800}
+  ul.checks li.warn:before{content:"\26A0\FE0E";color:var(--warn)}
+  ul.checks li.danger:before{content:"\2717";color:var(--bad)}
 
   table.cmp{width:100%;border-collapse:collapse;margin-top:8px;font-size:14.5px;background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden}
   table.cmp th,table.cmp td{padding:11px 14px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}

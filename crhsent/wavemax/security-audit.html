@@ -8,7 +8,7 @@
 <meta name="description" content="A point-in-time audit of the WaveMAX corporate site's security posture, code quality, broken links, performance, and SEO — every finding reproducible from public sources with named open-source tools.">
 <meta name="csp-nonce" content="{{CSP_NONCE}}">
 <link rel="icon" type="image/svg+xml" href="/wavemax/favicon.svg">
-<link rel="stylesheet" href="/wavemax/styles.css?v=20260527j">
+<link rel="stylesheet" href="/wavemax/styles.css?v=20260528a">
 </head>
 <body>
 
@@ -104,11 +104,11 @@
     </table>
     <p><strong>Template-level structural defects on every page</strong> — line numbers identical across all four pages, which is how you know it's a shared (broken) template, not isolated mistakes:</p>
     <ul class="checks">
-      <li><code>&lt;style&gt;</code> blocks placed inside <code>&lt;body&gt;</code> (three per page; lines 969, 1088, 1195).</li>
-      <li><code>&lt;header&gt;</code> element nested inside another <code>&lt;header&gt;</code> (line 1252).</li>
-      <li>81–165 inline <code>style=""</code> attributes per page.</li>
-      <li>170–210 trailing-whitespace errors per page.</li>
-      <li>19–32 <code>&lt;script&gt;</code> tags missing the required <code>type</code> attribute.</li>
+      <li class="warn"><code>&lt;style&gt;</code> blocks placed inside <code>&lt;body&gt;</code> (three per page; lines 969, 1088, 1195).</li>
+      <li class="warn"><code>&lt;header&gt;</code> element nested inside another <code>&lt;header&gt;</code> (line 1252).</li>
+      <li class="warn">81–165 inline <code>style=""</code> attributes per page.</li>
+      <li class="warn">170–210 trailing-whitespace errors per page.</li>
+      <li class="warn">19–32 <code>&lt;script&gt;</code> tags missing the required <code>type</code> attribute.</li>
     </ul>
     <p>Individually trivial. Collectively, the signal of a hand-edited template no one validates.</p>
     <p class="pb-foot"><strong>Verify it yourself:</strong> <code>curl https://wavemaxlaundry.com/franchise/ -o page.html &amp;&amp; npx html-validate page.html</code>. Or paste the rendered HTML into <a href="https://validator.w3.org/nu/" target="_blank" rel="noopener">validator.w3.org/nu/</a> — the W3C's own validator.</p>
@@ -166,7 +166,7 @@
     <h2 class="sec">7. SEO — zero local-business schema across the network</h2>
     <p>Google reads <strong>structured data (JSON-LD)</strong> on a laundromat page to decide whether the location belongs in the map pack, in "near me" results, in "laundromat in [city]" rich cards, and in the ★-rating cards. A passive rendered-DOM extraction on a 10-page sample of the corporate platform finds:</p>
     <ul class="checks">
-      <li><strong>9 of 10 sampled franchise pages</strong> ship only <code>BreadcrumbList</code> + <code>ListItem</code> — <strong>zero local-business schema</strong>, zero review-star markup.</li>
+      <li class="warn"><strong>9 of 10 sampled franchise pages</strong> ship only <code>BreadcrumbList</code> + <code>ListItem</code> — <strong>zero local-business schema</strong>, zero review-star markup.</li>
       <li>The lone outlier (the corporate Austin page) carries 7 JSON-LD types — a remnant of CRHS's prior tuning that survived the platform switch.</li>
       <li>CRHS's own page on the same Cloudflare stack ships <strong>23 JSON-LD types</strong> including the complete local-business set (DryCleaningOrLaundry · hours · geo · services · ★ 4.8 from 48 reviews).</li>
     </ul>
@@ -180,12 +180,12 @@
     <h2 class="sec">8. Privacy / OAuth / consumer disclosures</h2>
     <p>A passive audit of the Privacy Policy and Terms of Service linked from every franchisee footer (six locations verified) finds them missing:</p>
     <ul class="checks">
-      <li>OAuth-provider disclosures (Google / Facebook).</li>
-      <li>CCPA / CPRA language (California).</li>
-      <li>GDPR language.</li>
-      <li>COPPA language.</li>
-      <li>Retention-period statements.</li>
-      <li>Franchise Agreement §12.2 license-attribution markers.</li>
+      <li class="warn">OAuth-provider disclosures (Google / Facebook).</li>
+      <li class="warn">CCPA / CPRA language (California).</li>
+      <li class="warn">GDPR language.</li>
+      <li class="warn">COPPA language.</li>
+      <li class="warn">Retention-period statements.</li>
+      <li class="warn">Franchise Agreement §12.2 license-attribution markers.</li>
     </ul>
     <p>These gaps affect every franchisee on the platform, not only Austin — same template, same omissions, every location.</p>
   </div>
@@ -196,10 +196,10 @@
     <h2 class="sec">9. Brand &amp; license notices — §12.2 and copyright</h2>
     <p>Every franchisor-built corporate location page (verified across nine pages) ships with:</p>
     <ul class="checks">
-      <li>An ownerless <em>"© 2026 All rights reserved"</em> — the franchisor doesn't even claim copyright in its own franchise content.</li>
-      <li>Credit to the third-party vendor MHR Marketing as the developer.</li>
-      <li>No ® or ™ on the WaveMAX mark inside the content body.</li>
-      <li>No Franchise Agreement §12.2 license attribution.</li>
+      <li class="warn">An ownerless <em>"© 2026 All rights reserved"</em> — the franchisor doesn't even claim copyright in its own franchise content.</li>
+      <li class="warn">Credit to the third-party vendor MHR Marketing as the developer.</li>
+      <li class="warn">No ® or ™ on the WaveMAX mark inside the content body.</li>
+      <li class="warn">No Franchise Agreement §12.2 license attribution.</li>
     </ul>
   </div>
 </section>
@@ -220,8 +220,8 @@
     </table>
     <p>The <strong>paid add-on tiers ($1,050 – $1,500 / month)</strong> sell <em>"Custom Location-Specific Posts."</em> A May 25, 2026 census of 62 franchise Facebook pages across 22 states found:</p>
     <ul class="checks">
-      <li><strong>21 pages</strong> active with a shared MHR caption library — <em>"Laundry should not slow you down"</em> appeared on 7 pages in <strong>six different states</strong> (MD, TX, WA, CT, AZ, CO).</li>
-      <li><strong>39 pages</strong> with no post at all since the May 1 platform switch.</li>
+      <li class="warn"><strong>21 pages</strong> active with a shared MHR caption library — <em>"Laundry should not slow you down"</em> appeared on 7 pages in <strong>six different states</strong> (MD, TX, WA, CT, AZ, CO).</li>
+      <li class="warn"><strong>39 pages</strong> with no post at all since the May 1 platform switch.</li>
       <li><strong>2 pages</strong> with genuinely-unique content — neither shared anything with the MHR caption library, consistent with self-managed pages outside MHR's social service.</li>
     </ul>
     <p>(Recorded against interest: the corporate location pages themselves are populated with local store photos — 70 of 71. The website image build-out was done. The deficit is specific to the paid <em>social</em> product.)</p>
@@ -233,13 +233,13 @@
     <h2 class="sec">11. The composite picture</h2>
     <p>Treated as a single corporate marketing surface — the URL franchisees are required to send prospects to — the platform delivers:</p>
     <ul class="checks">
-      <li>A franchise-conversion page that <strong>crashes on every load</strong> and <strong>404s a network-wide link</strong>.</li>
-      <li><strong>Zero structured data</strong> for the local-search results that are the product of the SEO line item the package sells.</li>
-      <li><strong>Multiple OWASP-class security misconfigurations</strong> on a platform that markets "Security &amp; Malware Protection."</li>
-      <li>Performance <strong>~3× slower</strong> than the comparator built by one franchisee on the same CDN — <strong>8× slower mobile LCP</strong> on the Austin page.</li>
-      <li><strong>Zero franchise license attribution</strong>; no copyright claim in the franchisor's own content.</li>
-      <li><strong>Privacy / OAuth / consumer-disclosure gaps</strong> network-wide.</li>
-      <li><strong>Cross-state-identical "custom location-specific" posts</strong> on the third of franchise pages whose social feed it manages.</li>
+      <li class="danger">A franchise-conversion page that <strong>crashes on every load</strong> and <strong>404s a network-wide link</strong>.</li>
+      <li class="warn"><strong>Zero structured data</strong> for the local-search results that are the product of the SEO line item the package sells.</li>
+      <li class="danger"><strong>Multiple OWASP-class security misconfigurations</strong> on a platform that markets "Security &amp; Malware Protection."</li>
+      <li class="warn">Performance <strong>~3× slower</strong> than the comparator built by one franchisee on the same CDN — <strong>8× slower mobile LCP</strong> on the Austin page.</li>
+      <li class="warn"><strong>Zero franchise license attribution</strong>; no copyright claim in the franchisor's own content.</li>
+      <li class="warn"><strong>Privacy / OAuth / consumer-disclosure gaps</strong> network-wide.</li>
+      <li class="warn"><strong>Cross-state-identical "custom location-specific" posts</strong> on the third of franchise pages whose social feed it manages.</li>
     </ul>
     <p>Every finding is measured, named, and reproducible. Run the tools yourself.</p>
     <p style="margin-top:18px"><a class="btn" href="/wavemax/#audit-callout" data-back-to-offer>← Back to the offer</a></p>
