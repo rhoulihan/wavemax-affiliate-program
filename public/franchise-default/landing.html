@@ -43,10 +43,16 @@
   <link rel="preconnect" href="https://upload.wikimedia.org">
   <link rel="dns-prefetch" href="https://places.googleapis.com">
 
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Google Fonts CSS loaded non-blocking (media=print → all via css-async.js);
+       display=swap keeps text visible in the system fallback until the webfont
+       arrives. Removes a render-blocking cross-origin request from the iframe's
+       critical path. noscript keeps it working with JS disabled. -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@500;600;700;800&display=swap" media="print" data-async-css>
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@500;600;700;800&display=swap"></noscript>
+  <script src="/assets/js/css-async.js?v=20260529" defer></script>
 
   <link rel="stylesheet" href="/assets/css/wavemax-theme.css?v=20260504">
-  <link rel="stylesheet" href="/assets/css/wavemax-components.css?v=20260520i">
+  <link rel="stylesheet" href="/assets/css/wavemax-components.min.css?v=20260529">
 
   <link rel="stylesheet" href="/assets/css/austin-landing-v3.min.css?v=20260505">
 </head>
