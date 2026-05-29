@@ -542,6 +542,14 @@ app.use(compression());
 const accessGate = require('./server/middleware/accessGate');
 app.use(accessGate);
 
+// Coming-soon placeholder for rundberglaundry.com (held pending the Section 6.1(a)
+// approval). Public + noindex (no cloaking); runs before the location quarantine
+// and content routes so it covers every marketing path. Exempt paths (privacy
+// policy for OAuth, API/OAuth callbacks, .well-known, assets, favicon/robots/
+// sitemap) pass through to normal handling. crhsent.com is unaffected (gated above).
+const comingSoon = require('./server/middleware/comingSoon');
+app.use(comingSoon);
+
 // ---- crhsent.com — first-class app page, mounted AFTER the access gate so the
 // gate fronts the CRHS content (gated when access_gate_enabled=true). Served
 // through the app (not static nginx) for the full security model: nonce-based

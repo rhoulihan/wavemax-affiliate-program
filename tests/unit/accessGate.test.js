@@ -1,13 +1,7 @@
 // Unit tests for the site access-gate middleware.
-// Gate scope: crhsent.com (+ www) is fully private (no crawler bypass).
-// rundberglaundry.com (+ www) is gated to humans but lets VERIFIED Google
-// crawlers through (forward-confirmed reverse DNS). Every other Express-served
-// host passes through untouched. Unlock is the email magic-link flow on /__gate/*.
-jest.mock('dns', () => ({
-  reverse: jest.fn((ip, cb) => cb(null, [])),
-  resolve4: jest.fn((h, cb) => cb(null, [])),
-  resolve6: jest.fn((h, cb) => cb(null, [])),
-}));
+// Gate scope: password-protects crhsent.com (and www.crhsent.com) ONLY. Every
+// other Express-served host passes through untouched. Fully private — no
+// search-crawler bypass. Unlock is the email magic-link flow on /__gate/*.
 jest.mock('../../server/utils/logger', () => ({ info: jest.fn(), error: jest.fn(), warn: jest.fn(), debug: jest.fn() }));
 jest.mock('../../server/models/AccessGate', () => ({ findOne: jest.fn(() => ({ lean: () => Promise.resolve(null) })) }));
 jest.mock('../../server/models/AccessWhitelist', () => ({
@@ -51,10 +45,6 @@ describe('accessGate middleware', () => {
     accessGate._cache.salt = salt;
     accessGate._cache.hash = hash;
     accessGate._cache.ips = new Map();
-    accessGate._botCache.clear();
-    require('dns').reverse.mockImplementation((ip, cb) => cb(null, []));
-    require('dns').resolve4.mockImplementation((h, cb) => cb(null, []));
-    require('dns').resolve6.mockImplementation((h, cb) => cb(null, []));
     AccessWhitelist.findOne.mockReturnValue({ lean: () => Promise.resolve(null) });
     AccessWhitelist.updateOne.mockResolvedValue({});
     AccessClick.create.mockResolvedValue({});
@@ -107,7 +97,7 @@ describe('accessGate middleware', () => {
   });
 
   it('does NOT gate any other host — wavemax.promo and the per-location domains pass through', async () => {
-    for (const host of ['wavemax.promo', 'www.wavemax.promo', 'atxwashateria.com', 'wavemaxlaundry.com']) {
+    for (const host of ['wavemax.promo', 'www.wavemax.promo', 'rundberglaundry.com', 'atxwashateria.com', 'wavemaxlaundry.com']) {
       const req = mkReq({ ip: '8.8.8.8', path: '/', originalUrl: '/', headers: { host } });
       const res = mkRes(); const next = jest.fn();
       await accessGate(req, res, next);
@@ -115,48 +105,6 @@ describe('accessGate middleware', () => {
       expect(res.status).not.toHaveBeenCalledWith(401);
       expect(res.redirect).not.toHaveBeenCalled();
     }
-  });
-
-  it('GATES rundberglaundry.com for a non-Google visitor (401 landing)', async () => {
-    const req = mkReq({ ip: '8.8.8.8', path: '/austin-tx/', originalUrl: '/austin-tx/', headers: { host: 'rundberglaundry.com', 'user-agent': 'Mozilla/5.0' } });
-    const res = mkRes(); const next = jest.fn();
-    await accessGate(req, res, next);
-    expect(next).not.toHaveBeenCalled();
-    expect(res.status).toHaveBeenCalledWith(401);
-    expect(res.send.mock.calls[0][0]).toContain('name="email"');
-  });
-
-  it('lets a VERIFIED Google crawler through on rundberglaundry.com (UA + forward-confirmed reverse DNS)', async () => {
-    const dns = require('dns');
-    dns.reverse.mockImplementation((ip, cb) => cb(null, ip === '66.249.66.1' ? ['crawl-66-249-66-1.googlebot.com'] : ['x.example.com']));
-    dns.resolve4.mockImplementation((h, cb) => cb(null, /googlebot\.com$/.test(h) ? ['66.249.66.1'] : ['1.1.1.1']));
-    const req = mkReq({ ip: '66.249.66.1', headers: { host: 'rundberglaundry.com', 'user-agent': 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)' } });
-    const res = mkRes(); const next = jest.fn();
-    await accessGate(req, res, next);
-    expect(next).toHaveBeenCalled();
-    expect(res.status).not.toHaveBeenCalledWith(401);
-  });
-
-  it('GATES a SPOOFED Googlebot UA whose reverse DNS is not Google (no bypass)', async () => {
-    const dns = require('dns');
-    dns.reverse.mockImplementation((ip, cb) => cb(null, ['evil.example.com']));
-    dns.resolve4.mockImplementation((h, cb) => cb(null, ['6.6.6.6']));
-    const req = mkReq({ ip: '6.6.6.6', headers: { host: 'rundberglaundry.com', 'user-agent': 'Googlebot/2.1' } });
-    const res = mkRes(); const next = jest.fn();
-    await accessGate(req, res, next);
-    expect(next).not.toHaveBeenCalled();
-    expect(res.status).toHaveBeenCalledWith(401);
-  });
-
-  it('does NOT give crhsent.com the Google bypass — it stays fully dark even for a verified crawler', async () => {
-    const dns = require('dns');
-    dns.reverse.mockImplementation((ip, cb) => cb(null, ['crawl-x.googlebot.com']));
-    dns.resolve4.mockImplementation((h, cb) => cb(null, ['66.249.66.2']));
-    const req = mkReq({ ip: '66.249.66.2', headers: { host: 'crhsent.com', 'user-agent': 'Googlebot/2.1' } });
-    const res = mkRes(); const next = jest.fn();
-    await accessGate(req, res, next);
-    expect(next).not.toHaveBeenCalled();
-    expect(res.status).toHaveBeenCalledWith(401);
   });
 
   it('passes a whitelisted IP on the gated host and records the click when trackClicks=true', async () => {

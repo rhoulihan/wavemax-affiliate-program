@@ -1,9 +1,7 @@
-// Site access gate: password-protects two hosts. crhsent.com is fully private
-// (no crawler bypass — not indexed). rundberglaundry.com is password-gated to
-// humans but lets VERIFIED Google crawlers through, so it stays indexed / SEO-
-// visible while not publicly reachable. Every OTHER Express-served host
-// (wavemax.promo, the embedded affiliate app, the per-location domains) passes
-// through untouched.
+// Site access gate: password-protects the CRHS content on crhsent.com (and
+// www.crhsent.com). Every OTHER Express-served host (wavemax.promo, the
+// embedded affiliate app, the per-location domains) passes through untouched.
+// Fully private: no search-crawler bypass, so gated content is not indexed.
 // No username — a single shared password (PBKDF2-hashed in the AccessGate
 // collection).
 //
@@ -50,55 +48,10 @@ const TOKEN_TTL_MS = 60 * 60 * 1000;          // emailed link valid for 60 minut
 const SEND_THROTTLE_MS = 60 * 1000;           // min interval between link emails per IP
 const GATE_FROM = '"WaveMAX" <admin@rundberglaundry.com>';
 
-// Gated hosts, in two modes:
-//   FULLY_GATED        — crhsent.com: fully private, NO crawler bypass (not indexed).
-//   GATED_ALLOW_GOOGLE — rundberglaundry.com: password-gated to humans, but
-//                        VERIFIED Google crawlers pass through, so the site stays
-//                        indexed/SEO-visible while not publicly reachable.
-// Every other Express-served host (wavemax.promo, the embedded affiliate app,
-// the per-location domains) passes through untouched.
-const FULLY_GATED = ['crhsent.com', 'www.crhsent.com'];
-const GATED_ALLOW_GOOGLE = ['rundberglaundry.com', 'www.rundberglaundry.com'];
-const GATED_HOSTS = [...FULLY_GATED, ...GATED_ALLOW_GOOGLE];
-function gateMode(host) {
-  if (FULLY_GATED.includes(host)) return 'dark';
-  if (GATED_ALLOW_GOOGLE.includes(host)) return 'google-ok';
-  return null;
-}
-
-// Verified Google crawler bypass (GATED_ALLOW_GOOGLE hosts only). User-Agent
-// alone is trivially spoofable — anyone (incl. a scraper) could fake the Googlebot
-// UA — so we FORWARD-CONFIRM: reverse-DNS the client IP, require a
-// *.googlebot.com / *.google.com PTR, then re-resolve that hostname and confirm it
-// maps back to the same IP. Result is cached per-IP (the DNS round-trip is the cost).
-const dns = require('dns');
-const { promisify } = require('util');
-const dnsReverse = promisify(dns.reverse);
-const dnsResolve4 = promisify(dns.resolve4);
-const dnsResolve6 = promisify(dns.resolve6);
-const GOOGLE_CRAWLER_UA = /(Googlebot|Google-InspectionTool|GoogleOther|Storebot-Google|AdsBot-Google|Mediapartners-Google|APIs-Google|FeedFetcher-Google|Google-Site-Verification)/i;
-const GOOGLE_PTR = /\.(googlebot|google)\.com$/i;
-const BOT_TTL_MS = 60 * 60 * 1000;
-const botCache = new Map(); // ip -> { ok, exp }
-async function isVerifiedGoogle(req, ip) {
-  if (!ip || !GOOGLE_CRAWLER_UA.test(req.headers['user-agent'] || '')) return false;
-  const now = Date.now();
-  const hit = botCache.get(ip);
-  if (hit && hit.exp > now) return hit.ok;
-  let ok = false;
-  try {
-    const ptrs = (await dnsReverse(ip)) || [];
-    const ptr = ptrs.find((h) => GOOGLE_PTR.test(h));
-    if (ptr) {
-      const fwd = []
-        .concat(await dnsResolve4(ptr).catch(() => []))
-        .concat(await dnsResolve6(ptr).catch(() => []));
-      ok = fwd.includes(ip);
-    }
-  } catch (e) { ok = false; }
-  botCache.set(ip, { ok, exp: now + BOT_TTL_MS });
-  return ok;
-}
+// Only these hosts are gated. Every other Express-served host (wavemax.promo,
+// the embedded affiliate app, the per-location domains) passes through
+// untouched — the gate protects the CRHS content on crhsent.com only.
+const GATED_HOSTS = ['crhsent.com', 'www.crhsent.com'];
 
 const emailValid = (e) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(e || '').trim());
 const safeNext = (n) => (n && String(n).startsWith('/') ? String(n) : '/');
@@ -399,13 +352,8 @@ async function accessGate(req, res, next) {
 
   if (isExempt(req.path)) return next();
 
-  // Only the gated hosts are protected; every other host passes through untouched.
-  const mode = gateMode(reqHost(req));
-  if (!mode) return next();
-
-  // Verified Google crawlers pass through on Google-allowed hosts (keeps
-  // rundberglaundry.com indexed); crhsent.com ('dark') never gets this bypass.
-  if (mode === 'google-ok' && await isVerifiedGoogle(req, ip)) return next();
+  // Only crhsent.com is gated; every other host passes through untouched.
+  if (!GATED_HOSTS.includes(reqHost(req))) return next();
 
   // Hot path: in-memory whitelist hit.
   let entry = cache.ips.get(ip);
@@ -432,5 +380,4 @@ module.exports = accessGate;
 module.exports.loadCache = loadCache;
 module.exports.startCacheRefresh = startCacheRefresh;
 module.exports._cache = cache; // exposed for tests
-module.exports._botCache = botCache; // exposed for tests
 module.exports._landingPage = landingPage;
