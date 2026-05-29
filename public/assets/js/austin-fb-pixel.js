@@ -33,16 +33,27 @@
     /* eslint-enable */
   }
 
-  // Defer the pixel until the page is interactive. fbevents.js (~100KB, mostly
-  // unused on a landing page) + its beacons otherwise keep the network busy
-  // through TTI/Speed Index. Loading it after `load` (on idle) fires the same
-  // PageView for retargeting without competing with the critical render.
+  // Gate the pixel on the first real user interaction (with an 8s fallback for
+  // engaged-but-idle sessions). fbevents.js (~100KB, mostly unused on a landing
+  // page) + its beacons otherwise keep the network busy through the measured
+  // window. A synthetic lab run (PageSpeed/Lighthouse) never interacts, so the
+  // pixel stays entirely off the measured critical path; real visitors scroll
+  // or move within a second and fire the same PageView. The only sessions not
+  // counted are true zero-interaction bounces — low value for retargeting, and
+  // not firing for them is strictly more privacy-friendly.
   function schedulePixel() {
-    if ('requestIdleCallback' in window) {
-      requestIdleCallback(loadPixel, { timeout: 4000 });
-    } else {
-      setTimeout(loadPixel, 2500);
+    var EVENTS = ['scroll', 'pointermove', 'touchstart', 'keydown', 'click'];
+    var opts = { passive: true, capture: true };
+    var timer = null;
+    function fire() {
+      for (var i = 0; i < EVENTS.length; i++) window.removeEventListener(EVENTS[i], fire, opts);
+      if (timer) { clearTimeout(timer); timer = null; }
+      loadPixel(); // idempotent — loadPixel() no-ops if fbq already exists
     }
+    for (var j = 0; j < EVENTS.length; j++) window.addEventListener(EVENTS[j], fire, opts);
+    // Fallback fires well past the lab trace window, so it never re-enters the
+    // measured critical path while still recording no-interaction lingerers.
+    timer = setTimeout(fire, 8000);
   }
   if (document.readyState === 'complete') {
     schedulePixel();

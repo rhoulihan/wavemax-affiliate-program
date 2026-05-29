@@ -25,6 +25,7 @@ const ROOT = path.resolve(__dirname, '..');
 // [type, source (relative to repo root), output]
 const ASSETS = [
   ['css', 'public/assets/css/austin-landing-v3.css',        'public/assets/css/austin-landing-v3.min.css'],
+  ['css', 'public/assets/css/wavemax-components.css',       'public/assets/css/wavemax-components.min.css'],
   ['css', 'public/assets/css/wavemax-mhr-chrome.css',       'public/assets/css/wavemax-mhr-chrome.min.css'],
   ['js',  'public/assets/js/austin-host-mock.js',           'public/assets/js/austin-host-mock.min.js'],
   ['js',  'public/assets/js/austin-landing-init.js',        'public/assets/js/austin-landing-init.min.js'],

@@ -364,6 +364,9 @@
        the client). -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <!-- Preload the header logo — it's the host-frame LCP element; preload +
+       fetchpriority pulls it forward of the deferred chrome on throttled links. -->
+  <link rel="preload" as="image" href="/assets/images/brand/logo-wavemax.png" fetchpriority="high">
 
   <!-- Fonts loaded non-render-blocking (media=print, flipped to all by
        css-async.js). display=swap keeps text visible in the system fallback
@@ -486,7 +489,7 @@
     <div class="wmlnav-inner">
       <div class="wmlnav-b2-logo">
         <a id="wmlnav-logo-link" href="/{{SLUG}}/" aria-label="WaveMAX Austin home">
-          <img decoding="async" src="/assets/images/brand/logo-wavemax.png" alt="WaveMAX Laundry" width="395" height="90">
+          <img fetchpriority="high" src="/assets/images/brand/logo-wavemax.png" alt="WaveMAX Laundry" width="395" height="90">
         </a>
       </div>
       <div class="wmlnav-b2-right">
@@ -821,7 +824,7 @@
   "Do Not Sell or Share" path; GPC honored.
   ════════════════════════════════════════════════════════════════════
 -->
-<script src="/assets/js/austin-fb-pixel.js?v=20260524b" defer></script>
+<script src="/assets/js/austin-fb-pixel.js?v=20260529" defer></script>
 <noscript><img height="1" width="1" style="display:none" alt="" src="https://www.facebook.com/tr?id=1787020035321730&amp;ev=PageView&amp;noscript=1"></noscript>
 </body>
 </html>
