@@ -54,8 +54,9 @@ grep -c 'aria-label="Choose language"' /tmp/p.html          # changed markup gon
 1. **Bump `?v=` on any changed `/assets/*` file.** Static assets are served `immutable,
    max-age=1y`; without a new query string, the old copy is served from the browser/CF edge
    forever. Bump the stamp in **every** referencing page (`grep -rl`).
-2. **`git pull --ff-only` on BOTH boxes** (OCI primary `161.153.71.201` + Ultahost failover via
-   `wavemax-promo`). Keep them lockstep — same commit.
+2. **`git pull --ff-only` on BOTH web boxes** — dual-AZ active-active: oci1 `161.153.71.201` +
+   oci2 `144.24.4.202` (`ssh -i ~/.ssh/oci_wavemax ubuntu@<ip>`). Keep them lockstep — same commit.
+   (Ultahost is mail-only now, not a web box.) Full sequence: `docs`/memory "Deployment procedure".
 3. **`pm2 reload wavemax` on BOTH boxes if you touched a server-rendered template**
    (`franchise-host.html` is cached in memory in prod — `git pull` alone won't deploy it).
    Pure `express.static` assets don't need a reload. See `tasks/lessons.md`.
