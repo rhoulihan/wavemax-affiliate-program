@@ -69,6 +69,32 @@ describe('explorerGuard', () => {
     expect(res.status).toHaveBeenCalledWith(404);
   });
 
+  // --- encoded-path bypass tests ---
+  it('guards an encoded path (/%64esign-explorer/…) without token — bypass fix', () => {
+    // Express gives the guard the raw percent-encoded path; express.static decodes it.
+    // The guard must decode before matching so %64 (='d') is caught just like 'd'.
+    const req = mkReq({ path: '/%64esign-explorer/render/manifest.json', query: {} });
+    const res = mkRes(); const next = jest.fn();
+    explorerGuard(req, res, next);
+    expect(next).not.toHaveBeenCalled();
+    expect(res.status).toHaveBeenCalledWith(404);
+  });
+  it('passes through mixed-case /DESIGN-EXPLORER/x (documented Linux-only behavior)', () => {
+    const req = mkReq({ path: '/DESIGN-EXPLORER/x', query: {} });
+    const res = mkRes(); const next = jest.fn();
+    explorerGuard(req, res, next);
+    expect(next).toHaveBeenCalled();              // NOT guarded on case-sensitive FS
+  });
+  it('does not throw on malformed encoding and still guards the path', () => {
+    // %E0%A4%A is incomplete UTF-8; decodeURIComponent throws. Guard must catch and
+    // fall back to the raw path, which still starts with /design-explorer.
+    const req = mkReq({ path: '/design-explorer/%E0%A4%A', query: {} });
+    const res = mkRes(); const next = jest.fn();
+    expect(() => explorerGuard(req, res, next)).not.toThrow();
+    expect(next).not.toHaveBeenCalled();          // still guarded
+    expect(res.status).toHaveBeenCalledWith(404);
+  });
+
   // --- scoped CSP for the explorer ---
   it('sets a scoped Content-Security-Policy on an authenticated explorer response', () => {
     const req = mkReq({ query: { k: 'secret123' } }); const res = mkRes(); const next = jest.fn();

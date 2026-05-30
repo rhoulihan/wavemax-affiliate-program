@@ -62,4 +62,22 @@ describe('explorer guard — HTTP integration', () => {
       .set('Cookie', 'explorer_k=nope');
     expect(r.status).toBe(404);
   });
+
+  // --- encoded-path bypass: authoritative proof the bypass is CLOSED ---
+  it('(e) 404s /%64esign-explorer/render/manifest.json with no token (encoded-path bypass closed)', async () => {
+    // Before the fix: express.static decoded %64→d and served the real file (200).
+    // After the fix: the guard decodes first, matches the explorer namespace, and 404s.
+    const r = await request(app).get('/%64esign-explorer/render/manifest.json');
+    expect(r.status).toBe(404);
+    expect(r.headers['cache-control']).toBe('no-store');
+  });
+
+  it('(f) still serves /%64esign-explorer/render/manifest.json when the cookie is valid', async () => {
+    // Ensures the fix doesn't break authenticated access via encoded paths.
+    const r = await request(app)
+      .get('/%64esign-explorer/render/manifest.json')
+      .set('Cookie', 'explorer_k=testtok');
+    expect(r.status).toBe(200);
+    expect(Array.isArray(r.body.states)).toBe(true);
+  });
 });

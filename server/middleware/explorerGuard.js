@@ -38,7 +38,14 @@ const EXPLORER_CSP = [
 ].join('; ');
 
 function explorerGuard(req, res, next) {
-  const inExplorer = req.path === '/design-explorer' || req.path.startsWith('/design-explorer/');
+  // NB: req.path is NOT percent-decoded by Express, but express.static decodes before
+  // resolving files. Decode here so encoded variants (e.g. /%64esign-explorer/...) are
+  // matched and guarded consistently with what static will actually serve.
+  // On malformed encoding decodeURIComponent throws; keep the raw path in that case
+  // (it still matches if it literally starts with /design-explorer).
+  let p = req.path;
+  try { p = decodeURIComponent(req.path); } catch (e) { /* malformed encoding: keep raw */ }
+  const inExplorer = p === '/design-explorer' || p.startsWith('/design-explorer/');
   if (!inExplorer) return next();
 
   const token = process.env.EXPLORER_TOKEN;
