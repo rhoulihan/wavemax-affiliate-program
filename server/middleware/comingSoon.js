@@ -68,7 +68,7 @@ const PAGE = `<!DOCTYPE html>
       <a class="btn btn-dir" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&amp;destination=825+E+Rundberg+Ln+F1+Austin+TX+78753"><span aria-hidden="true">🧭</span> Get directions</a>
     </div>
     <div class="map">
-      <iframe title="Map to WaveMAX Laundry Austin — 825 E Rundberg Ln F1, Austin, TX 78753" loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="https://www.google.com/maps?q=WaveMAX+Laundry,+825+E+Rundberg+Ln,+Austin,+TX+78753&amp;output=embed&amp;t=k&amp;z=18"></iframe>
+      <iframe title="Map to WaveMAX Laundry Austin — 825 E Rundberg Ln F1, Austin, TX 78753" loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="https://www.google.com/maps?q=WaveMAX+Laundry,+825+E+Rundberg+Ln,+Austin,+TX+78753&amp;output=embed&amp;t=k&amp;z=16"></iframe>
     </div>
   </div>
   <div class="ft">
