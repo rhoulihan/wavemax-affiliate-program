@@ -202,14 +202,42 @@ const SS_ES = {
     sub: "La lavandería de autoservicio más limpia de Austin — 42 lavadoras Electrolux 450G, 42 secadoras rápidas, agua sanitizada con UV de grado hospitalario, atendida en cada turno. Familiar, sin monedas, sin membresía. Lava en 20 minutos, seca en 20 minutos, listo en menos de una hora.",
     tagline: 'MÁS LIMPIA · MÁS RÁPIDA · MÁS SEGURA',
   },
+  sections: [
+    { id: 'stats', kind: 'stats', title: '', items: [
+      { label: 'Lavadoras', value: '42' },
+      { label: 'Secadoras', value: '42' },
+      { label: 'Carga máxima', value: '80lb' },
+      { label: 'Secado más rápido', value: '50%' },
+      { label: 'Sanitización UV', value: '99.9%' },
+    ]},
+    { id: 'machines', kind: 'cards', title: 'Equipos', items: [
+      { title: 'Lavadoras Electrolux CompassPro 450G',
+        body: 'Lavados de 20 minutos, secados de 20 minutos. Las máquinas de alta centrifugación 450G significan menos tiempo esperando y más tiempo haciendo lo que prefieres.' },
+      { title: 'Sanitización UV de agua Omni LUX',
+        body: 'Cada ciclo de lavado se beneficia de nuestro sistema de sanitización UV de agua de grado hospitalario — eliminación del 99.9% de patógenos antes de que el agua toque tu ropa.' },
+      { title: 'WiFi gratis y comodidades',
+        body: 'Accesible para sillas de ruedas, estacionamiento gratuito, atendida en cada turno. Trae tu laptop — el WiFi es suficientemente rápido para trabajar de verdad.' },
+    ]},
+    { id: 'pricing', kind: 'pricing', title: 'Precios simples', items: [] },
+  ],
+  cta: {
+    title: '¿Listo para lavar de la manera fácil?',
+    sub: 'Llámanos o pásate — abierto todos los días de 7am a 10pm.',
+    primaryLabel: 'Cómo llegar',
+  },
 };
 
 function buildSelfServe(lang) {
   const en = SS_EN;
-  const overrides = lang === 'es' ? SS_ES : {};
-  const hero = Object.assign({}, en.hero, overrides.hero || {});
+  if (lang === 'es') {
+    return {
+      hero: Object.assign({}, en.hero, SS_ES.hero),
+      sections: structuredClone(SS_ES.sections),
+      cta: structuredClone(SS_ES.cta),
+    };
+  }
   return {
-    hero,
+    hero: Object.assign({}, en.hero),
     sections: structuredClone(en.sections),
     cta: structuredClone(en.cta),
   };
@@ -246,13 +274,35 @@ const WDF_ES = {
     title: 'Deja tu ropa, nosotros la cuidamos',
     sub: 'Deja tu ropa en WaveMAX Austin — la lavaremos, secaremos y doblaremos, y estará lista para ti al día siguiente. Agua sanitizada con UV de grado hospitalario, detergente hipoalergénico ecológico, sin efectivo.',
   },
+  sections: [
+    { id: 'howItWorks', kind: 'steps', title: 'Cómo funciona', items: [
+      { title: 'Deja tu ropa', body: 'Entrega en 2 minutos. Pesamos, lavamos, secamos y doblamos con sanitización UV de grado hospitalario.' },
+      { title: 'Entrega en 24 horas', body: 'Deja tu ropa en la mañana, recógela al día siguiente. ¿Necesitas algo más rápido? Pregunta por el servicio del mismo día.' },
+      { title: 'Precios simples', body: '$1.20/lb, mínimo 10 lb. Detergente, hojas para secadora y ganchos incluidos. Solo tarjetas, sin efectivo.' },
+    ]},
+    { id: 'addOns', kind: 'cards', title: 'Servicios adicionales', items: [
+      { title: 'Detergente premium', body: '$0.10/lb — hipoalergénico, sin colorantes ni perfumes.' },
+      { title: 'Suavizante de telas', body: '$0.10/lb — mantiene la ropa suave y sin estática.' },
+      { title: 'Removedor de manchas', body: '$0.10/lb — pretratamiento aplicado antes del lavado.' },
+    ]},
+  ],
+  cta: {
+    title: '¿Listo para dejar tu ropa?',
+    sub: 'Llama o pásate durante el horario de atención.',
+    primaryLabel: 'Llamar ahora',
+  },
 };
 
 function buildWashDryFold(lang) {
   const en = WDF_EN;
-  const overrides = lang === 'es' ? WDF_ES : {};
-  const hero = Object.assign({}, en.hero, overrides.hero || {});
-  return { hero, sections: structuredClone(en.sections), cta: structuredClone(en.cta) };
+  if (lang === 'es') {
+    return {
+      hero: Object.assign({}, en.hero, WDF_ES.hero),
+      sections: structuredClone(WDF_ES.sections),
+      cta: structuredClone(WDF_ES.cta),
+    };
+  }
+  return { hero: Object.assign({}, en.hero), sections: structuredClone(en.sections), cta: structuredClone(en.cta) };
 }
 
 // ─── commercial ────────────────────────────────────────────────────────────
@@ -288,13 +338,35 @@ const COM_ES = {
     sub: 'Agua sanitizada con UV de grado hospitalario, máquinas comerciales de 80 lb, turnaround programado o bajo demanda. Atendemos oficinas médicas, gimnasios, anfitriones de alquiler a corto plazo, salones y restaurantes en Austin — sin contratos, sin cargos de instalación.',
     tagline: 'VOLUMEN · MISMO DÍA · SIN CONTRATOS',
   },
+  sections: [
+    { id: 'whoWeServe', kind: 'cards', title: 'A quién atendemos', items: [
+      { title: 'Airbnb y alquileres', body: 'Apoyo para el cambio de turno el mismo día. Sábanas, toallas, edredones — doblados y listos antes del check-in.' },
+      { title: 'Oficinas médicas y gimnasios', body: 'Uniformes, ropa de trabajo, toallas — limpieza confiable, entrega puntual.' },
+      { title: 'Restaurantes y salones', body: 'Ropa de cama, delantales y toallas manejados en volumen. Cuentas sin contrato.' },
+    ]},
+    { id: 'whyUs', kind: 'cards', title: 'Por qué WaveMAX', items: [
+      { title: 'Sanitización de grado hospitalario', body: 'Eliminación del 99.9% de patógenos con purificación de agua UV Omni LUX.' },
+      { title: 'Sin contratos', body: 'Escala hacia arriba o hacia abajo sin compromisos. Paga solo por lo que traes.' },
+      { title: 'Máquinas de 80 lb de capacidad', body: 'Maneja grandes cargas comerciales en un solo ciclo.' },
+    ]},
+  ],
+  cta: {
+    title: '¿Listo para abrir una cuenta comercial?',
+    sub: 'Llama para un presupuesto — sin contratos, sin cargos de instalación.',
+    primaryLabel: 'Llamar para presupuesto',
+  },
 };
 
 function buildCommercial(lang) {
   const en = COM_EN;
-  const overrides = lang === 'es' ? COM_ES : {};
-  const hero = Object.assign({}, en.hero, overrides.hero || {});
-  return { hero, sections: structuredClone(en.sections), cta: structuredClone(en.cta) };
+  if (lang === 'es') {
+    return {
+      hero: Object.assign({}, en.hero, COM_ES.hero),
+      sections: structuredClone(COM_ES.sections),
+      cta: structuredClone(COM_ES.cta),
+    };
+  }
+  return { hero: Object.assign({}, en.hero), sections: structuredClone(en.sections), cta: structuredClone(en.cta) };
 }
 
 // ─── about ──────────────────────────────────────────────────────────────────
@@ -326,13 +398,31 @@ const ABOUT_ES = {
     sub: 'Este WaveMAX es propiedad y está operado por personas que viven en la comunidad a la que servimos. Elegimos WaveMAX porque creemos en brindar la mejor calidad y servicio al precio justo más bajo — y reinvertir en nuestro vecindario, cada día.',
     tagline: 'Propiedad local. Inversión local.',
   },
+  sections: [
+    { id: 'story', kind: 'prose', title: 'Nuestra historia', body: 'WaveMAX Austin es propiedad y está operada por la familia Houlihan — Colin (músico), Rick (ejecutivo tecnológico) y Simone (artista y filántropa). Tres locales de Austin devolviendo a la comunidad al brindar el mejor servicio de lavandería al precio justo más bajo.' },
+    { id: 'values', kind: 'cards', title: 'En lo que creemos', items: [
+      { title: 'La comunidad primero', body: 'Vivimos aquí. Compramos aquí. Reinvertimos las ganancias en el vecindario.' },
+      { title: 'Precios honestos', body: 'Sin cargos ocultos. Sin trampas. El precio que ves es el precio que pagas.' },
+      { title: 'Equipos de primera', body: 'WaveMAX solo opera máquinas Electrolux 450G. Tu ropa merece lo mejor.' },
+    ]},
+  ],
+  cta: {
+    title: 'Ven a saludarnos',
+    sub: 'Abierto todos los días de 7am a 10pm en 825 E Rundberg Ln F1, Austin.',
+    primaryLabel: 'Cómo llegar',
+  },
 };
 
 function buildAbout(lang) {
   const en = ABOUT_EN;
-  const overrides = lang === 'es' ? ABOUT_ES : {};
-  const hero = Object.assign({}, en.hero, overrides.hero || {});
-  return { hero, sections: structuredClone(en.sections), cta: structuredClone(en.cta) };
+  if (lang === 'es') {
+    return {
+      hero: Object.assign({}, en.hero, ABOUT_ES.hero),
+      sections: structuredClone(ABOUT_ES.sections),
+      cta: structuredClone(ABOUT_ES.cta),
+    };
+  }
+  return { hero: Object.assign({}, en.hero), sections: structuredClone(en.sections), cta: structuredClone(en.cta) };
 }
 
 // ─── contact ────────────────────────────────────────────────────────────────
@@ -362,13 +452,31 @@ const CONTACT_ES = {
     title: 'Contáctanos en WaveMAX Austin',
     sub: 'Llámanos, visítanos durante el horario de atención, o déjanos un mensaje — respondemos dentro de pocas horas durante el horario comercial.',
   },
+  sections: [
+    { id: 'info', kind: 'contact-info', title: 'Encuéntranos', items: [
+      { label: 'Dirección', value: '825 E Rundberg Ln F1, Austin, TX 78753' },
+      { label: 'Teléfono', value: '(512) 553-1674' },
+      { label: 'Horario', value: 'Abierto todos los días · 7:00 am – 10:00 pm' },
+    ]},
+    { id: 'form', kind: 'contact-form', title: 'Envíanos un mensaje', body: '' },
+  ],
+  cta: {
+    title: 'Nos encantaría saber de ti',
+    sub: 'Llama, visítanos o envía un mensaje — estamos aquí para ayudarte.',
+    primaryLabel: 'Llamar ahora',
+  },
 };
 
 function buildContact(lang) {
   const en = CONTACT_EN;
-  const overrides = lang === 'es' ? CONTACT_ES : {};
-  const hero = Object.assign({}, en.hero, overrides.hero || {});
-  return { hero, sections: structuredClone(en.sections), cta: structuredClone(en.cta) };
+  if (lang === 'es') {
+    return {
+      hero: Object.assign({}, en.hero, CONTACT_ES.hero),
+      sections: structuredClone(CONTACT_ES.sections),
+      cta: structuredClone(CONTACT_ES.cta),
+    };
+  }
+  return { hero: Object.assign({}, en.hero), sections: structuredClone(en.sections), cta: structuredClone(en.cta) };
 }
 
 // ─── Main builder ────────────────────────────────────────────────────────────

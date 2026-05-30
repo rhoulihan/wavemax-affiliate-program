@@ -24,13 +24,24 @@ describe('content-model', () => {
       }
     }
   });
-  it('ES pages with no full ES override fall back to EN cta/sections (and are independent copies)', () => {
-    const enPage = model.content.en.pages['wash-dry-fold'];
-    const esPage = model.content.es.pages['wash-dry-fold'];
-    // ES cta equals EN cta value (fallback worked)
-    expect(esPage.cta.primaryLabel).toBe(enPage.cta.primaryLabel);
-    // But they must not be the same object reference (I-2 clone fix)
-    expect(esPage.cta).not.toBe(enPage.cta);
-    expect(esPage.sections).not.toBe(enPage.sections);
+  it('EN and ES pages have independent object references (no shared mutable refs)', () => {
+    for (const page of ['self-serve', 'wash-dry-fold', 'commercial', 'about', 'contact']) {
+      const enPage = model.content.en.pages[page];
+      const esPage = model.content.es.pages[page];
+      expect(esPage.cta).not.toBe(enPage.cta);
+      expect(esPage.sections).not.toBe(enPage.sections);
+    }
+  });
+
+  it('non-home pages are genuinely translated in ES (no English section leak)', () => {
+    for (const page of ['self-serve', 'wash-dry-fold', 'commercial', 'about', 'contact']) {
+      const en = model.content.en.pages[page];
+      const es = model.content.es.pages[page];
+      expect(es.sections.map(s => s.kind)).toEqual(en.sections.map(s => s.kind)); // structural parity
+      expect(JSON.stringify(es.sections)).not.toEqual(JSON.stringify(en.sections)); // actually translated
+      expect(es.sections).not.toBe(en.sections); // independent refs
+      // CTA must also be translated (not EN copy)
+      expect(JSON.stringify(es.cta)).not.toEqual(JSON.stringify(en.cta));
+    }
   });
 });
