@@ -24,4 +24,13 @@ describe('content-model', () => {
       }
     }
   });
+  it('ES pages with no full ES override fall back to EN cta/sections (and are independent copies)', () => {
+    const enPage = model.content.en.pages['wash-dry-fold'];
+    const esPage = model.content.es.pages['wash-dry-fold'];
+    // ES cta equals EN cta value (fallback worked)
+    expect(esPage.cta.primaryLabel).toBe(enPage.cta.primaryLabel);
+    // But they must not be the same object reference (I-2 clone fix)
+    expect(esPage.cta).not.toBe(enPage.cta);
+    expect(esPage.sections).not.toBe(enPage.sections);
+  });
 });

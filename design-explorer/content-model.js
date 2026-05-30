@@ -155,8 +155,8 @@ function buildHome(loc, fb) {
         l.cta && l.cta.subtitle && l.cta.subtitle.full,
         f.cta && f.cta.subtitle && f.cta.subtitle.full
       ),
-      primaryLabel: s(l.common && l.common.buttons && l.common.buttons.getStarted,
-                      'Get Started'),
+      primaryLabel: s(loc.common && loc.common.buttons && loc.common.buttons.getStarted,
+                      (fb.common && fb.common.buttons && fb.common.buttons.getStarted) || 'Get Started'),
     },
   };
 }
@@ -171,14 +171,14 @@ const SS_EN = {
     sub: "Austin's cleanest self-serve laundromat — 42 Electrolux 450G washers, 42 fast dryers, hospital-grade UV-sanitized water, fully attended every shift. Family-owned, no-coin, no-membership. Wash 20 minutes, dry 20 minutes, out the door in under an hour.",
     tagline: 'CLEANER · FASTER · SAFER',
   },
-  stats: [
-    { label: 'Washers', value: '42' },
-    { label: 'Dryers', value: '42' },
-    { label: 'Largest Load', value: '80lb' },
-    { label: 'Faster Drying', value: '50%' },
-    { label: 'UV Sanitization', value: '99.9%' },
-  ],
   sections: [
+    { id: 'stats', kind: 'stats', title: '', items: [
+      { label: 'Washers', value: '42' },
+      { label: 'Dryers', value: '42' },
+      { label: 'Largest Load', value: '80lb' },
+      { label: 'Faster Drying', value: '50%' },
+      { label: 'UV Sanitization', value: '99.9%' },
+    ]},
     { id: 'machines', kind: 'cards', title: 'Equipment', items: [
       { title: 'Electrolux CompassPro 450G Washers',
         body: '20-minute washes, 20-minute dries. High-spin 450G machines mean less time waiting and more time doing what you\'d rather be doing.' },
@@ -210,8 +210,8 @@ function buildSelfServe(lang) {
   const hero = Object.assign({}, en.hero, overrides.hero || {});
   return {
     hero,
-    sections: en.sections,
-    cta: en.cta,
+    sections: structuredClone(en.sections),
+    cta: structuredClone(en.cta),
   };
 }
 
@@ -252,7 +252,7 @@ function buildWashDryFold(lang) {
   const en = WDF_EN;
   const overrides = lang === 'es' ? WDF_ES : {};
   const hero = Object.assign({}, en.hero, overrides.hero || {});
-  return { hero, sections: en.sections, cta: en.cta };
+  return { hero, sections: structuredClone(en.sections), cta: structuredClone(en.cta) };
 }
 
 // ─── commercial ────────────────────────────────────────────────────────────
@@ -294,7 +294,7 @@ function buildCommercial(lang) {
   const en = COM_EN;
   const overrides = lang === 'es' ? COM_ES : {};
   const hero = Object.assign({}, en.hero, overrides.hero || {});
-  return { hero, sections: en.sections, cta: en.cta };
+  return { hero, sections: structuredClone(en.sections), cta: structuredClone(en.cta) };
 }
 
 // ─── about ──────────────────────────────────────────────────────────────────
@@ -332,7 +332,7 @@ function buildAbout(lang) {
   const en = ABOUT_EN;
   const overrides = lang === 'es' ? ABOUT_ES : {};
   const hero = Object.assign({}, en.hero, overrides.hero || {});
-  return { hero, sections: en.sections, cta: en.cta };
+  return { hero, sections: structuredClone(en.sections), cta: structuredClone(en.cta) };
 }
 
 // ─── contact ────────────────────────────────────────────────────────────────
@@ -368,7 +368,7 @@ function buildContact(lang) {
   const en = CONTACT_EN;
   const overrides = lang === 'es' ? CONTACT_ES : {};
   const hero = Object.assign({}, en.hero, overrides.hero || {});
-  return { hero, sections: en.sections, cta: en.cta };
+  return { hero, sections: structuredClone(en.sections), cta: structuredClone(en.cta) };
 }
 
 // ─── Main builder ────────────────────────────────────────────────────────────
@@ -385,6 +385,8 @@ function buildContent() {
     const fb = locales['en']; // EN fallback
     result[lang] = {
       pages: {
+        // buildHome takes locale objects (loc/fb) because its strings live in common.json;
+        // the other builders take a lang string because their copy is hardcoded constants.
         'home': buildHome(loc, fb),
         'self-serve': buildSelfServe(lang),
         'wash-dry-fold': buildWashDryFold(lang),
