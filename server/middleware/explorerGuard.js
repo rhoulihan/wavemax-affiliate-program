@@ -1,20 +1,68 @@
 // Token-guard for /design-explorer/* — not publicly discoverable.
-// Requests to /design-explorer/* are allowed only when ?k= matches EXPLORER_TOKEN;
-// all other requests (and all non-explorer paths) pass straight through.
+//
+// Auth model: a request is authenticated when EITHER
+//   - the query param ?k= matches EXPLORER_TOKEN, OR
+//   - the explorer_k cookie matches EXPLORER_TOKEN.
+// When ?k matches we ALSO set the explorer_k cookie (httpOnly, sameSite=Lax,
+// path=/design-explorer). This lets corporate open
+//   /design-explorer/index.html?k=TOKEN
+// once; every sub-resource the static shell then requests (explorer.css,
+// explorer.js, render/manifest.json, and the iframed render files)
+// authenticates via the cookie, since a static index.html cannot append ?k=
+// to its own <link>/<script>/<iframe> references.
+//
+// Unauthenticated explorer paths 404; non-explorer paths pass straight through.
 //
 // NOTE: The prefix check below is case-sensitive and assumes a case-sensitive
 // filesystem (Linux/ext4 in production). On a case-insensitive FS (macOS HFS+,
 // Windows NTFS) an attacker could reach the files via a differently-cased URL
 // without being guarded; an additional lower-casing guard would be required.
+
+// Scoped CSP for authenticated explorer responses. Helmet's global policy uses
+// a strict per-request style nonce, which would block the render files' static
+// inline <style nonce="DSNONCE">. This guard runs AFTER helmet, so res.set()
+// here replaces helmet's header. With 'unsafe-inline' (and NO nonce-source) in
+// style-src, the render files' inline <style> are allowed regardless of their
+// DSNONCE attribute; the shell's own assets are external and covered by 'self';
+// Google Maps iframes/fonts are explicitly allowed.
+const EXPLORER_CSP = [
+  "default-src 'self'",
+  "script-src 'self'",
+  "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+  "font-src 'self' https://fonts.gstatic.com",
+  "img-src 'self' data: https://maps.gstatic.com https://maps.googleapis.com",
+  "frame-src 'self' https://www.google.com https://maps.google.com",
+  "connect-src 'self'",
+  "base-uri 'self'",
+  "object-src 'none'"
+].join('; ');
+
 function explorerGuard(req, res, next) {
   const inExplorer = req.path === '/design-explorer' || req.path.startsWith('/design-explorer/');
   if (!inExplorer) return next();
+
   const token = process.env.EXPLORER_TOKEN;
-  if (!token || req.query.k !== token) {
+  const queryOk = Boolean(token) && req.query.k === token;
+  const cookieOk = Boolean(token) && req.cookies && req.cookies.explorer_k === token;
+
+  if (!queryOk && !cookieOk) {
     res.set('Cache-Control', 'no-store');
     return res.status(404).type('html').send('<!doctype html><title>Not found</title>Not found');
   }
+
+  // Promote a valid ?k into a session cookie so sub-resources authenticate.
+  if (queryOk) {
+    res.cookie('explorer_k', token, {
+      httpOnly: true,
+      sameSite: 'lax',
+      path: '/design-explorer'
+    });
+  }
+
+  res.set('Cache-Control', 'no-store');
   res.set('X-Robots-Tag', 'noindex, nofollow');
+  res.set('Content-Security-Policy', EXPLORER_CSP);
   return next();
 }
+
 module.exports = explorerGuard;
