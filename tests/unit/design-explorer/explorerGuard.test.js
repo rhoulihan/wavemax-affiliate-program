@@ -33,4 +33,14 @@ describe('explorerGuard', () => {
     expect(next).toHaveBeenCalled();
     expect(res.headers['X-Robots-Tag']).toBe('noindex, nofollow');
   });
+  it('does not guard look-alike paths like /design-explorerX', () => {
+    const req = mkReq({ path: '/design-explorerX', query: {} }); const res = mkRes(); const next = jest.fn();
+    explorerGuard(req, res, next);
+    expect(next).toHaveBeenCalled();          // passes through, not 404'd
+  });
+  it('still guards the exact /design-explorer path', () => {
+    const req = mkReq({ path: '/design-explorer', query: {} }); const res = mkRes(); const next = jest.fn();
+    explorerGuard(req, res, next);
+    expect(res.status).toHaveBeenCalledWith(404);
+  });
 });
