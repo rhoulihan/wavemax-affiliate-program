@@ -23,11 +23,17 @@ function renderState({ skin, intensity, page, lang, nonce }) {
   const theme = themes[intensity];
   if (!theme) throw new Error(`unknown intensity: ${intensity}`);
 
+  if (!Object.prototype.hasOwnProperty.call(model.content, lang))
+    throw new Error(`unknown lang: ${lang}`);
+
+  // Fix #2: coerce skin.id to a safe attribute token (no quotes/special chars).
+  const skinId = String(skin.id).replace(/[^a-z0-9_-]/gi, '');
+
   const c = model.content[lang];
   const body = skin.renderPage(page, c, intensity, lang);
 
   const html = `<!DOCTYPE html>
-<html lang="${lang}" data-intensity="${theme.id}" data-skin="${skin.id}">
+<html lang="${lang}" data-intensity="${theme.id}" data-skin="${skinId}">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
@@ -36,6 +42,9 @@ function renderState({ skin, intensity, page, lang, nonce }) {
 ${skin.css}</style>
 </head>
 <body>
+<!-- ds-brandline: restylable presentational design-system hook; aria-hidden so it is
+     not announced as content. The accessible ownership disclosure is in the §12.2
+     footer below — do NOT remove aria-hidden="true" thinking info is suppressed. -->
 <p class="ds-brandline" aria-hidden="true">${theme.brandTitle}</p>
 ${body}
 <footer class="ds-tm" role="contentinfo">

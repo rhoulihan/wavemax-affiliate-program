@@ -24,6 +24,12 @@ describe('renderState (core)', () => {
     expect(light).toContain('data-intensity="light"');
     expect(heavy).toContain('WaveMAX Austin');
     expect(light).toContain('independently owned');
+    // Fix #2: skin id is coerced to a safe attribute token
+    expect(heavy).toContain('data-skin="stub"');
+  });
+  it('throws on unknown lang', () => {
+    expect(() => renderState({ ...base, intensity: 'heavy', lang: 'xx' }))
+      .toThrow(/unknown lang/);
   });
   it('delegates the body to the skin and carries the skin css', () => {
     const html = renderState({ ...base, intensity: 'heavy' });
