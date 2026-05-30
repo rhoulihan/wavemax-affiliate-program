@@ -847,6 +847,9 @@ app.use('/assets', express.static(path.join(__dirname, 'public', 'assets'), {
   }
 }));
 
+// Guard /design-explorer/* behind ?k=EXPLORER_TOKEN before static files can serve them
+app.use(require('./server/middleware/explorerGuard'));
+
 // Serve static files in all environments
 app.use(express.static(path.join(__dirname, 'public')));
 
