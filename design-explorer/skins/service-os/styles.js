@@ -254,7 +254,10 @@ h1,h2,h3{font-family:var(--so-display);font-weight:700;letter-spacing:-.02em;lin
   border:1px solid var(--so-line);background:var(--paper);color:var(--ink)}
 .so-cc-input input::placeholder{color:var(--so-muted)}
 .so-cc-send{font-family:var(--so-mono);font-weight:700;font-size:12px;padding:0 16px;border-radius:10px;border:0;
-  background:var(--so-lead);color:var(--so-on-lead);cursor:not-allowed}
+  background:var(--so-lead);color:var(--so-on-lead);cursor:pointer}
+.so-cc-send:disabled{opacity:.55;cursor:progress}
+/* empty reply bubble stays out of the layout until the client fills it */
+.so-bubble--bot:empty{display:none}
 .so-cc-note{font-family:var(--so-mono);font-size:10.5px;letter-spacing:.04em;color:var(--so-muted);margin:0}
 @media (max-width:720px){ .so-cc-body{grid-template-columns:1fr;gap:18px;padding:20px} }
 

@@ -429,7 +429,10 @@ html[data-intensity="light"] .ne-logo-chip{background:#23303f} /* dark navy band
 .ne-desk-input input{flex:1;font-family:var(--ne-body);font-size:14px;padding:12px 14px;
   border:1px solid var(--ne-line);border-radius:8px;background:var(--ne-cream);color:var(--ne-ink)}
 .ne-desk-send{font-family:var(--ne-body);font-weight:800;font-size:13px;letter-spacing:.04em;
-  padding:0 18px;border-radius:8px;border:0;background:var(--ne-ink);color:var(--ne-paper);cursor:not-allowed}
+  padding:0 18px;border-radius:8px;border:0;background:var(--ne-ink);color:var(--ne-paper);cursor:pointer}
+.ne-desk-send:disabled{opacity:.55;cursor:progress}
+/* empty answer bubble stays out of the layout until the client fills it */
+.ne-bubble--a:empty{display:none}
 .ne-desk-note{font-size:11.5px;color:var(--ne-muted);margin-top:4px;font-style:italic;
   font-family:var(--ne-display)}
 

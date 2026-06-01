@@ -105,7 +105,10 @@ function divider(label) {
   return `<div class="ne-divider"><span>${esc(label)}</span>${I.leaf}<span style="flex:0">·</span></div>`;
 }
 
-/* ===== Neighborhood desk (concierge VISUAL STUB — no JS, input disabled) ===== */
+/* ===== Neighborhood desk (concierge LIVE — bound by concierge-client.js to
+   /api/concierge). The <form data-concierge> is the shared hook; the answer
+   bubble is an aria-live region the client fills with textContent (CSP-clean).
+   A sample question stays visible as the conversation opener. ===== */
 function desk(lang) {
   const L = t(lang);
   return `<div class="ne-wrap"><section class="ne-desk" aria-labelledby="ne-desk-t">
@@ -115,16 +118,16 @@ function desk(lang) {
       <h2 id="ne-desk-t">${esc(L.deskTitle)}</h2>
       <p>${esc(L.deskBody)}</p>
     </div>
-    <div class="ne-desk-chat" role="group" aria-label="${esc(L.deskTitle)}">
+    <form class="ne-desk-chat" data-concierge aria-label="${esc(L.deskTitle)}">
       <div class="ne-bubble ne-bubble--q">${esc(L.deskSample)}</div>
-      <div class="ne-bubble ne-bubble--a">${esc(L.deskReply)}</div>
+      <div class="ne-bubble ne-bubble--a" data-concierge-response aria-live="polite"></div>
       <div class="ne-desk-input">
         <label for="ne-desk-q" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">${esc(L.deskTitle)}</label>
-        <input id="ne-desk-q" type="text" placeholder="${esc(L.deskPlaceholder)}" value="" readonly disabled aria-disabled="true">
-        <button class="ne-desk-send" type="button" disabled aria-disabled="true">${esc(L.deskSend)}</button>
+        <input id="ne-desk-q" name="message" type="text" placeholder="${esc(L.deskPlaceholder)}" autocomplete="off" maxlength="500">
+        <button class="ne-desk-send" type="submit">${esc(L.deskSend)}</button>
       </div>
       <p class="ne-desk-note">${esc(L.deskNote)}</p>
-    </div>
+    </form>
   </div>
 </section></div>`;
 }

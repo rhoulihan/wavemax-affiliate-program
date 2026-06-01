@@ -71,7 +71,10 @@ function topbar(page, intensity, lang) {
 </div></header>`;
 }
 
-/* ===== Concierge launcher (VISUAL STUB — no JS, input readonly+disabled) ===== */
+/* ===== Concierge launcher (LIVE — bound by concierge-client.js to /api/concierge).
+   The <form data-concierge> is the shared hook the external client binds to.
+   Input is enabled + labelled; the bot bubble is an aria-live region the client
+   writes the reply into via textContent (no innerHTML, CSP-clean). ===== */
 function concierge(lang) {
   const L = t(lang);
   return `<section class="so-concierge" aria-labelledby="so-cc-title">
@@ -83,16 +86,16 @@ function concierge(lang) {
       <h2 id="so-cc-title">${esc(L.conciergeTitle)}</h2>
       <p>${esc(L.conciergeBody)}</p>
     </div>
-    <div class="so-cc-chat" role="group" aria-label="${esc(L.conciergeTitle)}">
+    <form class="so-cc-chat" data-concierge aria-label="${esc(L.conciergeTitle)}">
       <div class="so-bubble so-bubble--user">${esc(L.conciergeSample)}</div>
-      <div class="so-bubble so-bubble--bot"><span class="so-typing" aria-hidden="true"><i></i><i></i><i></i></span></div>
+      <div class="so-bubble so-bubble--bot" data-concierge-response aria-live="polite"></div>
       <div class="so-cc-input">
         <label class="so-nap-l" for="so-cc-q" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">${esc(L.conciergeTitle)}</label>
-        <input id="so-cc-q" type="text" placeholder="${esc(L.conciergePlaceholder)}" value="" readonly disabled aria-disabled="true">
-        <button class="so-cc-send" type="button" disabled aria-disabled="true">${esc(L.conciergeSend)}</button>
+        <input id="so-cc-q" name="message" type="text" placeholder="${esc(L.conciergePlaceholder)}" autocomplete="off" maxlength="500">
+        <button class="so-cc-send" type="submit">${esc(L.conciergeSend)}</button>
       </div>
       <p class="so-cc-note">${esc(L.conciergeNote)}</p>
-    </div>
+    </form>
   </div>
 </section>`;
 }

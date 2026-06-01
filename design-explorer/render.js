@@ -51,6 +51,11 @@ ${body}
   <p class="ds-tm-notice">${model.TRADEMARK_NOTICE}</p>
   <p class="ds-tm-copy">&copy; 2026 CRHS Enterprises, LLC.</p>
 </footer>
+<!-- EXTERNAL same-origin concierge client. NOT an inline script — it has a src
+     attribute, so it is allowed by the explorer's script-src 'self' CSP. This
+     is the ONE place every rendered state loads the client that wires up the
+     <form data-concierge> widget(s) to POST /api/concierge. -->
+<script src="/design-explorer/concierge-client.js" defer></script>
 </body></html>`;
 
   return html.replace(/\{\{NONCE\}\}/g, nonce);

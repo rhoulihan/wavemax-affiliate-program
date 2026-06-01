@@ -573,7 +573,10 @@ html[data-intensity="light"] .ap-desk-card{box-shadow:8px 8px 0 var(--ap-plate-a
 .ap-desk-input input::placeholder{color:var(--ap-muted)}
 .ap-desk-send{display:inline-flex;align-items:center;gap:8px;font:800 14px/1 var(--ap-stamp);
   letter-spacing:.04em;text-transform:uppercase;border:3px solid var(--ap-ink);
-  background:var(--ap-hot);color:var(--ap-hot-ink);border-radius:3px;padding:0 18px;cursor:not-allowed}
+  background:var(--ap-hot);color:var(--ap-hot-ink);border-radius:3px;padding:0 18px;cursor:pointer}
+.ap-desk-send:disabled{opacity:.6;cursor:progress}
+/* empty answer bubble stays out of the layout until the client fills it */
+.ap-bubble--a:empty{display:none}
 .ap-desk-send svg{width:16px;height:16px}
 .ap-desk-note{font:500 13px/1.4 var(--ap-kick);color:var(--ap-muted);margin:14px 0 0}
 /* :focus-within nudge (still no JS) so the stub feels alive when tabbed into */

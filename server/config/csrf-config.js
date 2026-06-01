@@ -85,7 +85,12 @@ const CSRF_CONFIG = {
 
     // Facebook data deletion webhook (external callback)
     '/api/v1/auth/facebook/deletion-callback',
-    
+
+    // Public concierge — credential-free, no ambient cookie/session, so it is
+    // not a CSRF target (an attacker's forged POST gains nothing). Same-origin
+    // from the design-explorer pages; abuse is bounded by conciergeLimiter.
+    '/api/concierge',
+
     // Test endpoints (development only)
     '/api/v1/test/customer',
     '/api/v1/test/order',

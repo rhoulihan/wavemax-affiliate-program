@@ -867,6 +867,18 @@ app.use(conditionalCsrf);
 // CSRF token endpoint
 app.get('/api/csrf-token', csrfTokenEndpoint);
 
+// Concierge — LIVE, FAQ-scoped Claude-backed assistant for the design explorer
+// (and any WaveMAX Austin page). POST /api/concierge { message, history? }.
+// Registered here — AFTER conditionalCsrf (the path is on the CSRF public
+// allowlist) and express.json (applied globally above), but BEFORE the
+// apiVersioning middleware that rewrites /api/* → /api/v1/* (which would
+// otherwise steal this path before the route can match). A dedicated
+// conciergeLimiter caps per-IP usage of the paid LLM endpoint; the controller
+// fails gracefully and never leaks the API key or errors.
+const { conciergeLimiter } = require('./server/middleware/rateLimiting');
+const conciergeController = require('./server/controllers/conciergeController');
+app.post('/api/concierge', conciergeLimiter, express.json({ limit: '16kb' }), conciergeController.handle);
+
 // API Versioning middleware
 const API_VERSION = 'v1';
 const apiVersioning = (req, res, next) => {

@@ -114,30 +114,32 @@ function programTicker(lang) {
   </aside>`;
 }
 
-/* ===== front-desk concierge STUB (CSS-only; input readonly+disabled) =====
-   Answers hours/pricing/machines/WDF drop-off. NOT booking/pickup. A
-   :focus-within "reveal" flips a pre-written answer bubble visible without JS. */
+/* ===== front-desk concierge (LIVE — bound by concierge-client.js to
+   /api/concierge). Answers hours/pricing/machines/WDF drop-off only; NOT
+   booking/pickup. The <form data-concierge> is the shared hook the external
+   client binds to; the answer bubble is an aria-live region the client fills
+   with textContent (CSP-clean, no innerHTML). */
 function concierge(lang) {
   const L = t(lang);
   return `<section class="ap-desk" aria-labelledby="ap-desk-t">
-    <div class="ap-desk-card">
+    <form class="ap-desk-card" data-concierge aria-labelledby="ap-desk-t">
       <div class="ap-desk-head">
         <span class="ap-desk-label">${esc(L.deskLabel)}</span>
         <span class="ap-stars" aria-hidden="true">${I.star}${I.star}${I.star}${I.star}${I.star}</span>
       </div>
       <h2 id="ap-desk-t" class="ap-desk-title">${esc(L.deskTitle)}</h2>
       <p class="ap-desk-body">${esc(L.deskBody)}</p>
-      <div class="ap-desk-thread" role="group" aria-label="${esc(L.deskTitle)}">
+      <div class="ap-desk-thread">
         <p class="ap-bubble ap-bubble--q">${esc(L.deskSample)}</p>
-        <p class="ap-bubble ap-bubble--a">${esc(L.deskAnswer)}</p>
+        <p class="ap-bubble ap-bubble--a" data-concierge-response aria-live="polite"></p>
       </div>
       <div class="ap-desk-input">
         <label class="ap-sr" for="ap-desk-q">${esc(L.deskTitle)}</label>
-        <input id="ap-desk-q" type="text" placeholder="${esc(L.deskPlaceholder)}" value="" readonly disabled aria-disabled="true">
-        <button class="ap-desk-send" type="button" disabled aria-disabled="true">${esc(L.deskSend)} ${I.arrow}</button>
+        <input id="ap-desk-q" name="message" type="text" placeholder="${esc(L.deskPlaceholder)}" autocomplete="off" maxlength="500">
+        <button class="ap-desk-send" type="submit">${esc(L.deskSend)} ${I.arrow}</button>
       </div>
       <p class="ap-desk-note">${esc(L.deskNote)}</p>
-    </div>
+    </form>
   </section>`;
 }
 

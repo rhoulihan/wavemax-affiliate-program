@@ -41,8 +41,18 @@ describe('renderState (core)', () => {
     expect(html).toContain('nonce="TESTNONCE"');
     expect(html).not.toContain('{{NONCE}}');
   });
-  it('contains no inline event handlers (CSP-clean)', () => {
+  it('contains no inline event handlers and no INLINE scripts (CSP-clean)', () => {
     const html = renderState({ ...base, intensity: 'heavy' });
+    // No on*= handlers.
     expect(html).not.toMatch(/\son\w+=/);
+    // No INLINE script — a <script> WITHOUT a src. The legitimate external
+    // concierge client (<script src=...>) is allowed by script-src 'self'.
+    expect(html).not.toMatch(/<script(?![^>]*\ssrc=)/i);
+  });
+  it('loads the external (CSP-clean) concierge client script', () => {
+    const html = renderState({ ...base, intensity: 'heavy' });
+    expect(html).toContain('/design-explorer/concierge-client.js');
+    // It must be an external script (has a src) — not an inline one.
+    expect(html).toMatch(/<script[^>]*\ssrc="\/design-explorer\/concierge-client\.js"/);
   });
 });
