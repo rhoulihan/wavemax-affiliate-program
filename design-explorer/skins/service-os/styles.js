@@ -68,8 +68,12 @@ h1,h2,h3{font-family:var(--so-display);font-weight:700;letter-spacing:-.02em;lin
   backdrop-filter:saturate(1.2) blur(10px);border-bottom:1px solid var(--so-line)}
 .so-os-in{display:flex;align-items:center;gap:16px;height:64px}
 .so-brand{display:flex;align-items:center;gap:12px;text-decoration:none;flex:0 0 auto}
-.so-brand img{height:34px;width:auto}
-[data-intensity="light"] .so-brand img{height:22px;opacity:.92}
+/* Logo lockup: brand-colored chip so the white wordmark is always legible */
+.so-logo-lockup{display:inline-flex;align-items:center;justify-content:center;
+  background:var(--brand-deep);border-radius:8px;padding:5px 10px;flex:0 0 auto}
+.so-footer .so-logo-lockup{border-radius:7px;padding:4px 8px}
+.so-brand img{height:28px;width:auto}
+.so-footer .so-brand img{height:22px}
 .so-brand .so-brand-meta{display:flex;flex-direction:column;line-height:1.05}
 .so-brand-name{font-family:var(--so-display);font-weight:800;font-size:15px}
 .so-brand-tag{font-family:var(--so-mono);font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--so-muted)}
