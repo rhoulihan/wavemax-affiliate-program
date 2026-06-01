@@ -28,8 +28,9 @@ function buildAll({ outDir, skins }) {
 
 if (require.main === module) {
   const serviceOs = require('./skins/service-os');
+  const neighborhoodEditorial = require('./skins/neighborhood-editorial');
   const outDir = path.join(__dirname, '..', 'public', 'design-explorer', 'render');
-  const { count } = buildAll({ outDir, skins: [serviceOs] });
+  const { count } = buildAll({ outDir, skins: [serviceOs, neighborhoodEditorial] });
   // eslint-disable-next-line no-console
   console.log(`built ${count} states -> ${outDir}`);
 }
