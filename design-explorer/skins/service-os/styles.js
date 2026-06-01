@@ -111,8 +111,9 @@ h1,h2,h3{font-family:var(--so-display);font-weight:700;letter-spacing:-.02em;lin
 /* ===== BENTO GRID =====
    12-col grid that fills BOTH sides at desktop width. The LEAD tile (H1 +
    sub + chips + actions) spans 7 cols × 2 rows on the left; the right column
-   stacks service + status + stat + pricing + map tiles so there's no empty
-   region. Collapses to 6-col, then single-column on mobile. */
+   stacks the self-serve + consolidated wash-dry-fold tiles. A bottom band
+   runs the Omni UV showcase + commercial + map so there's no empty region.
+   Collapses to 6-col, then single-column on mobile. */
 .so-bento{display:grid;grid-template-columns:repeat(12,1fr);grid-auto-rows:minmax(150px,auto);gap:14px;margin:8px 0}
 .so-tile{grid-column:span 4;position:relative;border:1px solid var(--so-line);border-radius:var(--so-radius-lg);
   background:var(--so-panel-2);padding:18px;min-height:150px;display:flex;flex-direction:column;
@@ -147,46 +148,86 @@ h1,h2,h3{font-family:var(--so-display);font-weight:700;letter-spacing:-.02em;lin
 .so-tile--hero .so-btn{background:rgba(255,255,255,.14);color:#fff;border-color:rgba(255,255,255,.3)}
 .so-tile--hero .so-btn-primary{background:#fff;color:var(--brand-deep);border-color:#fff;box-shadow:0 12px 26px -16px rgba(0,0,0,.5)}
 
-/* right-column tiles share the remaining 5 cols */
-.so-tile--status,.so-tile--stat,.so-tile--price{grid-column:span 5}
-.so-tile--status{background:var(--so-panel)}
+/* right-column tiles share the remaining 5 cols, stacked beside the lead */
+.so-tile--service,.so-tile--wdf{grid-column:span 5}
 
-/* map + the three service tiles fill the bottom band */
-.so-tile--map{grid-column:span 6;padding:0;min-height:200px}
+/* bottom band: Omni UV showcase (5) + commercial (3) + map (4) = 12 */
+.so-tile--showcase{grid-column:span 5}
+.so-tile--commercial{grid-column:span 3}
+.so-tile--map{grid-column:span 4;padding:0;min-height:200px}
+
+/* consolidated WASH-DRY-FOLD tile (service + pricing in one) */
+.so-tile--wdf h3{margin:auto 0 8px}
+.so-wdf-price{display:flex;align-items:baseline;flex-wrap:wrap;gap:6px;
+  font-family:var(--so-display);font-weight:800;letter-spacing:-.03em;color:var(--so-lead)}
+.so-wdf-price b{font-size:clamp(28px,3.6vw,40px)}
+.so-wdf-price small{font-size:15px;color:var(--so-muted);font-family:var(--so-mono);font-weight:400}
+.so-wdf-price .so-wdf-meta{font-family:var(--so-mono);font-size:11px;font-weight:700;letter-spacing:.04em;
+  color:var(--so-muted);background:var(--so-panel);border:1px solid var(--so-line);
+  padding:3px 8px;border-radius:999px;margin-left:auto;align-self:center}
+.so-tile--wdf p{margin:6px 0 0}
+
+/* Omni UV SHOWCASE tile — visually distinct selling point */
+.so-tile--showcase{color:var(--so-on-lead);border-color:transparent;
+  background:
+    radial-gradient(120% 120% at 100% 0%, color-mix(in srgb,var(--accent) 60%,transparent), transparent 60%),
+    linear-gradient(150deg, color-mix(in srgb,var(--so-lead) 90%,var(--brand-deep)), var(--brand-deep))}
+.so-tile--showcase::after{content:"";position:absolute;inset:0;pointer-events:none;opacity:.5;
+  background:radial-gradient(80% 60% at 12% 110%, color-mix(in srgb,#fff 26%,transparent), transparent 60%)}
+.so-tile--showcase .so-tile-tag{color:color-mix(in srgb,#fff 82%,transparent)}
+.so-tile--showcase .so-tile-ico{background:rgba(255,255,255,.18);color:#fff}
+.so-tile--showcase h3{font-size:clamp(19px,1.7vw,23px);margin:6px 0 8px;position:relative}
+.so-tile--showcase p{color:color-mix(in srgb,#fff 84%,transparent);font-size:13.5px;position:relative}
+.so-showcase-badge{position:relative;margin-top:auto;align-self:flex-start;display:inline-flex;align-items:center;gap:7px;
+  font-family:var(--so-mono);font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+  padding:6px 11px;border-radius:999px;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.28);color:#fff}
+.so-showcase-badge svg{width:13px;height:13px}
+
+/* find-us MAP tile — caption is a real "Open in Maps" link; pin sized so
+   nothing covers the action */
 .so-tile--map iframe{width:100%;height:100%;min-height:200px;border:0;filter:saturate(1.05)}
-.so-tile--map .so-map-cap{position:absolute;left:12px;bottom:12px;font-family:var(--so-mono);font-size:11px;
-  background:color-mix(in srgb,var(--paper) 88%,transparent);padding:6px 10px;border-radius:8px;border:1px solid var(--so-line)}
-
-/* machines / capacity stat tile */
-.so-stat-pair{display:flex;align-items:baseline;gap:8px;margin:auto 0 6px;font-family:var(--so-display);font-weight:800;
-  letter-spacing:-.03em;color:var(--so-lead)}
-.so-stat-pair b{font-size:clamp(30px,4vw,44px)}
-.so-stat-pair span{font-size:22px;color:var(--so-muted)}
-
-/* wash-dry-fold pricing chip tile */
-.so-price-chip{font-family:var(--so-display);font-weight:800;font-size:clamp(30px,4vw,44px);letter-spacing:-.03em;
-  color:var(--so-lead);margin:auto 0 4px}
-.so-price-chip small{font-size:16px;color:var(--so-muted);font-family:var(--so-mono);font-weight:400}
-
-/* live-feel status readout */
-.so-status-rows{display:flex;flex-direction:column;gap:9px;margin-top:6px}
-.so-status-row{display:flex;align-items:center;justify-content:space-between;font-family:var(--so-mono);font-size:12px}
-.so-status-row b{font-weight:700}
-.so-status-bar{height:6px;border-radius:4px;background:var(--so-line);overflow:hidden;margin-top:auto}
-.so-status-bar i{display:block;height:100%;width:72%;border-radius:4px;
-  background:linear-gradient(90deg,var(--accent),var(--so-lead))}
+.so-tile--map .so-map-cap{position:absolute;left:12px;bottom:12px;z-index:1;
+  display:inline-flex;align-items:center;gap:7px;text-decoration:none;color:var(--ink);
+  font-family:var(--so-mono);font-size:11px;font-weight:700;letter-spacing:.02em;
+  background:color-mix(in srgb,var(--paper) 92%,transparent);padding:7px 11px;border-radius:9px;
+  border:1px solid var(--so-line);box-shadow:var(--so-shadow);transition:transform .12s ease}
+.so-tile--map .so-map-cap svg{width:14px;height:14px;flex:0 0 auto;color:var(--so-lead)}
+.so-tile--map .so-map-cap:hover{transform:translateY(-1px)}
 
 /* tablet: lead tile goes full width above a 6-col grid of the rest */
 @media (max-width:880px){
   .so-bento{grid-template-columns:repeat(6,1fr)}
   .so-tile{grid-column:span 3}
   .so-tile--hero{grid-column:span 6;grid-row:auto}
-  .so-tile--status,.so-tile--stat,.so-tile--price,.so-tile--map{grid-column:span 3}
+  .so-tile--service,.so-tile--wdf,.so-tile--showcase{grid-column:span 3}
+  .so-tile--commercial,.so-tile--map{grid-column:span 3}
 }
 @media (max-width:560px){
   .so-bento{grid-template-columns:1fr;gap:11px}
-  .so-tile,.so-tile--hero,.so-tile--status,.so-tile--stat,.so-tile--price,.so-tile--map{grid-column:span 1;grid-row:auto}
+  .so-tile,.so-tile--hero,.so-tile--service,.so-tile--wdf,.so-tile--showcase,
+  .so-tile--commercial,.so-tile--map{grid-column:span 1;grid-row:auto}
 }
+
+/* ===== KPI strip — full-width stat band BELOW the hero bento ===== */
+.so-kpis{padding:10px 0 6px}
+.so-kpi-row{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;
+  border:1px solid var(--so-line);border-radius:var(--so-radius-lg);background:var(--so-panel-2);
+  padding:18px 14px;box-shadow:var(--so-shadow)}
+.so-kpi{display:flex;flex-direction:column;align-items:flex-start;gap:3px;
+  padding:2px 14px;position:relative}
+.so-kpi + .so-kpi::before{content:"";position:absolute;left:0;top:6px;bottom:6px;width:1px;background:var(--so-line)}
+.so-kpi-ico{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;margin-bottom:5px;
+  background:color-mix(in srgb,var(--so-lead) 13%,transparent);color:var(--so-lead)}
+.so-kpi-ico svg{width:16px;height:16px}
+.so-kpi-v{font-family:var(--so-display);font-weight:800;font-size:clamp(20px,2.4vw,28px);
+  letter-spacing:-.02em;color:var(--so-lead);line-height:1}
+.so-kpi-l{font-family:var(--so-mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--so-muted)}
+@media (max-width:760px){
+  .so-kpi-row{grid-template-columns:repeat(2,1fr);gap:14px 8px}
+  .so-kpi{padding:2px 10px}
+  .so-kpi + .so-kpi::before{display:none}
+}
+@media (max-width:380px){ .so-kpi-row{grid-template-columns:1fr} }
 
 /* ===== CONCIERGE launcher (visual STUB) ===== */
 .so-concierge{margin:32px 0;border:1px solid var(--so-line);border-radius:var(--so-radius-lg);overflow:hidden;

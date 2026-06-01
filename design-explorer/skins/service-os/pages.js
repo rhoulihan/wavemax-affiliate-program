@@ -30,27 +30,29 @@ function heroActions(lang, primaryLabel) {
 }
 
 /* ---- BENTO hero (home only) ----
-   A full-width 12-col bento that fills both sides at desktop width. The
-   headline/sub/actions live in a tall LEAD tile (left), and the right side
-   is packed with service tiles, a live-status readout, a machines/stats
-   tile, a wash-dry-fold pricing chip, and a map — no empty region. All
-   tiles draw from the content model + NAP. CSS-only; no scripts. */
+   A full-width 12-col bento. The headline/sub/actions live in a tall LEAD
+   tile (left, 7×2). The right column carries two service tiles (self-serve +
+   a single consolidated wash-dry-fold tile that folds the $1.20/lb pricing
+   into the service). A bottom band runs an Omni UV-sanitization SHOWCASE
+   tile, the commercial tile, and a find-us MAP tile so no region is empty.
+   The headline KPI numbers live in a separate strip BELOW this section (see
+   kpiStrip). All tiles draw from the content model + NAP. CSS-only; no
+   scripts. */
 function bentoHero(content, intensity, lang) {
   const L = t(lang);
   const hero = content.pages.home.hero;
   const badge = hero.badge ? esc(hero.badge) : esc(L.rating);
 
-  // A service tile — pulls each service page's hero title from the model.
+  // A plain service tile — pulls each service page's hero title from the model.
   function serviceTile(slug, ico, klass) {
     const p = content.pages[slug];
     const h = p && p.hero ? p.hero : { title: slug, sub: '' };
-    const tag = L.nav[{ 'self-serve': 'selfServe', 'wash-dry-fold': 'wdf', commercial: 'commercial' }[slug]] || slug;
-    const open = slug === 'wash-dry-fold' ? L.tileDrop : L.tileOpen;
+    const tag = L.nav[{ 'self-serve': 'selfServe', commercial: 'commercial' }[slug]] || slug;
     return `<a class="so-tile ${klass || ''}" href="#" aria-label="${fill(h.title)}">
       <div class="so-tile-head"><span class="so-tile-tag">${esc(tag)}</span>
         <span class="so-tile-ico">${ico}</span></div>
       <h3>${fill(h.title)}</h3>
-      <span class="so-tile-open">${esc(open)} ${I.arrow}</span></a>`;
+      <span class="so-tile-open">${esc(L.tileOpen)} ${I.arrow}</span></a>`;
   }
 
   // LEAD tile — carries the H1, sub, and primary actions (self-serve + WDF).
@@ -63,51 +65,70 @@ function bentoHero(content, intensity, lang) {
     ${heroActions(lang, content.pages.home.cta && content.pages.home.cta.primaryLabel)}
   </div>`;
 
-  // Live-status readout.
-  const statusTile = `<div class="so-tile so-tile--status">
-    <div class="so-tile-head"><span class="so-tile-tag">${esc(L.bentoStatus)}</span><span class="so-dot"></span></div>
-    <div class="so-status-rows">
-      <div class="so-status-row"><span>${esc(L.openNow)}</span><b>${esc(L.until)}</b></div>
-      <div class="so-status-row"><span>WDF</span><b>$1.20/lb</b></div>
-      <div class="so-status-row"><span>${esc(L.turnaround)}</span><b>24 h</b></div>
-    </div>
-    <div class="so-status-bar" aria-hidden="true"><i></i></div></div>`;
-
-  // Machines / capacity stat tile.
-  const machinesTile = `<div class="so-tile so-tile--stat">
-    <div class="so-tile-head"><span class="so-tile-tag">${esc(L.machinesTag)}</span>
-      <span class="so-tile-ico">${I.bolt}</span></div>
-    <div class="so-stat-pair"><b>42</b><span>+</span><b>42</b></div>
-    <h3>${esc(L.machinesTitle)}</h3>
-    <p>${esc(L.machinesSub)}</p></div>`;
-
-  // Wash-dry-fold pricing chip tile.
-  const pricingTile = `<a class="so-tile so-tile--price" href="${C.tel}" aria-label="${esc(L.bentoWdf)}">
+  // Consolidated WASH-DRY-FOLD tile — service + $1.20/lb · 10-lb min · 24-hr
+  // pricing facts together (was two adjacent tiles, now one).
+  const wdfPage = content.pages['wash-dry-fold'];
+  const wdfTitle = wdfPage && wdfPage.hero ? wdfPage.hero.title : L.bentoWdf;
+  const wdfTile = `<a class="so-tile so-tile--wdf" href="${C.tel}" aria-label="${esc(L.bentoWdf)}">
     <div class="so-tile-head"><span class="so-tile-tag">${esc(L.pricingTag)}</span>
       <span class="so-tile-ico">${I.drop}</span></div>
-    <div class="so-price-chip">$1.20<small>/lb</small></div>
-    <p>${esc(L.turnaround)} · ${esc(L.pricingNote)}</p>
+    <h3>${fill(wdfTitle)}</h3>
+    <div class="so-wdf-price"><b>$1.20</b><small>${esc(L.wdfPerLb)}</small>
+      <span class="so-wdf-meta">${esc(L.wdfMin)} · ${esc(L.wdf24)}</span></div>
+    <p>${esc(L.pricingNote)}</p>
     <span class="so-tile-open">${esc(L.tileDrop)} ${I.arrow}</span></a>`;
 
-  // Find-us map tile.
+  // Omni UV-sanitization SHOWCASE tile — the store's hygiene differentiator.
+  const uvTile = `<div class="so-tile so-tile--showcase">
+    <div class="so-tile-head"><span class="so-tile-tag">${esc(L.uvTag)}</span>
+      <span class="so-tile-ico">${I.shield}</span></div>
+    <h3>${esc(L.uvTitle)}</h3>
+    <p>${esc(L.uvSub)}</p>
+    <span class="so-showcase-badge">${I.shield}${esc(L.uvBadge)}</span></div>`;
+
+  // Find-us MAP tile — caption is now a real "Open in Maps" link with a
+  // correctly-sized pin so nothing covers the action.
   const mapTile = `<div class="so-tile so-tile--map">
     <iframe title="WaveMAX Austin map" src="${esc(NAP.mapsEmbed)}" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
-    <span class="so-map-cap">${I.pin} ${esc(NAP.street)}</span></div>`;
+    <a class="so-map-cap" href="${esc(NAP.mapsDir)}" target="_blank" rel="noopener">${I.pin}<span>${esc(L.openInMaps)}</span></a></div>`;
 
   return `<section class="so-hero so-hero--bento" aria-labelledby="so-h1">
     <div class="so-wrap">
       <div class="so-bento">
         ${leadTile}
-        ${serviceTile('self-serve', I.wash)}
-        ${statusTile}
-        ${serviceTile('wash-dry-fold', I.drop)}
-        ${pricingTile}
-        ${machinesTile}
-        ${serviceTile('commercial', I.box)}
+        ${serviceTile('self-serve', I.wash, 'so-tile--service')}
+        ${wdfTile}
+        ${uvTile}
+        ${serviceTile('commercial', I.box, 'so-tile--commercial')}
         ${mapTile}
       </div>
     </div>
   </section>`;
+}
+
+/* ---- KPI strip (home) ----
+   Full-width horizontal stat band that sits DIRECTLY BELOW the hero bento,
+   between the hero and the next section. Carries the headline numbers
+   (42 washers · 42 dryers · 24-hr · $1.20/lb · hours). Wraps on mobile. */
+function kpiStrip(lang) {
+  const L = t(lang);
+  const items = [
+    { v: '42', l: L.kpiWashers, ico: I.wash },
+    { v: '42', l: L.kpiDryers, ico: I.bolt },
+    { v: '24 h', l: L.kpiTurn, ico: I.clock },
+    { v: '$1.20', l: `WDF${esc(L.wdfPerLb)}`, ico: I.drop, raw: true },
+    { v: L.kpiHoursVal, l: L.kpiHours, ico: I.cal },
+  ];
+  const cells = items.map(it =>
+    `<div class="so-kpi">
+      <span class="so-kpi-ico">${it.ico}</span>
+      <span class="so-kpi-v">${it.raw ? it.v : esc(it.v)}</span>
+      <span class="so-kpi-l">${esc(it.l)}</span>
+    </div>`
+  ).join('');
+  return `<section class="so-kpis" aria-label="${esc(L.bentoStatus)}"><div class="so-wrap">
+    <div class="so-kpi-row">${cells}</div>
+  </div></section>`;
 }
 
 /* ---- Banner hero (non-home pages) ---- */
@@ -152,6 +173,7 @@ function buildPage(page, content, intensity, lang) {
 
   if (page === 'home') {
     parts.push(bentoHero(content, intensity, lang));
+    parts.push(kpiStrip(lang));
     parts.push(`<div class="so-wrap">${C.concierge(lang)}</div>`);
     for (const s of (data.sections || [])) parts.push(renderSection(s, content, intensity, lang));
     parts.push(C.ctaBanner(data.cta, lang));

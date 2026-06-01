@@ -25,6 +25,19 @@ const T = {
     learnMore: 'Open', tileOpen: 'Open', tileDrop: 'Drop off',
     rating: '4.8 on Google', established: 'Locally owned',
     panel: 'PANEL', module: 'MODULE', ready: 'READY',
+    openInMaps: 'Open in Maps',
+    // Consolidated wash-dry-fold tile (service + pricing in one)
+    wdfTileSub: '$1.20/lb · 10-lb minimum · ready in 24 hours',
+    wdfPerLb: '/lb', wdfMin: '10-lb min', wdf24: '24-hr',
+    // Omni UV sanitization showcase tile
+    uvTag: 'Hygiene · LUX system',
+    uvTitle: 'Hospital-grade UV-sanitized water',
+    uvSub: 'Every wash runs on water treated by the Omni Solutions LUX system — UV light sanitizes the water itself, not just the clothes.',
+    uvBadge: 'Omni Solutions',
+    // KPI strip below the hero
+    kpiWashers: 'Washers', kpiDryers: 'Dryers',
+    kpiTurn: 'Turnaround', kpiHours: 'Open daily',
+    kpiHoursVal: '7 AM – 10 PM',
   },
   es: {
     nav: { home: 'Inicio', selfServe: 'Autoservicio', wdf: 'Lava-Seca-Dobla', commercial: 'Comercial', about: 'Nosotros', contact: 'Contacto' },
@@ -47,6 +60,19 @@ const T = {
     learnMore: 'Abrir', tileOpen: 'Abrir', tileDrop: 'Déjala',
     rating: '4.8 en Google', established: 'Negocio local',
     panel: 'PANEL', module: 'MÓDULO', ready: 'LISTO',
+    openInMaps: 'Abrir en Maps',
+    // Mosaico de lava-seca-dobla consolidado (servicio + precio en uno)
+    wdfTileSub: '$1.20/lb · mínimo 10 lb · lista en 24 horas',
+    wdfPerLb: '/lb', wdfMin: 'mín. 10 lb', wdf24: '24 h',
+    // Mosaico destacado de sanitización UV de Omni
+    uvTag: 'Higiene · sistema LUX',
+    uvTitle: 'Agua sanitizada con UV de grado hospitalario',
+    uvSub: 'Cada lavado usa agua tratada por el sistema LUX de Omni Solutions: la luz UV sanitiza el agua misma, no solo la ropa.',
+    uvBadge: 'Omni Solutions',
+    // Franja de indicadores bajo el hero
+    kpiWashers: 'Lavadoras', kpiDryers: 'Secadoras',
+    kpiTurn: 'Lista en', kpiHours: 'Abierto a diario',
+    kpiHoursVal: '7 AM – 10 PM',
   },
 };
 function t(lang) { return T[lang] || T.en; }
