@@ -19,6 +19,10 @@ const PHOTOS = {
   interior: '/assets/images/locations/austin-tx/interior-1.webp',
   door: '/assets/images/locations/austin-tx/interior-3.webp',
   floor: '/assets/images/locations/austin-tx/interior-5.webp',
+  // shop signage on the wall — the branded "WaveMAX · Lavandería · Laundry"
+  // sign mounted on the storefront's brick fascia. (Interior wall signage is
+  // present but too small/illegible to read; this is the strongest sign shot.)
+  signage: '/assets/images/locations/austin-tx/hero-1.webp',
 };
 
 /* ---- inline SVG icons (decorative => aria-hidden) ---- */

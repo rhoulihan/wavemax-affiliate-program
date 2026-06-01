@@ -57,15 +57,24 @@ function homeHero(content, intensity, lang) {
   </div></section>`;
 }
 
-/* ---- Pull quote drawn editorially from the first review (home) ---- */
+/* ---- Pull quote drawn editorially from the first review (home) ----
+   Two-column band: the quote (vertically centered) on the LEFT, a shop
+   signage photo on the RIGHT. Quote text always comes from reviews[0]. */
 function pullQuote(content, lang) {
   const L = t(lang);
   const reviews = (content.pages.home.sections.find(s => s.kind === 'reviews') || {}).items || [];
   if (!reviews.length) return '';
   const r = reviews[0];
-  return `<div class="ne-pull"><div class="ne-pull-in">
-    <blockquote>${fill(r.quote)}</blockquote>
-    <cite><b>${esc(r.name)}</b> · ${esc(r.meta || L.pullByline)}</cite>
+  const photo = C.figure(
+    C.PHOTOS.signage, L.altSignage,
+    `<b>${esc(L.capSignage)}</b>`, L.photoNote, 'ne-figure--wide'
+  );
+  return `<div class="ne-pull"><div class="ne-pull-band">
+    <div class="ne-pull-in">
+      <blockquote>${fill(r.quote)}</blockquote>
+      <cite><b>${esc(r.name)}</b> · ${esc(r.meta || L.pullByline)}</cite>
+    </div>
+    <div class="ne-pull-plate">${photo}</div>
   </div></div>`;
 }
 
@@ -119,6 +128,23 @@ function contactPage(content, intensity, lang) {
     </div></section>`;
 }
 
+/* ---- WDF-only: pair the three "how it works" steps with the front-door photo.
+   Two columns — steps on the LEFT, door photo (vertically centered) on the
+   RIGHT. Reuses the generic steps renderer for the step content; only wraps it.
+   Page-specific to wash-dry-fold (home's steps section is untouched). ---- */
+function wdfStepsWithDoor(s, content, intensity, lang) {
+  const L = t(lang);
+  const steps = renderSection(s, content, intensity, lang);
+  const photo = C.figure(
+    C.PHOTOS.door, L.altWdfDoor,
+    `<b>${esc(L.capWdfDoor)}</b>`, L.photoNote, 'ne-figure--tall'
+  );
+  return `<div class="ne-wdf-steps">
+    <div class="ne-wdf-steps-main">${steps}</div>
+    <div class="ne-wdf-steps-plate">${photo}</div>
+  </div>`;
+}
+
 /* ===== top-level page composition ===== */
 function buildPage(page, content, intensity, lang) {
   const data = content.pages[page];
@@ -152,7 +178,14 @@ function buildPage(page, content, intensity, lang) {
     parts.push(C.closer(data.cta, lang));
   } else {
     parts.push(bannerHero(content, page, intensity, lang));
-    for (const s of (data.sections || [])) parts.push(renderSection(s, content, intensity, lang));
+    for (const s of (data.sections || [])) {
+      // WDF only: render the steps paired with the front-door photo (two-column).
+      if (page === 'wash-dry-fold' && s.kind === 'steps') {
+        parts.push(wdfStepsWithDoor(s, content, intensity, lang));
+      } else {
+        parts.push(renderSection(s, content, intensity, lang));
+      }
+    }
     parts.push(C.desk(lang));
     parts.push(C.closer(data.cta, lang));
   }

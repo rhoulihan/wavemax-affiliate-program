@@ -325,6 +325,19 @@ html[data-intensity="light"] .ne-logo-chip{background:#23303f} /* dark navy band
 .ne-step h3{font-size:clamp(22px,3vw,30px);letter-spacing:-.015em}
 .ne-step p{color:var(--ne-muted);margin-top:10px;font-size:17px;max-width:56ch}
 
+/* WDF-only: steps paired with the front-door photo, vertically centered.
+   The grid takes over the page wrap; the nested steps <section>/<.ne-wrap>
+   are neutralized so the columns align with the rest of the page. */
+.ne-wdf-steps{max-width:var(--ne-maxw);margin:0 auto;padding:0 var(--ne-gut);
+  display:grid;gap:clamp(24px,4vw,52px);align-items:center}
+@media(min-width:880px){.ne-wdf-steps{grid-template-columns:1.15fr .85fr}}
+.ne-wdf-steps .ne-section{padding:clamp(36px,5vw,64px) 0}
+.ne-wdf-steps .ne-wrap{max-width:none;margin:0;padding:0}
+/* photo column: stay vertically centered against the steps on wide screens;
+   sits below the steps on mobile (steps then photo for reading flow). */
+.ne-wdf-steps-plate{order:2}
+@media(min-width:880px){.ne-wdf-steps-plate{order:0}}
+
 /* ============================================================= PROSE / STORY */
 .ne-prose{display:grid;gap:clamp(24px,4vw,48px)}
 @media(min-width:880px){.ne-prose{grid-template-columns:.85fr 1.15fr;align-items:start}}
@@ -336,10 +349,14 @@ html[data-intensity="light"] .ne-logo-chip{background:#23303f} /* dark navy band
   font-family:var(--ne-display);float:left;font-weight:600;
   font-size:3.6em;line-height:.7;padding:8px 14px 0 0;color:var(--ne-lead)}
 
-/* pull quote */
+/* pull quote — two-column band: quote (vertically centered) | signage photo */
 .ne-pull{margin:clamp(28px,4vw,46px) auto;max-width:var(--ne-maxw);padding:0 var(--ne-gut)}
-.ne-pull-in{border-top:2px solid var(--ne-rule);border-bottom:2px solid var(--ne-rule);
-  padding:clamp(26px,4vw,44px) 0;position:relative}
+.ne-pull-band{display:grid;gap:clamp(24px,4vw,52px);align-items:center;
+  border-top:2px solid var(--ne-rule);border-bottom:2px solid var(--ne-rule)}
+@media(min-width:880px){.ne-pull-band{grid-template-columns:1.05fr .95fr}}
+.ne-pull-in{padding:clamp(26px,4vw,44px) 0;position:relative}
+/* on wide screens give the photo a little breathing room from the top/bottom rules */
+@media(min-width:880px){.ne-pull-plate{padding:clamp(22px,3vw,34px) 0}}
 .ne-pull blockquote{margin:0;font-family:var(--ne-display);font-style:italic;font-weight:400;
   font-size:clamp(24px,4vw,40px);line-height:1.18;letter-spacing:-.01em;color:var(--ne-ink);
   max-width:24ch}
