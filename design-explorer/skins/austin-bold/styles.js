@@ -70,7 +70,7 @@ ${FONT_LINK}
 
   --ap-maxw:1220px;
   --ap-gut:clamp(18px,5vw,56px);
-  --ap-rail:46px;               /* width reserved for the vertical ticker rail */
+  --ap-rail:54px;               /* width reserved for the vertical ticker rail */
 }
 
 /* HEAVY = brand LEADS. (defaults above already encode heavy; restated for clarity) */
@@ -151,7 +151,7 @@ html[data-intensity="light"] .ap-grain{opacity:.09}
 .ap-chip{display:inline-flex;align-items:center;justify-content:center;
   background:var(--ap-navy);padding:6px 10px;border-radius:3px;
   box-shadow:3px 3px 0 var(--ap-teal);line-height:0}
-.ap-chip img{height:24px;width:auto;display:block;filter:brightness(0) invert(1)}
+.ap-chip img{height:24px;width:auto;display:block}
 
 /* ============================================================ MASTHEAD */
 .ap-mast{position:relative;z-index:30;background:var(--ap-paper);
@@ -177,8 +177,9 @@ html[data-intensity="light"] .ap-grain{opacity:.09}
   background:var(--ap-ink);color:var(--ap-paper);
   display:flex;flex-direction:column;align-items:center;justify-content:flex-start;
   padding-block:14px;overflow:hidden;border-right:3px solid var(--ap-hot)}
-.ap-tick-label{writing-mode:vertical-rl;font:800 12px/1 var(--ap-stamp);letter-spacing:.22em;
-  text-transform:uppercase;margin-bottom:14px;color:var(--ap-plate-a)}
+.ap-tick-label{writing-mode:vertical-rl;font:800 12px/1.6 var(--ap-stamp);letter-spacing:.2em;
+  text-transform:uppercase;margin-bottom:14px;color:var(--ap-plate-a);text-align:center;
+  padding-block:2px}
 html[data-intensity="light"] .ap-tick-label{color:var(--ap-plate-b)}
 .ap-tick-track{flex:1;writing-mode:vertical-rl;overflow:hidden;position:relative}
 .ap-tick-run{display:block;animation:ap-tick 26s linear infinite}
