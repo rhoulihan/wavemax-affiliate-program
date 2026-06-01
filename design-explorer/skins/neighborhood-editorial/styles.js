@@ -196,10 +196,11 @@ html[data-intensity="light"] .ne-logo-chip{background:#23303f} /* dark navy band
 .ne-hero{padding:clamp(34px,6vw,72px) 0 clamp(28px,4vw,46px);position:relative}
 .ne-hero-grid{display:grid;gap:clamp(24px,4vw,52px);align-items:end}
 @media(min-width:920px){.ne-hero-grid{grid-template-columns:1.05fr .95fr}}
-/* Home hero: photo upper-right, byline + CTAs beneath it in the right column;
-   top-align so the plate starts at the top (banner heroes keep end-align). */
-.ne-hero-grid--home{align-items:start}
-.ne-hero-grid--home .ne-byline{margin-top:22px}
+/* Home hero is a 2x2: headline | image (row 1), body text | labels+buttons (row 2).
+   Center each row vertically so the image centers with the headline and the
+   labels+buttons center with the body text. Banner heroes are unaffected. */
+.ne-hero-grid--home{align-items:center;row-gap:clamp(18px,2.6vw,30px)}
+.ne-hero-grid--home .ne-byline{margin-top:0}
 .ne-hero-grid--home .ne-cta-row{margin-top:18px}
 .ne-eyebrow{display:inline-flex;align-items:center;gap:10px;
   font-size:12px;letter-spacing:.24em;text-transform:uppercase;font-weight:800;color:var(--ne-lead)}
