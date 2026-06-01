@@ -236,3 +236,4 @@ public/design-explorer/render/
 mhr-payment-*.png
 *.playwright-mcp-screenshot.png
 .playwright-mcp/
+serve-explorer.scratch.js
