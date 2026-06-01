@@ -25,7 +25,7 @@ describe('content-model', () => {
     }
   });
   it('EN and ES pages have independent object references (no shared mutable refs)', () => {
-    for (const page of ['self-serve', 'wash-dry-fold', 'commercial', 'about', 'contact']) {
+    for (const page of model.PAGES) {
       const enPage = model.content.en.pages[page];
       const esPage = model.content.es.pages[page];
       expect(esPage.cta).not.toBe(enPage.cta);
@@ -33,8 +33,8 @@ describe('content-model', () => {
     }
   });
 
-  it('non-home pages are genuinely translated in ES (no English section leak)', () => {
-    for (const page of ['self-serve', 'wash-dry-fold', 'commercial', 'about', 'contact']) {
+  it('all pages (incl. home) are genuinely translated in ES (no English section leak)', () => {
+    for (const page of model.PAGES) {
       const en = model.content.en.pages[page];
       const es = model.content.es.pages[page];
       expect(es.sections.map(s => s.kind)).toEqual(en.sections.map(s => s.kind)); // structural parity
@@ -43,5 +43,28 @@ describe('content-model', () => {
       // CTA must also be translated (not EN copy)
       expect(JSON.stringify(es.cta)).not.toEqual(JSON.stringify(en.cta));
     }
+  });
+
+  it('home is re-based on the self-serve + WDF franchise landing (not the affiliate program copy)', () => {
+    for (const lang of model.LANGS) {
+      const home = model.content[lang].pages.home;
+      // self-serve + WDF framing present
+      expect(home.hero.title.toLowerCase()).toMatch(lang === 'es' ? /autoservicio|lava-seca-dobla/ : /self-serve|wash-dry-fold/);
+      // real location facts surfaced
+      const j = JSON.stringify(home).toLowerCase();
+      expect(j).toContain('electrolux');
+      expect(j).toContain('$1.20/lb');
+      // structural shape from the franchise landing: stats, services, reviews
+      const kinds = home.sections.map(s => s.kind);
+      expect(kinds).toContain('stats');
+      expect(kinds).toContain('reviews');
+    }
+  });
+
+  it('home (and all pages) contain no pickup/delivery framing — Austin is self-serve + WDF only', () => {
+    const j = JSON.stringify(model.content);
+    expect(j).not.toMatch(/pickup|door-to-door|recogida|\bentrega\b/i);
+    // 'delivery' check: allow none
+    expect(j.toLowerCase()).not.toContain('delivery');
   });
 });

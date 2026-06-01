@@ -95,13 +95,13 @@ function concierge(lang) {
 </section>`;
 }
 
-/* ===== Sticky mobile dock (CSS-only) ===== */
+/* ===== Sticky mobile dock (CSS-only) — Call / Directions / Wash-dry-fold ===== */
 function dock(lang) {
   const { tel, dir, L } = actionLinks(lang);
   return `<nav class="so-dock" aria-label="${esc(L.quickActions)}">
   <a href="${tel}">${I.phone}<span>${esc(L.call)}</span></a>
   <a href="${esc(dir)}" target="_blank" rel="noopener">${I.pin}<span>${esc(L.directions)}</span></a>
-  <a class="so-dock-primary" href="${tel}">${I.cal}<span>${esc(L.book)}</span></a>
+  <a class="so-dock-primary" href="${tel}">${I.drop}<span>${esc(L.wdf)}</span></a>
 </nav>`;
 }
 

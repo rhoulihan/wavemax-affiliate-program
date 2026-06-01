@@ -35,6 +35,18 @@ const renderers = {
     return `<section class="so-section so-section--alt"><div class="so-wrap">${header(s)}<div class="so-steps">${items}</div></div></section>`;
   },
 
+  reviews(s) {
+    const stars = '★★★★★';
+    const cards = (s.items || []).map(it =>
+      `<figure class="so-review">
+        <div class="so-review-stars" aria-label="5 out of 5 stars">${stars}</div>
+        <blockquote>${fill(it.quote)}</blockquote>
+        <figcaption><b>${esc(it.name)}</b>${it.meta ? `<span>${esc(it.meta)}</span>` : ''}</figcaption>
+      </figure>`
+    ).join('');
+    return `<section class="so-section so-section--alt"><div class="so-wrap">${header(s)}<div class="so-reviews">${cards}</div></div></section>`;
+  },
+
   prose(s) {
     return `<section class="so-section"><div class="so-wrap"><div class="so-prose">
       ${s.title ? `<h2 class="so-sec-title">${fill(s.title)}</h2>` : ''}
@@ -71,7 +83,7 @@ const renderers = {
     const es = lang === 'es';
     const featLabel = es ? 'Lava · Seca · Dobla' : 'Wash · Dry · Fold';
     const includes = es
-      ? ['Detergente, hojas para secadora y ganchos incluidos', 'Mínimo de 10 lb', 'Solo tarjeta · sin efectivo', 'Entrega en 24 horas']
+      ? ['Detergente, hojas para secadora y ganchos incluidos', 'Mínimo de 10 lb', 'Solo tarjeta · sin efectivo', 'Lista en 24 horas']
       : ['Detergent, dryer sheets & hangers included', '10 lb minimum', 'Cards only · no cash', '24-hour turnaround'];
     const selfTitle = es ? 'Autoservicio' : 'Self-serve wash';
     const selfList = es

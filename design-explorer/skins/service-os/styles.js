@@ -87,6 +87,7 @@ h1,h2,h3{font-family:var(--so-display);font-weight:700;letter-spacing:-.02em;lin
 
 /* ===== HERO (bento on home; banner elsewhere) ===== */
 .so-hero{padding:34px 0 10px}
+.so-hero--bento{padding:26px 0 4px}
 .so-hero-head{max-width:46ch}
 .so-h1{font-size:clamp(34px,6vw,64px);letter-spacing:-.03em;margin:14px 0 12px}
 .so-h1 .so-lead-word{color:var(--so-lead)}
@@ -107,8 +108,12 @@ h1,h2,h3{font-family:var(--so-display);font-weight:700;letter-spacing:-.02em;lin
   box-shadow:0 12px 26px -14px var(--so-lead)}
 .so-btn-primary:hover{box-shadow:0 18px 34px -14px var(--so-lead)}
 
-/* ===== BENTO GRID ===== */
-.so-bento{display:grid;grid-template-columns:repeat(12,1fr);gap:14px;margin:26px 0 8px}
+/* ===== BENTO GRID =====
+   12-col grid that fills BOTH sides at desktop width. The LEAD tile (H1 +
+   sub + chips + actions) spans 7 cols × 2 rows on the left; the right column
+   stacks service + status + stat + pricing + map tiles so there's no empty
+   region. Collapses to 6-col, then single-column on mobile. */
+.so-bento{display:grid;grid-template-columns:repeat(12,1fr);grid-auto-rows:minmax(150px,auto);gap:14px;margin:8px 0}
 .so-tile{grid-column:span 4;position:relative;border:1px solid var(--so-line);border-radius:var(--so-radius-lg);
   background:var(--so-panel-2);padding:18px;min-height:150px;display:flex;flex-direction:column;
   text-decoration:none;color:inherit;overflow:hidden;transition:transform .14s ease,border-color .14s ease,box-shadow .14s ease}
@@ -116,7 +121,7 @@ h1,h2,h3{font-family:var(--so-display);font-weight:700;letter-spacing:-.02em;lin
 .so-tile-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}
 .so-tile-tag{font-family:var(--so-mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--so-muted)}
 .so-tile-ico{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;
-  background:color-mix(in srgb,var(--so-lead) 14%,transparent);color:var(--so-lead)}
+  background:color-mix(in srgb,var(--so-lead) 14%,transparent);color:var(--so-lead);flex:0 0 auto}
 .so-tile-ico svg{width:18px;height:18px}
 .so-tile h3{font-size:19px;margin:auto 0 4px}
 .so-tile p{margin:0;color:var(--so-muted);font-size:13.5px}
@@ -125,18 +130,43 @@ h1,h2,h3{font-family:var(--so-display);font-weight:700;letter-spacing:-.02em;lin
 .so-tile-open svg{width:13px;height:13px;transition:transform .14s ease}
 .so-tile:hover .so-tile-open svg{transform:translateX(3px)}
 
-.so-tile--wide{grid-column:span 8}
-.so-tile--lead{grid-column:span 8;background:
+/* LEAD/hero tile — carries the H1 + sub + chips + actions */
+.so-tile--lead{background:
   linear-gradient(140deg, var(--so-lead), color-mix(in srgb,var(--so-lead) 55%, var(--brand-deep)));
   color:var(--so-on-lead);border-color:transparent}
-.so-tile--lead .so-tile-tag,.so-tile--lead p{color:color-mix(in srgb,#fff 80%,transparent)}
+.so-tile--lead .so-tile-tag,.so-tile--lead p{color:color-mix(in srgb,#fff 84%,transparent)}
 .so-tile--lead .so-tile-ico{background:rgba(255,255,255,.16);color:#fff}
 .so-tile--lead .so-tile-open{color:#fff}
-.so-tile--status{background:var(--so-panel);grid-column:span 4}
-.so-tile--map{grid-column:span 4;padding:0;min-height:200px}
+.so-tile--hero{grid-column:span 7;grid-row:span 2;padding:26px 26px 24px;justify-content:flex-start;cursor:default}
+.so-tile--hero .so-h1{font-size:clamp(30px,3.6vw,46px);margin:14px 0 12px;color:#fff;line-height:1.04}
+.so-tile--hero .so-h1 .so-lead-word{color:color-mix(in srgb,var(--accent) 70%,#fff)}
+.so-tile--hero .so-hero-sub{color:color-mix(in srgb,#fff 86%,transparent);max-width:52ch;font-size:clamp(14.5px,1.4vw,16.5px);margin:0 0 16px}
+.so-tile--hero .so-hero-chips{margin-bottom:0}
+.so-tile--hero .so-chip{border-color:rgba(255,255,255,.28);background:rgba(255,255,255,.12);color:#fff}
+.so-tile--hero .so-actions{margin-top:18px}
+.so-tile--hero .so-btn{background:rgba(255,255,255,.14);color:#fff;border-color:rgba(255,255,255,.3)}
+.so-tile--hero .so-btn-primary{background:#fff;color:var(--brand-deep);border-color:#fff;box-shadow:0 12px 26px -16px rgba(0,0,0,.5)}
+
+/* right-column tiles share the remaining 5 cols */
+.so-tile--status,.so-tile--stat,.so-tile--price{grid-column:span 5}
+.so-tile--status{background:var(--so-panel)}
+
+/* map + the three service tiles fill the bottom band */
+.so-tile--map{grid-column:span 6;padding:0;min-height:200px}
 .so-tile--map iframe{width:100%;height:100%;min-height:200px;border:0;filter:saturate(1.05)}
 .so-tile--map .so-map-cap{position:absolute;left:12px;bottom:12px;font-family:var(--so-mono);font-size:11px;
   background:color-mix(in srgb,var(--paper) 88%,transparent);padding:6px 10px;border-radius:8px;border:1px solid var(--so-line)}
+
+/* machines / capacity stat tile */
+.so-stat-pair{display:flex;align-items:baseline;gap:8px;margin:auto 0 6px;font-family:var(--so-display);font-weight:800;
+  letter-spacing:-.03em;color:var(--so-lead)}
+.so-stat-pair b{font-size:clamp(30px,4vw,44px)}
+.so-stat-pair span{font-size:22px;color:var(--so-muted)}
+
+/* wash-dry-fold pricing chip tile */
+.so-price-chip{font-family:var(--so-display);font-weight:800;font-size:clamp(30px,4vw,44px);letter-spacing:-.03em;
+  color:var(--so-lead);margin:auto 0 4px}
+.so-price-chip small{font-size:16px;color:var(--so-muted);font-family:var(--so-mono);font-weight:400}
 
 /* live-feel status readout */
 .so-status-rows{display:flex;flex-direction:column;gap:9px;margin-top:6px}
@@ -146,13 +176,16 @@ h1,h2,h3{font-family:var(--so-display);font-weight:700;letter-spacing:-.02em;lin
 .so-status-bar i{display:block;height:100%;width:72%;border-radius:4px;
   background:linear-gradient(90deg,var(--accent),var(--so-lead))}
 
+/* tablet: lead tile goes full width above a 6-col grid of the rest */
 @media (max-width:880px){
   .so-bento{grid-template-columns:repeat(6,1fr)}
-  .so-tile,.so-tile--wide,.so-tile--lead,.so-tile--status,.so-tile--map{grid-column:span 6}
+  .so-tile{grid-column:span 3}
+  .so-tile--hero{grid-column:span 6;grid-row:auto}
+  .so-tile--status,.so-tile--stat,.so-tile--price,.so-tile--map{grid-column:span 3}
 }
 @media (max-width:560px){
   .so-bento{grid-template-columns:1fr;gap:11px}
-  .so-tile,.so-tile--wide,.so-tile--lead,.so-tile--status,.so-tile--map{grid-column:span 1}
+  .so-tile,.so-tile--hero,.so-tile--status,.so-tile--stat,.so-tile--price,.so-tile--map{grid-column:span 1;grid-row:auto}
 }
 
 /* ===== CONCIERGE launcher (visual STUB) ===== */
@@ -247,6 +280,17 @@ h1,h2,h3{font-family:var(--so-display);font-weight:700;letter-spacing:-.02em;lin
   background:color-mix(in srgb,var(--accent) 22%,transparent);
   box-shadow:inset 0 0 0 2px var(--accent)}
 @media (max-width:760px){ .so-price{grid-template-columns:1fr} }
+
+/* reviews */
+.so-reviews{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.so-review{margin:0;border:1px solid var(--so-line);border-radius:var(--so-radius-lg);background:var(--so-panel-2);
+  padding:22px;display:flex;flex-direction:column;gap:12px}
+.so-review-stars{color:var(--accent);letter-spacing:.12em;font-size:15px}
+.so-review blockquote{margin:0;font-size:15px;color:color-mix(in srgb,var(--ink) 88%,var(--paper));line-height:1.5}
+.so-review figcaption{margin-top:auto;display:flex;flex-direction:column;gap:2px;
+  font-family:var(--so-mono);font-size:11.5px;color:var(--so-muted)}
+.so-review figcaption b{color:var(--ink);font-size:13px;font-family:var(--so-body)}
+@media (max-width:820px){ .so-reviews{grid-template-columns:1fr} }
 
 /* prose */
 .so-prose{max-width:64ch;font-size:1.06rem}

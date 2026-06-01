@@ -8,9 +8,6 @@
 // HTML data-i18n inline text (those keys are not in common.json).
 // ES falls back to EN when a string is missing.
 
-const path = require('path');
-const fs = require('fs');
-
 // ─── Constants ──────────────────────────────────────────────────────────────
 
 const NAP = {
@@ -31,133 +28,162 @@ const TRADEMARK_NOTICE =
 const PAGES = ['home', 'self-serve', 'wash-dry-fold', 'commercial', 'about', 'contact'];
 const LANGS = ['en', 'es'];
 
-// ─── Locale loader ──────────────────────────────────────────────────────────
-
-function loadLocale(lang) {
-  // Resolve relative to the repo root (one level up from design-explorer/)
-  const localeDir = path.resolve(__dirname, '../public/locales', lang, 'common.json');
-  try {
-    return JSON.parse(fs.readFileSync(localeDir, 'utf8'));
-  } catch (_) {
-    return {};
-  }
-}
-
 // ─── Per-page content builders ───────────────────────────────────────────────
-// Each builder returns { hero, sections, cta } for a given locale object.
-// `fb` is the EN locale, used as the fallback when an ES key is missing.
-// `s(val, fallback)` safely returns a non-empty string.
-
-function s(val, fallback) {
-  if (typeof val === 'string' && val.trim().length > 0) return val.trim();
-  if (typeof fallback === 'string' && fallback.trim().length > 0) return fallback.trim();
-  return '';
-}
+// Each builder takes a lang string and returns { hero, sections, cta }.
+// ES deep-clones its own constants (structuredClone) so EN/ES never share refs.
 
 // ─── home ────────────────────────────────────────────────────────────────────
+// Re-based on public/franchise-default/landing.html — the REAL Austin location
+// landing: a self-serve + wash-dry-fold laundromat (NO pickup/delivery; that
+// framing belongs to the affiliate program, not this physical store). Content
+// is hardcoded here (mirrors the other page builders) so it doesn't leak the
+// affiliate-program copy that lives under common.json `landing.*`.
 
-function buildHome(loc, fb) {
-  const l = loc.landing || {};
-  const f = fb.landing || {};
+const HOME_EN = {
+  hero: {
+    title: "Austin's cleanest self-serve laundry + wash-dry-fold",
+    sub: '42 Electrolux 450G washers and 42 fast dryers, hospital-grade UV-sanitized water, free WiFi and free parking — open every day 7am–10pm in North Austin on Rundberg. Wash it yourself or drop off your wash-dry-fold at $1.20/lb with 24-hour turnaround. Cards only, no cash needed.',
+    badge: '4.8 ★ on Google',
+  },
+  sections: [
+    {
+      id: 'stats',
+      kind: 'stats',
+      title: '',
+      items: [
+        { label: 'Electrolux Washers', value: '42' },
+        { label: 'Fast Dryers', value: '42' },
+        { label: 'Open Daily', value: '7am–10pm' },
+        { label: 'Wash-Dry-Fold', value: '$1.20/lb' },
+        { label: 'WDF Turnaround', value: '24hr' },
+      ],
+    },
+    {
+      id: 'services',
+      kind: 'tabs',
+      title: 'Two ways to get clean laundry',
+      sub: 'Wash it yourself on our floor, or drop off your wash-dry-fold and walk out. Commercial accounts welcome.',
+      tabs: ['self-serve', 'wash-dry-fold', 'commercial'],
+    },
+    {
+      id: 'howItWorks',
+      kind: 'steps',
+      title: 'Wash-dry-fold in three steps',
+      items: [
+        { title: 'Drop off, walk out', body: '2-minute drop-off. We weigh it, then wash, dry, and fold with hospital-grade UV sanitization.' },
+        { title: '24-hour turnaround', body: 'Drop off in the morning, pick up the next day. Need it faster? Ask about same-day.' },
+        { title: 'Simple pricing', body: '$1.20/lb, 10lb minimum. Detergent, dryer sheets, and hangers included. Cards-only payment, no cash needed.' },
+      ],
+    },
+    {
+      id: 'quality',
+      kind: 'cards',
+      title: 'Why WaveMAX Austin',
+      sub: 'Premium equipment, hospital-grade sanitization, and a fully attended floor every shift.',
+      items: [
+        { title: 'Electrolux CompassPro 450G', body: '20-minute washes, 20-minute dries. High-spin 450G machines mean less time waiting and more time doing what you\'d rather be doing.' },
+        { title: 'Omni LUX UV Water Sanitization', body: 'Every wash cycle benefits from our Hospital Grade UV Water Sanitization system — 99.9% pathogen kill before the water ever touches your clothes.' },
+        { title: 'Free WiFi, free parking', body: 'Wheelchair accessible, free parking, attended every shift. Bring a laptop — the WiFi\'s fast enough to actually work.' },
+      ],
+    },
+    {
+      id: 'reviews',
+      kind: 'reviews',
+      title: 'What our customers say',
+      sub: 'Five-star reviews from neighbors across North Austin.',
+      items: [
+        { quote: 'Cleanest laundromat I\'ve been to in Austin. The machines are fast and there\'s always an attendant around to help.', name: 'Marisol R.', meta: 'North Austin' },
+        { quote: 'Dropped off two weeks of laundry, picked it up the next day perfectly folded. The wash-dry-fold is worth every penny.', name: 'James T.', meta: 'Rundberg Ln' },
+        { quote: 'Big 80-lb machines got my comforters done in one load. Free parking and free WiFi make it easy to get in and out.', name: 'Aisha K.', meta: 'Georgian Acres' },
+      ],
+    },
+  ],
+  cta: {
+    title: 'Ready to do laundry the easy way?',
+    sub: 'Wash it yourself or drop off your wash-dry-fold — open daily 7am–10pm at 825 E Rundberg Ln F1.',
+    primaryLabel: 'Get Directions',
+  },
+};
+
+const HOME_ES = {
+  hero: {
+    title: 'El autoservicio de lavandería + lava-seca-dobla más limpio de Austin',
+    sub: '42 lavadoras Electrolux 450G y 42 secadoras rápidas, agua sanitizada con UV de grado hospitalario, WiFi gratis y estacionamiento gratis — abierto todos los días de 7am a 10pm en el norte de Austin sobre Rundberg. Lava tú mismo o deja tu lava-seca-dobla a $1.20/lb, lista en 24 horas. Solo tarjetas, sin efectivo.',
+    badge: '4.8 ★ en Google',
+  },
+  sections: [
+    {
+      id: 'stats',
+      kind: 'stats',
+      title: '',
+      items: [
+        { label: 'Lavadoras Electrolux', value: '42' },
+        { label: 'Secadoras rápidas', value: '42' },
+        { label: 'Abierto a diario', value: '7am–10pm' },
+        { label: 'Lava-Seca-Dobla', value: '$1.20/lb' },
+        { label: 'Lista en', value: '24hr' },
+      ],
+    },
+    {
+      id: 'services',
+      kind: 'tabs',
+      title: 'Dos maneras de tener ropa limpia',
+      sub: 'Lava tú mismo en nuestro local, o deja tu lava-seca-dobla y sal listo. Cuentas comerciales bienvenidas.',
+      tabs: ['self-serve', 'wash-dry-fold', 'commercial'],
+    },
+    {
+      id: 'howItWorks',
+      kind: 'steps',
+      title: 'Lava-seca-dobla en tres pasos',
+      items: [
+        { title: 'Déjala y sal', body: 'Déjala en 2 minutos. La pesamos, luego lavamos, secamos y doblamos con sanitización UV de grado hospitalario.' },
+        { title: 'Lista en 24 horas', body: 'Déjala en la mañana, está lista al día siguiente. ¿Necesitas algo más rápido? Pregunta por el servicio del mismo día.' },
+        { title: 'Precios simples', body: '$1.20/lb, mínimo 10 lb. Detergente, hojas para secadora y ganchos incluidos. Solo tarjetas, sin efectivo.' },
+      ],
+    },
+    {
+      id: 'quality',
+      kind: 'cards',
+      title: 'Por qué WaveMAX Austin',
+      sub: 'Equipos de primera, sanitización de grado hospitalario y un local atendido en cada turno.',
+      items: [
+        { title: 'Electrolux CompassPro 450G', body: 'Lavados de 20 minutos, secados de 20 minutos. Las máquinas de alta centrifugación 450G significan menos tiempo esperando y más tiempo haciendo lo que prefieres.' },
+        { title: 'Sanitización UV de agua Omni LUX', body: 'Cada ciclo de lavado se beneficia de nuestro sistema de sanitización UV de agua de grado hospitalario — eliminación del 99.9% de patógenos antes de que el agua toque tu ropa.' },
+        { title: 'WiFi gratis, estacionamiento gratis', body: 'Accesible para sillas de ruedas, estacionamiento gratuito, atendido en cada turno. Trae tu laptop — el WiFi es suficientemente rápido para trabajar de verdad.' },
+      ],
+    },
+    {
+      id: 'reviews',
+      kind: 'reviews',
+      title: 'Lo que dicen nuestros clientes',
+      sub: 'Reseñas de cinco estrellas de vecinos del norte de Austin.',
+      items: [
+        { quote: 'La lavandería más limpia en la que he estado en Austin. Las máquinas son rápidas y siempre hay alguien para ayudar.', name: 'Marisol R.', meta: 'Norte de Austin' },
+        { quote: 'Dejé dos semanas de ropa y la recogí al día siguiente perfectamente doblada. El lava-seca-dobla vale cada centavo.', name: 'James T.', meta: 'Rundberg Ln' },
+        { quote: 'Las máquinas grandes de 80 lb lavaron mis edredones en una sola carga. El estacionamiento y el WiFi gratis facilitan todo.', name: 'Aisha K.', meta: 'Georgian Acres' },
+      ],
+    },
+  ],
+  cta: {
+    title: '¿Listo para lavar de la manera fácil?',
+    sub: 'Lava tú mismo o deja tu lava-seca-dobla — abierto todos los días de 7am a 10pm en 825 E Rundberg Ln F1.',
+    primaryLabel: 'Cómo llegar',
+  },
+};
+
+function buildHome(lang) {
+  const en = HOME_EN;
+  if (lang === 'es') {
+    return {
+      hero: Object.assign({}, en.hero, HOME_ES.hero),
+      sections: structuredClone(HOME_ES.sections),
+      cta: structuredClone(HOME_ES.cta),
+    };
+  }
   return {
-    hero: {
-      title: s(l.hero && l.hero.title, f.hero && f.hero.title),
-      sub: s(
-        l.hero && l.hero.subtitle && l.hero.subtitle.full,
-        f.hero && f.hero.subtitle && f.hero.subtitle.full
-      ),
-      badge: s(l.hero && l.hero.badge, f.hero && f.hero.badge),
-    },
-    sections: [
-      {
-        id: 'stats',
-        kind: 'stats',
-        title: '',
-        items: [
-          { label: s(l.stats && l.stats.googleRating, 'Google Rating'), value: '4.8 ★' },
-          { label: s(l.stats && l.stats.openDaily, 'Open Daily'), value: '7am–10pm' },
-          { label: s(l.stats && l.stats.wdf, 'Wash-Dry-Fold'), value: '$1.20/lb' },
-          { label: s(l.stats && l.stats.turnaround, 'Turnaround'), value: '24hr' },
-          { label: s(l.stats && l.stats.fullLoad, 'Full Load Done'), value: '<45min' },
-        ],
-      },
-      {
-        id: 'services',
-        kind: 'tabs',
-        title: s(
-          l.services && l.services.title,
-          f.services && f.services.title,
-        ) || 'Three ways to get clean laundry',
-        sub: s(
-          l.services && l.services.subtitle,
-          f.services && f.services.subtitle,
-        ) || 'Whether you prefer to do it yourself or drop it off, we\'ve got you covered.',
-        tabs: ['wash-dry-fold', 'self-serve', 'commercial'],
-      },
-      {
-        id: 'howItWorks',
-        kind: 'steps',
-        title: s(
-          l.howItWorks && l.howItWorks.title,
-          f.howItWorks && f.howItWorks.title
-        ),
-        items: [
-          {
-            title: s(l.howItWorks && l.howItWorks.steps && l.howItWorks.steps.doorToDoor && l.howItWorks.steps.doorToDoor.title,
-                     f.howItWorks && f.howItWorks.steps && f.howItWorks.steps.doorToDoor && f.howItWorks.steps.doorToDoor.title),
-            body: s(l.howItWorks && l.howItWorks.steps && l.howItWorks.steps.doorToDoor && l.howItWorks.steps.doorToDoor.description && l.howItWorks.steps.doorToDoor.description.part2,
-                    f.howItWorks && f.howItWorks.steps && f.howItWorks.steps.doorToDoor && f.howItWorks.steps.doorToDoor.description && f.howItWorks.steps.doorToDoor.description.part2),
-          },
-          {
-            title: s(l.howItWorks && l.howItWorks.steps && l.howItWorks.steps.professional && l.howItWorks.steps.professional.title,
-                     f.howItWorks && f.howItWorks.steps && f.howItWorks.steps.professional && f.howItWorks.steps.professional.title),
-            body: s(l.howItWorks && l.howItWorks.steps && l.howItWorks.steps.professional && l.howItWorks.steps.professional.description,
-                    f.howItWorks && f.howItWorks.steps && f.howItWorks.steps.professional && f.howItWorks.steps.professional.description),
-          },
-          {
-            title: s(l.howItWorks && l.howItWorks.steps && l.howItWorks.steps.fastTurnaround && l.howItWorks.steps.fastTurnaround.title,
-                     f.howItWorks && f.howItWorks.steps && f.howItWorks.steps.fastTurnaround && f.howItWorks.steps.fastTurnaround.title),
-            body: s(l.howItWorks && l.howItWorks.steps && l.howItWorks.steps.fastTurnaround && l.howItWorks.steps.fastTurnaround.description,
-                    f.howItWorks && f.howItWorks.steps && f.howItWorks.steps.fastTurnaround && f.howItWorks.steps.fastTurnaround.description),
-          },
-        ],
-      },
-      {
-        id: 'quality',
-        kind: 'cards',
-        title: s(l.quality && l.quality.title, f.quality && f.quality.title),
-        sub: s(l.quality && l.quality.subtitle, f.quality && f.quality.subtitle),
-        items: [
-          {
-            title: s(l.quality && l.quality.electrolux && l.quality.electrolux.title,
-                     f.quality && f.quality.electrolux && f.quality.electrolux.title),
-            body: s(l.quality && l.quality.electrolux && l.quality.electrolux.description,
-                    f.quality && f.quality.electrolux && f.quality.electrolux.description),
-          },
-          {
-            title: s(l.quality && l.quality.omniLux && l.quality.omniLux.title,
-                     f.quality && f.quality.omniLux && f.quality.omniLux.title),
-            body: s(l.quality && l.quality.omniLux && l.quality.omniLux.description,
-                    f.quality && f.quality.omniLux && f.quality.omniLux.description),
-          },
-          {
-            title: s(l.quality && l.quality.qualityControl && l.quality.qualityControl.title,
-                     f.quality && f.quality.qualityControl && f.quality.qualityControl.title),
-            body: s(l.quality && l.quality.qualityControl && l.quality.qualityControl.description,
-                    f.quality && f.quality.qualityControl && f.quality.qualityControl.description),
-          },
-        ],
-      },
-    ],
-    cta: {
-      title: s(l.cta && l.cta.customerTitle, f.cta && f.cta.customerTitle),
-      sub: s(
-        l.cta && l.cta.subtitle && l.cta.subtitle.full,
-        f.cta && f.cta.subtitle && f.cta.subtitle.full
-      ),
-      primaryLabel: s(loc.common && loc.common.buttons && loc.common.buttons.getStarted,
-                      (fb.common && fb.common.buttons && fb.common.buttons.getStarted) || 'Get Started'),
-    },
+    hero: Object.assign({}, en.hero),
+    sections: structuredClone(en.sections),
+    cta: structuredClone(en.cta),
   };
 }
 
@@ -276,8 +302,8 @@ const WDF_ES = {
   },
   sections: [
     { id: 'howItWorks', kind: 'steps', title: 'Cómo funciona', items: [
-      { title: 'Deja tu ropa', body: 'Entrega en 2 minutos. Pesamos, lavamos, secamos y doblamos con sanitización UV de grado hospitalario.' },
-      { title: 'Entrega en 24 horas', body: 'Deja tu ropa en la mañana, recógela al día siguiente. ¿Necesitas algo más rápido? Pregunta por el servicio del mismo día.' },
+      { title: 'Deja tu ropa', body: 'Déjala en 2 minutos. Pesamos, lavamos, secamos y doblamos con sanitización UV de grado hospitalario.' },
+      { title: 'Lista en 24 horas', body: 'Deja tu ropa en la mañana, está lista al día siguiente. ¿Necesitas algo más rápido? Pregunta por el servicio del mismo día.' },
       { title: 'Precios simples', body: '$1.20/lb, mínimo 10 lb. Detergente, hojas para secadora y ganchos incluidos. Solo tarjetas, sin efectivo.' },
     ]},
     { id: 'addOns', kind: 'cards', title: 'Servicios adicionales', items: [
@@ -341,7 +367,7 @@ const COM_ES = {
   sections: [
     { id: 'whoWeServe', kind: 'cards', title: 'A quién atendemos', items: [
       { title: 'Airbnb y alquileres', body: 'Apoyo para el cambio de turno el mismo día. Sábanas, toallas, edredones — doblados y listos antes del check-in.' },
-      { title: 'Oficinas médicas y gimnasios', body: 'Uniformes, ropa de trabajo, toallas — limpieza confiable, entrega puntual.' },
+      { title: 'Oficinas médicas y gimnasios', body: 'Uniformes, ropa de trabajo, toallas — limpieza confiable, siempre a tiempo.' },
       { title: 'Restaurantes y salones', body: 'Ropa de cama, delantales y toallas manejados en volumen. Cuentas sin contrato.' },
     ]},
     { id: 'whyUs', kind: 'cards', title: 'Por qué WaveMAX', items: [
@@ -374,11 +400,11 @@ function buildCommercial(lang) {
 const ABOUT_EN = {
   hero: {
     title: 'About this WaveMAX',
-    sub: 'This WaveMAX is owned and operated by people who live in the community we serve. We chose WaveMAX because we believe in delivering the best quality and service at the lowest fair price — and reinvesting in our neighborhood, every day.',
+    sub: 'This WaveMAX is owned and operated by people who live in the community we serve. We chose WaveMAX because we believe in providing the best quality and service at the lowest fair price — and reinvesting in our neighborhood, every day.',
     tagline: 'Locally owned. Locally invested.',
   },
   sections: [
-    { id: 'story', kind: 'prose', title: 'Our story', body: 'WaveMAX Austin is owned and operated by the Houlihan family — Colin (musician), Rick (technology executive), and Simone (artist and philanthropist). Three Austin locals giving back to the community by delivering best-in-class laundry service at the lowest fair price.' },
+    { id: 'story', kind: 'prose', title: 'Our story', body: 'WaveMAX Austin is owned and operated by the Houlihan family — Colin (musician), Rick (technology executive), and Simone (artist and philanthropist). Three Austin locals giving back to the community by providing best-in-class laundry service at the lowest fair price.' },
     { id: 'values', kind: 'cards', title: 'What we believe', items: [
       { title: 'Community first', body: 'We live here. We shop here. We invest the profits back into the neighborhood.' },
       { title: 'Honest pricing', body: 'No hidden fees. No bait-and-switch. The price you see is the price you pay.' },
@@ -482,20 +508,14 @@ function buildContact(lang) {
 // ─── Main builder ────────────────────────────────────────────────────────────
 
 function buildContent() {
-  const locales = {};
-  for (const lang of LANGS) {
-    locales[lang] = loadLocale(lang);
-  }
-
   const result = {};
   for (const lang of LANGS) {
-    const loc = locales[lang];
-    const fb = locales['en']; // EN fallback
     result[lang] = {
       pages: {
-        // buildHome takes locale objects (loc/fb) because its strings live in common.json;
-        // the other builders take a lang string because their copy is hardcoded constants.
-        'home': buildHome(loc, fb),
+        // Every builder takes a lang string — all page copy is hardcoded here
+        // (mirrors the franchise-default landing + service pages), NOT pulled
+        // from common.json `landing.*` (which is the affiliate program copy).
+        'home': buildHome(lang),
         'self-serve': buildSelfServe(lang),
         'wash-dry-fold': buildWashDryFold(lang),
         'commercial': buildCommercial(lang),
