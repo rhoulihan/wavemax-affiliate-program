@@ -57,6 +57,23 @@ function homeHero(content, intensity, lang) {
   </div></section>`;
 }
 
+/* ---- Page ledger strip (commercial / about / contact) ----
+   The signature 5-cell stats grid home + self-serve carry under the hero. Those
+   two pages get their cells from the shared content model's `stats` section; the
+   pages below have no `stats` section in the model, so the cells come from the
+   skin's i18n `ledger` table (real store facts only). Renders the SAME .ne-ledger
+   markup the `stats` section renderer emits, so the styling is byte-identical. */
+function pageLedger(page, lang) {
+  const L = t(lang);
+  const items = (L.ledger || {})[page];
+  if (!items || !items.length) return '';
+  const cells = items.map(it =>
+    `<div class="ne-led-cell"><div class="ne-led-v">${esc(it.value)}</div><div class="ne-led-l">${esc(it.label)}</div></div>`
+  ).join('');
+  return `<section class="ne-section" style="padding-top:0"><div class="ne-wrap">
+      <div class="ne-ledger">${cells}</div></div></section>`;
+}
+
 /* ---- Pull quote drawn editorially from the first review (home) ----
    Two-column band: the quote (vertically centered) on the LEFT, a shop
    signage photo on the RIGHT. Quote text always comes from reviews[0]. */
@@ -110,7 +127,10 @@ function bannerHero(content, page, intensity, lang) {
   </div></section>`;
 }
 
-/* ---- Contact page (NAP + form, then a big satellite map iframe) ---- */
+/* ---- Contact page (NAP + form, then a big satellite map iframe) ----
+   Carries the same editorial rhythm as home: the ledger strip sits directly
+   under the hero (an at-a-glance amenity set, not a repeat of the NAP block)
+   before the contact content. ---- */
 function contactPage(content, intensity, lang) {
   const page = content.pages.contact;
   const info = page.sections.find(s => s.kind === 'contact-info');
@@ -118,6 +138,7 @@ function contactPage(content, intensity, lang) {
   const infoHtml = info ? renderSection(info, content, intensity, lang) : '';
   const formHtml = form ? renderSection(form, content, intensity, lang) : '';
   return `${bannerHero(content, 'contact', intensity, lang)}
+    ${pageLedger('contact', lang)}
     <section class="ne-section"><div class="ne-wrap">
       <div class="ne-contact">
         <div>${infoHtml}${formHtml}</div>
@@ -173,11 +194,17 @@ function buildPage(page, content, intensity, lang) {
     parts.push(C.closer(data.cta, lang, page));
   } else if (page === 'about') {
     parts.push(bannerHero(content, page, intensity, lang));
+    // ledger strip sits right under the hero (matches home's rhythm)
+    parts.push(pageLedger(page, lang));
     for (const s of (data.sections || [])) parts.push(renderSection(s, content, intensity, lang));
     parts.push(C.desk(lang));
     parts.push(C.closer(data.cta, lang, page));
   } else {
     parts.push(bannerHero(content, page, intensity, lang));
+    // commercial gets the ledger strip under the hero (matches home's rhythm);
+    // WDF gets the editorial pull-quote band there instead, before the steps.
+    if (page === 'commercial') parts.push(pageLedger(page, lang));
+    if (page === 'wash-dry-fold') parts.push(pullQuote(content, lang));
     for (const s of (data.sections || [])) {
       // WDF only: render the steps paired with the front-door photo (two-column).
       if (page === 'wash-dry-fold' && s.kind === 'steps') {

@@ -50,6 +50,30 @@ const T = {
     findUs: 'Find us', hoursLabel: 'Hours', addressLabel: 'Address', phoneLabel: 'Phone',
     ownedHeavy: 'WaveMAX Austin', ownedLight: 'Independently owned · WaveMAX-licensed',
     colophon: 'A neighborhood laundromat on Rundberg Ln, North Austin.',
+    // page ledger strips (real store facts — numerals decorative, labels readable)
+    ledger: {
+      commercial: [
+        { value: '80 lb', label: 'Machine capacity' },
+        { value: '24-hr', label: 'Turnaround' },
+        { value: '42+42', label: 'Washers + dryers' },
+        { value: 'No', label: 'Contracts' },
+        { value: 'UV', label: 'Sanitized water' },
+      ],
+      about: [
+        { value: '42+42', label: 'Machines' },
+        { value: '7am–10pm', label: 'Open daily' },
+        { value: 'Local', label: 'Owned & operated' },
+        { value: '$1.20/lb', label: 'Wash-dry-fold' },
+        { value: 'UV', label: 'Sanitized water' },
+      ],
+      contact: [
+        { value: '7am–10pm', label: 'Open daily' },
+        { value: 'Card', label: 'Only' },
+        { value: 'Free', label: 'WiFi' },
+        { value: 'Free', label: 'Parking' },
+        { value: '24-hr', label: 'Wash-dry-fold' },
+      ],
+    },
   },
   es: {
     nav: { home: 'Inicio', selfServe: 'Autoservicio', wdf: 'Lava-Seca-Dobla', commercial: 'Comercial', about: 'Nosotros', contact: 'Contacto' },
@@ -84,6 +108,29 @@ const T = {
     findUs: 'Ubicación', hoursLabel: 'Horario', addressLabel: 'Dirección', phoneLabel: 'Teléfono',
     ownedHeavy: 'WaveMAX Austin', ownedLight: 'Negocio local · con licencia WaveMAX',
     colophon: 'Una lavandería de barrio en Rundberg Ln, norte de Austin.',
+    ledger: {
+      commercial: [
+        { value: '80 lb', label: 'Capacidad de máquina' },
+        { value: '24 h', label: 'Lista al día siguiente' },
+        { value: '42+42', label: 'Lavadoras + secadoras' },
+        { value: 'Sin', label: 'Contratos' },
+        { value: 'UV', label: 'Agua sanitizada' },
+      ],
+      about: [
+        { value: '42+42', label: 'Máquinas' },
+        { value: '7am–10pm', label: 'Abierto a diario' },
+        { value: 'Local', label: 'Propiedad y operación' },
+        { value: '$1.20/lb', label: 'Lava-seca-dobla' },
+        { value: 'UV', label: 'Agua sanitizada' },
+      ],
+      contact: [
+        { value: '7am–10pm', label: 'Abierto a diario' },
+        { value: 'Tarjeta', label: 'Solamente' },
+        { value: 'Gratis', label: 'WiFi' },
+        { value: 'Gratis', label: 'Estacionamiento' },
+        { value: '24 h', label: 'Lava-seca-dobla' },
+      ],
+    },
   },
   pt: {
     nav: { home: 'Início', selfServe: 'Autoatendimento', wdf: 'Lavar-Secar-Dobrar', commercial: 'Comercial', about: 'Sobre', contact: 'Contato' },
@@ -118,6 +165,29 @@ const T = {
     findUs: 'Onde estamos', hoursLabel: 'Horário', addressLabel: 'Endereço', phoneLabel: 'Telefone',
     ownedHeavy: 'WaveMAX Austin', ownedLight: 'Negócio local · com licença WaveMAX',
     colophon: 'Uma lavanderia de bairro na Rundberg Ln, norte de Austin.',
+    ledger: {
+      commercial: [
+        { value: '80 lb', label: 'Capacidade da máquina' },
+        { value: '24 h', label: 'Pronta no dia seguinte' },
+        { value: '42+42', label: 'Lavadoras + secadoras' },
+        { value: 'Sem', label: 'Contratos' },
+        { value: 'UV', label: 'Água sanitizada' },
+      ],
+      about: [
+        { value: '42+42', label: 'Máquinas' },
+        { value: '7h–22h', label: 'Aberta todo dia' },
+        { value: 'Local', label: 'Propriedade e operação' },
+        { value: '$1,20/lb', label: 'Lavar-secar-dobrar' },
+        { value: 'UV', label: 'Água sanitizada' },
+      ],
+      contact: [
+        { value: '7h–22h', label: 'Aberta todo dia' },
+        { value: 'Cartão', label: 'Somente' },
+        { value: 'Grátis', label: 'WiFi' },
+        { value: 'Grátis', label: 'Estacionamento' },
+        { value: '24 h', label: 'Lavar-secar-dobrar' },
+      ],
+    },
   },
   de: {
     nav: { home: 'Start', selfServe: 'SB-Wäscherei', wdf: 'Waschen-Trocknen-Falten', commercial: 'Gewerbe', about: 'Über uns', contact: 'Kontakt' },
@@ -152,6 +222,29 @@ const T = {
     findUs: 'So finden Sie uns', hoursLabel: 'Öffnungszeiten', addressLabel: 'Adresse', phoneLabel: 'Telefon',
     ownedHeavy: 'WaveMAX Austin', ownedLight: 'Lokal geführt · WaveMAX-lizenziert',
     colophon: 'Eine Nachbarschafts-Wäscherei an der Rundberg Ln, Nord-Austin.',
+    ledger: {
+      commercial: [
+        { value: '80 lb', label: 'Maschinenkapazität' },
+        { value: '24 Std.', label: 'Fertig am nächsten Tag' },
+        { value: '42+42', label: 'Wasch- + Trockenmaschinen' },
+        { value: 'Kein', label: 'Vertrag' },
+        { value: 'UV', label: 'Desinfiziertes Wasser' },
+      ],
+      about: [
+        { value: '42+42', label: 'Maschinen' },
+        { value: '7–22 Uhr', label: 'Täglich geöffnet' },
+        { value: 'Lokal', label: 'Geführt & betrieben' },
+        { value: '$1,20/lb', label: 'Waschen-Trocknen-Falten' },
+        { value: 'UV', label: 'Desinfiziertes Wasser' },
+      ],
+      contact: [
+        { value: '7–22 Uhr', label: 'Täglich geöffnet' },
+        { value: 'Karte', label: 'Nur' },
+        { value: 'Gratis', label: 'WLAN' },
+        { value: 'Gratis', label: 'Parkplätze' },
+        { value: '24 Std.', label: 'Waschen-Trocknen-Falten' },
+      ],
+    },
   },
 };
 function t(lang) { return T[lang] || T.en; }
