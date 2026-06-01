@@ -175,7 +175,12 @@ function buildPage(page, content, intensity, lang) {
     parts.push(bentoHero(content, intensity, lang));
     parts.push(kpiStrip(lang));
     parts.push(`<div class="so-wrap">${C.concierge(lang)}</div>`);
-    for (const s of (data.sections || [])) parts.push(renderSection(s, content, intensity, lang));
+    // The KPI strip under the hero already presents the stats, so skip the
+    // model's redundant 'stats' section on home (avoids a second KPI row).
+    for (const s of (data.sections || [])) {
+      if (s.kind === 'stats') continue;
+      parts.push(renderSection(s, content, intensity, lang));
+    }
     parts.push(C.ctaBanner(data.cta, lang));
   } else if (page === 'contact') {
     parts.push(contactPage(content, intensity, lang));
