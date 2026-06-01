@@ -31,8 +31,11 @@ function heroMarquee(content, page, intensity, lang) {
   const hero = content.pages[page].hero;
   const tagline = hero.tagline ? esc(hero.tagline) : (hero.badge ? esc(hero.badge) : esc(L.heroLede));
   const cta = content.pages[page].cta || {};
-  // The screenprint storefront "relief" fills the empty right column on HOME only.
-  const isHome = page === 'home';
+  // The screenprint duotone "relief" fills the empty right column on every page
+  // that has a relief assignment (home = storefront; inner heroes = interiors /
+  // the front door). Pages with no entry (e.g. about) stay single-column.
+  const reliefHtml = pageRelief(page, lang);
+  const hasRelief = reliefHtml !== '';
   const main = `<div class="ap-hero-main">
       <p class="ap-hero-kicker">${esc(L.heroKicker)} <span class="ap-hero-rule" aria-hidden="true"></span> ${tagline}</p>
 
@@ -53,40 +56,79 @@ function heroMarquee(content, page, intensity, lang) {
     </div>`;
   return `<section class="ap-band ap-band--hero" aria-labelledby="ap-h1">
     <div class="ap-grain" aria-hidden="true"></div>
-    <div class="ap-wrap ap-hero-wrap${isHome ? ' ap-hero-wrap--split' : ''}">
-      ${main}${isHome ? storefrontRelief(lang) : ''}
+    <div class="ap-wrap ap-hero-wrap${hasRelief ? ' ap-hero-wrap--split' : ''}">
+      ${main}${reliefHtml}
     </div>
   </section>`;
 }
 
-/* ---------- the storefront RELIEF: a duotone+halftone screenprint photo plate ----------
-   The real bilingual "LAVANDERÍA · LAUNDRY" facade, treated CSS-only to read as a
-   2-color riso plate that belongs in the poster (NOT a pasted stock photo). The
-   duotone is built by stacking blend modes:
+/* ---------- per-page RELIEF assignments ----------
+   Each hero relief is the SAME duotone+halftone screenprint plate; only the photo
+   + its caption change. HOME shows the storefront; the inner heroes show varied
+   store INTERIORS; CONTACT shows the front DOOR. Pages absent from this map (e.g.
+   ABOUT) keep the single-column hero with no relief.
+
+   Only two visually distinct interior compositions exist in the asset set
+   (interior-1 = the fold/seating side; interior-2/5/6 = the long machine-aisle),
+   so COMMERCIAL reuses the machine-hall composition via the distinct interior-5
+   file — every page still references its own photo, but self-serve and commercial
+   share the aisle scene. The duotone/halftone treatment makes them read as
+   different plates regardless. */
+const PAGE_RELIEF = {
+  // home keeps the bilingual storefront facade (unchanged)
+  'home':          { src: '/assets/images/locations/austin-tx/hero-1.webp' },
+  // inner heroes — distinct interiors
+  'self-serve':    { src: '/assets/images/locations/austin-tx/interior-2.webp' }, // the long self-serve machine aisle
+  'wash-dry-fold': { src: '/assets/images/locations/austin-tx/interior-1.webp' }, // the fold tables + washer bank
+  'commercial':    { src: '/assets/images/locations/austin-tx/interior-5.webp' }, // the full machine hall (capacity)
+  // contact — the front door on Rundberg Ln
+  'contact':       { src: '/assets/images/locations/austin-tx/interior-3.webp' },
+};
+
+/* ---------- the duotone+halftone screenprint photo RELIEF (parametrized) ----------
+   A real store photo treated CSS-only to read as a 2-color riso plate that belongs
+   in the poster (NOT a pasted stock photo). The duotone is built by stacking blend
+   modes (see the .ap-relief-* rules in styles.js — shared by ALL reliefs):
      · the plate container paints the dominant ink (--ap-relief-a) as its ground;
-     · the <img> sits grayscale+high-contrast with mix-blend-mode:luminosity so the
-       photo's tonal values modulate that ink;
-     · ::before flushes the accent plate (--ap-relief-b) into the shadows via
-       mix-blend-mode:lighten, offset for the misregistration hit;
-     · ::after overlays the halftone dot screen (the codebase --ap-dot radial pattern)
-       at low opacity with mix-blend-mode:multiply.
-   Tape corners + a thin rule + a rotated address seal frame it in the press vernacular.
-   Inks recolor per intensity purely through the --ap-relief-* tokens (see styles.js). */
-function storefrontRelief(lang) {
+     · the <img> sits grayscale+high-contrast, blended so the photo's tonal values
+       modulate that ink;
+     · ::after flushes the accent plate (--ap-relief-b) into the highlights, offset
+       for the misregistration hit;
+     · the screen overlays the halftone dot pattern + grain via multiply.
+   Tape corners + a thin rule + a rotated stamp/caption seal frame it in the press
+   vernacular. Inks recolor per intensity purely through the --ap-relief-* tokens.
+
+   `alt` = the accessible image description; `cap` = the small corner caption seal.
+   Home uses the storefront alt + address seal; inner pages use their per-page
+   { alt, cap } from i18n. CSS is reused for every page — no per-page CSS. */
+function relief(src, alt, cap, lang) {
   const L = t(lang);
-  return `<figure class="ap-relief" role="group" aria-label="${esc(L.reliefAlt)}">
+  return `<figure class="ap-relief" role="group" aria-label="${esc(alt)}">
     <span class="ap-tape ap-tape--tl" aria-hidden="true"></span>
     <span class="ap-tape ap-tape--br" aria-hidden="true"></span>
     <div class="ap-relief-plate">
-      <img class="ap-relief-img" src="/assets/images/locations/austin-tx/hero-1.webp"
-        alt="${esc(L.reliefAlt)}" width="1200" height="800" loading="lazy" decoding="async">
+      <img class="ap-relief-img" src="${esc(src)}"
+        alt="${esc(alt)}" width="1200" height="800" loading="lazy" decoding="async">
       <span class="ap-relief-screen" aria-hidden="true"></span>
     </div>
     <figcaption class="ap-relief-cap" aria-hidden="true">
       <span class="ap-relief-stamp">${esc(L.reliefStamp)}</span>
-      <span class="ap-relief-addr">${esc(L.reliefCap)}</span>
+      <span class="ap-relief-addr">${esc(cap)}</span>
     </figcaption>
   </figure>`;
+}
+
+/* Resolve the relief for the current page (or '' if the page has no assignment). */
+function pageRelief(page, lang) {
+  const cfg = PAGE_RELIEF[page];
+  if (!cfg) return '';
+  const L = t(lang);
+  if (page === 'home') {
+    // storefront keeps its dedicated facade alt + street-address seal
+    return relief(cfg.src, L.reliefAlt, L.reliefCap, lang);
+  }
+  const r = (L.relief && L.relief[page]) || {};
+  return relief(cfg.src, r.alt || L.reliefAlt, r.cap || L.reliefCap, lang);
 }
 
 /* display-only row of language stamps (the real switch is the explorer shell) */

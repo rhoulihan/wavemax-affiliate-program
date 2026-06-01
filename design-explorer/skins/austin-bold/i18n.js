@@ -77,6 +77,14 @@ const T = {
     reliefAlt: 'WaveMAX Austin storefront — Lavandería · Laundry, 825 E Rundberg Ln',
     reliefCap: '825 E RUNDBERG LN',
     reliefStamp: 'OFF THE PRESS',
+    // per-page hero reliefs (inner pages) — { alt, cap } per page. alt is the
+    // accessible image description; cap is the small corner address/scene seal.
+    relief: {
+      'self-serve': { alt: 'WaveMAX Austin interior — rows of self-serve washers and dryers down the floor', cap: 'ON THE FLOOR' },
+      'wash-dry-fold': { alt: 'WaveMAX Austin interior — fold tables and washer bank under the front windows', cap: 'THE FOLD ROOM' },
+      'commercial': { alt: 'WaveMAX Austin interior — the full machine hall, high-capacity washers and dryers', cap: 'THE MACHINE HALL' },
+      'contact': { alt: 'WaveMAX Austin front door on Rundberg Ln — Lavandería · Laundry, open every day', cap: 'THE FRONT DOOR' },
+    },
     // misc
     section: 'No.', ready: 'Last call', toTop: 'Back to top',
     skip: 'Skip to main content',
@@ -131,6 +139,12 @@ const T = {
     reliefAlt: 'Fachada de WaveMAX Austin — Lavandería · Laundry, 825 E Rundberg Ln',
     reliefCap: '825 E RUNDBERG LN',
     reliefStamp: 'RECIÉN IMPRESO',
+    relief: {
+      'self-serve': { alt: 'Interior de WaveMAX Austin — hileras de lavadoras y secadoras de autoservicio en el salón', cap: 'EN EL SALÓN' },
+      'wash-dry-fold': { alt: 'Interior de WaveMAX Austin — mesas para doblar y banco de lavadoras junto a las ventanas', cap: 'SALA DE DOBLADO' },
+      'commercial': { alt: 'Interior de WaveMAX Austin — el salón completo de máquinas, lavadoras y secadoras de gran capacidad', cap: 'SALÓN DE MÁQUINAS' },
+      'contact': { alt: 'Puerta de entrada de WaveMAX Austin en Rundberg Ln — Lavandería · Laundry, abierto a diario', cap: 'LA ENTRADA' },
+    },
     section: 'Núm.', ready: 'Última llamada', toTop: 'Volver arriba',
     skip: 'Saltar al contenido principal',
   },
@@ -184,6 +198,12 @@ const T = {
     reliefAlt: 'Fachada da WaveMAX Austin — Lavandería · Laundry, 825 E Rundberg Ln',
     reliefCap: '825 E RUNDBERG LN',
     reliefStamp: 'SAINDO DA GRÁFICA',
+    relief: {
+      'self-serve': { alt: 'Interior da WaveMAX Austin — fileiras de lavadoras e secadoras de autoatendimento pelo salão', cap: 'NO SALÃO' },
+      'wash-dry-fold': { alt: 'Interior da WaveMAX Austin — mesas para dobrar e fileira de lavadoras junto às vitrines', cap: 'SALA DE DOBRA' },
+      'commercial': { alt: 'Interior da WaveMAX Austin — o salão completo de máquinas, lavadoras e secadoras de alta capacidade', cap: 'SALÃO DE MÁQUINAS' },
+      'contact': { alt: 'Porta de entrada da WaveMAX Austin na Rundberg Ln — Lavandería · Laundry, aberta todo dia', cap: 'A ENTRADA' },
+    },
     section: 'N.º', ready: 'Última chamada', toTop: 'Voltar ao topo',
     skip: 'Pular para o conteúdo principal',
   },
@@ -237,6 +257,12 @@ const T = {
     reliefAlt: 'Ladenfront der WaveMAX Austin — Lavandería · Laundry, 825 E Rundberg Ln',
     reliefCap: '825 E RUNDBERG LN',
     reliefStamp: 'FRISCH GEDRUCKT',
+    relief: {
+      'self-serve': { alt: 'Innenraum der WaveMAX Austin — Reihen von SB-Waschmaschinen und Trocknern im Saal', cap: 'IM SAAL' },
+      'wash-dry-fold': { alt: 'Innenraum der WaveMAX Austin — Falttische und Waschmaschinenreihe an den Schaufenstern', cap: 'DER FALTRAUM' },
+      'commercial': { alt: 'Innenraum der WaveMAX Austin — der ganze Maschinensaal, Großraum-Waschmaschinen und Trockner', cap: 'DER MASCHINENSAAL' },
+      'contact': { alt: 'Eingangstür der WaveMAX Austin an der Rundberg Ln — Lavandería · Laundry, täglich geöffnet', cap: 'DER EINGANG' },
+    },
     section: 'Nr.', ready: 'Letzter Aufruf', toTop: 'Nach oben',
     skip: 'Zum Hauptinhalt springen',
   },
