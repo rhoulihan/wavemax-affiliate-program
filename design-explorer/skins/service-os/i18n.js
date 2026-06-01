@@ -25,7 +25,8 @@ const T = {
     learnMore: 'Open', tileOpen: 'Open', tileDrop: 'Drop off',
     rating: '4.8 on Google', established: 'Locally owned',
     panel: 'PANEL', module: 'MODULE', ready: 'READY',
-    openInMaps: 'Open in Maps',
+    // Self-serve tile pricing
+    ssTag: 'Self-serve', ssPerLoad: 'per load', ssLoads: '18–80 lb loads',
     // Consolidated wash-dry-fold tile (service + pricing in one)
     wdfTileSub: '$1.20/lb · 10-lb minimum · ready in 24 hours',
     wdfPerLb: '/lb', wdfMin: '10-lb min', wdf24: '24-hr',
@@ -60,7 +61,8 @@ const T = {
     learnMore: 'Abrir', tileOpen: 'Abrir', tileDrop: 'Déjala',
     rating: '4.8 en Google', established: 'Negocio local',
     panel: 'PANEL', module: 'MÓDULO', ready: 'LISTO',
-    openInMaps: 'Abrir en Maps',
+    // Mosaico de autoservicio con precios
+    ssTag: 'Autoservicio', ssPerLoad: 'por carga', ssLoads: 'cargas de 18–80 lb',
     // Mosaico de lava-seca-dobla consolidado (servicio + precio en uno)
     wdfTileSub: '$1.20/lb · mínimo 10 lb · lista en 24 horas',
     wdfPerLb: '/lb', wdfMin: 'mín. 10 lb', wdf24: '24 h',
@@ -95,7 +97,8 @@ const T = {
     learnMore: 'Abrir', tileOpen: 'Abrir', tileDrop: 'Deixar roupa',
     rating: '4,8 no Google', established: 'Negócio local',
     panel: 'PAINEL', module: 'MÓDULO', ready: 'PRONTO',
-    openInMaps: 'Abrir no Maps',
+    // Bloco de autoatendimento com preços
+    ssTag: 'Autoatendimento', ssPerLoad: 'por carga', ssLoads: 'cargas de 18–80 lb',
     wdfTileSub: '$1,20/lb · mínimo 10 lb · pronta em 24 horas',
     wdfPerLb: '/lb', wdfMin: 'mín. 10 lb', wdf24: '24 h',
     uvTag: 'Higiene · sistema LUX',
@@ -127,7 +130,8 @@ const T = {
     learnMore: 'Öffnen', tileOpen: 'Öffnen', tileDrop: 'Abgeben',
     rating: '4,8 bei Google', established: 'Lokal geführt',
     panel: 'PANEL', module: 'MODUL', ready: 'BEREIT',
-    openInMaps: 'In Maps öffnen',
+    // SB-Wäscherei-Kachel mit Preisen
+    ssTag: 'SB-Wäscherei', ssPerLoad: 'pro Ladung', ssLoads: 'Ladungen 18–80 lb',
     wdfTileSub: '$1,20/lb · Mindestmenge 10 lb · fertig in 24 Std.',
     wdfPerLb: '/lb', wdfMin: 'min. 10 lb', wdf24: '24 Std.',
     uvTag: 'Hygiene · LUX-System',

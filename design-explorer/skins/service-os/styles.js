@@ -187,16 +187,10 @@ h1,h2,h3{font-family:var(--so-display);font-weight:700;letter-spacing:-.02em;lin
   padding:6px 11px;border-radius:999px;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.28);color:#fff}
 .so-showcase-badge svg{width:13px;height:13px}
 
-/* find-us MAP tile — caption is a real "Open in Maps" link; pin sized so
-   nothing covers the action */
+/* find-us MAP tile — iframe fills the tile; no overlay button (Google embed
+   provides its own open-in-maps control; directions also available in the lead
+   tile and the sticky dock) */
 .so-tile--map iframe{width:100%;height:100%;min-height:200px;border:0;filter:saturate(1.05)}
-.so-tile--map .so-map-cap{position:absolute;left:12px;bottom:12px;z-index:1;
-  display:inline-flex;align-items:center;gap:7px;text-decoration:none;color:var(--ink);
-  font-family:var(--so-mono);font-size:11px;font-weight:700;letter-spacing:.02em;
-  background:color-mix(in srgb,var(--paper) 92%,transparent);padding:7px 11px;border-radius:9px;
-  border:1px solid var(--so-line);box-shadow:var(--so-shadow);transition:transform .12s ease}
-.so-tile--map .so-map-cap svg{width:14px;height:14px;flex:0 0 auto;color:var(--so-lead)}
-.so-tile--map .so-map-cap:hover{transform:translateY(-1px)}
 
 /* tablet: lead tile goes full width above a 6-col grid of the rest */
 @media (max-width:880px){

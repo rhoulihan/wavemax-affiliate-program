@@ -65,6 +65,19 @@ function bentoHero(content, intensity, lang) {
     ${heroActions(lang, content.pages.home.cta && content.pages.home.cta.primaryLabel)}
   </div>`;
 
+  // Dedicated SELF-SERVE tile — shows the real pricing range ($2.75–$10.50) and
+  // washer load range (18–80 lb) alongside the page title from the content model.
+  const ssPage = content.pages['self-serve'];
+  const ssTitle = ssPage && ssPage.hero ? ssPage.hero.title : L.nav.selfServe;
+  const selfServeTile = `<a class="so-tile so-tile--service" href="#" aria-label="${fill(ssTitle)}">
+    <div class="so-tile-head"><span class="so-tile-tag">${esc(L.ssTag)}</span>
+      <span class="so-tile-ico">${I.wash}</span></div>
+    <h3>${fill(ssTitle)}</h3>
+    <div class="so-wdf-price"><b>$2.75</b><small>–$10.50</small>
+      <span class="so-wdf-meta">${esc(L.ssPerLoad)}</span></div>
+    <p>${esc(L.ssLoads)}</p>
+    <span class="so-tile-open">${esc(L.tileOpen)} ${I.arrow}</span></a>`;
+
   // Consolidated WASH-DRY-FOLD tile — service + $1.20/lb · 10-lb min · 24-hr
   // pricing facts together (was two adjacent tiles, now one).
   const wdfPage = content.pages['wash-dry-fold'];
@@ -86,17 +99,17 @@ function bentoHero(content, intensity, lang) {
     <p>${esc(L.uvSub)}</p>
     <span class="so-showcase-badge">${I.shield}${esc(L.uvBadge)}</span></div>`;
 
-  // Find-us MAP tile — caption is now a real "Open in Maps" link with a
-  // correctly-sized pin so nothing covers the action.
+  // Find-us MAP tile — iframe only; the Google embed provides its own open-in-maps
+  // control. The lead tile's "Get directions" action and the sticky dock already
+  // cover the directions use-case, so no overlay needed here.
   const mapTile = `<div class="so-tile so-tile--map">
-    <iframe title="WaveMAX Austin map" src="${esc(NAP.mapsEmbed)}" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
-    <a class="so-map-cap" href="${esc(NAP.mapsDir)}" target="_blank" rel="noopener">${I.pin}<span>${esc(L.openInMaps)}</span></a></div>`;
+    <iframe title="WaveMAX Austin map" src="${esc(NAP.mapsEmbed)}" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe></div>`;
 
   return `<section class="so-hero so-hero--bento" aria-labelledby="so-h1">
     <div class="so-wrap">
       <div class="so-bento">
         ${leadTile}
-        ${serviceTile('self-serve', I.wash, 'so-tile--service')}
+        ${selfServeTile}
         ${wdfTile}
         ${uvTile}
         ${serviceTile('commercial', I.box, 'so-tile--commercial')}
