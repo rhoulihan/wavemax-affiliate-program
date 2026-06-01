@@ -71,7 +71,7 @@ const HOME_EN = {
       title: 'Wash-dry-fold in three steps',
       items: [
         { title: 'Drop off, walk out', body: '2-minute drop-off. We weigh it, then wash, dry, and fold with hospital-grade UV sanitization.' },
-        { title: '24-hour turnaround', body: 'Drop off in the morning, pick up the next day. Need it faster? Ask about same-day.' },
+        { title: '24-hour turnaround', body: 'Drop off in the morning, ready the next day. Need it faster? Ask about same-day.' },
         { title: 'Simple pricing', body: '$1.20/lb, 10lb minimum. Detergent, dryer sheets, and hangers included. Cards-only payment, no cash needed.' },
       ],
     },
@@ -93,7 +93,7 @@ const HOME_EN = {
       sub: 'Five-star reviews from neighbors across North Austin.',
       items: [
         { quote: 'Cleanest laundromat I\'ve been to in Austin. The machines are fast and there\'s always an attendant around to help.', name: 'Marisol R.', meta: 'North Austin' },
-        { quote: 'Dropped off two weeks of laundry, picked it up the next day perfectly folded. The wash-dry-fold is worth every penny.', name: 'James T.', meta: 'Rundberg Ln' },
+        { quote: 'Dropped off two weeks of laundry, came back the next day to perfectly folded clothes. The wash-dry-fold is worth every penny.', name: 'James T.', meta: 'Rundberg Ln' },
         { quote: 'Big 80-lb machines got my comforters done in one load. Free parking and free WiFi make it easy to get in and out.', name: 'Aisha K.', meta: 'Georgian Acres' },
       ],
     },
@@ -269,7 +269,7 @@ const HOME_DE = {
       title: 'Waschen-Trocknen-Falten in drei Schritten',
       items: [
         { title: 'Wäsche abgeben, fertig', body: 'Abgabe in 2 Minuten. Wir wiegen, waschen, trocknen und falten mit krankenhausreiner UV-Desinfektion.' },
-        { title: 'Fertig in 24 Stunden', body: 'Morgens abgeben, am nächsten Tag abholen. Brauchen Sie es schneller? Fragen Sie nach dem Expressservice.' },
+        { title: 'Fertig in 24 Stunden', body: 'Morgens abgeben, am nächsten Tag fertig. Brauchen Sie es schneller? Fragen Sie nach dem Expressservice.' },
         { title: 'Einfache Preise', body: '$1,20/lb, Mindestmenge 10 lb. Waschmittel, Trocknertücher und Kleiderbügel inklusive. Nur Kartenzahlung, kein Bargeld.' },
       ],
     },
@@ -291,7 +291,7 @@ const HOME_DE = {
       sub: 'Fünf-Sterne-Bewertungen von Nachbarn aus Nord-Austin.',
       items: [
         { quote: 'Die sauberste Wäscherei, die ich je in Austin besucht habe. Die Maschinen sind schnell und es ist immer jemand da, der hilft.', name: 'Marisol R.', meta: 'Nord-Austin' },
-        { quote: 'Ich habe zwei Wochen Wäsche abgegeben und sie am nächsten Tag perfekt gefaltet abgeholt. Das Waschen-Trocknen-Falten ist jeden Cent wert.', name: 'James T.', meta: 'Rundberg Ln' },
+        { quote: 'Ich habe zwei Wochen Wäsche abgegeben und sie am nächsten Tag perfekt gefaltet zurückbekommen. Das Waschen-Trocknen-Falten ist jeden Cent wert.', name: 'James T.', meta: 'Rundberg Ln' },
         { quote: 'Die großen 80-lb-Maschinen haben meine Bettdecken in einem Durchgang gewaschen. Kostenfreie Parkplätze und WLAN machen alles einfacher.', name: 'Aisha K.', meta: 'Georgian Acres' },
       ],
     },
@@ -501,7 +501,7 @@ const WDF_EN = {
   sections: [
     { id: 'howItWorks', kind: 'steps', title: 'How it works', items: [
       { title: 'Drop off', body: '2-minute drop-off. We weigh, wash, dry, and fold with hospital-grade UV sanitization.' },
-      { title: '24-hour turnaround', body: 'Drop off in the morning, pick up the next day. Need it faster? Ask about same-day.' },
+      { title: '24-hour turnaround', body: 'Drop off in the morning, ready the next day. Need it faster? Ask about same-day.' },
       { title: 'Simple pricing', body: '$1.20/lb, 10lb minimum. Detergent, dryer sheets, and hangers included. Cards-only payment, no cash needed.' },
     ]},
     { id: 'addOns', kind: 'cards', title: 'Add-ons', items: [

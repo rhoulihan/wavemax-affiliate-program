@@ -77,10 +77,11 @@ describe('content-model', () => {
 
   it('home (and all pages) contain no pickup/delivery framing — Austin is self-serve + WDF only', () => {
     const j = JSON.stringify(model.content);
-    expect(j).not.toMatch(/pickup|door-to-door|recogida|\bentrega\b/i);
-    // 'delivery' check: allow none
-    expect(j.toLowerCase()).not.toContain('delivery');
-    // DE: no Lieferung (implies a delivery service)
-    expect(j).not.toMatch(/\bLieferung\b/i);
+    // Two-word and one-word EN forms
+    expect(j).not.toMatch(/pick ?up|picked up/i);
+    // DE pickup/collection/delivery forms
+    expect(j).not.toMatch(/abhol|abgeholt|Abholung|Lieferung/i);
+    // Broader EN/multi-lang delivery indicators
+    expect(j).not.toMatch(/pickup|door-to-door|recogida|\bentrega\b|\bdelivery\b/i);
   });
 });

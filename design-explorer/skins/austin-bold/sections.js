@@ -48,7 +48,7 @@ const renderers = {
     const slugs = (s.tabs || []).slice(0, 3);
     const ico = { 'self-serve': '①', 'wash-dry-fold': '②', commercial: '③' };
     const inputs = slugs.map((_, i) =>
-      `<input class="ap-bill-radio ap-sr" type="radio" name="ap-bill" id="ap-bill${i}"${i === 0 ? ' checked' : ''} tabindex="-1">`
+      `<input class="ap-bill-radio ap-sr" type="radio" name="ap-bill" id="ap-bill${i}"${i === 0 ? ' checked' : ''}>`
     ).join('');
     const tabs = slugs.map((slug, i) => {
       const title = (content.pages[slug] && content.pages[slug].hero) ? content.pages[slug].hero.title : slug;
@@ -69,7 +69,7 @@ const renderers = {
       ${bandHead(s, L.servicesLabel)}
       <div class="ap-bills">
         ${inputs}
-        <div class="ap-bill-tabs" role="tablist">${tabs}</div>
+        <div class="ap-bill-tabs">${tabs}</div>
         <div class="ap-bill-stage">${panels}</div>
       </div>
     </div></section>`;
