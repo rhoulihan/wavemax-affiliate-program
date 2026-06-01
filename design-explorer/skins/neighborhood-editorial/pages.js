@@ -166,16 +166,16 @@ function buildPage(page, content, intensity, lang) {
       parts.push(renderSection(s, content, intensity, lang));
     }
     parts.push(C.desk(lang));
-    parts.push(C.closer(data.cta, lang));
+    parts.push(C.closer(data.cta, lang, page));
   } else if (page === 'contact') {
     parts.push(contactPage(content, intensity, lang));
     parts.push(C.desk(lang));
-    parts.push(C.closer(data.cta, lang));
+    parts.push(C.closer(data.cta, lang, page));
   } else if (page === 'about') {
     parts.push(bannerHero(content, page, intensity, lang));
     for (const s of (data.sections || [])) parts.push(renderSection(s, content, intensity, lang));
     parts.push(C.desk(lang));
-    parts.push(C.closer(data.cta, lang));
+    parts.push(C.closer(data.cta, lang, page));
   } else {
     parts.push(bannerHero(content, page, intensity, lang));
     for (const s of (data.sections || [])) {
@@ -187,7 +187,7 @@ function buildPage(page, content, intensity, lang) {
       }
     }
     parts.push(C.desk(lang));
-    parts.push(C.closer(data.cta, lang));
+    parts.push(C.closer(data.cta, lang, page));
   }
   return parts.join('\n');
 }

@@ -129,12 +129,18 @@ function desk(lang) {
 </section></div>`;
 }
 
-/* ===== Closing CTA ===== */
-function closer(cta, lang) {
+/* ===== Closing CTA ("Visit us") — paired with a satellite map control.
+   The map is included on every page EXCEPT contact (which has its own large map). ===== */
+function closer(cta, lang, page) {
   if (!cta) return '';
   const L = t(lang);
-  return `<div class="ne-wrap"><section class="ne-closer" aria-labelledby="ne-closer-t">
-    <div class="ne-closer-in">
+  const withMap = page !== 'contact';
+  const mapHtml = withMap ? `<div class="ne-closer-map">
+        <iframe title="${esc(NAP.name)} — ${esc(L.visit)}" src="${esc(NAP.mapsEmbed)}" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+      </div>` : '';
+  return `<div class="ne-wrap"><section class="ne-closer${withMap ? ' ne-closer--map' : ''}" aria-labelledby="ne-closer-t">
+    <div class="ne-closer-in${withMap ? ' ne-closer-in--map' : ''}">
+      <div class="ne-closer-copy">
       <span class="ne-eyebrow">${esc(L.visit)}</span>
       <h2 id="ne-closer-t">${fill(cta.title)}</h2>
       <p>${fill(cta.sub)}</p>
@@ -142,6 +148,8 @@ function closer(cta, lang) {
         <a class="ne-btn ne-btn-primary" href="${tel}">${I.phone}${esc(cta.primaryLabel || L.call)}</a>
         <a class="ne-btn ne-btn-ghost" href="${esc(NAP.mapsDir)}" target="_blank" rel="noopener">${I.pin}${esc(L.directions)}</a>
       </div>
+      </div>
+      ${mapHtml}
     </div>
   </section></div>`;
 }

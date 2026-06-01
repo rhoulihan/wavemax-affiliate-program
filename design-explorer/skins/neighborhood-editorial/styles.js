@@ -462,6 +462,13 @@ html[data-intensity="light"] .ne-logo-chip{background:#23303f} /* dark navy band
 
 /* ============================================================= CLOSING CTA */
 .ne-closer{margin:clamp(32px,5vw,60px) 0 0}
+/* "Visit us" closer paired with a satellite map: copy left, map right, centered. */
+.ne-closer-in--map{display:grid;gap:clamp(22px,3vw,40px);align-items:center}
+@media(min-width:860px){.ne-closer-in--map{grid-template-columns:1.1fr .9fr}}
+.ne-closer-copy{position:relative;z-index:1}
+.ne-closer-map{position:relative;z-index:1;border:1.5px solid rgba(255,255,255,.28);
+  border-radius:var(--ne-radius);overflow:hidden;box-shadow:0 22px 44px -28px rgba(0,0,0,.7)}
+.ne-closer-map iframe{display:block;width:100%;height:clamp(240px,30vw,330px);border:0;filter:saturate(.95)}
 .ne-closer-in{background:var(--ne-brand-deep);color:#fff;border-radius:var(--ne-radius);
   padding:clamp(34px,5vw,60px);position:relative;overflow:hidden;
   box-shadow:0 30px 60px -40px rgba(0,0,0,.6)}
