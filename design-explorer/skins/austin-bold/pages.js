@@ -31,9 +31,9 @@ function heroMarquee(content, page, intensity, lang) {
   const hero = content.pages[page].hero;
   const tagline = hero.tagline ? esc(hero.tagline) : (hero.badge ? esc(hero.badge) : esc(L.heroLede));
   const cta = content.pages[page].cta || {};
-  return `<section class="ap-band ap-band--hero" aria-labelledby="ap-h1">
-    <div class="ap-grain" aria-hidden="true"></div>
-    <div class="ap-wrap ap-hero-wrap">
+  // The screenprint storefront "relief" fills the empty right column on HOME only.
+  const isHome = page === 'home';
+  const main = `<div class="ap-hero-main">
       <p class="ap-hero-kicker">${esc(L.heroKicker)} <span class="ap-hero-rule" aria-hidden="true"></span> ${tagline}</p>
 
       <h1 class="ap-hero-word" id="ap-h1" data-word="${esc(L.heroWord)}">
@@ -50,8 +50,43 @@ function heroMarquee(content, page, intensity, lang) {
 
       ${C.sealStrip(lang)}
       ${langStampRow(lang)}
+    </div>`;
+  return `<section class="ap-band ap-band--hero" aria-labelledby="ap-h1">
+    <div class="ap-grain" aria-hidden="true"></div>
+    <div class="ap-wrap ap-hero-wrap${isHome ? ' ap-hero-wrap--split' : ''}">
+      ${main}${isHome ? storefrontRelief(lang) : ''}
     </div>
   </section>`;
+}
+
+/* ---------- the storefront RELIEF: a duotone+halftone screenprint photo plate ----------
+   The real bilingual "LAVANDERÍA · LAUNDRY" facade, treated CSS-only to read as a
+   2-color riso plate that belongs in the poster (NOT a pasted stock photo). The
+   duotone is built by stacking blend modes:
+     · the plate container paints the dominant ink (--ap-relief-a) as its ground;
+     · the <img> sits grayscale+high-contrast with mix-blend-mode:luminosity so the
+       photo's tonal values modulate that ink;
+     · ::before flushes the accent plate (--ap-relief-b) into the shadows via
+       mix-blend-mode:lighten, offset for the misregistration hit;
+     · ::after overlays the halftone dot screen (the codebase --ap-dot radial pattern)
+       at low opacity with mix-blend-mode:multiply.
+   Tape corners + a thin rule + a rotated address seal frame it in the press vernacular.
+   Inks recolor per intensity purely through the --ap-relief-* tokens (see styles.js). */
+function storefrontRelief(lang) {
+  const L = t(lang);
+  return `<figure class="ap-relief" role="group" aria-label="${esc(L.reliefAlt)}">
+    <span class="ap-tape ap-tape--tl" aria-hidden="true"></span>
+    <span class="ap-tape ap-tape--br" aria-hidden="true"></span>
+    <div class="ap-relief-plate">
+      <img class="ap-relief-img" src="/assets/images/locations/austin-tx/hero-1.webp"
+        alt="${esc(L.reliefAlt)}" width="1200" height="800" loading="lazy" decoding="async">
+      <span class="ap-relief-screen" aria-hidden="true"></span>
+    </div>
+    <figcaption class="ap-relief-cap" aria-hidden="true">
+      <span class="ap-relief-stamp">${esc(L.reliefStamp)}</span>
+      <span class="ap-relief-addr">${esc(L.reliefCap)}</span>
+    </figcaption>
+  </figure>`;
 }
 
 /* display-only row of language stamps (the real switch is the explorer shell) */

@@ -56,6 +56,11 @@ ${FONT_LINK}
   --ap-dark-ink:#F4EFE4;
   --ap-seal-line:rgba(10,42,58,.85);
 
+  /* storefront-relief duotone plates (default = HEAVY: navy ground + teal accent) */
+  --ap-relief-a:#0A2A3A;       /* dominant photo plate (shadows) */
+  --ap-relief-b:#0C93AD;       /* accent photo plate (highlights) */
+  --ap-relief-paper:#F4EFE4;   /* the plate "stock" tint behind the photo */
+
   /* halftone dot screens (gradient only) */
   --ap-dot:rgba(10,42,58,.16);
   --ap-dot-2:rgba(12,147,173,.18);
@@ -79,6 +84,8 @@ html[data-intensity="heavy"]{
   --ap-dot:rgba(10,42,58,.15); --ap-dot-2:rgba(12,147,173,.20);
   --ap-line:rgba(10,42,58,.22); --ap-muted:rgba(10,42,58,.66);
   --ap-seal-line:rgba(10,42,58,.85);
+  /* heavy plates lead the relief: teal + navy duotone */
+  --ap-relief-a:#0A2A3A; --ap-relief-b:#0C93AD; --ap-relief-paper:#F4EFE4;
 }
 /* LIGHT = local LEADS, brand recedes to ONE teal hit (seals/rule/chip). Dusk
    magenta + marigold lead on sun-bleached kraft; warm near-black ink. */
@@ -94,6 +101,8 @@ html[data-intensity="light"]{
   --ap-dot:rgba(36,26,18,.16); --ap-dot-2:rgba(194,48,107,.18);
   --ap-line:rgba(36,26,18,.24); --ap-muted:rgba(36,26,18,.68);
   --ap-seal-line:rgba(36,26,18,.85);
+  /* light plates lead the relief: dusk-magenta + marigold duotone on sun-bleached kraft */
+  --ap-relief-a:#C2306B; --ap-relief-b:#E8A33D; --ap-relief-paper:#F2E7D2;
 }
 
 /* ============================================================ RESET */
@@ -263,6 +272,69 @@ html[data-intensity="light"] .ap-hero-word{color:var(--ap-plate-b)}
   margin:0 0 12px;max-width:24ch;text-wrap:balance}
 .ap-hero-sub{font-size:clamp(16px,1.5vw,19px);color:var(--ap-ink);max-width:62ch;
   margin:0 0 24px;line-height:1.6}
+
+/* ---- HOME hero: 2-column split (content left, storefront relief right) ----
+   single column by default (mobile / inner pages); becomes 2-col at >=900px. */
+.ap-hero-wrap--split{display:block}
+@media (min-width:900px){
+  .ap-hero-wrap--split{display:grid;
+    grid-template-columns:minmax(0,1.32fr) minmax(300px,.78fr);
+    gap:clamp(28px,4vw,64px);align-items:center}
+}
+
+/* ---- the storefront RELIEF (CSS-only duotone + halftone screenprint plate) ----
+   On mobile it stacks under the hero content (the painted word stays the star);
+   the column layout above promotes it into the right column at >=900px. */
+.ap-relief{position:relative;margin:34px 0 0;max-width:520px}
+@media (min-width:900px){.ap-relief{margin:0;justify-self:end;width:100%}}
+
+/* the plate = the dominant ink (--ap-relief-a) on the stock tint; the photo and
+   accent plate are blended ONTO this ground. A poster frame + misregistration nudge. */
+.ap-relief-plate{position:relative;overflow:hidden;
+  aspect-ratio:4/3;isolation:isolate;
+  background:var(--ap-relief-paper);
+  border:3px solid var(--ap-ink);border-radius:4px;
+  box-shadow:9px 9px 0 var(--ap-relief-a);
+  transform:rotate(-1.1deg)}
+.ap-relief-plate::before{content:"";position:absolute;inset:0;z-index:1;
+  background:var(--ap-relief-a);mix-blend-mode:normal;opacity:.96}
+
+/* the photo: grayscale + punchy contrast, multiplied over the dominant plate so
+   the ink only shows through the photo's tonal values (the duotone "dark" plate). */
+.ap-relief-img{position:absolute;inset:0;width:100%;height:100%;z-index:2;
+  object-fit:cover;
+  filter:grayscale(1) contrast(1.28) brightness(1.08);
+  mix-blend-mode:screen}
+
+/* accent plate: the SECOND ink flushed into the highlights, offset ~6px = the
+   misregistration hit that sells the screenprint. lighten keeps it to the lights. */
+.ap-relief-plate::after{content:"";position:absolute;inset:0;z-index:3;
+  background:linear-gradient(160deg,var(--ap-relief-b),transparent 62%);
+  mix-blend-mode:lighten;opacity:.55;transform:translate(6px,5px);pointer-events:none}
+
+/* halftone dot screen + grain, multiplied on top = the printed-dot texture. Reuses
+   the codebase --ap-dot radial pattern and the shared SVG GRAIN data-URI. */
+.ap-relief-screen{position:absolute;inset:0;z-index:4;pointer-events:none;
+  background-image:
+    radial-gradient(var(--ap-dot) 30%,transparent 31%),
+    ${GRAIN};
+  background-size:6px 6px,160px 160px;
+  mix-blend-mode:multiply;opacity:.5}
+html[data-intensity="light"] .ap-relief-screen{opacity:.42}
+/* a thin top seam rule = the plate registration edge */
+.ap-relief-screen::after{content:"";position:absolute;left:0;right:0;top:0;
+  height:3px;background:var(--ap-relief-b);opacity:.7}
+
+/* rotated address seal tucked on the corner */
+.ap-relief-cap{position:absolute;right:-8px;bottom:-14px;z-index:5;
+  display:flex;flex-direction:column;align-items:flex-end;gap:5px;transform:rotate(-2.4deg)}
+.ap-relief-stamp{font:800 10px/1 var(--ap-stamp);letter-spacing:.16em;text-transform:uppercase;
+  color:var(--ap-hot-ink);background:var(--ap-hot);padding:5px 9px;border-radius:2px;
+  box-shadow:2px 2px 0 var(--ap-ink);transform:rotate(2deg)}
+.ap-relief-addr{font:800 12px/1 var(--ap-stamp);letter-spacing:.08em;text-transform:uppercase;
+  color:var(--ap-ink);background:var(--ap-relief-paper);border:2.5px solid var(--ap-ink);
+  padding:7px 11px;border-radius:2px;box-shadow:3px 3px 0 var(--ap-relief-b)}
+@media (prefers-reduced-motion:reduce){.ap-relief-plate{transform:none}}
 
 /* language stamp row (display-only) */
 .ap-langrow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:22px 0 0}
