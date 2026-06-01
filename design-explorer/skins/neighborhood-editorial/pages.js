@@ -37,17 +37,17 @@ function homeHero(content, intensity, lang) {
   const cta = content.pages.home.cta || {};
   const badge = hero.badge ? esc(hero.badge) : esc(L.ratingLabel);
   return `<section class="ne-hero" aria-labelledby="ne-h1"><div class="ne-wrap">
-    <div class="ne-hero-grid">
+    <div class="ne-hero-grid ne-hero-grid--home">
       <div class="ne-hero-copy">
         <p class="ne-eyebrow">${esc(L.feature)} · ${badge}</p>
         <h1 class="ne-h1" id="ne-h1">${emphasize(hero.title)}</h1>
         <p class="ne-lede ne-drop">${fill(hero.sub)}</p>
-        ${byline(lang)}
-        ${heroCtas(lang, cta.primaryLabel)}
       </div>
       <div class="ne-plate">
         ${C.figure(C.PHOTOS.storefront, L.capStorefront,
           `<b>${esc(NAP.street)}</b> — ${esc(L.capStorefront)}`, L.photoNote, 'ne-figure--wide')}
+        ${byline(lang)}
+        ${heroCtas(lang, cta.primaryLabel)}
       </div>
     </div>
   </div></section>`;
