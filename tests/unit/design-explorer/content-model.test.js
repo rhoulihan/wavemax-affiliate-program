@@ -2,9 +2,9 @@
 const model = require('../../../design-explorer/content-model');
 
 describe('content-model', () => {
-  it('exposes the 6 pages and EN/ES', () => {
+  it('exposes the 6 pages and EN/ES/PT/DE', () => {
     expect(model.PAGES).toEqual(['home','self-serve','wash-dry-fold','commercial','about','contact']);
-    expect(model.LANGS).toEqual(['en','es']);
+    expect(model.LANGS).toEqual(['en','es','pt','de']);
   });
   it('carries correct NAP', () => {
     expect(model.NAP.street).toBe('825 E Rundberg Ln F1');
@@ -24,36 +24,50 @@ describe('content-model', () => {
       }
     }
   });
-  it('EN and ES pages have independent object references (no shared mutable refs)', () => {
-    for (const page of model.PAGES) {
-      const enPage = model.content.en.pages[page];
-      const esPage = model.content.es.pages[page];
-      expect(esPage.cta).not.toBe(enPage.cta);
-      expect(esPage.sections).not.toBe(enPage.sections);
+  it('all language pages have independent object references from EN (no shared mutable refs)', () => {
+    for (const lang of model.LANGS.filter(l => l !== 'en')) {
+      for (const page of model.PAGES) {
+        const enPage = model.content.en.pages[page];
+        const langPage = model.content[lang].pages[page];
+        expect(langPage.cta).not.toBe(enPage.cta);
+        expect(langPage.sections).not.toBe(enPage.sections);
+      }
     }
   });
 
-  it('all pages (incl. home) are genuinely translated in ES (no English section leak)', () => {
-    for (const page of model.PAGES) {
-      const en = model.content.en.pages[page];
-      const es = model.content.es.pages[page];
-      expect(es.sections.map(s => s.kind)).toEqual(en.sections.map(s => s.kind)); // structural parity
-      expect(JSON.stringify(es.sections)).not.toEqual(JSON.stringify(en.sections)); // actually translated
-      expect(es.sections).not.toBe(en.sections); // independent refs
-      // CTA must also be translated (not EN copy)
-      expect(JSON.stringify(es.cta)).not.toEqual(JSON.stringify(en.cta));
+  it('all pages (incl. home) are genuinely translated in every non-EN language (no English section leak)', () => {
+    for (const lang of model.LANGS.filter(l => l !== 'en')) {
+      for (const page of model.PAGES) {
+        const en = model.content.en.pages[page];
+        const lp = model.content[lang].pages[page];
+        expect(lp.sections.map(s => s.kind)).toEqual(en.sections.map(s => s.kind)); // structural parity
+        expect(JSON.stringify(lp.sections)).not.toEqual(JSON.stringify(en.sections)); // actually translated
+        expect(lp.sections).not.toBe(en.sections); // independent refs
+        // CTA must also be translated (not EN copy)
+        expect(JSON.stringify(lp.cta)).not.toEqual(JSON.stringify(en.cta));
+      }
     }
   });
 
   it('home is re-based on the self-serve + WDF franchise landing (not the affiliate program copy)', () => {
+    const homeKeywords = {
+      en: /self-serve|wash-dry-fold/,
+      es: /autoservicio|lava-seca-dobla/,
+      pt: /autoatendimento|lavar-secar-dobrar/,
+      de: /sb-w.scherei|waschen-trocknen-falten/i,
+    };
+    // price strings differ by locale decimal separator
+    const priceStrings = {
+      en: '$1.20/lb', es: '$1.20/lb', pt: '$1,20/lb', de: '$1,20/lb',
+    };
     for (const lang of model.LANGS) {
       const home = model.content[lang].pages.home;
       // self-serve + WDF framing present
-      expect(home.hero.title.toLowerCase()).toMatch(lang === 'es' ? /autoservicio|lava-seca-dobla/ : /self-serve|wash-dry-fold/);
+      expect(home.hero.title.toLowerCase()).toMatch(homeKeywords[lang]);
       // real location facts surfaced
       const j = JSON.stringify(home).toLowerCase();
       expect(j).toContain('electrolux');
-      expect(j).toContain('$1.20/lb');
+      expect(j).toContain(priceStrings[lang].toLowerCase());
       // structural shape from the franchise landing: stats, services, reviews
       const kinds = home.sections.map(s => s.kind);
       expect(kinds).toContain('stats');
@@ -66,5 +80,7 @@ describe('content-model', () => {
     expect(j).not.toMatch(/pickup|door-to-door|recogida|\bentrega\b/i);
     // 'delivery' check: allow none
     expect(j.toLowerCase()).not.toContain('delivery');
+    // DE: no Lieferung (implies a delivery service)
+    expect(j).not.toMatch(/\bLieferung\b/i);
   });
 });
