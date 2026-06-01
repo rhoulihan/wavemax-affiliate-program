@@ -136,12 +136,12 @@ html[data-intensity="light"] :focus-visible{outline-color:var(--ap-plate-a)}
 html[data-intensity="light"] .ap-grain{opacity:.09}
 
 /* ============================================================ THE CHIP */
-/* white WaveMAX wordmark ALWAYS on a solid teal chip — legible on warm paper
-   in BOTH intensities (the one shared brand hit). */
+/* white WaveMAX wordmark on a solid NAVY chip — white-on-navy is ~16:1 and reads
+   cleanly (white-on-teal was ~2.3:1 and unreadable). Teal offset shadow = the second
+   "plate" (the misregistration hit). Legible in BOTH intensities. */
 .ap-chip{display:inline-flex;align-items:center;justify-content:center;
-  background:var(--ap-teal);padding:6px 10px;border-radius:3px;
-  box-shadow:3px 3px 0 var(--ap-navy);line-height:0}
-html[data-intensity="light"] .ap-chip{box-shadow:3px 3px 0 var(--ap-ink)}
+  background:var(--ap-navy);padding:6px 10px;border-radius:3px;
+  box-shadow:3px 3px 0 var(--ap-teal);line-height:0}
 .ap-chip img{height:24px;width:auto;display:block;filter:brightness(0) invert(1)}
 
 /* ============================================================ MASTHEAD */
@@ -523,6 +523,14 @@ html[data-intensity="light"] .ap-desk-card{box-shadow:8px 8px 0 var(--ap-plate-a
 
 /* ============================================================ COLOPHON */
 .ap-colophon{background:var(--ap-ink);color:var(--ap-paper);padding-block:34px}
+/* Core §12.2 footer (emitted by the engine after the skin body): clear the fixed
+   ticker rail — otherwise the rail covers its left edge and the declaration looks
+   cut off. --ap-rail collapses to 0 on mobile, so this needs no separate override. */
+.ds-tm{margin-left:var(--ap-rail);padding:18px var(--ap-gut);background:var(--ap-paper);
+  border-top:2px solid var(--ap-ink);font-family:var(--ap-kick);font-size:12px;
+  line-height:1.55;color:var(--ap-ink)}
+.ds-tm .ds-tm-notice{max-width:var(--ap-maxw)}
+.ds-tm .ds-tm-copy{margin-top:4px;opacity:.7}
 .ap-colophon-in{display:flex;align-items:center;justify-content:space-between;gap:18px 30px;flex-wrap:wrap}
 .ap-colophon .ap-chip{box-shadow:3px 3px 0 rgba(0,0,0,.45)}
 .ap-colophon-mark{display:flex;align-items:center;gap:14px}
