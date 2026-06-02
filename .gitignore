@@ -224,6 +224,14 @@ docs/security/exhibit-*
 docs/security/NEW-SINCE-LAWYER-*
 docs/security/forensic-evidence/
 docs/security/mhr-iframe-embed-patch/
+# 2026-06-02: belt-and-suspenders. The specific patterns above missed nine
+# files that ended up tracked/public (parent-site-audit-*, seo-comparison-*,
+# prod-lockdown-*, SECURITY_REMEDIATION_*, ENCRYPTION_KEY_MIGRATION,
+# IMMEDIATE_SECURITY_ACTIONS, csurf-migration-plan). The entire docs/security/
+# tree is internal legal/audit working product — blanket-ignore it so no
+# sensitive document can slip through a missing pattern again. The intentionally
+# public corporate-handoff proposal lives outside docs/security/.
+docs/security/
 docs/corporate-handoff/
 .playwright-mcp/
 about-hero-*.png
