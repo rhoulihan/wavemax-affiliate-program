@@ -48,6 +48,27 @@ describe('comingSoon middleware', () => {
     }
   });
 
+  it('lets the token-gated /design-explorer review tool through (explorerGuard then enforces the token)', () => {
+    for (const path of [
+      '/design-explorer', '/design-explorer/', '/design-explorer/index.html',
+      '/design-explorer/explorer.js', '/design-explorer/explorer.css',
+      '/design-explorer/render/manifest.json',
+      '/design-explorer/render/service-os.heavy.home.en.html',
+    ]) {
+      const req = mkReq({ path }); const res = mkRes(); const next = jest.fn();
+      comingSoon(req, res, next);
+      expect(next).toHaveBeenCalled();
+      expect(res.send).not.toHaveBeenCalled();
+    }
+  });
+
+  it('does NOT exempt a lookalike path (/design-explorer-foo is still held)', () => {
+    const req = mkReq({ path: '/design-exploreriffic' }); const res = mkRes(); const next = jest.fn();
+    comingSoon(req, res, next);
+    expect(next).not.toHaveBeenCalled();
+    expect(res.status).toHaveBeenCalledWith(200);
+  });
+
   it('does NOT touch other hosts — wavemax.promo and crhsent.com pass through', () => {
     for (const host of ['wavemax.promo', 'www.wavemax.promo', 'crhsent.com', 'wavemaxlaundry.com']) {
       const req = mkReq({ host: undefined, headers: { host }, path: '/' }); const res = mkRes(); const next = jest.fn();

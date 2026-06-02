@@ -16,6 +16,7 @@ function isExempt(p) {
     p === '/privacy-policy' || p === '/privacy-policy/' || p === '/privacy-policy.html' ||
     p === '/terms-of-service' || p === '/terms-of-service/' ||
     p === '/terms-and-conditions' || p === '/terms-and-conditions.html' ||
+    p === '/design-explorer' || p.startsWith('/design-explorer/') || // token-gated design review tool (explorerGuard enforces the token)
     p.startsWith('/api/') ||                 // health, app API, OAuth callbacks
     p.startsWith('/.well-known/') ||         // ACME cert renewal, etc.
     p.startsWith('/assets/') ||              // so the exempt pages keep their styles
