@@ -188,6 +188,27 @@ describe('Location quarantine middleware', () => {
       });
     });
 
+    // ── Allowlist: design-explorer review tool ────────────────────────
+    // The token-gated franchisor review tool. Quarantine must not 302 it to
+    // corporate; explorerGuard then enforces EXPLORER_TOKEN (404 without it).
+    describe('Design-explorer allowlist', () => {
+      for (const p of [
+        '/design-explorer', '/design-explorer/', '/design-explorer/index.html',
+        '/design-explorer/explorer.js', '/design-explorer/render/manifest.json',
+      ]) {
+        it(`allows ${p} (does not 302 to corporate)`, async () => {
+          const response = await request(app).get(p).redirects(0);
+          expect(response.headers.location || '').not.toMatch(/wavemaxlaundry\.com/);
+        });
+      }
+
+      it('still redirects a lookalike (/design-exploreriffic) to corporate', async () => {
+        const response = await request(app).get('/design-exploreriffic').redirects(0);
+        expect(response.status).toBe(302);
+        expect(response.headers.location || '').toMatch(/wavemaxlaundry\.com/);
+      });
+    });
+
     // ── Redirect: non-Austin franchise slugs ──────────────────────────
     describe('Non-Austin franchise slugs', () => {
       it('redirects /dallas-tx/ to corporate (preserve path)', async () => {

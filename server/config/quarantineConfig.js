@@ -33,6 +33,7 @@ const ALLOWLIST = [
   /^\/embed-app(-v2)?\.html$/,      // SPA shell
   /^\/[a-z0-9-]+-embed\.html$/,     // any *-embed.html (affiliate-login, customer-register, etc.)
   /^\/operator-login-store\.html$/, // store-IP-gated operator login
+  /^\/design-explorer(\/.*)?$/,     // token-gated franchisor design review tool (explorerGuard enforces EXPLORER_TOKEN)
   /^\/oauth-success\.html$/,        // OAuth callback landing
   /^\/registration-success\.html$/,
   /^\/deletion-status\.html$/,
