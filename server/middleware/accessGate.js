@@ -184,9 +184,7 @@ function landingPage(error, nextUrl, email, nonce) {
   const next = esc(safeNext(nextUrl));
   const err = error ? `<p class="err">${esc(error)}</p>` : '';
   return pageShell(`
-  <form class="card" method="POST" action="/__gate" autocomplete="off" data-spinner="Sending your access link…">
-    <img class="logo" src="/assets/images/brand/logo-wavemax.png" alt="WaveMAX">
-    <h1>Request access</h1>
+  <form class="card" method="POST" action="/__gate" autocomplete="off" data-spinner="Sending your access link…">    <h1>Request access</h1>
     <p class="sub">This content is private. Enter your email and the access password and we'll email you an access link.</p>
     ${err}
     <input type="email" name="email" placeholder="Email address" value="${esc(email)}" autocomplete="off" autofocus required>
@@ -198,9 +196,7 @@ function landingPage(error, nextUrl, email, nonce) {
 
 function sentPage(nonce) {
   return pageShell(`
-  <div class="card">
-    <img class="logo" src="/assets/images/brand/logo-wavemax.png" alt="WaveMAX">
-    <h1>Check your email</h1>
+  <div class="card">    <h1>Check your email</h1>
     <p class="sub">We've sent an access link to your email address. Open it and click <strong>Enter the site</strong> to continue. The link expires in 60 minutes.</p>
     <p class="sub" style="color:#fcd34d"><strong>Don't see it?</strong> Check your spam or promotions folder and mark it "Not spam".</p>
     <a class="link" href="/__gate">Use a different email</a>
@@ -209,9 +205,7 @@ function sentPage(nonce) {
 
 function confirmPage(token, nextUrl, nonce) {
   return pageShell(`
-  <form class="card" method="POST" action="/__gate/confirm" autocomplete="off" data-spinner="Entering the site…">
-    <img class="logo" src="/assets/images/brand/logo-wavemax.png" alt="WaveMAX">
-    <h1>You're verified</h1>
+  <form class="card" method="POST" action="/__gate/confirm" autocomplete="off" data-spinner="Entering the site…">    <h1>You're verified</h1>
     <p class="sub">Click below to unlock access to this site from this device.</p>
     <input type="hidden" name="token" value="${esc(token)}">
     <input type="hidden" name="next" value="${esc(safeNext(nextUrl))}">
@@ -221,9 +215,7 @@ function confirmPage(token, nextUrl, nonce) {
 
 function confirmErrorPage(nonce) {
   return pageShell(`
-  <div class="card">
-    <img class="logo" src="/assets/images/brand/logo-wavemax.png" alt="WaveMAX">
-    <h1>Link expired or already used</h1>
+  <div class="card">    <h1>Link expired or already used</h1>
     <p class="sub">This access link is no longer valid. Request a fresh one and we'll email you a new link.</p>
     <a class="link" href="/__gate">Request a new link</a>
   </div>`, nonce);
