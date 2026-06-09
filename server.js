@@ -28,7 +28,6 @@ const administratorRoutes = require('./server/routes/administratorRoutes');
 const operatorRoutes = require('./server/routes/operatorRoutes');
 const monitoringRoutes = require('./server/routes/monitoringRoutes');
 const systemConfigRoutes = require('./server/routes/systemConfigRoutes');
-const paymentRoutes = require('./server/routes/paymentRoutes');
 const quickbooksRoutes = require('./server/routes/quickbooksRoutes');
 const serviceAreaRoutes = require('./server/routes/serviceAreaRoutes');
 const affiliateController = require('./server/controllers/affiliateController');
@@ -152,15 +151,6 @@ if (process.env.NODE_ENV !== 'test') {
         await initializeDefaults();
       } catch (error) {
         logger.error('Error initializing default accounts:', { error: error.message });
-      }
-
-      // Initialize Paygistix callback pool
-      try {
-        const callbackPoolManager = require('./server/services/callbackPoolManager');
-        await callbackPoolManager.initializePool();
-        logger.info('Paygistix callback pool initialized');
-      } catch (error) {
-        logger.error('Error initializing callback pool:', { error: error.message });
       }
 
       // Initialize data retention service
@@ -371,7 +361,6 @@ app.use((req, res, next) => {
       "'self'",
       'https://cdnjs.cloudflare.com',
       'https://cdn.jsdelivr.net',
-      'https://safepay.paymentlogistics.net',
       'https://code.jquery.com',
       'https://www.local-marketing-reports.com',
       // reports.hibu.com used to be in this list when the page loaded
@@ -408,7 +397,7 @@ app.use((req, res, next) => {
          // Educational clickjacking demo only — see isClickjackingDemo comment above.
          'https://www.wavemaxlaundry.com', 'https://wavemaxlaundry.com', 'https://rundberglaundry.com']
       : ["'self'", 'https://www.google.com', 'https://maps.google.com', 'https://my.matterport.com', 'https://challenges.cloudflare.com'],
-    'form-action': ["'self'", 'https://safepay.paymentlogistics.net'],
+    'form-action': ["'self'"],
     'frame-ancestors': ["'self'", 'https://www.wavemaxlaundry.com', 'https://wavemaxlaundry.com'],
     'base-uri': ["'self'"],
     'child-src': ["'none'"],
@@ -911,14 +900,6 @@ app.use(express.static(path.join(__dirname, 'public'), {
   }
 }));
 
-// Test payment form - only available when explicitly enabled
-if (process.env.ENABLE_TEST_PAYMENT_FORM === 'true') {
-  app.get('/test-payment', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'test-payment-form.html'));
-  });
-  logger.info('Test payment form enabled and available at /test-payment');
-}
-
 // API Routes with versioning
 const apiV1Router = express.Router();
 
@@ -932,8 +913,7 @@ apiV1Router.get('/environment', (req, res) => {
   res.json({
     success: true,
     nodeEnv: process.env.NODE_ENV || 'development',
-    enableDeleteDataFeature: process.env.ENABLE_DELETE_DATA_FEATURE === 'true',
-    enableTestPaymentForm: process.env.ENABLE_TEST_PAYMENT_FORM === 'true'
+    enableDeleteDataFeature: process.env.ENABLE_DELETE_DATA_FEATURE === 'true'
   });
 });
 
@@ -953,17 +933,12 @@ apiV1Router.use('/location', require('./server/routes/locationRoutes'));  // Per
 apiV1Router.use('/contact', require('./server/routes/contactRoutes'));  // Per-location contact-form submissions
 apiV1Router.use('/', require('./server/routes/corporateInquiryRoutes'));  // /corporate-contact + /franchise-lead
 apiV1Router.use('/', require('./server/routes/mapsConfigRoute'));  // /maps-config — Maps API key for corporate pages
-apiV1Router.use('/payments', paymentRoutes);
-
 // Test routes (development only)
 if (process.env.NODE_ENV !== 'production' || process.env.ENABLE_TEST_ROUTES === 'true') {
   const testRoutes = require('./server/routes/testRoutes');
   apiV1Router.use('/test', testRoutes);
 }
 apiV1Router.use('/quickbooks', quickbooksRoutes);  // QuickBooks export functionality
-
-// Paygistix callback route (directly under /api/v1 for the callback)
-apiV1Router.use('/payment_callback', require('./server/routes/generalPaymentCallback'));
 
 // Environment endpoint
 apiV1Router.get('/environment', (req, res) => {
