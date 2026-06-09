@@ -73,7 +73,7 @@ GATE: ready_for_pickup  IFF  (status would be processed)  AND  (paymentStatus ==
    └─► notify affiliate "collect from store"
 
 Operator scans the finished bag OUT of the store ──► status: picked_up ──► "on the way" email to customer
-Affiliate scans the bag QR at the customer's DOOR + confirms ──► status: delivered
+Affiliate scans the bag QR at the customer's DOOR (native camera → claim URL) + enters delivery code ──► status: delivered
    └─► realize affiliate commission, apply WDF credit/debit, email delivery confirmation
 ```
 
@@ -367,7 +367,7 @@ commissionRealizedAt: Date,
 
 // Proof of delivery
 proofOfDelivery: {
-  method:      { type: String, enum: ['scan','manual_confirm'], default: 'scan' },
+  method:      { type: String, enum: ['affiliate_code','manual_confirm'], default: 'affiliate_code' },
   confirmedAt: Date,
   geo:  { type: { type: String, enum: ['Point'] }, coordinates: { type: [Number] } }, // [lng, lat], optional
   photoKey:    String,                                            // FUTURE hook — not built now
@@ -390,6 +390,7 @@ proofOfDelivery: {
 - **Remove** `availabilitySchedule` — the fixed-route model has no per-affiliate availability windows.
 - Keep `minimumDeliveryFee`/`perBagDeliveryFee`, encrypted `paypalEmail`/`venmoHandle`, and the `paymentProcessingLocked` block.
 - **Drop service-area enforcement.** Service area is no longer a concern — the affiliate owns pickup/delivery logistics (their own scheduling/route), and customers are bound to an affiliate by the bag, not by location matching. Stop using `serviceLocation`/`serviceRadius` for any validation and remove them (the affiliate-registration map step + geocoding go with them — see §7). Verify no other consumer (e.g. an admin map view) before deleting the fields; enforcement stops immediately regardless.
+- **Add an affiliate delivery code.** `affiliateDeliveryCodeHash` (PBKDF2-hashed, like the account password) + `affiliateDeliveryCodeSetAt` — a short per-affiliate secret used to confirm door deliveries on the overloaded claim URL (§6.6). Auto-generated at invited registration, shown on the affiliate dashboard, resettable. **Not** the login password.
 
 ### 4.7 Removed Models
 
@@ -425,14 +426,16 @@ All new endpoints follow house conventions: `asyncWrapper` + `ControllerHelpers.
 | POST | `/api/v1/w9/admin/:affiliateId/reject` | administrator + `manage_affiliates` (CSRF) | `w9Status → rejected` + reason |
 | POST | `/api/v1/administrators/affiliates/:affiliateId/unlock-payments` | administrator (CSRF) | Reuse `affiliatePaymentLockService.unlockPayments` |
 | **Customer claim + registration** | | | |
-| GET | `/api/v1/customers/claim/:bagToken` | public (rate-limited) | Resolve token → `{ state:'claimable'|'claimed'|'invalid', affiliate? }` |
+| GET | `/api/v1/customers/claim/:bagToken` | public (rate-limited) | Resolve token → `{ state:'claimable'|'claimed'|'invalid', affiliate?, order?:{ status, awaitingDelivery } }` (no customer PII) |
 | POST | `/api/v1/customers/claim/:bagToken/register` | public (registration limiter + CAPTCHA) | Create customer (affiliate from bag) + atomic claim |
 | GET | `/api/v1/auth/customer/{google\|facebook}?bag=<token>` | public | OAuth claim entry (threads bag token where `affiliateId` used to ride) |
 | POST | `/api/v1/auth/customer/social/register` | public (signed state) | OAuth claim completion; validator requires `bagToken` (not `affiliateId`) |
 | **Order intake + lifecycle** | | | |
 | POST | `/api/v1/operators/intake` | operator (CSRF) | Scan + weigh + add-ons + ack → CREATE one order (`in_progress`), email payment request |
 | POST | `/api/v1/operators/scan-pickup` | operator (CSRF) | Scan bag OUT → `picked_up` (rejects non-`ready_for_pickup`) |
-| POST | `/api/v1/affiliates/:affiliateId/deliveries/scan` | affiliate (self) / administrator (CSRF) | Door scan + confirm → `delivered`, realize commission |
+| POST | `/api/v1/bags/:bagToken/confirm-delivery` | public (rate-limited + attempt lockout); body `{ affiliateCode, geo? }` | Affiliate confirms door delivery on a `picked_up` order → `delivered` + realize commission (no login/JWT — gated by the affiliate code) |
+| GET | `/api/v1/affiliates/:affiliateId/delivery-code` | affiliate (self) / administrator | View delivery-code status (set / last-reset; the code itself is shown once, only on reset) |
+| POST | `/api/v1/affiliates/:affiliateId/delivery-code/reset` | affiliate (self) / administrator (CSRF) | Regenerate the affiliate delivery code |
 | PUT | `/api/v1/orders/:orderId/status` | role-scoped (CSRF) | Status transition validated against the shared `TRANSITIONS` map |
 | PUT | `/api/v1/orders/:orderId/verify-payment` | admin / administrator (CSRF) | Manual payment verify → run ready gate |
 | POST | `/api/v1/orders/confirm-payment` | public | Customer "I already paid" → trigger a scan |
@@ -504,7 +507,7 @@ pending_review ──(admin reject)──► rejected ──(affiliate re-upload
 
 ### 6.3 QR-Driven Customer Claim + Registration
 
-**New service:** `server/services/bagClaimService.js` — `resolveClaimToken(bagToken)` → `{ state:'claimable'|'claimed'|'invalid', bag, affiliate }` (maps `issued`→`claimable`, `active`→`claimed`, else→`invalid`; on `claimable` loads the affiliate with the public projection from `getPublicAffiliateInfo`); `claimForCustomer(bag, customerId)` → calls `Bag.claim`, throws `ClaimError('bag_already_claimed', 409)` on race loss.
+**New service:** `server/services/bagClaimService.js` — `resolveClaimToken(bagToken)` → `{ state:'claimable'|'claimed'|'invalid', bag, affiliate, order? }` (maps `issued`→`claimable`, `active`→`claimed`, else→`invalid`; on `claimable` loads the affiliate via the public projection from `getPublicAffiliateInfo`; on `claimed` also returns the open order's `{ status, awaitingDelivery }` — `awaitingDelivery` is `true` iff that order is `picked_up` — **with no customer PII**, so the overloaded page can branch to delivery-confirm vs status, see §6.6); `claimForCustomer(bag, customerId)` → calls `Bag.claim`, throws `ClaimError('bag_already_claimed', 409)` on race loss.
 
 > **Terminology note:** the claim path uses the same opaque bag **token** as everything else (`Bag.token`, the `:bagToken` route param carries it). Earlier drafts referred to a `claimToken` field with a base64url `crypto.randomBytes(24)` value; the **settled canon is `Bag.token` = `encryptionUtil.generateToken(16)` (32 hex chars, 128 bits)** used identically by claim, intake, and delivery. The "claimable while issued, claimed while active" routing is unchanged.
 
@@ -512,20 +515,22 @@ pending_review ──(admin reject)──► rejected ──(affiliate re-upload
 
 **Controllers:** `customerController.resolveClaim` (state-discriminated response), `customerController.claimRegister` (injects `req.params.bagToken` into the body, delegates to the service, extends the `isRegistrationError` mapping to also catch `ClaimError`). OAuth: `completeSocialCustomerRegistration` reads `bagToken` instead of `affiliateId`; update the `socialAuthRoutes.js` validator.
 
-**Frontend:** `public/claim-embed.html` + `public/assets/js/claim.js`. Register `/claim` in **both** `EMBED_PAGES` and `pageScripts` (PITFALLS #3) and in `excludedRoutes` (so a bare `/claim` without `?bag=` isn't persisted). `claim.js` reads `?bag=` via `new URLSearchParams(window.location.search).get('bag')`. Affiliate name rendered via `textContent` (never `innerHTML`). Mobile-first single-column card; H1 "Claim your bag"; OAuth buttons above the fold; full-card error/login-redirect states.
+**Frontend:** `public/claim-embed.html` + `public/assets/js/claim.js` — a small **state machine** (claim | deliver | status), since the same QR/URL is scanned by both customers and affiliates (§6.6). Register `/claim` in **both** `EMBED_PAGES` and `pageScripts` (PITFALLS #3) and in `excludedRoutes` (so a bare `/claim` without `?bag=` isn't persisted). `claim.js` reads `?bag=` via `new URLSearchParams(window.location.search).get('bag')`. Affiliate name rendered via `textContent` (never `innerHTML`). Mobile-first single-column card; H1 varies by state ("Claim your bag" / "Confirm delivery" / the order status); OAuth buttons above the fold in the claim state; full-card error/login-redirect states. **No in-app camera** — the phone's native camera opens this URL.
 
 **Global access-gate clearance (load-bearing — the new public surfaces must survive `server.js`'s pre-route middleware: `accessGate`, `comingSoon`, `locationQuarantine`, `franchisePreview`).** The customer QR lands on `embed-app-v2.html?route=/claim&bag=<token>`, so `req.path` is `/embed-app-v2.html` (already allowlisted in `quarantineConfig.js`: `/^\/embed-app(-v2)?\.html$/`), `claim-embed.html` matches `/^\/[a-z0-9-]+-embed\.html$/`, and all `/api/v1/customers/claim/*` + `/api/v1/bags/resolve/*` calls match `/^\/api\//` — so **the existing allowlist already covers the claim path and API by pattern.** Two confirmations are still required before launch: (1) verify `comingSoon` is host-scoped so it doesn't intercept the production claim host, and (2) if any new public surface is ever served at a bare top-level path (not `*-embed.html`, not under `/api/`), add an anchored entry to `quarantineConfig.js` `ALLOWLIST`. Capture both as deploy-checklist items (§12).
 
 **Flow:**
 ```
-scan QR → /claim?bag=<token> → GET /api/v1/customers/claim/:bagToken
+scan QR (native phone camera) → /claim?bag=<token> → GET /api/v1/customers/claim/:bagToken
   ├─ 'claimable' → registration form, affiliate name shown, affiliateId LOCKED (not a form field)
   │     submit (traditional) → POST /claim/:bagToken/register
   │     submit (OAuth)       → /auth/customer/{google|facebook}?bag=<token> → social/register
   │       service: create customer (affiliate from bag) → Bag.claim(customerId) atomic
   │         won  → bag active, JWT, welcome emails → /customer-dashboard
   │         lost → rollback customer → 409 {state:'claimed'} → "already claimed, please log in"
-  ├─ 'claimed' → redirect /customer-login
+  ├─ 'claimed' + order.awaitingDelivery (order is picked_up) → delivery-confirm panel (affiliate code + optional geo)
+  │     POST /api/v1/bags/:bagToken/confirm-delivery {affiliateCode, geo?} → delivered + commission (§6.6)
+  ├─ 'claimed' + not out for delivery → show order status + customer-login link (no code field)
   └─ 'invalid' → friendly error
 ```
 
@@ -601,29 +606,24 @@ Retune the working V2 stack; centralize the gate. **Links are generated exactly 
 
 **Edge cases:** payment during processing (gate no-op until processed); payment after the 8th reminder (scanner still verifies, gate promotes, no "too late" state); over/underpayment (already handled — underpaid stays in cadence); duplicate after verified (admin notice, idempotent gate); manual-verify races scanner (guarded update / re-read); reminder vs scan clock skew (time-based, never over-sends); hold-notice double-send guarded by `holdNoticeSentAt`; cancelled excluded from cron + gate.
 
-### 6.6 Affiliate Delivery Scanner + picked_up / delivered
+### 6.6 Delivery via the Overloaded Claim URL + Operator Scan-Out
 
-**New surface (affiliates have no scanner today).**
+**No separate affiliate scanner is built.** The affiliate scans the bag with their phone's **native camera**, which opens the **same** `/claim?bag=<token>` URL already printed on the label. The claim page is a small state machine (claim | deliver | status, §6.3); delivery is authorized by a lightweight **affiliate delivery code**, not a JWT session. This deletes the entire in-app camera stack an affiliate scanner would have needed: no `affiliate-scan-embed.html`, no `navigator.mediaDevices.getUserMedia`, no client-side QR **decoder** dependency (`jsQR`/`html5-qrcode`), no `camera=(self)` Permissions-Policy change, no `worker-src` CSP change, and no `session-manager` `PROTECTED_ROUTES.affiliate` entry.
 
-- **Operator scan-OUT → `picked_up`:** `POST /api/v1/operators/scan-pickup` (`checkRole(['operator'])`, CSRF). `operatorPickupService.scanOutForPickup` requires `ready_for_pickup` (rejects held/unpaid → `409 not_ready`), sets `picked_up`, `pickedUpBy=operatorId`, `pickedUpAt`, bag sub-status `picked_up`. Sends "on the way" customer email; does **not** realize commission, does **not** send the affiliate "ready" email (that fired on `ready_for_pickup`).
-- **Affiliate delivery scan → `delivered`:** `POST /api/v1/affiliates/:affiliateId/deliveries/scan` (`authorize('affiliate','administrator')` + ownership `req.user.affiliateId === :affiliateId`, CSRF). New service `server/services/affiliateDeliveryService.js` + controller `server/controllers/affiliateDeliveryController.js`. `deliverOrder` resolves bag→order via the shared `resolveOrderByBagQr`, guards `status==='picked_up'` (else `409 not_picked_up`) and `order.affiliateId===affiliateId` (else `403`), sets `delivered`, `deliveredBy=affiliateId`, `proofOfDelivery{method:'scan', confirmedAt, geo, note}`, bag sub-status `delivered`. Pre-save stamps `deliveredAt` + `commissionRealizedAt` (set-once, idempotent → no double commission). Sends customer "delivered" email + `sendAffiliateCommissionEmail` (best-effort, swallow SMTP errors).
+- **Operator scan-OUT → `picked_up`:** `POST /api/v1/operators/scan-pickup` (`checkRole(['operator'])`, CSRF). `operatorPickupService.scanOutForPickup` requires `ready_for_pickup` (rejects held/unpaid → `409 not_ready`), sets `picked_up`, `pickedUpBy=operatorId`, `pickedUpAt`, bag sub-status `picked_up`. Sends the "on the way" customer email; does **not** realize commission, does **not** re-send the affiliate "ready" email (that fired on `ready_for_pickup`).
 
-**Frontend — genuinely NEW surface (does NOT mirror the operator scanner):** `public/affiliate-scan-embed.html` + `public/assets/js/affiliate-scan-init.js`. The operator scanner is a **hardware/keyboard-wedge** reader (`operator-scan-init.js` uses a hidden `scanInput` + `scanBuffer` keypress capture, Fully Kiosk) — it does **not** use `getUserMedia` and shares no decode path with this page. The affiliate phone scanner is built from scratch:
-- **Camera capture** via `navigator.mediaDevices.getUserMedia` (HTTPS only).
-- **QR decoding requires a NEW dependency** — the repo's `public/assets/js/qrcode.min.js` is the *generator* (`qrcode@1.5.1`), not a decoder. Add a client-side QR **decoder**: ship **`jsQR`** (zero-dependency, no Web Worker → no `worker-src` change needed) self-hosted under `public/assets/js/`, or `html5-qrcode` from the already-allowlisted `cdn.jsdelivr.net`. **If a worker-using lib is chosen, the CSP must add `worker-src 'self'`** (currently unset → falls back to `script-src`/`default-src`). Recommendation: self-hosted `jsQR` (no worker, no CSP change, no CDN dependency).
-- Lazy-load the decoder on the user's "Start camera" gesture (TBT/Lighthouse on the new public-adjacent page).
-- Manual bag-token fallback input for camera-denied / decode-failure.
+- **Delivery confirmation → `delivered`:** `resolveClaimToken` (§6.3) returns, for a `claimed` bag, the open order's `{ status, awaitingDelivery }` (`awaitingDelivery === true` iff the order is `picked_up`; no customer PII). The page branches: `awaitingDelivery` → a **delivery-confirm panel** (affiliate-code field + optional "use my location" for proof-of-delivery geo); otherwise → an **order-status message** + customer-login link (no code field). The confirm action hits a **public, code-gated** endpoint: `POST /api/v1/bags/:bagToken/confirm-delivery`, body `{ affiliateCode, geo? }`. New `server/services/affiliateDeliveryService.js` + a **public** `bagDeliveryController` (no JWT). `confirmDelivery`: resolve bag → open order; guard `status === 'picked_up'` (else `409 not_picked_up`); load the order's affiliate; verify `affiliateCode` against `affiliateDeliveryCodeHash` **constant-time** (else `401 bad_code` + bump a per-bag/per-IP attempt counter, **lockout after `delivery_code_max_attempts`**). On success: `delivered`, `deliveredBy = order.affiliateId`, `proofOfDelivery { method:'affiliate_code', confirmedAt, geo? }`, bag sub-status `delivered`. Pre-save stamps `deliveredAt` + `commissionRealizedAt` (set-once, idempotent → no double commission). Sends the customer "delivered" email + `sendAffiliateCommissionEmail` (best-effort, swallow SMTP errors).
 
-Register `/affiliate-scan` in **both** `EMBED_PAGES` and `pageScripts`; add `/affiliate-scan` to `session-manager` `PROTECTED_ROUTES.affiliate`. Add a "Deliver an order" button on the affiliate dashboard.
+**Affiliate delivery code:** a per-affiliate secret used only to confirm deliveries — **not** the account password (typing a login password on a public page is a phishing/exposure risk). Stored hashed (`Affiliate.affiliateDeliveryCodeHash`, PBKDF2 like the account password), **auto-generated at invited registration**, shown on the affiliate dashboard, **resettable** (`POST /api/v1/affiliates/:affiliateId/delivery-code/reset`, affiliate-self/admin). Recommend a 6-character unambiguous alphanumeric code (drop `0/O/1/l`). Blast radius is tiny — even a guessed code only marks an already-`picked_up` order of that one affiliate as delivered (reversible by admin) — and constant-time compare + rate-limit + lockout make online guessing infeasible. **Optional UX:** the page may remember the code on the device (`localStorage`, explicit opt-in) so an affiliate running a route enters it once, not per stop.
 
-**Camera Permissions-Policy (EDIT, do not add):** `server.js:242-243` already sets a **global** `Permissions-Policy` that disables camera everywhere (`camera=()`). Do **not** add a second header and do **not** flip the global to `camera=(self)` — that would re-enable the camera on every page, widening the policy far beyond this scanner. Instead, **keep `camera=()` global and set `camera=(self)` only on the `/affiliate-scan` route response** (override the header on that one response, e.g. in the route handler / a narrow per-route middleware). Net effect: the affiliate scanner page is the only surface allowed `getUserMedia`.
+Add a **"Deliver / check a bag"** affordance on the affiliate dashboard that simply instructs "scan the bag's QR with your phone camera" — there is no in-app scanner to launch.
 
 **Notifications:**
 - **Notification A — affiliate "order ready, collect from store" on `ready_for_pickup`. REUSE the existing dispatcher**, do not build a new one. Both `sendOrderReadyNotification` (`server/services/email/dispatcher/ops.js:73`) and `sendV2PickupReadyNotification` (`.../payment.js:308`) already exist; the ready gate (§6.5 `orderReadyGateService.applyReadyGate`) calls `sendOrderReadyNotification`. If the existing copy doesn't fit the new "collect from store" flow, **retune the existing template** rather than adding a parallel `affiliate-order-ready.html`. There is no new `sendAffiliateOrderReadyEmail` dispatcher and no new `affiliate-order-ready.html` template. (This is the single source of truth; §6.5 and §10 name the same function.)
 - **Notification B — customer "your laundry was delivered" on `delivered`** — genuinely new: dispatcher `sendCustomerDeliveredEmail`, template `customer-order-delivered.html` (no existing equivalent).
 - Commission email (`sendAffiliateCommissionEmail`, existing) moves from pickup to delivery.
 
-**Edge cases:** deliver another affiliate's bag → 403 (audit anomaly); deliver before pickup → 409; double-deliver → 409 (no second commission); scan-out a held order → 409; concurrent scan-out + payment flip → guarded `findOneAndUpdate`; offline at the door → queue scan in `localStorage`, retry on `navigator.onLine`, server `deliveredAt` canonical, replays idempotent; camera denied → manual entry.
+**Edge cases:** wrong code → `401` + per-bag/IP attempt counter, lockout after `delivery_code_max_attempts`; a different affiliate's code → the same generic `401` (no oracle); confirm on a non-`picked_up` order → `409 not_picked_up`; double-confirm → `409`/idempotent (no second commission); scan-out a held order → `409 not_ready`; concurrent scan-out + payment flip → guarded `findOneAndUpdate`; the customer scanning during the delivery window sees order status (and the code panel they can't satisfy) — acceptable, no PII leaked; offline at the door → affiliate retries when back online (server `deliveredAt` canonical, replays idempotent); admin override → `manual_confirm` via the status PUT.
 
 ---
 
@@ -635,7 +635,7 @@ Register `/affiliate-scan` in **both** `EMBED_PAGES` and `pageScripts`; add `/af
 - Beta: `server/models/BetaRequest.js`, `server/services/email/dispatcher/beta.js`, beta templates under `server/templates/emails/{lang}/`.
 
 **Scrub references:**
-- `server.js`: remove Paygistix `app.use` mounts; remove `https://safepay.paymentlogistics.net` from CSP `script-src` and `form-action` (it is no longer in `frame-src`). **Do not touch the global `Permissions-Policy` header (`server.js:242-243`) — it stays `camera=()` for every page.** Camera is re-enabled narrowly: `camera=(self)` is set only on the `/affiliate-scan` route response (§6.6), not globally. If the chosen QR decoder uses a Web Worker, add `worker-src 'self'` to the CSP (jsQR does not).
+- `server.js`: remove Paygistix `app.use` mounts; remove `https://safepay.paymentlogistics.net` from CSP `script-src` and `form-action` (it is no longer in `frame-src`). **Leave the global `Permissions-Policy` header (`server.js:242-243`) as-is — `camera=()` stays for every page.** Delivery uses the phone's native camera (which opens the claim URL), so there is **no in-app `getUserMedia`**, no `camera=(self)` exception, and no `worker-src` CSP change.
 - `affiliateController.registerAffiliate`: delete the BetaRequest gate; remove `submitBetaRequest`, `BetaRequest` import, inline `require`.
 - `administratorController`: remove `getBetaRequests`, `sendBetaWelcomeEmail`, `sendBetaReminderEmail`, `checkAffiliateExists`.
 - `orderController`: delete `createOrder` (customer path), `createImmediateOrder`, `checkImmediateAvailability`, `checkActiveOrders`, the immediate-pickup-hours require.
@@ -688,9 +688,10 @@ Added to / retuned in `SystemConfig.initializeDefaults()`. All payment keys `cat
 - **Anti-enumeration.** Bag `/resolve`, invite `/validate`, and intake return a single generic error for not-found/retired/malformed — no validity oracle. `/resolve` returns affiliate name only for `unclaimed`, `customerId` only for `claimed` (to route login), never customer names. Token-lookup endpoints get a tight rate limiter on top of `apiLimiter`.
 - **W-9 at rest.** AES-256-GCM (`encryptBuffer`) to a **self-framed encrypted file** on the DRBD-replicated `W9_STORAGE_PATH` (mode `0600`, dirs `0700`); per-file IV + authTag; SHA-256 plaintext integrity. **Not GridFS** (ADB Mongo API support is uncertain) and never in the DB. No raw TIN stored (only `taxIdLast4`, admin-entered). Single-primary volume on the leader box, W-9 routes pinned there, secondary promoted on failover. Download admin-only, `attachment` + `nosniff`, never inlined, **audit-logged every access**.
 - **Server-trust on relationships.** Customer `affiliateId` derived from the bag; intake `customerId`/`affiliateId` derived from the resolved bag — never from client input. This closes the `?affid` trust hole and the old `createOrder` client-supplied-ids gap.
-- **CSRF** on every mutation per `csrf-config.js`; registration/claim are CSRF-exempt but invite-token/CAPTCHA/rate-limit gated. **Strict nonce-based CSP** on all new pages (no inline script/style; `script.nonce = window.CSP_NONCE`; QR via `data:` `<img>`; camera over HTTPS only).
-- **Rate-limiting:** `registrationLimiter` on claim-register and invited registration; `sensitiveOperationLimiter` on invite-mint and bag-mint; `fileUploadLimiter` on W-9 upload; `apiLimiter` (+ tight limiter) on token resolve/validate; `passwordResetLimiter` unchanged.
-- **Audit events** (`auditLogger`): `INVITE_MINTED/CONSUMED/REVOKED`, `BAG_MINTED/ISSUED/CLAIMED` (+ future `BAG_REASSIGNED/RETIRED`), `W9_UPLOADED/VERIFIED/REJECTED/DOCUMENT_ACCESSED`, `PAYMENT_MANUAL_VERIFY`, `PAYMENT_ESCALATED`, and `ORDER_STATUS_CHANGED` on every transition (actor id + bag token). Winston only; never log raw tokens or decrypted bytes.
+- **Affiliate delivery code (delivery auth).** A per-affiliate secret (`affiliateDeliveryCodeHash`, PBKDF2) gates the **public** `confirm-delivery` endpoint in lieu of a JWT. Constant-time compare; verified against the *order's* affiliate (not client-supplied); per-bag/IP attempt counter + lockout (`delivery_code_max_attempts`). Low blast radius — success only flips an already-`picked_up` order to `delivered` (admin-reversible). Resettable from the dashboard if exposed.
+- **CSRF** on every mutation per `csrf-config.js`; registration/claim/confirm-delivery are CSRF-exempt but CAPTCHA / affiliate-code / rate-limit gated as applicable. **Strict nonce-based CSP** on all new pages (no inline script/style; `script.nonce = window.CSP_NONCE`; QR via `data:` `<img>`). **No in-app camera** (native camera only), so no `getUserMedia` / Permissions-Policy / `worker-src` changes.
+- **Rate-limiting:** `registrationLimiter` on claim-register and invited registration; `sensitiveOperationLimiter` on invite-mint, bag-mint, and delivery-code reset; a **tight limiter + per-bag/IP attempt lockout** on `confirm-delivery`; `fileUploadLimiter` on W-9 upload; `apiLimiter` (+ tight limiter) on token resolve/validate; `passwordResetLimiter` unchanged.
+- **Audit events** (`auditLogger`): `INVITE_MINTED/CONSUMED/REVOKED`, `BAG_MINTED/ISSUED/CLAIMED` (+ future `BAG_REASSIGNED/RETIRED`), `W9_UPLOADED/VERIFIED/REJECTED/DOCUMENT_ACCESSED`, `PAYMENT_MANUAL_VERIFY`, `PAYMENT_ESCALATED`, `DELIVERY_CONFIRMED`, `DELIVERY_CODE_RESET`, `DELIVERY_CODE_FAILED` (failed-code attempt), and `ORDER_STATUS_CHANGED` on every transition (actor id + bag token). Winston only; never log raw tokens, codes, or decrypted bytes.
 
 ### RBAC matrix
 
@@ -709,7 +710,8 @@ Added to / retuned in `SystemConfig.initializeDefaults()`. All payment keys `cat
 | Unlock payments | ✅ | ❌ | ❌ | ❌ |
 | Operator intake (create order) | ❌ | ❌ | ❌ | ✅ |
 | Operator scan-out (`picked_up`) | ❌ | ❌ | ❌ | ✅ |
-| Affiliate delivery scan (`delivered`) | ✅ (override) | ✅ (self/own order) | ❌ | ❌ |
+| Confirm delivery (`delivered`) | ✅ (override) | public + affiliate code | ❌ | ❌ |
+| View / reset affiliate delivery code | ✅ | ✅ (self) | ❌ | ❌ |
 | Manual payment verify | ✅ | ❌ | ❌ | ❌ |
 | Held-orders view | ✅ | (own, scoped) | ❌ | ✅ |
 | Resend payment request | ✅ | ❌ | ❌ | ❌ |
@@ -728,7 +730,8 @@ All new user-facing copy ships in en / es / pt / de (`public/locales/{lang}/comm
 - **Affiliate register (invite + W-9):** `affiliateRegister.invite.invalidOrExpired`, `affiliateRegister.invite.emailLocked`, `affiliateRegister.w9.uploadLabel`, `affiliateRegister.w9.fileTypeHint` ("PDF, JPG, or PNG, max {{max}} MB"), `affiliateRegister.w9.tooLarge`, `affiliateRegister.w9.wrongType`, `affiliateRegister.w9.optionalNote`.
 - **Admin invites / W-9:** `admin.invites.*` (mint/list/resend/revoke), `admin.w9.*` (pending/verify/reject/download).
 - **Operator intake:** `operator.intake.weightLabel`, `operator.intake.addOns.{premiumDetergent|fabricSoftener|stainRemover}`, `operator.intake.freshFormAck`, `operator.intake.created`, `operator.intake.error.{bagNotActive|orderAlreadyOpen|bagNotFound}`.
-- **Affiliate scanner:** `affiliateScan.title/subtitle/startCamera/manualEntry/bagIdPlaceholder/confirmDelivery/customerLabel/addressLabel/success`, `affiliateScan.errors.{notYourOrder|notPickedUp|alreadyDelivered|notFound|cameraDenied}`, `affiliateScan.offlineQueued`, `affiliateScan.geoOptIn`, `affiliateDashboard.deliverOrderButton`.
+- **Claim page — delivery + status (overloaded URL):** `claim.deliver.title`, `claim.deliver.codeLabel`, `claim.deliver.codePlaceholder`, `claim.deliver.geoOptIn`, `claim.deliver.rememberCode`, `claim.deliver.confirm`, `claim.deliver.success`, `claim.deliver.badCode`, `claim.deliver.lockedOut`; `claim.status.{in_progress|processed|ready_for_pickup|picked_up|delivered}` (customer-facing status messages) + `claim.status.loginCta`.
+- **Affiliate dashboard — delivery code:** `affiliateDashboard.deliveryCode.{title|current|reset|resetConfirm|shownOnceNote}`, `affiliateDashboard.deliverHelp` ("scan the bag's QR with your phone camera").
 - **Order status display:** `order.status.{in_progress|processed|ready_for_pickup|picked_up|delivered|cancelled}`.
 
 **Email templates / keys (4 langs each):**
@@ -749,9 +752,9 @@ Strict TDD — write the failing test first, confirm it fails for the right reas
 
 **Invites + W-9 (`tests/unit/affiliateInvite.test.js`, `tests/integration/affiliateInvites.test.js`, `tests/unit/secureFileStore.test.js`, `tests/integration/w9Upload.test.js`, `tests/integration/w9Admin.test.js`):** `hashToken` deterministic ≠ raw; `consume` single-use + expiry + concurrent race; mint RBAC/CSRF/409-duplicate; validate valid/expired/unknown (no enumeration); resend re-mints; revoke; register requires `inviteToken` (proves the gate is gone); valid invite → 201 + accepted; reused invite → 409 no second affiliate; client email ignored; `encryptBuffer`↔`decryptBuffer` round-trip + corrupted authTag throws; `secureFileStore` round-trip writes a self-framed ciphertext file to disk (assert on-disk bytes ≠ plaintext) and reads back the exact plaintext, tampered authTag/`sha256` throws, `storageKey` path layout correct; multipart register PDF → `pending_review`; disallowed type / oversize → 400; upload self vs other affiliate; admin pending list; document download decrypts + audits; verify → `on_file` + unlocks payments; reject + re-upload loop; verify/reject CSRF.
 
-**Customer claim (`tests/unit/bagClaimService.test.js`, `tests/integration/customerClaim.test.js`):** resolve states; `claimForCustomer` flips + race-loss throws; registration derives affiliate from bag (ignores payload `affiliateId`); rollback on race loss (no orphan); resolve responses (no PII / generic 404 / no customerId on claimed); concurrent double-claim → exactly one 201 + one customer; duplicate-email keeps bag `issued`; OAuth claim with `bagToken`; rate-limit; `/claim` in both maps + `excludedRoutes`; i18n parity.
+**Customer claim (`tests/unit/bagClaimService.test.js`, `tests/integration/customerClaim.test.js`):** resolve states; `claimForCustomer` flips + race-loss throws; registration derives affiliate from bag (ignores payload `affiliateId`); rollback on race loss (no orphan); resolve responses (no PII / generic 404 / no customerId on claimed); concurrent double-claim → exactly one 201 + one customer; duplicate-email keeps bag `issued`; OAuth claim with `bagToken`; rate-limit; resolve on a `claimed` bag returns `order.{status, awaitingDelivery}` with **no customer PII** and `awaitingDelivery` true only when the order is `picked_up`; `/claim` in both maps + `excludedRoutes`; i18n parity.
 
-**Order + intake (`tests/unit/orderStateMachine.test.js`, `tests/unit/order.model.test.js`, `tests/integration/operatorIntake.test.js`, `tests/integration/readyForPickupGate.test.js`, `tests/integration/operatorScanOut.test.js`, `tests/integration/affiliateDeliverScan.test.js`):** transition allows/rejects (incl. cancel only from in_progress/processed); `applyTransition`/pre-save timestamp stamping (set-once); `maybeReadyForPickup`/`applyReadyGate` flips only when processed+verified, idempotent; default `in_progress`, old enum values rejected; pre-save pricing from `actualWeight` + operator-entered add-ons; **intake populates `feeBreakdown` before save and the saved order has non-zero `feeBreakdown.totalFee`, `affiliateCommission`, and `paymentAmount`** (guards the silent-zero regression); intake creates exactly one order, derives ids from bag, fires payment request, records ack; rejects non-active / open-order / missing weight; RBAC + CSRF; gate via both paths (processed-then-paid, paid-then-processed); scan-out on ready → picked_up + "on the way" + no commission; scan-out on held → 409; deliver on picked_up → delivered + commission realized + emails; deliver other affiliate → 403; double-deliver → 409 (no second commission); optional geo persists `[lng,lat]`; admin override; delivery succeeds when customer email throws.
+**Order + intake (`tests/unit/orderStateMachine.test.js`, `tests/unit/order.model.test.js`, `tests/integration/operatorIntake.test.js`, `tests/integration/readyForPickupGate.test.js`, `tests/integration/operatorScanOut.test.js`, `tests/integration/confirmDelivery.test.js`, `tests/unit/affiliateDeliveryService.test.js`):** transition allows/rejects (incl. cancel only from in_progress/processed); `applyTransition`/pre-save timestamp stamping (set-once); `maybeReadyForPickup`/`applyReadyGate` flips only when processed+verified, idempotent; default `in_progress`, old enum values rejected; pre-save pricing from `actualWeight` + operator-entered add-ons; **intake populates `feeBreakdown` before save and the saved order has non-zero `feeBreakdown.totalFee`, `affiliateCommission`, and `paymentAmount`** (guards the silent-zero regression); intake creates exactly one order, derives ids from bag, fires payment request, records ack; rejects non-active / open-order / missing weight; RBAC + CSRF; gate via both paths (processed-then-paid, paid-then-processed); scan-out on ready → picked_up + "on the way" + no commission; scan-out on held → 409; confirm-delivery with the correct affiliate code on a picked_up order → delivered + commission realized + emails; wrong code → 401 + attempt counter + lockout after the cap; a different affiliate's code → 401 (no oracle); confirm on a non-picked_up order → 409; double-confirm → 409 (no second commission); delivery-code reset regenerates + invalidates the old code; optional geo persists `[lng,lat]`; admin `manual_confirm` override; delivery succeeds when customer email throws.
 
 **Payment job (`tests/unit/paymentVerificationJob.test.js`, `tests/unit/orderReadyGateService.test.js`, `tests/integration/payment-ready-gate.test.js`, `tests/unit/email-come-to-store.test.js`):** `shouldSendReminder` time-based boundaries / cap / escalation flag; `maybeSendReminderOrHold` increments + hold notice once + stays `awaiting` (not failed); escalated orders skip reminder/hold on subsequent runs; reminders reuse stored links (assert `generatePaymentLinks` not called); cron query inclusion/exclusion; **regression: a `confirming` order with a matching inbound payment is auto-verified by the cron/scanner (proves the `{ $in: ['awaiting','confirming'] }` widening) and promoted through the gate**; scanner verify on processed → ready; admin verify → ready; scanProcessed on verified → ready; scanProcessed on unpaid → held + no workflow-service reminder; payment after escalation still verifies (escalated-but-`awaiting` order still matched by the scanner); `confirmPayment` no longer escalates; underpayment stays awaiting; duplicate on ready no re-notify; come-to-store template resolves all 4 langs.
 
@@ -777,9 +780,9 @@ One concern per PR, ≤500-line diffs, tests green at every merge (deletions pai
 | 6 | `Bag` model + mint/issue/label + `bagService` + claim flow + claim page | PR 5 |
 | 7 | Operator intake rework (`orderIntakeService`, `weighBags`/`scanProcessed` re-point, order-at-intake) | PR 4, PR 6 |
 | 8 | Payment job retune + escalation (`shouldSendReminder` 60/8, `come-to-store`, `applyReadyGate` wiring) | PR 3, PR 4 |
-| 9 | Operator scan-out (`picked_up`) + affiliate delivery scan (`delivered`) + scanner page | PR 4, PR 7 |
+| 9 | Operator scan-out (`picked_up`) + delivery confirmation via the overloaded `/claim` URL + affiliate delivery code (no scanner page) | PR 4, PR 6, PR 7 |
 | 10 | W-9 upload / encrypted DRBD-file storage / admin review (+ `multer`, `secureFileStore`, `encryptBuffer`/`decryptBuffer`) | PR 5 (parallel to 6–9) |
-| 11 | i18n completion + Lighthouse pass on new public pages (claim, affiliate-scan) | all |
+| 11 | i18n completion + Lighthouse pass on new public pages (claim) | all |
 
 **Checklist (mark done as you go):**
 
@@ -791,18 +794,18 @@ One concern per PR, ≤500-line diffs, tests green at every merge (deletions pai
 - [ ] PR 6 — `Bag` + mint/issue/label + claim flow + `/claim` page (both maps + `excludedRoutes`)
 - [ ] PR 7 — operator intake creates the order (one bag = one order, idempotent)
 - [ ] PR 8 — payment retune (60/8, come-to-store, held-at-store, escalated not failed)
-- [ ] PR 9 — scan-out + affiliate delivery scan + `/affiliate-scan` page (protected route)
+- [ ] PR 9 — scan-out + delivery confirmation on the `/claim` page (affiliate code, no separate scanner)
 - [ ] PR 10 — W-9 upload/encrypted-storage/review + `multer` + payment-lock integration
 - [ ] PR 11 — all 4 languages shipped; new pages measured mobile + desktop
 
 **Deploy / launch checklist (verify on the production host, not just in tests):**
 
-- [ ] **Access-gate clearance for the new public surfaces.** Confirm the claim QR (`/embed-app-v2.html?route=/claim`), `claim-embed.html`, `affiliate-scan-embed.html`, and the `/api/v1/customers/claim/*`, `/api/v1/bags/resolve/*` endpoints all pass `locationQuarantine` (covered by the existing `embed-app(-v2).html`, `*-embed.html`, and `/api/` allowlist patterns in `server/config/quarantineConfig.js`). If any new public surface is served at a bare top-level path, add an anchored `ALLOWLIST` entry.
+- [ ] **Access-gate clearance for the new public surfaces.** Confirm the claim QR (`/embed-app-v2.html?route=/claim`), `claim-embed.html`, and the `/api/v1/customers/claim/*`, `/api/v1/bags/resolve/*`, `/api/v1/bags/*/confirm-delivery` endpoints all pass `locationQuarantine` (covered by the existing `embed-app(-v2).html`, `*-embed.html`, and `/api/` allowlist patterns in `server/config/quarantineConfig.js`). If any new public surface is served at a bare top-level path, add an anchored `ALLOWLIST` entry.
 - [ ] **`comingSoon` host scoping** does not intercept the production claim host.
 - [ ] **`RUN_BACKGROUND_JOBS='true'` on exactly one (leader) box** so the retuned `paymentVerificationJob` reminder cron runs once (existing `scheduler.js` gate — nothing to build, just verify the env).
-- [ ] **`camera=(self)` is set ONLY on the `/affiliate-scan` response**; the global `Permissions-Policy` still reads `camera=()` for every other page.
+- [ ] **Affiliate delivery code** auto-generated at registration and visible/resettable on the affiliate dashboard; no in-app camera (native camera opens the claim URL), so the global `Permissions-Policy` stays `camera=()`.
 - [ ] **DRBD W-9 volume** single-primary on the leader box with `W9_STORAGE_PATH` mounted (`0700`); **W-9 routes pinned** to that box (nginx upstream / CF rule); secondary-promotion failover tested.
-- [ ] **CSP:** if a worker-using QR decoder was chosen, `worker-src 'self'` is present (skip if `jsQR`).
+- [ ] **`confirm-delivery` rate-limit + per-bag/IP lockout** active; no in-app camera / decoder / `worker-src` change is needed.
 
 **Cross-phase notes (already settled — listed for implementer awareness, not as open risks):**
 - **Dual-AZ background-job duplication — mitigated, no action.** The retuned `paymentVerificationJob` runs only on the leader box via the existing `RUN_BACKGROUND_JOBS` gate (`scheduler.js`). Nothing new to build.
@@ -826,6 +829,7 @@ All implementation and product questions are **settled** below so the team can b
 7. **W-9 file storage — SETTLED: AES-256-GCM files on a DRBD-replicated local FS, single-primary + pinned routes.** Bytes are encrypted to self-framed files under `W9_STORAGE_PATH`, **not** GridFS (Oracle ADB's Mongo API very likely doesn't support it) and never in the DB. DRBD replicates the volume between oci1/oci2; it is single-primary on the leader box, and the `/api/v1/w9/*` + W-9 upload routes are pinned to that box (secondary promotes on failover). (See §4.3, §9, §12.)
 8. **Service area — SETTLED: not enforced.** The affiliate owns pickup/delivery logistics (their own route/scheduling) and customers are bound to an affiliate by the bag, so there is no geocoding / service-radius check at claim or registration. `Affiliate.serviceLocation`/`serviceRadius` and the affiliate-register map step are removed. (See §4.6, §6.3, §7.)
 9. **One bag per customer — SETTLED (launch).** Each customer claims exactly one durable bag (naturally enforced by the unique email at claim). A returning customer scanning a new bag gets `duplicate_email` with a "log in" affordance; multi-bag-per-account linking is out of scope for now. (See §2, §6.1, §6.3.)
+10. **Delivery confirmation — SETTLED: overloaded claim URL + affiliate code (no separate scanner, no in-app camera).** The affiliate scans the bag with the phone's native camera (opening `/claim?bag=<token>`); when the order is `picked_up` the page shows a code panel; `POST /api/v1/bags/:bagToken/confirm-delivery` is public but gated by the per-affiliate `affiliateDeliveryCodeHash` (constant-time, rate-limited, lockout). This deletes the affiliate-scanner page, `getUserMedia`, the `jsQR`/`html5-qrcode` decoder dependency, the `camera=(self)` Permissions-Policy exception, and the `worker-src` CSP change. (See §4.6, §6.3, §6.6, §9.)
 
 ### Open product questions
 
