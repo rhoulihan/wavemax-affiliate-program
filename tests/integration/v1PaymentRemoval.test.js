@@ -70,4 +70,24 @@ describe('V1 Paygistix removal', () => {
       expect(csp).not.toMatch(/safepay\.paymentlogistics\.net/);
     });
   });
+
+  describe('V1 customer payment endpoints are gone', () => {
+    it('POST /api/v1/customers/initiate-payment -> 404', async () => {
+      // /api/v1/customers/initiate-payment is on NO csrf-config exemption list,
+      // so the global conditionalCsrf default-enforces it: a tokenless POST
+      // would 403 before AND after the route removal (the probe could never
+      // pass). The agent + x-csrf-token (from the file-level beforeAll) lets
+      // the request reach routing, so removal genuinely yields 404.
+      const res = await agent
+        .post('/api/v1/customers/initiate-payment')
+        .set('x-csrf-token', csrfToken)
+        .send({ orderId: 'ORD-x' });
+      expect(res.status).toBe(404);
+    });
+
+    it('GET /api/v1/customers/payment-status/:orderId -> 404', async () => {
+      const res = await request(app).get('/api/v1/customers/payment-status/ORD-x');
+      expect(res.status).toBe(404);
+    });
+  });
 });
