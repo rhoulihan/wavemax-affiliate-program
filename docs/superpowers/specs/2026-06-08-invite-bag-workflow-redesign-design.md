@@ -33,7 +33,7 @@ This redesign inverts three core assumptions of the current WaveMAX affiliate pl
 
 - **No data migration.** Clean-slate redeploy; existing production data is discarded.
 - **Bag reassign / retire automation.** Schema hooks are reserved (`reassignmentHistory`, `retiredAt/By/Reason`) but no admin reassign/retire logic is built this phase.
-- **Linking an existing customer to an additional bag.** Launch scope is one customer claims via registration; multi-bag linking for an existing account is a future hook.
+- **More than one bag per customer.** Launch is **one bag per customer**; a returning customer who scans a new bag gets `duplicate_email`. Multi-bag-per-account linking is out of scope for now.
 - **Photo proof-of-delivery.** `proofOfDelivery.photoKey` hook is reserved; optional geo ships, photo capture is deferred.
 - **Hard PDF generation for label sheets.** Print-styled HTML (browser "Save as PDF") ships; a headless PDF renderer is a future hook.
 - **Public self-serve customer registration.** The `?affid` referral funnel is removed. The QR claim is the only customer-onboarding path at launch. An admin-only manual-create endpoint (`POST /api/v1/administrators/customers`) for at-the-door / lost-QR recovery is a **scope addition beyond the 14 agreed decisions** — Future, pending product sign-off, not in the API table (§13).
@@ -58,7 +58,7 @@ Customer scans an UNCLAIMED bag QR (phone camera, no app)
                └─► atomic claim ──► bag status: issued → active, customerId+affiliateId linked
    (scanning an ALREADY-CLAIMED bag ──► route that customer to login / status)
 
-Affiliate runs a fixed route ──► collects whatever full bags are out (no scheduling)
+Affiliate handles pickup/delivery (their own route/scheduling) ──► collects whatever full bags are out (no in-app scheduling, no service-area check)
    └─► drops bags at the store
 
 Operator INTAKE: scan bag ──► weigh ──► enter add-ons (paper form) ──► ack fresh form in pocket
@@ -225,9 +225,9 @@ Raw token = `encryptionUtil.generateToken(32)` (64 hex chars, CSPRNG). TTL is co
 
 ### 4.3 W-9 Document Storage
 
-W-9 binary storage uses **GridFS in the shared MongoDB, bytes AES-256-GCM encrypted before chunking**. This is the only candidate that works across the dual-AZ active-active OCI deployment (oci1 + oci2): a filesystem write on one box is invisible to the other, and an inline blob would bloat the hot `Affiliate` doc. The DB is the single shared store both boxes already reach.
+W-9 binary storage uses **AES-256-GCM-encrypted files on a DRBD-replicated local filesystem** (path from the `W9_STORAGE_PATH` env var), **not** GridFS. Rationale: the backend is Oracle ADB's *Database API for MongoDB* — a MongoDB-compatible subset over SODA — which very likely does **not** support GridFS (`fs.files`/`fs.chunks` semantics + the admin/index behaviors it needs), so we do not bet the W-9 feature on it and we keep the binary bytes off ADB entirely. DRBD replicates the W-9 volume block-for-block between oci1 and oci2. The volume is **single-primary**, mounted on the leader box (the same box that runs `RUN_BACKGROUND_JOBS`); on failover the secondary is promoted. Because the web tier is active-active and CF round-robins to either box, the W-9 routes (`/api/v1/w9/*` and the multipart W-9 field on `/api/v1/affiliates/register`) are **pinned to the primary box** (nginx upstream / CF rule) so every read and write hits the box that has the volume mounted. W-9 traffic is low-volume (upload once, admin download occasionally), so pinning costs nothing operationally.
 
-The store is wrapped by **`server/services/secureFileStore.js`**: `storeEncrypted(buffer, { contentType, filename, metadata })` → encrypts, opens an upload stream on the `w9docs` bucket, stores `iv`/`authTag`/`sha256` in the GridFS file `metadata`, returns `{ fileId }`. `readDecrypted(fileId)` → streams chunks, decrypts, verifies authTag, returns a Buffer.
+The store is wrapped by **`server/services/secureFileStore.js`**: `storeEncrypted(buffer, { contentType, filename })` → `encryptBuffer`, then writes a **self-framed encrypted file** (`[iv(16) | authTag(16) | ciphertext]`) to `${W9_STORAGE_PATH}/<storageKey>` (storageKey = `aff/<affiliateId>/<uuid>.enc`; file mode `0600`, dirs `0700`), returns `{ storageKey, sha256 }`. `readDecrypted(storageKey)` → reads the file, splits the frame, `decryptBuffer`, verifies authTag + `sha256`, returns a Buffer. The path is the only storage detail outside the abstraction; swapping DRBD for another shared/replicated FS later touches only `W9_STORAGE_PATH`.
 
 Binary encryption helpers added to `server/utils/encryption.js` (the existing `encryptField`/`encrypt` are string-only via `cipher.update(text,'utf8',…)`):
 
@@ -253,7 +253,7 @@ w9Status: { type: String,
 w9OnFileAt: Date,        // (exists) set when admin verifies
 taxIdLast4: String,      // (exists) admin display only; full TIN lives only inside the encrypted file
 w9Document: {
-  fileId:      { type: mongoose.Schema.Types.ObjectId },  // GridFS _id in the w9docs bucket
+  storageKey:  { type: String },                          // path under W9_STORAGE_PATH (DRBD-replicated), e.g. aff/<affiliateId>/<uuid>.enc
   filename:    String,                                     // sanitized original filename
   contentType: { type: String, enum: ['application/pdf','image/jpeg','image/png'] },
   sizeBytes:   Number,
@@ -269,7 +269,7 @@ w9RejectedReason: String
 
 `paymentProcessingLocked` / `paymentLockReason` stay exactly as-is — they remain the payment gate, already wired into `affiliatePaymentLockService`.
 
-> **Terminology note:** earlier exploratory drafts referenced a separate `W9Document` collection record with an object-store `storageKey`. The settled design is the **GridFS `w9docs` bucket + the `Affiliate.w9Document` subdocument** above (`fileId` references the GridFS file). There is no standalone `W9Document` model.
+> **Terminology note:** earlier exploratory drafts referenced GridFS and/or a separate `W9Document` collection. The settled design is the **DRBD-replicated encrypted file store + the `Affiliate.w9Document` subdocument** above (`storageKey` is the file path under `W9_STORAGE_PATH`). There is no GridFS bucket and no standalone `W9Document` model. (See §13 #7.)
 
 ### 4.4 `Order` — `server/models/Order.js`
 
@@ -388,7 +388,8 @@ proofOfDelivery: {
 
 - W-9 fields per §4.3.
 - **Remove** `availabilitySchedule` — the fixed-route model has no per-affiliate availability windows.
-- Keep `serviceLocation` (2dsphere), `minimumDeliveryFee`/`perBagDeliveryFee`, encrypted `paypalEmail`/`venmoHandle`, and the `paymentProcessingLocked` block.
+- Keep `minimumDeliveryFee`/`perBagDeliveryFee`, encrypted `paypalEmail`/`venmoHandle`, and the `paymentProcessingLocked` block.
+- **Drop service-area enforcement.** Service area is no longer a concern — the affiliate owns pickup/delivery logistics (their own scheduling/route), and customers are bound to an affiliate by the bag, not by location matching. Stop using `serviceLocation`/`serviceRadius` for any validation and remove them (the affiliate-registration map step + geocoding go with them — see §7). Verify no other consumer (e.g. an admin map view) before deleting the fields; enforcement stops immediately regardless.
 
 ### 4.7 Removed Models
 
@@ -475,7 +476,7 @@ async function getInventory({ affiliateId, status, page })     // affiliate/admi
 **The QR payload on the printed label is the full claim URL** so a phone camera works with no app:
 `https://wavemax.promo/embed-app-v2.html?route=/claim&bag=<token>`
 
-**Edge cases:** double-claim race (atomic `findOneAndUpdate`, loser gets `null` → `409 bag_already_claimed`); rescan-during-intake idempotency (`linkToOrderAtIntake` returns the existing non-terminal order instead of spawning a second); lost token → generic `404 invalid_bag`; mint quantity bounded `1 ≤ n ≤ bag_mint_max_batch`; customer with multiple active bags allowed (intake resolves by token, not by customer).
+**Edge cases:** double-claim race (atomic `findOneAndUpdate`, loser gets `null` → `409 bag_already_claimed`); rescan-during-intake idempotency (`linkToOrderAtIntake` returns the existing non-terminal order instead of spawning a second); lost token → generic `404 invalid_bag`; mint quantity bounded `1 ≤ n ≤ bag_mint_max_batch`; **one active bag per customer (launch invariant)** — naturally enforced because each claim creates one customer (unique email) per bag; intake resolves by token, not by customer.
 
 ### 6.2 Affiliate Invites + W-9 Upload
 
@@ -499,7 +500,7 @@ pending_review ──(admin verify)──► on_file  (+ unlock payments if lock
 pending_review ──(admin reject)──► rejected ──(affiliate re-uploads)──► pending_review
 ```
 
-**Edge cases:** double-submit / replay of one invite (atomic `consume`, loser 409 + rollback); client tampers email (ignored — taken from invite); expired-but-pending (lazy `validate` returns `reason:'expired'`); resend only on `pending`; W-9 wrong type/oversized rejected by multer (`pdf/jpeg/png` only — SVG disallowed); decryption/authTag failure on download → 500 + audit `SUSPICIOUS_ACTIVITY`; re-upload after rejection deletes the prior GridFS file (no orphan blobs); invite email send failure leaves the row resendable (registration not blocked); affiliate never uploads → `w9Status` stays `not_required` until earnings cross threshold.
+**Edge cases:** double-submit / replay of one invite (atomic `consume`, loser 409 + rollback); client tampers email (ignored — taken from invite); expired-but-pending (lazy `validate` returns `reason:'expired'`); resend only on `pending`; W-9 wrong type/oversized rejected by multer (`pdf/jpeg/png` only — SVG disallowed); decryption/authTag failure on download → 500 + audit `SUSPICIOUS_ACTIVITY`; re-upload after rejection deletes the prior encrypted file (no orphan files); invite email send failure leaves the row resendable (registration not blocked); affiliate never uploads → `w9Status` stays `not_required` until earnings cross threshold.
 
 ### 6.3 QR-Driven Customer Claim + Registration
 
@@ -528,7 +529,7 @@ scan QR → /claim?bag=<token> → GET /api/v1/customers/claim/:bagToken
   └─ 'invalid' → friendly error
 ```
 
-**Edge cases:** simultaneous claim (atomic, one wins); double-submit retry (duplicate email/username caught before claim — no orphan); returning user scans a new bag (`duplicate_email`; existing-customer-additional-bag is a future hook); rescan of own claimed bag → login/status; minted/retired token → `invalid` (don't leak which); service-area mismatch → warn-not-block (fixed route, bag issued in-area); OAuth abandon → bag stays `issued`, re-scannable.
+**Edge cases:** simultaneous claim (atomic, one wins); double-submit retry (duplicate email/username caught before claim — no orphan); returning user scans a new bag → `duplicate_email` (**one bag per customer for now** — multi-bag linking out of scope; show a "log in" affordance); rescan of own claimed bag → login/status; minted/retired token → `invalid` (don't leak which); **no service-area / geocoding check** (the affiliate owns logistics); OAuth abandon → bag stays `issued`, re-scannable.
 
 **Deprecation:** remove the public `?affid` self-serve registration entirely (it reintroduces the affiliateId-trust hole). An authenticated admin endpoint that keeps `registerCustomer` callable with an explicit `affiliateId` (`POST /api/v1/administrators/customers`, RBAC administrator) for at-the-door account creation / lost-QR recovery is a **net-new scope addition beyond the 14 agreed decisions** — it is **deliberately not in the §5 API table** and is listed under Non-Goals/Future (§2) and §13. It requires explicit product sign-off before it appears in any PR; do not build it as part of the launch phases.
 
@@ -640,6 +641,7 @@ Register `/affiliate-scan` in **both** `EMBED_PAGES` and `pageScripts`; add `/af
 - `orderController`: delete `createOrder` (customer path), `createImmediateOrder`, `checkImmediateAvailability`, `checkActiveOrders`, the immediate-pickup-hours require.
 - Routes: remove the order create/immediate/check-active routes, beta-request routes (affiliate + admin), V1 customer register, schedule-pickup, affiliate-schedule.
 - Models: drop `Affiliate.availabilitySchedule`; drop `Customer.registrationVersion/bagCredit/bagCreditApplied/initialBagsRequested/numberOfBags`; drop the Order V1/scheduling/Pickup-Now/refund fields and the multi-bag machinery.
+- **Service area (no longer enforced):** drop `Affiliate.serviceLocation`/`serviceRadius`; remove the affiliate-register service-area map step (Leaflet) + `serviceLatitude/Longitude/Radius` capture; remove `locationValidation` geocoding / service-radius checks from affiliate registration **and** from the customer claim path (Nominatim is no longer called for service-area matching).
 - Frontend: remove `/schedule-pickup` from `EMBED_PAGES`/`pageScripts`, "Pickup Now" UI/availability widgets, the `?affid` referral binding and hidden `affiliateId` plumbing in `customer-register.js`, and the `paymentConfirmed` rate-limit bypass.
 - `operatorBagWorkflowService.parseCustomerQr`; client QR string parsing in `operator-scan-init.js`.
 
@@ -684,7 +686,7 @@ Added to / retuned in `SystemConfig.initializeDefaults()`. All payment keys `cat
 
 - **Opaque, non-enumerable tokens.** Bag token = `encryptionUtil.generateToken(16)` (128 bits, lowercase hex); invite raw token = `generateToken(32)` stored only as SHA-256. Never sequential, never derived from a business ID, never PII-in-QR. **Bag at-rest hardening: the `unique` index and all lookups are on `tokenHash` (HMAC-SHA256 keyed by `ENCRYPTION_KEY`); the raw `token` is stored non-unique solely to regenerate label QR images** (settled, §4.1 / §13 #1). Invite token compared by hash, constant-time.
 - **Anti-enumeration.** Bag `/resolve`, invite `/validate`, and intake return a single generic error for not-found/retired/malformed — no validity oracle. `/resolve` returns affiliate name only for `unclaimed`, `customerId` only for `claimed` (to route login), never customer names. Token-lookup endpoints get a tight rate limiter on top of `apiLimiter`.
-- **W-9 at rest.** AES-256-GCM (`encryptBuffer`) before GridFS write; per-file IV + authTag; SHA-256 plaintext integrity. No raw TIN stored (only `taxIdLast4`, admin-entered). Download admin-only, `attachment` + `nosniff`, never inlined, **audit-logged every access**. Shared GridFS (not local fs) for dual-AZ.
+- **W-9 at rest.** AES-256-GCM (`encryptBuffer`) to a **self-framed encrypted file** on the DRBD-replicated `W9_STORAGE_PATH` (mode `0600`, dirs `0700`); per-file IV + authTag; SHA-256 plaintext integrity. **Not GridFS** (ADB Mongo API support is uncertain) and never in the DB. No raw TIN stored (only `taxIdLast4`, admin-entered). Single-primary volume on the leader box, W-9 routes pinned there, secondary promoted on failover. Download admin-only, `attachment` + `nosniff`, never inlined, **audit-logged every access**.
 - **Server-trust on relationships.** Customer `affiliateId` derived from the bag; intake `customerId`/`affiliateId` derived from the resolved bag — never from client input. This closes the `?affid` trust hole and the old `createOrder` client-supplied-ids gap.
 - **CSRF** on every mutation per `csrf-config.js`; registration/claim are CSRF-exempt but invite-token/CAPTCHA/rate-limit gated. **Strict nonce-based CSP** on all new pages (no inline script/style; `script.nonce = window.CSP_NONCE`; QR via `data:` `<img>`; camera over HTTPS only).
 - **Rate-limiting:** `registrationLimiter` on claim-register and invited registration; `sensitiveOperationLimiter` on invite-mint and bag-mint; `fileUploadLimiter` on W-9 upload; `apiLimiter` (+ tight limiter) on token resolve/validate; `passwordResetLimiter` unchanged.
@@ -719,7 +721,7 @@ Added to / retuned in `SystemConfig.initializeDefaults()`. All payment keys `cat
 All new user-facing copy ships in en / es / pt / de (`public/locales/{lang}/common.json`) **in the same commit** as the code. Email templates ship in `server/templates/emails/{en,es,pt,de}/` (and `/v2/` variants where the dispatcher resolves them).
 
 **Client UI keys:**
-- **Bag claim:** `claim.title`, `claim.subtitle` ("You're signing up with {{affiliateName}}…"), `claim.serviceArea`, `claim.cta`, `claim.ctaOAuthGoogle`, `claim.ctaOAuthFacebook`, `claim.alreadyClaimedTitle/Body/Cta`, `claim.invalidTitle/Body`, `claim.raceLost`, `claim.resolving`.
+- **Bag claim:** `claim.title`, `claim.subtitle` ("You're signing up with {{affiliateName}}…"), `claim.cta`, `claim.ctaOAuthGoogle`, `claim.ctaOAuthFacebook`, `claim.alreadyClaimedTitle/Body/Cta`, `claim.invalidTitle/Body`, `claim.raceLost`, `claim.resolving`.
 - **Bag labels:** `bag.label.affiliateHeading`, `bag.label.bagRef`, `bag.label.printInstructions`.
 - **Admin bags:** `admin.bags.mint.title/affiliate/quantity/submit/success`, `admin.bags.issue.confirm`, `admin.bags.inventory.status.{minted|issued|active|retired}`.
 - **Affiliate bags:** `affiliate.bags.inventory.title`, `affiliate.bags.inventory.empty`.
@@ -745,7 +747,7 @@ Strict TDD — write the failing test first, confirm it fails for the right reas
 
 **Bags (`tests/unit/bags/bagService.test.js`, `tests/unit/models/Bag.test.js`, `tests/integration/bags.test.js`):** token entropy/uniqueness; `mintBatch` status/batch/affiliate/quantity bounds; `issueBatch` flips only that batch; `resolveByToken` outcomes (unclaimed/claimed/null); atomic `claim` (concurrent → one non-null); `linkToOrderAtIntake` returns ids + increments counters, throws on unclaimed, idempotent on rescan; unique-token `E11000`; status-enum guard; mint RBAC (403 without role / permission); labels `text/html` with affiliate name + QR imgs + no inline `<script>`; resolve unclaimed (no PII) / claimed (customerId only) / unknown (generic 404); inventory scoping.
 
-**Invites + W-9 (`tests/unit/affiliateInvite.test.js`, `tests/integration/affiliateInvites.test.js`, `tests/unit/secureFileStore.test.js`, `tests/integration/w9Upload.test.js`, `tests/integration/w9Admin.test.js`):** `hashToken` deterministic ≠ raw; `consume` single-use + expiry + concurrent race; mint RBAC/CSRF/409-duplicate; validate valid/expired/unknown (no enumeration); resend re-mints; revoke; register requires `inviteToken` (proves the gate is gone); valid invite → 201 + accepted; reused invite → 409 no second affiliate; client email ignored; `encryptBuffer`↔`decryptBuffer` round-trip + corrupted authTag throws; GridFS round-trip with ciphertext-at-rest assertion; multipart register PDF → `pending_review`; disallowed type / oversize → 400; upload self vs other affiliate; admin pending list; document download decrypts + audits; verify → `on_file` + unlocks payments; reject + re-upload loop; verify/reject CSRF.
+**Invites + W-9 (`tests/unit/affiliateInvite.test.js`, `tests/integration/affiliateInvites.test.js`, `tests/unit/secureFileStore.test.js`, `tests/integration/w9Upload.test.js`, `tests/integration/w9Admin.test.js`):** `hashToken` deterministic ≠ raw; `consume` single-use + expiry + concurrent race; mint RBAC/CSRF/409-duplicate; validate valid/expired/unknown (no enumeration); resend re-mints; revoke; register requires `inviteToken` (proves the gate is gone); valid invite → 201 + accepted; reused invite → 409 no second affiliate; client email ignored; `encryptBuffer`↔`decryptBuffer` round-trip + corrupted authTag throws; `secureFileStore` round-trip writes a self-framed ciphertext file to disk (assert on-disk bytes ≠ plaintext) and reads back the exact plaintext, tampered authTag/`sha256` throws, `storageKey` path layout correct; multipart register PDF → `pending_review`; disallowed type / oversize → 400; upload self vs other affiliate; admin pending list; document download decrypts + audits; verify → `on_file` + unlocks payments; reject + re-upload loop; verify/reject CSRF.
 
 **Customer claim (`tests/unit/bagClaimService.test.js`, `tests/integration/customerClaim.test.js`):** resolve states; `claimForCustomer` flips + race-loss throws; registration derives affiliate from bag (ignores payload `affiliateId`); rollback on race loss (no orphan); resolve responses (no PII / generic 404 / no customerId on claimed); concurrent double-claim → exactly one 201 + one customer; duplicate-email keeps bag `issued`; OAuth claim with `bagToken`; rate-limit; `/claim` in both maps + `excludedRoutes`; i18n parity.
 
@@ -776,7 +778,7 @@ One concern per PR, ≤500-line diffs, tests green at every merge (deletions pai
 | 7 | Operator intake rework (`orderIntakeService`, `weighBags`/`scanProcessed` re-point, order-at-intake) | PR 4, PR 6 |
 | 8 | Payment job retune + escalation (`shouldSendReminder` 60/8, `come-to-store`, `applyReadyGate` wiring) | PR 3, PR 4 |
 | 9 | Operator scan-out (`picked_up`) + affiliate delivery scan (`delivered`) + scanner page | PR 4, PR 7 |
-| 10 | W-9 upload / encrypted GridFS storage / admin review (+ `multer`, `secureFileStore`, `encryptBuffer`) | PR 5 (parallel to 6–9) |
+| 10 | W-9 upload / encrypted DRBD-file storage / admin review (+ `multer`, `secureFileStore`, `encryptBuffer`/`decryptBuffer`) | PR 5 (parallel to 6–9) |
 | 11 | i18n completion + Lighthouse pass on new public pages (claim, affiliate-scan) | all |
 
 **Checklist (mark done as you go):**
@@ -799,19 +801,19 @@ One concern per PR, ≤500-line diffs, tests green at every merge (deletions pai
 - [ ] **`comingSoon` host scoping** does not intercept the production claim host.
 - [ ] **`RUN_BACKGROUND_JOBS='true'` on exactly one (leader) box** so the retuned `paymentVerificationJob` reminder cron runs once (existing `scheduler.js` gate — nothing to build, just verify the env).
 - [ ] **`camera=(self)` is set ONLY on the `/affiliate-scan` response**; the global `Permissions-Policy` still reads `camera=()` for every other page.
-- [ ] **GridFS `w9docs` bucket** reachable from both AZ boxes (it lives in the shared MongoDB).
+- [ ] **DRBD W-9 volume** single-primary on the leader box with `W9_STORAGE_PATH` mounted (`0700`); **W-9 routes pinned** to that box (nginx upstream / CF rule); secondary-promotion failover tested.
 - [ ] **CSP:** if a worker-using QR decoder was chosen, `worker-src 'self'` is present (skip if `jsQR`).
 
 **Cross-phase notes (already settled — listed for implementer awareness, not as open risks):**
 - **Dual-AZ background-job duplication — mitigated, no action.** The retuned `paymentVerificationJob` runs only on the leader box via the existing `RUN_BACKGROUND_JOBS` gate (`scheduler.js`). Nothing new to build.
-- **Shared W-9 storage — settled.** GridFS `w9docs` bucket in the shared MongoDB (both AZ boxes reach it); see §4.3. Confirm the bucket is created on first write (PR 10).
+- **Shared W-9 storage — settled (§13 #7).** AES-256-GCM files on a DRBD-replicated `W9_STORAGE_PATH`, single-primary on the leader box, W-9 routes pinned there; see §4.3. Confirm the directory exists (`0700`) on first write (PR 10).
 - **Single canonical ready-gate function — settled (§13 #3).** `orderReadyGateService.applyReadyGate` is canonical; `orderStateMachine.maybeReadyForPickup` delegates; the gate is the sole writer of `readyForPickupAt`. Implement the canonical helper in PR 4 and wire all callers in PR 4/PR 8.
 
 ---
 
 ## 13. Decisions & Open Questions
 
-All load-bearing implementation questions are **settled** below so the team can build without blocking. Only two genuine **product** questions remain open, each with a named owner.
+All implementation and product questions are **settled** below so the team can build without blocking.
 
 ### Settled decisions (build to these)
 
@@ -821,13 +823,15 @@ All load-bearing implementation questions are **settled** below so the team can 
 4. **Transactions vs compensating delete — SETTLED: compensating delete (assume standalone mongod).** The customer-create-then-claim and affiliate-create-then-consume races use a compensating delete (`Customer.deleteOne` / affiliate rollback) so the design is correct on a **standalone mongod** without requiring a replica set. The clean-slate redeploy is **not** assumed to guarantee a replica set; Mongo multi-doc transactions (`session.withTransaction`) require one, so they are a documented **future hook** to switch to only if/when a replica set is confirmed. Tests target the compensating-delete semantics (no orphan on race loss). *(If ops later confirms the target is a replica set, this becomes a one-line swap — but do not block the build on it.)*
 5. **Optional geo proof-of-delivery — SETTLED: ship optional geo, defer photo.** Optional lat/lng capture on the affiliate door scan (`proofOfDelivery.geo`, `[lng,lat]`); `proofOfDelivery.photoKey` stays a reserved hook, not built. (See §4.4, §6.6.)
 6. **`store_pickup_address` source — SETTLED: single global SystemConfig key.** One global `store_pickup_address` (`isPublic:true`) for launch (one Austin store), consumed by the come-to-store notice. Per-affiliate addressing is a future hook if the network grows beyond one facility. (See §8.)
+7. **W-9 file storage — SETTLED: AES-256-GCM files on a DRBD-replicated local FS, single-primary + pinned routes.** Bytes are encrypted to self-framed files under `W9_STORAGE_PATH`, **not** GridFS (Oracle ADB's Mongo API very likely doesn't support it) and never in the DB. DRBD replicates the volume between oci1/oci2; it is single-primary on the leader box, and the `/api/v1/w9/*` + W-9 upload routes are pinned to that box (secondary promotes on failover). (See §4.3, §9, §12.)
+8. **Service area — SETTLED: not enforced.** The affiliate owns pickup/delivery logistics (their own route/scheduling) and customers are bound to an affiliate by the bag, so there is no geocoding / service-radius check at claim or registration. `Affiliate.serviceLocation`/`serviceRadius` and the affiliate-register map step are removed. (See §4.6, §6.3, §7.)
+9. **One bag per customer — SETTLED (launch).** Each customer claims exactly one durable bag (naturally enforced by the unique email at claim). A returning customer scanning a new bag gets `duplicate_email` with a "log in" affordance; multi-bag-per-account linking is out of scope for now. (See §2, §6.1, §6.3.)
 
-### Open product questions (owned by product, not implementation-blocking)
+### Open product questions
 
-7. **Service-area mismatch at claim.** Warn-and-allow (driver runs a fixed route; the bag was issued in-area) vs block. **Build default:** warn-not-block (the claim succeeds, a soft warning is shown). **Owner: product** — confirm whether any hard block is ever wanted; the default is safe to ship and reversible.
-8. **Existing-customer-claims-another-bag.** Launch scope is one customer claims via registration; a returning user who scans a new unclaimed bag hits `duplicate_email`. Should they instead be able to link the new bag to their existing account? **Build default:** future hook + a "log in to link this bag" affordance shown on the `duplicate_email` path now. **Owner: product** — decide whether multi-bag linking is in a near-term follow-up.
+**None remaining** — every prior open question (service-area enforcement, multi-bag-per-customer) is now resolved; see settled #7–#9.
 
 ### Scope additions beyond the 14 agreed decisions (require product sign-off before any PR)
 
 - **Admin-only manual customer create (`POST /api/v1/administrators/customers`)** for at-the-door / lost-QR account creation is **net-new scope** not among the 14 decisions. It is listed in Non-Goals/Future, **not** in the §5 API table, and must get explicit product sign-off before it appears in any PR.
-- **Existing-customer-multi-bag linking** (Open Question #8) is likewise Future, not launch scope.
+- **Existing-customer-multi-bag linking** is Future, not launch scope (one bag per customer for now — settled #9).
