@@ -35,4 +35,25 @@ describe('PR 2 removed routes return 404', () => {
     const res = await request(app).get('/api/v1/affiliates/AFF-test/schedule');
     expect(res.status).toBe(404);
   });
+
+  it('order creation / Pickup Now / check-active routes are unregistered', () => {
+    // Route-table assertion instead of HTTP probes: /check-active falls
+    // through to GET /:orderId (authenticate → 401 anonymous, same as before
+    // removal), and the POSTs would 403 on CSRF before routing — neither
+    // probe can observe the removal over HTTP.
+    const orderRoutes = require('../../server/routes/orderRoutes');
+    const registered = orderRoutes.stack
+      .filter((layer) => layer.route)
+      .map((layer) => `${Object.keys(layer.route.methods).join(',')} ${layer.route.path}`);
+    expect(registered).not.toContain('get /check-active');
+    expect(registered).not.toContain('get /immediate/availability');
+    expect(registered).not.toContain('post /immediate');
+    expect(registered).not.toContain('post /');
+  });
+
+  it('GET /api/v1/orders/immediate/availability is gone', async () => {
+    // Two path segments — nothing left matches → global 404.
+    const res = await request(app).get('/api/v1/orders/immediate/availability');
+    expect(res.status).toBe(404);
+  });
 });

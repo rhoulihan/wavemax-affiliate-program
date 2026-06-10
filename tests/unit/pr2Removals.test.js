@@ -13,4 +13,16 @@ describe('PR 2 — beta program code removed', () => {
   it('betaRequestService module is deleted', () => {
     expect(() => require('../../server/services/betaRequestService')).toThrow(/Cannot find module/);
   });
+
+  it('orderController no longer exports the customer-creation / Pickup Now handlers', () => {
+    const orderController = require('../../server/controllers/orderController');
+    expect(orderController.createOrder).toBeUndefined();
+    expect(orderController.createImmediateOrder).toBeUndefined();
+    expect(orderController.checkImmediateAvailability).toBeUndefined();
+    expect(orderController.checkActiveOrders).toBeUndefined();
+  });
+
+  it('orderImmediatePickupHours service is deleted', () => {
+    expect(() => require('../../server/services/orderImmediatePickupHours')).toThrow(/Cannot find module/);
+  });
 });
