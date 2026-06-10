@@ -130,6 +130,16 @@ function initializeAffiliateDashboard() {
 
   // Function to switch to a specific tab
   function switchToTab(tabId, updateHistory = true) {
+    // Resolve the target button first; fall back to the default tab if it
+    // no longer exists (e.g. stale localStorage/bookmark for a removed tab)
+    const targetButton = document.querySelector(`[data-tab="${tabId}"]`);
+    if (!targetButton) {
+      if (tabId !== 'pickups') {
+        switchToTab('pickups', updateHistory);
+      }
+      return;
+    }
+
     // Remove active class from all buttons and tabs
     tabButtons.forEach(btn => {
       btn.classList.remove('border-blue-600');
@@ -141,37 +151,34 @@ function initializeAffiliateDashboard() {
       content.classList.remove('active');
     });
 
-    // Find and activate the tab button
-    const targetButton = document.querySelector(`[data-tab="${tabId}"]`);
-    if (targetButton) {
-      targetButton.classList.add('border-blue-600');
-      targetButton.classList.add('text-blue-600');
-      targetButton.classList.remove('border-transparent');
+    // Activate the tab button
+    targetButton.classList.add('border-blue-600');
+    targetButton.classList.add('text-blue-600');
+    targetButton.classList.remove('border-transparent');
 
-      const tabContent = document.getElementById(`${tabId}-tab`);
-      if (tabContent) {
-        tabContent.classList.add('active');
-      }
+    const tabContent = document.getElementById(`${tabId}-tab`);
+    if (tabContent) {
+      tabContent.classList.add('active');
+    }
 
-      // Save current tab to localStorage
-      localStorage.setItem('affiliateCurrentTab', tabId);
+    // Save current tab to localStorage
+    localStorage.setItem('affiliateCurrentTab', tabId);
 
-      // Update URL with tab parameter for browser history (only if not from popstate)
-      if (updateHistory && window.updateTabInUrl) {
-        window.updateTabInUrl(tabId);
-      }
+    // Update URL with tab parameter for browser history (only if not from popstate)
+    if (updateHistory && window.updateTabInUrl) {
+      window.updateTabInUrl(tabId);
+    }
 
-      // Always load tab-specific data
-      console.log('[Affiliate Dashboard] Loading data for tab:', tabId);
-      if (tabId === 'pickups') {
-        loadPickupRequests(affiliateId);
-      } else if (tabId === 'customers') {
-        loadCustomers(affiliateId);
-      } else if (tabId === 'invoices') {
-        loadInvoices(affiliateId);
-      } else if (tabId === 'settings') {
-        loadSettingsData(affiliateId);
-      }
+    // Always load tab-specific data
+    console.log('[Affiliate Dashboard] Loading data for tab:', tabId);
+    if (tabId === 'pickups') {
+      loadPickupRequests(affiliateId);
+    } else if (tabId === 'customers') {
+      loadCustomers(affiliateId);
+    } else if (tabId === 'invoices') {
+      loadInvoices(affiliateId);
+    } else if (tabId === 'settings') {
+      loadSettingsData(affiliateId);
     }
   }
 
