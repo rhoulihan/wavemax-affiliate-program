@@ -1,7 +1,6 @@
 const mongoose = require('mongoose');
 const Administrator = require('../../server/models/Administrator');
 const Operator = require('../../server/models/Operator');
-const Payment = require('../../server/models/Payment');
 const DataDeletionRequest = require('../../server/models/DataDeletionRequest');
 const encryptionUtil = require('../../server/utils/encryption');
 
@@ -158,80 +157,7 @@ describe('Model Methods', () => {
       });
     });
   });
-  
-  describe('Payment Model', () => {
-    describe('pre-save middleware', () => {
-      it('should prevent modification of paygistixId after creation', async () => {
-        const payment = new Payment({
-          orderId: new mongoose.Types.ObjectId(),
-          customerId: new mongoose.Types.ObjectId(),
-          paymentMethodId: new mongoose.Types.ObjectId(),
-          paygistixId: 'PAY123',
-          amount: 100
-        });
-        
-        // Mark as not new (simulating existing document)
-        payment.isNew = false;
-        payment.isModified = (field) => field === 'paygistixId';
-        
-        let errorThrown = null;
-        try {
-          await payment.save({ validateBeforeSave: false });
-        } catch (error) {
-          errorThrown = error;
-        }
-        
-        expect(errorThrown).toBeDefined();
-        expect(errorThrown.message).toBe('Paygistix ID cannot be modified');
-      });
-      
-      it('should prevent modification of orderId after creation', async () => {
-        const payment = new Payment({
-          orderId: new mongoose.Types.ObjectId(),
-          customerId: new mongoose.Types.ObjectId(),
-          paymentMethodId: new mongoose.Types.ObjectId(),
-          paygistixId: 'PAY123',
-          amount: 100
-        });
-        
-        // Mark as not new (simulating existing document)
-        payment.isNew = false;
-        payment.isModified = (field) => field === 'orderId';
-        
-        let errorThrown = null;
-        try {
-          await payment.save({ validateBeforeSave: false });
-        } catch (error) {
-          errorThrown = error;
-        }
-        
-        expect(errorThrown).toBeDefined();
-        expect(errorThrown.message).toBe('Order ID cannot be modified');
-      });
-      
-      it('should allow modification of other fields', (done) => {
-        const payment = new Payment({
-          orderId: new mongoose.Types.ObjectId(),
-          customerId: new mongoose.Types.ObjectId(),
-          paymentMethodId: new mongoose.Types.ObjectId(),
-          paygistixId: 'PAY123',
-          amount: 100
-        });
-        
-        // Mark as not new but modifying different field
-        payment.isNew = false;
-        payment.isModified = (field) => field === 'status';
-        
-        // Call pre-save middleware directly
-        const preSaveMiddleware = payment.schema.s.hooks._pres.get('save')[0].fn;
-        preSaveMiddleware.call(payment, (error) => {
-          expect(error).toBeUndefined();
-          done();
-        });
-      });
-    });
-  });
-  
+
   describe('DataDeletionRequest Model', () => {
     describe('markAsFailed method', () => {
       it('should mark request as failed with errors', async () => {

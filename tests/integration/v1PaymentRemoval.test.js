@@ -106,4 +106,14 @@ describe('V1 Paygistix removal', () => {
       expect(() => require(mod)).toThrow(/Cannot find module/);
     });
   });
+
+  describe('V1 payment models are deleted', () => {
+    it.each([
+      '../../server/models/Payment',
+      '../../server/models/PaymentToken',
+      '../../server/models/CallbackPool'
+    ])('require(%s) throws MODULE_NOT_FOUND', (mod) => {
+      expect(() => require(mod)).toThrow(/Cannot find module/);
+    });
+  });
 });
