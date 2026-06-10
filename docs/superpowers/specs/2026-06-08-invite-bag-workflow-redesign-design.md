@@ -824,9 +824,9 @@ One concern per PR, ≤500-line diffs, tests green at every merge (deletions pai
 
 **Checklist (mark done as you go):**
 
-- [ ] PR 1 — V1 Paygistix removed; CSP scrubbed; suite green
-- [ ] PR 2 — scheduling / Pickup Now / BetaRequest / `?affid` removed
-- [ ] PR 3 — SystemConfig keys seeded; legacy keys retired; `laundry_bag_fee` deleted
+- [x] PR 1 — V1 Paygistix removed; CSP scrubbed; suite green
+- [x] PR 2 — scheduling / Pickup Now / BetaRequest / `?affid` removed
+- [x] PR 3 — SystemConfig keys seeded; legacy keys retired; `laundry_bag_fee` deleted
 - [ ] PR 4 — order enum + `orderStateMachine` + gate helper; transition tests pass
 - [ ] PR 5 — `AffiliateInvite` + invite flow + invite-bound registration
 - [ ] PR 6 — `Bag` + mint/issue/label + claim flow + `/claim` page (both maps + `excludedRoutes`)
