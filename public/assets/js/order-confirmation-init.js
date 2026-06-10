@@ -39,7 +39,6 @@
 
         // Set up navigation buttons
         const viewOrdersBtn = document.getElementById('viewOrdersBtn');
-        const scheduleAnotherBtn = document.getElementById('scheduleAnotherBtn');
 
         if (viewOrdersBtn) {
             viewOrdersBtn.addEventListener('click', function(e) {
@@ -60,24 +59,6 @@
             });
         }
 
-        if (scheduleAnotherBtn) {
-            scheduleAnotherBtn.addEventListener('click', function(e) {
-                e.preventDefault();
-                console.log('[Order Confirmation] Schedule another clicked');
-                
-                // Try different navigation methods
-                if (window.parent && window.parent.navigateTo) {
-                    // embed-app-v2.html navigation
-                    window.parent.navigateTo('/schedule-pickup');
-                } else if (window.navigateTo) {
-                    // Direct navigation if available
-                    window.navigateTo('/schedule-pickup');
-                } else {
-                    // Fallback to direct navigation
-                    window.location.href = '/embed-app-v2.html?route=/schedule-pickup';
-                }
-            });
-        }
     }
 
     async function loadOrderDetails(orderId) {

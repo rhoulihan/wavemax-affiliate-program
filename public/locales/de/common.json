@@ -702,7 +702,6 @@
     "dashboard": {
       "title": "Kunden-Dashboard",
       "welcome": "Willkommen zurück, {{name}}!",
-      "schedulePickup": "Abholung planen",
       "activeOrder": "Aktive Bestellung",
       "activeOrders": "Aktive Bestellungen",
       "orderHistory": "Bestellverlauf",
@@ -1244,7 +1243,6 @@
       "step2": "Ihr Partner wird Sie benachrichtigen, wenn er unterwegs ist",
       "step3": "Wir wiegen Ihre Wäsche und teilen Ihnen die endgültigen Kosten mit",
       "step4": "Saubere Wäsche wird am geplanten Liefertermin geliefert",
-      "scheduleAnother": "Weitere Abholung planen",
       "orderNumber": "Bestellnummer",
       "pickupScheduled": "Abholung geplant",
       "estimatedDelivery": "Voraussichtliche Lieferung",
@@ -1276,8 +1274,7 @@
       "operatorMessage": "Willkommen beim WaveMAX Team! Ihr Operator-Konto wurde erstellt.",
       "operatorPin": "Ihre PIN:",
       "accessPortal": "Portal aufrufen",
-      "accessDashboard": "Auf Ihr Dashboard zugreifen",
-      "schedulePickup": "Planen Sie Ihre erste Abholung"
+      "accessDashboard": "Auf Ihr Dashboard zugreifen"
     },
     "commission": {
       "title": "Provisionszahlungsbenachrichtigung",

@@ -695,7 +695,6 @@
     "dashboard": {
       "title": "Panel de Cliente",
       "welcome": "¡Bienvenido de vuelta, {{name}}!",
-      "schedulePickup": "Programar Recogida",
       "activeOrder": "Pedido Activo",
       "activeOrders": "Pedidos Activos",
       "orderHistory": "Historial de Pedidos",
@@ -1226,7 +1225,6 @@
       "step2": "Tu socio afiliado te notificará cuando esté en camino",
       "step3": "Pesaremos tu lavandería y te proporcionaremos el costo final",
       "step4": "La ropa limpia será entregada en tu fecha de entrega programada",
-      "scheduleAnother": "Programar Otra Recogida",
       "orderNumber": "Número de Pedido",
       "pickupScheduled": "Recogida Programada",
       "estimatedDelivery": "Entrega Estimada",
@@ -1258,8 +1256,7 @@
       "operatorMessage": "¡Bienvenido al equipo WaveMAX! Tu cuenta de operador ha sido creada.",
       "operatorPin": "Tu PIN:",
       "accessPortal": "Acceder al Portal",
-      "accessDashboard": "Acceder a tu Panel",
-      "schedulePickup": "Programa tu Primera Recogida"
+      "accessDashboard": "Acceder a tu Panel"
     },
     "commission": {
       "title": "Notificación de Pago de Comisión",

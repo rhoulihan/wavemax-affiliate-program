@@ -56,7 +56,6 @@ const EMBED_PAGES = {
     '/reset-password': '/reset-password-embed.html',
     '/administrator-login': '/administrator-login-embed.html',
     '/administrator-dashboard': '/administrator-dashboard-embed.html',
-    '/schedule-pickup': '/schedule-pickup-embed.html',
     '/order-confirmation': '/order-confirmation-embed.html',
     '/customer-dashboard': '/customer-dashboard-embed.html',
     '/affiliate-success': '/affiliate-success-embed.html',
@@ -88,13 +87,7 @@ function getRouteFromUrl() {
     if (!route && params.get('login')) {
         const loginType = params.get('login');
         if (loginType === 'customer') {
-            // Check if pickup parameter is also present
-            if (params.get('pickup') === 'true') {
-                route = '/schedule-pickup';
-                console.log('Mapped login=customer&pickup=true to /schedule-pickup');
-            } else {
-                route = '/customer-login';
-            }
+            route = '/customer-login';
         } else if (loginType === 'affiliate') {
             route = '/affiliate-login';
         } else if (loginType === 'administrator') {
@@ -597,7 +590,6 @@ function initializePageScripts(route) {
         '/reset-password': ['/assets/js/embed-config.js', '/assets/js/i18n.js', '/assets/js/language-switcher.js', '/assets/js/modal-utils.js', '/assets/js/csrf-utils.js', '/assets/js/swirl-spinner.js', '/assets/js/api-client.js', '/assets/js/reset-password-init.js'],
         '/administrator-login': ['/assets/js/i18n.js', '/assets/js/language-switcher.js', '/assets/js/csrf-utils.js', '/assets/js/api-client.js', '/assets/js/administrator-login-init.js'],
         '/administrator-dashboard': ['https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js', '/assets/js/i18n.js', '/assets/js/language-switcher.js', '/assets/js/modal-utils.js', '/assets/js/errorHandler.js', '/assets/js/csrf-utils.js', '/assets/js/api-client.js', '/assets/js/password-validator-component.js', '/assets/js/qrcode.min.js', 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js', '/assets/js/label-print-utils.js', '/assets/js/administrator-dashboard-init.js?v=marketing-modal-fix', '/assets/js/admin-operator-fix.js', '/assets/js/administrator-dashboard-i18n.js'],
-        '/schedule-pickup': ['/assets/js/i18n.js', '/assets/js/language-switcher.js', '/assets/js/csrf-utils.js', '/assets/js/modal-utils.js', '/assets/js/swirl-spinner.js', '/assets/js/api-client.js', '/assets/js/schedule-pickup-embed.js'],
         '/order-confirmation': ['/assets/js/i18n.js', '/assets/js/language-switcher.js', '/assets/js/order-confirmation-init.js'],
         '/customer-dashboard': ['/assets/js/i18n.js', '/assets/js/language-switcher.js', '/assets/js/modal-utils.js', '/assets/js/csrf-utils.js', '/assets/js/swirl-spinner.js', '/assets/js/api-client.js', '/assets/js/address-validation-component.js', 'https://cdnjs.cloudflare.com/ajax/libs/awesomplete/1.1.5/awesomplete.min.js', '/assets/js/service-area-autocomplete.js', '/assets/js/customer-dashboard.js?v=20250108-5'],
         '/affiliate-success': ['/assets/js/i18n.js', '/assets/js/language-switcher.js', '/assets/js/modal-utils.js', '/assets/js/affiliate-success-init.js'],

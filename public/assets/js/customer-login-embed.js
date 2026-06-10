@@ -129,11 +129,6 @@
 
               // Determine where to redirect
               let redirectTo = '/customer-dashboard'; // default
-              
-              if (redirectParam === 'schedule-pickup' || pickupParam === 'true' || 
-                  pickupFromSession === 'true' || redirectFromSession === 'schedule-pickup') {
-                redirectTo = '/schedule-pickup';
-              }
 
               // Clear the session flags after reading
               if (pickupFromSession) {
@@ -301,12 +296,7 @@
                   });
 
                   // Determine where to redirect
-                  let redirectTo = '/customer-dashboard'; // default
-                  
-                  if (redirectParam === 'schedule-pickup' || pickupParam === 'true' || 
-                      pickupFromSession === 'true' || redirectFromSession === 'schedule-pickup') {
-                    redirectTo = '/schedule-pickup';
-                  }
+                  const redirectTo = '/customer-dashboard'; // default
 
                   // Clear the session flags after reading
                   if (pickupFromSession) {

@@ -113,22 +113,7 @@ function displayCustomerData(data) {
   }
 
   // Update button links to use direct navigation
-  const schedulePickupBtn = document.getElementById('schedulePickupBtn');
   const customerDashboardBtn = document.getElementById('customerDashboardBtn');
-
-  if (schedulePickupBtn) {
-    schedulePickupBtn.href = 'https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?login=customer&pickup=true';
-    schedulePickupBtn.onclick = function(e) {
-      e.preventDefault();
-      // For embedded context, navigate within iframe
-      if (window.parent !== window) {
-        window.location.href = '/embed-app-v2.html?login=customer&pickup=true';
-      } else {
-        // For direct access, navigate to the parent site
-        window.top.location.href = this.href;
-      }
-    };
-  }
 
   if (customerDashboardBtn) {
     customerDashboardBtn.href = 'https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?login=customer';

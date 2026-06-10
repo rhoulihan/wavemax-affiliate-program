@@ -227,19 +227,6 @@
             });
         }
         
-        const scheduleAnotherBtn = document.getElementById('scheduleAnotherBtn');
-        if (scheduleAnotherBtn) {
-            scheduleAnotherBtn.addEventListener('click', function(e) {
-                e.preventDefault();
-                // Navigate using the embed navigation system
-                if (window.navigateTo) {
-                    window.navigateTo('/schedule-pickup');
-                } else {
-                    navigateParent('/schedule-pickup');
-                }
-            });
-        }
-        
         // Notify parent that iframe is loaded
         sendMessageToParent('iframe-loaded', { page: 'order-confirmation' });
     }

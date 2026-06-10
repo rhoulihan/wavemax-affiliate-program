@@ -731,7 +731,6 @@
     "dashboard": {
       "title": "Customer Dashboard",
       "welcome": "Welcome back, {{name}}!",
-      "schedulePickup": "Schedule Pickup",
       "activeOrder": "Active Order",
       "activeOrders": "Active Orders",
       "orderHistory": "Order History",
@@ -1221,7 +1220,6 @@
       "step2": "Your affiliate partner will notify you when they're on their way",
       "step3": "We'll weigh your laundry and provide the final cost",
       "step4": "Clean laundry will be delivered on your scheduled delivery date",
-      "scheduleAnother": "Schedule Another Pickup",
       "orderNumber": "Order Number",
       "pickupScheduled": "Pickup Scheduled",
       "estimatedDelivery": "Estimated Delivery",
@@ -1253,8 +1251,7 @@
       "operatorMessage": "Welcome to the WaveMAX team! Your operator account has been created.",
       "operatorPin": "Your PIN:",
       "accessPortal": "Access Portal",
-      "accessDashboard": "Access Your Dashboard",
-      "schedulePickup": "Schedule Your First Pickup"
+      "accessDashboard": "Access Your Dashboard"
     },
     "commission": {
       "title": "Commission Payment Notification",

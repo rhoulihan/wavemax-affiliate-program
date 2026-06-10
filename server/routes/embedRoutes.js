@@ -51,9 +51,6 @@ router.get('/embed-landing.html', serveHTMLWithNonce('embed-landing.html'));
 // Affiliate Dashboard
 router.get('/affiliate-dashboard-embed.html', serveHTMLWithNonce('affiliate-dashboard-embed.html'));
 
-// Schedule Pickup
-router.get('/schedule-pickup-embed.html', serveHTMLWithNonce('schedule-pickup-embed.html'));
-
 // Order Confirmation
 router.get('/order-confirmation-embed.html', serveHTMLWithNonce('order-confirmation-embed.html'));
 

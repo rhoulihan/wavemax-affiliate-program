@@ -60,4 +60,9 @@ describe('PR 2 removed routes return 404', () => {
     const res = await request(app).get('/api/v1/orders/immediate/availability');
     expect(res.status).toBe(404);
   });
+
+  it('schedule-pickup-embed.html is gone', async () => {
+    const res = await request(app).get('/schedule-pickup-embed.html');
+    expect(res.status).toBe(404);
+  });
 });
