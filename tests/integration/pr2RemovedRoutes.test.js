@@ -45,6 +45,10 @@ describe('PR 2 removed routes return 404', () => {
     const registered = orderRoutes.stack
       .filter((layer) => layer.route)
       .map((layer) => `${Object.keys(layer.route.methods).join(',')} ${layer.route.path}`);
+    // Canary: a route that DOES exist must appear, proving the introspection
+    // sees real routes — otherwise the not.toContain checks pass vacuously
+    // if a future Express version changes the layer shape.
+    expect(registered).toContain('get /export');
     expect(registered).not.toContain('get /check-active');
     expect(registered).not.toContain('get /immediate/availability');
     expect(registered).not.toContain('post /immediate');

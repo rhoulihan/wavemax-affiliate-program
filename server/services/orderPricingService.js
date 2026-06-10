@@ -1,8 +1,12 @@
 // Order pricing service
 //
 // Pure pricing logic for orders: delivery-fee calculation with affiliate
-// overrides + system defaults, plus the commission formula used both in
-// the Order model's pre-save hook and in reporting code.
+// overrides + system defaults, plus the commission formula.
+//
+// Currently caller-less: its consumers were deleted with customer-facing
+// order creation (PR 2). Retained deliberately for PR 7's operator-intake
+// service (orderIntakeService.createOrderFromBag spreads calculateDeliveryFee
+// into order.feeBreakdown) — do NOT remove in dead-code sweeps.
 //
 // Extracted from orderController.js in Phase 2 so pricing lives in one
 // place and can be unit-tested in isolation.
