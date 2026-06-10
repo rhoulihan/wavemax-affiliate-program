@@ -25,4 +25,8 @@ describe('PR 2 — beta program code removed', () => {
   it('orderImmediatePickupHours service is deleted', () => {
     expect(() => require('../../server/services/orderImmediatePickupHours')).toThrow(/Cannot find module/);
   });
+
+  it('identityAvailabilityService is deleted', () => {
+    expect(() => require('../../server/services/identityAvailabilityService')).toThrow(/Cannot find module/);
+  });
 });

@@ -108,72 +108,6 @@
         return allRequirementsMet;
     }
 
-    // Validate username availability
-    async function validateUsername() {
-        const username = document.getElementById('username');
-        if (!username || !username.value) return;
-
-        const usernameHelp = username.nextElementSibling;
-        
-        try {
-            const result = await ApiClient.post('/api/v1/auth/check-username', 
-                { username: username.value },
-                { showError: false }
-            );
-
-            if (result.available) {
-                username.classList.remove('border-red-500');
-                username.classList.add('border-green-500');
-                if (usernameHelp) {
-                    usernameHelp.textContent = '✅ Username is available';
-                    usernameHelp.classList.remove('text-gray-500', 'text-red-600');
-                    usernameHelp.classList.add('text-green-600');
-                }
-            } else {
-                username.classList.remove('border-green-500');
-                username.classList.add('border-red-500');
-                if (usernameHelp) {
-                    usernameHelp.textContent = '❌ Username is already taken';
-                    usernameHelp.classList.remove('text-gray-500', 'text-green-600');
-                    usernameHelp.classList.add('text-red-600');
-                }
-            }
-        } catch (error) {
-            console.error('[V2 Registration] Error checking username:', error);
-        }
-    }
-
-    // Validate email availability
-    async function validateEmail() {
-        const email = document.getElementById('email');
-        if (!email || !email.value) return;
-
-        try {
-            const result = await ApiClient.post('/api/v1/auth/check-email',
-                { email: email.value },
-                { showError: false }
-            );
-
-            if (result.available) {
-                email.classList.remove('border-red-500');
-                email.classList.add('border-green-500');
-            } else {
-                email.classList.remove('border-green-500');
-                email.classList.add('border-red-500');
-                // Create or update help text
-                let emailHelp = email.parentElement.querySelector('.text-xs.text-red-600');
-                if (!emailHelp) {
-                    emailHelp = document.createElement('p');
-                    emailHelp.className = 'text-xs text-red-600 mt-1';
-                    email.parentElement.appendChild(emailHelp);
-                }
-                emailHelp.textContent = '❌ This email is already registered';
-            }
-        } catch (error) {
-            console.error('[V2 Registration] Error checking email:', error);
-        }
-    }
-
     // Bag selection function
     function selectBags(num) {
         document.querySelectorAll('.bag-option').forEach(option => {
@@ -703,7 +637,6 @@
         }
         if (usernameInput) {
             usernameInput.addEventListener('input', validatePassword);
-            usernameInput.addEventListener('blur', validateUsername);
             // Reset on input change
             usernameInput.addEventListener('input', function() {
                 const usernameHelp = this.nextElementSibling;
@@ -717,7 +650,6 @@
         }
         if (emailInput) {
             emailInput.addEventListener('input', validatePassword);
-            emailInput.addEventListener('blur', validateEmail);
             // Reset on input change
             emailInput.addEventListener('input', function() {
                 const emailHelp = this.parentElement.querySelector('.text-xs.text-red-600');

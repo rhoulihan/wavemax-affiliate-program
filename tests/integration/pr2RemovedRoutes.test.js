@@ -65,4 +65,23 @@ describe('PR 2 removed routes return 404', () => {
     const res = await request(app).get('/schedule-pickup-embed.html');
     expect(res.status).toBe(404);
   });
+
+  it('POST /api/v1/auth/check-username is gone', async () => {
+    // This task also deletes the check-* entries from csrf-config
+    // PUBLIC_ENDPOINTS, so the path is now default-enforced — a tokenless
+    // POST would 403 before routing. Use the shared agent + token.
+    const res = await agent
+      .post('/api/v1/auth/check-username')
+      .set('x-csrf-token', csrfToken)
+      .send({ username: 'whoever' });
+    expect(res.status).toBe(404);
+  });
+
+  it('POST /api/v1/auth/check-email is gone', async () => {
+    const res = await agent
+      .post('/api/v1/auth/check-email')
+      .set('x-csrf-token', csrfToken)
+      .send({ email: 'who@ever.com' });
+    expect(res.status).toBe(404);
+  });
 });

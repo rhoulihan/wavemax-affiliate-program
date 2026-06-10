@@ -36,8 +36,6 @@ describe('Social Auth Routes - Full Coverage', () => {
       administratorLogin: jest.fn(),
       operatorLogin: jest.fn(),
       operatorAutoLogin: jest.fn(),
-      checkEmail: jest.fn(),
-      checkUsername: jest.fn(),
       forgotPassword: jest.fn(),
       resetPassword: jest.fn(),
       verifyToken: jest.fn(),

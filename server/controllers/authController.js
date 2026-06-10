@@ -15,7 +15,6 @@ const { logLoginAttempt, logAuditEvent, AuditEvents } = require('../utils/auditL
 const { sanitizeInput } = require('../middleware/sanitization');
 const { escapeRegex } = require('../utils/securityUtils');
 
-const identityAvailabilityService = require('../services/identityAvailabilityService');
 const passwordResetService = require('../services/passwordResetService');
 const authTokenService = require('../services/authTokenService');
 const socialAuthAffiliateService = require('../services/socialAuthAffiliateService');
@@ -1662,48 +1661,6 @@ exports.completeSocialCustomerRegistration = async (req, res) => {
     }
     logger.error('Customer social registration error:', err);
     res.status(500).json({ success: false, message: 'Customer registration failed' });
-  }
-};
-
-/**
- * Check if username is available (public endpoint)
- * @route   POST /api/auth/check-username
- * @desc    Check if username is available
- * @access  Public
- */
-exports.checkUsername = async (req, res) => {
-  try {
-    const available = await identityAvailabilityService.isUsernameAvailable({
-      username: req.body.username
-    });
-    res.json({ success: true, available });
-  } catch (err) {
-    if (err.isIdentityAvailabilityError) {
-      return res.status(err.status).json({ success: false, message: err.message });
-    }
-    logger.error('Check username error:', err);
-    res.status(500).json({ success: false, message: 'Error checking username availability' });
-  }
-};
-
-/**
- * Check if email is available (public endpoint)
- * @route   POST /api/auth/check-email
- * @desc    Check if email is available
- * @access  Public
- */
-exports.checkEmail = async (req, res) => {
-  try {
-    const available = await identityAvailabilityService.isEmailAvailable({
-      email: req.body.email
-    });
-    res.json({ success: true, available });
-  } catch (err) {
-    if (err.isIdentityAvailabilityError) {
-      return res.status(err.status).json({ success: false, message: err.message });
-    }
-    logger.error('Check email error:', err);
-    res.status(500).json({ success: false, message: 'Error checking email availability' });
   }
 };
 

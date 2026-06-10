@@ -985,83 +985,11 @@
         return;
       }
 
-      // Check email availability
-      try {
-        const response = await csrfFetch('/api/v1/auth/check-email', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ email })
-        });
-
-        const result = await response.json();
-
-        if (result.available) {
-          emailField.classList.remove('border-red-500');
-          emailField.classList.add('border-green-500');
-          emailHelp.textContent = '✓ Email available';
-          emailHelp.classList.remove('text-red-600');
-          emailHelp.classList.add('text-green-600');
-        } else {
-          emailField.classList.remove('border-green-500');
-          emailField.classList.add('border-red-500');
-          emailHelp.textContent = '❌ Email already registered';
-          emailHelp.classList.remove('text-green-600');
-          emailHelp.classList.add('text-red-600');
-        }
-      } catch (error) {
-        console.error('Error checking email:', error);
-        // Don't show error to user, just reset state
-        emailField.classList.remove('border-red-500', 'border-green-500');
-        emailHelp.textContent = '';
-      }
-    }
-
-    // Add username validation function
-    async function validateUsername() {
-      const username = usernameField?.value?.trim();
-      if (!username) return;
-
-      // Find or create help text element
-      let usernameHelp = usernameField.parentElement.querySelector('.username-validation-message');
-      if (!usernameHelp) {
-        usernameHelp = document.createElement('p');
-        usernameHelp.className = 'username-validation-message text-xs mt-1';
-        usernameField.parentElement.appendChild(usernameHelp);
-      }
-
-      // Check username availability
-      try {
-        const response = await csrfFetch('/api/v1/auth/check-username', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ username })
-        });
-
-        const result = await response.json();
-
-        if (result.available) {
-          usernameField.classList.remove('border-red-500');
-          usernameField.classList.add('border-green-500');
-          usernameHelp.textContent = '✓ Username available';
-          usernameHelp.classList.remove('text-red-600');
-          usernameHelp.classList.add('text-green-600');
-        } else {
-          usernameField.classList.remove('border-green-500');
-          usernameField.classList.add('border-red-500');
-          usernameHelp.textContent = '❌ Username already taken';
-          usernameHelp.classList.remove('text-green-600');
-          usernameHelp.classList.add('text-red-600');
-        }
-      } catch (error) {
-        console.error('Error checking username:', error);
-        // Don't show error to user, just reset state
-        usernameField.classList.remove('border-red-500', 'border-green-500');
-        usernameHelp.textContent = '';
-      }
+      // Format is valid — duplicate-email errors surface at submit time.
+      emailField.classList.remove('border-red-500');
+      emailField.classList.add('border-green-500');
+      emailHelp.textContent = '';
+      emailHelp.classList.remove('text-red-600', 'text-green-600');
     }
 
     // Add email validation event listeners
@@ -1084,23 +1012,6 @@
             usernameField?.value || '',
             this.value
           );
-        }
-      });
-    }
-
-    // Add username validation event listeners
-    if (usernameField) {
-      // Validate on blur (when user leaves the field)
-      usernameField.addEventListener('blur', validateUsername);
-      
-      // Clear validation message on input but keep the original input handler
-      const originalInputHandler = usernameField.oninput;
-      usernameField.addEventListener('input', function() {
-        const usernameHelp = this.parentElement.querySelector('.username-validation-message');
-        if (usernameHelp && usernameHelp.textContent.includes('❌')) {
-          this.classList.remove('border-red-500', 'border-green-500');
-          usernameHelp.textContent = '';
-          usernameHelp.classList.remove('text-red-600', 'text-green-600');
         }
       });
     }
