@@ -343,19 +343,9 @@
       "city": "City *",
       "state": "State *",
       "zipCode": "ZIP Code *",
-      "serviceAddress": "Service Center Address",
-      "addressPlaceholder": "Enter address or click on map",
       "passwordPlaceholder": "Enter your password",
       "confirmPasswordPlaceholder": "Re-enter your password",
       "usernamePlaceholder": "Choose a unique username",
-      "addressHelp": "Start typing to search for an address",
-      "serviceRadius": "Service Radius:",
-      "miles": "miles",
-      "serviceCenter": "Service Center:",
-      "coverageArea": "Coverage Area:",
-      "coordinates": "Coordinates:",
-      "useRegistrationAddress": "Use Registration Address",
-      "notSet": "Not set",
       "serviceInfo": "Service Information",
       "deliveryFeeStructure": "Delivery Fee Structure",
       "dynamicPricing": "Dynamic Pricing:",
@@ -364,14 +354,8 @@
       "minimumFeeDesc": "The minimum fee charged regardless of bag count",
       "perBagFee": "Per-Bag Fee ($) *",
       "perBagFeeDesc": "Fee charged for each bag of laundry",
-      "addressAutoFill": "The map will automatically center on your business address once all address fields are filled above.",
       "validateAddress": "Validate Address",
       "validateAddressHelp": "Click to verify your address before continuing",
-      "selectServiceLocation": "Select Your Service Location",
-      "confirmServiceLocation": "Confirm Your Service Location",
-      "selectCorrectLocation": "We found multiple possible locations. Please select the correct one:",
-      "confirmCorrectAddress": "Please confirm this is the correct address for your service area:",
-      "confirm": "Confirm",
       "livePricingPreview": "Live Pricing Preview",
       "1bag": "1 bag",
       "3bags": "3 bags",
@@ -522,9 +506,7 @@
       "marketingLinks": {
         "title": "Your Marketing Links",
         "landingPage": "Customer Landing Page",
-        "landingPageDesc": "Share this professional page to showcase your services",
-        "registrationLink": "Direct Registration Link",
-        "registrationDesc": "Direct link for customers to register"
+        "landingPageDesc": "Share this professional page to showcase your services"
       },
       "pickups": {
         "title": "Upcoming Pickups & Deliveries"
@@ -592,9 +574,6 @@
       "marketingLinkTitle": "Your Customer Landing Page",
       "marketingLinkDescription": "Share this professional landing page with potential customers to showcase your services and pricing:",
       "marketingLinkHelp": "This page includes information about your services, pricing, and a registration form.",
-      "linkTitle": "Direct Customer Registration Link",
-      "linkDescription": "Customers can also use this direct link to register:",
-      "linkHelp": "Each customer registered through your links will be associated with your account.",
       "nextStepsTitle": "Next Steps",
       "nextStep1": "Check your email for your welcome message and login credentials",
       "nextStep2": "Log in to your affiliate dashboard to access marketing materials",
@@ -696,7 +675,6 @@
       "v2": {
         "noPaymentRequired": "No Payment Required",
         "subtitle": "Sign up for premium laundry pickup and delivery service - pay after we weigh your laundry!",
-        "freeBagsBanner": "Get Your First 1-2 Laundry Bags FREE - No Credit Card Required!",
         "howItWorks": "How Our V2 Payment System Works",
         "step1": "Sign up now with no credit card required",
         "socialSignupText": "Sign up quickly using your social media account",
@@ -954,8 +932,6 @@
         "marketingLinksDesc": "Share these links with your affiliate to promote customer registration.",
         "landingPageLink": "Affiliate Landing Page",
         "landingPageDesc": "Marketing page with revenue calculator and customer registration",
-        "customerRegisterLink": "Customer Registration Page",
-        "customerRegisterDesc": "Direct link to customer registration for this affiliate",
         "sendW9": "Send W9",
         "sending": "Sending...",
         "confirmSendW9": "Send W9 form to this affiliate?",
@@ -1348,7 +1324,12 @@
     "description": "Check the status of your Facebook data deletion request",
     "loading": "Loading status...",
     "confirmationCode": "Confirmation Code",
-    "status": "Status",
+    "status": {
+      "pending": "Pending Processing",
+      "processing": "Currently Processing",
+      "completed": "Completed Successfully",
+      "failed": "Failed"
+    },
     "requestedAt": "Requested At",
     "completedAt": "Completed At",
     "contact": "For questions about your data deletion request, please contact support.",
@@ -1358,12 +1339,6 @@
       "noCode": "No confirmation code provided",
       "loadFailed": "Failed to load deletion status",
       "notFound": "Deletion request not found"
-    },
-    "status": {
-      "pending": "Pending Processing",
-      "processing": "Currently Processing",
-      "completed": "Completed Successfully",
-      "failed": "Failed"
     },
     "success": {
       "title": "Deletion Completed",

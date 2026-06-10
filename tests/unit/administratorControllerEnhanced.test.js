@@ -827,19 +827,8 @@ describe('Administrator Controller - Enhanced Coverage', () => {
           }
         ];
 
-        const mockGeographicDistribution = [
-          {
-            _id: 'TX',
-            affiliateCount: 10
-          }
-        ];
-
         // Mock aggregation results
-        Affiliate.aggregate.mockResolvedValue(mockAffiliateAnalytics);
-        
-        // Second call for geographic distribution
-        Affiliate.aggregate.mockResolvedValueOnce(mockAffiliateAnalytics)
-          .mockResolvedValueOnce(mockGeographicDistribution);
+        Affiliate.aggregate.mockResolvedValueOnce(mockAffiliateAnalytics);
 
         await getAffiliateAnalytics(req, res);
 
@@ -847,8 +836,7 @@ describe('Administrator Controller - Enhanced Coverage', () => {
         expect(res.json).toHaveBeenCalledWith({
           success: true,
           analytics: {
-            affiliates: mockAffiliateAnalytics,
-            geographicDistribution: mockGeographicDistribution
+            affiliates: mockAffiliateAnalytics
           }
         });
       });

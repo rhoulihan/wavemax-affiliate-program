@@ -110,8 +110,7 @@ describe('V2 Controller Logic', () => {
       await handler(req, res, next);
       
       expect(res.status).toHaveBeenCalledWith(201);
-      const responseData = res.json.mock.calls[0][0];
-      
+
       const customer = await Customer.findOne({ email: 'john@test.com' });
       expect(customer).toBeDefined();
     });

@@ -1861,7 +1861,6 @@
 
     // Build the marketing links using the correct route and parameter names
     const landingPageUrl = `${baseUrl}?route=/affiliate-landing&code=${affiliateId}`;
-    const customerRegisterUrl = `${baseUrl}?route=/customer-register&affid=${affiliateId}`;
 
     // Update modal title with affiliate name
     const modalTitle = modal.querySelector('.modal-header h3');
@@ -1873,7 +1872,6 @@
 
     // Populate the modal inputs
     document.getElementById('landingPageLink').value = landingPageUrl;
-    document.getElementById('customerRegisterLink').value = customerRegisterUrl;
 
     // Show the modal
     modal.classList.remove('hidden');
@@ -1894,7 +1892,6 @@
     const closeBtn = document.getElementById('closeMarketingLinksModal');
     const closeModalBtn = document.getElementById('closeMarketingLinksBtn');
     const copyLandingPageBtn = document.getElementById('copyLandingPageBtn');
-    const copyCustomerRegisterBtn = document.getElementById('copyCustomerRegisterBtn');
 
     // Close modal handlers
     const closeModal = () => {
@@ -1946,31 +1943,6 @@
           copyLandingPageBtn.textContent = t('common.buttons.copied', 'Copied!');
           setTimeout(() => {
             copyLandingPageBtn.textContent = originalText;
-          }, 2000);
-        }
-      });
-    }
-
-    if (copyCustomerRegisterBtn) {
-      copyCustomerRegisterBtn.addEventListener('click', async () => {
-        const input = document.getElementById('customerRegisterLink');
-        const t = window.i18n ? window.i18n.t.bind(window.i18n) : (key) => key;
-
-        try {
-          await navigator.clipboard.writeText(input.value);
-          const originalText = copyCustomerRegisterBtn.textContent;
-          copyCustomerRegisterBtn.textContent = t('common.buttons.copied', 'Copied!');
-          setTimeout(() => {
-            copyCustomerRegisterBtn.textContent = originalText;
-          }, 2000);
-        } catch (err) {
-          // Fallback for older browsers
-          input.select();
-          document.execCommand('copy');
-          const originalText = copyCustomerRegisterBtn.textContent;
-          copyCustomerRegisterBtn.textContent = t('common.buttons.copied', 'Copied!');
-          setTimeout(() => {
-            copyCustomerRegisterBtn.textContent = originalText;
           }, 2000);
         }
       });

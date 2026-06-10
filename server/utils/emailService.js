@@ -3,7 +3,7 @@
 // The implementation was split in Phase 2 of the refactor:
 //   - server/services/email/transport.js          — SMTP (Mailcow) + console adapter
 //   - server/services/email/template-manager.js   — template loading + i18n fallback + fillers
-//   - server/services/email/dispatcher/{affiliate,customer,admin,operator,ops,payment,beta}.js
+//   - server/services/email/dispatcher/{affiliate,customer,admin,operator,ops,payment,marketing}.js
 //     — per-domain email senders
 //
 // New code should import from `server/services/email/...` directly. This shim

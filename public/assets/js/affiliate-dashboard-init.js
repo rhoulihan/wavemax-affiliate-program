@@ -219,14 +219,6 @@ function initializeAffiliateDashboard() {
 
   // Schedule pickup button removed - affiliates should not schedule pickups
 
-  // Copy registration link button
-  const copyBtn = document.getElementById('copyRegistrationLinkBtn');
-  if (copyBtn) {
-    copyBtn.addEventListener('click', function() {
-      copyRegistrationLink();
-    });
-  }
-
   // Copy landing page link button
   const copyLandingBtn = document.getElementById('copyLandingPageLinkBtn');
   if (copyLandingBtn) {
@@ -515,11 +507,6 @@ async function loadAffiliateData(affiliateId) {
         }
       }
 
-      // Generate and display registration link with wavemaxlaundry.com format
-      const registrationLink = `https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?route=/customer-register&affid=${affiliateId}`;
-      const linkElement = document.getElementById('registrationLink');
-      if (linkElement) linkElement.value = registrationLink;
-
       // Generate and display landing page link
       const landingPageLink = `https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?route=/affiliate-landing&code=${affiliateId}`;
       const landingPageElement = document.getElementById('landingPageLink');
@@ -798,54 +785,6 @@ async function loadInvoices(affiliateId) {
   }
 }
 
-// Copy link functionality
-window.copyLink = function() {
-  const linkInput = document.getElementById('registrationLink');
-  linkInput.select();
-  document.execCommand('copy');
-
-  const copyBtn = event.target;
-  const originalText = copyBtn.textContent;
-  copyBtn.textContent = 'Copied!';
-  copyBtn.classList.add('bg-green-600');
-
-  setTimeout(() => {
-    copyBtn.textContent = originalText;
-    copyBtn.classList.remove('bg-green-600');
-  }, 2000);
-};
-
-// Copy registration link
-function copyRegistrationLink() {
-  const linkInput = document.getElementById('registrationLink');
-  const copyBtn = document.getElementById('copyRegistrationLinkBtn');
-
-  // Use setTimeout to ensure our code runs in a clean call stack
-  setTimeout(() => {
-    // Focus the input first
-    linkInput.focus();
-    linkInput.select();
-
-    try {
-      // Use execCommand which works better in iframes
-      const successful = document.execCommand('copy');
-      if (successful) {
-        showCopySuccess(copyBtn);
-        // Blur the input after successful copy
-        linkInput.blur();
-      } else {
-        // If copy fails, show the text for manual copying
-        linkInput.blur();
-        showManualCopyPrompt(linkInput.value);
-      }
-    } catch (err) {
-      // Show text for manual copying if everything fails
-      linkInput.blur();
-      showManualCopyPrompt(linkInput.value);
-    }
-  }, 10);
-}
-
 // Show manual copy prompt
 function showManualCopyPrompt(text) {
   // Create a temporary textarea for better compatibility
@@ -980,7 +919,6 @@ async function loadSettingsData(affiliateId) {
         const emailField = document.getElementById('settingsEmail');
         const phoneField = document.getElementById('settingsPhone');
         const businessNameField = document.getElementById('settingsBusinessName');
-        const registrationLinkField = document.getElementById('registrationLink');
         const minimumDeliveryFeeField = document.getElementById('settingsMinimumDeliveryFee');
         const perBagDeliveryFeeField = document.getElementById('settingsPerBagDeliveryFee');
 
@@ -1031,11 +969,6 @@ async function loadSettingsData(affiliateId) {
           updateFeeCalculatorPreview();
         }
 
-        // Generate and display registration link with wavemaxlaundry.com format
-        const registrationLink = `https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?route=/customer-register&affid=${affiliateId}`;
-        if (registrationLinkField) registrationLinkField.value = registrationLink;
-
-        // Load W-9 status
         // Set landing page link
         const landingPageLinkField = document.getElementById('landingPageLink');
         const landingPageLink = `https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?route=/affiliate-landing&code=${affiliateId}`;
@@ -1056,7 +989,7 @@ function enableEditMode() {
   const inputs = document.querySelectorAll('#settingsForm input[type="text"], #settingsForm input[type="email"], #settingsForm input[type="tel"], #settingsForm input[type="number"]');
   inputs.forEach(input => {
     // Skip the registration link field
-    if (input.id !== 'registrationLink' && input.id !== 'landingPageLink') {
+    if (input.id !== 'landingPageLink') {
       input.removeAttribute('readonly');
       input.classList.remove('bg-gray-100');
     }
@@ -1080,7 +1013,7 @@ function enableEditMode() {
 function disableEditMode() {
   const inputs = document.querySelectorAll('#settingsForm input[type="text"], #settingsForm input[type="email"], #settingsForm input[type="tel"], #settingsForm input[type="number"]');
   inputs.forEach(input => {
-    if (input.id !== 'registrationLink' && input.id !== 'landingPageLink') {
+    if (input.id !== 'landingPageLink') {
       input.setAttribute('readonly', true);
       input.classList.add('bg-gray-100');
     }

@@ -1148,20 +1148,12 @@ describe('Administrator Controller', () => {
         }
       }]);
       
-      // Mock geographic distribution
-      Customer.aggregate.mockResolvedValue([{
-        _id: 'City1',
-        affiliateCount: 10,
-        activeAffiliates: 8
-      }]);
-
       await administratorController.getAffiliateAnalytics(req, res, next);
 
       expect(res.json).toHaveBeenCalledWith({
         success: true,
         analytics: {
-          affiliates: expect.any(Array),
-          geographicDistribution: expect.any(Array)
+          affiliates: expect.any(Array)
         }
       });
     });

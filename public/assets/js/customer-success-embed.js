@@ -17,18 +17,9 @@
   function navigateParent(page) {
     // For embedded context, navigate within iframe
     if (window.parent !== window) {
-      // Get current URL parameters to preserve affiliate ID
-      const currentParams = new URLSearchParams(window.location.search);
-      const affiliateId = currentParams.get('affid') || currentParams.get('affiliate');
-
       // Build new URL with route
       const newParams = new URLSearchParams();
       newParams.set('route', `/${page}`);
-
-      // Preserve affiliate ID if present
-      if (affiliateId) {
-        newParams.set('affid', affiliateId);
-      }
 
       // Navigate to the new route
       window.location.href = `/embed-app-v2.html?${newParams.toString()}`;

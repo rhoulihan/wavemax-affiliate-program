@@ -154,7 +154,7 @@ async function sendWelcomeEmails(customer, affiliate) {
     logger.error('Failed to send welcome email:', emailError);
   }
   try {
-    await emailService.sendAffiliateNewCustomerEmail(affiliate, customer, bagInfo);
+    await emailService.sendAffiliateNewCustomerEmail(affiliate, customer);
   } catch (emailError) {
     logger.error('Failed to send affiliate notification:', emailError);
   }

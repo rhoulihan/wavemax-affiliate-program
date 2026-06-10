@@ -124,9 +124,14 @@
       }
     },
     "howItWorks": {
-        "step1": "Jetzt ohne Kreditkarte anmelden",
+      "step1": {
         "socialSignupText": "Melden Sie sich schnell mit Ihrem Social-Media-Konto an",
         "socialConnectedMessage": "Großartig! Wir haben Ihr soziales Konto verbunden. Füllen Sie einfach das untenstehende Formular aus, um die Registrierung abzuschließen - keine Zahlung erforderlich!",
+        "title": "Registrieren",
+        "description": "Erstellen Sie Ihr Partnerkonto in wenigen Minuten"
+      },
+      "socialSignupText": "Melden Sie sich schnell mit Ihrem Social-Media-Konto an",
+      "socialConnectedMessage": "Großartig! Wir haben Ihr soziales Konto verbunden. Füllen Sie einfach das untenstehende Formular aus, um die Registrierung abzuschließen - keine Zahlung erforderlich!",
       "title": "So funktioniert unser Service",
       "subtitle": "Einfacher Prozess",
       "steps": {
@@ -145,12 +150,6 @@
           "title": "Schnelle Bearbeitung",
           "description": "Ihre Kleidung wird professionell gereinigt und frisch, gefaltet und tragfertig zurückgegeben - normalerweise innerhalb von 24-48 Stunden."
         }
-      },
-      "step1": {
-        "socialSignupText": "Melden Sie sich schnell mit Ihrem Social-Media-Konto an",
-        "socialConnectedMessage": "Großartig! Wir haben Ihr soziales Konto verbunden. Füllen Sie einfach das untenstehende Formular aus, um die Registrierung abzuschließen - keine Zahlung erforderlich!",
-        "title": "Registrieren",
-        "description": "Erstellen Sie Ihr Partnerkonto in wenigen Minuten"
       },
       "step2": {
         "title": "Teilen Sie Ihren Link",
@@ -340,19 +339,9 @@
       "city": "Stadt *",
       "state": "Bundesstaat *",
       "zipCode": "Postleitzahl *",
-      "serviceAddress": "Adresse des Servicezentrums",
-      "addressPlaceholder": "Adresse eingeben oder auf Karte klicken",
       "passwordPlaceholder": "Geben Sie Ihr Passwort ein",
       "confirmPasswordPlaceholder": "Passwort erneut eingeben",
       "usernamePlaceholder": "Wählen Sie einen eindeutigen Benutzernamen",
-      "addressHelp": "Beginnen Sie mit der Eingabe, um nach einer Adresse zu suchen",
-      "serviceRadius": "Serviceradius:",
-      "miles": "Meilen",
-      "serviceCenter": "Servicezentrum:",
-      "coverageArea": "Abdeckungsgebiet:",
-      "coordinates": "Koordinaten:",
-      "useRegistrationAddress": "Registrierungsadresse verwenden",
-      "notSet": "Nicht festgelegt",
       "serviceInfo": "Serviceinformationen",
       "deliveryFeeStructure": "Liefergebührenstruktur",
       "dynamicPricing": "Dynamische Preisgestaltung:",
@@ -363,11 +352,6 @@
       "perBagFeeDesc": "Gebühr für jede Wäschetasche",
       "validateAddress": "Adresse validieren",
       "validateAddressHelp": "Klicken Sie hier, um Ihre Adresse zu überprüfen, bevor Sie fortfahren",
-      "selectServiceLocation": "Wählen Sie Ihren Servicestandort",
-      "confirmServiceLocation": "Bestätigen Sie Ihren Servicestandort",
-      "selectCorrectLocation": "Wir haben mehrere mögliche Standorte gefunden. Bitte wählen Sie den richtigen aus:",
-      "confirmCorrectAddress": "Bitte bestätigen Sie, dass dies die richtige Adresse für Ihr Servicegebiet ist:",
-      "confirm": "Bestätigen",
       "livePricingPreview": "Live-Preisvorschau",
       "1bag": "1 Tasche",
       "3bags": "3 Taschen",
@@ -496,9 +480,7 @@
       "marketingLinks": {
         "title": "Ihre Marketing-Links",
         "landingPage": "Kunden-Landingpage",
-        "landingPageDesc": "Teilen Sie diese professionelle Seite, um Ihre Dienstleistungen zu präsentieren",
-        "registrationLink": "Direkter Registrierungslink",
-        "registrationDesc": "Direkter Link für Kunden zur Registrierung"
+        "landingPageDesc": "Teilen Sie diese professionelle Seite, um Ihre Dienstleistungen zu präsentieren"
       },
       "pickups": {
         "title": "Anstehende Abholungen & Lieferungen"
@@ -566,9 +548,6 @@
       "marketingLinkTitle": "Ihre Kunden-Landingpage",
       "marketingLinkDescription": "Teilen Sie diese professionelle Seite mit potenziellen Kunden, um Ihre Dienstleistungen und Preise zu präsentieren:",
       "marketingLinkHelp": "Diese Seite enthält Informationen über Ihre Dienstleistungen, Preise und ein Registrierungsformular.",
-      "linkTitle": "Direkter Kundenregistrierungslink",
-      "linkDescription": "Kunden können auch diesen direkten Link zur Registrierung verwenden:",
-      "linkHelp": "Jeder über Ihre Links registrierte Kunde wird Ihrem Konto zugeordnet.",
       "nextStepsTitle": "Nächste Schritte",
       "nextStep1": "Überprüfen Sie Ihre E-Mail für Ihre Willkommensnachricht und Anmeldedaten",
       "nextStep2": "Melden Sie sich in Ihrem Partner-Dashboard an, um auf Marketingmaterialien zuzugreifen",
@@ -667,7 +646,6 @@
       "v2": {
         "noPaymentRequired": "Keine Zahlung Erforderlich",
         "subtitle": "Melden Sie sich für den Premium-Wäscheabhol- und Lieferservice an - zahlen Sie nach dem Wiegen Ihrer Wäsche!",
-        "freeBagsBanner": "Erhalten Sie Ihre ersten 1-2 Wäschesäcke KOSTENLOS - Keine Kreditkarte erforderlich!",
         "howItWorks": "So funktioniert unser V2-Zahlungssystem",
         "step1": "Jetzt ohne Kreditkarte anmelden",
         "socialSignupText": "Melden Sie sich schnell mit Ihrem Social-Media-Konto an",
@@ -922,8 +900,6 @@
         "marketingLinksDesc": "Teilen Sie diese Links mit Ihrem Partner, um die Kundenregistrierung zu fördern.",
         "landingPageLink": "Partner-Landingpage",
         "landingPageDesc": "Marketing-Seite mit Umsatzrechner und Kundenregistrierung",
-        "customerRegisterLink": "Kundenregistrierungsseite",
-        "customerRegisterDesc": "Direkter Link zur Kundenregistrierung für diesen Partner",
         "sendW9": "W9 senden",
         "sending": "Wird gesendet...",
         "confirmSendW9": "W9-Formular an diesen Partner senden?",
@@ -1361,7 +1337,12 @@
     "description": "Überprüfen Sie den Status Ihrer Facebook-Datenlöschungsanfrage",
     "loading": "Status wird geladen...",
     "confirmationCode": "Bestätigungscode",
-    "status": "Status",
+    "status": {
+      "pending": "Verarbeitung ausstehend",
+      "processing": "Wird derzeit verarbeitet",
+      "completed": "Erfolgreich abgeschlossen",
+      "failed": "Fehlgeschlagen"
+    },
     "requestedAt": "Angefordert am",
     "completedAt": "Abgeschlossen am",
     "contact": "Bei Fragen zu Ihrer Datenlöschungsanfrage wenden Sie sich bitte an den Support.",
@@ -1371,12 +1352,6 @@
       "noCode": "Kein Bestätigungscode angegeben",
       "loadFailed": "Löschungsstatus konnte nicht geladen werden",
       "notFound": "Löschungsanfrage nicht gefunden"
-    },
-    "status": {
-      "pending": "Verarbeitung ausstehend",
-      "processing": "Wird derzeit verarbeitet",
-      "completed": "Erfolgreich abgeschlossen",
-      "failed": "Fehlgeschlagen"
     },
     "success": {
       "title": "Löschung abgeschlossen",

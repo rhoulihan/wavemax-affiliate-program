@@ -375,25 +375,14 @@ describe('Admin Dashboard Functions', () => {
         }
       ];
       
-      const mockGeographicDistribution = [
-        {
-          _id: 'New York',
-          affiliateCount: 5,
-          activeAffiliates: 4,
-          avgServiceRadius: 10
-        }
-      ];
-      
-      Affiliate.aggregate.mockResolvedValueOnce(mockAffiliateAnalytics)
-        .mockResolvedValueOnce(mockGeographicDistribution);
-      
+      Affiliate.aggregate.mockResolvedValueOnce(mockAffiliateAnalytics);
+
       await administratorController.getAffiliateAnalytics(mockReq, mockRes);
-      
+
       expect(mockRes.json).toHaveBeenCalledWith({
         success: true,
         analytics: {
-          affiliates: mockAffiliateAnalytics,
-          geographicDistribution: mockGeographicDistribution
+          affiliates: mockAffiliateAnalytics
         }
       });
     });

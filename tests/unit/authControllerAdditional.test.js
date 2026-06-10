@@ -222,12 +222,22 @@ describe('Auth Controller - Additional Coverage', () => {
       const handler = extractHandler(authController.handleSocialCallback);
       await handler(req, res, next);
 
-      expect(res.redirect).toHaveBeenCalledWith(expect.stringMatching(/^\/affiliate-dashboard-embed\.html\?token=mock-token&refreshToken=[a-f0-9]{80}$/));
+      // SEC H-3: tokens are stored server-side in OAuthSession and the
+      // redirect carries only an opaque lookup key (?fetch=oauth-result:<key>)
+      expect(OAuthSession.createSession).toHaveBeenCalledWith(
+        expect.stringMatching(/^oauth-result:[a-f0-9]{48}$/),
+        expect.objectContaining({ type: 'social-auth-login', token: 'mock-token' })
+      );
+      expect(res.redirect).toHaveBeenCalledWith(
+        expect.stringMatching(/^\/affiliate-dashboard-embed\.html\?fetch=oauth-result%3A[a-f0-9]{48}$/)
+      );
+      // No raw tokens may appear in the redirect URL
+      expect(res.redirect.mock.calls[0][0]).not.toContain('mock-token');
       expect(logLoginAttempt).toHaveBeenCalledWith(
-        true, 
-        'affiliate', 
+        true,
+        'affiliate',
         'johndoe',
-        req, 
+        req,
         'Social login successful'
       );
     });
@@ -251,12 +261,13 @@ describe('Auth Controller - Additional Coverage', () => {
       const handler = extractHandler(authController.handleSocialCallback);
       await handler(req, res, next);
 
-      // For new users, it creates a regular auth token and redirects to registration
+      // The user lacks isNewUser so the controller takes the existing-user
+      // path: tokens go into OAuthSession, redirect carries the lookup key only
       expect(jwt.sign).toHaveBeenCalled();
-      // The user is treated as existing (even though no _id) so redirects to dashboard
       expect(res.redirect).toHaveBeenCalledWith(
-        '/affiliate-dashboard-embed.html?token=social-token-123&refreshToken=61616161616161616161616161616161616161616161616161616161616161616161616161616161'
+        expect.stringMatching(/^\/affiliate-dashboard-embed\.html\?fetch=oauth-result%3A[a-f0-9]{48}$/)
       );
+      expect(res.redirect.mock.calls[0][0]).not.toContain('social-token-123');
     });
 
     it('should handle errors', async () => {

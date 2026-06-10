@@ -235,13 +235,6 @@
     }
 
     handleValidationSuccess(data) {
-      // Update hidden lat/lon fields if they exist
-      const latField = document.getElementById('serviceLatitude');
-      const lonField = document.getElementById('serviceLongitude');
-      
-      if (latField) latField.value = data.latitude;
-      if (lonField) lonField.value = data.longitude;
-
       // Show success message
       this.showSuccess('Address validated successfully!');
 
@@ -320,13 +313,6 @@
     // Clear validated data
     clearValidatedData() {
       window.validatedAddressData = null;
-      
-      // Clear hidden fields
-      const latField = document.getElementById('serviceLatitude');
-      const lonField = document.getElementById('serviceLongitude');
-      
-      if (latField) latField.value = '';
-      if (lonField) lonField.value = '';
     }
   }
 

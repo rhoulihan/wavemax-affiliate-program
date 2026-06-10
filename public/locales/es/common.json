@@ -333,19 +333,9 @@
       "city": "Ciudad *",
       "state": "Estado *",
       "zipCode": "Código Postal *",
-      "serviceAddress": "Dirección del Centro de Servicio",
-      "addressPlaceholder": "Ingrese la dirección o haga clic en el mapa",
       "passwordPlaceholder": "Ingrese su contraseña",
       "confirmPasswordPlaceholder": "Vuelva a ingresar su contraseña",
       "usernamePlaceholder": "Elija un nombre de usuario único",
-      "addressHelp": "Comience a escribir para buscar una dirección",
-      "serviceRadius": "Radio de Servicio:",
-      "miles": "millas",
-      "serviceCenter": "Centro de Servicio:",
-      "coverageArea": "Área de Cobertura:",
-      "coordinates": "Coordenadas:",
-      "useRegistrationAddress": "Usar Dirección de Registro",
-      "notSet": "No establecido",
       "serviceInfo": "Información de Servicio",
       "deliveryFeeStructure": "Estructura de Tarifas de Entrega",
       "dynamicPricing": "Precios Dinámicos:",
@@ -356,11 +346,6 @@
       "perBagFeeDesc": "Tarifa cobrada por cada bolsa de lavandería",
       "validateAddress": "Validar Dirección",
       "validateAddressHelp": "Haga clic para verificar su dirección antes de continuar",
-      "selectServiceLocation": "Seleccione su Ubicación de Servicio",
-      "confirmServiceLocation": "Confirme su Ubicación de Servicio",
-      "selectCorrectLocation": "Encontramos múltiples ubicaciones posibles. Por favor seleccione la correcta:",
-      "confirmCorrectAddress": "Por favor confirme que esta es la dirección correcta para su área de servicio:",
-      "confirm": "Confirmar",
       "livePricingPreview": "Vista Previa de Precios en Vivo",
       "1bag": "1 bolsa",
       "3bags": "3 bolsas",
@@ -489,9 +474,7 @@
       "marketingLinks": {
         "title": "Tus Enlaces de Marketing",
         "landingPage": "Página de Destino para Clientes",
-        "landingPageDesc": "Comparte esta página profesional para mostrar tus servicios",
-        "registrationLink": "Enlace de Registro Directo",
-        "registrationDesc": "Enlace directo para que los clientes se registren"
+        "landingPageDesc": "Comparte esta página profesional para mostrar tus servicios"
       },
       "pickups": {
         "title": "Próximas Recogidas y Entregas"
@@ -559,9 +542,6 @@
       "marketingLinkTitle": "Su Página de Destino para Clientes",
       "marketingLinkDescription": "Comparta esta página profesional con clientes potenciales para mostrar sus servicios y precios:",
       "marketingLinkHelp": "Esta página incluye información sobre sus servicios, precios y un formulario de registro.",
-      "linkTitle": "Enlace Directo de Registro de Clientes",
-      "linkDescription": "Los clientes también pueden usar este enlace directo para registrarse:",
-      "linkHelp": "Cada cliente registrado a través de sus enlaces estará asociado con su cuenta.",
       "nextStepsTitle": "Próximos Pasos",
       "nextStep1": "Revise su correo electrónico para su mensaje de bienvenida y credenciales de acceso",
       "nextStep2": "Inicie sesión en su panel de afiliado para acceder a materiales de marketing",
@@ -660,7 +640,6 @@
       "v2": {
         "noPaymentRequired": "Sin Pago Requerido",
         "subtitle": "¡Regístrate para el servicio premium de recogida y entrega de ropa - paga después de que pesemos tu ropa!",
-        "freeBagsBanner": "¡Obtén tus primeras 1-2 bolsas de lavandería GRATIS - No se requiere tarjeta de crédito!",
         "howItWorks": "Cómo funciona nuestro sistema de pago V2",
         "step1": "Regístrate ahora sin tarjeta de crédito",
         "socialSignupText": "Regístrate rápidamente usando tu cuenta de redes sociales",
@@ -915,8 +894,6 @@
         "marketingLinksDesc": "Comparte estos enlaces con tu afiliado para promover el registro de clientes.",
         "landingPageLink": "Página de Destino del Afiliado",
         "landingPageDesc": "Página de marketing con calculadora de ingresos y registro de clientes",
-        "customerRegisterLink": "Página de Registro de Clientes",
-        "customerRegisterDesc": "Enlace directo al registro de clientes para este afiliado",
         "sendW9": "Enviar W9",
         "sending": "Enviando...",
         "confirmSendW9": "¿Enviar formulario W9 a este afiliado?",
@@ -1343,7 +1320,12 @@
     "description": "Verifica el estado de tu solicitud de eliminación de datos de Facebook",
     "loading": "Cargando estado...",
     "confirmationCode": "Código de Confirmación",
-    "status": "Estado",
+    "status": {
+      "pending": "Procesamiento Pendiente",
+      "processing": "Procesando Actualmente",
+      "completed": "Completado Exitosamente",
+      "failed": "Falló"
+    },
     "requestedAt": "Solicitado el",
     "completedAt": "Completado el",
     "contact": "Para preguntas sobre tu solicitud de eliminación de datos, por favor contacta soporte.",
@@ -1353,12 +1335,6 @@
       "noCode": "No se proporcionó código de confirmación",
       "loadFailed": "Error al cargar el estado de eliminación",
       "notFound": "Solicitud de eliminación no encontrada"
-    },
-    "status": {
-      "pending": "Procesamiento Pendiente",
-      "processing": "Procesando Actualmente",
-      "completed": "Completado Exitosamente",
-      "failed": "Falló"
     },
     "success": {
       "title": "Eliminación Completada",

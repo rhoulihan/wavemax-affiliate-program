@@ -405,18 +405,7 @@ async function getAffiliateAnalytics({ startDate, endDate }) {
     { $sort: { 'metrics.totalRevenue': -1 } }
   ]);
 
-  const geographicDistribution = await Affiliate.aggregate([
-    {
-      $group: {
-        _id: '$city',
-        affiliateCount: { $sum: 1 },
-        activeAffiliates: { $sum: { $cond: ['$isActive', 1, 0] } }
-      }
-    },
-    { $sort: { affiliateCount: -1 } }
-  ]);
-
-  return { affiliates, geographicDistribution };
+  return { affiliates };
 }
 
 async function generateOrdersReport({ startDate, endDate }) {

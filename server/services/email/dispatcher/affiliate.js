@@ -2,7 +2,7 @@ const logger = require('../../../utils/logger');
 // Affiliate-facing email dispatchers.
 // Extracted from utils/emailService.js in Phase 2.
 
-const { loadTemplate, fillTemplate } = require('../template-manager');
+const { loadTemplate, fillTemplate, formatTimeSlot } = require('../template-manager');
 const { sendEmail } = require('../transport');
 // =============================================================================
 // Affiliate Emails
@@ -206,23 +206,23 @@ exports.sendAffiliateWelcomeEmail = async (affiliate) => {
 exports.sendAffiliateNewCustomerEmail = async (affiliate, customer, bagInfo = {}) => {
   try {
     // Debug logging
-    logger.info('[sendAffiliateNewCustomerEmail] Affiliate:', affiliate ? { 
-      email: affiliate.email, 
-      affiliateId: affiliate.affiliateId, 
-      businessName: affiliate.businessName 
+    logger.info('[sendAffiliateNewCustomerEmail] Affiliate:', affiliate ? {
+      email: affiliate.email,
+      affiliateId: affiliate.affiliateId,
+      businessName: affiliate.businessName
     } : 'undefined');
-    logger.info('[sendAffiliateNewCustomerEmail] Customer:', customer ? { 
-      email: customer.email, 
-      firstName: customer.firstName, 
-      customerId: customer.customerId 
+    logger.info('[sendAffiliateNewCustomerEmail] Customer:', customer ? {
+      email: customer.email,
+      firstName: customer.firstName,
+      customerId: customer.customerId
     } : 'undefined');
-    
+
     // Validate inputs
     if (!affiliate || !customer) {
       logger.error('Missing affiliate or customer data for new customer notification');
       return;
     }
-    
+
     if (!affiliate.email) {
       logger.error('Affiliate email is missing or undefined');
       return;
@@ -236,7 +236,7 @@ exports.sendAffiliateNewCustomerEmail = async (affiliate, customer, bagInfo = {}
 
     // Build the greeting with the actual business name
     const businessName = affiliate.businessName || `${affiliate.firstName} ${affiliate.lastName}`;
-    
+
     // Get translations for the email content
     const translations = {
       en: {
@@ -246,7 +246,7 @@ exports.sendAffiliateNewCustomerEmail = async (affiliate, customer, bagInfo = {}
         NEW_CUSTOMER_MESSAGE: 'Great news! A new customer has just registered through your affiliate link.',
         ACTION_REQUIRED_LABEL: 'Action Required',
         ACTION_REQUIRED_MESSAGE: `Please deliver ${numberOfBags} laundry bag(s) to your new customer within 48 hours.`,
-        BAG_FEE_NOTE: isFreeRegistration ? 
+        BAG_FEE_NOTE: isFreeRegistration ?
           'Note: This customer received their first bag FREE as part of our promotional offer.' :
           'Note: The customer has been charged for their bags. This fee will be credited on their first order.',
         CUSTOMER_INFO_TITLE: 'Customer Information',

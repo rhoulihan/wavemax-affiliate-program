@@ -124,9 +124,14 @@
       }
     },
     "howItWorks": {
-        "step1": "Cadastre-se agora sem cartão de crédito",
+      "step1": {
         "socialSignupText": "Inscreva-se rapidamente usando sua conta de mídia social",
         "socialConnectedMessage": "Ótimo! Conectamos sua conta social. Apenas complete o formulário abaixo para finalizar o registro - não é necessário pagamento!",
+        "title": "Cadastre-se",
+        "description": "Crie sua conta de afiliado em minutos"
+      },
+      "socialSignupText": "Inscreva-se rapidamente usando sua conta de mídia social",
+      "socialConnectedMessage": "Ótimo! Conectamos sua conta social. Apenas complete o formulário abaixo para finalizar o registro - não é necessário pagamento!",
       "title": "Como Funciona Nosso Serviço",
       "subtitle": "Processo Simples",
       "steps": {
@@ -145,12 +150,6 @@
           "title": "Entrega Rápida",
           "description": "Suas roupas são limpas profissionalmente e devolvidas frescas, dobradas e prontas para usar - normalmente dentro de 24-48 horas."
         }
-      },
-      "step1": {
-        "socialSignupText": "Inscreva-se rapidamente usando sua conta de mídia social",
-        "socialConnectedMessage": "Ótimo! Conectamos sua conta social. Apenas complete o formulário abaixo para finalizar o registro - não é necessário pagamento!",
-        "title": "Cadastre-se",
-        "description": "Crie sua conta de afiliado em minutos"
       },
       "step2": {
         "title": "Compartilhe Seu Link",
@@ -340,19 +339,9 @@
       "city": "Cidade *",
       "state": "Estado *",
       "zipCode": "CEP *",
-      "serviceAddress": "Endereço do Centro de Serviço",
-      "addressPlaceholder": "Digite o endereço ou clique no mapa",
       "passwordPlaceholder": "Digite sua senha",
       "confirmPasswordPlaceholder": "Digite novamente sua senha",
       "usernamePlaceholder": "Escolha um nome de usuário único",
-      "addressHelp": "Comece a digitar para pesquisar um endereço",
-      "serviceRadius": "Raio de Serviço:",
-      "miles": "milhas",
-      "serviceCenter": "Centro de Serviço:",
-      "coverageArea": "Área de Cobertura:",
-      "coordinates": "Coordenadas:",
-      "useRegistrationAddress": "Usar Endereço de Registro",
-      "notSet": "Não definido",
       "serviceInfo": "Informações de Serviço",
       "deliveryFeeStructure": "Estrutura de Taxas de Entrega",
       "dynamicPricing": "Preços Dinâmicos:",
@@ -363,11 +352,6 @@
       "perBagFeeDesc": "Taxa cobrada por cada sacola de roupa",
       "validateAddress": "Validar Endereço",
       "validateAddressHelp": "Clique para verificar seu endereço antes de continuar",
-      "selectServiceLocation": "Selecione seu Local de Serviço",
-      "confirmServiceLocation": "Confirme seu Local de Serviço",
-      "selectCorrectLocation": "Encontramos vários locais possíveis. Por favor, selecione o correto:",
-      "confirmCorrectAddress": "Por favor, confirme se este é o endereço correto para sua área de serviço:",
-      "confirm": "Confirmar",
       "livePricingPreview": "Visualização de Preços ao Vivo",
       "1bag": "1 sacola",
       "3bags": "3 sacolas",
@@ -496,9 +480,7 @@
       "marketingLinks": {
         "title": "Seus Links de Marketing",
         "landingPage": "Página de Destino para Clientes",
-        "landingPageDesc": "Compartilhe esta página profissional para mostrar seus serviços",
-        "registrationLink": "Link de Registro Direto",
-        "registrationDesc": "Link direto para clientes se registrarem"
+        "landingPageDesc": "Compartilhe esta página profissional para mostrar seus serviços"
       },
       "pickups": {
         "title": "Próximas Coletas e Entregas"
@@ -566,9 +548,6 @@
       "marketingLinkTitle": "Sua Página de Destino para Clientes",
       "marketingLinkDescription": "Compartilhe esta página profissional com clientes potenciais para mostrar seus serviços e preços:",
       "marketingLinkHelp": "Esta página inclui informações sobre seus serviços, preços e um formulário de registro.",
-      "linkTitle": "Link Direto de Registro de Clientes",
-      "linkDescription": "Os clientes também podem usar este link direto para se registrar:",
-      "linkHelp": "Cada cliente registrado através de seus links estará associado à sua conta.",
       "nextStepsTitle": "Próximos Passos",
       "nextStep1": "Verifique seu e-mail para sua mensagem de boas-vindas e credenciais de acesso",
       "nextStep2": "Faça login no seu painel de afiliado para acessar materiais de marketing",
@@ -667,7 +646,6 @@
       "v2": {
         "noPaymentRequired": "Pagamento Não Necessário",
         "subtitle": "Cadastre-se para o serviço premium de coleta e entrega de roupa - pague depois de pesarmos sua roupa!",
-        "freeBagsBanner": "Ganhe suas primeiras 1-2 sacolas de lavanderia GRÁTIS - Não é necessário cartão de crédito!",
         "howItWorks": "Como funciona nosso sistema de pagamento V2",
         "step1": "Cadastre-se agora sem cartão de crédito",
         "socialSignupText": "Inscreva-se rapidamente usando sua conta de mídia social",
@@ -922,8 +900,6 @@
         "marketingLinksDesc": "Compartilhe esses links com seu afiliado para promover o registro de clientes.",
         "landingPageLink": "Página de Destino do Afiliado",
         "landingPageDesc": "Página de marketing com calculadora de receita e registro de clientes",
-        "customerRegisterLink": "Página de Registro de Clientes",
-        "customerRegisterDesc": "Link direto para o registro de clientes para este afiliado",
         "sendW9": "Enviar W9",
         "sending": "Enviando...",
         "confirmSendW9": "Enviar formulário W9 para este afiliado?",
@@ -983,7 +959,7 @@
         "title": "Integração QuickBooks",
         "vendorExport": "Exportar Fornecedores",
         "vendorExportDesc": "Exportar afiliados como fornecedores do QuickBooks",
-        "paymentSummary": "Resumo de Pagamentos", 
+        "paymentSummary": "Resumo de Pagamentos",
         "paymentSummaryDesc": "Exportar resumo de pagamentos de comissões",
         "commissionDetail": "Detalhes de Comissões",
         "commissionDetailDesc": "Exportar relatório detalhado de comissões",
@@ -1296,7 +1272,12 @@
     "description": "Verifique o status da sua solicitação de exclusão de dados do Facebook",
     "loading": "Carregando status...",
     "confirmationCode": "Código de Confirmação",
-    "status": "Status",
+    "status": {
+      "pending": "Processamento Pendente",
+      "processing": "Processando Atualmente",
+      "completed": "Concluído com Sucesso",
+      "failed": "Falhou"
+    },
     "requestedAt": "Solicitado em",
     "completedAt": "Concluído em",
     "contact": "Para perguntas sobre sua solicitação de exclusão de dados, entre em contato com o suporte.",
@@ -1306,12 +1287,6 @@
       "noCode": "Nenhum código de confirmação fornecido",
       "loadFailed": "Falha ao carregar o status de exclusão",
       "notFound": "Solicitação de exclusão não encontrada"
-    },
-    "status": {
-      "pending": "Processamento Pendente",
-      "processing": "Processando Atualmente",
-      "completed": "Concluído com Sucesso",
-      "failed": "Falhou"
     },
     "success": {
       "title": "Exclusão Concluída",
