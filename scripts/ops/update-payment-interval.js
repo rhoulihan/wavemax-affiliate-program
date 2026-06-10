@@ -19,18 +19,19 @@ async function updatePaymentInterval() {
     await mongoose.connect(mongoUri);
     console.log('Connected to MongoDB');
 
-    // Update payment check interval to 60 seconds (60000 milliseconds)
+    // Update the IMAP payment-detection scan interval to 60 seconds (the
+    // canonical key seeded by initializeDefaults; min 60000 per spec §8)
     const intervalMs = 60000; // 1 minute
-    
-    await SystemConfig.setValue('payment_check_interval', intervalMs);
-    console.log(`Payment check interval updated to ${intervalMs}ms (${intervalMs / 1000} seconds)`);
+
+    await SystemConfig.setValue('payment_scan_interval_ms', intervalMs);
+    console.log(`Payment scan interval updated to ${intervalMs}ms (${intervalMs / 1000} seconds)`);
 
     // Also ensure V2 payment system is enabled
     await SystemConfig.setValue('payment_version', 'v2');
     console.log('V2 payment system enabled');
 
     // Show current settings
-    const currentInterval = await SystemConfig.getValue('payment_check_interval');
+    const currentInterval = await SystemConfig.getValue('payment_scan_interval_ms');
     const paymentVersion = await SystemConfig.getValue('payment_version');
     
     console.log('\nCurrent settings:');

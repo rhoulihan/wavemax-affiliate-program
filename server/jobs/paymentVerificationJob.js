@@ -24,9 +24,15 @@ class PaymentVerificationJob {
    */
   async start() {
     try {
-      // Get check interval from config (in milliseconds, convert to minutes for cron)
-      const intervalMs = await SystemConfig.getValue('payment_check_interval', 300000);
+      // PR 3 (redesign spec §8): payment_scan_interval_ms is the canonical IMAP
+      // detection cadence; the retired payment_check_interval is read only as a
+      // fallback until PR 8 rewrites this job.
+      const legacyIntervalMs = await SystemConfig.getValue('payment_check_interval', 300000);
+      const intervalMs = await SystemConfig.getValue('payment_scan_interval_ms', legacyIntervalMs);
       this.checkInterval = Math.max(1, Math.round(intervalMs / 60000)); // Convert to minutes, minimum 1
+      // PR 8 handoff: maxAttempts is the DETECTION cap (48 IMAP scans), NOT the
+      // reminder cap (payment_reminder_max_attempts = 8). Keep the legacy read here;
+      // PR 8 decouples detection vs reminder counters and deletes both legacy reads.
       this.maxAttempts = await SystemConfig.getValue('payment_check_max_attempts', 48);
 
       // Create cron pattern (run every N minutes)
