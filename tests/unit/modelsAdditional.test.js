@@ -1,6 +1,5 @@
 const mongoose = require('mongoose');
 const Administrator = require('../../server/models/Administrator');
-const Payment = require('../../server/models/Payment');
 
 describe('Models - Additional Coverage', () => {
   describe('Administrator Model - Pre-save Hook', () => {
@@ -96,64 +95,6 @@ describe('Models - Additional Coverage', () => {
     });
   });
 
-  describe('Payment Model - Helper Methods', () => {
-    it('should have a method to format payment display', () => {
-      const payment = new Payment({
-        paymentId: 'PAY001',
-        amount: 1234.56,
-        currency: 'USD',
-        status: 'completed',
-        type: 'commission'
-      });
-
-      // Test if the model has display formatting method
-      if (typeof payment.getDisplayAmount === 'function') {
-        expect(payment.getDisplayAmount()).toBe('$1,234.56');
-      }
-      
-      // Test status display
-      if (typeof payment.getStatusDisplay === 'function') {
-        expect(payment.getStatusDisplay()).toBe('Completed');
-      }
-    });
-
-    it('should validate payment can be refunded', () => {
-      const payment = new Payment({
-        paymentId: 'PAY001',
-        amount: 100,
-        status: 'completed',
-        type: 'commission'
-      });
-
-      // Test if payment can be refunded
-      if (typeof payment.canBeRefunded === 'function') {
-        payment.status = 'completed';
-        expect(payment.canBeRefunded()).toBe(true);
-        
-        payment.status = 'refunded';
-        expect(payment.canBeRefunded()).toBe(false);
-        
-        payment.status = 'pending';
-        expect(payment.canBeRefunded()).toBe(false);
-      }
-    });
-
-    it('should calculate net amount after fees', () => {
-      const payment = new Payment({
-        paymentId: 'PAY001',
-        amount: 100,
-        processingFee: 2.9,
-        status: 'completed',
-        type: 'commission'
-      });
-
-      // Test net amount calculation
-      if (typeof payment.getNetAmount === 'function') {
-        expect(payment.getNetAmount()).toBe(97.1);
-      }
-    });
-  });
-
   describe('Edge Cases and Error Handling', () => {
     it('should handle missing required fields gracefully', () => {
       const admin = new Administrator({
@@ -169,21 +110,5 @@ describe('Models - Additional Coverage', () => {
       expect(errors.errors).toHaveProperty('passwordSalt');
     });
 
-    it('should handle invalid enum values', () => {
-      const payment = new Payment({
-        paymentId: 'PAY001',
-        customerId: 'CUST001',
-        orderId: 'ORD001',
-        paygistixId: 'PG001',
-        paymentMethodId: 'PM001',
-        amount: 100,
-        status: 'invalid_status' // Invalid enum value
-      });
-
-      const errors = payment.validateSync();
-      expect(errors).toBeDefined();
-      expect(errors.errors).toHaveProperty('status');
-      expect(errors.errors.status.message).toContain('is not a valid enum value');
-    });
   });
 });

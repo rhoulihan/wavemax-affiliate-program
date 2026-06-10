@@ -10,7 +10,6 @@ jest.mock('../../server/models/Administrator');
 jest.mock('../../server/models/Affiliate');
 jest.mock('../../server/models/Customer');
 jest.mock('../../server/models/Order');
-jest.mock('../../server/models/Payment');
 jest.mock('../../server/models/Operator');
 
 jest.mock('fs', () => ({

@@ -57,3 +57,10 @@ Patterns learned from corrections and incidents, written as rules to prevent rec
 - **Credential scanning is correctly blocked even when "the user said the key was added."** (2026-05-24) Hunting a Google PSI API key with `grep -roE "AIza..."` across `~/` and listing all `*token*`/`*key*` dotfiles was denied by the auto-mode classifier as Credential Exploration — the right call. The task didn't actually need the key: the score claims were already real PSI numbers from an earlier provisioned run, and the table could be re-grounded on tool-independent byte/curl metrics. Don't systematically scan credential stores; find the path that doesn't need the secret, or ask.
 
 - **Production config edits on live hosts require explicit confirmation** even mid-incident — the auto-mode classifier correctly blocked an autonomous `docker-compose.override.yml` rewrite + container recreation on the live mail host until the user authorized it. Surface the incident + the exact fix, get the go-ahead, then act.
+
+## 2026-06-09 — Subagent model selection during the redesign build
+Rick's call: don't economize on subagent models for this redesign — run implementers
+AND reviewers on the most capable model (Opus), not Sonnet, even for mechanical tasks.
+Rationale: ultracode session, correctness >> token cost; the skill's "least powerful
+model that works" heuristic optimizes the wrong variable here. (Context: PR 1 sonnet
+implementers all passed first-try, but the margin isn't worth the savings.)

@@ -15,12 +15,6 @@ router.get('/terms-and-conditions-embed.html', serveHTMLWithNonce('terms-and-con
 // Privacy Policy
 router.get('/privacy-policy.html', serveHTMLWithNonce('privacy-policy.html'));
 
-// Payment Success
-router.get('/payment-success-embed.html', serveHTMLWithNonce('payment-success-embed.html'));
-
-// Payment Error
-router.get('/payment-error-embed.html', serveHTMLWithNonce('payment-error-embed.html'));
-
 // Operator Scan
 router.get('/operator-scan-embed.html', serveHTMLWithNonce('operator-scan-embed.html'));
 
