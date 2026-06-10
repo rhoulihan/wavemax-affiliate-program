@@ -139,11 +139,7 @@ const CSRF_CONFIG = {
     '/api/v1/affiliates/beta-request',
     '/api/affiliates/beta-request',
     '/api/v1/auth/social/register',
-    '/api/v1/auth/customer/social/register',
-    // Payment token creation for registration (part of registration flow)
-    // Excluded from CSRF due to cross-origin iframe limitations where sessions
-    // may not be properly established. Protected by rate limiting and validation.
-    '/api/v1/payments/create-token'
+    '/api/v1/auth/customer/social/register'
   ],
 
   // CRITICAL endpoints that MUST have CSRF protection (Phase 1)

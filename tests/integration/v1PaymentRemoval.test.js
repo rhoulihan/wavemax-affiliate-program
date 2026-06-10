@@ -116,4 +116,24 @@ describe('V1 Paygistix removal', () => {
       expect(() => require(mod)).toThrow(/Cannot find module/);
     });
   });
+
+  describe('secondary reference scrub', () => {
+    it('CSRF registration exemptions no longer include the Paygistix token endpoint', () => {
+      const { CSRF_CONFIG } = require('../../server/config/csrf-config');
+      expect(CSRF_CONFIG.REGISTRATION_ENDPOINTS).not.toContain('/api/v1/payments/create-token');
+    });
+
+    it('systemHealthService no longer reads paygistix-forms.json', () => {
+      const src = fs.readFileSync(
+        path.join(__dirname, '../../server/services/systemHealthService.js'), 'utf8');
+      expect(src).not.toMatch(/paygistix/i);
+      expect(src).not.toMatch(/ENABLE_TEST_PAYMENT_FORM/);
+    });
+
+    it('connectivity monitor no longer probes the Paygistix gateway', () => {
+      const src = fs.readFileSync(
+        path.join(__dirname, '../../server/monitoring/connectivity-monitor.js'), 'utf8');
+      expect(src).not.toMatch(/Paygistix|safepay/);
+    });
+  });
 });

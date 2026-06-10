@@ -30,12 +30,6 @@ const SERVICES = [
     critical: false,
   },
   {
-    name: 'Paygistix Payment Gateway',
-    type: 'https',
-    url: 'https://safepay.paymentlogistics.net',
-    critical: true,
-  },
-  {
     name: 'QuickBooks API',
     type: 'https',
     url: 'https://sandbox-quickbooks.api.intuit.com',

@@ -25,7 +25,7 @@ const ALLOWED_ENV_VARS = [
   // Stripe (deprecated but still in env)
   'STRIPE_PUBLISHABLE_KEY', 'STRIPE_SECRET_KEY',
   // Feature flags
-  'SHOW_DOCS', 'ENABLE_TEST_PAYMENT_FORM', 'ENABLE_DELETE_DATA_FEATURE',
+  'SHOW_DOCS', 'ENABLE_DELETE_DATA_FEATURE',
   'CSRF_PHASE', 'RELAX_RATE_LIMITING',
   // Rate limiting
   'RATE_LIMIT_WINDOW_MS', 'RATE_LIMIT_MAX_REQUESTS', 'AUTH_RATE_LIMIT_MAX',
@@ -79,28 +79,13 @@ async function getEnvironmentVariables({ user, req }) {
     }
   }
 
-  let paygistixConfig = {};
-  try {
-    const paygistixForms = require('../config/paygistix-forms.json');
-    paygistixConfig = {
-      'PAYGISTIX_MERCHANT_ID (from JSON)': paygistixForms.merchantId || 'Not configured',
-      'PAYGISTIX_FORM_ID (from JSON)': paygistixForms.form?.formId || 'Not configured',
-      'PAYGISTIX_FORM_HASH (from JSON)': superAdmin
-        ? (paygistixForms.form?.formHash || 'Not configured')
-        : '••••••••',
-      'PAYGISTIX_CONFIG_SOURCE': 'paygistix-forms.json'
-    };
-  } catch (error) {
-    paygistixConfig = { 'PAYGISTIX_CONFIG_ERROR': 'Failed to load paygistix-forms.json' };
-  }
-
   await logAuditEvent(AuditEvents.ADMIN_VIEW_ENV_VARS, user, {
     action: 'view_environment_variables',
     viewedSensitive: superAdmin && Object.keys(sensitiveValues).length > 0
   }, req);
 
   return {
-    variables: { ...variables, ...paygistixConfig },
+    variables,
     sensitiveValues: superAdmin ? sensitiveValues : {},
     isSuperAdmin: superAdmin
   };
