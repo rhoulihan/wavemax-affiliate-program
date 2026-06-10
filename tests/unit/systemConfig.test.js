@@ -701,6 +701,79 @@ describe('SystemConfig Model', () => {
         expect(maintenanceMode).toBeDefined();
         expect(maintenanceMode.value).toBe(false);
       });
+
+      it('should seed every redesign key per spec §8 (PR 3)', async () => {
+        await SystemConfig.initializeDefaults();
+
+        const expected = [
+          { key: 'payment_scan_interval_ms', value: 120000, category: 'payment', dataType: 'number', isPublic: false, min: 60000, max: 600000 },
+          { key: 'payment_reminder_interval_minutes', value: 60, category: 'payment', dataType: 'number', isPublic: false, min: 15, max: 240 },
+          { key: 'payment_reminder_max_attempts', value: 8, category: 'payment', dataType: 'number', isPublic: false, min: 1, max: 24 },
+          { key: 'payment_hold_notice_enabled', value: true, category: 'payment', dataType: 'boolean', isPublic: false },
+          { key: 'invite_token_ttl_hours', value: 72, category: 'affiliate', dataType: 'number', isPublic: false, min: 1, max: 336 },
+          { key: 'w9_max_upload_mb', value: 10, category: 'affiliate', dataType: 'number', isPublic: false, min: 1, max: 25 },
+          { key: 'w9_threshold_usd', value: 600, category: 'payment', dataType: 'number', isPublic: false, min: 0, max: 10000 },
+          { key: 'bag_mint_max_batch', value: 200, category: 'operations', dataType: 'number', isPublic: false, min: 1, max: 500 },
+          { key: 'bag_token_bytes', value: 16, category: 'operations', dataType: 'number', isPublic: false, min: 12, max: 32 },
+          { key: 'bag_label_columns', value: 3, category: 'operations', dataType: 'number', isPublic: false, min: 1, max: 6 },
+          { key: 'bag_label_qr_size_px', value: 300, category: 'operations', dataType: 'number', isPublic: false, min: 150, max: 600 },
+          { key: 'store_pickup_address', value: '825 E Rundberg Ln F1, Austin, TX 78753', category: 'system', dataType: 'string', isPublic: true },
+          { key: 'delivery_code_max_attempts', value: 5, category: 'system', dataType: 'number', isPublic: false, min: 3, max: 10 },
+          { key: 'operator_scan_code_max_attempts', value: 5, category: 'operator', dataType: 'number', isPublic: false, min: 3, max: 10 },
+          { key: 'operator_scan_code_length', value: 8, category: 'operator', dataType: 'number', isPublic: false, min: 6, max: 12 },
+          { key: 'customer_delivery_pin_length', value: 6, category: 'customer', dataType: 'number', isPublic: false, min: 4, max: 10 },
+          { key: 'affiliate_delivery_code_length', value: 6, category: 'affiliate', dataType: 'number', isPublic: false, min: 4, max: 10 }
+        ];
+
+        for (const spec of expected) {
+          const config = await SystemConfig.findOne({ key: spec.key });
+          // Compare as one object so a failure names the offending key.
+          expect({
+            key: spec.key,
+            value: config?.value,
+            defaultValue: config?.defaultValue,
+            category: config?.category,
+            dataType: config?.dataType,
+            isPublic: config?.isPublic ?? false,
+            min: config?.validation?.min,
+            max: config?.validation?.max
+          }).toEqual({
+            key: spec.key,
+            value: spec.value,
+            defaultValue: spec.value,
+            category: spec.category,
+            dataType: spec.dataType,
+            isPublic: spec.isPublic,
+            min: spec.min,
+            max: spec.max
+          });
+        }
+      });
+
+      it('should enforce spec §8 ranges on the new keys via setValue', async () => {
+        await SystemConfig.initializeDefaults();
+
+        await expect(SystemConfig.setValue('payment_reminder_max_attempts', 25))
+          .rejects.toThrow('Value must be at most 24');
+        await expect(SystemConfig.setValue('payment_scan_interval_ms', 59999))
+          .rejects.toThrow('Value must be at least 60000');
+
+        const updated = await SystemConfig.setValue('invite_token_ttl_hours', 24);
+        expect(updated.value).toBe(24);
+      });
+
+      it('should keep w9_earnings_threshold seeded as the legacy alias of w9_threshold_usd', async () => {
+        await SystemConfig.initializeDefaults();
+
+        const legacy = await SystemConfig.findOne({ key: 'w9_earnings_threshold' });
+        const canonical = await SystemConfig.findOne({ key: 'w9_threshold_usd' });
+
+        expect(legacy).not.toBeNull();
+        expect(legacy.value).toBeCloseTo(600, 2);
+        expect(legacy.category).toBe('payment');
+        expect(canonical).not.toBeNull();
+        expect(canonical.value).toBeCloseTo(600, 2);
+      });
     });
   });
 
