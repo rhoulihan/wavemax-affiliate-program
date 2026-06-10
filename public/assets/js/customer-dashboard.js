@@ -266,14 +266,14 @@ async function loadOrders() {
     } else {
       contentArea.innerHTML = `
                 <h3 class="text-xl font-bold mb-4">My Orders</h3>
-                <p class="text-gray-500">No orders found. Schedule your first pickup to get started!</p>
+                <p class="text-gray-500">No orders yet — your orders will appear here after your laundry is received at the store.</p>
             `;
     }
   } catch (error) {
     console.error('Error loading orders:', error);
     contentArea.innerHTML = `
             <h3 class="text-xl font-bold mb-4">My Orders</h3>
-            <p class="text-gray-500">No orders yet. Schedule your first pickup!</p>
+            <p class="text-gray-500">Unable to load orders. Please refresh the page.</p>
         `;
   }
 }

@@ -114,26 +114,17 @@
 
               console.log('Login successful, navigating to dashboard');
 
-              // Check URL params for redirect destination
-              const urlParams = new URLSearchParams(window.location.search);
-              const redirectParam = urlParams.get('redirect');
-              const pickupParam = urlParams.get('pickup');
-              const pickupFromSession = sessionStorage.getItem('redirectToPickup');
+              // Check session for redirect destination
               const redirectFromSession = sessionStorage.getItem('redirectTo');
 
               console.log('Current URL:', window.location.href);
               console.log('URL search params:', window.location.search);
-              console.log('Redirect parameter from URL:', redirectParam);
-              console.log('Pickup parameter from URL:', pickupParam);
               console.log('Redirect from session:', redirectFromSession);
 
               // Determine where to redirect
               let redirectTo = '/customer-dashboard'; // default
 
-              // Clear the session flags after reading
-              if (pickupFromSession) {
-                sessionStorage.removeItem('redirectToPickup');
-              }
+              // Clear the session flag after reading
               if (redirectFromSession) {
                 sessionStorage.removeItem('redirectTo');
               }
@@ -281,27 +272,17 @@
                     token: data.result.token
                   });
 
-                  // Check for redirect destination
-                  const urlParams = new URLSearchParams(window.location.search);
-                  const redirectParam = urlParams.get('redirect');
-                  const pickupParam = urlParams.get('pickup');
-                  const pickupFromSession = sessionStorage.getItem('redirectToPickup');
+                  // Check session for redirect destination
                   const redirectFromSession = sessionStorage.getItem('redirectTo');
 
                   console.log('OAuth redirect parameters:', {
-                    redirectParam,
-                    pickupParam,
-                    pickupFromSession,
                     redirectFromSession
                   });
 
                   // Determine where to redirect
                   const redirectTo = '/customer-dashboard'; // default
 
-                  // Clear the session flags after reading
-                  if (pickupFromSession) {
-                    sessionStorage.removeItem('redirectToPickup');
-                  }
+                  // Clear the session flag after reading
                   if (redirectFromSession) {
                     sessionStorage.removeItem('redirectTo');
                   }
@@ -447,13 +428,6 @@
     if (redirectParam) {
       sessionStorage.setItem('redirectTo', redirectParam);
       console.log('Stored redirect parameter in session:', redirectParam);
-    }
-    
-    // Store pickup flag if present (legacy support)
-    const pickupFlag = urlParams.get('pickup');
-    if (pickupFlag === 'true') {
-      sessionStorage.setItem('redirectToPickup', 'true');
-      console.log('Stored pickup flag in session');
     }
 
     // Setup components
