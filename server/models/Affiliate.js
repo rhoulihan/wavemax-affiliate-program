@@ -21,34 +21,6 @@ const affiliateSchema = new mongoose.Schema({
   city: { type: String, required: true },
   state: { type: String, required: true },
   zipCode: { type: String, required: true }, // Keep required for now - can geocode later
-  // Location fields for map-based service area
-  serviceLocation: {
-    type: {
-      type: String,
-      enum: ['Point'],
-      default: 'Point'
-    },
-    coordinates: {
-      type: [Number], // [longitude, latitude]
-      required: false,
-      default: undefined
-    }
-  },
-  serviceLatitude: {
-    type: Number,
-    required: function() {
-      // Only required for new affiliates or traditional registration
-      return this.isNew || this.registrationMethod === 'traditional';
-    }
-  },
-  serviceLongitude: {
-    type: Number,
-    required: function() {
-      // Only required for new affiliates or traditional registration
-      return this.isNew || this.registrationMethod === 'traditional';
-    }
-  },
-  serviceRadius: { type: Number, required: true, default: 5, min: 1, max: 50 }, // Service radius in miles
   // Delivery fee structure
   minimumDeliveryFee: {
     type: Number,
@@ -215,25 +187,10 @@ affiliateSchema.pre('save', function(next) {
   next();
 });
 
-// Create 2dsphere index for location-based queries
-affiliateSchema.index({ serviceLocation: '2dsphere' });
-
 // Method to check if affiliate can receive commission payouts
 affiliateSchema.methods.canReceivePayments = function() {
   return !this.paymentProcessingLocked && this.isActive;
 };
-
-// Update serviceLocation when lat/lng changes
-affiliateSchema.pre('save', function(next) {
-  // Update serviceLocation from lat/lng if they exist
-  if (this.serviceLatitude && this.serviceLongitude && (this.isModified('serviceLatitude') || this.isModified('serviceLongitude'))) {
-    this.serviceLocation = {
-      type: 'Point',
-      coordinates: [this.serviceLongitude, this.serviceLatitude]
-    };
-  }
-  next();
-});
 
 // ── H-5 account lockout (mirrors Administrator) ────────────────────────
 affiliateSchema.virtual('isLocked').get(function() {

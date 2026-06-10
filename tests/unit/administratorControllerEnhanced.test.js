@@ -917,9 +917,6 @@ describe('Administrator Controller - Enhanced Coverage', () => {
               firstName: 'John',
               lastName: 'Doe',
               businessName: 'Doe Laundry',
-              serviceLatitude: 30.2672,
-              serviceLongitude: -97.7431,
-              serviceRadius: 10,
               isActive: true
             }
           ])

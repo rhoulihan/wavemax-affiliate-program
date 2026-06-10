@@ -65,11 +65,10 @@ app.use((req, res, next) => {
 // Define MongoDB connection options
 const mongoOptions = {
   // Do NOT auto-build schema indexes on connect. The Oracle Autonomous DB
-  // MongoDB API rejects 2dsphere (geospatial) and TTL index builds, so an
-  // autoIndex pass would throw on the Affiliate serviceLocation 2dsphere
-  // index at startup. Indexes are managed explicitly (the migration creates
-  // the Oracle-compatible set). Disabling autoIndex is also standard practice
-  // for production regardless of backend.
+  // MongoDB API rejects geospatial and TTL index builds, so an autoIndex
+  // pass could throw at startup. Indexes are managed explicitly (the
+  // migration creates the Oracle-compatible set). Disabling autoIndex is
+  // also standard practice for production regardless of backend.
   autoIndex: false,
   // Cap the pool — this app is lightweight and does NOT need many connections.
   // The driver default maxPoolSize is 100; across cluster workers and multiple

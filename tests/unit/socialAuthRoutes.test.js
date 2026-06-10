@@ -52,7 +52,7 @@ describe('Social Auth Routes - Simple Tests', () => {
     });
 
     app.post('/api/auth/social/register', (req, res) => {
-      const requiredFields = ['socialToken', 'phone', 'address', 'city', 'state', 'zipCode', 'serviceLatitude', 'serviceLongitude', 'serviceRadius', 'paymentMethod'];
+      const requiredFields = ['socialToken', 'phone', 'address', 'city', 'state', 'zipCode', 'paymentMethod'];
       const errors = [];
 
       requiredFields.forEach(field => {
@@ -60,10 +60,6 @@ describe('Social Auth Routes - Simple Tests', () => {
           errors.push({ msg: `${field} is required`, param: field });
         }
       });
-
-      if (req.body.serviceRadius && (req.body.serviceRadius < 1 || req.body.serviceRadius > 50)) {
-        errors.push({ msg: 'Service radius must be between 1 and 50 miles', param: 'serviceRadius' });
-      }
 
       if (req.body.paymentMethod && !['check', 'paypal', 'venmo'].includes(req.body.paymentMethod)) {
         errors.push({ msg: 'Invalid payment method', param: 'paymentMethod' });
@@ -282,9 +278,6 @@ describe('Social Auth Routes - Simple Tests', () => {
           city: 'Austin',
           state: 'TX',
           zipCode: '78701',
-          serviceLatitude: 30.2672,
-          serviceLongitude: -97.7431,
-          serviceRadius: 10,
           paymentMethod: 'paypal'
         });
 
@@ -305,27 +298,6 @@ describe('Social Auth Routes - Simple Tests', () => {
       expect(response.body.errors.length).toBeGreaterThan(0);
     });
 
-    it('should validate service radius range', async () => {
-      const response = await request(app)
-        .post('/api/auth/social/register')
-        .send({
-          socialToken: 'valid-token',
-          phone: '123-456-7890',
-          address: '123 Main St',
-          city: 'Austin',
-          state: 'TX',
-          zipCode: '78701',
-          serviceLatitude: 30.2672,
-          serviceLongitude: -97.7431,
-          serviceRadius: 100, // Out of range
-          paymentMethod: 'paypal'
-        });
-
-      expect(response.status).toBe(400);
-      expect(response.body.errors).toBeDefined();
-      expect(response.body.errors.some(err => err.msg.includes('Service radius must be between 1 and 50 miles'))).toBe(true);
-    });
-
     it('should validate payment method', async () => {
       const response = await request(app)
         .post('/api/auth/social/register')
@@ -336,9 +308,6 @@ describe('Social Auth Routes - Simple Tests', () => {
           city: 'Austin',
           state: 'TX',
           zipCode: '78701',
-          serviceLatitude: 30.2672,
-          serviceLongitude: -97.7431,
-          serviceRadius: 10,
           paymentMethod: 'invalid' // Invalid payment method
         });
 
@@ -360,9 +329,6 @@ describe('Social Auth Routes - Simple Tests', () => {
             city: 'Austin',
             state: 'TX',
             zipCode: '78701',
-            serviceLatitude: 30.2672,
-            serviceLongitude: -97.7431,
-            serviceRadius: 10,
             paymentMethod: paymentMethod,
             venmoHandle: paymentMethod === 'venmo' ? '@testuser' : undefined
           });

@@ -281,7 +281,6 @@ describe('Social Auth Routes - Full Coverage', () => {
           city: 'Test City',
           state: 'CA',
           zipCode: '12345',
-          serviceRadius: 10,
           minimumDeliveryFee: 25,
           perBagDeliveryFee: 5,
           paymentMethod: 'paypal'

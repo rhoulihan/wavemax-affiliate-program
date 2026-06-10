@@ -71,8 +71,6 @@ describe('Customer Dashboard WDF Credit Display', () => {
       passwordHash: 'hash',
       username: 'dashaffiliate',
       paymentMethod: 'check',
-      serviceLatitude: 40.7128,
-      serviceLongitude: -74.0060
     });
 
     // Create test customer

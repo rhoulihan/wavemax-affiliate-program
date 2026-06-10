@@ -51,8 +51,6 @@ describe.skip('WDF Credit Integration Test (DEPRECATED - Feature being removed)'
         passwordSalt: 'salt',
         passwordHash: 'hash',
         paymentMethod: 'check',
-        serviceLatitude: 40.7128,
-        serviceLongitude: -74.0060
       });
 
       // Create test customer with WDF credit

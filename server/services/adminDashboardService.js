@@ -385,9 +385,6 @@ async function getAffiliateAnalytics({ startDate, endDate }) {
         firstName: 1,
         lastName: 1,
         businessName: 1,
-        serviceLatitude: 1,
-        serviceLongitude: 1,
-        serviceRadius: 1,
         w9Status: 1,
         paymentProcessingLocked: 1,
         email: 1,
@@ -413,8 +410,7 @@ async function getAffiliateAnalytics({ startDate, endDate }) {
       $group: {
         _id: '$city',
         affiliateCount: { $sum: 1 },
-        activeAffiliates: { $sum: { $cond: ['$isActive', 1, 0] } },
-        avgServiceRadius: { $avg: '$serviceRadius' }
+        activeAffiliates: { $sum: { $cond: ['$isActive', 1, 0] } }
       }
     },
     { $sort: { affiliateCount: -1 } }
@@ -506,11 +502,6 @@ async function generateAffiliatesReport({ startDate, endDate }) {
       affiliateId: affiliate.affiliateId,
       name: `${affiliate.firstName} ${affiliate.lastName}`,
       businessName: affiliate.businessName,
-      serviceLocation: {
-        latitude: affiliate.serviceLatitude,
-        longitude: affiliate.serviceLongitude,
-        radius: affiliate.serviceRadius
-      },
       customerCount,
       totalOrders: stats[0]?.totalOrders || 0,
       totalRevenue: stats[0]?.totalRevenue || 0,

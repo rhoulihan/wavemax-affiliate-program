@@ -52,8 +52,6 @@ describe('Order API - Add-on Functionality Integration Tests', () => {
       state: 'TS',
       zipCode: '12345',
       serviceArea: ['12345'],
-      serviceLatitude: 30.2672,
-      serviceLongitude: -97.7431,
       minimumDeliveryFee: 15,
       perBagDeliveryFee: 5,
       paymentMethod: 'check',

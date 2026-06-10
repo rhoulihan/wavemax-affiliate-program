@@ -19,3 +19,17 @@ describe('Affiliate schema — scheduling / Pickup Now fields removed', () => {
     expect(Affiliate.schema.methods.getDayOfWeekKey).toBeUndefined();
   });
 });
+
+describe('Affiliate schema — service-area fields removed', () => {
+  it('service-area paths are gone', () => {
+    expect(Affiliate.schema.path('serviceLocation.coordinates')).toBeUndefined();
+    expect(Affiliate.schema.path('serviceLatitude')).toBeUndefined();
+    expect(Affiliate.schema.path('serviceLongitude')).toBeUndefined();
+    expect(Affiliate.schema.path('serviceRadius')).toBeUndefined();
+  });
+
+  it('the 2dsphere index is gone', () => {
+    const geoIndex = Affiliate.schema.indexes().find(([fields]) => fields.serviceLocation);
+    expect(geoIndex).toBeUndefined();
+  });
+});

@@ -24,10 +24,6 @@ describe('Affiliate registration without a beta request (gate removed)', () => {
         city: 'Austin',
         state: 'TX',
         zipCode: '78701',
-        // NOTE: service* fields still required by route validators until Task 10
-        serviceLatitude: 30.2672,
-        serviceLongitude: -97.7431,
-        serviceRadius: 10,
         username: 'opengate',
         // 'SecurePass123!' fails the sequential-character password rule;
         // use the shared strong-password helper like the other suites.

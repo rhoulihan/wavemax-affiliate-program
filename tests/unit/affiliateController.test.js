@@ -965,9 +965,6 @@ describe('Affiliate Controller', () => {
         businessName: 'Johns Laundry',
         minimumDeliveryFee: 25,
         perBagDeliveryFee: 5,
-        serviceLatitude: 40.7128,
-        serviceLongitude: -74.0060,
-        serviceRadius: 10,
         city: 'New York',
         state: 'NY'
       , save: jest.fn().mockResolvedValue(true)};

@@ -40,9 +40,6 @@ exports.registerAffiliate = async (req, res) => {
       city,
       state,
       zipCode,
-      serviceLatitude,
-      serviceLongitude,
-      serviceRadius,
       minimumDeliveryFee,
       perBagDeliveryFee,
       username,
@@ -94,9 +91,6 @@ exports.registerAffiliate = async (req, res) => {
       city,
       state,
       zipCode,
-      serviceLatitude,
-      serviceLongitude,
-      serviceRadius,
       minimumDeliveryFee: parseFloat(minimumDeliveryFee) || 20,
       perBagDeliveryFee: parseFloat(perBagDeliveryFee) || 5,
       username,
@@ -176,9 +170,6 @@ exports.getAffiliateProfile = ControllerHelpers.asyncWrapper(async (req, res) =>
     city: affiliate.city,
     state: affiliate.state,
     zipCode: affiliate.zipCode,
-    serviceLatitude: affiliate.serviceLatitude,
-    serviceLongitude: affiliate.serviceLongitude,
-    serviceRadius: affiliate.serviceRadius,
     minimumDeliveryFee: Formatters.currency(affiliate.minimumDeliveryFee),
     perBagDeliveryFee: Formatters.currency(affiliate.perBagDeliveryFee),
     paymentMethod: affiliate.paymentMethod,
@@ -233,7 +224,7 @@ exports.updateAffiliateProfile = async (req, res) => {
     // Fields that can be updated
     const updatableFields = [
       'firstName', 'lastName', 'phone', 'businessName',
-      'address', 'city', 'state', 'zipCode', 'serviceArea', 'serviceLatitude', 'serviceLongitude', 'serviceRadius',
+      'address', 'city', 'state', 'zipCode',
       'minimumDeliveryFee', 'perBagDeliveryFee', 'paymentMethod'
     ];
 
@@ -946,7 +937,7 @@ exports.getPublicAffiliateInfo = async (req, res) => {
 
     // Find affiliate by code
     const affiliate = await Affiliate.findOne({ affiliateId: affiliateCode })
-      .select('firstName lastName businessName minimumDeliveryFee perBagDeliveryFee serviceLatitude serviceLongitude serviceRadius city state');
+      .select('firstName lastName businessName minimumDeliveryFee perBagDeliveryFee city state');
 
     if (!affiliate) {
       return res.status(404).json({
@@ -963,9 +954,6 @@ exports.getPublicAffiliateInfo = async (req, res) => {
       businessName: affiliate.businessName,
       minimumDeliveryFee: affiliate.minimumDeliveryFee,
       perBagDeliveryFee: affiliate.perBagDeliveryFee,
-      serviceLatitude: affiliate.serviceLatitude,
-      serviceLongitude: affiliate.serviceLongitude,
-      serviceRadius: affiliate.serviceRadius,
       city: affiliate.city,
       state: affiliate.state
     });
@@ -985,7 +973,7 @@ exports.getPublicAffiliateInfoById = async (req, res) => {
 
     // Find affiliate by ID
     const affiliate = await Affiliate.findOne({ affiliateId: affiliateId })
-      .select('firstName lastName businessName minimumDeliveryFee perBagDeliveryFee serviceLatitude serviceLongitude serviceRadius city state');
+      .select('firstName lastName businessName minimumDeliveryFee perBagDeliveryFee city state');
 
     if (!affiliate) {
       return res.status(404).json({
@@ -1007,8 +995,8 @@ exports.getPublicAffiliateInfoById = async (req, res) => {
         deliveryFee: deliveryFee,
         minimumDeliveryFee: affiliate.minimumDeliveryFee,
         perBagDeliveryFee: affiliate.perBagDeliveryFee,
-        serviceArea: `${affiliate.city}, ${affiliate.state}`,
-        serviceRadius: affiliate.serviceRadius
+        // Display label from city/state for the customer success page — not a service-area field
+        serviceArea: `${affiliate.city}, ${affiliate.state}`
       }
     });
   } catch (error) {

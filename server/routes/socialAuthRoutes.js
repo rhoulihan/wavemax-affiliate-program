@@ -162,9 +162,6 @@ router.post('/social/register', [
   body('city').notEmpty().withMessage('City is required'),
   body('state').notEmpty().withMessage('State is required'),
   body('zipCode').notEmpty().withMessage('ZIP code is required'),
-  body('serviceLatitude').notEmpty().isNumeric().withMessage('Service latitude is required'),
-  body('serviceLongitude').notEmpty().isNumeric().withMessage('Service longitude is required'),
-  body('serviceRadius').notEmpty().isNumeric().isInt({ min: 1, max: 50 }).withMessage('Service radius must be between 1 and 50 miles'),
   body('minimumDeliveryFee').optional().isNumeric().withMessage('Minimum delivery fee must be a number'),
   body('perBagDeliveryFee').optional().isNumeric().withMessage('Per-bag delivery fee must be a number'),
   body('paymentMethod').isIn(['check', 'paypal', 'venmo']).withMessage('Invalid payment method')

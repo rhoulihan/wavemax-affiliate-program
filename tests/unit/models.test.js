@@ -23,9 +23,6 @@ describe('Model Tests', () => {
         serviceArea: 'Downtown Austin',
         minimumDeliveryFee: 25,
         perBagDeliveryFee: 5,
-        serviceLatitude: 30.2672,
-        serviceLongitude: -97.7431,
-        serviceRadius: 10,
         username: 'johndoe',
         passwordHash: 'hashedpassword',
         passwordSalt: 'salt',
@@ -58,8 +55,6 @@ describe('Model Tests', () => {
       expect(error.errors.email).toBeDefined();
       expect(error.errors.phone).toBeDefined();
       expect(error.errors.username).toBeDefined();
-      expect(error.errors.serviceLatitude).toBeDefined();
-      expect(error.errors.serviceLongitude).toBeDefined();
     });
 
     it('should enforce unique constraints', async () => {
@@ -81,9 +76,6 @@ describe('Model Tests', () => {
         serviceArea: 'Downtown',
         minimumDeliveryFee: 25,
         perBagDeliveryFee: 5,
-        serviceLatitude: 30.2672,
-        serviceLongitude: -97.7431,
-        serviceRadius: 10,
         paymentMethod: 'check'
       };
 
@@ -142,9 +134,6 @@ describe('Model Tests', () => {
         serviceArea: 'Downtown',
         minimumDeliveryFee: 25,
         perBagDeliveryFee: 5,
-        serviceLatitude: 30.2672,
-        serviceLongitude: -97.7431,
-        serviceRadius: 10,
         paymentMethod: 'paypal',
         paypalEmail: 'paypal@example.com'
       });
@@ -171,9 +160,6 @@ describe('Model Tests', () => {
         serviceArea: 'Downtown',
         minimumDeliveryFee: 25,
         perBagDeliveryFee: 5,
-        serviceLatitude: 30.2672,
-        serviceLongitude: -97.7431,
-        serviceRadius: 10,
         paymentMethod: 'venmo',
         venmoHandle: '@testuser-venmo'
       });
