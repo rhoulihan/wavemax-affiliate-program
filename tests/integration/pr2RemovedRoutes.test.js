@@ -28,4 +28,11 @@ describe('PR 2 removed routes return 404', () => {
       });
     expect(res.status).toBe(404);
   });
+
+  it('GET /api/v1/affiliates/:affiliateId/schedule is gone', async () => {
+    // Route had per-route `authenticate`: before removal an anonymous request
+    // gets 401; after removal nothing matches the two-segment path → global 404.
+    const res = await request(app).get('/api/v1/affiliates/AFF-test/schedule');
+    expect(res.status).toBe(404);
+  });
 });

@@ -21,7 +21,6 @@ const authRoutes = require('./server/routes/authRoutes');
 const socialAuthRoutes = require('./server/routes/socialAuthRoutes');
 const facebookDataRoutes = require('./server/routes/facebookDataRoutes');
 const affiliateRoutes = require('./server/routes/affiliateRoutes');
-const affiliateScheduleRoutes = require('./server/routes/affiliateScheduleRoutes');
 const customerRoutes = require('./server/routes/customerRoutes');
 const orderRoutes = require('./server/routes/orderRoutes');
 const administratorRoutes = require('./server/routes/administratorRoutes');
@@ -920,7 +919,6 @@ apiV1Router.use('/auth', authRoutes);
 apiV1Router.use('/auth', socialAuthRoutes);  // Social auth routes
 apiV1Router.use('/auth/facebook', facebookDataRoutes);  // Facebook data deletion routes
 apiV1Router.use('/affiliates', affiliateRoutes);
-apiV1Router.use('/affiliates', affiliateScheduleRoutes);  // Affiliate schedule management
 apiV1Router.use('/customers', customerRoutes);
 apiV1Router.use('/orders', orderRoutes);
 apiV1Router.use('/administrators', administratorRoutes);
