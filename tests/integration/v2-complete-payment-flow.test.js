@@ -52,7 +52,6 @@ describe('V2 Complete Payment Flow', () => {
       { key: 'venmo_handle', value: '@wavemax', dataType: 'string', category: 'payment' },
       { key: 'paypal_handle', value: 'wavemax', dataType: 'string', category: 'payment' },
       { key: 'cashapp_handle', value: '$wavemax', dataType: 'string', category: 'payment' },
-      { key: 'laundry_bag_fee', value: 10.00, dataType: 'number', category: 'payment' },
       { key: 'base_rate', value: 1.25, dataType: 'number', category: 'payment' }
     ]);
 

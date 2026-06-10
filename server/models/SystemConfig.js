@@ -243,16 +243,6 @@ systemConfigSchema.statics.initializeDefaults = async function() {
       isPublic: true
     },
     {
-      key: 'laundry_bag_fee',
-      value: 10.00,
-      defaultValue: 10.00,
-      description: 'Fee per laundry bag for new customers',
-      category: 'payment',
-      dataType: 'number',
-      validation: { min: 0.00, max: 50.00 },
-      isPublic: true
-    },
-    {
       key: 'delivery_minimum_fee',
       value: 10.00,
       defaultValue: 10.00,

@@ -774,6 +774,17 @@ describe('SystemConfig Model', () => {
         expect(canonical).not.toBeNull();
         expect(canonical.value).toBeCloseTo(600, 2);
       });
+
+      it('should not seed retired keys (laundry_bag_fee, payment_check_*)', async () => {
+        await SystemConfig.initializeDefaults();
+
+        // Deleted in PR 3 — V1 bag-purchase artifact (spec §7/§8)
+        expect(await SystemConfig.findOne({ key: 'laundry_bag_fee' })).toBeNull();
+        // Never seeded; retired in favor of payment_scan_interval_ms +
+        // payment_reminder_* (guards against accidental re-introduction)
+        expect(await SystemConfig.findOne({ key: 'payment_check_interval' })).toBeNull();
+        expect(await SystemConfig.findOne({ key: 'payment_check_max_attempts' })).toBeNull();
+      });
     });
   });
 
