@@ -15,7 +15,6 @@ exports.sendAffiliateWelcomeEmail = async (affiliate) => {
   try {
     const language = affiliate.languagePreference || 'en';
     const template = await loadTemplate('affiliate-welcome', language);
-    const registrationUrl = `https://wavemax.promo/embed-app-v2.html?route=/customer-login&affid=${affiliate.affiliateId}`;
     const landingPageUrl = `https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?route=/affiliate-landing&code=${affiliate.affiliateId}`;
 
     // Get translations for the email content
@@ -30,10 +29,8 @@ exports.sendAffiliateWelcomeEmail = async (affiliate) => {
         AFFILIATE_ID_LABEL: 'Affiliate ID',
         LANDING_PAGE_LABEL: 'Customer Landing Page',
         LANDING_PAGE_DESC: 'Share this professional landing page with potential customers to showcase your services and pricing.',
-        REGISTRATION_URL_LABEL: 'Direct Registration URL',
-        REGISTRATION_URL_DESC: 'Customers can also use this direct link to register. Each customer registered through your links will be associated with your account.',
         GETTING_STARTED_TITLE: 'Getting Started',
-        STEP_1: 'Share your registration link with potential customers',
+        STEP_1: 'Customers join by claiming one of your laundry bags.',
         STEP_2: 'Receive laundry bags with unique barcodes for your customers',
         STEP_3: 'Coordinate pickups and deliveries based on customer schedules',
         STEP_4: 'Bring the laundry to our WaveMAX location for washing, drying, and folding',
@@ -64,10 +61,8 @@ exports.sendAffiliateWelcomeEmail = async (affiliate) => {
         AFFILIATE_ID_LABEL: 'ID de Afiliado',
         LANDING_PAGE_LABEL: 'Página de Destino para Clientes',
         LANDING_PAGE_DESC: 'Comparta esta página profesional con clientes potenciales para mostrar sus servicios y precios.',
-        REGISTRATION_URL_LABEL: 'URL de Registro Directo',
-        REGISTRATION_URL_DESC: 'Los clientes también pueden usar este enlace directo para registrarse. Cada cliente registrado a través de sus enlaces estará asociado con su cuenta.',
         GETTING_STARTED_TITLE: 'Primeros Pasos',
-        STEP_1: 'Comparta su enlace de registro con clientes potenciales',
+        STEP_1: 'Los clientes se unen reclamando una de tus bolsas de lavandería.',
         STEP_2: 'Reciba bolsas de lavandería con códigos de barras únicos para sus clientes',
         STEP_3: 'Coordine recogidas y entregas según los horarios de los clientes',
         STEP_4: 'Lleve la ropa a nuestra ubicación WaveMAX para lavar, secar y doblar',
@@ -98,10 +93,8 @@ exports.sendAffiliateWelcomeEmail = async (affiliate) => {
         AFFILIATE_ID_LABEL: 'ID de Afiliado',
         LANDING_PAGE_LABEL: 'Página de Destino para Clientes',
         LANDING_PAGE_DESC: 'Compartilhe esta página profissional com clientes em potencial para mostrar seus serviços e preços.',
-        REGISTRATION_URL_LABEL: 'URL de Registro Direto',
-        REGISTRATION_URL_DESC: 'Os clientes também podem usar este link direto para se registrar. Cada cliente registrado através de seus links será associado à sua conta.',
         GETTING_STARTED_TITLE: 'Primeiros Passos',
-        STEP_1: 'Compartilhe seu link de registro com clientes em potencial',
+        STEP_1: 'Os clientes aderem resgatando uma de suas sacolas de lavanderia.',
         STEP_2: 'Receba sacolas de lavanderia com códigos de barras exclusivos para seus clientes',
         STEP_3: 'Coordene coletas e entregas com base nos horários dos clientes',
         STEP_4: 'Leve a roupa para nossa localização WaveMAX para lavar, secar e dobrar',
@@ -132,10 +125,8 @@ exports.sendAffiliateWelcomeEmail = async (affiliate) => {
         AFFILIATE_ID_LABEL: 'Affiliate-ID',
         LANDING_PAGE_LABEL: 'Kunden-Landingpage',
         LANDING_PAGE_DESC: 'Teilen Sie diese professionelle Landingpage mit potenziellen Kunden, um Ihre Dienstleistungen und Preise zu präsentieren.',
-        REGISTRATION_URL_LABEL: 'Direkte Registrierungs-URL',
-        REGISTRATION_URL_DESC: 'Kunden können auch diesen direkten Link zur Registrierung verwenden. Jeder über Ihre Links registrierte Kunde wird Ihrem Konto zugeordnet.',
         GETTING_STARTED_TITLE: 'Erste Schritte',
-        STEP_1: 'Teilen Sie Ihren Registrierungslink mit potenziellen Kunden',
+        STEP_1: 'Kunden treten bei, indem sie einen Ihrer Wäschebeutel einlösen.',
         STEP_2: 'Erhalten Sie Wäschesäcke mit einzigartigen Barcodes für Ihre Kunden',
         STEP_3: 'Koordinieren Sie Abholungen und Lieferungen basierend auf Kundenterminen',
         STEP_4: 'Bringen Sie die Wäsche zu unserem WaveMAX-Standort zum Waschen, Trocknen und Falten',
@@ -165,8 +156,6 @@ exports.sendAffiliateWelcomeEmail = async (affiliate) => {
       last_name: affiliate.lastName,
       affiliate_id: affiliate.affiliateId,
       AFFILIATE_ID: affiliate.affiliateId,
-      registration_url: registrationUrl,
-      REGISTRATION_URL: registrationUrl,
       landing_page_url: landingPageUrl,
       LANDING_PAGE_URL: landingPageUrl,
       login_url: 'https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?login=affiliate',
