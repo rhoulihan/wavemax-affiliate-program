@@ -90,4 +90,20 @@ describe('V1 Paygistix removal', () => {
       expect(res.status).toBe(404);
     });
   });
+
+  describe('V1 payment modules are deleted', () => {
+    it.each([
+      '../../server/controllers/paymentController',
+      '../../server/services/callbackPoolManager',
+      '../../server/services/customerPaymentService',
+      '../../server/services/orderPaymentService',
+      '../../server/services/paygistix',
+      '../../server/config/paygistix.config',
+      '../../server/routes/paymentRoutes',
+      '../../server/routes/paymentCallbackRoute',
+      '../../server/routes/generalPaymentCallback'
+    ])('require(%s) throws MODULE_NOT_FOUND', (mod) => {
+      expect(() => require(mod)).toThrow(/Cannot find module/);
+    });
+  });
 });
