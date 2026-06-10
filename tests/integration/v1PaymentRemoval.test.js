@@ -163,5 +163,15 @@ describe('V1 Paygistix removal', () => {
         expect(fs.existsSync(path.join(__dirname, '../../', rel))).toBe(false);
       }
     });
+
+    it('GET /payment-success-embed.html -> 404 (stale embed route removed)', async () => {
+      const res = await request(app).get('/payment-success-embed.html');
+      expect(res.status).toBe(404);
+    });
+
+    it('GET /payment-error-embed.html -> 404 (stale embed route removed)', async () => {
+      const res = await request(app).get('/payment-error-embed.html');
+      expect(res.status).toBe(404);
+    });
   });
 });
