@@ -290,8 +290,6 @@ app.use((req, res, next) => {
   const strictCSPPages = [
     '/terms-and-conditions-embed.html',
     '/privacy-policy.html',
-    '/payment-success-embed.html',
-    '/payment-error-embed.html',
     '/operator-scan-embed.html',
     '/affiliate-success-embed.html',
     '/affiliate-landing-embed.html',

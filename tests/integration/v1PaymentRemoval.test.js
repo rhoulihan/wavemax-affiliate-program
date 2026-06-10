@@ -136,4 +136,32 @@ describe('V1 Paygistix removal', () => {
       expect(src).not.toMatch(/Paygistix|safepay/);
     });
   });
+
+  describe('frontend Paygistix surface is gone', () => {
+    it('embed-app-v2.js no longer maps the Paygistix return pages or modal', () => {
+      const src = fs.readFileSync(
+        path.join(__dirname, '../../public/assets/js/embed-app-v2.js'), 'utf8');
+      expect(src).not.toMatch(/payment-success|payment-error|v2-payment-modal/);
+    });
+
+    it('server.js strictCSPPages no longer lists the deleted return pages', () => {
+      const src = fs.readFileSync(path.join(__dirname, '../../server.js'), 'utf8');
+      expect(src).not.toMatch(/payment-success-embed|payment-error-embed/);
+    });
+
+    it('Paygistix client assets are deleted from public/', () => {
+      const gone = [
+        'public/payment-callback-handler.html',
+        'public/payment-success-embed.html',
+        'public/payment-error-embed.html',
+        'public/test-payment-form.html',
+        'public/assets/js/v2-payment-modal.js',
+        'public/assets/js/payment-callback-handler.js',
+        'public/assets/css/paygistix-payment-form.css'
+      ];
+      for (const rel of gone) {
+        expect(fs.existsSync(path.join(__dirname, '../../', rel))).toBe(false);
+      }
+    });
+  });
 });
