@@ -59,14 +59,9 @@ async function registerCustomer(payload) {
     billingZip,
     savePaymentInfo,
     languagePreference,
-    paymentConfirmed,
     socialToken,
     socialProvider
   } = payload;
-
-  if (paymentConfirmed) {
-    logger.info(`Post-payment registration for email: ${email}, affiliate: ${affiliateId}`);
-  }
 
   const affiliate = await Affiliate.findOne({ affiliateId });
   if (!affiliate) {

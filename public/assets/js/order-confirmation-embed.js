@@ -193,9 +193,8 @@
                 }
                 document.getElementById('affiliateName').textContent = affiliateName;
                 
-                // Display service area instead of contact since phone is not included in public data
-                const serviceInfo = `Service Area: ${affiliate.serviceArea}${affiliate.serviceRadius ? ` (${affiliate.serviceRadius} mile radius)` : ''}`;
-                document.getElementById('affiliateContact').textContent = serviceInfo;
+                // Display service-area label (city/state) instead of contact since phone is not included in public data
+                document.getElementById('affiliateContact').textContent = `Service Area: ${affiliate.serviceArea}`;
             } else {
                 document.getElementById('affiliateInfo').innerHTML = '<p class="text-gray-500">Affiliate information not available</p>';
             }

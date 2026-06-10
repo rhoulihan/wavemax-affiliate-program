@@ -3,25 +3,12 @@
 const express = require('express');
 const router = express.Router();
 const customerController = require('../controllers/customerController');
-const logger = require('../utils/logger');
 const { authenticate, authorize } = require('../middleware/auth');
 const { checkRole } = require('../middleware/rbac');
 const { body } = require('express-validator');
 const { customPasswordValidator } = require('../utils/passwordValidator');
 const { registrationLimiter } = require('../middleware/rateLimiting');
 const { registrationAddressValidation, profileAddressValidation, handleValidationErrors } = require('../middleware/locationValidation');
-
-// Conditional rate limiter that skips rate limiting for post-payment registrations
-const conditionalRegistrationLimiter = (req, res, next) => {
-  // Skip rate limiting if this is a post-payment registration
-  if (req.body.paymentConfirmed === true) {
-    logger.info('Skipping rate limit for post-payment registration');
-    return next();
-  }
-  
-  // Otherwise apply the normal rate limiter
-  return registrationLimiter(req, res, next);
-};
 
 /**
  * @route   GET /api/customers/check-rate-limit
@@ -52,7 +39,7 @@ router.get('/check-rate-limit', (req, res, next) => {
  * @desc    Register a new customer
  * @access  Public
  */
-router.post('/register', conditionalRegistrationLimiter, [
+router.post('/register', registrationLimiter, [
   body('affiliateId').notEmpty().withMessage('Affiliate ID is required'),
   body('firstName').notEmpty().withMessage('First name is required'),
   body('lastName').notEmpty().withMessage('Last name is required'),
