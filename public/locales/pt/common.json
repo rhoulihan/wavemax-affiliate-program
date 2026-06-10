@@ -71,7 +71,6 @@
       "loginSuccess": "Login realizado com sucesso!",
       "logoutSuccess": "Você saiu com sucesso.",
       "registrationSuccess": "Registro realizado com sucesso!",
-      "betaRestriction": "Atualmente estamos em beta fechado. Por favor, tente novamente em alguns dias ou entre em contato conosco se acredita que deveria ter acesso.",
       "registrationFailed": "Falha no registro. Por favor, tente novamente.",
       "passwordResetSuccess": "Redefinição de senha bem-sucedida!",
       "passwordResetFailed": "Falha na redefinição de senha. Por favor, tente novamente.",
@@ -293,7 +292,7 @@
       "title": "Pronto para começar a ganhar?",
       "customerTitle": "Pronto para roupas limpas e frescas?",
       "description": "Junte-se ao nosso programa de afiliados e comece a ganhar comissões oferecendo serviços de lavanderia aos seus clientes.",
-      "createAccount": "Criar Conta de Afiliado",
+      "createAccount": "Torne-se um afiliado",
       "login": "Login de Afiliado",
       "subtitle": {
         "full": "Deixe {{affiliateName}} cuidar da coleta e entrega enquanto a WaveMAX garante a limpeza profissional",

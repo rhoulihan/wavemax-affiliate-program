@@ -581,8 +581,8 @@ function initializePageScripts(route) {
     
     // Define page-specific scripts
     const pageScripts = {
-        '/': ['/assets/js/i18n.js', '/assets/js/language-switcher.js', '/assets/js/embed-navigation.js', '/assets/js/revenue-calculator.js', '/assets/js/embed-landing-init.js', '/assets/js/beta-request-modal.js'],
-        '/landing': ['/assets/js/i18n.js', '/assets/js/language-switcher.js', '/assets/js/embed-navigation.js', '/assets/js/revenue-calculator.js', '/assets/js/embed-landing-init.js', '/assets/js/beta-request-modal.js'],
+        '/': ['/assets/js/i18n.js', '/assets/js/language-switcher.js', '/assets/js/embed-navigation.js', '/assets/js/revenue-calculator.js', '/assets/js/embed-landing-init.js'],
+        '/landing': ['/assets/js/i18n.js', '/assets/js/language-switcher.js', '/assets/js/embed-navigation.js', '/assets/js/revenue-calculator.js', '/assets/js/embed-landing-init.js'],
         '/terms-of-service': ['/assets/js/terms-and-conditions.js'],
         '/terms-and-conditions': ['/assets/js/terms-and-conditions.js'],
         '/operator-login': ['/assets/js/embed-config.js', '/assets/js/i18n.js', '/assets/js/language-switcher.js', '/assets/js/csrf-utils.js', '/assets/js/api-client.js', '/assets/js/operator-login-init.js'],

@@ -153,4 +153,62 @@ exports.sendAdministratorPasswordResetEmail = async (administrator, resetUrl) =>
   }
 };
 
+/**
+ * Send notification to admin
+ * @param {Object} options - Email options
+ * @param {String} options.subject - Email subject
+ * @param {String} options.html - HTML content
+ * @param {String} options.priority - Email priority (high, normal, low)
+ * @returns {Promise<Boolean>}
+ */
+exports.sendAdminNotification = async function(options) {
+  try {
+    const { subject, html, priority = 'normal' } = options;
+
+    // Get admin email from SystemConfig or use default
+    const SystemConfig = require('../../../models/SystemConfig');
+    let adminEmail = await SystemConfig.getValue('admin_notification_email', null);
+
+    if (!adminEmail) {
+      // Fallback to environment variable or default
+      adminEmail = process.env.ADMIN_EMAIL || 'admin@wavemaxlaundry.com';
+    }
+
+    // Add priority header if high priority
+    const headers = priority === 'high' ? {
+      'X-Priority': '1',
+      'Importance': 'high'
+    } : {};
+
+    const fullHtml = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+            h2 { color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 10px; }
+            h3 { color: #34495e; margin-top: 20px; }
+            ul { background: #f4f4f4; padding: 15px; border-radius: 5px; }
+            li { margin: 5px 0; }
+            .alert { background: #fff3cd; border: 1px solid #ffc107; padding: 15px; border-radius: 5px; margin: 20px 0; }
+            .error { background: #f8d7da; border: 1px solid #dc3545; }
+            hr { border: none; border-top: 1px solid #ddd; margin: 30px 0; }
+          </style>
+        </head>
+        <body>
+          ${html}
+        </body>
+      </html>
+    `;
+
+    await sendEmail(adminEmail, subject, fullHtml, headers);
+
+    logger.info(`Admin notification sent: ${subject}`);
+    return true;
+  } catch (error) {
+    logger.error('Error sending admin notification:', error);
+    throw error;
+  }
+};
+
 module.exports = exports;

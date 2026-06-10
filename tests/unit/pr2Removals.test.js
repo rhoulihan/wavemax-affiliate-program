@@ -11,6 +11,6 @@ describe('PR 2 — beta program code removed', () => {
   });
 
   it('betaRequestService module is deleted', () => {
-    expect(() => require('../../server/services/betaRequestService')).toThrow();
+    expect(() => require('../../server/services/betaRequestService')).toThrow(/Cannot find module/);
   });
 });
