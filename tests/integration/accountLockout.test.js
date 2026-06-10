@@ -42,10 +42,6 @@ describe('Per-account login lockout (H-5)', () => {
         passwordHash: hash,
         businessName: 'Test', address: '1 Test', city: 'Austin',
         state: 'TX', zipCode: '78753',
-        serviceLocation: { type: 'Point', coordinates: [-97.7, 30.27] },
-        serviceLongitude: -97.7,
-        serviceLatitude: 30.27,
-        serviceRadius: 5,
         minimumDeliveryFee: 25, perBagDeliveryFee: 5,
         paymentMethod: 'check',
         registrationMethod: 'traditional',
@@ -130,9 +126,7 @@ describe('Per-account login lockout (H-5)', () => {
         address: '1 Test', city: 'Austin',
         state: 'TX', zipCode: '78753',
         serviceFrequency: 'weekly',
-        numberOfBags: 1,
         registrationMethod: 'traditional',
-        registrationVersion: 'v2',
         languagePreference: 'en',
         isActive: true
       });

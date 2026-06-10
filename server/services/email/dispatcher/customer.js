@@ -2,7 +2,7 @@ const logger = require('../../../utils/logger');
 // Customer-facing email dispatchers.
 // Extracted from utils/emailService.js in Phase 2.
 
-const { loadTemplate, fillTemplate } = require('../template-manager');
+const { loadTemplate, fillTemplate, formatTimeSlot } = require('../template-manager');
 const { sendEmail } = require('../transport');
 // =============================================================================
 // Customer Emails
@@ -14,22 +14,22 @@ const { sendEmail } = require('../transport');
 exports.sendCustomerWelcomeEmail = async (customer, affiliate, bagInfo = {}) => {
   try {
     // Debug logging
-    logger.info('[sendCustomerWelcomeEmail] Customer:', customer ? { 
-      email: customer.email, 
-      firstName: customer.firstName, 
-      customerId: customer.customerId 
+    logger.info('[sendCustomerWelcomeEmail] Customer:', customer ? {
+      email: customer.email,
+      firstName: customer.firstName,
+      customerId: customer.customerId
     } : 'undefined');
-    logger.info('[sendCustomerWelcomeEmail] Affiliate:', affiliate ? { 
-      affiliateId: affiliate.affiliateId, 
-      businessName: affiliate.businessName 
+    logger.info('[sendCustomerWelcomeEmail] Affiliate:', affiliate ? {
+      affiliateId: affiliate.affiliateId,
+      businessName: affiliate.businessName
     } : 'undefined');
-    
+
     // Validate inputs
     if (!customer || !affiliate) {
       logger.error('Missing customer or affiliate data for welcome email');
       return;
     }
-    
+
     if (!customer.email) {
       logger.error('Customer email is missing or undefined');
       return;
@@ -290,166 +290,6 @@ exports.sendCustomerWelcomeEmail = async (customer, affiliate, bagInfo = {}) => 
   } catch (error) {
     logger.error('Error sending customer welcome email:', error);
     throw error; // Re-throw to let the controller handle it
-  }
-};
-
-/**
- * Send bags ready notification email to customer
- */
-exports.sendCustomerBagsReadyEmail = async (customer, affiliate, bagInfo = {}) => {
-  try {
-    // Validate inputs
-    if (!customer || !affiliate) {
-      logger.error('Missing customer or affiliate data for bags ready email');
-      return;
-    }
-
-    if (!customer.email) {
-      logger.error('Customer email is missing or undefined');
-      return;
-    }
-
-    const language = customer.languagePreference || 'en';
-    const template = await loadTemplate('customer-bags-ready', language);
-
-    // Build affiliate name with fallback
-    const affiliateName = affiliate.businessName ||
-      `${affiliate.firstName || ''} ${affiliate.lastName || ''}`.trim() ||
-      'Your WaveMAX Partner';
-
-    // Extract bag information with defaults
-    const numberOfBags = bagInfo.numberOfBags || 0;
-
-    // Get translations for the email content
-    const translations = {
-      en: {
-        EMAIL_TITLE: 'Your Laundry Bags Are Ready!',
-        EMAIL_HEADER: 'Your Bags Are Ready!',
-        GREETING: `Hi ${customer.firstName},`,
-        MAIN_MESSAGE: 'Great news! Your laundry bags have been prepared and are ready for you.',
-        BAGS_READY_TITLE: 'Your Bags Are Ready!',
-        BAGS_READY_MESSAGE: `Your service provider will deliver your ${numberOfBags > 0 ? numberOfBags + ' ' : ''}laundry bag${numberOfBags !== 1 ? 's' : ''} when you place your first order.`,
-        NEXT_STEPS_TITLE: 'What Happens Next?',
-        STEP_1: 'Schedule your first pickup using the button below',
-        STEP_2: 'Your service provider will bring your bags with your first pickup',
-        STEP_3: 'Start enjoying hassle-free laundry service!',
-        YOUR_PROVIDER_TITLE: 'Your Service Provider',
-        NAME_LABEL: 'Name',
-        PHONE_LABEL: 'Phone',
-        EMAIL_LABEL: 'Email',
-        PROVIDER_MESSAGE: 'Feel free to reach out if you have any questions about your bags or service!',
-        READY_TO_START_TITLE: 'Ready to Schedule Your First Pickup?',
-        READY_TO_START_MESSAGE: 'Click the button below to access your dashboard and schedule your first laundry pickup.',
-        SCHEDULE_BUTTON: 'Schedule Your First Pickup',
-        DASHBOARD_MESSAGE: 'Access your customer dashboard anytime to manage orders and track deliveries.',
-        DASHBOARD_BUTTON: 'Go to Dashboard',
-        FOOTER_SUPPORT: 'If you have any questions, please contact our support team.',
-        FOOTER_RIGHTS: 'All rights reserved.',
-        FOOTER_ADDRESS: '123 Main Street, Austin, TX 78701'
-      },
-      es: {
-        EMAIL_TITLE: '¡Sus Bolsas de Lavandería Están Listas!',
-        EMAIL_HEADER: '¡Sus Bolsas Están Listas!',
-        GREETING: `Hola ${customer.firstName},`,
-        MAIN_MESSAGE: '¡Excelentes noticias! Sus bolsas de lavandería han sido preparadas y están listas para usted.',
-        BAGS_READY_TITLE: '¡Sus Bolsas Están Listas!',
-        BAGS_READY_MESSAGE: `Su proveedor de servicio entregará su${numberOfBags > 0 ? 's ' + numberOfBags : 's'} bolsa${numberOfBags !== 1 ? 's' : ''} de lavandería cuando haga su primer pedido.`,
-        NEXT_STEPS_TITLE: '¿Qué Sucede Ahora?',
-        STEP_1: 'Programe su primera recogida usando el botón a continuación',
-        STEP_2: 'Su proveedor de servicio traerá sus bolsas con su primera recogida',
-        STEP_3: '¡Comience a disfrutar del servicio de lavandería sin complicaciones!',
-        YOUR_PROVIDER_TITLE: 'Su Proveedor de Servicio',
-        NAME_LABEL: 'Nombre',
-        PHONE_LABEL: 'Teléfono',
-        EMAIL_LABEL: 'Correo',
-        PROVIDER_MESSAGE: '¡No dude en contactar si tiene preguntas sobre sus bolsas o el servicio!',
-        READY_TO_START_TITLE: '¿Listo para Programar Su Primera Recogida?',
-        READY_TO_START_MESSAGE: 'Haga clic en el botón a continuación para acceder a su panel y programar su primera recogida de lavandería.',
-        SCHEDULE_BUTTON: 'Programe Su Primera Recogida',
-        DASHBOARD_MESSAGE: 'Acceda a su panel de cliente en cualquier momento para gestionar pedidos y rastrear entregas.',
-        DASHBOARD_BUTTON: 'Ir al Panel',
-        FOOTER_SUPPORT: 'Si tiene alguna pregunta, contacte a nuestro equipo de soporte.',
-        FOOTER_RIGHTS: 'Todos los derechos reservados.',
-        FOOTER_ADDRESS: '123 Main Street, Austin, TX 78701'
-      },
-      pt: {
-        EMAIL_TITLE: 'Suas Sacolas de Lavanderia Estão Prontas!',
-        EMAIL_HEADER: 'Suas Sacolas Estão Prontas!',
-        GREETING: `Olá ${customer.firstName},`,
-        MAIN_MESSAGE: 'Ótimas notícias! Suas sacolas de lavanderia foram preparadas e estão prontas para você.',
-        BAGS_READY_TITLE: 'Suas Sacolas Estão Prontas!',
-        BAGS_READY_MESSAGE: `Seu provedor de serviço entregará sua${numberOfBags > 0 ? 's ' + numberOfBags : 's'} sacola${numberOfBags !== 1 ? 's' : ''} de lavanderia quando você fizer seu primeiro pedido.`,
-        NEXT_STEPS_TITLE: 'O Que Acontece Agora?',
-        STEP_1: 'Agende sua primeira coleta usando o botão abaixo',
-        STEP_2: 'Seu provedor de serviço trará suas sacolas com sua primeira coleta',
-        STEP_3: 'Comece a desfrutar do serviço de lavanderia sem complicações!',
-        YOUR_PROVIDER_TITLE: 'Seu Provedor de Serviço',
-        NAME_LABEL: 'Nome',
-        PHONE_LABEL: 'Telefone',
-        EMAIL_LABEL: 'E-mail',
-        PROVIDER_MESSAGE: 'Sinta-se à vontade para entrar em contato se tiver dúvidas sobre suas sacolas ou serviço!',
-        READY_TO_START_TITLE: 'Pronto para Agendar Sua Primeira Coleta?',
-        READY_TO_START_MESSAGE: 'Clique no botão abaixo para acessar seu painel e agendar sua primeira coleta de lavanderia.',
-        SCHEDULE_BUTTON: 'Agende Sua Primeira Coleta',
-        DASHBOARD_MESSAGE: 'Acesse seu painel de cliente a qualquer momento para gerenciar pedidos e rastrear entregas.',
-        DASHBOARD_BUTTON: 'Ir para o Painel',
-        FOOTER_SUPPORT: 'Se você tiver alguma dúvida, entre em contato com nossa equipe de suporte.',
-        FOOTER_RIGHTS: 'Todos os direitos reservados.',
-        FOOTER_ADDRESS: '123 Main Street, Austin, TX 78701'
-      },
-      de: {
-        EMAIL_TITLE: 'Ihre Wäschesäcke Sind Bereit!',
-        EMAIL_HEADER: 'Ihre Säcke Sind Bereit!',
-        GREETING: `Hallo ${customer.firstName},`,
-        MAIN_MESSAGE: 'Großartige Neuigkeiten! Ihre Wäschesäcke wurden vorbereitet und sind für Sie bereit.',
-        BAGS_READY_TITLE: 'Ihre Säcke Sind Bereit!',
-        BAGS_READY_MESSAGE: `Ihr Dienstleister wird Ihre ${numberOfBags > 0 ? numberOfBags + ' ' : ''}Wäschesack${numberOfBags !== 1 ? 'säcke' : ''} bei Ihrer ersten Bestellung mitbringen.`,
-        NEXT_STEPS_TITLE: 'Was Passiert Als Nächstes?',
-        STEP_1: 'Planen Sie Ihre erste Abholung mit dem Button unten',
-        STEP_2: 'Ihr Dienstleister bringt Ihre Säcke bei Ihrer ersten Abholung mit',
-        STEP_3: 'Beginnen Sie, den problemlosen Wäscheservice zu genießen!',
-        YOUR_PROVIDER_TITLE: 'Ihr Dienstleister',
-        NAME_LABEL: 'Name',
-        PHONE_LABEL: 'Telefon',
-        EMAIL_LABEL: 'E-Mail',
-        PROVIDER_MESSAGE: 'Zögern Sie nicht, Kontakt aufzunehmen, wenn Sie Fragen zu Ihren Säcken oder dem Service haben!',
-        READY_TO_START_TITLE: 'Bereit, Ihre Erste Abholung zu Planen?',
-        READY_TO_START_MESSAGE: 'Klicken Sie auf den Button unten, um auf Ihr Dashboard zuzugreifen und Ihre erste Wäscheabholung zu planen.',
-        SCHEDULE_BUTTON: 'Planen Sie Ihre Erste Abholung',
-        DASHBOARD_MESSAGE: 'Greifen Sie jederzeit auf Ihr Kunden-Dashboard zu, um Bestellungen zu verwalten und Lieferungen zu verfolgen.',
-        DASHBOARD_BUTTON: 'Zum Dashboard',
-        FOOTER_SUPPORT: 'Bei Fragen wenden Sie sich bitte an unser Support-Team.',
-        FOOTER_RIGHTS: 'Alle Rechte vorbehalten.',
-        FOOTER_ADDRESS: '123 Main Street, Austin, TX 78701'
-      }
-    };
-
-    const scheduleUrl = `${process.env.APP_BASE_URL || 'https://wavemax.promo'}/customer/schedule-pickup`;
-    const loginUrl = `${process.env.APP_BASE_URL || 'https://wavemax.promo'}/customer/login`;
-
-    const data = {
-      ...translations[language],
-      CUSTOMER_ID: customer.customerId,
-      AFFILIATE_NAME: affiliateName,
-      AFFILIATE_PHONE: affiliate.phone || 'Not provided',
-      AFFILIATE_EMAIL: affiliate.email || 'Not provided',
-      SCHEDULE_URL: scheduleUrl,
-      LOGIN_URL: loginUrl,
-      CURRENT_YEAR: new Date().getFullYear()
-    };
-
-    const html = fillTemplate(template, data);
-
-    await sendEmail(
-      customer.email,
-      `${translations[language].EMAIL_TITLE}`,
-      html
-    );
-
-    logger.info('Customer bags ready email sent successfully to:', customer.email);
-  } catch (error) {
-    logger.error('Error sending customer bags ready email:', error);
-    throw error;
   }
 };
 
@@ -779,8 +619,6 @@ exports.sendOrderCancellationEmail = async (customer, order) => {
         ORDER_ID_LABEL: 'Order ID',
         ORIGINAL_PICKUP_DATE_LABEL: 'Original Pickup Date',
         CANCELLED_AT_LABEL: 'Cancelled At',
-        RESCHEDULE_MESSAGE: 'If you\'d like to schedule a new pickup, you can do so at any time:',
-        SCHEDULE_BUTTON: 'Schedule New Pickup',
         VIEW_DASHBOARD_LINK: 'View Your Dashboard',
         APOLOGY_MESSAGE: 'We\'re sorry for any inconvenience. If you have any questions, please contact your affiliate partner.',
         CLOSING_MESSAGE: 'Best regards,<br>The WaveMAX Laundry Team',
@@ -796,8 +634,6 @@ exports.sendOrderCancellationEmail = async (customer, order) => {
         ORDER_ID_LABEL: 'ID del Pedido',
         ORIGINAL_PICKUP_DATE_LABEL: 'Fecha Original de Recogida',
         CANCELLED_AT_LABEL: 'Cancelado a las',
-        RESCHEDULE_MESSAGE: 'Si desea programar una nueva recogida, puede hacerlo en cualquier momento:',
-        SCHEDULE_BUTTON: 'Programar Nueva Recogida',
         VIEW_DASHBOARD_LINK: 'Ver Su Panel',
         APOLOGY_MESSAGE: 'Lamentamos cualquier inconveniente. Si tiene preguntas, contacte a su socio afiliado.',
         CLOSING_MESSAGE: 'Saludos cordiales,<br>El Equipo de WaveMAX Laundry',
@@ -813,8 +649,6 @@ exports.sendOrderCancellationEmail = async (customer, order) => {
         ORDER_ID_LABEL: 'ID do Pedido',
         ORIGINAL_PICKUP_DATE_LABEL: 'Data Original de Coleta',
         CANCELLED_AT_LABEL: 'Cancelado às',
-        RESCHEDULE_MESSAGE: 'Se você gostaria de agendar uma nova coleta, pode fazê-lo a qualquer momento:',
-        SCHEDULE_BUTTON: 'Agendar Nova Coleta',
         VIEW_DASHBOARD_LINK: 'Ver Seu Painel',
         APOLOGY_MESSAGE: 'Pedimos desculpas por qualquer inconveniente. Se tiver dúvidas, entre em contato com seu parceiro afiliado.',
         CLOSING_MESSAGE: 'Atenciosamente,<br>A Equipe WaveMAX Laundry',
@@ -830,8 +664,6 @@ exports.sendOrderCancellationEmail = async (customer, order) => {
         ORDER_ID_LABEL: 'Bestell-ID',
         ORIGINAL_PICKUP_DATE_LABEL: 'Ursprüngliches Abholdatum',
         CANCELLED_AT_LABEL: 'Storniert um',
-        RESCHEDULE_MESSAGE: 'Wenn Sie eine neue Abholung planen möchten, können Sie dies jederzeit tun:',
-        SCHEDULE_BUTTON: 'Neue Abholung planen',
         VIEW_DASHBOARD_LINK: 'Ihr Dashboard anzeigen',
         APOLOGY_MESSAGE: 'Wir entschuldigen uns für etwaige Unannehmlichkeiten. Bei Fragen kontaktieren Sie bitte Ihren Affiliate-Partner.',
         CLOSING_MESSAGE: 'Mit freundlichen Grüßen,<br>Das WaveMAX Laundry Team',
@@ -848,7 +680,6 @@ exports.sendOrderCancellationEmail = async (customer, order) => {
       pickup_date: new Date(order.pickupDate).toLocaleDateString(),
       cancellation_time: new Date().toLocaleTimeString(),
       dashboard_url: 'https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?login=customer',
-      schedule_url: 'https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?login=customer&pickup=true',
       current_year: new Date().getFullYear(),
       ...emailTranslations
     };

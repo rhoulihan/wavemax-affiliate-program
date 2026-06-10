@@ -9,7 +9,7 @@
   'use strict';
 
   // Forward every query param to the iframe. The affiliate landing (and
-  // other routes) rely on things like `code`, `affid`, `token`, etc., so
+  // other routes) rely on things like `code`, `token`, etc., so
   // we can't just pluck `route` out.
   const urlParams = new URLSearchParams(window.location.search);
   if (!urlParams.has('route')) urlParams.set('route', '/');

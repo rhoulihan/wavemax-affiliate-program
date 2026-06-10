@@ -71,7 +71,6 @@
       "loginSuccess": "Anmeldung erfolgreich!",
       "logoutSuccess": "Sie wurden erfolgreich abgemeldet.",
       "registrationSuccess": "Registrierung erfolgreich!",
-    "betaRestriction": "Wir befinden uns derzeit in der geschlossenen Beta-Phase. Bitte versuchen Sie es in ein paar Tagen erneut oder kontaktieren Sie uns, wenn Sie glauben, dass Sie Zugang haben sollten.",
       "registrationFailed": "Registrierung fehlgeschlagen. Bitte versuchen Sie es erneut.",
       "passwordResetSuccess": "Passwort erfolgreich zurückgesetzt!",
       "passwordResetFailed": "Passwort-Zurücksetzung fehlgeschlagen. Bitte versuchen Sie es erneut.",
@@ -125,9 +124,14 @@
       }
     },
     "howItWorks": {
-        "step1": "Jetzt ohne Kreditkarte anmelden",
+      "step1": {
         "socialSignupText": "Melden Sie sich schnell mit Ihrem Social-Media-Konto an",
         "socialConnectedMessage": "Großartig! Wir haben Ihr soziales Konto verbunden. Füllen Sie einfach das untenstehende Formular aus, um die Registrierung abzuschließen - keine Zahlung erforderlich!",
+        "title": "Registrieren",
+        "description": "Erstellen Sie Ihr Partnerkonto in wenigen Minuten"
+      },
+      "socialSignupText": "Melden Sie sich schnell mit Ihrem Social-Media-Konto an",
+      "socialConnectedMessage": "Großartig! Wir haben Ihr soziales Konto verbunden. Füllen Sie einfach das untenstehende Formular aus, um die Registrierung abzuschließen - keine Zahlung erforderlich!",
       "title": "So funktioniert unser Service",
       "subtitle": "Einfacher Prozess",
       "steps": {
@@ -146,12 +150,6 @@
           "title": "Schnelle Bearbeitung",
           "description": "Ihre Kleidung wird professionell gereinigt und frisch, gefaltet und tragfertig zurückgegeben - normalerweise innerhalb von 24-48 Stunden."
         }
-      },
-      "step1": {
-        "socialSignupText": "Melden Sie sich schnell mit Ihrem Social-Media-Konto an",
-        "socialConnectedMessage": "Großartig! Wir haben Ihr soziales Konto verbunden. Füllen Sie einfach das untenstehende Formular aus, um die Registrierung abzuschließen - keine Zahlung erforderlich!",
-        "title": "Registrieren",
-        "description": "Erstellen Sie Ihr Partnerkonto in wenigen Minuten"
       },
       "step2": {
         "title": "Teilen Sie Ihren Link",
@@ -293,7 +291,7 @@
       "title": "Bereit, Geld zu verdienen?",
       "customerTitle": "Bereit für frische, saubere Wäsche?",
       "description": "Treten Sie unserem Partnerprogramm bei und verdienen Sie Provisionen, indem Sie Ihren Kunden Wäscheservice anbieten.",
-      "createAccount": "Partnerkonto erstellen",
+      "createAccount": "Werden Sie Partner",
       "login": "Partner-Login",
       "subtitle": {
         "full": "Lassen Sie {{affiliateName}} die Abholung und Lieferung übernehmen, während WaveMAX die professionelle Reinigung sicherstellt",
@@ -341,25 +339,9 @@
       "city": "Stadt *",
       "state": "Bundesstaat *",
       "zipCode": "Postleitzahl *",
-      "serviceArea": "Servicegebiet *",
-      "serviceAddress": "Adresse des Servicezentrums",
-      "addressPlaceholder": "Adresse eingeben oder auf Karte klicken",
       "passwordPlaceholder": "Geben Sie Ihr Passwort ein",
       "confirmPasswordPlaceholder": "Passwort erneut eingeben",
       "usernamePlaceholder": "Wählen Sie einen eindeutigen Benutzernamen",
-      "addressHelp": "Beginnen Sie mit der Eingabe, um nach einer Adresse zu suchen",
-      "serviceAreaInstructions": "So legen Sie Ihr Servicegebiet fest",
-      "serviceAreaStep1": "Geben Sie eine Adresse ein oder klicken Sie auf die Karte",
-      "serviceAreaStep2": "Ziehen Sie den Marker bei Bedarf, um seine Position anzupassen",
-      "serviceAreaStep3": "Verwenden Sie den Schieberegler, um Ihren Serviceradius festzulegen",
-      "serviceRadius": "Serviceradius:",
-      "miles": "Meilen",
-      "serviceAreaDetails": "Details zum Servicegebiet",
-      "serviceCenter": "Servicezentrum:",
-      "coverageArea": "Abdeckungsgebiet:",
-      "coordinates": "Koordinaten:",
-      "useRegistrationAddress": "Registrierungsadresse verwenden",
-      "notSet": "Nicht festgelegt",
       "serviceInfo": "Serviceinformationen",
       "deliveryFeeStructure": "Liefergebührenstruktur",
       "dynamicPricing": "Dynamische Preisgestaltung:",
@@ -368,13 +350,8 @@
       "minimumFeeDesc": "Die Mindestgebühr, die unabhängig von der Taschenanzahl erhoben wird",
       "perBagFee": "Gebühr pro Tasche ($) *",
       "perBagFeeDesc": "Gebühr für jede Wäschetasche",
-      "validateAddress": "Adresse validieren und Servicestandort festlegen",
-      "validateAddressHelp": "Klicken Sie hier, um Ihre Adresse zu überprüfen und automatisch das Zentrum Ihres Servicebereichs auf der Karte unten festzulegen",
-      "selectServiceLocation": "Wählen Sie Ihren Servicestandort",
-      "confirmServiceLocation": "Bestätigen Sie Ihren Servicestandort",
-      "selectCorrectLocation": "Wir haben mehrere mögliche Standorte gefunden. Bitte wählen Sie den richtigen aus:",
-      "confirmCorrectAddress": "Bitte bestätigen Sie, dass dies die richtige Adresse für Ihr Servicegebiet ist:",
-      "confirm": "Bestätigen",
+      "validateAddress": "Adresse validieren",
+      "validateAddressHelp": "Klicken Sie hier, um Ihre Adresse zu überprüfen, bevor Sie fortfahren",
       "livePricingPreview": "Live-Preisvorschau",
       "1bag": "1 Tasche",
       "3bags": "3 Taschen",
@@ -488,57 +465,7 @@
         "pickups": "Abholungen & Lieferungen",
         "customers": "Kunden",
         "earnings": "Verdienste",
-        "schedule": "Zeitplan",
         "settings": "Einstellungen"
-      },
-      "schedule": {
-        "title": "Verfügbarkeitsplan",
-        "subtitle": "Verwalten Sie Ihre Verfügbarkeit für Abholungen und Lieferungen",
-        "weeklyTemplate": "Wöchentliche Vorlage",
-        "dateExceptions": "Datumsausnahmen",
-        "editWeeklyTemplate": "Wöchentliche Vorlage Bearbeiten",
-        "blockDate": "Datum Blockieren",
-        "bookingSettings": "Buchungseinstellungen",
-        "legend": "Legende",
-        "available": "Verfügbar",
-        "partiallyAvailable": "Teilweise Verfügbar",
-        "unavailable": "Nicht Verfügbar",
-        "blocked": "Blockiert",
-        "override": "Überschreibung",
-        "morning": "Morgen (8 - 12 Uhr)",
-        "afternoon": "Nachmittag (12 - 16 Uhr)",
-        "evening": "Abend (16 - 20 Uhr)",
-        "days": {
-          "monday": "Montag",
-          "tuesday": "Dienstag",
-          "wednesday": "Mittwoch",
-          "thursday": "Donnerstag",
-          "friday": "Freitag",
-          "saturday": "Samstag",
-          "sunday": "Sonntag"
-        },
-        "modal": {
-          "editTemplate": "Wöchentliche Vorlage Bearbeiten",
-          "blockDateTitle": "Datum Blockieren",
-          "overrideDateTitle": "Datum Überschreiben",
-          "settingsTitle": "Buchungseinstellungen",
-          "selectDate": "Datum Auswählen",
-          "reason": "Grund (optional)",
-          "advanceBookingDays": "Mindestens Tage im Voraus",
-          "maxBookingDays": "Maximale Buchungstage",
-          "timezone": "Zeitzone",
-          "saveChanges": "Änderungen Speichern",
-          "cancel": "Abbrechen"
-        },
-        "notifications": {
-          "templateUpdated": "Wöchentliche Vorlage erfolgreich aktualisiert",
-          "dateBlocked": "Datum erfolgreich blockiert",
-          "dateOverridden": "Datumsüberschreibung erfolgreich gespeichert",
-          "exceptionRemoved": "Datumsausnahme erfolgreich entfernt",
-          "settingsUpdated": "Buchungseinstellungen erfolgreich aktualisiert",
-          "loadError": "Fehler beim Laden des Zeitplans",
-          "saveError": "Fehler beim Speichern der Änderungen"
-        }
       },
       "metrics": {
         "totalCustomers": "Kunden gesamt",
@@ -553,9 +480,7 @@
       "marketingLinks": {
         "title": "Ihre Marketing-Links",
         "landingPage": "Kunden-Landingpage",
-        "landingPageDesc": "Teilen Sie diese professionelle Seite, um Ihre Dienstleistungen zu präsentieren",
-        "registrationLink": "Direkter Registrierungslink",
-        "registrationDesc": "Direkter Link für Kunden zur Registrierung"
+        "landingPageDesc": "Teilen Sie diese professionelle Seite, um Ihre Dienstleistungen zu präsentieren"
       },
       "pickups": {
         "title": "Anstehende Abholungen & Lieferungen"
@@ -623,9 +548,6 @@
       "marketingLinkTitle": "Ihre Kunden-Landingpage",
       "marketingLinkDescription": "Teilen Sie diese professionelle Seite mit potenziellen Kunden, um Ihre Dienstleistungen und Preise zu präsentieren:",
       "marketingLinkHelp": "Diese Seite enthält Informationen über Ihre Dienstleistungen, Preise und ein Registrierungsformular.",
-      "linkTitle": "Direkter Kundenregistrierungslink",
-      "linkDescription": "Kunden können auch diesen direkten Link zur Registrierung verwenden:",
-      "linkHelp": "Jeder über Ihre Links registrierte Kunde wird Ihrem Konto zugeordnet.",
       "nextStepsTitle": "Nächste Schritte",
       "nextStep1": "Überprüfen Sie Ihre E-Mail für Ihre Willkommensnachricht und Anmeldedaten",
       "nextStep2": "Melden Sie sich in Ihrem Partner-Dashboard an, um auf Marketingmaterialien zuzugreifen",
@@ -674,7 +596,6 @@
       "bagDelivered": "Von Ihrem Partner geliefert",
       "bagCredited": "Bei Ihrer ersten Bestellung gutgeschrieben",
       "numberOfBags": "Anzahl benötigter Säcke *",
-      "selectBags": "Anzahl der Säcke auswählen",
       "bagRecommendation": "Die meisten Haushalte benötigen 2-3 Säcke für den regulären Wäscheservice.",
       "totalBagFee": "Gesamtgebühr für Säcke:",
       "bagCreditNote": "Dieser Betrag wird bei Ihrer ersten Bestellung gutgeschrieben.",
@@ -725,19 +646,12 @@
       "v2": {
         "noPaymentRequired": "Keine Zahlung Erforderlich",
         "subtitle": "Melden Sie sich für den Premium-Wäscheabhol- und Lieferservice an - zahlen Sie nach dem Wiegen Ihrer Wäsche!",
-        "freeBagsBanner": "Erhalten Sie Ihre ersten 1-2 Wäschesäcke KOSTENLOS - Keine Kreditkarte erforderlich!",
-        "selectBags": "Wählen Sie Ihre kostenlosen Wäschesäcke",
-        "selectBagsDescription": "Wählen Sie, wie viele Säcke Sie zum Start benötigen. Jeder Sack fasst 20-25 Pfund Wäsche.",
-        "oneBag": "1 Sack",
-        "oneBagDesc": "Perfekt für Einzelpersonen und Paare",
-        "twoBags": "2 Säcke",
-        "twoBagsDesc": "Ideal für größere Familien",
         "howItWorks": "So funktioniert unser V2-Zahlungssystem",
         "step1": "Jetzt ohne Kreditkarte anmelden",
         "socialSignupText": "Melden Sie sich schnell mit Ihrem Social-Media-Konto an",
         "socialConnectedMessage": "Großartig! Wir haben Ihr soziales Konto verbunden. Füllen Sie einfach das untenstehende Formular aus, um die Registrierung abzuschließen - keine Zahlung erforderlich!",
         "step2": "Erhalten Sie Ihre kostenlosen Wäschesäcke",
-        "step3": "Planen Sie Ihre erste Abholung",
+        "step3": "Geben Sie Ihren Wäschebeutel an Ihren Partner — Ihre Bestellung wird erstellt, wenn er im Geschäft ankommt",
         "step4": "Wir wiegen Ihre Wäsche und senden Ihnen Zahlungslinks",
         "step5": "Bezahlen Sie bequem über Venmo, PayPal oder CashApp",
         "step6": "Erhalten Sie Ihre frische, saubere Wäsche!",
@@ -753,7 +667,6 @@
     "dashboard": {
       "title": "Kunden-Dashboard",
       "welcome": "Willkommen zurück, {{name}}!",
-      "schedulePickup": "Abholung planen",
       "activeOrder": "Aktive Bestellung",
       "activeOrders": "Aktive Bestellungen",
       "orderHistory": "Bestellverlauf",
@@ -855,8 +768,7 @@
       "subtabs": {
         "overview": "Übersicht",
         "charts": "Diagramme",
-        "recentActivity": "Letzte Aktivitäten",
-        "betaRequests": "Beta-Anfragen"
+        "recentActivity": "Letzte Aktivitäten"
       },
       "stats": {
         "activeOperators": "Aktive Operatoren",
@@ -988,8 +900,6 @@
         "marketingLinksDesc": "Teilen Sie diese Links mit Ihrem Partner, um die Kundenregistrierung zu fördern.",
         "landingPageLink": "Partner-Landingpage",
         "landingPageDesc": "Marketing-Seite mit Umsatzrechner und Kundenregistrierung",
-        "customerRegisterLink": "Kundenregistrierungsseite",
-        "customerRegisterDesc": "Direkter Link zur Kundenregistrierung für diesen Partner",
         "sendW9": "W9 senden",
         "sending": "Wird gesendet...",
         "confirmSendW9": "W9-Formular an diesen Partner senden?",
@@ -1296,7 +1206,6 @@
       "step2": "Ihr Partner wird Sie benachrichtigen, wenn er unterwegs ist",
       "step3": "Wir wiegen Ihre Wäsche und teilen Ihnen die endgültigen Kosten mit",
       "step4": "Saubere Wäsche wird am geplanten Liefertermin geliefert",
-      "scheduleAnother": "Weitere Abholung planen",
       "orderNumber": "Bestellnummer",
       "pickupScheduled": "Abholung geplant",
       "estimatedDelivery": "Voraussichtliche Lieferung",
@@ -1328,8 +1237,7 @@
       "operatorMessage": "Willkommen beim WaveMAX Team! Ihr Operator-Konto wurde erstellt.",
       "operatorPin": "Ihre PIN:",
       "accessPortal": "Portal aufrufen",
-      "accessDashboard": "Auf Ihr Dashboard zugreifen",
-      "schedulePickup": "Planen Sie Ihre erste Abholung"
+      "accessDashboard": "Auf Ihr Dashboard zugreifen"
     },
     "commission": {
       "title": "Provisionszahlungsbenachrichtigung",
@@ -1429,7 +1337,12 @@
     "description": "Überprüfen Sie den Status Ihrer Facebook-Datenlöschungsanfrage",
     "loading": "Status wird geladen...",
     "confirmationCode": "Bestätigungscode",
-    "status": "Status",
+    "status": {
+      "pending": "Verarbeitung ausstehend",
+      "processing": "Wird derzeit verarbeitet",
+      "completed": "Erfolgreich abgeschlossen",
+      "failed": "Fehlgeschlagen"
+    },
     "requestedAt": "Angefordert am",
     "completedAt": "Abgeschlossen am",
     "contact": "Bei Fragen zu Ihrer Datenlöschungsanfrage wenden Sie sich bitte an den Support.",
@@ -1439,12 +1352,6 @@
       "noCode": "Kein Bestätigungscode angegeben",
       "loadFailed": "Löschungsstatus konnte nicht geladen werden",
       "notFound": "Löschungsanfrage nicht gefunden"
-    },
-    "status": {
-      "pending": "Verarbeitung ausstehend",
-      "processing": "Wird derzeit verarbeitet",
-      "completed": "Erfolgreich abgeschlossen",
-      "failed": "Fehlgeschlagen"
     },
     "success": {
       "title": "Löschung abgeschlossen",

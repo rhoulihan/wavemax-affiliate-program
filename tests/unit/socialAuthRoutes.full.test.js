@@ -36,8 +36,6 @@ describe('Social Auth Routes - Full Coverage', () => {
       administratorLogin: jest.fn(),
       operatorLogin: jest.fn(),
       operatorAutoLogin: jest.fn(),
-      checkEmail: jest.fn(),
-      checkUsername: jest.fn(),
       forgotPassword: jest.fn(),
       resetPassword: jest.fn(),
       verifyToken: jest.fn(),
@@ -283,7 +281,6 @@ describe('Social Auth Routes - Full Coverage', () => {
           city: 'Test City',
           state: 'CA',
           zipCode: '12345',
-          serviceRadius: 10,
           minimumDeliveryFee: 25,
           perBagDeliveryFee: 5,
           paymentMethod: 'paypal'

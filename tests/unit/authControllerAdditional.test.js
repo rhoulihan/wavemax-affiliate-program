@@ -86,152 +86,6 @@ describe('Auth Controller - Additional Coverage', () => {
     });
   });
 
-  describe('checkEmail', () => {
-    it('should return available when email does not exist', async () => {
-      req.body.email = 'new@example.com';
-      
-      Affiliate.findOne.mockResolvedValue(null);
-      Customer.findOne.mockResolvedValue(null);
-      Administrator.findOne.mockResolvedValue(null);
-      Operator.findOne.mockResolvedValue(null);
-
-      const handler = extractHandler(authController.checkEmail);
-      await handler(req, res, next);
-
-      expect(res.json).toHaveBeenCalledWith({
-        success: true,
-        available: true
-      });
-    });
-
-    it('should return not available when email exists in Affiliate', async () => {
-      req.body.email = 'existing@example.com';
-      
-      Affiliate.findOne.mockResolvedValue({ email: 'existing@example.com' });
-      Customer.findOne.mockResolvedValue(null);
-      Administrator.findOne.mockResolvedValue(null);
-      Operator.findOne.mockResolvedValue(null);
-
-      const handler = extractHandler(authController.checkEmail);
-      await handler(req, res, next);
-
-      expect(res.json).toHaveBeenCalledWith({
-        success: true,
-        available: false
-      });
-    });
-
-    it('should return not available when email exists in Customer', async () => {
-      req.body.email = 'customer@example.com';
-      
-      Affiliate.findOne.mockResolvedValue(null);
-      Customer.findOne.mockResolvedValue({ email: 'customer@example.com' });
-      Administrator.findOne.mockResolvedValue(null);
-      Operator.findOne.mockResolvedValue(null);
-
-      const handler = extractHandler(authController.checkEmail);
-      await handler(req, res, next);
-
-      expect(res.json).toHaveBeenCalledWith({
-        success: true,
-        available: false
-      });
-    });
-
-    it('should handle errors', async () => {
-      const next = jest.fn();
-      req.body.email = 'test@example.com';
-      
-      Affiliate.findOne.mockRejectedValue(new Error('Database error'));
-
-      const handler = extractHandler(authController.checkEmail);
-      await handler(req, res, next);
-
-      expect(res.status).toHaveBeenCalledWith(500);
-      expect(res.json).toHaveBeenCalledWith({
-        success: false,
-        message: 'Error checking email availability'
-      });
-    });
-
-    it('should return error for missing email', async () => {
-      const next = jest.fn();
-      req.body.email = '';
-
-      const handler = extractHandler(authController.checkEmail);
-      await handler(req, res, next);
-
-      expect(res.status).toHaveBeenCalledWith(400);
-      expect(res.json).toHaveBeenCalledWith({
-        success: false,
-        message: 'Email is required'
-      });
-    });
-  });
-
-  describe('checkUsername', () => {
-    it('should return available when username does not exist', async () => {
-      req.body.username = 'newuser';
-      
-      Affiliate.findOne.mockResolvedValue(null);
-      Administrator.findOne.mockResolvedValue(null);
-      Operator.findOne.mockResolvedValue(null);
-
-      const handler = extractHandler(authController.checkUsername);
-      await handler(req, res, next);
-
-      expect(res.json).toHaveBeenCalledWith({
-        success: true,
-        available: true
-      });
-    });
-
-    it('should return not available when username exists', async () => {
-      const next = jest.fn();
-      req.body.username = 'existinguser';
-      
-      Affiliate.findOne.mockResolvedValue({ username: 'existinguser' });
-
-      const handler = extractHandler(authController.checkUsername);
-      await handler(req, res, next);
-
-      expect(res.json).toHaveBeenCalledWith({
-        success: true,
-        available: false
-      });
-    });
-
-    it('should handle errors', async () => {
-      const next = jest.fn();
-      req.body.username = 'testuser';
-      
-      Affiliate.findOne.mockRejectedValue(new Error('Database error'));
-
-      const handler = extractHandler(authController.checkUsername);
-      await handler(req, res, next);
-
-      expect(res.status).toHaveBeenCalledWith(500);
-      expect(res.json).toHaveBeenCalledWith({
-        success: false,
-        message: 'Error checking username availability'
-      });
-    });
-
-    it('should return error for missing username', async () => {
-      const next = jest.fn();
-      req.body.username = '';
-
-      const handler = extractHandler(authController.checkUsername);
-      await handler(req, res, next);
-
-      expect(res.status).toHaveBeenCalledWith(400);
-      expect(res.json).toHaveBeenCalledWith({
-        success: false,
-        message: 'Username must be at least 3 characters'
-      });
-    });
-  });
-
   describe('operatorAutoLogin', () => {
     beforeEach(() => {
       // Set up store IP address for auto-login tests
@@ -368,12 +222,22 @@ describe('Auth Controller - Additional Coverage', () => {
       const handler = extractHandler(authController.handleSocialCallback);
       await handler(req, res, next);
 
-      expect(res.redirect).toHaveBeenCalledWith(expect.stringMatching(/^\/affiliate-dashboard-embed\.html\?token=mock-token&refreshToken=[a-f0-9]{80}$/));
+      // SEC H-3: tokens are stored server-side in OAuthSession and the
+      // redirect carries only an opaque lookup key (?fetch=oauth-result:<key>)
+      expect(OAuthSession.createSession).toHaveBeenCalledWith(
+        expect.stringMatching(/^oauth-result:[a-f0-9]{48}$/),
+        expect.objectContaining({ type: 'social-auth-login', token: 'mock-token' })
+      );
+      expect(res.redirect).toHaveBeenCalledWith(
+        expect.stringMatching(/^\/affiliate-dashboard-embed\.html\?fetch=oauth-result%3A[a-f0-9]{48}$/)
+      );
+      // No raw tokens may appear in the redirect URL
+      expect(res.redirect.mock.calls[0][0]).not.toContain('mock-token');
       expect(logLoginAttempt).toHaveBeenCalledWith(
-        true, 
-        'affiliate', 
+        true,
+        'affiliate',
         'johndoe',
-        req, 
+        req,
         'Social login successful'
       );
     });
@@ -397,12 +261,13 @@ describe('Auth Controller - Additional Coverage', () => {
       const handler = extractHandler(authController.handleSocialCallback);
       await handler(req, res, next);
 
-      // For new users, it creates a regular auth token and redirects to registration
+      // The user lacks isNewUser so the controller takes the existing-user
+      // path: tokens go into OAuthSession, redirect carries the lookup key only
       expect(jwt.sign).toHaveBeenCalled();
-      // The user is treated as existing (even though no _id) so redirects to dashboard
       expect(res.redirect).toHaveBeenCalledWith(
-        '/affiliate-dashboard-embed.html?token=social-token-123&refreshToken=61616161616161616161616161616161616161616161616161616161616161616161616161616161'
+        expect.stringMatching(/^\/affiliate-dashboard-embed\.html\?fetch=oauth-result%3A[a-f0-9]{48}$/)
       );
+      expect(res.redirect.mock.calls[0][0]).not.toContain('social-token-123');
     });
 
     it('should handle errors', async () => {

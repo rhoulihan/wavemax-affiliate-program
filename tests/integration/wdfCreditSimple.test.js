@@ -51,8 +51,6 @@ describe.skip('WDF Credit Integration Test (DEPRECATED - Feature being removed)'
         passwordSalt: 'salt',
         passwordHash: 'hash',
         paymentMethod: 'check',
-        serviceLatitude: 40.7128,
-        serviceLongitude: -74.0060
       });
 
       // Create test customer with WDF credit
@@ -96,33 +94,6 @@ describe.skip('WDF Credit Integration Test (DEPRECATED - Feature being removed)'
       expect(res.body.dashboard).toHaveProperty('wdfCredit');
       expect(res.body.dashboard.wdfCredit.amount).toBe(15.50);
       expect(res.body.dashboard.wdfCredit.fromOrderId).toBe('ORD-PREV-001');
-    });
-
-    it('should apply WDF credit when creating new order', async () => {
-      const res = await request(app)
-        .post('/api/v1/orders')
-        .set('Authorization', `Bearer ${customerToken}`)
-        .send({
-          customerId: testCustomer.customerId,
-          affiliateId: testAffiliate.affiliateId,
-          pickupDate: new Date().toISOString(),
-          pickupTime: 'morning',
-          estimatedWeight: 25,
-          numberOfBags: 2,
-          specialPickupInstructions: 'Test order with credit'
-        });
-
-      expect(res.status).toBe(201);
-      expect(res.body.success).toBe(true);
-      expect(res.body.wdfCreditApplied).toBe(15.50);
-
-      // Verify credit was consumed
-      const updatedCustomer = await Customer.findOne({ customerId: testCustomer.customerId });
-      expect(updatedCustomer.wdfCredit).toBe(0);
-
-      // Verify order has credit applied
-      const order = await Order.findOne({ orderId: res.body.orderId });
-      expect(order.wdfCreditApplied).toBe(15.50);
     });
 
     it('should show WDF credit in order details', async () => {

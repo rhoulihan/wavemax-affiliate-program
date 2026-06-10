@@ -2,7 +2,7 @@ const logger = require('../../../utils/logger');
 // Affiliate-facing email dispatchers.
 // Extracted from utils/emailService.js in Phase 2.
 
-const { loadTemplate, fillTemplate } = require('../template-manager');
+const { loadTemplate, fillTemplate, formatTimeSlot } = require('../template-manager');
 const { sendEmail } = require('../transport');
 // =============================================================================
 // Affiliate Emails
@@ -15,7 +15,6 @@ exports.sendAffiliateWelcomeEmail = async (affiliate) => {
   try {
     const language = affiliate.languagePreference || 'en';
     const template = await loadTemplate('affiliate-welcome', language);
-    const registrationUrl = `https://wavemax.promo/embed-app-v2.html?route=/customer-login&affid=${affiliate.affiliateId}`;
     const landingPageUrl = `https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?route=/affiliate-landing&code=${affiliate.affiliateId}`;
 
     // Get translations for the email content
@@ -30,10 +29,8 @@ exports.sendAffiliateWelcomeEmail = async (affiliate) => {
         AFFILIATE_ID_LABEL: 'Affiliate ID',
         LANDING_PAGE_LABEL: 'Customer Landing Page',
         LANDING_PAGE_DESC: 'Share this professional landing page with potential customers to showcase your services and pricing.',
-        REGISTRATION_URL_LABEL: 'Direct Registration URL',
-        REGISTRATION_URL_DESC: 'Customers can also use this direct link to register. Each customer registered through your links will be associated with your account.',
         GETTING_STARTED_TITLE: 'Getting Started',
-        STEP_1: 'Share your registration link with potential customers',
+        STEP_1: 'Customers join by claiming one of your laundry bags.',
         STEP_2: 'Receive laundry bags with unique barcodes for your customers',
         STEP_3: 'Coordinate pickups and deliveries based on customer schedules',
         STEP_4: 'Bring the laundry to our WaveMAX location for washing, drying, and folding',
@@ -64,10 +61,8 @@ exports.sendAffiliateWelcomeEmail = async (affiliate) => {
         AFFILIATE_ID_LABEL: 'ID de Afiliado',
         LANDING_PAGE_LABEL: 'Página de Destino para Clientes',
         LANDING_PAGE_DESC: 'Comparta esta página profesional con clientes potenciales para mostrar sus servicios y precios.',
-        REGISTRATION_URL_LABEL: 'URL de Registro Directo',
-        REGISTRATION_URL_DESC: 'Los clientes también pueden usar este enlace directo para registrarse. Cada cliente registrado a través de sus enlaces estará asociado con su cuenta.',
         GETTING_STARTED_TITLE: 'Primeros Pasos',
-        STEP_1: 'Comparta su enlace de registro con clientes potenciales',
+        STEP_1: 'Los clientes se unen reclamando una de tus bolsas de lavandería.',
         STEP_2: 'Reciba bolsas de lavandería con códigos de barras únicos para sus clientes',
         STEP_3: 'Coordine recogidas y entregas según los horarios de los clientes',
         STEP_4: 'Lleve la ropa a nuestra ubicación WaveMAX para lavar, secar y doblar',
@@ -98,10 +93,8 @@ exports.sendAffiliateWelcomeEmail = async (affiliate) => {
         AFFILIATE_ID_LABEL: 'ID de Afiliado',
         LANDING_PAGE_LABEL: 'Página de Destino para Clientes',
         LANDING_PAGE_DESC: 'Compartilhe esta página profissional com clientes em potencial para mostrar seus serviços e preços.',
-        REGISTRATION_URL_LABEL: 'URL de Registro Direto',
-        REGISTRATION_URL_DESC: 'Os clientes também podem usar este link direto para se registrar. Cada cliente registrado através de seus links será associado à sua conta.',
         GETTING_STARTED_TITLE: 'Primeiros Passos',
-        STEP_1: 'Compartilhe seu link de registro com clientes em potencial',
+        STEP_1: 'Os clientes aderem resgatando uma de suas sacolas de lavanderia.',
         STEP_2: 'Receba sacolas de lavanderia com códigos de barras exclusivos para seus clientes',
         STEP_3: 'Coordene coletas e entregas com base nos horários dos clientes',
         STEP_4: 'Leve a roupa para nossa localização WaveMAX para lavar, secar e dobrar',
@@ -132,10 +125,8 @@ exports.sendAffiliateWelcomeEmail = async (affiliate) => {
         AFFILIATE_ID_LABEL: 'Affiliate-ID',
         LANDING_PAGE_LABEL: 'Kunden-Landingpage',
         LANDING_PAGE_DESC: 'Teilen Sie diese professionelle Landingpage mit potenziellen Kunden, um Ihre Dienstleistungen und Preise zu präsentieren.',
-        REGISTRATION_URL_LABEL: 'Direkte Registrierungs-URL',
-        REGISTRATION_URL_DESC: 'Kunden können auch diesen direkten Link zur Registrierung verwenden. Jeder über Ihre Links registrierte Kunde wird Ihrem Konto zugeordnet.',
         GETTING_STARTED_TITLE: 'Erste Schritte',
-        STEP_1: 'Teilen Sie Ihren Registrierungslink mit potenziellen Kunden',
+        STEP_1: 'Kunden treten bei, indem sie einen Ihrer Wäschebeutel einlösen.',
         STEP_2: 'Erhalten Sie Wäschesäcke mit einzigartigen Barcodes für Ihre Kunden',
         STEP_3: 'Koordinieren Sie Abholungen und Lieferungen basierend auf Kundenterminen',
         STEP_4: 'Bringen Sie die Wäsche zu unserem WaveMAX-Standort zum Waschen, Trocknen und Falten',
@@ -165,8 +156,6 @@ exports.sendAffiliateWelcomeEmail = async (affiliate) => {
       last_name: affiliate.lastName,
       affiliate_id: affiliate.affiliateId,
       AFFILIATE_ID: affiliate.affiliateId,
-      registration_url: registrationUrl,
-      REGISTRATION_URL: registrationUrl,
       landing_page_url: landingPageUrl,
       LANDING_PAGE_URL: landingPageUrl,
       login_url: 'https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?login=affiliate',
@@ -206,23 +195,23 @@ exports.sendAffiliateWelcomeEmail = async (affiliate) => {
 exports.sendAffiliateNewCustomerEmail = async (affiliate, customer, bagInfo = {}) => {
   try {
     // Debug logging
-    logger.info('[sendAffiliateNewCustomerEmail] Affiliate:', affiliate ? { 
-      email: affiliate.email, 
-      affiliateId: affiliate.affiliateId, 
-      businessName: affiliate.businessName 
+    logger.info('[sendAffiliateNewCustomerEmail] Affiliate:', affiliate ? {
+      email: affiliate.email,
+      affiliateId: affiliate.affiliateId,
+      businessName: affiliate.businessName
     } : 'undefined');
-    logger.info('[sendAffiliateNewCustomerEmail] Customer:', customer ? { 
-      email: customer.email, 
-      firstName: customer.firstName, 
-      customerId: customer.customerId 
+    logger.info('[sendAffiliateNewCustomerEmail] Customer:', customer ? {
+      email: customer.email,
+      firstName: customer.firstName,
+      customerId: customer.customerId
     } : 'undefined');
-    
+
     // Validate inputs
     if (!affiliate || !customer) {
       logger.error('Missing affiliate or customer data for new customer notification');
       return;
     }
-    
+
     if (!affiliate.email) {
       logger.error('Affiliate email is missing or undefined');
       return;
@@ -236,7 +225,7 @@ exports.sendAffiliateNewCustomerEmail = async (affiliate, customer, bagInfo = {}
 
     // Build the greeting with the actual business name
     const businessName = affiliate.businessName || `${affiliate.firstName} ${affiliate.lastName}`;
-    
+
     // Get translations for the email content
     const translations = {
       en: {
@@ -246,7 +235,7 @@ exports.sendAffiliateNewCustomerEmail = async (affiliate, customer, bagInfo = {}
         NEW_CUSTOMER_MESSAGE: 'Great news! A new customer has just registered through your affiliate link.',
         ACTION_REQUIRED_LABEL: 'Action Required',
         ACTION_REQUIRED_MESSAGE: `Please deliver ${numberOfBags} laundry bag(s) to your new customer within 48 hours.`,
-        BAG_FEE_NOTE: isFreeRegistration ? 
+        BAG_FEE_NOTE: isFreeRegistration ?
           'Note: This customer received their first bag FREE as part of our promotional offer.' :
           'Note: The customer has been charged for their bags. This fee will be credited on their first order.',
         CUSTOMER_INFO_TITLE: 'Customer Information',
@@ -518,194 +507,6 @@ exports.sendAffiliateNewOrderEmail = async (affiliate, customer, order) => {
     );
   } catch (error) {
     logger.error('Error sending new order notification email:', error);
-  }
-};
-
-/**
- * Send urgent pickup notification to affiliate for immediate pickup orders
- */
-exports.sendAffiliateUrgentPickupEmail = async (affiliate, customer, order) => {
-  try {
-    const language = affiliate.languagePreference || 'en';
-    const template = await loadTemplate('affiliate-urgent-pickup', language);
-
-    // Build the greeting with fallback
-    const affiliateName = affiliate.firstName || affiliate.businessName || 'Partner';
-
-    // Format the pickup deadline nicely
-    const deadline = new Date(order.pickupDeadline);
-    const deadlineFormatted = deadline.toLocaleString('en-US', {
-      weekday: 'short',
-      month: 'short',
-      day: 'numeric',
-      hour: 'numeric',
-      minute: '2-digit',
-      timeZoneName: 'short'
-    });
-
-    // Check if this is customer's first order
-    const isFirstOrder = !customer.totalOrders || customer.totalOrders === 0;
-
-    // Build Google Maps URL
-    const address = `${customer.address}, ${customer.city}, ${customer.state} ${customer.zipCode}`;
-    const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`;
-
-    // Get translations for the email content
-    const translations = {
-      en: {
-        EMAIL_TITLE: 'URGENT: Immediate Pickup Request',
-        EMAIL_HEADER: 'Immediate Pickup Request',
-        URGENT_BANNER_TEXT: 'URGENT - SAME-DAY PICKUP REQUIRED',
-        PICKUP_BY_LABEL: 'Pick up by:',
-        GREETING: `Hello ${affiliateName},`,
-        URGENT_MESSAGE: 'A customer has requested an immediate pickup. Please pick up this order as soon as possible!',
-        ORDER_DETAILS_TITLE: 'Pickup Details',
-        ORDER_ID_LABEL: 'Order ID',
-        CUSTOMER_LABEL: 'Customer',
-        PHONE_LABEL: 'Phone',
-        ADDRESS_LABEL: 'Pickup Address',
-        PICKUP_DATE_LABEL: 'Pickup Date',
-        PICKUP_TIME_LABEL: 'Time Window',
-        ESTIMATED_WEIGHT_LABEL: 'Estimated Weight',
-        NUMBER_OF_BAGS_LABEL: 'Number of Bags',
-        SPECIAL_INSTRUCTIONS_LABEL: 'Special Instructions',
-        VIEW_ORDER_BUTTON: 'View in Dashboard',
-        OPEN_MAPS_BUTTON: 'Open in Google Maps',
-        URGENT_REMINDER: 'This is a time-sensitive pickup request. Please ensure you arrive before the deadline shown above.',
-        FIRST_ORDER_NOTE: 'First Order Note: Customer will have laundry in tall kitchen bags. Please deliver WaveMAX laundry bags with the clean laundry.',
-        CLOSING_MESSAGE: 'Best regards,<br>The WaveMAX Laundry Team',
-        FOOTER_RIGHTS: 'All rights reserved.',
-        FOOTER_AUTOMATED_MESSAGE: 'This is an automated message. Please do not reply to this email.',
-        NONE: 'None'
-      },
-      es: {
-        EMAIL_TITLE: 'URGENTE: Solicitud de Recogida Inmediata',
-        EMAIL_HEADER: 'Solicitud de Recogida Inmediata',
-        URGENT_BANNER_TEXT: 'URGENTE - RECOGIDA EL MISMO DIA REQUERIDA',
-        PICKUP_BY_LABEL: 'Recoger antes de:',
-        GREETING: `Hola ${affiliateName},`,
-        URGENT_MESSAGE: 'Un cliente ha solicitado una recogida inmediata. Por favor recoja este pedido lo antes posible!',
-        ORDER_DETAILS_TITLE: 'Detalles de Recogida',
-        ORDER_ID_LABEL: 'ID del Pedido',
-        CUSTOMER_LABEL: 'Cliente',
-        PHONE_LABEL: 'Telefono',
-        ADDRESS_LABEL: 'Direccion de Recogida',
-        PICKUP_DATE_LABEL: 'Fecha de Recogida',
-        PICKUP_TIME_LABEL: 'Ventana de Tiempo',
-        ESTIMATED_WEIGHT_LABEL: 'Peso Estimado',
-        NUMBER_OF_BAGS_LABEL: 'Numero de Bolsas',
-        SPECIAL_INSTRUCTIONS_LABEL: 'Instrucciones Especiales',
-        VIEW_ORDER_BUTTON: 'Ver en el Panel',
-        OPEN_MAPS_BUTTON: 'Abrir en Google Maps',
-        URGENT_REMINDER: 'Esta es una solicitud de recogida urgente. Por favor asegurese de llegar antes de la fecha limite mostrada arriba.',
-        FIRST_ORDER_NOTE: 'Nota de Primer Pedido: El cliente tendra la ropa en bolsas de cocina. Por favor entregue bolsas de lavanderia WaveMAX con la ropa limpia.',
-        CLOSING_MESSAGE: 'Saludos cordiales,<br>El Equipo de WaveMAX Laundry',
-        FOOTER_RIGHTS: 'Todos los derechos reservados.',
-        FOOTER_AUTOMATED_MESSAGE: 'Este es un mensaje automatizado. Por favor no responda a este correo.',
-        NONE: 'Ninguna'
-      },
-      pt: {
-        EMAIL_TITLE: 'URGENTE: Solicitacao de Coleta Imediata',
-        EMAIL_HEADER: 'Solicitacao de Coleta Imediata',
-        URGENT_BANNER_TEXT: 'URGENTE - COLETA NO MESMO DIA NECESSARIA',
-        PICKUP_BY_LABEL: 'Coletar ate:',
-        GREETING: `Ola ${affiliateName},`,
-        URGENT_MESSAGE: 'Um cliente solicitou uma coleta imediata. Por favor colete este pedido o mais rapido possivel!',
-        ORDER_DETAILS_TITLE: 'Detalhes da Coleta',
-        ORDER_ID_LABEL: 'ID do Pedido',
-        CUSTOMER_LABEL: 'Cliente',
-        PHONE_LABEL: 'Telefone',
-        ADDRESS_LABEL: 'Endereco de Coleta',
-        PICKUP_DATE_LABEL: 'Data de Coleta',
-        PICKUP_TIME_LABEL: 'Janela de Tempo',
-        ESTIMATED_WEIGHT_LABEL: 'Peso Estimado',
-        NUMBER_OF_BAGS_LABEL: 'Numero de Sacolas',
-        SPECIAL_INSTRUCTIONS_LABEL: 'Instrucoes Especiais',
-        VIEW_ORDER_BUTTON: 'Ver no Painel',
-        OPEN_MAPS_BUTTON: 'Abrir no Google Maps',
-        URGENT_REMINDER: 'Esta e uma solicitacao de coleta urgente. Por favor, certifique-se de chegar antes do prazo mostrado acima.',
-        FIRST_ORDER_NOTE: 'Nota de Primeiro Pedido: O cliente tera a roupa em sacos de cozinha. Por favor entregue sacolas de lavanderia WaveMAX com a roupa limpa.',
-        CLOSING_MESSAGE: 'Atenciosamente,<br>A Equipe WaveMAX Laundry',
-        FOOTER_RIGHTS: 'Todos os direitos reservados.',
-        FOOTER_AUTOMATED_MESSAGE: 'Esta e uma mensagem automatizada. Por favor, nao responda a este e-mail.',
-        NONE: 'Nenhuma'
-      },
-      de: {
-        EMAIL_TITLE: 'DRINGEND: Sofortige Abholanfrage',
-        EMAIL_HEADER: 'Sofortige Abholanfrage',
-        URGENT_BANNER_TEXT: 'DRINGEND - ABHOLUNG AM SELBEN TAG ERFORDERLICH',
-        PICKUP_BY_LABEL: 'Abholen bis:',
-        GREETING: `Hallo ${affiliateName},`,
-        URGENT_MESSAGE: 'Ein Kunde hat eine sofortige Abholung angefordert. Bitte holen Sie diese Bestellung so schnell wie moglich ab!',
-        ORDER_DETAILS_TITLE: 'Abholdetails',
-        ORDER_ID_LABEL: 'Bestell-ID',
-        CUSTOMER_LABEL: 'Kunde',
-        PHONE_LABEL: 'Telefon',
-        ADDRESS_LABEL: 'Abholadresse',
-        PICKUP_DATE_LABEL: 'Abholdatum',
-        PICKUP_TIME_LABEL: 'Zeitfenster',
-        ESTIMATED_WEIGHT_LABEL: 'Geschatztes Gewicht',
-        NUMBER_OF_BAGS_LABEL: 'Anzahl der Sacke',
-        SPECIAL_INSTRUCTIONS_LABEL: 'Besondere Anweisungen',
-        VIEW_ORDER_BUTTON: 'Im Dashboard anzeigen',
-        OPEN_MAPS_BUTTON: 'In Google Maps offnen',
-        URGENT_REMINDER: 'Dies ist eine zeitkritische Abholanfrage. Bitte stellen Sie sicher, dass Sie vor der oben angezeigten Frist ankommen.',
-        FIRST_ORDER_NOTE: 'Erstbestellungs-Hinweis: Der Kunde hat die Wasche in Kuchenbeuteln. Bitte liefern Sie WaveMAX Waschesacke mit der sauberen Wasche.',
-        CLOSING_MESSAGE: 'Mit freundlichen Grussen,<br>Das WaveMAX Laundry Team',
-        FOOTER_RIGHTS: 'Alle Rechte vorbehalten.',
-        FOOTER_AUTOMATED_MESSAGE: 'Dies ist eine automatisierte Nachricht. Bitte antworten Sie nicht auf diese E-Mail.',
-        NONE: 'Keine'
-      }
-    };
-
-    const emailTranslations = translations[language] || translations.en;
-
-    // Build first order note HTML if applicable
-    const firstOrderNoteHtml = isFirstOrder
-      ? `<div class="first-order-note"><strong>${emailTranslations.FIRST_ORDER_NOTE}</strong></div>`
-      : '';
-
-    const data = {
-      affiliate_first_name: affiliate.firstName,
-      order_id: order.orderId,
-      customer_name: `${customer.firstName} ${customer.lastName}`,
-      customer_phone: customer.phone,
-      customer_phone_raw: customer.phone.replace(/[^0-9+]/g, ''),
-      customer_address: address,
-      maps_url: mapsUrl,
-      pickup_date: new Date(order.pickupDate).toLocaleDateString(),
-      pickup_time: formatTimeSlot(order.pickupTime),
-      pickup_deadline: deadlineFormatted,
-      estimated_weight: order.estimatedWeight ? `${order.estimatedWeight} lbs` : emailTranslations.NONE,
-      number_of_bags: order.numberOfBags || 1,
-      special_instructions: order.specialPickupInstructions || emailTranslations.NONE,
-      first_order_note_html: firstOrderNoteHtml,
-      dashboard_url: 'https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?login=affiliate',
-      current_year: new Date().getFullYear(),
-      ...emailTranslations
-    };
-
-    const html = fillTemplate(template, data);
-
-    // Translate subject based on language
-    const subjects = {
-      en: `URGENT: Immediate Pickup Request - ${customer.firstName} ${customer.lastName}`,
-      es: `URGENTE: Solicitud de Recogida Inmediata - ${customer.firstName} ${customer.lastName}`,
-      pt: `URGENTE: Solicitacao de Coleta Imediata - ${customer.firstName} ${customer.lastName}`,
-      de: `DRINGEND: Sofortige Abholanfrage - ${customer.firstName} ${customer.lastName}`
-    };
-    const subject = subjects[language] || subjects.en;
-
-    await sendEmail(
-      affiliate.email,
-      subject,
-      html
-    );
-
-    logger.info(`Urgent pickup email sent to affiliate ${affiliate.affiliateId} for order ${order.orderId}`);
-  } catch (error) {
-    logger.error('Error sending urgent pickup notification email:', error);
-    throw error; // Re-throw to let caller handle
   }
 };
 

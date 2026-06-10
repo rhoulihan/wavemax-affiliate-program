@@ -122,11 +122,8 @@ router.post('/customer', async (req, res) => {
                 state: 'TX',
                 zipCode: '78702',
                 isActive: true,
-                serviceRadius: 5,
                 minimumDeliveryFee: 1,  // Set to $1 for testing
                 perBagDeliveryFee: 1,   // Set to $1 for testing
-                serviceLatitude: 30.2672,
-                serviceLongitude: -97.7431,
                 registrationMethod: 'traditional',
                 paymentMethod: 'check',
                 passwordSalt: affSalt,

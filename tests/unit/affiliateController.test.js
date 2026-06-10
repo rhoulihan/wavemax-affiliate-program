@@ -124,12 +124,6 @@ describe('Affiliate Controller', () => {
 
   describe('registerAffiliate', () => {
     it('should successfully register a new affiliate', async () => {
-      const BetaRequest = require('../../server/models/BetaRequest');
-      BetaRequest.findOne = jest.fn().mockResolvedValue({
-        email: 'john@example.com',
-        welcomeEmailSent: true
-      });
-
       const mockAffiliate = createMockDocument({
         affiliateId: 'AFF123456'
       });
@@ -204,12 +198,6 @@ describe('Affiliate Controller', () => {
     });
 
     it('should handle duplicate email or username', async () => {
-      const BetaRequest = require('../../server/models/BetaRequest');
-      BetaRequest.findOne = jest.fn().mockResolvedValue({
-        email: 'existing@example.com',
-        welcomeEmailSent: true
-      });
-
       req.body = {
         email: 'existing@example.com',
         username: 'existing',
@@ -244,12 +232,6 @@ describe('Affiliate Controller', () => {
     });
 
     it('should handle email service failure gracefully', async () => {
-      const BetaRequest = require('../../server/models/BetaRequest');
-      BetaRequest.findOne = jest.fn().mockResolvedValue({
-        email: 'john@example.com',
-        welcomeEmailSent: true
-      });
-
       const mockAffiliate = createMockDocument({
         affiliateId: 'AFF123456'
       });
@@ -294,8 +276,8 @@ describe('Affiliate Controller', () => {
     });
 
     it('should handle database errors', async () => {
-      const BetaRequest = require('../../server/models/BetaRequest');
-      BetaRequest.findOne = jest.fn().mockRejectedValue(new Error('Database error'));
+      // Gate removed: trigger the 500 path via the first remaining DB call
+      Affiliate.findOne = jest.fn().mockRejectedValue(new Error('Database error'));
 
       req.body = {
         email: 'test@example.com',
@@ -983,9 +965,6 @@ describe('Affiliate Controller', () => {
         businessName: 'Johns Laundry',
         minimumDeliveryFee: 25,
         perBagDeliveryFee: 5,
-        serviceLatitude: 40.7128,
-        serviceLongitude: -74.0060,
-        serviceRadius: 10,
         city: 'New York',
         state: 'NY'
       , save: jest.fn().mockResolvedValue(true)};

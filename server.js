@@ -21,7 +21,6 @@ const authRoutes = require('./server/routes/authRoutes');
 const socialAuthRoutes = require('./server/routes/socialAuthRoutes');
 const facebookDataRoutes = require('./server/routes/facebookDataRoutes');
 const affiliateRoutes = require('./server/routes/affiliateRoutes');
-const affiliateScheduleRoutes = require('./server/routes/affiliateScheduleRoutes');
 const customerRoutes = require('./server/routes/customerRoutes');
 const orderRoutes = require('./server/routes/orderRoutes');
 const administratorRoutes = require('./server/routes/administratorRoutes');
@@ -66,11 +65,10 @@ app.use((req, res, next) => {
 // Define MongoDB connection options
 const mongoOptions = {
   // Do NOT auto-build schema indexes on connect. The Oracle Autonomous DB
-  // MongoDB API rejects 2dsphere (geospatial) and TTL index builds, so an
-  // autoIndex pass would throw on the Affiliate serviceLocation 2dsphere
-  // index at startup. Indexes are managed explicitly (the migration creates
-  // the Oracle-compatible set). Disabling autoIndex is also standard practice
-  // for production regardless of backend.
+  // MongoDB API rejects geospatial and TTL index builds, so an autoIndex
+  // pass could throw at startup. Indexes are managed explicitly (the
+  // migration creates the Oracle-compatible set). Disabling autoIndex is
+  // also standard practice for production regardless of backend.
   autoIndex: false,
   // Cap the pool — this app is lightweight and does NOT need many connections.
   // The driver default maxPoolSize is 100; across cluster workers and multiple
@@ -920,7 +918,6 @@ apiV1Router.use('/auth', authRoutes);
 apiV1Router.use('/auth', socialAuthRoutes);  // Social auth routes
 apiV1Router.use('/auth/facebook', facebookDataRoutes);  // Facebook data deletion routes
 apiV1Router.use('/affiliates', affiliateRoutes);
-apiV1Router.use('/affiliates', affiliateScheduleRoutes);  // Affiliate schedule management
 apiV1Router.use('/customers', customerRoutes);
 apiV1Router.use('/orders', orderRoutes);
 apiV1Router.use('/administrators', administratorRoutes);

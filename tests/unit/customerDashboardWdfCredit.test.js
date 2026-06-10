@@ -71,8 +71,6 @@ describe('Customer Dashboard WDF Credit Display', () => {
       passwordHash: 'hash',
       username: 'dashaffiliate',
       paymentMethod: 'check',
-      serviceLatitude: 40.7128,
-      serviceLongitude: -74.0060
     });
 
     // Create test customer
@@ -89,10 +87,7 @@ describe('Customer Dashboard WDF Credit Display', () => {
       zipCode: '54321',
       username: 'dashcustomer',
       passwordSalt: 'salt',
-      passwordHash: 'hash',
-      numberOfBags: 2,
-      bagCredit: 20,
-      bagCreditApplied: false
+      passwordHash: 'hash'
     });
   });
 
@@ -197,8 +192,6 @@ describe('Customer Dashboard WDF Credit Display', () => {
 
       const responseData = JSON.parse(res._getData());
       
-      // Should have both numberOfBags and wdfCredits
-      expect(responseData.customer.numberOfBags).toBe(2);
       expect(responseData.customer.wdfCredits).toBe(5.00);
     });
   });

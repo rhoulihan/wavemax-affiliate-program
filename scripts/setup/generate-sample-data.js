@@ -139,8 +139,6 @@ async function generateAffiliates() {
     const lastName = faker.person.lastName();
     const address = generateAustinAddress();
     
-    const longitude = -97.7431 + (Math.random() - 0.5) * 0.2; // Austin longitude +/- variance
-    const latitude = 30.2672 + (Math.random() - 0.5) * 0.2;   // Austin latitude +/- variance
     const paymentMethod = getRandomElement(['check', 'paypal', 'venmo']);
     
     // Hash the password
@@ -158,9 +156,6 @@ async function generateAffiliates() {
       city: address.city,
       state: address.state,
       zipCode: address.zipCode,
-      serviceLatitude: latitude,
-      serviceLongitude: longitude,
-      serviceRadius: getRandomInt(5, 15), // 5-15 miles radius
       minimumDeliveryFee: getRandomFloat(10, 15),
       perBagDeliveryFee: getRandomFloat(5, 8),
       paymentMethod: paymentMethod,

@@ -149,11 +149,11 @@
     }
 
     // Update links
-    updateLinks(affiliateCode, affiliate);
+    updateLinks();
   }
 
   // Function to update registration and login links
-  function updateLinks(affiliateCode, affiliate) {
+  function updateLinks() {
     const baseUrl = window.location.origin;
 
     // Update registration links
@@ -164,27 +164,15 @@
 
     registerLinks.forEach(link => {
       if (link) {
-        link.href = `${baseUrl}/embed-app-v2.html?route=/customer-register&affid=${affiliateCode}`;
+        link.href = `${baseUrl}/embed-app-v2.html?route=/customer-register`;
       }
     });
 
     // Update login link
     const loginLink = document.getElementById('loginLink');
     if (loginLink) {
-      loginLink.href = `${baseUrl}/embed-app-v2.html?route=/customer-login&affid=${affiliateCode}`;
+      loginLink.href = `${baseUrl}/embed-app-v2.html?route=/customer-login`;
     }
-
-    // Add affiliate code to internal links for tracking (excluding navigation links)
-    document.querySelectorAll('a[href^="/"]').forEach(link => {
-      // Skip links that use data-navigate attribute (they're handled by embed-navigation.js)
-      if (!link.hasAttribute('data-navigate')) {
-        const url = new URL(link.href, window.location.origin);
-        if (!url.searchParams.has('affid') && !url.searchParams.has('affiliateCode')) {
-          url.searchParams.set('affid', affiliateCode);
-          link.href = url.toString();
-        }
-      }
-    });
   }
 
   // Track if already initialized

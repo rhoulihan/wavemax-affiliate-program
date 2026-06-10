@@ -71,7 +71,6 @@
       "loginSuccess": "¡Inicio de sesión exitoso!",
       "logoutSuccess": "Has cerrado sesión exitosamente.",
       "registrationSuccess": "¡Registro exitoso!",
-    "betaRestriction": "Actualmente estamos en beta cerrada. Por favor, vuelva a intentarlo en unos días o contáctenos si cree que debería tener acceso.",
       "registrationFailed": "Error en el registro. Por favor intenta nuevamente.",
       "passwordResetSuccess": "¡Restablecimiento de contraseña exitoso!",
       "passwordResetFailed": "Error al restablecer la contraseña. Por favor intenta nuevamente.",
@@ -286,7 +285,7 @@
       "title": "¿Listo para empezar a ganar?",
       "customerTitle": "¿Listo para ropa limpia y fresca?",
       "description": "Únete a nuestro programa de afiliados y comienza a ganar comisiones ofreciendo servicios de lavandería a tus clientes.",
-      "createAccount": "Crear Cuenta de Afiliado",
+      "createAccount": "Conviértete en afiliado",
       "login": "Acceso de Afiliado",
       "subtitle": {
         "full": "Deja que {{affiliateName}} maneje la recogida y entrega mientras WaveMAX asegura la limpieza profesional",
@@ -334,25 +333,9 @@
       "city": "Ciudad *",
       "state": "Estado *",
       "zipCode": "Código Postal *",
-      "serviceArea": "Área de Servicio *",
-      "serviceAddress": "Dirección del Centro de Servicio",
-      "addressPlaceholder": "Ingrese la dirección o haga clic en el mapa",
       "passwordPlaceholder": "Ingrese su contraseña",
       "confirmPasswordPlaceholder": "Vuelva a ingresar su contraseña",
       "usernamePlaceholder": "Elija un nombre de usuario único",
-      "addressHelp": "Comience a escribir para buscar una dirección",
-      "serviceAreaInstructions": "Cómo Establecer su Área de Servicio",
-      "serviceAreaStep1": "Ingrese una dirección o haga clic en el mapa",
-      "serviceAreaStep2": "Arrastre el marcador para ajustar su posición si es necesario",
-      "serviceAreaStep3": "Use el control deslizante para establecer su radio de servicio",
-      "serviceRadius": "Radio de Servicio:",
-      "miles": "millas",
-      "serviceAreaDetails": "Detalles del Área de Servicio",
-      "serviceCenter": "Centro de Servicio:",
-      "coverageArea": "Área de Cobertura:",
-      "coordinates": "Coordenadas:",
-      "useRegistrationAddress": "Usar Dirección de Registro",
-      "notSet": "No establecido",
       "serviceInfo": "Información de Servicio",
       "deliveryFeeStructure": "Estructura de Tarifas de Entrega",
       "dynamicPricing": "Precios Dinámicos:",
@@ -361,13 +344,8 @@
       "minimumFeeDesc": "La tarifa mínima cobrada independientemente del número de bolsas",
       "perBagFee": "Tarifa por Bolsa ($) *",
       "perBagFeeDesc": "Tarifa cobrada por cada bolsa de lavandería",
-      "validateAddress": "Validar Dirección y Establecer Ubicación de Servicio",
-      "validateAddressHelp": "Haga clic para verificar su dirección y establecer automáticamente el centro de su área de servicio en el mapa a continuación",
-      "selectServiceLocation": "Seleccione su Ubicación de Servicio",
-      "confirmServiceLocation": "Confirme su Ubicación de Servicio",
-      "selectCorrectLocation": "Encontramos múltiples ubicaciones posibles. Por favor seleccione la correcta:",
-      "confirmCorrectAddress": "Por favor confirme que esta es la dirección correcta para su área de servicio:",
-      "confirm": "Confirmar",
+      "validateAddress": "Validar Dirección",
+      "validateAddressHelp": "Haga clic para verificar su dirección antes de continuar",
       "livePricingPreview": "Vista Previa de Precios en Vivo",
       "1bag": "1 bolsa",
       "3bags": "3 bolsas",
@@ -481,57 +459,7 @@
         "pickups": "Recogidas y Entregas",
         "customers": "Clientes",
         "earnings": "Ganancias",
-        "schedule": "Horario",
         "settings": "Configuración"
-      },
-      "schedule": {
-        "title": "Horario de Disponibilidad",
-        "subtitle": "Administre cuándo está disponible para recogidas y entregas",
-        "weeklyTemplate": "Plantilla Semanal",
-        "dateExceptions": "Excepciones de Fecha",
-        "editWeeklyTemplate": "Editar Plantilla Semanal",
-        "blockDate": "Bloquear Fecha",
-        "bookingSettings": "Configuración de Reservas",
-        "legend": "Leyenda",
-        "available": "Disponible",
-        "partiallyAvailable": "Parcialmente Disponible",
-        "unavailable": "No Disponible",
-        "blocked": "Bloqueado",
-        "override": "Anulación",
-        "morning": "Mañana (8 AM - 12 PM)",
-        "afternoon": "Tarde (12 PM - 4 PM)",
-        "evening": "Noche (4 PM - 8 PM)",
-        "days": {
-          "monday": "Lunes",
-          "tuesday": "Martes",
-          "wednesday": "Miércoles",
-          "thursday": "Jueves",
-          "friday": "Viernes",
-          "saturday": "Sábado",
-          "sunday": "Domingo"
-        },
-        "modal": {
-          "editTemplate": "Editar Plantilla Semanal",
-          "blockDateTitle": "Bloquear Fecha",
-          "overrideDateTitle": "Anular Fecha",
-          "settingsTitle": "Configuración de Reservas",
-          "selectDate": "Seleccionar Fecha",
-          "reason": "Razón (opcional)",
-          "advanceBookingDays": "Días Mínimos de Anticipación",
-          "maxBookingDays": "Días Máximos para Reservar",
-          "timezone": "Zona Horaria",
-          "saveChanges": "Guardar Cambios",
-          "cancel": "Cancelar"
-        },
-        "notifications": {
-          "templateUpdated": "Plantilla semanal actualizada exitosamente",
-          "dateBlocked": "Fecha bloqueada exitosamente",
-          "dateOverridden": "Anulación de fecha guardada exitosamente",
-          "exceptionRemoved": "Excepción de fecha eliminada exitosamente",
-          "settingsUpdated": "Configuración de reservas actualizada exitosamente",
-          "loadError": "Error al cargar el horario",
-          "saveError": "Error al guardar los cambios"
-        }
       },
       "metrics": {
         "totalCustomers": "Total de Clientes",
@@ -546,9 +474,7 @@
       "marketingLinks": {
         "title": "Tus Enlaces de Marketing",
         "landingPage": "Página de Destino para Clientes",
-        "landingPageDesc": "Comparte esta página profesional para mostrar tus servicios",
-        "registrationLink": "Enlace de Registro Directo",
-        "registrationDesc": "Enlace directo para que los clientes se registren"
+        "landingPageDesc": "Comparte esta página profesional para mostrar tus servicios"
       },
       "pickups": {
         "title": "Próximas Recogidas y Entregas"
@@ -616,9 +542,6 @@
       "marketingLinkTitle": "Su Página de Destino para Clientes",
       "marketingLinkDescription": "Comparta esta página profesional con clientes potenciales para mostrar sus servicios y precios:",
       "marketingLinkHelp": "Esta página incluye información sobre sus servicios, precios y un formulario de registro.",
-      "linkTitle": "Enlace Directo de Registro de Clientes",
-      "linkDescription": "Los clientes también pueden usar este enlace directo para registrarse:",
-      "linkHelp": "Cada cliente registrado a través de sus enlaces estará asociado con su cuenta.",
       "nextStepsTitle": "Próximos Pasos",
       "nextStep1": "Revise su correo electrónico para su mensaje de bienvenida y credenciales de acceso",
       "nextStep2": "Inicie sesión en su panel de afiliado para acceder a materiales de marketing",
@@ -667,7 +590,6 @@
       "bagDelivered": "Entregada por tu afiliado",
       "bagCredited": "Acreditada en tu primer pedido",
       "numberOfBags": "Número de Bolsas Necesarias *",
-      "selectBags": "Selecciona el número de bolsas",
       "bagRecommendation": "La mayoría de los hogares necesitan 2-3 bolsas para el servicio regular de lavandería.",
       "totalBagFee": "Tarifa Total de Bolsas:",
       "bagCreditNote": "Esta cantidad será acreditada en tu primer pedido.",
@@ -718,19 +640,12 @@
       "v2": {
         "noPaymentRequired": "Sin Pago Requerido",
         "subtitle": "¡Regístrate para el servicio premium de recogida y entrega de ropa - paga después de que pesemos tu ropa!",
-        "freeBagsBanner": "¡Obtén tus primeras 1-2 bolsas de lavandería GRATIS - No se requiere tarjeta de crédito!",
-        "selectBags": "Selecciona tus bolsas de lavandería gratis",
-        "selectBagsDescription": "Elige cuántas bolsas necesitas para empezar. Cada bolsa contiene 20-25 libras de ropa.",
-        "oneBag": "1 Bolsa",
-        "oneBagDesc": "Perfecto para individuos y parejas",
-        "twoBags": "2 Bolsas",
-        "twoBagsDesc": "Ideal para familias grandes",
         "howItWorks": "Cómo funciona nuestro sistema de pago V2",
         "step1": "Regístrate ahora sin tarjeta de crédito",
         "socialSignupText": "Regístrate rápidamente usando tu cuenta de redes sociales",
         "socialConnectedMessage": "¡Excelente! Hemos conectado tu cuenta social. Solo completa el formulario a continuación para finalizar el registro - ¡no se requiere pago!",
         "step2": "Recibe tus bolsas de lavandería gratis",
-        "step3": "Programa tu primera recogida",
+        "step3": "Entrega tu bolsa de lavandería a tu afiliado: tu pedido se crea cuando llega a la tienda",
         "step4": "Pesamos tu ropa y te enviamos enlaces de pago",
         "step5": "Paga cómodamente vía Venmo, PayPal o CashApp",
         "step6": "¡Recibe tu ropa limpia y fresca!",
@@ -746,7 +661,6 @@
     "dashboard": {
       "title": "Panel de Cliente",
       "welcome": "¡Bienvenido de vuelta, {{name}}!",
-      "schedulePickup": "Programar Recogida",
       "activeOrder": "Pedido Activo",
       "activeOrders": "Pedidos Activos",
       "orderHistory": "Historial de Pedidos",
@@ -848,8 +762,7 @@
       "subtabs": {
         "overview": "Resumen",
         "charts": "Gráficos",
-        "recentActivity": "Actividad Reciente",
-        "betaRequests": "Solicitudes Beta"
+        "recentActivity": "Actividad Reciente"
       },
       "stats": {
         "activeOperators": "Operadores Activos",
@@ -981,8 +894,6 @@
         "marketingLinksDesc": "Comparte estos enlaces con tu afiliado para promover el registro de clientes.",
         "landingPageLink": "Página de Destino del Afiliado",
         "landingPageDesc": "Página de marketing con calculadora de ingresos y registro de clientes",
-        "customerRegisterLink": "Página de Registro de Clientes",
-        "customerRegisterDesc": "Enlace directo al registro de clientes para este afiliado",
         "sendW9": "Enviar W9",
         "sending": "Enviando...",
         "confirmSendW9": "¿Enviar formulario W9 a este afiliado?",
@@ -1278,7 +1189,6 @@
       "step2": "Tu socio afiliado te notificará cuando esté en camino",
       "step3": "Pesaremos tu lavandería y te proporcionaremos el costo final",
       "step4": "La ropa limpia será entregada en tu fecha de entrega programada",
-      "scheduleAnother": "Programar Otra Recogida",
       "orderNumber": "Número de Pedido",
       "pickupScheduled": "Recogida Programada",
       "estimatedDelivery": "Entrega Estimada",
@@ -1310,8 +1220,7 @@
       "operatorMessage": "¡Bienvenido al equipo WaveMAX! Tu cuenta de operador ha sido creada.",
       "operatorPin": "Tu PIN:",
       "accessPortal": "Acceder al Portal",
-      "accessDashboard": "Acceder a tu Panel",
-      "schedulePickup": "Programa tu Primera Recogida"
+      "accessDashboard": "Acceder a tu Panel"
     },
     "commission": {
       "title": "Notificación de Pago de Comisión",
@@ -1411,7 +1320,12 @@
     "description": "Verifica el estado de tu solicitud de eliminación de datos de Facebook",
     "loading": "Cargando estado...",
     "confirmationCode": "Código de Confirmación",
-    "status": "Estado",
+    "status": {
+      "pending": "Procesamiento Pendiente",
+      "processing": "Procesando Actualmente",
+      "completed": "Completado Exitosamente",
+      "failed": "Falló"
+    },
     "requestedAt": "Solicitado el",
     "completedAt": "Completado el",
     "contact": "Para preguntas sobre tu solicitud de eliminación de datos, por favor contacta soporte.",
@@ -1421,12 +1335,6 @@
       "noCode": "No se proporcionó código de confirmación",
       "loadFailed": "Error al cargar el estado de eliminación",
       "notFound": "Solicitud de eliminación no encontrada"
-    },
-    "status": {
-      "pending": "Procesamiento Pendiente",
-      "processing": "Procesando Actualmente",
-      "completed": "Completado Exitosamente",
-      "failed": "Falló"
     },
     "success": {
       "title": "Eliminación Completada",

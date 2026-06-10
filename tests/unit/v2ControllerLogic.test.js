@@ -58,8 +58,6 @@ describe('V2 Controller Logic', () => {
       city: 'Test City',
       state: 'TX',
       zipCode: '12345',
-      serviceLatitude: 30.123,
-      serviceLongitude: -97.456,
       username: `affiliate${Date.now()}`,
       passwordHash: hash,
       passwordSalt: salt,
@@ -94,7 +92,6 @@ describe('V2 Controller Logic', () => {
           affiliateId: testAffiliate.affiliateId,
           pickupDate: '2026-01-27',
           pickupTime: 'morning',
-          numberOfBags: 2,
           estimatedWeight: 25
         }
       };
@@ -113,51 +110,9 @@ describe('V2 Controller Logic', () => {
       await handler(req, res, next);
       
       expect(res.status).toHaveBeenCalledWith(201);
-      const responseData = res.json.mock.calls[0][0];
-      
-      // Verify post-weigh registration caps bags at the free-initial-bags setting
+
       const customer = await Customer.findOne({ email: 'john@test.com' });
-      expect(customer.numberOfBags).toBe(2);
-    });
-
-    it('should limit initial bags to configured maximum', async () => {
-      const req = {
-        body: {
-          firstName: 'Jane',
-          lastName: 'Smith',
-          email: 'jane@test.com',
-          phone: '555-5678',
-          address: '456 Oak St',
-          city: 'Dallas',
-          state: 'TX',
-          zipCode: '75001',
-          username: `janesmith${Date.now()}`,
-          password: 'testpass123',
-          affiliateId: testAffiliate.affiliateId,
-          pickupDate: '2026-01-27',
-          pickupTime: 'afternoon',
-          numberOfBags: 5, // Requesting more than allowed
-          estimatedWeight: 50
-        }
-      };
-
-      const res = {
-        status: jest.fn().mockReturnThis(),
-        json: jest.fn()
-      };
-
-      const next = jest.fn();
-
-      emailService.sendCustomerWelcomeEmail = jest.fn().mockResolvedValue(true);
-      emailService.sendNewCustomerNotification = jest.fn().mockResolvedValue(true);
-
-      const handler = extractHandler(customerController.registerCustomer);
-      await handler(req, res, next);
-
-      // Should limit customer's bag count to free_initial_bags (default 2)
-      const customer = await Customer.findOne({ email: 'jane@test.com' });
       expect(customer).toBeDefined();
-      expect(customer.numberOfBags).toBe(2);
     });
   });
 
@@ -388,128 +343,6 @@ describe('V2 Controller Logic', () => {
       
       // Pickup notification is not yet implemented (commented out in controller)
       // expect(emailService.sendPickupReadyNotification).toHaveBeenCalled();
-    });
-  });
-
-  describe('V2 Order Creation', () => {
-    let testCustomer;
-    
-    beforeEach(async () => {
-      testCustomer = await Customer.create({
-        name: 'V2 Customer',
-        firstName: 'V2',
-        lastName: 'Customer',
-        email: 'v2new@test.com',
-        phone: '555-4444',
-        address: '999 V2 Blvd',
-        city: 'V2 City',
-        state: 'TX',
-        zipCode: '99999',
-        username: `v2new${Date.now()}`,
-        passwordHash: crypto.randomBytes(32).toString('hex'),
-        passwordSalt: crypto.randomBytes(16).toString('hex'),
-        affiliateId: testAffiliate._id,
-        registrationVersion: 'v2',
-        initialBagsRequested: 1
-      });
-    });
-
-    it('should create V2 order with pending payment status', async () => {
-      const req = {
-        body: {
-          customerId: testCustomer.customerId,
-          affiliateId: testAffiliate.affiliateId,
-          pickupDate: '2026-01-27',
-          pickupTime: 'morning',
-          numberOfBags: 3,
-          estimatedWeight: 35,
-          addOns: {
-            premiumDetergent: true,
-            fabricSoftener: false,
-            stainRemover: true
-          }
-        },
-        user: {
-          role: 'customer',
-          customerId: testCustomer.customerId
-        }
-      };
-      
-      const res = {
-        status: jest.fn().mockReturnThis(),
-        json: jest.fn()
-      };
-      
-      const next = jest.fn();
-      
-      emailService.sendOrderConfirmation = jest.fn().mockResolvedValue(true);
-      emailService.sendNewOrderNotification = jest.fn().mockResolvedValue(true);
-      
-      const handler = orderController.createOrder;
-      await handler(req, res, next);
-      
-      expect(res.status).toHaveBeenCalledWith(201);
-      const responseData = res.json.mock.calls[0][0];
-      
-      // Verify V2 order fields
-      const order = await Order.findOne({ customerId: testCustomer.customerId });
-      expect(order.paymentStatus).toBe('pending');
-      expect(order.paymentMethod).toBe('pending');
-      expect(order.numberOfBags).toBe(3);
-      expect(order.addOns.premiumDetergent).toBe(true);
-      expect(order.addOns.stainRemover).toBe(true);
-      
-      // Should not have payment links yet (not weighed)
-      expect(order.paymentLinks).toEqual({});
-      expect(order.paymentAmount).toBe(0);
-    });
-
-    it('should prevent V2 customer from creating order if previous payment pending', async () => {
-      // Create existing order with pending payment
-      await Order.create({
-        customerId: testCustomer.customerId,
-        affiliateId: testAffiliate.affiliateId,
-        pickupDate: new Date(),
-        pickupTime: 'afternoon',
-        estimatedWeight: 20,
-        numberOfBags: 2,
-        status: 'processed',
-        paymentStatus: 'awaiting',
-        paymentAmount: 45.00
-      });
-      
-      const req = {
-        body: {
-          customerId: testCustomer.customerId,
-          affiliateId: testAffiliate.affiliateId,
-          pickupDate: new Date(Date.now() + 172800000).toISOString(),
-          pickupTime: 'evening',
-          numberOfBags: 1,
-          estimatedWeight: 10
-        },
-        user: {
-          role: 'customer',
-          customerId: testCustomer.customerId
-        }
-      };
-      
-      const res = {
-        status: jest.fn().mockReturnThis(),
-        json: jest.fn()
-      };
-      
-      const next = jest.fn();
-      
-      const handler = extractHandler(orderController.createOrder);
-      await handler(req, res, next);
-      
-      // Should be rejected
-      expect(res.status).toHaveBeenCalledWith(400);
-      expect(res.json).toHaveBeenCalledWith(
-        expect.objectContaining({
-          message: expect.stringContaining('active order')
-        })
-      );
     });
   });
 

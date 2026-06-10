@@ -74,32 +74,20 @@
         
         // Check for specific parameters and route accordingly
         const login = params.get('login');
-        const affid = params.get('affid') || params.get('affiliate');
-        const pickup = params.get('pickup');
         const route = params.get('route');
-        
+
         // Handle login parameter
         if (login) {
             iframeParams.set('login', login);
         }
-        
-        // Handle affiliate ID
-        if (affid) {
-            iframeParams.set('affid', affid);
-        }
-        
-        // Handle pickup flag
-        if (pickup === 'true') {
-            iframeParams.set('pickup', 'true');
-        }
-        
+
         // Handle specific route
         if (route) {
             iframeParams.set('route', route);
         }
-        
+
         // If no specific parameters, check if we should show landing
-        if (!login && !affid && !route) {
+        if (!login && !route) {
             iframeParams.set('route', '/landing');
         }
         
@@ -170,9 +158,7 @@
     <p>The embed code will properly handle these URL patterns:</p>
     
     <ul>
-        <li><code>?affid=AFF123456</code> - Shows customer registration for specific affiliate</li>
         <li><code>?login=customer</code> - Shows customer login</li>
-        <li><code>?login=customer&pickup=true</code> - Shows customer login, then redirects to schedule pickup</li>
         <li><code>?login=affiliate</code> - Shows affiliate login</li>
         <li><code>?login=admin</code> - Shows administrator login</li>
         <li><code>?login=operator</code> - Shows operator login</li>
@@ -183,12 +169,10 @@
     <p>After implementing the embed code, test these URLs:</p>
     
     <ol>
-        <li><strong>Affiliate Registration Link:</strong><br>
-            <code>https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?affid=AFF227530</code></li>
         <li><strong>Customer Login:</strong><br>
             <code>https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?login=customer</code></li>
-        <li><strong>Schedule Pickup:</strong><br>
-            <code>https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?login=customer&pickup=true</code></li>
+        <li><strong>Affiliate Login:</strong><br>
+            <code>https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?login=affiliate</code></li>
     </ol>
 
     <h2>Important Notes</h2>
@@ -216,10 +200,10 @@
         const params=new URLSearchParams(window.location.search);
         const iframeParams=new URLSearchParams();
         
-        ['login','affid','affiliate','pickup','route'].forEach(key=>{
+        ['login','route'].forEach(key=>{
             const value=params.get(key);
             if(value){
-                iframeParams.set(key==='affiliate'?'affid':key,value);
+                iframeParams.set(key,value);
             }
         });
         

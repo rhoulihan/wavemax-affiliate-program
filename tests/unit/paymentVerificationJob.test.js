@@ -44,8 +44,6 @@ describe('PaymentVerificationJob', () => {
       city: 'Test City',
       state: 'TX',
       zipCode: '12345',
-      serviceLatitude: 30.123,
-      serviceLongitude: -97.456,
       username: `affiliate${Date.now()}`,
       passwordHash: hash,
       passwordSalt: salt,

@@ -14,34 +14,12 @@ describe('Password Validation Integration Tests', () => {
   let agent;
   let csrfToken;
 
-  // Helper function to ensure beta request exists for affiliate registration
-  const ensureBetaRequest = async (email, firstName = 'Test', lastName = 'User') => {
-    const BetaRequest = require('../../server/models/BetaRequest');
-    await BetaRequest.findOneAndUpdate(
-      { email: email.toLowerCase() },
-      {
-        email: email.toLowerCase(),
-        firstName,
-        lastName,
-        phone: '+1234567890',
-        address: '123 Test St',
-        city: 'Austin',
-        state: 'TX',
-        zipCode: '78701',
-        welcomeEmailSent: true
-      },
-      { upsert: true, new: true }
-    );
-  };
-
   beforeEach(async () => {
     // Clean up test data
     await Affiliate.deleteMany({});
     await Customer.deleteMany({});
     await Administrator.deleteMany({});
     await Operator.deleteMany({});
-    const BetaRequest = require('../../server/models/BetaRequest');
-    await BetaRequest.deleteMany({});
 
     // Create agent and get CSRF token
     agent = createAgent(app);
@@ -77,9 +55,6 @@ describe('Password Validation Integration Tests', () => {
           state: 'TX',
           zipCode: '78701',
           serviceArea: 'Downtown',
-          serviceLatitude: 30.2672,
-          serviceLongitude: -97.7431,
-          serviceRadius: 10,
           minimumDeliveryFee: 25,
           perBagDeliveryFee: 5,
           paymentMethod: 'check',
@@ -116,9 +91,6 @@ describe('Password Validation Integration Tests', () => {
         const strongPassword = strongPasswords[i];
         const email = `test${i}@example.com`;
 
-        // Ensure beta request exists for this email (required in beta mode)
-        await ensureBetaRequest(email, 'Test', 'User');
-
         const registrationData = {
           firstName: 'Test',
           lastName: 'User',
@@ -132,9 +104,6 @@ describe('Password Validation Integration Tests', () => {
           state: 'TX',
           zipCode: '78701',
           serviceArea: 'Downtown',
-          serviceLatitude: 30.2672,
-          serviceLongitude: -97.7431,
-          serviceRadius: 10,
           minimumDeliveryFee: 25,
           perBagDeliveryFee: 5,
           paymentMethod: 'check',
@@ -165,9 +134,6 @@ describe('Password Validation Integration Tests', () => {
         state: 'TS',
         zipCode: '12345',
         serviceArea: 'Downtown',
-        serviceLatitude: 30.2672,
-        serviceLongitude: -97.7431,
-        serviceRadius: 10,
         minimumDeliveryFee: 25,
         perBagDeliveryFee: 5,
         paymentMethod: 'check',
@@ -204,9 +170,6 @@ describe('Password Validation Integration Tests', () => {
         state: 'TS',
         zipCode: '12345',
         serviceArea: 'Downtown',
-        serviceLatitude: 30.2672,
-        serviceLongitude: -97.7431,
-        serviceRadius: 10,
         minimumDeliveryFee: 25,
         perBagDeliveryFee: 5,
         paymentMethod: 'check',
@@ -252,9 +215,6 @@ describe('Password Validation Integration Tests', () => {
           state: 'TX',
           zipCode: '78701',
           serviceArea: 'Downtown',
-          serviceLatitude: 30.2672,
-          serviceLongitude: -97.7431,
-          serviceRadius: 10,
           minimumDeliveryFee: 25,
           perBagDeliveryFee: 5,
           paymentMethod: 'check',
@@ -296,9 +256,6 @@ describe('Password Validation Integration Tests', () => {
         state: 'TS',
         zipCode: '12345',
         serviceArea: 'Downtown',
-        serviceLatitude: 30.2672,
-        serviceLongitude: -97.7431,
-        serviceRadius: 10,
         minimumDeliveryFee: 25,
         perBagDeliveryFee: 5,
         paymentMethod: 'check'
@@ -353,9 +310,6 @@ describe('Password Validation Integration Tests', () => {
         state: 'TS',
         zipCode: '12345',
         serviceArea: 'Downtown',
-        serviceLatitude: 30.2672,
-        serviceLongitude: -97.7431,
-        serviceRadius: 10,
         minimumDeliveryFee: 25,
         perBagDeliveryFee: 5,
         paymentMethod: 'check'
@@ -574,9 +528,6 @@ describe('Password Validation Integration Tests', () => {
         state: 'RC',
         zipCode: '12345',
         serviceArea: 'Downtown',
-        serviceLatitude: 30.2672,
-        serviceLongitude: -97.7431,
-        serviceRadius: 10,
         minimumDeliveryFee: 25,
         perBagDeliveryFee: 5,
         paymentMethod: 'check'
@@ -637,9 +588,6 @@ describe('Password Validation Integration Tests', () => {
         state: 'RC',
         zipCode: '12345',
         serviceArea: 'Downtown',
-        serviceLatitude: 30.2672,
-        serviceLongitude: -97.7431,
-        serviceRadius: 10,
         minimumDeliveryFee: 25,
         perBagDeliveryFee: 5,
         paymentMethod: 'check'
@@ -697,9 +645,6 @@ describe('Password Validation Integration Tests', () => {
         state: 'LC',
         zipCode: '12345',
         serviceArea: 'Downtown',
-        serviceLatitude: 30.2672,
-        serviceLongitude: -97.7431,
-        serviceRadius: 10,
         minimumDeliveryFee: 25,
         perBagDeliveryFee: 5,
         paymentMethod: 'check'
@@ -734,9 +679,6 @@ describe('Password Validation Integration Tests', () => {
         state: 'TS',
         zipCode: '12345',
         serviceArea: 'Downtown',
-        serviceLatitude: 30.2672,
-        serviceLongitude: -97.7431,
-        serviceRadius: 10,
         minimumDeliveryFee: 25,
         perBagDeliveryFee: 5,
         paymentMethod: 'check',
@@ -782,9 +724,6 @@ describe('Password Validation Integration Tests', () => {
         state: 'EC',
         zipCode: '12345',
         serviceArea: 'Downtown',
-        serviceLatitude: 30.2672,
-        serviceLongitude: -97.7431,
-        serviceRadius: 10,
         minimumDeliveryFee: 25,
         perBagDeliveryFee: 5,
         paymentMethod: 'check',
@@ -811,9 +750,6 @@ describe('Password Validation Integration Tests', () => {
       const strongPassword = 'M1x3d&Ch@r$Distr1but10n!';
       const email = 'mixed@example.com';
 
-      // Ensure beta request exists (required in beta mode)
-      await ensureBetaRequest(email, 'Mixed', 'Distribution');
-
       const registrationData = {
         firstName: 'Mixed',
         lastName: 'Distribution',
@@ -827,9 +763,6 @@ describe('Password Validation Integration Tests', () => {
         state: 'TX',
         zipCode: '78701',
         serviceArea: 'Downtown',
-        serviceLatitude: 30.2672,
-        serviceLongitude: -97.7431,
-        serviceRadius: 10,
         minimumDeliveryFee: 25,
         perBagDeliveryFee: 5,
         paymentMethod: 'check',
@@ -861,9 +794,6 @@ describe('Password Validation Integration Tests', () => {
         state: 'UC',
         zipCode: '12345',
         serviceArea: 'Downtown',
-        serviceLatitude: 30.2672,
-        serviceLongitude: -97.7431,
-        serviceRadius: 10,
         minimumDeliveryFee: 25,
         perBagDeliveryFee: 5,
         paymentMethod: 'check',

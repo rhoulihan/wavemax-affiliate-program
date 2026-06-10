@@ -44,9 +44,6 @@ describe('Customer Integration Tests', () => {
       state: 'TX',
       zipCode: '78701',
       serviceArea: 'Downtown',
-      serviceLatitude: 30.2672,
-      serviceLongitude: -97.7431,
-      serviceRadius: 10,
       minimumDeliveryFee: 25,
       perBagDeliveryFee: 5,
       username: 'johndoe',
@@ -682,43 +679,6 @@ describe('Customer Integration Tests', () => {
         success: true,
         message: 'Rate limit check passed'
       });
-    });
-  });
-
-  describe('POST /api/v1/customers/register with paymentConfirmed', () => {
-    it('should register customer with payment confirmed flag', async () => {
-      const newCustomer = {
-        affiliateId: 'AFF123',
-        firstName: 'Payment',
-        lastName: 'Customer',
-        email: 'payment@example.com',
-        username: 'paymentuser',
-        password: 'TestPassword123!',
-        phone: '555-999-8888',
-        address: {
-          street: '999 Payment St',
-          city: 'Austin',
-          state: 'TX',
-          zipCode: '78701'
-        },
-        numberOfBags: 2,
-        paymentConfirmed: true  // This should skip rate limiting
-      };
-
-      const response = await agent
-        .post('/api/v1/customers/register')
-        .set('X-CSRF-Token', csrfToken)
-        .send(newCustomer);
-
-      // Should succeed even if rate limiting would normally apply
-      expect([201, 400]).toContain(response.status);
-      // If it succeeds, verify the customer was created
-      if (response.status === 201) {
-        expect(response.body.success).toBe(true);
-        expect(response.body.customer).toMatchObject({
-          email: 'payment@example.com'
-        });
-      }
     });
   });
 });

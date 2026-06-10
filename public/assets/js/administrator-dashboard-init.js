@@ -167,11 +167,6 @@
         
         // Save current sub-tab to localStorage
         localStorage.setItem('adminCurrentSubTab', targetSubTab);
-        
-        // Load beta requests when that tab is clicked
-        if (targetSubTab === 'beta-requests' && typeof loadBetaRequests === 'function') {
-          loadBetaRequests();
-        }
       });
     });
     
@@ -1866,7 +1861,6 @@
 
     // Build the marketing links using the correct route and parameter names
     const landingPageUrl = `${baseUrl}?route=/affiliate-landing&code=${affiliateId}`;
-    const customerRegisterUrl = `${baseUrl}?route=/customer-register&affid=${affiliateId}`;
 
     // Update modal title with affiliate name
     const modalTitle = modal.querySelector('.modal-header h3');
@@ -1878,7 +1872,6 @@
 
     // Populate the modal inputs
     document.getElementById('landingPageLink').value = landingPageUrl;
-    document.getElementById('customerRegisterLink').value = customerRegisterUrl;
 
     // Show the modal
     modal.classList.remove('hidden');
@@ -1899,7 +1892,6 @@
     const closeBtn = document.getElementById('closeMarketingLinksModal');
     const closeModalBtn = document.getElementById('closeMarketingLinksBtn');
     const copyLandingPageBtn = document.getElementById('copyLandingPageBtn');
-    const copyCustomerRegisterBtn = document.getElementById('copyCustomerRegisterBtn');
 
     // Close modal handlers
     const closeModal = () => {
@@ -1951,31 +1943,6 @@
           copyLandingPageBtn.textContent = t('common.buttons.copied', 'Copied!');
           setTimeout(() => {
             copyLandingPageBtn.textContent = originalText;
-          }, 2000);
-        }
-      });
-    }
-
-    if (copyCustomerRegisterBtn) {
-      copyCustomerRegisterBtn.addEventListener('click', async () => {
-        const input = document.getElementById('customerRegisterLink');
-        const t = window.i18n ? window.i18n.t.bind(window.i18n) : (key) => key;
-
-        try {
-          await navigator.clipboard.writeText(input.value);
-          const originalText = copyCustomerRegisterBtn.textContent;
-          copyCustomerRegisterBtn.textContent = t('common.buttons.copied', 'Copied!');
-          setTimeout(() => {
-            copyCustomerRegisterBtn.textContent = originalText;
-          }, 2000);
-        } catch (err) {
-          // Fallback for older browsers
-          input.select();
-          document.execCommand('copy');
-          const originalText = copyCustomerRegisterBtn.textContent;
-          copyCustomerRegisterBtn.textContent = t('common.buttons.copied', 'Copied!');
-          setTimeout(() => {
-            copyCustomerRegisterBtn.textContent = originalText;
           }, 2000);
         }
       });
@@ -3293,262 +3260,6 @@
       }
     }, 5000);
   }
-
-  // Beta Requests Management Functions
-  async function loadBetaRequests() {
-    try {
-      const response = await adminFetch('/api/v1/administrators/beta-requests');
-      const data = await response.json();
-      
-      if (response.ok && data.success) {
-        // Check affiliate status for each request
-        const requestsWithStatus = await Promise.all(data.betaRequests.map(async (request) => {
-          try {
-            const affiliateResponse = await adminFetch(`/api/v1/administrators/check-affiliate-exists?email=${encodeURIComponent(request.email)}`);
-            const affiliateData = await affiliateResponse.json();
-            return {
-              ...request,
-              hasAffiliate: affiliateData.exists || false,
-              affiliateRegisteredAt: affiliateData.registeredAt || null
-            };
-          } catch (error) {
-            console.error(`Error checking affiliate for ${request.email}:`, error);
-            return {
-              ...request,
-              hasAffiliate: false,
-              affiliateRegisteredAt: null
-            };
-          }
-        }));
-        
-        renderBetaRequests(requestsWithStatus);
-      } else {
-        document.getElementById('betaRequestsList').innerHTML = `
-          <div class="p-20 text-center text-muted">
-            Failed to load beta requests: ${data.message || 'Unknown error'}
-          </div>
-        `;
-      }
-    } catch (error) {
-      console.error('Error loading beta requests:', error);
-      document.getElementById('betaRequestsList').innerHTML = `
-        <div class="p-20 text-center text-muted">
-          Error loading beta requests. Please try again.
-        </div>
-      `;
-    }
-  }
-
-  function renderBetaRequests(requests) {
-    const container = document.getElementById('betaRequestsList');
-    
-    if (!requests || requests.length === 0) {
-      container.innerHTML = `
-        <div class="p-20 text-center text-muted">
-          No beta requests found.
-        </div>
-      `;
-      return;
-    }
-    
-    // Helper function to check if 72 hours have passed since a date
-    function canSendReminder(sentDate) {
-      if (!sentDate) return false;
-      const sentTime = new Date(sentDate).getTime();
-      const currentTime = new Date().getTime();
-      const hoursPassed = (currentTime - sentTime) / (1000 * 60 * 60);
-      return hoursPassed >= 72;
-    }
-    
-    // Helper function to get hours until reminder can be sent
-    function getHoursUntilReminder(sentDate) {
-      if (!sentDate) return 0;
-      const sentTime = new Date(sentDate).getTime();
-      const currentTime = new Date().getTime();
-      const hoursPassed = (currentTime - sentTime) / (1000 * 60 * 60);
-      const hoursRemaining = 72 - hoursPassed;
-      return Math.max(0, Math.ceil(hoursRemaining));
-    }
-    
-    // Helper function to format time remaining
-    function formatTimeRemaining(hours) {
-      if (hours <= 0) return 'now';
-      if (hours < 24) return `${hours} hour${hours !== 1 ? 's' : ''}`;
-      const days = Math.floor(hours / 24);
-      const remainingHours = hours % 24;
-      if (remainingHours === 0) {
-        return `${days} day${days !== 1 ? 's' : ''}`;
-      }
-      return `${days} day${days !== 1 ? 's' : ''}, ${remainingHours} hour${remainingHours !== 1 ? 's' : ''}`;
-    }
-    
-    const html = `
-      <div class="table-responsive">
-        <table class="table">
-          <thead>
-            <tr>
-              <th>Date</th>
-              <th>Name</th>
-              <th>Email</th>
-              <th>Phone</th>
-              <th>Location</th>
-              <th>Business</th>
-              <th>Welcome Status</th>
-              <th>Affiliate Status</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${requests.map(request => `
-              <tr>
-                <td>${new Date(request.createdAt).toLocaleDateString()}</td>
-                <td>${request.firstName} ${request.lastName}</td>
-                <td>${request.email}</td>
-                <td>${request.phone}</td>
-                <td>${request.city}, ${request.state} ${request.zipCode}</td>
-                <td>${request.businessName || '-'}</td>
-                <td>
-                  ${request.welcomeEmailSent 
-                    ? `<div>
-                        <span class="badge badge-success">✓ Sent</span>
-                        <div class="text-muted text-xs mt-1">${new Date(request.welcomeEmailSentAt).toLocaleString()}</div>
-                      </div>` 
-                    : `<span class="badge badge-warning">Pending</span>`}
-                </td>
-                <td>
-                  ${request.hasAffiliate 
-                    ? `<div>
-                        <span class="badge badge-success">✓ Registered</span>
-                        <div class="text-muted text-xs mt-1">${new Date(request.affiliateRegisteredAt).toLocaleString()}</div>
-                      </div>` 
-                    : `<span class="badge badge-secondary">Not Registered</span>`}
-                </td>
-                <td>
-                  ${!request.welcomeEmailSent 
-                    ? `<button class="btn btn-sm btn-primary" data-request-id="${request._id}" data-action="send-welcome">
-                        Send Welcome
-                      </button>` 
-                    : request.hasAffiliate
-                      ? `<span class="text-success text-sm">✓ Complete</span>`
-                      : (() => {
-                          // Use last reminder timestamp if available, otherwise use welcome email timestamp
-                          const lastEmailSentAt = request.lastReminderEmailSentAt || request.welcomeEmailSentAt;
-                          const canSend = canSendReminder(lastEmailSentAt);
-                          const hoursUntil = getHoursUntilReminder(lastEmailSentAt);
-                          const formattedTime = formatTimeRemaining(hoursUntil);
-                          const reminderCount = request.reminderEmailCount || 0;
-                          const tooltipText = canSend 
-                            ? `Send reminder about the opportunity${reminderCount > 0 ? ` (Reminder #${reminderCount + 1})` : ''}` 
-                            : `Next reminder can be sent in ${formattedTime}`;
-                          
-                          if (canSend) {
-                            return `<div>
-                              <button 
-                                class="btn btn-sm btn-warning" 
-                                data-request-id="${request._id}" 
-                                data-action="send-reminder" 
-                                title="${tooltipText}">
-                                  Send Reminder
-                                </button>
-                              ${reminderCount > 0 ? `<div class="text-muted text-xs mt-1">${reminderCount} reminder${reminderCount !== 1 ? 's' : ''} sent</div>` : ''}
-                            </div>`;
-                          } else {
-                            return `<div>
-                              <button 
-                                class="btn btn-sm btn-secondary" 
-                                data-request-id="${request._id}" 
-                                data-action="send-reminder" 
-                                title="${tooltipText}"
-                                disabled>
-                                  Send Reminder
-                                </button>
-                              <div class="text-muted text-xs mt-1">Available in ${formattedTime}</div>
-                              ${reminderCount > 0 ? `<div class="text-muted text-xs">${reminderCount} reminder${reminderCount !== 1 ? 's' : ''} sent</div>` : ''}
-                            </div>`;
-                          }
-                        })()
-                  }
-                </td>
-              </tr>
-            `).join('')}
-          </tbody>
-        </table>
-      </div>
-    `;
-    
-    container.innerHTML = html;
-  }
-
-  async function sendBetaWelcomeEmail(requestId) {
-    if (!confirm('Send welcome email to this beta request?')) {
-      return;
-    }
-    
-    try {
-      const response = await adminFetch(`/api/v1/administrators/beta-requests/${requestId}/send-welcome`, {
-        method: 'POST'
-      });
-      
-      const data = await response.json();
-      
-      if (response.ok && data.success) {
-        showNotification('Welcome email sent successfully!', 'success');
-        loadBetaRequests(); // Reload the list
-      } else {
-        showNotification(data.message || 'Failed to send welcome email', 'error');
-      }
-    } catch (error) {
-      console.error('Error sending welcome email:', error);
-      showNotification('Error sending welcome email', 'error');
-    }
-  }
-  
-  async function sendBetaReminderEmail(requestId) {
-    if (!confirm('Send reminder email about the affiliate opportunity?')) {
-      return;
-    }
-    
-    try {
-      const response = await adminFetch(`/api/v1/administrators/beta-requests/${requestId}/send-reminder`, {
-        method: 'POST'
-      });
-      
-      const data = await response.json();
-      
-      if (response.ok && data.success) {
-        showNotification('Reminder email sent successfully!', 'success');
-        loadBetaRequests(); // Reload the list to update the button state
-      } else {
-        showNotification(data.message || 'Failed to send reminder email', 'error');
-      }
-    } catch (error) {
-      console.error('Error sending reminder email:', error);
-      showNotification('Error sending reminder email', 'error');
-    }
-  }
-
-  // Add event delegation for beta request actions
-  document.addEventListener('click', function(e) {
-    // Handle Send Welcome button clicks
-    if (e.target.dataset.action === 'send-welcome') {
-      const requestId = e.target.dataset.requestId;
-      sendBetaWelcomeEmail(requestId);
-    }
-    
-    // Handle Send Reminder button clicks
-    if (e.target.dataset.action === 'send-reminder') {
-      const requestId = e.target.dataset.requestId;
-      sendBetaReminderEmail(requestId);
-    }
-    
-    // Handle Refresh button click
-    if (e.target.id === 'refreshBetaRequestsBtn') {
-      loadBetaRequests();
-    }
-  });
-
-  window.sendBetaWelcomeEmail = sendBetaWelcomeEmail;
-  window.sendBetaReminderEmail = sendBetaReminderEmail;
 
   // ========================================
   // Marketing Email Modal Functions

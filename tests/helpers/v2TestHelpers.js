@@ -47,8 +47,6 @@ async function ensureTestAffiliate(options = {}) {
       city: options.city || 'Test City',
       state: options.state || 'TX',
       zipCode: options.zipCode || '78701',
-      serviceLatitude: options.serviceLatitude || 30.2672,
-      serviceLongitude: options.serviceLongitude || -97.7431,
       paymentMethod: options.paymentMethod || 'check',
       commissionRate: options.commissionRate || 20,
       minimumDeliveryFee: options.minimumDeliveryFee || 10,

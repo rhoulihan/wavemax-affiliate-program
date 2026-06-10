@@ -107,11 +107,6 @@ function initializeAffiliateSuccess() {
     }
   }
 
-  // Copy registration link functionality
-  window.copyLink = function() {
-    copyToClipboard('registrationLink', 'copyLinkBtn', 'link-copied');
-  };
-
   // Copy landing page link functionality
   window.copyLandingPageLink = function() {
     copyToClipboard('landingPageLink', 'copyLandingLinkBtn', 'landing-link-copied');
@@ -138,10 +133,6 @@ function initializeAffiliateSuccess() {
         if (landingPageInput) {
           landingPageInput.value = landingPageLink;
         }
-
-        // Generate registration link with wavemax.promo format
-        const registrationLink = `${window.location.origin}/embed-app-v2.html?route=/customer-login&affid=${affiliateData.affiliateId}`;
-        document.getElementById('registrationLink').value = registrationLink;
 
         // Update dashboard link to go to login
         const dashboardLink = document.getElementById('dashboardLink');
@@ -186,16 +177,6 @@ function initializeAffiliateSuccess() {
           };
         }
 
-        // Set up copy button event listener for registration link
-        const copyBtn = document.getElementById('copyLinkBtn');
-        if (copyBtn) {
-          copyBtn.onclick = function(e) {
-            e.preventDefault();
-            window.copyLink();
-            return false;
-          };
-        }
-
         // Set up copy button event listener for landing page link
         const copyLandingBtn = document.getElementById('copyLandingLinkBtn');
         if (copyLandingBtn) {
@@ -208,8 +189,7 @@ function initializeAffiliateSuccess() {
 
         // Notify parent of successful registration
         sendMessageToParent('registration-complete', {
-          affiliateId: affiliateData.affiliateId,
-          registrationLink: registrationLink
+          affiliateId: affiliateData.affiliateId
         });
       } catch (e) {
         console.error('Error parsing affiliate data:', e);
@@ -229,8 +209,6 @@ function initializeAffiliateSuccess() {
     document.getElementById('affiliateId').textContent = 'Your unique ID will be provided shortly';
     document.getElementById('affiliateName').textContent = 'Your information is being processed';
     document.getElementById('affiliateEmail').textContent = 'Check your email for confirmation';
-    document.getElementById('registrationLink').value =
-            'Your unique registration link will be available after confirmation';
   }
 
   // Initialize when DOM is ready or immediately if already ready

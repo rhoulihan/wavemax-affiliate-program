@@ -74,8 +74,6 @@ describe('V2 Complete Payment Flow', () => {
       city: 'Austin',
       state: 'TX',
       zipCode: '78701',
-      serviceLatitude: 30.2672,
-      serviceLongitude: -97.7431,
       paymentMethod: 'check',
       commissionRate: 20
     });

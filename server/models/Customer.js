@@ -69,8 +69,6 @@ const customerSchema = new mongoose.Schema({
   },
   // Payment is handled by Paygistix after bags are weighed (post-weigh workflow).
   // No payment information is stored in our database.
-  // Bag information
-  numberOfBags: { type: Number, default: 1 },
   // WDF Credit tracking
   wdfCredit: { type: Number, default: 0 }, // Positive = credit, Negative = debit
   wdfCreditUpdatedAt: Date, // When the credit was last updated

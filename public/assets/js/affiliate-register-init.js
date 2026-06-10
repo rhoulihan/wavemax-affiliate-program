@@ -269,13 +269,6 @@
         }
       }
 
-      // Check service area separately (stored in hidden fields with component-generated IDs)
-      const serviceLatitude = document.getElementById('registrationServiceAreaComponent-latitude');
-      const serviceLongitude = document.getElementById('registrationServiceAreaComponent-longitude');
-      if (!serviceLatitude?.value || !serviceLongitude?.value) {
-        missingFields.push('Service Area (Please click on the map to set your service location)');
-      }
-
       // Check payment method specific fields
       const paymentMethod = document.getElementById('paymentMethod')?.value;
       if (paymentMethod === 'paypal') {
@@ -985,83 +978,11 @@
         return;
       }
 
-      // Check email availability
-      try {
-        const response = await csrfFetch('/api/v1/auth/check-email', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ email })
-        });
-
-        const result = await response.json();
-
-        if (result.available) {
-          emailField.classList.remove('border-red-500');
-          emailField.classList.add('border-green-500');
-          emailHelp.textContent = '✓ Email available';
-          emailHelp.classList.remove('text-red-600');
-          emailHelp.classList.add('text-green-600');
-        } else {
-          emailField.classList.remove('border-green-500');
-          emailField.classList.add('border-red-500');
-          emailHelp.textContent = '❌ Email already registered';
-          emailHelp.classList.remove('text-green-600');
-          emailHelp.classList.add('text-red-600');
-        }
-      } catch (error) {
-        console.error('Error checking email:', error);
-        // Don't show error to user, just reset state
-        emailField.classList.remove('border-red-500', 'border-green-500');
-        emailHelp.textContent = '';
-      }
-    }
-
-    // Add username validation function
-    async function validateUsername() {
-      const username = usernameField?.value?.trim();
-      if (!username) return;
-
-      // Find or create help text element
-      let usernameHelp = usernameField.parentElement.querySelector('.username-validation-message');
-      if (!usernameHelp) {
-        usernameHelp = document.createElement('p');
-        usernameHelp.className = 'username-validation-message text-xs mt-1';
-        usernameField.parentElement.appendChild(usernameHelp);
-      }
-
-      // Check username availability
-      try {
-        const response = await csrfFetch('/api/v1/auth/check-username', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ username })
-        });
-
-        const result = await response.json();
-
-        if (result.available) {
-          usernameField.classList.remove('border-red-500');
-          usernameField.classList.add('border-green-500');
-          usernameHelp.textContent = '✓ Username available';
-          usernameHelp.classList.remove('text-red-600');
-          usernameHelp.classList.add('text-green-600');
-        } else {
-          usernameField.classList.remove('border-green-500');
-          usernameField.classList.add('border-red-500');
-          usernameHelp.textContent = '❌ Username already taken';
-          usernameHelp.classList.remove('text-green-600');
-          usernameHelp.classList.add('text-red-600');
-        }
-      } catch (error) {
-        console.error('Error checking username:', error);
-        // Don't show error to user, just reset state
-        usernameField.classList.remove('border-red-500', 'border-green-500');
-        usernameHelp.textContent = '';
-      }
+      // Format is valid — duplicate-email errors surface at submit time.
+      emailField.classList.remove('border-red-500');
+      emailField.classList.add('border-green-500');
+      emailHelp.textContent = '';
+      emailHelp.classList.remove('text-red-600', 'text-green-600');
     }
 
     // Add email validation event listeners
@@ -1084,23 +1005,6 @@
             usernameField?.value || '',
             this.value
           );
-        }
-      });
-    }
-
-    // Add username validation event listeners
-    if (usernameField) {
-      // Validate on blur (when user leaves the field)
-      usernameField.addEventListener('blur', validateUsername);
-      
-      // Clear validation message on input but keep the original input handler
-      const originalInputHandler = usernameField.oninput;
-      usernameField.addEventListener('input', function() {
-        const usernameHelp = this.parentElement.querySelector('.username-validation-message');
-        if (usernameHelp && usernameHelp.textContent.includes('❌')) {
-          this.classList.remove('border-red-500', 'border-green-500');
-          usernameHelp.textContent = '';
-          usernameHelp.classList.remove('text-red-600', 'text-green-600');
         }
       });
     }
@@ -1314,15 +1218,6 @@
               affiliateData[fieldName] = element.value || '';
             }
           });
-
-          // Handle service area fields with component-generated IDs
-          const serviceLatField = document.getElementById('registrationServiceAreaComponent-latitude');
-          const serviceLngField = document.getElementById('registrationServiceAreaComponent-longitude');
-          const serviceRadiusField = document.getElementById('registrationServiceAreaComponent-radius');
-
-          if (serviceLatField) affiliateData['serviceLatitude'] = serviceLatField.value || '';
-          if (serviceLngField) affiliateData['serviceLongitude'] = serviceLngField.value || '';
-          if (serviceRadiusField) affiliateData['serviceRadius'] = serviceRadiusField.value || '';
 
           // If address fields are empty but we have validated address, use those values
           if (window.validatedAddress && window.addressValidated) {
@@ -1841,499 +1736,6 @@
     }
 
 
-    // OLD SERVICE AREA MAP IMPLEMENTATION - REPLACED BY SERVICE AREA COMPONENT
-    // Keeping for reference but commenting out to prevent conflicts
-    /*
-  // Initialize service area map
-  let serviceAreaMap = window.affiliateServiceAreaMap || null;
-  let serviceMarker = window.affiliateServiceMarker || null;
-  let serviceCircle = window.affiliateServiceCircle || null;
-  let mapInitialized = window.affiliateMapInitialized || false;
-
-  function initializeServiceAreaMap_OLD() {
-    // Prevent duplicate initialization
-    if (mapInitialized || serviceAreaMap) {
-      console.log('Map already initialized, skipping');
-      return;
-    }
-
-    // Default to WaveMAX store location: 825 E Rundberg Lane, Austin, TX 78753
-    const defaultLat = 30.3524;
-    const defaultLng = -97.6841;
-
-    try {
-      // Initialize map with a zoom level that will show a typical service area
-      // Start with zoom 12 which shows about 10-15 mile radius well
-      serviceAreaMap = L.map('serviceAreaMap').setView([defaultLat, defaultLng], 12);
-      mapInitialized = true;
-      // Store globally to prevent re-initialization
-      window.affiliateServiceAreaMap = serviceAreaMap;
-      window.affiliateMapInitialized = true;
-      console.log('Map initialized successfully');
-    } catch (error) {
-      console.error('Error initializing map:', error);
-      return;
-    }
-
-    // Add OpenStreetMap tiles
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-      maxZoom: 19
-    }).addTo(serviceAreaMap);
-
-    // Get radius slider and value display
-    const radiusSlider = document.getElementById('radiusSlider');
-    const radiusValue = document.getElementById('radiusValue');
-    // NOTE: serviceRadius field is now created by component with ID: registrationServiceAreaComponent-radius
-
-    // NOTE: Default values are now set by the service area component
-    // Old code that set serviceLatitude/serviceLongitude/serviceRadius directly is no longer needed
-
-    // Function to update service area
-    function updateServiceArea(lat, lng, radius) {
-      // NOTE: Hidden fields are now managed by the service area component
-      // The component creates fields with IDs like:
-      // - registrationServiceAreaComponent-latitude
-      // - registrationServiceAreaComponent-longitude
-      // - registrationServiceAreaComponent-radius
-
-      // Remove existing marker and circle
-      if (serviceMarker) {
-        serviceAreaMap.removeLayer(serviceMarker);
-      }
-      if (serviceCircle) {
-        serviceAreaMap.removeLayer(serviceCircle);
-      }
-
-      // Add new marker
-      serviceMarker = L.marker([lat, lng], {
-        title: 'Service Center',
-        draggable: true
-      }).addTo(serviceAreaMap);
-      window.affiliateServiceMarker = serviceMarker;
-
-      // Add circle to show service area
-      serviceCircle = L.circle([lat, lng], {
-        color: '#3b82f6',
-        fillColor: '#93c5fd',
-        fillOpacity: 0.3,
-        radius: radius * 1609.34 // Convert miles to meters
-      }).addTo(serviceAreaMap);
-      window.affiliateServiceCircle = serviceCircle;
-
-      // Update info display
-      const serviceAreaInfo = document.getElementById('serviceAreaInfo');
-      if (serviceAreaInfo) {
-        serviceAreaInfo.classList.remove('hidden');
-      }
-
-      // Display the address
-      const centerLocationElement = document.getElementById('centerLocation');
-      if (centerLocationElement) {
-        if (window.confirmedServiceAddress) {
-          centerLocationElement.textContent = window.confirmedServiceAddress;
-        } else {
-          centerLocationElement.textContent = 'Loading address...';
-        }
-      }
-
-      // Always display coordinates
-      const centerCoordinatesElement = document.getElementById('centerCoordinates');
-      if (centerCoordinatesElement) {
-        centerCoordinatesElement.textContent = `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
-      }
-
-      // Ensure the entire service area is visible on the map
-      // Only zoom out if necessary to show the full circle
-      const bounds = serviceCircle.getBounds();
-      const currentBounds = serviceAreaMap.getBounds();
-
-      // Check if the circle extends beyond current view
-      if (!currentBounds.contains(bounds.getNorthEast()) || !currentBounds.contains(bounds.getSouthWest())) {
-        // Fit the map to show the entire circle with some padding
-        serviceAreaMap.fitBounds(bounds, { padding: [50, 50] });
-      }
-
-      const coverageAreaElement = document.getElementById('coverageArea');
-      if (coverageAreaElement) {
-        coverageAreaElement.textContent = `${radius} mile radius`;
-      }
-
-      // Handle marker drag
-      serviceMarker.on('dragend', function(event) {
-        const position = event.target.getLatLng();
-        updateServiceArea(position.lat, position.lng, parseInt(radiusSlider.value));
-        // Reverse geocode to get address
-        reverseGeocodeForServiceArea(position.lat, position.lng);
-      });
-    }
-
-    // Make updateServiceArea globally accessible
-    window.updateServiceArea = updateServiceArea;
-
-    // Handle map click
-    serviceAreaMap.on('click', function(e) {
-      updateServiceArea(e.latlng.lat, e.latlng.lng, parseInt(radiusSlider.value));
-      // Reverse geocode to get address
-      reverseGeocodeForServiceArea(e.latlng.lat, e.latlng.lng);
-    });
-
-    // Reverse geocode for service area - updates the display address
-    function reverseGeocodeForServiceArea(lat, lng) {
-      const centerLocationElement = document.getElementById('centerLocation');
-      if (!centerLocationElement) return;
-
-      // Show loading state
-      centerLocationElement.textContent = 'Loading address...';
-
-      if (window.parent !== window) {
-        // Use bridge method when in iframe
-        const requestId = 'service_area_reverse_' + Date.now();
-        console.log('[Service Area Map] Using bridge for reverse geocoding');
-
-        // Request from parent
-        window.parent.postMessage({
-          type: 'geocode-reverse',
-          data: {
-            lat: lat,
-            lng: lng,
-            requestId: requestId
-          }
-        }, '*');
-
-        // Set up one-time handler for this specific request
-        const handleResponse = function(event) {
-          if (event.data && event.data.type === 'geocode-reverse-response' &&
-              event.data.data && event.data.data.requestId === requestId) {
-            console.log('[Service Area Map] Received reverse geocoding response:', event.data.data);
-
-            if (event.data.data.address) {
-              // Parse and format the address properly
-              const parts = event.data.data.address.split(',').map(p => p.trim());
-              let displayAddress = '';
-
-              // Extract components we want
-              let street = '';
-              let city = '';
-              let state = '';
-              let zipcode = '';
-
-              // Nominatim format often includes: house_number, street, neighborhood, city, county, state, zip, country
-              // We want: street (no comma after number), city, state zipcode
-
-              if (parts.length >= 2) {
-                // First part might be house number, second is street, or first is full street
-                if (parts[0].match(/^\d+$/)) {
-                  // First part is just a number, combine with street
-                  street = parts[0] + ' ' + parts[1];
-                  let startIdx = 2;
-
-                  // Skip neighborhood/suburb names by looking for the city
-                  // Cities usually come after neighborhoods but before county
-                  for (let i = startIdx; i < parts.length; i++) {
-                    const part = parts[i];
-                    // Skip if it looks like a neighborhood or county
-                    if (part.toLowerCase().includes('county') ||
-                        part.toLowerCase().includes('township')) {
-                      continue;
-                    }
-                    // Check if this is a state abbreviation
-                    if (part.match(/^[A-Z]{2}$/)) {
-                      state = part;
-                    } else if (part.match(/\d{5}/)) {
-                      // This is a zipcode
-                      zipcode = part.match(/\d{5}/)[0];
-                    } else if (!city && !state && !part.match(/USA|United States/i)) {
-                      // This is likely the city
-                      city = part;
-                    }
-                  }
-                } else {
-                  // First part is the full street
-                  street = parts[0];
-
-                  // Process remaining parts
-                  for (let i = 1; i < parts.length; i++) {
-                    const part = parts[i];
-                    // Skip if it looks like a neighborhood or county
-                    if (part.toLowerCase().includes('county') ||
-                        part.toLowerCase().includes('township')) {
-                      continue;
-                    }
-                    // Check if this is a state abbreviation
-                    if (part.match(/^[A-Z]{2}$/)) {
-                      state = part;
-                    } else if (part.match(/\d{5}/)) {
-                      // This is a zipcode
-                      zipcode = part.match(/\d{5}/)[0];
-                    } else if (!city && !state && !part.match(/USA|United States/i)) {
-                      // This is likely the city
-                      city = part;
-                    }
-                  }
-                }
-              }
-
-              // Build the formatted address
-              displayAddress = street;
-              if (city) {
-                displayAddress += ', ' + city;
-              }
-              if (state) {
-                displayAddress += ', ' + state;
-                if (zipcode) {
-                  displayAddress += ' ' + zipcode;
-                }
-              }
-
-              // Fallback if we couldn't parse properly
-              if (!street || !city) {
-                displayAddress = parts.slice(0, 3).join(', ');
-              }
-
-              centerLocationElement.textContent = displayAddress;
-              window.confirmedServiceAddress = displayAddress;
-            } else {
-              centerLocationElement.textContent = 'Address not found';
-            }
-
-            // Remove this handler
-            window.removeEventListener('message', handleResponse);
-          }
-        };
-
-        window.addEventListener('message', handleResponse);
-      } else {
-        // Direct Nominatim call when not in iframe
-        console.log('[Service Area Map] Direct Nominatim call for reverse geocoding');
-        fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&accept-language=en`)
-          .then(response => response.json())
-          .then(data => {
-            if (data.display_name) {
-              // Parse and format the address properly
-              const parts = data.display_name.split(',').map(p => p.trim());
-              let displayAddress = '';
-
-              // Extract components we want
-              let street = '';
-              let city = '';
-              let state = '';
-              let zipcode = '';
-
-              // Nominatim format often includes: house_number, street, neighborhood, city, county, state, zip, country
-              // We want: street (no comma after number), city, state zipcode
-
-              if (parts.length >= 2) {
-                // First part might be house number, second is street, or first is full street
-                if (parts[0].match(/^\d+$/)) {
-                  // First part is just a number, combine with street
-                  street = parts[0] + ' ' + parts[1];
-                  let startIdx = 2;
-
-                  // Skip neighborhood/suburb names by looking for the city
-                  // Cities usually come after neighborhoods but before county
-                  for (let i = startIdx; i < parts.length; i++) {
-                    const part = parts[i];
-                    // Skip if it looks like a neighborhood or county
-                    if (part.toLowerCase().includes('county') ||
-                        part.toLowerCase().includes('township')) {
-                      continue;
-                    }
-                    // Check if this is a state abbreviation
-                    if (part.match(/^[A-Z]{2}$/)) {
-                      state = part;
-                    } else if (part.match(/\d{5}/)) {
-                      // This is a zipcode
-                      zipcode = part.match(/\d{5}/)[0];
-                    } else if (!city && !state && !part.match(/USA|United States/i)) {
-                      // This is likely the city
-                      city = part;
-                    }
-                  }
-                } else {
-                  // First part is the full street
-                  street = parts[0];
-
-                  // Process remaining parts
-                  for (let i = 1; i < parts.length; i++) {
-                    const part = parts[i];
-                    // Skip if it looks like a neighborhood or county
-                    if (part.toLowerCase().includes('county') ||
-                        part.toLowerCase().includes('township')) {
-                      continue;
-                    }
-                    // Check if this is a state abbreviation
-                    if (part.match(/^[A-Z]{2}$/)) {
-                      state = part;
-                    } else if (part.match(/\d{5}/)) {
-                      // This is a zipcode
-                      zipcode = part.match(/\d{5}/)[0];
-                    } else if (!city && !state && !part.match(/USA|United States/i)) {
-                      // This is likely the city
-                      city = part;
-                    }
-                  }
-                }
-              }
-
-              // Build the formatted address
-              displayAddress = street;
-              if (city) {
-                displayAddress += ', ' + city;
-              }
-              if (state) {
-                displayAddress += ', ' + state;
-                if (zipcode) {
-                  displayAddress += ' ' + zipcode;
-                }
-              }
-
-              // Fallback if we couldn't parse properly
-              if (!street || !city) {
-                displayAddress = parts.slice(0, 3).join(', ');
-              }
-
-              centerLocationElement.textContent = displayAddress;
-              window.confirmedServiceAddress = displayAddress;
-            } else {
-              centerLocationElement.textContent = 'Address not found';
-            }
-          })
-          .catch(error => {
-            console.error('Reverse geocoding error:', error);
-            centerLocationElement.textContent = 'Address lookup failed';
-          });
-      }
-    }
-
-    // Address autocomplete removed - using form fields instead
-
-    // Handle radius slider change
-    radiusSlider.addEventListener('input', function() {
-      const radius = parseInt(this.value);
-      radiusValue.textContent = radius;
-
-      // Update circle if marker exists
-      if (serviceMarker) {
-        const position = serviceMarker.getLatLng();
-        updateServiceArea(position.lat, position.lng, radius);
-      }
-    });
-
-    // Check if we have pending map center from address validation
-    if (window.pendingMapCenter) {
-      console.log('[Service Area Map] Using pending map center from address validation');
-      updateServiceArea(window.pendingMapCenter.lat, window.pendingMapCenter.lon, window.pendingMapCenter.radius);
-      // Don't set a fixed zoom - let updateServiceArea handle it to show the full circle
-      // Clear the pending center
-      delete window.pendingMapCenter;
-    } else {
-      // Set initial marker and circle at default location
-      updateServiceArea(defaultLat, defaultLng, parseInt(radiusSlider ? radiusSlider.value : 5));
-      // Perform reverse geocoding for default location if no address is set
-      if (!window.confirmedServiceAddress) {
-        reverseGeocodeForServiceArea(defaultLat, defaultLng);
-      }
-    }
-  }
-
-  // Initialize map when container is visible and Leaflet is loaded
-  function waitForLeafletAndInitialize_OLD() {
-    console.log('[Service Area Map] waitForLeafletAndInitialize called');
-
-    // Remove any remaining event listeners to prevent duplicate calls
-    window.removeEventListener('init-service-area-map', waitForLeafletAndInitialize_OLD);
-    window.removeEventListener('dom-sections-ready', waitForLeafletAndInitialize_OLD);
-
-    const mapContainer = document.getElementById('serviceAreaMap');
-
-    if (!mapContainer) {
-      console.log('[Service Area Map] Map container not found, skipping map initialization');
-      return;
-    }
-
-    // Check if Leaflet is loaded
-    if (typeof L === 'undefined') {
-      console.log('Leaflet not loaded yet, waiting...');
-      // Try to load Leaflet dynamically if not present
-      if (!document.querySelector('script[src*="leaflet"]')) {
-        console.log('Loading Leaflet dynamically...');
-
-        // Add Leaflet CSS
-        if (!document.querySelector('link[href*="leaflet"]')) {
-          const leafletCSS = document.createElement('link');
-          leafletCSS.rel = 'stylesheet';
-          leafletCSS.href = 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css';
-          document.head.appendChild(leafletCSS);
-        }
-
-        // Add Leaflet JS
-        const leafletJS = document.createElement('script');
-        leafletJS.src = 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js';
-        leafletJS.onload = function() {
-          console.log('Leaflet loaded dynamically');
-          // Try to initialize again now that Leaflet is loaded
-          waitForLeafletAndInitialize_OLD();
-        };
-        document.body.appendChild(leafletJS);
-        return;
-      }
-      // Just return, Leaflet will call us back when loaded
-      return;
-    }
-
-    // Check if container has dimensions
-    const rect = mapContainer.getBoundingClientRect();
-    console.log('[Service Area Map] Container dimensions:', { width: rect.width, height: rect.height });
-
-    if (rect.width === 0 || rect.height === 0) {
-      console.log('[Service Area Map] Map container has no dimensions yet');
-      // Check if container is actually visible
-      const section = document.getElementById('serviceAreaSection');
-      console.log('[Service Area Map] Service area section display:', section ? section.style.display : 'section not found');
-
-      // Try one more time after a render frame
-      requestAnimationFrame(() => {
-        const rect2 = mapContainer.getBoundingClientRect();
-        console.log('[Service Area Map] Container dimensions after frame:', { width: rect2.width, height: rect2.height });
-        if (rect2.width > 0 && rect2.height > 0) {
-          console.log('[Service Area Map] Container now has dimensions, initializing map');
-          initializeServiceAreaMap_OLD();
-        } else {
-          console.log('[Service Area Map] Container still has no dimensions, giving up');
-        }
-      });
-      return;
-    }
-
-    console.log('Leaflet loaded and container ready, initializing map');
-    console.log('Leaflet version:', L.version);
-    initializeServiceAreaMap_OLD();
-  }
-  */
-
-    // OLD MAP INITIALIZATION - REPLACED BY SERVICE AREA COMPONENT
-    // Commenting out to prevent conflicts with new component
-    /*
-  // Listen for trigger events to initialize map
-  window.addEventListener('init-service-area-map', waitForLeafletAndInitialize, { once: true });
-  window.addEventListener('dom-sections-ready', () => {
-    console.log('[Service Area Map] DOM sections ready event received');
-    // Give browser a chance to complete rendering
-    requestAnimationFrame(() => {
-      waitForLeafletAndInitialize_OLD();
-    });
-  }, { once: true });
-
-  // Try initial initialization in case section is already visible
-  if (document.getElementById('serviceAreaMap')) {
-    const container = document.getElementById('serviceAreaMap').closest('.form-section-hidden');
-    if (!container || container.style.display !== 'none') {
-      // Section is visible, try to initialize
-      waitForLeafletAndInitialize_OLD();
-    }
-  }
-  */
 
     // Set up account setup next button
     function setupAccountSetupNavigation() {
@@ -2480,12 +1882,12 @@
         });
       }
 
-      // Set up back button (this is now used when going back from final sections to service area)
+      // Set up back button (goes back from final sections to the address/personal info step)
       const backButton = document.getElementById('backButton');
       if (backButton) {
         backButton.addEventListener('click', function() {
           console.log('[Navigation] Final section back button clicked');
-          
+
           // Hide all the final sections
           const sectionsToHide = [
             'serviceInfoSection',
@@ -2493,7 +1895,7 @@
             'termsSection',
             'submitSection'
           ];
-          
+
           sectionsToHide.forEach(sectionId => {
             const section = document.getElementById(sectionId);
             if (section) {
@@ -2501,60 +1903,20 @@
               section.classList.remove('form-section-visible');
             }
           });
-          
+
           // Hide this back button
           backButton.classList.add('hidden');
-          
-          // Show service area section and its navigation again
-          const serviceAreaSection = document.getElementById('serviceAreaSection');
-          const serviceAreaNav = document.getElementById('serviceAreaNavigation');
-          
-          if (serviceAreaSection) {
-            serviceAreaSection.classList.remove('form-section-hidden');
-            serviceAreaSection.classList.add('form-section-visible');
-          }
-          if (serviceAreaNav) {
-            serviceAreaNav.classList.remove('hidden');
-          }
-          
-          // Scroll to service area
-          setTimeout(() => {
-            if (serviceAreaSection) {
-              serviceAreaSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }
-            
-            // Trigger height recalculation
-            window.dispatchEvent(new Event('section-toggled'));
-          }, 100);
-        });
-      }
+          backButton.style.display = 'none';
 
-      // Set up service area navigation buttons
-      const serviceAreaBackButton = document.getElementById('serviceAreaBackButton');
-      if (serviceAreaBackButton) {
-        serviceAreaBackButton.addEventListener('click', function() {
-          console.log('[Navigation] Service area back button clicked');
-          
-          // Hide service area section and navigation
-          const serviceAreaSection = document.getElementById('serviceAreaSection');
-          const serviceAreaNav = document.getElementById('serviceAreaNavigation');
-          if (serviceAreaSection) {
-            serviceAreaSection.classList.add('form-section-hidden');
-            serviceAreaSection.classList.remove('form-section-visible');
-          }
-          if (serviceAreaNav) {
-            serviceAreaNav.classList.add('hidden');
-          }
-          
           // Show the first sections again (OAuth, personal info, business info)
           const socialAuthSection = document.getElementById('socialAuthSection');
           const personalInfoSection = document.getElementById('personalInfoSection');
           const businessInfoSection = document.getElementById('businessInfoSection');
-          
+
           if (socialAuthSection) {
             socialAuthSection.style.display = '';
           }
-          
+
           if (personalInfoSection) {
             personalInfoSection.style.display = '';
             // Re-add required attributes
@@ -2563,7 +1925,7 @@
               field.setAttribute('required', 'required');
             });
           }
-          
+
           if (businessInfoSection) {
             businessInfoSection.style.display = '';
             // Re-add required attributes
@@ -2572,90 +1934,24 @@
               field.setAttribute('required', 'required');
             });
           }
-          
+
           // Reset address validation state
           window.addressValidated = false;
-          
+
           // Scroll to top
           const form = document.getElementById('affiliateRegistrationForm');
           if (form) {
             form.scrollIntoView({ behavior: 'smooth', block: 'start' });
           }
-          
+
           // Trigger height recalculation
           window.dispatchEvent(new Event('section-toggled'));
-        });
-      }
-      
-      const serviceAreaNextButton = document.getElementById('serviceAreaNextButton');
-      if (serviceAreaNextButton) {
-        serviceAreaNextButton.addEventListener('click', function() {
-          console.log('[Navigation] Service area next button clicked');
-          
-          // Validate that service area has been set
-          const latField = document.getElementById('registrationServiceAreaComponent-latitude');
-          const lngField = document.getElementById('registrationServiceAreaComponent-longitude');
-          const radiusField = document.getElementById('registrationServiceAreaComponent-radius');
-          
-          if (!latField || !latField.value || !lngField || !lngField.value || !radiusField || !radiusField.value) {
-            alert('Please set your service area before continuing.');
-            return;
-          }
-          
-          // Hide service area section and navigation
-          const serviceAreaSection = document.getElementById('serviceAreaSection');
-          const serviceAreaNav = document.getElementById('serviceAreaNavigation');
-          if (serviceAreaSection) {
-            serviceAreaSection.classList.add('form-section-hidden');
-            serviceAreaSection.classList.remove('form-section-visible');
-          }
-          if (serviceAreaNav) {
-            serviceAreaNav.classList.add('hidden');
-          }
-          
-          // Show all remaining sections
-          const sectionsToShow = [
-            'serviceInfoSection',
-            'paymentInfoSection', 
-            'termsSection',
-            'submitSection'
-          ];
-          
-          sectionsToShow.forEach(sectionId => {
-            const section = document.getElementById(sectionId);
-            if (section) {
-              section.classList.remove('form-section-hidden');
-              section.style.display = '';
-            }
-          });
-          
-          // Show the old back button in the submit section
-          const oldBackButton = document.getElementById('backButton');
-          if (oldBackButton) {
-            oldBackButton.style.display = 'flex';
-          }
-          
-          // Initialize pricing preview if needed
-          if (window.PricingPreviewComponent) {
-            window.PricingPreviewComponent.init('registrationPricingPreview');
-          }
-          
-          // Scroll to service info section
-          setTimeout(() => {
-            const serviceInfoSection = document.getElementById('serviceInfoSection');
-            if (serviceInfoSection) {
-              serviceInfoSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }
-            
-            // Trigger height recalculation after scroll
-            window.dispatchEvent(new Event('section-toggled'));
-          }, 100);
         });
       }
 
       // Monitor address fields and geocode when complete
       function validateAndSetAddress() {
-        console.log('[Service Area Map] Using new address validation component');
+        console.log('[Address Validation] Using address validation component');
         
         // Use the new address validation component
         if (window.affiliateAddressValidator) {
@@ -2674,73 +1970,30 @@
           window.affiliateAddressValidator = validator;
           validator.validateAddress();
         } else {
-          console.error('[Service Area Map] Address validation component not available');
+          console.error('[Address Validation] Address validation component not available');
           alert('Address validation is temporarily unavailable. Please try again.');
         }
       }
 
       // Handle successful address validation from the new component
       function handleAddressValidationSuccess(data) {
-        console.log('[Service Area Map] Address validation successful:', data);
-        
-        // Update service location fields
-        const latField = document.getElementById('serviceLatitude');
-        const lonField = document.getElementById('serviceLongitude');
-        
-        if (latField) latField.value = data.latitude;
-        if (lonField) lonField.value = data.longitude;
-        
-        // Get radius value
-        const radiusSlider = document.getElementById('radiusSlider');
-        const radiusValue = radiusSlider ? parseInt(radiusSlider.value) : 5;
-        
+        console.log('[Address Validation] Address validation successful:', data);
+
         // Store the validated address components
         const formAddress = document.getElementById('address')?.value?.trim() || '';
         const formCity = document.getElementById('city')?.value?.trim() || '';
         const formState = document.getElementById('state')?.value?.trim() || '';
         const formZip = document.getElementById('zipCode')?.value?.trim() || '';
-        
+
         window.validatedAddress = {
           address: formAddress,
           city: formCity,
           state: formState,
           zipCode: formZip
         };
-        
-        // Store service area data
-        window.selectedServiceAreaData = {
-          latitude: data.latitude,
-          longitude: data.longitude,
-          radius: radiusValue,
-          address: data.formattedAddress
-        };
-        
-        window.confirmedServiceAddress = data.formattedAddress;
+
         window.addressValidated = true;
-        
-        // Update UI elements
-        const centerLocationElement = document.getElementById('centerLocation');
-        if (centerLocationElement) {
-          centerLocationElement.textContent = data.formattedAddress;
-        }
-        
-        const centerCoordinatesElement = document.getElementById('centerCoordinates');
-        if (centerCoordinatesElement) {
-          centerCoordinatesElement.textContent = `${data.latitude.toFixed(6)}, ${data.longitude.toFixed(6)}`;
-        }
-        
-        // Show service area info
-        const serviceAreaInfo = document.getElementById('serviceAreaInfo');
-        if (serviceAreaInfo) {
-          serviceAreaInfo.classList.remove('hidden');
-        }
-        
-        // Update coverage area
-        const coverageAreaElement = document.getElementById('coverageArea');
-        if (coverageAreaElement) {
-          coverageAreaElement.textContent = `${radiusValue} mile radius`;
-        }
-        
+
         // Hide other sections
         const businessInfoSection = document.querySelector('#businessInfoSection');
         if (businessInfoSection) {
@@ -2772,78 +2025,51 @@
           }
         }
         
+        // Show all remaining sections (service info, payment, terms, submit)
+        const sectionsToShow = [
+          'serviceInfoSection',
+          'paymentInfoSection',
+          'termsSection',
+          'submitSection'
+        ];
+
+        sectionsToShow.forEach(sectionId => {
+          const section = document.getElementById(sectionId);
+          if (section) {
+            section.classList.remove('form-section-hidden');
+            section.style.display = '';
+          }
+        });
+
+        // Show the back button in the submit section
         const oldBackButton = document.getElementById('backButton');
         if (oldBackButton) {
-          oldBackButton.style.display = 'none';
+          oldBackButton.style.display = 'flex';
         }
-        
-        // Show service area section
-        const serviceAreaSection = document.getElementById('serviceAreaSection');
-        if (serviceAreaSection) {
-          serviceAreaSection.classList.remove('form-section-hidden');
-          serviceAreaSection.classList.add('form-section-visible');
-          
-          const serviceAreaNav = document.getElementById('serviceAreaNavigation');
-          if (serviceAreaNav) {
-            serviceAreaNav.classList.remove('hidden');
-          }
-          
-          // Initialize service area component
-          if (window.ServiceAreaComponent && window.selectedServiceAreaData) {
-            const data = window.selectedServiceAreaData;
-            setTimeout(() => {
-              window.registrationServiceArea = window.ServiceAreaComponent.init('registrationServiceAreaComponent', {
-                latitude: data.latitude,
-                longitude: data.longitude,
-                radius: data.radius,
-                address: data.address,
-                editable: true,
-                showMap: true,
-                showControls: true,
-                showInfo: true,
-                registrationAddress: data.address,
-                registrationLat: data.latitude,
-                registrationLng: data.longitude,
-                onUpdate: function(serviceData) {
-                  const latField = document.getElementById('registrationServiceAreaComponent-latitude');
-                  const lngField = document.getElementById('registrationServiceAreaComponent-longitude');
-                  const radiusField = document.getElementById('registrationServiceAreaComponent-radius');
-                  if (latField) latField.value = serviceData.latitude;
-                  if (lngField) lngField.value = serviceData.longitude;
-                  if (radiusField) radiusField.value = serviceData.radius;
-                }
-              });
-              
-              // Update hidden fields with initial values
-              const latField = document.getElementById('registrationServiceAreaComponent-latitude');
-              const lngField = document.getElementById('registrationServiceAreaComponent-longitude');
-              const radiusField = document.getElementById('registrationServiceAreaComponent-radius');
-              if (latField) latField.value = data.latitude;
-              if (lngField) lngField.value = data.longitude;
-              if (radiusField) radiusField.value = data.radius;
-            }, 100);
-          }
-          
-          // Scroll to service area section
-          setTimeout(() => {
-            serviceAreaSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            window.dispatchEvent(new Event('section-toggled'));
-            if (window.embedNavigation && window.embedNavigation.sendHeight) {
-              window.embedNavigation.sendHeight(true);
-            }
-          }, 100);
+
+        // Initialize pricing preview if needed
+        if (window.PricingPreviewComponent) {
+          window.PricingPreviewComponent.init('registrationPricingPreview');
         }
+
+        // Scroll to service info section
+        setTimeout(() => {
+          const serviceInfoSection = document.getElementById('serviceInfoSection');
+          if (serviceInfoSection) {
+            serviceInfoSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+
+          // Trigger height recalculation after scroll
+          window.dispatchEvent(new Event('section-toggled'));
+          if (window.embedNavigation && window.embedNavigation.sendHeight) {
+            window.embedNavigation.sendHeight(true);
+          }
+        }, 100);
       }
-      
+
       // Handle address validation errors from the new component
       function handleAddressValidationError(message) {
-        console.error('[Service Area Map] Address validation error:', message);
-        
-        // Hide service area section if shown
-        const serviceAreaSection = document.getElementById('serviceAreaSection');
-        if (serviceAreaSection) {
-          serviceAreaSection.classList.add('form-section-hidden');
-        }
+        console.error('[Address Validation] Address validation error:', message);
       }
 
       // DEPRECATED - Old address confirmation modal has been removed

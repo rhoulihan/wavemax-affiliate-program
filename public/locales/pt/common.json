@@ -71,7 +71,6 @@
       "loginSuccess": "Login realizado com sucesso!",
       "logoutSuccess": "Você saiu com sucesso.",
       "registrationSuccess": "Registro realizado com sucesso!",
-      "betaRestriction": "Atualmente estamos em beta fechado. Por favor, tente novamente em alguns dias ou entre em contato conosco se acredita que deveria ter acesso.",
       "registrationFailed": "Falha no registro. Por favor, tente novamente.",
       "passwordResetSuccess": "Redefinição de senha bem-sucedida!",
       "passwordResetFailed": "Falha na redefinição de senha. Por favor, tente novamente.",
@@ -125,9 +124,14 @@
       }
     },
     "howItWorks": {
-        "step1": "Cadastre-se agora sem cartão de crédito",
+      "step1": {
         "socialSignupText": "Inscreva-se rapidamente usando sua conta de mídia social",
         "socialConnectedMessage": "Ótimo! Conectamos sua conta social. Apenas complete o formulário abaixo para finalizar o registro - não é necessário pagamento!",
+        "title": "Cadastre-se",
+        "description": "Crie sua conta de afiliado em minutos"
+      },
+      "socialSignupText": "Inscreva-se rapidamente usando sua conta de mídia social",
+      "socialConnectedMessage": "Ótimo! Conectamos sua conta social. Apenas complete o formulário abaixo para finalizar o registro - não é necessário pagamento!",
       "title": "Como Funciona Nosso Serviço",
       "subtitle": "Processo Simples",
       "steps": {
@@ -146,12 +150,6 @@
           "title": "Entrega Rápida",
           "description": "Suas roupas são limpas profissionalmente e devolvidas frescas, dobradas e prontas para usar - normalmente dentro de 24-48 horas."
         }
-      },
-      "step1": {
-        "socialSignupText": "Inscreva-se rapidamente usando sua conta de mídia social",
-        "socialConnectedMessage": "Ótimo! Conectamos sua conta social. Apenas complete o formulário abaixo para finalizar o registro - não é necessário pagamento!",
-        "title": "Cadastre-se",
-        "description": "Crie sua conta de afiliado em minutos"
       },
       "step2": {
         "title": "Compartilhe Seu Link",
@@ -293,7 +291,7 @@
       "title": "Pronto para começar a ganhar?",
       "customerTitle": "Pronto para roupas limpas e frescas?",
       "description": "Junte-se ao nosso programa de afiliados e comece a ganhar comissões oferecendo serviços de lavanderia aos seus clientes.",
-      "createAccount": "Criar Conta de Afiliado",
+      "createAccount": "Torne-se um afiliado",
       "login": "Login de Afiliado",
       "subtitle": {
         "full": "Deixe {{affiliateName}} cuidar da coleta e entrega enquanto a WaveMAX garante a limpeza profissional",
@@ -341,25 +339,9 @@
       "city": "Cidade *",
       "state": "Estado *",
       "zipCode": "CEP *",
-      "serviceArea": "Área de Serviço *",
-      "serviceAddress": "Endereço do Centro de Serviço",
-      "addressPlaceholder": "Digite o endereço ou clique no mapa",
       "passwordPlaceholder": "Digite sua senha",
       "confirmPasswordPlaceholder": "Digite novamente sua senha",
       "usernamePlaceholder": "Escolha um nome de usuário único",
-      "addressHelp": "Comece a digitar para pesquisar um endereço",
-      "serviceAreaInstructions": "Como Definir sua Área de Serviço",
-      "serviceAreaStep1": "Digite um endereço ou clique no mapa",
-      "serviceAreaStep2": "Arraste o marcador para ajustar sua posição se necessário",
-      "serviceAreaStep3": "Use o controle deslizante para definir seu raio de serviço",
-      "serviceRadius": "Raio de Serviço:",
-      "miles": "milhas",
-      "serviceAreaDetails": "Detalhes da Área de Serviço",
-      "serviceCenter": "Centro de Serviço:",
-      "coverageArea": "Área de Cobertura:",
-      "coordinates": "Coordenadas:",
-      "useRegistrationAddress": "Usar Endereço de Registro",
-      "notSet": "Não definido",
       "serviceInfo": "Informações de Serviço",
       "deliveryFeeStructure": "Estrutura de Taxas de Entrega",
       "dynamicPricing": "Preços Dinâmicos:",
@@ -368,13 +350,8 @@
       "minimumFeeDesc": "A taxa mínima cobrada independentemente do número de sacolas",
       "perBagFee": "Taxa por Sacola ($) *",
       "perBagFeeDesc": "Taxa cobrada por cada sacola de roupa",
-      "validateAddress": "Validar Endereço e Definir Local de Serviço",
-      "validateAddressHelp": "Clique para verificar seu endereço e definir automaticamente o centro da sua área de serviço no mapa abaixo",
-      "selectServiceLocation": "Selecione seu Local de Serviço",
-      "confirmServiceLocation": "Confirme seu Local de Serviço",
-      "selectCorrectLocation": "Encontramos vários locais possíveis. Por favor, selecione o correto:",
-      "confirmCorrectAddress": "Por favor, confirme se este é o endereço correto para sua área de serviço:",
-      "confirm": "Confirmar",
+      "validateAddress": "Validar Endereço",
+      "validateAddressHelp": "Clique para verificar seu endereço antes de continuar",
       "livePricingPreview": "Visualização de Preços ao Vivo",
       "1bag": "1 sacola",
       "3bags": "3 sacolas",
@@ -488,57 +465,7 @@
         "pickups": "Coletas e Entregas",
         "customers": "Clientes",
         "earnings": "Ganhos",
-        "schedule": "Agenda",
         "settings": "Configurações"
-      },
-      "schedule": {
-        "title": "Agenda de Disponibilidade",
-        "subtitle": "Gerencie quando você está disponível para coletas e entregas",
-        "weeklyTemplate": "Modelo Semanal",
-        "dateExceptions": "Exceções de Data",
-        "editWeeklyTemplate": "Editar Modelo Semanal",
-        "blockDate": "Bloquear Data",
-        "bookingSettings": "Configurações de Reserva",
-        "legend": "Legenda",
-        "available": "Disponível",
-        "partiallyAvailable": "Parcialmente Disponível",
-        "unavailable": "Indisponível",
-        "blocked": "Bloqueado",
-        "override": "Substituição",
-        "morning": "Manhã (8 AM - 12 PM)",
-        "afternoon": "Tarde (12 PM - 4 PM)",
-        "evening": "Noite (4 PM - 8 PM)",
-        "days": {
-          "monday": "Segunda-feira",
-          "tuesday": "Terça-feira",
-          "wednesday": "Quarta-feira",
-          "thursday": "Quinta-feira",
-          "friday": "Sexta-feira",
-          "saturday": "Sábado",
-          "sunday": "Domingo"
-        },
-        "modal": {
-          "editTemplate": "Editar Modelo Semanal",
-          "blockDateTitle": "Bloquear Data",
-          "overrideDateTitle": "Substituir Data",
-          "settingsTitle": "Configurações de Reserva",
-          "selectDate": "Selecionar Data",
-          "reason": "Motivo (opcional)",
-          "advanceBookingDays": "Dias Mínimos de Antecedência",
-          "maxBookingDays": "Dias Máximos para Reservar",
-          "timezone": "Fuso Horário",
-          "saveChanges": "Salvar Alterações",
-          "cancel": "Cancelar"
-        },
-        "notifications": {
-          "templateUpdated": "Modelo semanal atualizado com sucesso",
-          "dateBlocked": "Data bloqueada com sucesso",
-          "dateOverridden": "Substituição de data salva com sucesso",
-          "exceptionRemoved": "Exceção de data removida com sucesso",
-          "settingsUpdated": "Configurações de reserva atualizadas com sucesso",
-          "loadError": "Falha ao carregar a agenda",
-          "saveError": "Falha ao salvar as alterações"
-        }
       },
       "metrics": {
         "totalCustomers": "Total de Clientes",
@@ -553,9 +480,7 @@
       "marketingLinks": {
         "title": "Seus Links de Marketing",
         "landingPage": "Página de Destino para Clientes",
-        "landingPageDesc": "Compartilhe esta página profissional para mostrar seus serviços",
-        "registrationLink": "Link de Registro Direto",
-        "registrationDesc": "Link direto para clientes se registrarem"
+        "landingPageDesc": "Compartilhe esta página profissional para mostrar seus serviços"
       },
       "pickups": {
         "title": "Próximas Coletas e Entregas"
@@ -623,9 +548,6 @@
       "marketingLinkTitle": "Sua Página de Destino para Clientes",
       "marketingLinkDescription": "Compartilhe esta página profissional com clientes potenciais para mostrar seus serviços e preços:",
       "marketingLinkHelp": "Esta página inclui informações sobre seus serviços, preços e um formulário de registro.",
-      "linkTitle": "Link Direto de Registro de Clientes",
-      "linkDescription": "Os clientes também podem usar este link direto para se registrar:",
-      "linkHelp": "Cada cliente registrado através de seus links estará associado à sua conta.",
       "nextStepsTitle": "Próximos Passos",
       "nextStep1": "Verifique seu e-mail para sua mensagem de boas-vindas e credenciais de acesso",
       "nextStep2": "Faça login no seu painel de afiliado para acessar materiais de marketing",
@@ -674,7 +596,6 @@
       "bagDelivered": "Entregue pelo seu afiliado",
       "bagCredited": "Creditada em seu primeiro pedido",
       "numberOfBags": "Número de Sacolas Necessárias *",
-      "selectBags": "Selecione o número de sacolas",
       "bagRecommendation": "A maioria das famílias precisa de 2-3 sacolas para o serviço regular de lavanderia.",
       "totalBagFee": "Taxa Total de Sacolas:",
       "bagCreditNote": "Este valor será creditado em seu primeiro pedido.",
@@ -725,19 +646,12 @@
       "v2": {
         "noPaymentRequired": "Pagamento Não Necessário",
         "subtitle": "Cadastre-se para o serviço premium de coleta e entrega de roupa - pague depois de pesarmos sua roupa!",
-        "freeBagsBanner": "Ganhe suas primeiras 1-2 sacolas de lavanderia GRÁTIS - Não é necessário cartão de crédito!",
-        "selectBags": "Selecione suas sacolas de lavanderia grátis",
-        "selectBagsDescription": "Escolha quantas sacolas você precisa para começar. Cada sacola comporta 20-25 libras de roupa.",
-        "oneBag": "1 Sacola",
-        "oneBagDesc": "Perfeito para indivíduos e casais",
-        "twoBags": "2 Sacolas",
-        "twoBagsDesc": "Ótimo para famílias maiores",
         "howItWorks": "Como funciona nosso sistema de pagamento V2",
         "step1": "Cadastre-se agora sem cartão de crédito",
         "socialSignupText": "Inscreva-se rapidamente usando sua conta de mídia social",
         "socialConnectedMessage": "Ótimo! Conectamos sua conta social. Apenas complete o formulário abaixo para finalizar o registro - não é necessário pagamento!",
         "step2": "Receba suas sacolas de lavanderia grátis",
-        "step3": "Agende sua primeira coleta",
+        "step3": "Entregue sua sacola de roupas ao seu afiliado — seu pedido é criado quando chega à loja",
         "step4": "Pesamos sua roupa e enviamos links de pagamento",
         "step5": "Pague convenientemente via Venmo, PayPal ou CashApp",
         "step6": "Receba sua roupa limpa e fresca!",
@@ -753,7 +667,6 @@
     "dashboard": {
       "title": "Painel do Cliente",
       "welcome": "Bem-vindo de volta, {{name}}!",
-      "schedulePickup": "Agendar Coleta",
       "activeOrder": "Pedido Ativo",
       "activeOrders": "Pedidos Ativos",
       "orderHistory": "Histórico de Pedidos",
@@ -855,8 +768,7 @@
       "subtabs": {
         "overview": "Visão Geral",
         "charts": "Gráficos",
-        "recentActivity": "Atividade Recente",
-        "betaRequests": "Solicitações Beta"
+        "recentActivity": "Atividade Recente"
       },
       "stats": {
         "activeOperators": "Operadores Ativos",
@@ -988,8 +900,6 @@
         "marketingLinksDesc": "Compartilhe esses links com seu afiliado para promover o registro de clientes.",
         "landingPageLink": "Página de Destino do Afiliado",
         "landingPageDesc": "Página de marketing com calculadora de receita e registro de clientes",
-        "customerRegisterLink": "Página de Registro de Clientes",
-        "customerRegisterDesc": "Link direto para o registro de clientes para este afiliado",
         "sendW9": "Enviar W9",
         "sending": "Enviando...",
         "confirmSendW9": "Enviar formulário W9 para este afiliado?",
@@ -1049,7 +959,7 @@
         "title": "Integração QuickBooks",
         "vendorExport": "Exportar Fornecedores",
         "vendorExportDesc": "Exportar afiliados como fornecedores do QuickBooks",
-        "paymentSummary": "Resumo de Pagamentos", 
+        "paymentSummary": "Resumo de Pagamentos",
         "paymentSummaryDesc": "Exportar resumo de pagamentos de comissões",
         "commissionDetail": "Detalhes de Comissões",
         "commissionDetailDesc": "Exportar relatório detalhado de comissões",
@@ -1231,7 +1141,6 @@
       "step2": "Seu parceiro afiliado notificará quando estiver a caminho",
       "step3": "Pesaremos sua lavanderia e forneceremos o custo final",
       "step4": "A roupa limpa será entregue na data de entrega agendada",
-      "scheduleAnother": "Agendar Outra Coleta",
       "orderNumber": "Número do Pedido",
       "pickupScheduled": "Coleta Agendada",
       "estimatedDelivery": "Entrega Estimada",
@@ -1263,8 +1172,7 @@
       "operatorMessage": "Bem-vindo à equipe WaveMAX! Sua conta de operador foi criada.",
       "operatorPin": "Seu PIN:",
       "accessPortal": "Acessar Portal",
-      "accessDashboard": "Acessar Seu Painel",
-      "schedulePickup": "Agende Sua Primeira Coleta"
+      "accessDashboard": "Acessar Seu Painel"
     },
     "commission": {
       "title": "Notificação de Pagamento de Comissão",
@@ -1364,7 +1272,12 @@
     "description": "Verifique o status da sua solicitação de exclusão de dados do Facebook",
     "loading": "Carregando status...",
     "confirmationCode": "Código de Confirmação",
-    "status": "Status",
+    "status": {
+      "pending": "Processamento Pendente",
+      "processing": "Processando Atualmente",
+      "completed": "Concluído com Sucesso",
+      "failed": "Falhou"
+    },
     "requestedAt": "Solicitado em",
     "completedAt": "Concluído em",
     "contact": "Para perguntas sobre sua solicitação de exclusão de dados, entre em contato com o suporte.",
@@ -1374,12 +1287,6 @@
       "noCode": "Nenhum código de confirmação fornecido",
       "loadFailed": "Falha ao carregar o status de exclusão",
       "notFound": "Solicitação de exclusão não encontrada"
-    },
-    "status": {
-      "pending": "Processamento Pendente",
-      "processing": "Processando Atualmente",
-      "completed": "Concluído com Sucesso",
-      "failed": "Falhou"
     },
     "success": {
       "title": "Exclusão Concluída",

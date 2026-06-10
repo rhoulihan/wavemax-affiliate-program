@@ -84,8 +84,6 @@ describe.skip('WDF Credit System (DEPRECATED - Feature being removed)', () => {
       city: 'Test City',
       state: 'TS',
       zipCode: '54321',
-      serviceLatitude: 40.7128,
-      serviceLongitude: -74.0060,
       username: 'testaffiliate',
       passwordSalt: 'salt',
       passwordHash: 'hash',

@@ -21,31 +21,12 @@ router.post('/register', registrationLimiter, [
   body('email').isEmail().withMessage('Valid email is required'),
   body('phone').notEmpty().withMessage('Phone number is required'),
   ...registrationAddressValidation,
-  body('serviceLatitude').notEmpty().isNumeric().withMessage('Service latitude is required'),
-  body('serviceLongitude').notEmpty().isNumeric().withMessage('Service longitude is required'),
-  body('serviceRadius').notEmpty().isNumeric().isInt({ min: 1, max: 50 }).withMessage('Service radius must be between 1 and 50 miles'),
   body('minimumDeliveryFee').optional().isNumeric().withMessage('Minimum delivery fee must be a number'),
   body('perBagDeliveryFee').optional().isNumeric().withMessage('Per-bag delivery fee must be a number'),
   body('username').notEmpty().withMessage('Username is required'),
   body('password').custom(customPasswordValidator()),
   body('paymentMethod').isIn(['check', 'paypal', 'venmo']).withMessage('Invalid payment method')
 ], handleValidationErrors, affiliateController.registerAffiliate);
-
-/**
- * @route   POST /api/affiliates/beta-request
- * @desc    Submit a beta program request
- * @access  Public
- */
-router.post('/beta-request', registrationLimiter, [
-  body('firstName').notEmpty().withMessage('First name is required'),
-  body('lastName').notEmpty().withMessage('Last name is required'),
-  body('email').isEmail().withMessage('Valid email is required'),
-  body('phone').notEmpty().withMessage('Phone number is required'),
-  body('address').notEmpty().withMessage('Address is required'),
-  body('city').notEmpty().withMessage('City is required'),
-  body('state').notEmpty().isLength({ min: 2, max: 2 }).withMessage('State is required'),
-  body('zipCode').notEmpty().matches(/^\d{5}$/).withMessage('Valid ZIP code is required')
-], handleValidationErrors, affiliateController.submitBetaRequest);
 
 /**
  * @route   GET /api/affiliates/public/:affiliateCode

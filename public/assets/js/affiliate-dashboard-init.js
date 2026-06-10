@@ -3,51 +3,6 @@ if (window.ApiClient) {
   ApiClient.initCSRF();
 }
 
-// Helper function to format address from Nominatim response
-function formatDashboardAddress(displayName) {
-  const parts = displayName.split(',').map(p => p.trim());
-  let street = '', city = '', state = '', zipcode = '';
-
-  // Parse address components
-  if (parts.length >= 2) {
-    if (parts[0].match(/^\d+$/)) {
-      street = parts[0] + ' ' + parts[1];
-      for (let i = 2; i < parts.length; i++) {
-        const part = parts[i];
-        if (part.match(/^[A-Z]{2}$/)) {
-          state = part;
-        } else if (part.match(/\d{5}/)) {
-          zipcode = part.match(/\d{5}/)[0];
-        } else if (!city && !state && !part.match(/USA|United States|county|township/i)) {
-          city = part;
-        }
-      }
-    } else {
-      street = parts[0];
-      for (let i = 1; i < parts.length; i++) {
-        const part = parts[i];
-        if (part.match(/^[A-Z]{2}$/)) {
-          state = part;
-        } else if (part.match(/\d{5}/)) {
-          zipcode = part.match(/\d{5}/)[0];
-        } else if (!city && !state && !part.match(/USA|United States|county|township/i)) {
-          city = part;
-        }
-      }
-    }
-  }
-
-  // Build formatted address
-  let formatted = street;
-  if (city) formatted += ', ' + city;
-  if (state) {
-    formatted += ', ' + state;
-    if (zipcode) formatted += ' ' + zipcode;
-  }
-
-  return formatted || parts.slice(0, 3).join(', ');
-}
-
 // Affiliate dashboard functionality for embedded environment
 function initializeAffiliateDashboard() {
   const isEmbedded = window.EMBED_CONFIG?.isEmbedded || false;
@@ -130,6 +85,16 @@ function initializeAffiliateDashboard() {
 
   // Function to switch to a specific tab
   function switchToTab(tabId, updateHistory = true) {
+    // Resolve the target button first; fall back to the default tab if it
+    // no longer exists (e.g. stale localStorage/bookmark for a removed tab)
+    const targetButton = document.querySelector(`[data-tab="${tabId}"]`);
+    if (!targetButton) {
+      if (tabId !== 'pickups') {
+        switchToTab('pickups', updateHistory);
+      }
+      return;
+    }
+
     // Remove active class from all buttons and tabs
     tabButtons.forEach(btn => {
       btn.classList.remove('border-blue-600');
@@ -141,37 +106,34 @@ function initializeAffiliateDashboard() {
       content.classList.remove('active');
     });
 
-    // Find and activate the tab button
-    const targetButton = document.querySelector(`[data-tab="${tabId}"]`);
-    if (targetButton) {
-      targetButton.classList.add('border-blue-600');
-      targetButton.classList.add('text-blue-600');
-      targetButton.classList.remove('border-transparent');
+    // Activate the tab button
+    targetButton.classList.add('border-blue-600');
+    targetButton.classList.add('text-blue-600');
+    targetButton.classList.remove('border-transparent');
 
-      const tabContent = document.getElementById(`${tabId}-tab`);
-      if (tabContent) {
-        tabContent.classList.add('active');
-      }
+    const tabContent = document.getElementById(`${tabId}-tab`);
+    if (tabContent) {
+      tabContent.classList.add('active');
+    }
 
-      // Save current tab to localStorage
-      localStorage.setItem('affiliateCurrentTab', tabId);
+    // Save current tab to localStorage
+    localStorage.setItem('affiliateCurrentTab', tabId);
 
-      // Update URL with tab parameter for browser history (only if not from popstate)
-      if (updateHistory && window.updateTabInUrl) {
-        window.updateTabInUrl(tabId);
-      }
+    // Update URL with tab parameter for browser history (only if not from popstate)
+    if (updateHistory && window.updateTabInUrl) {
+      window.updateTabInUrl(tabId);
+    }
 
-      // Always load tab-specific data
-      console.log('[Affiliate Dashboard] Loading data for tab:', tabId);
-      if (tabId === 'pickups') {
-        loadPickupRequests(affiliateId);
-      } else if (tabId === 'customers') {
-        loadCustomers(affiliateId);
-      } else if (tabId === 'invoices') {
-        loadInvoices(affiliateId);
-      } else if (tabId === 'settings') {
-        loadSettingsData(affiliateId);
-      }
+    // Always load tab-specific data
+    console.log('[Affiliate Dashboard] Loading data for tab:', tabId);
+    if (tabId === 'pickups') {
+      loadPickupRequests(affiliateId);
+    } else if (tabId === 'customers') {
+      loadCustomers(affiliateId);
+    } else if (tabId === 'invoices') {
+      loadInvoices(affiliateId);
+    } else if (tabId === 'settings') {
+      loadSettingsData(affiliateId);
     }
   }
 
@@ -256,14 +218,6 @@ function initializeAffiliateDashboard() {
   }
 
   // Schedule pickup button removed - affiliates should not schedule pickups
-
-  // Copy registration link button
-  const copyBtn = document.getElementById('copyRegistrationLinkBtn');
-  if (copyBtn) {
-    copyBtn.addEventListener('click', function() {
-      copyRegistrationLink();
-    });
-  }
 
   // Copy landing page link button
   const copyLandingBtn = document.getElementById('copyLandingPageLinkBtn');
@@ -541,9 +495,6 @@ async function loadAffiliateData(affiliateId) {
       const businessElement = document.getElementById('businessName');
       if (businessElement) businessElement.textContent = data.businessName || 'N/A';
 
-      const serviceAreaElement = document.getElementById('serviceArea');
-      if (serviceAreaElement) serviceAreaElement.textContent = data.serviceArea;
-
       // Display delivery fee structure
       const deliveryFeeElement = document.getElementById('deliveryFee');
       if (deliveryFeeElement) {
@@ -556,11 +507,6 @@ async function loadAffiliateData(affiliateId) {
         }
       }
 
-      // Generate and display registration link with wavemaxlaundry.com format
-      const registrationLink = `https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?route=/customer-register&affid=${affiliateId}`;
-      const linkElement = document.getElementById('registrationLink');
-      if (linkElement) linkElement.value = registrationLink;
-
       // Generate and display landing page link
       const landingPageLink = `https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?route=/affiliate-landing&code=${affiliateId}`;
       const landingPageElement = document.getElementById('landingPageLink');
@@ -568,67 +514,6 @@ async function loadAffiliateData(affiliateId) {
 
       // Store affiliate data in localStorage for other uses
       localStorage.setItem('currentAffiliate', JSON.stringify(data));
-
-      // Initialize service area component if available
-      if (window.ServiceAreaComponent) {
-        console.log('Initializing service area component in loadAffiliateData');
-        const lat = parseFloat(data.serviceLatitude) || 30.3524;
-        const lng = parseFloat(data.serviceLongitude) || -97.6841;
-        const hasAddress = data.serviceArea && data.serviceArea.trim() !== '';
-
-        window.settingsServiceArea = window.ServiceAreaComponent.init('settingsServiceAreaComponent', {
-          latitude: lat,
-          longitude: lng,
-          radius: parseInt(data.serviceRadius) || 5,
-          address: data.serviceArea || '',
-          readOnly: true, // Start in read-only mode
-          showInfo: true,
-          showMap: false, // Hide map initially
-          showControls: false, // Hide controls initially
-          onUpdate: function(serviceData) {
-            console.log('Service area updated:', serviceData);
-          }
-        });
-
-        // If no address is stored, trigger reverse geocoding
-        if (!hasAddress && lat && lng) {
-          console.log('No address stored, triggering reverse geocoding for coordinates:', lat, lng);
-          // Trigger reverse geocoding through the component
-          if (window.parent !== window) {
-            const requestId = 'dashboard_init_' + Date.now();
-
-            window.parent.postMessage({
-              type: 'geocode-reverse',
-              data: { lat, lng, requestId }
-            }, '*');
-
-            // Set up one-time handler for the response
-            const handleResponse = function(event) {
-              if (event.data && event.data.type === 'geocode-reverse-response' &&
-                  event.data.data && event.data.data.requestId === requestId) {
-
-                if (event.data.data.address) {
-                  // Format the address
-                  const formattedAddress = formatDashboardAddress(event.data.data.address);
-                  // Update the location element directly
-                  const locationElement = document.getElementById('settingsServiceAreaComponent-centerLocation');
-                  if (locationElement) {
-                    locationElement.textContent = formattedAddress;
-                  }
-                  // Update the component's config
-                  if (window.settingsServiceArea) {
-                    window.settingsServiceArea.config.address = formattedAddress;
-                  }
-                }
-
-                window.removeEventListener('message', handleResponse);
-              }
-            };
-
-            window.addEventListener('message', handleResponse);
-          }
-        }
-      }
 
       // Check if this is an OAuth account and hide change password section if so
       if (data.registrationMethod && data.registrationMethod !== 'traditional') {
@@ -900,54 +785,6 @@ async function loadInvoices(affiliateId) {
   }
 }
 
-// Copy link functionality
-window.copyLink = function() {
-  const linkInput = document.getElementById('registrationLink');
-  linkInput.select();
-  document.execCommand('copy');
-
-  const copyBtn = event.target;
-  const originalText = copyBtn.textContent;
-  copyBtn.textContent = 'Copied!';
-  copyBtn.classList.add('bg-green-600');
-
-  setTimeout(() => {
-    copyBtn.textContent = originalText;
-    copyBtn.classList.remove('bg-green-600');
-  }, 2000);
-};
-
-// Copy registration link
-function copyRegistrationLink() {
-  const linkInput = document.getElementById('registrationLink');
-  const copyBtn = document.getElementById('copyRegistrationLinkBtn');
-
-  // Use setTimeout to ensure our code runs in a clean call stack
-  setTimeout(() => {
-    // Focus the input first
-    linkInput.focus();
-    linkInput.select();
-
-    try {
-      // Use execCommand which works better in iframes
-      const successful = document.execCommand('copy');
-      if (successful) {
-        showCopySuccess(copyBtn);
-        // Blur the input after successful copy
-        linkInput.blur();
-      } else {
-        // If copy fails, show the text for manual copying
-        linkInput.blur();
-        showManualCopyPrompt(linkInput.value);
-      }
-    } catch (err) {
-      // Show text for manual copying if everything fails
-      linkInput.blur();
-      showManualCopyPrompt(linkInput.value);
-    }
-  }, 10);
-}
-
 // Show manual copy prompt
 function showManualCopyPrompt(text) {
   // Create a temporary textarea for better compatibility
@@ -1082,7 +919,6 @@ async function loadSettingsData(affiliateId) {
         const emailField = document.getElementById('settingsEmail');
         const phoneField = document.getElementById('settingsPhone');
         const businessNameField = document.getElementById('settingsBusinessName');
-        const registrationLinkField = document.getElementById('registrationLink');
         const minimumDeliveryFeeField = document.getElementById('settingsMinimumDeliveryFee');
         const perBagDeliveryFeeField = document.getElementById('settingsPerBagDeliveryFee');
 
@@ -1092,7 +928,6 @@ async function loadSettingsData(affiliateId) {
           email: data.email,
           phone: data.phone,
           businessName: data.businessName,
-          serviceArea: data.serviceArea,
           minimumDeliveryFee: data.minimumDeliveryFee,
           perBagDeliveryFee: data.perBagDeliveryFee
         });
@@ -1124,31 +959,6 @@ async function loadSettingsData(affiliateId) {
           }
         }
 
-        // Initialize or update service area component
-        if (window.ServiceAreaComponent) {
-          if (window.settingsServiceArea) {
-            // Update existing component
-            window.ServiceAreaComponent.update('settingsServiceAreaComponent', {
-              latitude: parseFloat(data.serviceLatitude) || 30.3524,
-              longitude: parseFloat(data.serviceLongitude) || -97.6841,
-              radius: parseInt(data.serviceRadius) || 5,
-              address: data.serviceArea || ''
-            });
-          } else {
-            // Initialize new component
-            window.settingsServiceArea = window.ServiceAreaComponent.init('settingsServiceAreaComponent', {
-              latitude: parseFloat(data.serviceLatitude) || 30.3524,
-              longitude: parseFloat(data.serviceLongitude) || -97.6841,
-              radius: parseInt(data.serviceRadius) || 5,
-              address: data.serviceArea || '',
-              readOnly: true,
-              showInfo: true,
-              showMap: false,
-              showControls: false
-            });
-          }
-        }
-
         // Initialize pricing preview component
         if (window.PricingPreviewComponent) {
           console.log('Initializing pricing preview in loadSettingsData');
@@ -1159,11 +969,6 @@ async function loadSettingsData(affiliateId) {
           updateFeeCalculatorPreview();
         }
 
-        // Generate and display registration link with wavemaxlaundry.com format
-        const registrationLink = `https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?route=/customer-register&affid=${affiliateId}`;
-        if (registrationLinkField) registrationLinkField.value = registrationLink;
-
-        // Load W-9 status
         // Set landing page link
         const landingPageLinkField = document.getElementById('landingPageLink');
         const landingPageLink = `https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?route=/affiliate-landing&code=${affiliateId}`;
@@ -1184,7 +989,7 @@ function enableEditMode() {
   const inputs = document.querySelectorAll('#settingsForm input[type="text"], #settingsForm input[type="email"], #settingsForm input[type="tel"], #settingsForm input[type="number"]');
   inputs.forEach(input => {
     // Skip the registration link field
-    if (input.id !== 'registrationLink' && input.id !== 'landingPageLink') {
+    if (input.id !== 'landingPageLink') {
       input.removeAttribute('readonly');
       input.classList.remove('bg-gray-100');
     }
@@ -1200,16 +1005,6 @@ function enableEditMode() {
   document.getElementById('editBtn').style.display = 'none';
   document.getElementById('formButtons').style.display = 'block';
 
-  // Enable service area editing
-  if (window.settingsServiceArea && window.ServiceAreaComponent) {
-    // Update the component to show map and controls
-    window.ServiceAreaComponent.update('settingsServiceAreaComponent', {
-      readOnly: false,
-      showMap: true,
-      showControls: true
-    });
-  }
-
   // The pricing preview component handles its own event listeners
   // No need to add additional listeners here
 }
@@ -1218,7 +1013,7 @@ function enableEditMode() {
 function disableEditMode() {
   const inputs = document.querySelectorAll('#settingsForm input[type="text"], #settingsForm input[type="email"], #settingsForm input[type="tel"], #settingsForm input[type="number"]');
   inputs.forEach(input => {
-    if (input.id !== 'registrationLink' && input.id !== 'landingPageLink') {
+    if (input.id !== 'landingPageLink') {
       input.setAttribute('readonly', true);
       input.classList.add('bg-gray-100');
     }
@@ -1233,16 +1028,6 @@ function disableEditMode() {
 
   document.getElementById('editBtn').style.display = 'block';
   document.getElementById('formButtons').style.display = 'none';
-
-  // Disable service area editing
-  if (window.settingsServiceArea && window.ServiceAreaComponent) {
-    // Update the component to hide map and controls
-    window.ServiceAreaComponent.update('settingsServiceAreaComponent', {
-      readOnly: true,
-      showMap: false,
-      showControls: false
-    });
-  }
 
   // The pricing preview component handles its own event listeners
   // No need to remove listeners here
@@ -1261,17 +1046,6 @@ async function saveSettings(affiliateId) {
       minimumDeliveryFee: parseFloat(formData.get('minimumDeliveryFee')) || null,
       perBagDeliveryFee: parseFloat(formData.get('perBagDeliveryFee')) || null
     };
-
-    // Get service area data from component
-    if (window.settingsServiceArea && window.ServiceAreaComponent) {
-      const serviceAreaData = window.ServiceAreaComponent.getData('settingsServiceAreaComponent');
-      if (serviceAreaData) {
-        data.serviceArea = serviceAreaData.address;
-        data.serviceLatitude = serviceAreaData.latitude;
-        data.serviceLongitude = serviceAreaData.longitude;
-        data.serviceRadius = serviceAreaData.radius;
-      }
-    }
 
     const token = localStorage.getItem('affiliateToken');
     const result = await ApiClient.put(`/api/v1/affiliates/${affiliateId}`, data, {

@@ -4,7 +4,6 @@ const Affiliate = require('../models/Affiliate');
 const Customer = require('../models/Customer');
 const Order = require('../models/Order');
 const Transaction = require('../models/Transaction');
-const BetaRequest = require('../models/BetaRequest');
 const encryptionUtil = require('../utils/encryption');
 const emailService = require('../utils/emailService');
 const { validationResult } = require('express-validator');
@@ -15,73 +14,6 @@ const ControllerHelpers = require('../utils/controllerHelpers');
 const AuthorizationHelpers = require('../middleware/authorizationHelpers');
 const Formatters = require('../utils/formatters');
 const logger = require('../utils/logger');
-
-/**
- * Submit a beta program request
- */
-exports.submitBetaRequest = async (req, res) => {
-  try {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({
-        success: false,
-        errors: errors.array()
-      });
-    }
-
-    const {
-      firstName,
-      lastName,
-      email,
-      phone,
-      businessName,
-      address,
-      city,
-      state,
-      zipCode,
-      message
-    } = req.body;
-
-    // Check if a request already exists for this email
-    const existingRequest = await BetaRequest.findByEmail(email);
-    if (existingRequest && existingRequest.status === 'pending') {
-      return res.status(400).json({
-        success: false,
-        message: 'A beta request for this email is already pending.'
-      });
-    }
-
-    // Create new beta request
-    const betaRequest = new BetaRequest({
-      firstName,
-      lastName,
-      email,
-      phone,
-      businessName,
-      address,
-      city,
-      state,
-      zipCode,
-      message
-    });
-
-    await betaRequest.save();
-
-    // Send email notification to admin
-    await emailService.sendBetaRequestNotification(betaRequest);
-
-    res.json({
-      success: true,
-      message: 'Your beta request has been submitted successfully. We will contact you soon.'
-    });
-  } catch (error) {
-    logger.error('Error submitting beta request:', error);
-    res.status(500).json({
-      success: false,
-      message: 'An error occurred while submitting your request. Please try again.'
-    });
-  }
-};
 
 /**
  * Register a new affiliate
@@ -108,9 +40,6 @@ exports.registerAffiliate = async (req, res) => {
       city,
       state,
       zipCode,
-      serviceLatitude,
-      serviceLongitude,
-      serviceRadius,
       minimumDeliveryFee,
       perBagDeliveryFee,
       username,
@@ -120,21 +49,6 @@ exports.registerAffiliate = async (req, res) => {
       venmoHandle,
       languagePreference
     } = req.body;
-
-    // Beta validation: Check if email is associated with an invited beta user
-    const BetaRequest = require('../models/BetaRequest');
-    const betaRequest = await BetaRequest.findOne({ 
-      email: email.toLowerCase(),
-      welcomeEmailSent: true 
-    });
-
-    if (!betaRequest) {
-      return res.status(403).json({
-        success: false,
-        message: 'We are currently in closed beta. Please check back in a few days or contact us if you believe you should have access.',
-        isBetaRestriction: true
-      });
-    }
 
     // Check if email or username already exists
     const existingEmail = await Affiliate.findOne({ email });
@@ -177,9 +91,6 @@ exports.registerAffiliate = async (req, res) => {
       city,
       state,
       zipCode,
-      serviceLatitude,
-      serviceLongitude,
-      serviceRadius,
       minimumDeliveryFee: parseFloat(minimumDeliveryFee) || 20,
       perBagDeliveryFee: parseFloat(perBagDeliveryFee) || 5,
       username,
@@ -259,9 +170,6 @@ exports.getAffiliateProfile = ControllerHelpers.asyncWrapper(async (req, res) =>
     city: affiliate.city,
     state: affiliate.state,
     zipCode: affiliate.zipCode,
-    serviceLatitude: affiliate.serviceLatitude,
-    serviceLongitude: affiliate.serviceLongitude,
-    serviceRadius: affiliate.serviceRadius,
     minimumDeliveryFee: Formatters.currency(affiliate.minimumDeliveryFee),
     perBagDeliveryFee: Formatters.currency(affiliate.perBagDeliveryFee),
     paymentMethod: affiliate.paymentMethod,
@@ -316,9 +224,8 @@ exports.updateAffiliateProfile = async (req, res) => {
     // Fields that can be updated
     const updatableFields = [
       'firstName', 'lastName', 'phone', 'businessName',
-      'address', 'city', 'state', 'zipCode', 'serviceArea', 'serviceLatitude', 'serviceLongitude', 'serviceRadius',
-      'minimumDeliveryFee', 'perBagDeliveryFee', 'paymentMethod',
-      'allowImmediatePickup'
+      'address', 'city', 'state', 'zipCode',
+      'minimumDeliveryFee', 'perBagDeliveryFee', 'paymentMethod'
     ];
 
     // Update fields
@@ -1030,7 +937,7 @@ exports.getPublicAffiliateInfo = async (req, res) => {
 
     // Find affiliate by code
     const affiliate = await Affiliate.findOne({ affiliateId: affiliateCode })
-      .select('firstName lastName businessName minimumDeliveryFee perBagDeliveryFee serviceLatitude serviceLongitude serviceRadius city state');
+      .select('firstName lastName businessName minimumDeliveryFee perBagDeliveryFee city state');
 
     if (!affiliate) {
       return res.status(404).json({
@@ -1047,9 +954,6 @@ exports.getPublicAffiliateInfo = async (req, res) => {
       businessName: affiliate.businessName,
       minimumDeliveryFee: affiliate.minimumDeliveryFee,
       perBagDeliveryFee: affiliate.perBagDeliveryFee,
-      serviceLatitude: affiliate.serviceLatitude,
-      serviceLongitude: affiliate.serviceLongitude,
-      serviceRadius: affiliate.serviceRadius,
       city: affiliate.city,
       state: affiliate.state
     });
@@ -1069,7 +973,7 @@ exports.getPublicAffiliateInfoById = async (req, res) => {
 
     // Find affiliate by ID
     const affiliate = await Affiliate.findOne({ affiliateId: affiliateId })
-      .select('firstName lastName businessName minimumDeliveryFee perBagDeliveryFee serviceLatitude serviceLongitude serviceRadius city state');
+      .select('firstName lastName businessName minimumDeliveryFee perBagDeliveryFee city state');
 
     if (!affiliate) {
       return res.status(404).json({
@@ -1091,8 +995,8 @@ exports.getPublicAffiliateInfoById = async (req, res) => {
         deliveryFee: deliveryFee,
         minimumDeliveryFee: affiliate.minimumDeliveryFee,
         perBagDeliveryFee: affiliate.perBagDeliveryFee,
-        serviceArea: `${affiliate.city}, ${affiliate.state}`,
-        serviceRadius: affiliate.serviceRadius
+        // Display label from city/state for the customer success page — not a service-area field
+        serviceArea: `${affiliate.city}, ${affiliate.state}`
       }
     });
   } catch (error) {
