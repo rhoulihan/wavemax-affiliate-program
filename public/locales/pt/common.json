@@ -855,8 +855,7 @@
       "subtabs": {
         "overview": "Visão Geral",
         "charts": "Gráficos",
-        "recentActivity": "Atividade Recente",
-        "betaRequests": "Solicitações Beta"
+        "recentActivity": "Atividade Recente"
       },
       "stats": {
         "activeOperators": "Operadores Ativos",

@@ -114,12 +114,6 @@ router.post('/reset-rate-limits', checkAdminPermission(['system.manage']), async
   }
 });
 
-// Beta Request Management
-router.get('/beta-requests', administratorController.getBetaRequests);
-router.post('/beta-requests/:id/send-welcome', administratorController.sendBetaWelcomeEmail);
-router.get('/check-affiliate-exists', administratorController.checkAffiliateExists);
-router.post('/beta-requests/:id/send-reminder', administratorController.sendBetaReminderEmail);
-
 // Marketing Email Management
 const marketingController = require('../controllers/marketingController');
 router.get('/marketing/templates', marketingController.getTemplates);

@@ -8,7 +8,6 @@ const Affiliate = require('../models/Affiliate');
 const Customer = require('../models/Customer');
 const SystemConfig = require('../models/SystemConfig');
 const Transaction = require('../models/Transaction');
-const BetaRequest = require('../models/BetaRequest');
 const { fieldFilter } = require('../utils/fieldFilter');
 const emailService = require('../utils/emailService');
 const { logAuditEvent, AuditEvents } = require('../utils/auditLogger');
@@ -20,7 +19,6 @@ const mongoose = require('mongoose');
 const encryptionUtil = require('../utils/encryption');
 const logger = require('../utils/logger');
 
-const betaRequestService = require('../services/betaRequestService');
 const affiliatePaymentLockService = require('../services/affiliatePaymentLockService');
 const systemConfigService = require('../services/systemConfigService');
 const systemHealthService = require('../services/systemHealthService');
@@ -734,79 +732,6 @@ exports.resetRateLimits = async (req, res) => {
       success: false,
       message: 'Failed to reset rate limits',
       error: err.message
-    });
-  }
-};
-
-
-/**
- * Get all beta requests
- */
-exports.getBetaRequests = async (req, res) => {
-  try {
-    const betaRequests = await betaRequestService.listBetaRequests();
-    res.json({ success: true, betaRequests });
-  } catch (error) {
-    logger.error('Error fetching beta requests:', error);
-    res.status(500).json({ success: false, message: 'Failed to fetch beta requests' });
-  }
-};
-
-/**
- * Send welcome email to beta request
- */
-exports.sendBetaWelcomeEmail = async (req, res) => {
-  try {
-    await betaRequestService.sendWelcomeEmail({
-      id: req.params.id,
-      user: req.user,
-      req
-    });
-    res.json({ success: true, message: 'Welcome email sent successfully' });
-  } catch (err) {
-    if (err.isBetaRequestError) {
-      return res.status(err.status).json({ success: false, message: err.message });
-    }
-    logger.error('Error sending beta welcome email:', err);
-    res.status(500).json({ success: false, message: 'Failed to send welcome email' });
-  }
-};
-
-/**
- * Check if an affiliate exists for a given email
- */
-exports.checkAffiliateExists = async (req, res) => {
-  try {
-    const result = await betaRequestService.checkAffiliateExists({ email: req.query.email });
-    res.json({ success: true, ...result });
-  } catch (err) {
-    if (err.isBetaRequestError) {
-      return res.status(err.status).json({ success: false, message: err.message });
-    }
-    logger.error('Error checking affiliate existence:', err);
-    res.status(500).json({ success: false, message: 'Failed to check affiliate existence' });
-  }
-};
-
-/**
- * Send reminder email to beta request user who hasn't registered
- */
-exports.sendBetaReminderEmail = async (req, res) => {
-  try {
-    await betaRequestService.sendReminderEmail({
-      id: req.params.id,
-      user: req.user,
-      req
-    });
-    res.json({ success: true, message: 'Reminder email sent successfully' });
-  } catch (err) {
-    if (err.isBetaRequestError) {
-      return res.status(err.status).json({ success: false, message: err.message });
-    }
-    logger.error('Error sending beta reminder email:', err);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to send reminder email'
     });
   }
 };
