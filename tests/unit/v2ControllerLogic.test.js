@@ -92,7 +92,6 @@ describe('V2 Controller Logic', () => {
           affiliateId: testAffiliate.affiliateId,
           pickupDate: '2026-01-27',
           pickupTime: 'morning',
-          numberOfBags: 2,
           estimatedWeight: 25
         }
       };
@@ -113,49 +112,8 @@ describe('V2 Controller Logic', () => {
       expect(res.status).toHaveBeenCalledWith(201);
       const responseData = res.json.mock.calls[0][0];
       
-      // Verify post-weigh registration caps bags at the free-initial-bags setting
       const customer = await Customer.findOne({ email: 'john@test.com' });
-      expect(customer.numberOfBags).toBe(2);
-    });
-
-    it('should limit initial bags to configured maximum', async () => {
-      const req = {
-        body: {
-          firstName: 'Jane',
-          lastName: 'Smith',
-          email: 'jane@test.com',
-          phone: '555-5678',
-          address: '456 Oak St',
-          city: 'Dallas',
-          state: 'TX',
-          zipCode: '75001',
-          username: `janesmith${Date.now()}`,
-          password: 'testpass123',
-          affiliateId: testAffiliate.affiliateId,
-          pickupDate: '2026-01-27',
-          pickupTime: 'afternoon',
-          numberOfBags: 5, // Requesting more than allowed
-          estimatedWeight: 50
-        }
-      };
-
-      const res = {
-        status: jest.fn().mockReturnThis(),
-        json: jest.fn()
-      };
-
-      const next = jest.fn();
-
-      emailService.sendCustomerWelcomeEmail = jest.fn().mockResolvedValue(true);
-      emailService.sendNewCustomerNotification = jest.fn().mockResolvedValue(true);
-
-      const handler = extractHandler(customerController.registerCustomer);
-      await handler(req, res, next);
-
-      // Should limit customer's bag count to free_initial_bags (default 2)
-      const customer = await Customer.findOne({ email: 'jane@test.com' });
       expect(customer).toBeDefined();
-      expect(customer.numberOfBags).toBe(2);
     });
   });
 

@@ -698,7 +698,6 @@ describe('Customer Integration Tests', () => {
           state: 'TX',
           zipCode: '78701'
         },
-        numberOfBags: 2,
         paymentConfirmed: true  // This should skip rate limiting
       };
 

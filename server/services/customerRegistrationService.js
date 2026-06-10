@@ -12,7 +12,6 @@ const { v4: uuidv4 } = require('uuid');
 
 const Affiliate = require('../models/Affiliate');
 const Customer = require('../models/Customer');
-const SystemConfig = require('../models/SystemConfig');
 const encryptionUtil = require('../utils/encryption');
 const emailService = require('../utils/emailService');
 const Formatters = require('../utils/formatters');
@@ -59,7 +58,6 @@ async function registerCustomer(payload) {
     cvv,
     billingZip,
     savePaymentInfo,
-    numberOfBags,
     languagePreference,
     paymentConfirmed,
     socialToken,
@@ -110,10 +108,6 @@ async function registerCustomer(payload) {
     passwordHash = hash;
   }
 
-  // Cap requested bags at the free-initial-bags setting.
-  const freeInitialBags = await SystemConfig.getValue('free_initial_bags', 2);
-  const initialBagsRequested = Math.min(numberOfBags || 1, freeInitialBags);
-
   const newCustomer = new Customer({
     customerId: `CUST-${uuidv4()}`,
     affiliateId,
@@ -131,7 +125,6 @@ async function registerCustomer(payload) {
     passwordSalt,
     passwordHash,
     languagePreference: languagePreference || 'en',
-    numberOfBags: initialBagsRequested,
     registrationMethod: socialToken ? (socialProvider || 'social') : 'traditional'
   });
 
@@ -153,18 +146,15 @@ async function registerCustomer(payload) {
     { expiresIn: '24h' }
   );
 
-  // Post-weigh workflow: no upfront bag purchase, so email bag-info is empty.
-  const bagInfo = { numberOfBags: 0, totalCredit: 0, bagFee: 0 };
-
   // Emails are best-effort — never fail registration on SMTP hiccup.
-  await sendWelcomeEmails(newCustomer, affiliate, bagInfo);
+  await sendWelcomeEmails(newCustomer, affiliate);
 
   return { customer: newCustomer, affiliate, token };
 }
 
-async function sendWelcomeEmails(customer, affiliate, bagInfo) {
+async function sendWelcomeEmails(customer, affiliate) {
   try {
-    await emailService.sendCustomerWelcomeEmail(customer, affiliate, bagInfo);
+    await emailService.sendCustomerWelcomeEmail(customer, affiliate);
   } catch (emailError) {
     logger.error('Failed to send welcome email:', emailError);
   }

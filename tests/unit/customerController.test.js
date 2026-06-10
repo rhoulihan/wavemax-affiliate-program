@@ -201,8 +201,7 @@ describe('Customer Controller', () => {
         serviceFrequency: 'weekly',
         username: 'janesmith',
         password: 'securepassword123',
-        affiliateId: 'AFF123',
-        numberOfBags: 2
+        affiliateId: 'AFF123'
       };
 
       const mockCustomer = createMockDocument({
@@ -210,9 +209,7 @@ describe('Customer Controller', () => {
         firstName: 'Jane',
         lastName: 'Smith',
         email: 'jane@example.com',
-        affiliateId: 'AFF123',
-        numberOfBags: 2,
-        bagCredit: 20.00
+        affiliateId: 'AFF123'
       });
       mockCustomer.save.mockResolvedValue(mockCustomer);
 

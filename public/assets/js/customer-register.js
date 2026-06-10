@@ -108,32 +108,6 @@
         return allRequirementsMet;
     }
 
-    // Bag selection function
-    function selectBags(num) {
-        document.querySelectorAll('.bag-option').forEach(option => {
-            option.classList.remove('selected');
-        });
-        const selectedOption = document.querySelector(`[data-bags="${num}"]`);
-        if (selectedOption) {
-            selectedOption.classList.add('selected');
-        }
-        const numberOfBagsField = document.getElementById('numberOfBags');
-        if (numberOfBagsField) {
-            numberOfBagsField.value = num;
-        }
-    }
-
-    // Setup bag selection handlers
-    function setupBagSelection() {
-        const bagOptions = document.querySelectorAll('.bag-option');
-        bagOptions.forEach(option => {
-            option.addEventListener('click', function() {
-                const bags = this.getAttribute('data-bags');
-                selectBags(bags);
-            });
-        });
-    }
-
     // Form submission handler
     function setupFormSubmission() {
         const form = document.getElementById('customerRegistrationForm');
@@ -174,9 +148,7 @@
             });
             
             // Add V2 specific fields
-            data.registrationVersion = 'v2';
             data.paymentVersion = 'v2';
-            data.initialBagsRequested = parseInt(data.numberOfBags || '1');
             
             // Show spinner
             let spinner = null;
@@ -775,7 +747,6 @@
         }
         
         // Setup all handlers
-        setupBagSelection();
         setupFormSubmission();
         setupOAuthHandlers();
         setupPasswordValidation();

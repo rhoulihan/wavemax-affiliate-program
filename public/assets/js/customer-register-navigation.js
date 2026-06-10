@@ -274,20 +274,7 @@
         {
             name: 'Service Summary',
             sections: ['serviceSummarySection'],
-            isLastStep: true,
-            validate: async function() {
-                // Ensure bags are selected
-                const numberOfBags = document.getElementById('numberOfBags');
-                if (!numberOfBags || !numberOfBags.value) {
-                    if (window.ModalSystem) {
-                        window.ModalSystem.error('Please select the number of bags.', 'Required Selection');
-                    } else {
-                        alert('Please select the number of bags.');
-                    }
-                    return false;
-                }
-                return true;
-            }
+            isLastStep: true
         }
     ];
 

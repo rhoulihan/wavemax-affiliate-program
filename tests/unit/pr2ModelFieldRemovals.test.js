@@ -1,5 +1,6 @@
 // PR 2 — spec §4.5/§4.6 field removals, pinned at the schema level.
 const Affiliate = require('../../server/models/Affiliate');
+const Customer = require('../../server/models/Customer');
 
 describe('Affiliate schema — scheduling / Pickup Now fields removed', () => {
   it('availabilitySchedule paths are gone', () => {
@@ -32,4 +33,12 @@ describe('Affiliate schema — service-area fields removed', () => {
     const geoIndex = Affiliate.schema.indexes().find(([fields]) => fields.serviceLocation);
     expect(geoIndex).toBeUndefined();
   });
+});
+
+describe('Customer schema — V1 bag-purchase fields removed', () => {
+  it.each(['numberOfBags', 'registrationVersion', 'bagCredit', 'bagCreditApplied', 'initialBagsRequested'])(
+    '%s is gone', (field) => {
+      expect(Customer.schema.path(field)).toBeUndefined();
+    }
+  );
 });

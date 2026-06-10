@@ -126,9 +126,7 @@ describe('Per-account login lockout (H-5)', () => {
         address: '1 Test', city: 'Austin',
         state: 'TX', zipCode: '78753',
         serviceFrequency: 'weekly',
-        numberOfBags: 1,
         registrationMethod: 'traditional',
-        registrationVersion: 'v2',
         languagePreference: 'en',
         isActive: true
       });

@@ -47,8 +47,7 @@ exports.registerCustomer = ControllerHelpers.asyncWrapper(async (req, res) => {
           city: customer.city,
           state: customer.state,
           zipCode: customer.zipCode,
-          affiliateId: customer.affiliateId,
-          numberOfBags: customer.numberOfBags
+          affiliateId: customer.affiliateId
         },
         affiliateData: {
           businessName: affiliate.businessName,
@@ -282,7 +281,6 @@ exports.getCustomerDashboardStats = [
         address: Formatters.address(customer),
         wdfCredits: customer.wdfCredit || 0,
         formattedCredits: Formatters.currency(customer.wdfCredit || 0),
-        numberOfBags: customer.numberOfBags,
         memberSince: Formatters.date(customer.createdAt, 'medium'),
         memberDuration: Formatters.relativeTime(customer.createdAt)
       },
@@ -557,8 +555,7 @@ exports.getCustomersForAdmin = [
       registrationDate: Formatters.date(customer.createdAt),
       createdAt: customer.createdAt,
       lastActive: customer.lastLogin ? Formatters.relativeTime(customer.lastLogin) : 'Never',
-      orderCount: orderCountMap[customer.customerId] || 0,
-      numberOfBags: customer.numberOfBags || 1
+      orderCount: orderCountMap[customer.customerId] || 0
     }));
 
     // Calculate pagination
