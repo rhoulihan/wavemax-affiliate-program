@@ -40,8 +40,8 @@ exports.sendV2PaymentRequest = async ({ customer, order, paymentAmount, paymentL
       shortOrderId: order.orderId.replace('ORD', ''),
       amount: totalAmount.toFixed(2),
       actualWeight: order.actualWeight,
-      numberOfBags: order.numberOfBags,
-      pickupDate: new Date(order.pickupDate).toLocaleDateString(),
+      numberOfBags: 1, // one bag = one order (redesign)
+      pickupDate: new Date(order.intakeAt || order.createdAt || Date.now()).toLocaleDateString(),
       // Breakdown amounts
       wdfAmount: wdfAmount.toFixed(2),
       wdfRate: (order.baseRate || 1.25).toFixed(2),
