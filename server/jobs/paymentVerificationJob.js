@@ -1,6 +1,22 @@
 /**
- * Payment Verification Cron Job
- * Runs periodically to check for payments and send reminders
+ * Payment Verification Cron Job — retuned per the redesign spec §6.5.
+ *
+ * Two decoupled cadences:
+ *  - DETECTION: every cron tick (payment_scan_interval_ms, default 2 min) the
+ *    IMAP scanner looks for inbound payment emails. `paymentCheckAttempts`
+ *    counts detection scans only.
+ *  - REMINDERS: time-based, every payment_reminder_interval_minutes (default
+ *    60), capped at payment_reminder_max_attempts (default 8).
+ *    `paymentReminderCount` is the authoritative reminder counter.
+ *
+ * After the final reminder the order escalates: one "come to the store"
+ * notice (sendV2ComeToStoreNotice, guarded by holdNoticeSentAt and the
+ * payment_hold_notice_enabled master switch), paymentEscalated=true,
+ * heldAtStore=true, admin-visibility hook (escalateToAdmin), audit event.
+ * paymentStatus is NEVER set to 'failed' — the inbox keeps being scanned and
+ * a late payment still verifies and promotes through applyReadyGate (Path B).
+ *
+ * Runs on the leader box only (RUN_BACKGROUND_JOBS gate in scheduler.js).
  */
 
 const cron = require('node-cron');
@@ -8,55 +24,49 @@ const Order = require('../models/Order');
 const Customer = require('../models/Customer');
 const SystemConfig = require('../models/SystemConfig');
 const paymentEmailScanner = require('../services/paymentEmailScanner');
+const orderReadyGateService = require('../services/orderReadyGateService');
 const emailService = require('../utils/emailService');
 const logger = require('../utils/logger');
+const { logAuditEvent, AuditEvents } = require('../utils/auditLogger');
 
 class PaymentVerificationJob {
   constructor() {
     this.running = false;
     this.job = null;
-    this.checkInterval = 5; // Default 5 minutes
-    this.maxAttempts = 48; // Default 48 attempts (4 hours)
+    this.scanIntervalMs = 120000;       // payment_scan_interval_ms
+    this.reminderIntervalMinutes = 60;  // payment_reminder_interval_minutes
+    this.maxReminders = 8;              // payment_reminder_max_attempts
+    this.holdNoticeEnabled = true;      // payment_hold_notice_enabled
   }
 
   /**
-   * Initialize and start the cron job
+   * Initialize config from SystemConfig and start the cron schedule.
    */
   async start() {
     try {
-      // PR 3 (redesign spec §8): payment_scan_interval_ms is the canonical IMAP
-      // detection cadence; the retired payment_check_interval is read only as a
-      // fallback until PR 8 rewrites this job.
-      const legacyIntervalMs = await SystemConfig.getValue('payment_check_interval', 300000);
-      const intervalMs = await SystemConfig.getValue('payment_scan_interval_ms', legacyIntervalMs);
-      this.checkInterval = Math.max(1, Math.round(intervalMs / 60000)); // Convert to minutes, minimum 1
-      // PR 8 handoff: maxAttempts is the DETECTION cap (48 IMAP scans), NOT the
-      // reminder cap (payment_reminder_max_attempts = 8). Keep the legacy read here;
-      // PR 8 decouples detection vs reminder counters and deletes both legacy reads.
-      this.maxAttempts = await SystemConfig.getValue('payment_check_max_attempts', 48);
+      this.scanIntervalMs = await SystemConfig.getValue('payment_scan_interval_ms', 120000);
+      this.reminderIntervalMinutes = await SystemConfig.getValue('payment_reminder_interval_minutes', 60);
+      this.maxReminders = await SystemConfig.getValue('payment_reminder_max_attempts', 8);
+      this.holdNoticeEnabled = await SystemConfig.getValue('payment_hold_notice_enabled', true);
 
-      // Create cron pattern (run every N minutes)
-      const cronPattern = `*/${this.checkInterval} * * * *`;
-      
-      logger.info(`Starting payment verification job - checking every ${this.checkInterval} minutes`);
-      
-      // Schedule the job
+      const intervalMinutes = Math.max(1, Math.round(this.scanIntervalMs / 60000));
+      const cronPattern = `*/${intervalMinutes} * * * *`;
+
+      logger.info(`Starting payment verification job - scan every ${intervalMinutes} min, reminders every ${this.reminderIntervalMinutes} min, cap ${this.maxReminders}`);
+
       this.job = cron.schedule(cronPattern, async () => {
         await this.runVerification();
       });
-      
+
       // Run immediately on startup
       await this.runVerification();
-      
+
       logger.info('Payment verification job started successfully');
     } catch (error) {
       logger.error('Error starting payment verification job:', error);
     }
   }
 
-  /**
-   * Stop the cron job
-   */
   stop() {
     if (this.job) {
       this.job.stop();
@@ -66,10 +76,10 @@ class PaymentVerificationJob {
   }
 
   /**
-   * Run the verification process
+   * One tick: scan the inbox (detection), then walk pending orders
+   * (per-order detection + reminder cadence).
    */
   async runVerification() {
-    // Prevent concurrent runs
     if (this.running) {
       logger.info('Payment verification already running, skipping...');
       return;
@@ -77,23 +87,18 @@ class PaymentVerificationJob {
 
     this.running = true;
     const startTime = Date.now();
-    
+
     try {
-      logger.info(`[${new Date().toISOString()}] Starting payment verification check`);
-      
-      // First, scan for new payment emails
+      // Inbox-wide scan first — this path has NO escalation filter, so a
+      // post-escalation payment still verifies (spec §6.5).
       const scannedPayments = await paymentEmailScanner.scanForPayments();
-      
       if (scannedPayments.length > 0) {
         logger.info(`Verified ${scannedPayments.length} payments from email scan`);
       }
-      
-      // Then check pending orders
+
       await this.checkPendingPayments();
-      
-      const duration = Date.now() - startTime;
-      logger.info(`Payment verification completed in ${duration}ms`);
-      
+
+      logger.info(`Payment verification completed in ${Date.now() - startTime}ms`);
     } catch (error) {
       logger.error('Error in payment verification job:', error);
     } finally {
@@ -102,23 +107,23 @@ class PaymentVerificationJob {
   }
 
   /**
-   * Check all orders awaiting payment
+   * Orders still on the reminder cadence. Escalated orders are excluded —
+   * they only leave the held state via the scanner/manual verify paths.
    */
   async checkPendingPayments() {
     try {
-      // Get orders awaiting payment that have been weighed (WDF complete)
       const pendingOrders = await Order.find({
-        paymentStatus: 'awaiting',
-        status: { $in: ['in_progress', 'processed'] }, // Order has been weighed (born at intake)
-        paymentCheckAttempts: { $lt: this.maxAttempts }
+        paymentStatus: { $in: ['awaiting', 'confirming'] },
+        status: { $in: ['in_progress', 'processed'] },
+        paymentEscalated: { $ne: true }
       });
-      
+
       if (pendingOrders.length === 0) {
         return;
       }
-      
+
       logger.info(`Found ${pendingOrders.length} orders awaiting payment`);
-      
+
       for (const order of pendingOrders) {
         try {
           await this.processOrder(order);
@@ -132,228 +137,158 @@ class PaymentVerificationJob {
   }
 
   /**
-   * Process a single order for payment verification
+   * Per-order tick: one targeted IMAP detection check, then the time-based
+   * reminder/escalation cadence. Never sets paymentStatus='failed'.
    */
   async processOrder(order) {
     try {
-      // Skip already verified or failed orders
-      if (order.paymentStatus === 'verified' || order.paymentStatus === 'failed') {
-        return; // Order payment already resolved
-      }
-
-      // Check if customer is V2
-      const customer = await Customer.findOne({ customerId: order.customerId });
-      if (!customer) {
-        return; // Skip non-V2 customers
-      }
-
-      // Try to verify payment via email scan
-      const verified = await paymentEmailScanner.checkOrderPayment(order._id);
-      
-      if (verified) {
-        logger.info(`Payment verified for order ${order._id}`);
-        
-        // If order is ready (WDF complete), send pickup notification
-        if (order.status === 'processed') {
-          await this.sendPickupNotification(order);
-        }
-        
+      if (order.paymentStatus === 'verified') {
         return;
       }
-      
-      // Payment not found, increment check attempts
-      order.paymentCheckAttempts = (order.paymentCheckAttempts || 0) + 1;
-      order.lastPaymentCheck = new Date();
-      
-      // Check if we should send a reminder or escalate
-      if (order.paymentCheckAttempts >= this.maxAttempts) {
-        // Max attempts reached - mark as failed and escalate
-        order.paymentStatus = 'failed';
-        await order.save();
-        
-        logger.info(`Payment timeout for order ${order._id} - escalating to admin`);
-        await this.escalateToAdmin(order);
-        
-      } else {
-        // Determine if we should send a reminder
-        const shouldSendReminder = this.shouldSendReminder(order);
-        
-        if (shouldSendReminder) {
-          await this.sendPaymentReminder(order);
-        }
-        
-        await order.save();
+
+      const customer = await Customer.findOne({ customerId: order.customerId });
+      if (!customer) {
+        return;
       }
-      
+
+      // DETECTION — targeted check for this order's payment email.
+      const verified = await paymentEmailScanner.checkOrderPayment(order._id);
+      if (verified) {
+        logger.info(`Payment verified for order ${order._id}`);
+        // Path B: run the canonical gate on a fresh document (idempotent;
+        // the scanner's verifyAndUpdateOrder also gates — double-gating is a
+        // deliberate no-op by design).
+        const fresh = await Order.findById(order._id);
+        if (fresh) {
+          await orderReadyGateService.applyReadyGate(fresh, { trigger: 'payment_verified' });
+        }
+        return;
+      }
+
+      order.paymentCheckAttempts = (order.paymentCheckAttempts || 0) + 1; // detection counter ONLY
+      order.lastPaymentCheck = new Date();
+
+      // REMINDERS — time-based cadence + escalation.
+      await this.maybeSendReminderOrHold(order, customer);
+
+      await order.save();
     } catch (error) {
       logger.error(`Error processing order ${order._id}:`, error);
     }
   }
 
   /**
-   * Determine if a payment reminder should be sent
+   * Time-based reminder gate (spec §6.5):
+   *  - never when escalated
+   *  - never past the cap
+   *  - due when the interval has elapsed since the last reminder
+   *    (or since paymentRequestedAt when none was sent yet).
    */
   shouldSendReminder(order) {
-    const attempts = order.paymentCheckAttempts || 0;
-    
-    // Send reminders hourly after the first 30 minutes
-    // First reminder after 30 minutes (6 attempts at 5-minute intervals)
-    // Then every hour (12 attempts each hour)
-    if (attempts >= 6) {
-      // After 30 minutes, send reminder every hour (every 12 attempts)
-      return (attempts - 6) % 12 === 0;
+    if (order.paymentEscalated) {
+      return false;
     }
-    
-    // First reminder at 30 minutes
-    return attempts === 6;
+    if ((order.paymentReminderCount || 0) >= this.maxReminders) {
+      return false;
+    }
+    const clockBase = order.paymentLastReminderAt || order.paymentRequestedAt;
+    if (!clockBase) {
+      return false;
+    }
+    const elapsedMs = Date.now() - new Date(clockBase).getTime();
+    return elapsedMs >= this.reminderIntervalMinutes * 60 * 1000;
   }
 
   /**
-   * Send payment reminder to customer
+   * Send a due reminder; when the count reaches the cap, escalate-and-hold
+   * exactly once. Mutates `order`; the caller saves.
    */
-  async sendPaymentReminder(order) {
+  async maybeSendReminderOrHold(order, customer) {
+    if (this.shouldSendReminder(order)) {
+      await this.sendPaymentReminder(order, customer);
+    }
+    if ((order.paymentReminderCount || 0) >= this.maxReminders && !order.paymentEscalated) {
+      await this.escalateAndHold(order, customer);
+    }
+  }
+
+  /**
+   * Send one reminder reusing the STORED paymentLinks/paymentQRCodes generated
+   * once at intake — links are never regenerated (spec §6.4/§6.5).
+   */
+  async sendPaymentReminder(order, customer) {
     try {
-      // Fetch customer by customerId
-      const customer = await Customer.findOne({ customerId: order.customerId });
-      
       if (!customer || !customer.email) {
         logger.error('Cannot send reminder - customer not found or email missing');
         return;
       }
-      
-      // Calculate time elapsed and urgency
-      const hoursElapsed = Math.floor((order.paymentCheckAttempts || 0) * this.checkInterval / 60);
-      const hoursRemaining = Math.max(0, 4 - hoursElapsed);
-      const isUrgent = hoursRemaining <= 1;
-      
-      logger.info(`Sending payment reminder to ${customer.email} for order ${order._id} (${hoursElapsed} hours elapsed, ${hoursRemaining} hours remaining)`);
-      
-      // Generate fresh payment links (in case they expired or were lost)
-      const paymentLinkService = require('../services/paymentLinkService');
-      const { links, qrCodes, shortOrderId } = await paymentLinkService.generatePaymentLinks(
-        order._id,
-        order.paymentAmount || order.actualTotal || order.estimatedTotal,
-        customer.name || `${customer.firstName} ${customer.lastName}`
-      );
-      
-      // Update order with fresh links
-      order.paymentLinks = links;
-      order.paymentQRCodes = qrCodes;
-      await order.save();
-      
-      // Generate "already paid?" confirmation link
-      const baseUrl = process.env.BASE_URL || 'https://wavemax.promo';
-      const confirmationLink = `${baseUrl}/payment-confirmation-embed.html?orderId=${shortOrderId}&token=${order._id}`;
-      
-      // Send reminder email with urgency and confirmation link
-      await this.sendReminderEmail(order, customer, {
-        hoursElapsed,
-        hoursRemaining,
-        isUrgent,
-        confirmationLink
-      });
-      
-    } catch (error) {
-      logger.error('Error sending payment reminder:', error);
-    }
-  }
 
-  /**
-   * Send reminder email to customer
-   */
-  async sendReminderEmail(order, customer, reminderInfo) {
-    try {
-      // Calculate reminder number based on attempts
-      const reminderNumber = Math.floor((order.paymentCheckAttempts - 6) / 12) + 1;
-      
-      // Update reminder tracking on order
-      order.reminderCount = reminderNumber;
-      order.lastReminderSentAt = new Date();
-      
-      // Add to reminders array
-      if (!order.paymentReminders) {
-        order.paymentReminders = [];
-      }
-      order.paymentReminders.push({
-        sentAt: new Date(),
-        reminderNumber: reminderNumber,
-        method: 'email'
-      });
-      
-      await order.save();
-      
-      // Send the reminder email
+      const reminderNumber = (order.paymentReminderCount || 0) + 1;
+
       await emailService.sendV2PaymentReminder({
         customer,
         order,
         reminderNumber,
         paymentAmount: order.paymentAmount,
         paymentLinks: order.paymentLinks,
-        qrCodes: order.paymentQRCodes
+        qrCodes: order.paymentQRCodes,
+        maxReminders: this.maxReminders
       });
-      
-      logger.info(`Payment reminder #${reminderNumber} sent to ${customer.email} for order ${order.orderId}`);
+
+      order.paymentReminderCount = reminderNumber;
+      order.paymentLastReminderAt = new Date();
+      order.paymentReminders.push({ sentAt: new Date(), reminderNumber, method: 'email' });
+
+      logger.info(`Payment reminder #${reminderNumber}/${this.maxReminders} sent to ${customer.email} for order ${order.orderId}`);
     } catch (error) {
-      logger.error('Error sending reminder email:', error);
+      logger.error('Error sending payment reminder:', error);
     }
   }
 
   /**
-   * Send pickup ready notification to affiliate
+   * Escalate after the final reminder: one come-to-store notice (master
+   * switch payment_hold_notice_enabled; double-send guarded by
+   * holdNoticeSentAt), flags, audit, admin hook. Mutates `order`; caller saves.
    */
-  async sendPickupNotification(order) {
+  async escalateAndHold(order, customer) {
     try {
-      // Fetch affiliate and customer by their IDs
-      const Affiliate = require('../models/Affiliate');
-      const affiliate = await Affiliate.findOne({ affiliateId: order.affiliateId });
-      const customer = await Customer.findOne({ customerId: order.customerId });
-      
-      if (!affiliate || !affiliate.email) {
-        logger.error('Cannot send pickup notification - affiliate not found or email missing');
-        return;
+      if (this.holdNoticeEnabled && !order.holdNoticeSentAt && customer && customer.email) {
+        await emailService.sendV2ComeToStoreNotice({ customer, order });
+        order.holdNoticeSentAt = new Date();
       }
-      
-      logger.info(`Sending pickup notification to affiliate ${affiliate.email} for order ${order.orderId}`);
-      
-      // Send notification to affiliate that order is ready
-      await emailService.sendAffiliateCommissionEmail(
-        affiliate,
-        order,
-        customer
-      );
-      
-      // Also notify customer that order is ready
-      if (customer && customer.email) {
-        await emailService.sendOrderStatusUpdateEmail(
-          customer,
-          order,
-          'ready'
-        );
-      }
+
+      order.paymentEscalated = true;
+      order.heldAtStore = true; // physically held until payment verifies
+
+      logAuditEvent(AuditEvents.PAYMENT_ESCALATED, {
+        orderId: order.orderId,
+        paymentReminderCount: order.paymentReminderCount,
+        holdNoticeSentAt: order.holdNoticeSentAt
+      });
+
+      await this.escalateToAdmin(order);
+
+      logger.info(`Order ${order.orderId} escalated after ${order.paymentReminderCount} reminders - held at store, paymentStatus stays '${order.paymentStatus}'`);
     } catch (error) {
-      logger.error('Error sending pickup notification:', error);
+      logger.error('Error escalating order:', error);
     }
   }
 
   /**
-   * Escalate to admin when payment timeout occurs
+   * Admin-visibility hook fired alongside the hold notice (spec §6.5).
+   * No longer implies failure — paymentStatus is never set to 'failed'.
    */
   async escalateToAdmin(order) {
     try {
-      logger.info(`Escalating payment timeout for order ${order._id} to admin`);
-      
-      // Get customer and affiliate information
       const Affiliate = require('../models/Affiliate');
       const customer = await Customer.findOne({ customerId: order.customerId });
       const affiliate = await Affiliate.findOne({ affiliateId: order.affiliateId });
-      
-      // Get admin email from config or use default
       const adminEmail = await SystemConfig.getValue('admin_notification_email', 'admin@wavemax.promo');
-      
-      // Calculate time since payment requested
-      const hoursSinceRequest = Math.round((Date.now() - order.paymentRequestedAt.getTime()) / (1000 * 60 * 60));
-      
-      // Prepare escalation details
+
+      const hoursSinceRequest = order.paymentRequestedAt
+        ? Math.round((Date.now() - order.paymentRequestedAt.getTime()) / (1000 * 60 * 60))
+        : 0;
+
       const escalationDetails = {
         orderId: order.orderId,
         orderMongoId: order._id,
@@ -365,37 +300,28 @@ class PaymentVerificationJob {
         paymentAmount: order.paymentAmount || order.actualTotal || 'Unknown',
         hoursSinceRequest,
         paymentRequestedAt: order.paymentRequestedAt,
-        attemptsMade: order.paymentCheckAttempts || 0
+        attemptsMade: order.paymentReminderCount || 0
       };
-      
-      // Log escalation details
-      logger.info(`Admin escalation details:`, escalationDetails);
-      
-      // Send escalation email
-      // await emailService.sendPaymentTimeoutEscalation(order, adminEmail, escalationDetails);
-      
-      // Log for now
-      logger.info(`Admin escalation email would be sent to ${adminEmail} for order ${order._id}`);
-      
+
+      await emailService.sendV2PaymentTimeoutEscalation(order, adminEmail, escalationDetails);
+      logger.info(`Admin escalation sent to ${adminEmail} for order ${order.orderId}`);
     } catch (error) {
       logger.error('Error escalating to admin:', error);
     }
   }
 
-  /**
-   * Get job status
-   */
   getStatus() {
     return {
       running: this.running,
       scheduled: this.job !== null,
-      checkInterval: this.checkInterval,
-      maxAttempts: this.maxAttempts
+      scanIntervalMs: this.scanIntervalMs,
+      reminderIntervalMinutes: this.reminderIntervalMinutes,
+      maxReminders: this.maxReminders
     };
   }
 
   /**
-   * Manually trigger verification (for testing)
+   * Manually trigger verification (admin/testing).
    */
   async triggerManual() {
     logger.info('Manual payment verification triggered');
@@ -403,8 +329,7 @@ class PaymentVerificationJob {
   }
 }
 
-// Create singleton instance
+// Singleton
 const paymentVerificationJob = new PaymentVerificationJob();
 
-// Export the instance
 module.exports = paymentVerificationJob;

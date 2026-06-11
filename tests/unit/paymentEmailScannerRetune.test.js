@@ -11,10 +11,17 @@ jest.mock('../../server/services/mailcowService', () => ({
 jest.mock('../../server/utils/emailService', () => ({
   sendAdminNotification: jest.fn().mockResolvedValue(true)
 }));
+jest.mock('../../server/services/imapEmailScanner', () => ({
+  connect: jest.fn().mockResolvedValue(true),
+  getUnreadEmails: jest.fn().mockResolvedValue([]),
+  markAsRead: jest.fn().mockResolvedValue(true),
+  disconnect: jest.fn()
+}));
 
 const crypto = require('crypto');
 const { v4: uuidv4 } = require('uuid');
 const paymentEmailScanner = require('../../server/services/paymentEmailScanner');
+const imapScanner = require('../../server/services/imapEmailScanner');
 const orderReadyGateService = require('../../server/services/orderReadyGateService');
 const Order = require('../../server/models/Order');
 const Customer = require('../../server/models/Customer');
@@ -93,6 +100,34 @@ describe('paymentEmailScanner retune (spec §6.5)', () => {
       expect(ok).toBe(true);
       expect((await Order.findById(order._id)).paymentStatus).toBe('verified');
       expect(orderReadyGateService.applyReadyGate).toHaveBeenCalledTimes(1);
+    });
+
+    // MANDATORY regression (spec §11): a 'confirming' order with a matching
+    // inbound payment email is auto-verified by the scanner sweep (proves the
+    // $in widening end-to-end) and promoted through the canonical gate.
+    it('auto-verifies a confirming order from an inbound payment email and runs the gate', async () => {
+      const order = await createOrder({ status: 'processed', paymentStatus: 'confirming' });
+      // resetMocks:true wipes factory implementations — set them per test.
+      imapScanner.connect.mockResolvedValue(true);
+      imapScanner.markAsRead.mockResolvedValue(true);
+      imapScanner.disconnect.mockReturnValue(undefined);
+      imapScanner.getUnreadEmails.mockResolvedValue([{
+        uid: 'email-confirming-1',
+        from: 'payment@venmo.com',
+        subject: 'You received $50.00 from Pat Doe',
+        text: `Pat Doe paid you. Payment of $ 50 . 00 received. Note: WaveMAX Order ${order.orderId}`,
+        date: new Date()
+      }]);
+
+      const verified = await paymentEmailScanner.scanForPayments();
+
+      expect(verified).toHaveLength(1);
+      expect(verified[0].orderId).toBe(order.orderId);
+      const updated = await Order.findById(order._id);
+      expect(updated.paymentStatus).toBe('verified');
+      expect(orderReadyGateService.applyReadyGate).toHaveBeenCalledTimes(1);
+      expect(orderReadyGateService.applyReadyGate.mock.calls[0][0].orderId).toBe(order.orderId);
+      expect(orderReadyGateService.applyReadyGate.mock.calls[0][1]).toEqual({ trigger: 'scanner_verify' });
     });
 
     it('does not verify or run the gate on underpayment', async () => {
