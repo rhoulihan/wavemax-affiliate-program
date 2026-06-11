@@ -118,11 +118,12 @@ async function createTestOrder(options = {}) {
     _id: orderId,
     customerId,
     affiliateId,
-    pickupDate: options.pickupDate || new Date(Date.now() + 86400000),
-    pickupTime: options.pickupTime || 'morning',
-    numberOfBags: options.numberOfBags || 2,
-    estimatedWeight: options.estimatedWeight || 20,
-    status: options.status || 'pending',
+    bagId: options.bagId || `BAG-${require('uuid').v4()}`,
+    bagToken: options.bagToken || require('crypto').randomBytes(16).toString('hex'),
+    feeBreakdown: options.feeBreakdown || {
+      numberOfBags: 1, minimumFee: 10, perBagFee: 2, totalFee: 10, minimumApplied: true
+    },
+    status: options.status || 'in_progress',
     
     // V2 Payment fields
     paymentStatus: options.paymentStatus || 'pending',
@@ -138,15 +139,9 @@ async function createTestOrder(options = {}) {
     // Actual weight and processing
     actualWeight: options.actualWeight || null,
     actualTotal: options.actualTotal || null,
-    bagsWeighed: options.bagsWeighed || 0,
-    bagsProcessed: options.bagsProcessed || 0,
-    bagsPickedUp: options.bagsPickedUp || 0,
-    
+
     // Bags array
-    bags: options.bags || [],
-    
-    // Payment status
-    isPaid: options.isPaid !== undefined ? options.isPaid : false
+    bags: options.bags || []
   };
   
   // Remove null values to let defaults apply
@@ -195,10 +190,9 @@ async function setupV2PaymentScenario(options = {}) {
     ...options.order,
     customerId: customer.customerId,
     affiliateId: affiliate.affiliateId,
-    status: 'processing',
+    status: 'in_progress',
     actualWeight: 10,
     actualTotal: 12.50,
-    bagsWeighed: 2,
     paymentStatus: 'awaiting',
     paymentAmount: 12.50,
     paymentRequestedAt: new Date(),
@@ -208,9 +202,9 @@ async function setupV2PaymentScenario(options = {}) {
       cashapp: 'https://cash.app/$wavemax/12.50'
     },
     bags: [
-      { bagId: 'bag-001', weight: 5, status: 'processing', bagNumber: 1 },
-      { bagId: 'bag-002', weight: 5, status: 'processing', bagNumber: 2 }
+      { bagToken: 'f0e1d2c3b4a5968778695a4b3c2d1e0f', weight: 10, status: 'intake', bagNumber: 1 }
     ],
+    bagToken: 'f0e1d2c3b4a5968778695a4b3c2d1e0f',
     skipValidation: true
   });
   
