@@ -154,4 +154,37 @@ exports.sendOrderPickedUpNotification = async (customerEmail, data) => {
   return sendEmail(customerEmail, subject, html);
 };
 
+// ---------------------------------------------------------------------------
+// PR 9 — overloaded-bag-URL lifecycle emails
+// Templates use the [PLACEHOLDER] token convention (template-manager
+// fillTemplate). loadTemplate resolves templates/emails/{lang}/<name>.html
+// with the root file as the English fallback.
+// ---------------------------------------------------------------------------
+
+const ON_THE_WAY_SUBJECTS = {
+  en: (orderId) => `Your laundry is on the way — Order ${orderId}`,
+  es: (orderId) => `Tu ropa está en camino — Pedido ${orderId}`,
+  pt: (orderId) => `Sua roupa está a caminho — Pedido ${orderId}`,
+  de: (orderId) => `Ihre Wäsche ist unterwegs — Bestellung ${orderId}`
+};
+
+/**
+ * "On the way" — sent at operator scan-OUT (ready_for_pickup -> picked_up).
+ * Includes the customer's (freshly rotated) delivery PIN so they can confirm
+ * receipt at the door (spec §6.4/§6.6).
+ */
+exports.sendOrderOnTheWayEmail = async (customer, order, { deliveryPin, affiliateName } = {}) => {
+  const language = customer.languagePreference || 'en';
+  const template = await loadTemplate('customer-on-the-way', language);
+  const html = fillTemplate(template, {
+    customer_name: `${customer.firstName} ${customer.lastName}`,
+    order_id: order.orderId,
+    affiliate_name: affiliateName || 'Your delivery provider',
+    delivery_pin: deliveryPin || '',
+    total_weight: order.actualWeight != null ? String(order.actualWeight) : ''
+  });
+  const subjectFor = ON_THE_WAY_SUBJECTS[language] || ON_THE_WAY_SUBJECTS.en;
+  return sendEmail(customer.email, subjectFor(order.orderId), html);
+};
+
 module.exports = exports;

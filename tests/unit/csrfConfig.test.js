@@ -291,7 +291,7 @@ describe('CSRF Configuration', () => {
 
       it('should match nested parameterized routes', () => {
         req.method = 'POST';
-        req.path = '/api/v1/administrators/operators/op-456/reset-pin';
+        req.path = '/api/v1/operators/op-456/scan-code/reset';
         expect(shouldEnforceCsrf(req)).toBe(true);
       });
 

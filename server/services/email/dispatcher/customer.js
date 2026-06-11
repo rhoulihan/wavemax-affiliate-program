@@ -738,7 +738,7 @@ exports.sendCustomerPasswordResetEmail = async (customer, resetUrl) => {
  * confirm, or the re-intake auto-deliver (method 'reintake').
  * Best-effort: returns false on failure, never throws.
  */
-exports.sendCustomerDeliveredEmail = async (customer, order) => {
+exports.sendCustomerDeliveredEmail = async (customer, order, { affiliateName } = {}) => {
   try {
     const language = customer.languagePreference || 'en';
     const template = await loadTemplate('customer-order-delivered', language);
@@ -751,6 +751,8 @@ exports.sendCustomerDeliveredEmail = async (customer, order) => {
         DELIVERED_MESSAGE: 'Your clean laundry has been delivered. The bag is back with you and ready for next time.',
         ORDER_ID_LABEL: 'Order ID',
         DELIVERED_AT_LABEL: 'Delivered',
+        DELIVERED_BY_LABEL: 'Delivered by',
+        AFFILIATE_NAME_FALLBACK: 'Your delivery provider',
         THANKS_MESSAGE: 'Thank you for choosing WaveMAX Laundry!',
         CLOSING_MESSAGE: 'Best regards,<br>The WaveMAX Laundry Team',
         FOOTER_RIGHTS: 'All rights reserved.',
@@ -763,6 +765,8 @@ exports.sendCustomerDeliveredEmail = async (customer, order) => {
         DELIVERED_MESSAGE: 'Su ropa limpia ha sido entregada. La bolsa está de vuelta con usted y lista para la próxima vez.',
         ORDER_ID_LABEL: 'ID del Pedido',
         DELIVERED_AT_LABEL: 'Entregado',
+        DELIVERED_BY_LABEL: 'Entregado por',
+        AFFILIATE_NAME_FALLBACK: 'Su proveedor de entrega',
         THANKS_MESSAGE: '¡Gracias por elegir WaveMAX Laundry!',
         CLOSING_MESSAGE: 'Saludos cordiales,<br>El Equipo de WaveMAX Laundry',
         FOOTER_RIGHTS: 'Todos los derechos reservados.',
@@ -775,6 +779,8 @@ exports.sendCustomerDeliveredEmail = async (customer, order) => {
         DELIVERED_MESSAGE: 'Sua roupa limpa foi entregue. A sacola está de volta com você e pronta para a próxima vez.',
         ORDER_ID_LABEL: 'ID do Pedido',
         DELIVERED_AT_LABEL: 'Entregue',
+        DELIVERED_BY_LABEL: 'Entregue por',
+        AFFILIATE_NAME_FALLBACK: 'Seu provedor de entrega',
         THANKS_MESSAGE: 'Obrigado por escolher a WaveMAX Laundry!',
         CLOSING_MESSAGE: 'Atenciosamente,<br>Equipe WaveMAX Laundry',
         FOOTER_RIGHTS: 'Todos os direitos reservados.',
@@ -787,6 +793,8 @@ exports.sendCustomerDeliveredEmail = async (customer, order) => {
         DELIVERED_MESSAGE: 'Ihre saubere Wäsche wurde geliefert. Der Beutel ist wieder bei Ihnen und bereit für das nächste Mal.',
         ORDER_ID_LABEL: 'Auftragsnummer',
         DELIVERED_AT_LABEL: 'Geliefert',
+        DELIVERED_BY_LABEL: 'Geliefert von',
+        AFFILIATE_NAME_FALLBACK: 'Ihr Lieferpartner',
         THANKS_MESSAGE: 'Vielen Dank, dass Sie WaveMAX Laundry gewählt haben!',
         CLOSING_MESSAGE: 'Mit freundlichen Grüßen,<br>Ihr WaveMAX Laundry Team',
         FOOTER_RIGHTS: 'Alle Rechte vorbehalten.',
@@ -800,6 +808,7 @@ exports.sendCustomerDeliveredEmail = async (customer, order) => {
       ...t,
       ORDER_ID: order.orderId,
       DELIVERED_AT: deliveredAt.toLocaleString(),
+      AFFILIATE_NAME: affiliateName || t.AFFILIATE_NAME_FALLBACK,
       CURRENT_YEAR: String(new Date().getFullYear())
     });
 

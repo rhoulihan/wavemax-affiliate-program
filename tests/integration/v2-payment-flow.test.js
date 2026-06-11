@@ -27,7 +27,6 @@ const {
 jest.mock('../../server/utils/emailService', () => ({
   sendV2PaymentRequest: jest.fn().mockResolvedValue(true),
   sendV2PaymentReminder: jest.fn().mockResolvedValue(true),
-  sendV2PaymentVerified: jest.fn().mockResolvedValue(true),
   sendV2PaymentTimeoutEscalation: jest.fn().mockResolvedValue(true),
   sendV2PickupReadyNotification: jest.fn().mockResolvedValue(true),
   sendEmailWithTemplate: jest.fn().mockResolvedValue(true),
@@ -281,18 +280,10 @@ describe('V2 Payment Flow Integration Tests', () => {
       order.isPaid = true;
       await order.save();
 
-      // Send verification email
-      const emailSpy = jest.spyOn(emailService, 'sendV2PaymentVerified');
-      
-      await emailService.sendV2PaymentVerified(order, order.customer, {
-        amount: order.paymentAmount || 12.50,
-        paymentMethod: 'Venmo',
-        transactionId: 'VEN123456',
-        verifiedTime: new Date().toLocaleString()
-      });
-
-      expect(emailSpy).toHaveBeenCalled();
-      emailSpy.mockRestore();
+      // PR 9: sendV2PaymentVerified was deleted (dead code) — verification
+      // is asserted on the persisted order state alone.
+      const saved = await Order.findById(testOrder._id);
+      expect(saved.paymentStatus).toBe('verified');
     });
   });
 

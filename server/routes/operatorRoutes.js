@@ -46,7 +46,7 @@ router.patch('/:id', authenticate, async (req, res, next) => {
 });
 router.delete('/:id', checkRole(['administrator']), checkAdminPermission(['operators.delete']), administratorController.deleteOperator);
 router.post('/:id/reset-password', checkRole(['administrator']), checkAdminPermission(['operators.update']), administratorController.resetOperatorPassword);
-router.post('/:id/reset-pin', checkRole(['administrator']), checkAdminPermission(['operators.update']), administratorController.resetOperatorPin);
+router.post('/:operatorId/scan-code/reset', checkRole(['administrator']), checkAdminPermission(['operators.update']), administratorController.resetOperatorScanCode);
 router.patch('/:id/stats', checkRole(['administrator']), checkAdminPermission(['operators.update']), administratorController.updateOperatorStats);
 
 // Operator-specific routes (require operator role)
@@ -84,11 +84,11 @@ router.post('/intake', (req, res, next) => {
 router.post('/scan-bag', operatorController.scanBag);
 router.post('/orders/:orderId/receive', operatorController.receiveOrder);
 router.post('/orders/weigh-bags', operatorController.weighBags); // New bag tracking endpoint
-router.post('/scan-processed', operatorController.scanProcessed); // New endpoint for scanning processed bags
-router.post('/complete-pickup', operatorController.completePickup); // New endpoint for completing pickup with bag verification
-router.post('/orders/:orderId/process-bag', operatorController.markBagProcessed); // Legacy endpoint
-router.post('/orders/:orderId/ready', operatorController.markOrderReady); // Deprecated
-router.post('/confirm-pickup', operatorController.confirmPickup); // Legacy endpoint
+router.post('/advance', operatorController.advance); // PR 9 — state-driven scan-2/scan-3
+router.post('/scan-processed', operatorController.scanProcessed); // legacy delegate -> advance
+// Deleted (PR 9): /complete-pickup, /confirm-pickup, /orders/:orderId/process-bag,
+// and the deprecated /orders/:orderId/ready — the last was a payment-gate BYPASS
+// (set processed + emailed the affiliate with no payment check).
 router.get('/stats/today', operatorController.getTodayStats);
 
 // Label Printing Routes

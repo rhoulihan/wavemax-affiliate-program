@@ -16,6 +16,9 @@ const bagClaimService = require('../services/bagClaimService');
 const ControllerHelpers = require('../utils/controllerHelpers');
 const AuthorizationHelpers = require('../middleware/authorizationHelpers');
 const Formatters = require('../utils/formatters');
+const SystemConfig = require('../models/SystemConfig');
+const roleCodes = require('../utils/roleCodes');
+const { logAuditEvent, AuditEvents } = require('../utils/auditLogger');
 
 // ============================================================================
 // Customer Controllers - Refactored with Utilities
@@ -594,5 +597,47 @@ exports.getCustomersForAdmin = [
     return ControllerHelpers.sendPaginated(res, formattedCustomers, pagination, 'customers');
   })
 ];
+
+/**
+ * GET /api/v1/customers/:customerId/delivery-pin — PIN status (self only).
+ * Plaintext is never returned here; it is shown once, only on reset (§5).
+ */
+exports.getDeliveryPinStatus = ControllerHelpers.asyncWrapper(async (req, res) => {
+  const { customerId } = req.params;
+  if (req.user.role === 'customer' && req.user.customerId !== customerId) {
+    return ControllerHelpers.sendError(res, 'Unauthorized', 403);
+  }
+  const customer = await Customer.findOne({ customerId }).select('+deliveryPinHash');
+  if (!customer) return ControllerHelpers.sendError(res, 'Customer not found', 404);
+  ControllerHelpers.sendSuccess(res, {
+    deliveryPinSet: !!customer.deliveryPinHash,
+    deliveryPinSetAt: customer.deliveryPinSetAt || null
+  }, 'Delivery PIN status');
+});
+
+/**
+ * POST /api/v1/customers/:customerId/delivery-pin/reset — regenerate (self, CSRF).
+ * Returns the new plaintext PIN exactly once.
+ */
+exports.resetDeliveryPin = ControllerHelpers.asyncWrapper(async (req, res) => {
+  const { customerId } = req.params;
+  if (req.user.role === 'customer' && req.user.customerId !== customerId) {
+    return ControllerHelpers.sendError(res, 'Unauthorized', 403);
+  }
+  const customer = await Customer.findOne({ customerId });
+  if (!customer) return ControllerHelpers.sendError(res, 'Customer not found', 404);
+
+  const pinLength = await SystemConfig.getValue('customer_delivery_pin_length', 6);
+  const deliveryPin = roleCodes.generateCode(pinLength);
+  customer.deliveryPinHash = roleCodes.hashCode(deliveryPin);
+  customer.deliveryPinSetAt = new Date();
+  await customer.save();
+
+  logAuditEvent(AuditEvents.CUSTOMER_PIN_RESET, { customerId, userId: req.user.id }, req);
+  ControllerHelpers.sendSuccess(res, {
+    deliveryPin,
+    deliveryPinSetAt: customer.deliveryPinSetAt
+  }, 'Delivery PIN reset');
+});
 
 module.exports = exports;

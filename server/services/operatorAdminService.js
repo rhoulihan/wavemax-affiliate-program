@@ -54,7 +54,24 @@ async function createOperator({ payload, adminId, req }) {
     createdBy: adminId
   });
 
-  await operator.save();
+  // PR 9: provision the operator scan code (shown once in the create response).
+  const SystemConfig = require('../models/SystemConfig');
+  const roleCodes = require('../utils/roleCodes');
+  const scanCodeLength = await SystemConfig.getValue('operator_scan_code_length', 8);
+  let scanCode;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    scanCode = roleCodes.generateCode(scanCodeLength);
+    operator.scanCodeHmac = roleCodes.hmacCode(scanCode);
+    operator.scanCodeSetAt = new Date();
+    try {
+      await operator.save();
+      break;
+    } catch (err) {
+      // E11000 on scanCodeHmac = astronomically rare collision -> regenerate.
+      if (err.code === 11000 && err.message.includes('scanCodeHmac') && attempt < 2) continue;
+      throw err;
+    }
+  }
   await emailService.sendOperatorWelcomeEmail(operator, password);
 
   logAuditEvent(AuditEvents.DATA_MODIFICATION, {
@@ -66,7 +83,7 @@ async function createOperator({ payload, adminId, req }) {
     details: { operatorId: operator.operatorId, email: operator.email }
   }, req);
 
-  return fieldFilter(operator.toObject(), 'administrator');
+  return { ...fieldFilter(operator.toObject(), 'administrator'), scanCode };
 }
 
 async function listOperators({
@@ -331,24 +348,24 @@ async function deleteOperator({ id, adminId }) {
   });
 }
 
-async function resetOperatorPin({ id, newPassword, adminId }) {
-  if (!newPassword) {
-    throw new OperatorAdminError('password_required', 'New password is required');
-  }
-
+async function resetOperatorScanCode({ id, adminId, req }) {
   const operator = await Operator.findById(id);
   if (!operator) throw new OperatorAdminError('not_found', 'Operator not found', 404);
 
-  // save() triggers the pre-save hash hook; also clear any lockout state.
-  operator.password = newPassword;
-  operator.loginAttempts = 0;
-  operator.lockUntil = undefined;
+  const SystemConfig = require('../models/SystemConfig');
+  const roleCodes = require('../utils/roleCodes');
+  const scanCodeLength = await SystemConfig.getValue('operator_scan_code_length', 8);
+  const scanCode = roleCodes.generateCode(scanCodeLength);
+  operator.scanCodeHmac = roleCodes.hmacCode(scanCode);
+  operator.scanCodeSetAt = new Date();
   await operator.save();
 
-  await logAuditEvent(AuditEvents.ADMIN_RESET_OPERATOR_PASSWORD, adminId, {
-    operatorId: operator.operatorId,
-    operatorEmail: operator.email
-  });
+  logAuditEvent(AuditEvents.OPERATOR_SCAN_CODE_RESET, {
+    userId: adminId, userType: 'administrator',
+    operatorId: operator.operatorId
+  }, req);
+
+  return { scanCode, scanCodeSetAt: operator.scanCodeSetAt };
 }
 
 const SELF_UPDATE_ALLOWED_FIELDS = ['firstName', 'lastName', 'password', 'phone'];
@@ -392,7 +409,7 @@ module.exports = {
   updateOperatorStats,
   getAvailableOperators,
   deleteOperator,
-  resetOperatorPin,
+  resetOperatorScanCode,
   updateOperatorSelf,
   getOperatorSelf,
   OperatorAdminError

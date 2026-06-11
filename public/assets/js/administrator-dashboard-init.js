@@ -627,7 +627,7 @@
                             </td>
                             <td>
                                 <button class="btn btn-sm edit-operator-btn" data-operator-id="${op._id}">${t('administrator.dashboard.operators.edit')}</button>
-                                <button class="btn btn-sm btn-secondary reset-pin-btn" data-operator-id="${op._id}">${t('administrator.dashboard.operators.resetPin')}</button>
+                                <button class="btn btn-sm btn-secondary reset-pin-btn" data-operator-id="${op._id}">${t('admin.operators.scanCode.reset')}</button>
                             </td>
                         </tr>
                     `).join('')}
@@ -2995,13 +2995,14 @@
     }
 
     try {
-      const response = await adminFetch(`/api/v1/administrators/operators/${operatorId}/reset-pin`, {
+      const response = await adminFetch(`/api/v1/operators/${operatorId}/scan-code/reset`, {
         method: 'POST',
         body: JSON.stringify({})
       });
 
       if (response.ok) {
-        alert(t('administrator.dashboard.operators.pinResetSuccess', 'PIN reset successfully. New PIN has been sent to the operator.'));
+        const data = await response.json();
+        alert(`${t('admin.operators.scanCode.shownOnceNote', 'New scan code (shown only once):')} ${data.scanCode}`);
       } else {
         const error = await response.json();
         alert(error.message || t('administrator.dashboard.operators.pinResetFailed', 'Failed to reset PIN'));

@@ -132,32 +132,10 @@ describe('Operator Controller', () => {
       });
     });
 
-    it('should handle order not found in confirmPickup', async () => {
-      const next = jest.fn();
-      req.body = { orderId: 'NONEXISTENT', numberOfBags: 1 };
-      Order.findOne.mockResolvedValue(null);
-
-      await operatorController.confirmPickup(req, res, next);
-
-      expect(res.status).toHaveBeenCalledWith(404);
-      expect(res.json).toHaveBeenCalledWith({
-        success: false,
-        error: 'Order not found'
-      });
-    });
-
-    it('should handle error in confirmPickup', async () => {
-      req.body = { orderId: 'ORD123', numberOfBags: 1 };
-      Order.findOne.mockRejectedValue(new Error('Database error'));
-
-      await operatorController.confirmPickup(req, res, next);
-
-      expect(res.status).toHaveBeenCalledWith(500);
-      expect(res.json).toHaveBeenCalledWith({
-        success: false,
-        error: 'Failed to confirm pickup'
-      });
-    });
+    // confirmPickup / completePickup / markOrderReady / markBagProcessed were
+    // deleted in PR 9 (legacy pickup paths; markOrderReady was a payment-gate
+    // bypass). Coverage for the replacement lives in
+    // tests/integration/kioskAdvance.test.js + operatorScanOut.test.js.
 
     it('should handle error in getTodayStats', async () => {
       Order.countDocuments.mockRejectedValue(new Error('Database error'));
@@ -170,84 +148,5 @@ describe('Operator Controller', () => {
       });
     });
 
-    it('should handle markOrderReady (deprecated function)', async () => {
-      const mockOrder = {
-        orderId: 'ORD123',
-        orderProcessingStatus: 'quality_check',
- save: jest.fn().mockResolvedValue(true)};
-
-      req.params.orderId = 'ORD123';
-      Order.findOne.mockResolvedValue(mockOrder);
-
-      const handler = operatorController.markOrderReady;
-      await handler(req, res, next);
-
-      // Note: markOrderReady is deprecated and doesn't update orderProcessingStatus
-      expect(mockOrder.orderProcessingStatus).toBe('quality_check'); // Unchanged
-      expect(mockOrder.status).toBe('processed');
-      expect(mockOrder.processedAt).toBeDefined();
-      expect(res.json).toHaveBeenCalledWith({
-        success: true,
-        message: 'Order marked as ready for pickup',
-        order: mockOrder
-      });
-    });
-
-    it('should handle markOrderReady with affiliate notification', async () => {
-      const mockOrder = {
-        orderId: 'ORD123',
-        affiliateId: 'AFF123',
-        customerId: 'CUST123',
-        actualWeight: 25,
- save: jest.fn().mockResolvedValue(true)};
-
-      const mockAffiliate = {
-        affiliateId: 'AFF123',
-        email: 'affiliate@example.com',
-        businessName: 'Test Affiliate',
- save: jest.fn().mockResolvedValue(true)};
-
-      const mockCustomer = {
-        customerId: 'CUST123',
-        firstName: 'John',
-        lastName: 'Doe',
- save: jest.fn().mockResolvedValue(true)};
-
-      req.params.orderId = 'ORD123';
-      Order.findOne.mockResolvedValue(mockOrder);
-      
-      const Affiliate = require('../../server/models/Affiliate');
-      Affiliate.findOne.mockResolvedValue(mockAffiliate);
-      Customer.findOne.mockResolvedValue(mockCustomer);
-
-      const emailService = require('../../server/utils/emailService');
-      emailService.sendOrderReadyNotification.mockResolvedValue();
-
-      await operatorController.markOrderReady(req, res, next);
-
-      expect(emailService.sendOrderReadyNotification).toHaveBeenCalledWith(
-        'affiliate@example.com',
-        expect.objectContaining({
-          affiliateName: 'Test Affiliate',
-          orderId: 'ORD123',
-          customerName: 'John Doe',
-          numberOfBags: 1,
-          totalWeight: 25
-        })
-      );
-    });
-
-    it('should handle errors in markOrderReady', async () => {
-      req.params.orderId = 'ORD123';
-      Order.findOne.mockRejectedValue(new Error('Database error'));
-
-      await operatorController.markOrderReady(req, res, next);
-
-      expect(res.status).toHaveBeenCalledWith(500);
-      expect(res.json).toHaveBeenCalledWith({
-        success: false,
-        error: 'Failed to mark order as ready'
-      });
-    });
   });
 });

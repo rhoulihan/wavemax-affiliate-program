@@ -174,6 +174,23 @@ const orderSchema = new mongoose.Schema({
   cancelledAt: Date
 }, { timestamps: true });
 
+// Two-kiosk re-intake race backstop (PR 9): at most ONE open order per bag.
+// The intake guard is read-then-write; this partial unique index makes the
+// invariant a database guarantee — the race loser's E11000 is mapped to a
+// 409 order_already_open by orderIntakeService. Named explicitly so it never
+// collides with the plain field-level bagId index (which still serves the
+// $nin / closed-status lookups a partial index cannot).
+orderSchema.index(
+  { bagId: 1 },
+  {
+    unique: true,
+    name: 'bagId_open_unique',
+    partialFilterExpression: {
+      status: { $in: ['in_progress', 'processed', 'ready_for_pickup', 'picked_up'] }
+    }
+  }
+);
+
 // Pricing + lifecycle pre-save engine (design §4.4 rewrite).
 // Pricing inputs (feeBreakdown, addOns, actualWeight, wdfCreditApplied) must be
 // set BEFORE the first .save() — this hook READS feeBreakdown.totalFee, it does

@@ -1,7 +1,7 @@
 // Post-weigh payment email dispatchers.
 // Extracted from utils/emailService.js in Phase 2.
 
-const { loadTemplate, fillTemplate } = require('../template-manager');
+const { loadTemplate } = require('../template-manager');
 const { sendEmail } = require('../transport');
 const fs = require('fs');
 const path = require('path');
@@ -197,57 +197,8 @@ exports.sendV2PaymentReminder = async ({ customer, order, reminderNumber, paymen
   }
 };
 
-/**
- * Send V2 payment verified email
- */
-exports.sendV2PaymentVerified = async (order, customer, paymentData) => {
-  try {
-    const language = customer.languagePreference || 'en';
-
-    // Load V2 verified template
-    const v2TemplatePath = path.join(__dirname, '../templates/v2/payment-verified.html');
-    let template = await readFile(v2TemplatePath, 'utf8');
-
-    const emailData = {
-      customerName: customer.name || `${customer.firstName} ${customer.lastName}`,
-      orderId: order.orderId,
-      shortOrderId: order._id.toString().slice(-8).toUpperCase(),
-      amount: (order.paymentAmount || order.actualTotal).toFixed(2),
-      actualWeight: order.actualWeight,
-      numberOfBags: 1,
-      paymentMethod: order.paymentMethod,
-      transactionId: order.paymentTransactionId || 'N/A',
-      verifiedTime: new Date(order.paymentVerifiedAt).toLocaleString(),
-      isProcessing: order.status === 'in_progress',
-      subtotal: ((order.actualWeight || 0) * (order.baseRate || 1.25)).toFixed(2),
-      addOnsTotal: order.addOnTotal ? order.addOnTotal.toFixed(2) : null
-    };
-
-    // Handle conditional sections
-    template = template.replace(/{{#if isProcessing}}(.*?){{else}}(.*?){{\/if}}/gs,
-      emailData.isProcessing ? '$1' : '$2');
-    template = template.replace(/{{#if isProcessing}}(.*?){{\/if}}/gs,
-      emailData.isProcessing ? '$1' : '');
-    template = template.replace(/{{#if addOnsTotal}}(.*?){{\/if}}/gs,
-      emailData.addOnsTotal ? '$1' : '');
-
-    // Replace template variables
-    let html = template;
-    Object.keys(emailData).forEach(key => {
-      const regex = new RegExp(`{{${key}}}`, 'g');
-      html = html.replace(regex, emailData[key] || '');
-    });
-
-    const subject = `Payment Verified - Order #${emailData.shortOrderId}`;
-
-    await sendEmail(customer.email, subject, html);
-    logger.info(`V2 payment verification sent to ${customer.email} for order ${order.orderId}`);
-    return true;
-  } catch (error) {
-    logger.error('Error sending V2 payment verified email:', error);
-    throw error;
-  }
-};
+// sendV2PaymentVerified was deleted in PR 9 — dead code: no production call
+// site existed (verify paths notify via the ready gate, not a payment email).
 
 /**
  * Send V2 payment timeout escalation to admin

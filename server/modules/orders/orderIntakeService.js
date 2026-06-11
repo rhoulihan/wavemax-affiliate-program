@@ -45,8 +45,10 @@ async function autoDeliverPickedUpOrder(order, operatorId, req) {
   if (order.bags && order.bags[0]) {
     order.bags[0].status = 'delivered';
     order.bags[0].scannedAt.delivered = new Date();
-    // bags[].scannedBy.delivered is typed String ref Affiliate (door scans);
-    // re-intake is operator-confirmed, recorded in proofOfDelivery instead.
+    // bags[].scannedBy.delivered is typed String ref Affiliate — the affiliate
+    // physically delivered the bag; the operator confirmation lives in
+    // proofOfDelivery (parity with affiliateDeliveryService.confirmDelivery).
+    order.bags[0].scannedBy.delivered = order.affiliateId;
   }
   if (order.intake) {
     order.intake.deliveredAt = new Date();
@@ -55,9 +57,12 @@ async function autoDeliverPickedUpOrder(order, operatorId, req) {
 
   const customer = await Customer.findOne({ customerId: order.customerId });
   const affiliate = await Affiliate.findOne({ affiliateId: order.affiliateId });
+  const affiliateName = affiliate
+    ? (affiliate.businessName || `${affiliate.firstName} ${affiliate.lastName}`)
+    : null;
   try {
     if (customer) {
-      await emailService.sendCustomerDeliveredEmail(customer, order);
+      await emailService.sendCustomerDeliveredEmail(customer, order, { affiliateName });
     }
     if (affiliate && customer) {
       await emailService.sendAffiliateCommissionEmail(affiliate, order, customer);
@@ -188,7 +193,22 @@ async function createOrderFromBag({ bagToken, weight, addOns, freshAddOnsFormPla
   });
 
   // 5. Save — pre-save computes actualTotal / paymentAmount / affiliateCommission.
-  await order.save();
+  // The partial unique index on open Order.bagId backstops the read-then-write
+  // open-order guard above: when two kiosks race the same bag, exactly one
+  // save wins and the loser's E11000 maps to the same clean 409.
+  try {
+    await order.save();
+  } catch (err) {
+    if (err && err.code === 11000 && /bagId/.test(err.message || '')) {
+      throw new IntakeError(
+        'order_already_open',
+        'An order is already open for this bag',
+        409,
+        { bagId: bag.bagId }
+      );
+    }
+    throw err;
+  }
 
   if (wdfCreditToApply !== 0) {
     customer.wdfCredit = 0;

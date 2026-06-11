@@ -40,3 +40,61 @@
   font-size: 14px;
   margin: 0 0 12px;
 }
+
+/* PR 9: deliver / re-intake / status panels */
+.claim-panel {
+  padding: 24px;
+}
+.claim-panel h1 {
+  font-size: 22px;
+  font-weight: 700;
+  margin: 0 0 16px;
+}
+.claim-panel label {
+  display: block;
+  margin-bottom: 6px;
+  color: #374151;
+}
+.claim-panel input[type="text"],
+.claim-panel input[type="number"] {
+  width: 100%;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  padding: 10px 12px;
+  margin-bottom: 12px;
+  font-size: 15px;
+}
+.claim-panel .btn {
+  width: 100%;
+  background: #1e3a5f;
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  padding: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 8px;
+}
+.claim-panel .btn:hover { background: #16304f; }
+.claim-panel .btn[disabled] { opacity: 0.6; cursor: not-allowed; }
+
+.claim-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+  font-size: 14px;
+  color: #374151;
+}
+.claim-checkbox input[type="checkbox"] {
+  width: auto;
+  margin: 0;
+}
+
+.claim-success {
+  color: #15803d;
+  font-size: 15px;
+  font-weight: 600;
+  margin: 12px 0 0;
+}

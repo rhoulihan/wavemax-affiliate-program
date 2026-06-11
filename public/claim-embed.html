@@ -63,8 +63,43 @@
             <section id="claim-state-claimed" class="p-6 text-center" hidden>
                 <h1 class="text-2xl font-bold mb-2" data-i18n="claim.alreadyClaimedTitle">This bag is already claimed</h1>
                 <p class="text-gray-600 mb-4" data-i18n="claim.alreadyClaimedBody">This bag is linked to an existing account. Log in to see your order status.</p>
-                <!-- PR 9 adds the deliver / re-intake panels into this section -->
                 <a id="claim-login-link" href="/embed-app-v2.html?route=/customer-login" class="claim-submit inline-block" data-i18n="claim.alreadyClaimedCta">Log in</a>
+            </section>
+
+            <!-- PR 9: deliver / re-intake / status branches of the overloaded bag URL -->
+            <section id="claim-deliver-panel" class="claim-panel" hidden>
+                <h1 data-i18n="claim.deliver.title">Confirm delivery</h1>
+                <label for="deliver-code" data-i18n="claim.deliver.codeLabel">Delivery code or PIN</label>
+                <input id="deliver-code" type="text" autocomplete="one-time-code" autocapitalize="characters"
+                       maxlength="12" data-i18n-placeholder="claim.deliver.codePlaceholder">
+                <label class="claim-checkbox">
+                    <input id="deliver-geo-optin" type="checkbox">
+                    <span data-i18n="claim.deliver.geoOptIn">Attach my location to this confirmation</span>
+                </label>
+                <label class="claim-checkbox">
+                    <input id="deliver-remember-code" type="checkbox">
+                    <span data-i18n="claim.deliver.rememberCode">Remember my code on this device</span>
+                </label>
+                <button id="deliver-submit" type="button" class="btn btn-primary" data-i18n="claim.deliver.confirm">Confirm delivery</button>
+                <p id="deliver-error" class="claim-error" hidden></p>
+                <p id="deliver-success" class="claim-success" hidden data-i18n="claim.deliver.success">Delivery confirmed — thank you!</p>
+            </section>
+
+            <section id="claim-reintake-panel" class="claim-panel" hidden>
+                <h1 data-i18n="claim.reintake.prompt">Mark delivered &amp; start a new order?</h1>
+                <label for="reintake-weight" data-i18n="operator.intake.weightLabel">Weight (lbs)</label>
+                <input id="reintake-weight" type="number" min="1" step="0.1" inputmode="decimal">
+                <label class="claim-checkbox"><input id="reintake-addon-detergent" type="checkbox"><span data-i18n="operator.intake.addOns.premiumDetergent">Premium detergent</span></label>
+                <label class="claim-checkbox"><input id="reintake-addon-softener" type="checkbox"><span data-i18n="operator.intake.addOns.fabricSoftener">Fabric softener</span></label>
+                <label class="claim-checkbox"><input id="reintake-addon-stain" type="checkbox"><span data-i18n="operator.intake.addOns.stainRemover">Stain remover</span></label>
+                <label class="claim-checkbox"><input id="reintake-fresh-form" type="checkbox"><span data-i18n="operator.intake.freshFormAck">Fresh add-ons form placed in pocket</span></label>
+                <button id="reintake-confirm" type="button" class="btn btn-primary" data-i18n="claim.reintake.confirm">Yes — start a new order</button>
+                <p id="reintake-error" class="claim-error" hidden></p>
+            </section>
+
+            <section id="claim-status-panel" class="claim-panel" hidden>
+                <h1 id="claim-status-heading"></h1>
+                <a id="claim-status-login" href="/embed-app-v2.html?route=/customer-login" data-i18n="claim.status.loginCta">Log in to see your order</a>
             </section>
 
             <!-- STATE: invalid -->

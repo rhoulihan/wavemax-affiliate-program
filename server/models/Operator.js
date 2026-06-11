@@ -94,6 +94,12 @@ const operatorSchema = new mongoose.Schema({
     default: 0
   },
   lockUntil: Date,
+  // Operator scan code — powers the ad-hoc operator path on the overloaded
+  // bag URL (spec §4.8). HMAC-SHA256(code, ENCRYPTION_KEY), unique-indexed
+  // for O(1) identify-and-verify. The kiosk authenticates by JWT instead.
+  // sparse: legacy/test operators without a code don't collide on null.
+  scanCodeHmac: { type: String, unique: true, sparse: true },
+  scanCodeSetAt: Date,
   passwordResetToken: String,
   passwordResetExpires: Date,
   passwordHistory: [{

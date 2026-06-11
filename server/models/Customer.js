@@ -82,6 +82,13 @@ const customerSchema = new mongoose.Schema({
   // prod-lockdown-2026-05-20.
   loginAttempts: { type: Number, default: 0 },
   lockUntil: Date,
+  // Delivery PIN — short code the customer enters at the door to confirm
+  // receipt (spec §4.5/§6.6). Verified only against THIS order's customer.
+  // Stored as "pbkdf2hash:salt" via utils/roleCodes.hashCode; rotated at each
+  // operator scan-out so the plaintext can ride in the "on the way" email
+  // while only a hash exists at rest. NOT a login credential.
+  deliveryPinHash: { type: String, select: false },
+  deliveryPinSetAt: Date,
   // Language preference for communications
   languagePreference: {
     type: String,

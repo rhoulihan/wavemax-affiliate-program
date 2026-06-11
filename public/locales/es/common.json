@@ -1,4 +1,22 @@
 {
+  "affiliateDashboard": {
+    "deliveryCode": {
+      "title": "Código de entrega",
+      "current": "Tu código de entrega está configurado",
+      "reset": "Restablecer código de entrega",
+      "resetConfirm": "¿Restablecer tu código de entrega? El código anterior deja de funcionar de inmediato.",
+      "shownOnceNote": "Tu nuevo código se muestra solo una vez — guárdalo en un lugar seguro:"
+    },
+    "deliverHelp": "Para entregar o consultar una bolsa, escanea el código QR de la bolsa con la cámara de tu teléfono."
+  },
+  "customerDashboard": {
+    "deliveryPin": {
+      "title": "PIN de entrega",
+      "current": "Tu PIN de entrega está configurado",
+      "reset": "Restablecer PIN de entrega",
+      "shownOnceNote": "Tu nuevo PIN se muestra solo una vez. También se incluye en cada correo \"en camino\":"
+    }
+  },
   "claim": {
     "title": "Reclama tu bolsa de lavandería",
     "subtitle": "Te estás registrando con",
@@ -11,7 +29,33 @@
     "alreadyClaimedCta": "Iniciar sesión",
     "invalidTitle": "Bolsa no reconocida",
     "invalidBody": "No pudimos reconocer esta bolsa. Comunícate con tu proveedor de servicio de lavandería.",
-    "raceLost": "Alguien acaba de reclamar esta bolsa. Si fuiste tú en otro dispositivo, inicia sesión."
+    "raceLost": "Alguien acaba de reclamar esta bolsa. Si fuiste tú en otro dispositivo, inicia sesión.",
+    "deliver": {
+      "title": "Confirmar entrega",
+      "codeLabel": "Código de entrega o PIN",
+      "codePlaceholder": "Introduce tu código",
+      "geoOptIn": "Adjuntar mi ubicación a esta confirmación",
+      "rememberCode": "Recordar mi código en este dispositivo",
+      "confirm": "Confirmar entrega",
+      "success": "Entrega confirmada — ¡gracias!",
+      "badCode": "El código no coincide. Inténtalo de nuevo.",
+      "lockedOut": "Demasiados intentos. Inténtalo más tarde."
+    },
+    "reintake": {
+      "prompt": "¿Marcar como entregado y comenzar un nuevo pedido?",
+      "confirm": "Sí — comenzar un nuevo pedido"
+    },
+    "scan": {
+      "operatorCodeLabel": "Código de operador"
+    },
+    "status": {
+      "in_progress": "Tu ropa se está procesando",
+      "processed": "Tu ropa está lavada y esperando en la tienda",
+      "ready_for_pickup": "Tu ropa está lista — tu repartidor la recogerá pronto",
+      "picked_up": "Tu ropa está en camino",
+      "delivered": "Tu ropa fue entregada",
+      "loginCta": "Inicia sesión para ver tu pedido"
+    }
   },
   "bag": {
     "label": {
@@ -1409,6 +1453,14 @@
     "processing": {
       "message": "Tu solicitud de eliminación de datos está siendo procesada. Por favor revisa más tarde para actualizaciones.",
       "delayed": "Nota: Esta solicitud ha estado pendiente por más de 24 horas. Si tienes preocupaciones, por favor contacta soporte."
+    }
+  },
+  "admin": {
+    "operators": {
+      "scanCode": {
+        "reset": "Restablecer código de escaneo",
+        "shownOnceNote": "Nuevo código de escaneo (se muestra solo una vez):"
+      }
     }
   }
 }

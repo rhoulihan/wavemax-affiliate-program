@@ -7,7 +7,7 @@ const { authenticate, authorize } = require('../middleware/auth');
 const { body } = require('express-validator');
 const paginationMiddleware = require('../utils/paginationMiddleware');
 const { customPasswordValidator } = require('../utils/passwordValidator');
-const { registrationLimiter } = require('../middleware/rateLimiting');
+const { registrationLimiter, sensitiveOperationLimiter } = require('../middleware/rateLimiting');
 const { registrationAddressValidation, profileAddressValidation, handleValidationErrors } = require('../middleware/locationValidation');
 
 /**
@@ -97,6 +97,11 @@ router.get('/:affiliateId/transactions', authenticate, paginationMiddleware, aff
  * @access  Private (self or admin)
  */
 router.get('/:affiliateId/dashboard', authenticate, affiliateController.getAffiliateDashboardStats);
+
+// Vendor delivery code (PR 9) — self/admin status + reset (reset returns
+// the plaintext exactly once; CSRF enforced by default on the POST).
+router.get('/:affiliateId/delivery-code', authenticate, affiliateController.getDeliveryCodeStatus);
+router.post('/:affiliateId/delivery-code/reset', authenticate, sensitiveOperationLimiter, affiliateController.resetDeliveryCode);
 
 /**
  * @route   GET /api/affiliates/:affiliateId/stats/ytd

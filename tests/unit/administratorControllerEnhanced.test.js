@@ -36,7 +36,7 @@ const {
   updateOperatorStats,
   getAvailableOperators,
   deleteOperator,
-  resetOperatorPin,
+  resetOperatorScanCode,
   updateOperatorSelf,
   getOperatorSelf
 } = require('../../server/controllers/administratorController');
@@ -615,42 +615,46 @@ describe('Administrator Controller - Enhanced Coverage', () => {
       });
     });
 
-    describe('resetOperatorPin', () => {
-      test('should reset operator PIN', async () => {
-        req.params.id = '507f1f77bcf86cd799439011';
-        req.body = { newPassword: '1234' };
+    describe('resetOperatorScanCode', () => {
+      test('should reset operator scan code and return it once', async () => {
+        req.params.operatorId = '507f1f77bcf86cd799439011';
+        req.body = {};
 
         const mockOperator = {
           _id: '507f1f77bcf86cd799439011',
           operatorId: 'OP001',
           email: 'operator@example.com',
           firstName: 'Op',
-      save: jest.fn().mockResolvedValue(true)
+          save: jest.fn().mockResolvedValue(true)
         };
 
         Operator.findById.mockResolvedValue(mockOperator);
+        SystemConfig.getValue.mockResolvedValue(8);
 
-        await resetOperatorPin(req, res);
+        await resetOperatorScanCode(req, res);
 
-        expect(mockOperator.password).toBe('1234');
-        expect(mockOperator.loginAttempts).toBe(0);
+        expect(mockOperator.scanCodeHmac).toMatch(/^[a-f0-9]{64}$/);
+        expect(mockOperator.scanCodeSetAt).toBeInstanceOf(Date);
         expect(mockOperator.save).toHaveBeenCalled();
-        expect(res.json).toHaveBeenCalledWith({
+        expect(res.json).toHaveBeenCalledWith(expect.objectContaining({
           success: true,
-          message: 'PIN reset successfully'
-        });
+          message: 'Scan code reset successfully',
+          scanCode: expect.stringMatching(/^[ABCDEFGHJKMNPQRSTUVWXYZ23456789]{8}$/)
+        }));
       });
 
-      test('should validate PIN format', async () => {
-        req.params.id = '507f1f77bcf86cd799439011';
-        req.body = {}; // Missing newPassword
+      test('should handle operator not found', async () => {
+        req.params.operatorId = '507f1f77bcf86cd799439011';
+        req.body = {};
 
-        await resetOperatorPin(req, res);
+        Operator.findById.mockResolvedValue(null);
 
-        expect(res.status).toHaveBeenCalledWith(400);
+        await resetOperatorScanCode(req, res);
+
+        expect(res.status).toHaveBeenCalledWith(404);
         expect(res.json).toHaveBeenCalledWith({
           success: false,
-          message: 'New password is required'
+          message: 'Operator not found'
         });
       });
     });

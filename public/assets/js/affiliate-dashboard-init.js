@@ -58,6 +58,9 @@ function initializeAffiliateDashboard() {
   // Load settings data on initial load
   loadSettingsData(affiliateId);
 
+  // PR 9: delivery code card
+  initDeliveryCodeCard(affiliateId);
+
   // Fetch admin support email for W9 notifications
   fetchAdminSupportEmail();
 
@@ -1363,6 +1366,55 @@ async function fetchAdminSupportEmail() {
     // Affiliates can't list administrators (403) — expected. Fall back silently.
     localStorage.setItem('adminSupportEmail', 'support@wavemaxlaundry.com');
   }
+}
+
+// ---- PR 9: vendor delivery code card ---------------------------------------
+async function initDeliveryCodeCard(affiliateId) {
+  const btn = document.getElementById('delivery-code-reset-btn');
+  if (!btn) return;
+
+  const token = localStorage.getItem('affiliateToken');
+  const authenticatedFetch = window.CsrfUtils ? window.CsrfUtils.createAuthenticatedFetch(() => token) : fetch;
+  const t = (key, fallback) => {
+    if (window.i18n && typeof window.i18n.t === 'function') {
+      const v = window.i18n.t(key);
+      if (v && v !== key) return v;
+    }
+    return fallback;
+  };
+
+  try {
+    const status = await authenticatedFetch(`/api/v1/affiliates/${affiliateId}/delivery-code`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    if (status.ok) {
+      const data = await status.json();
+      if (!data.deliveryCodeSet) {
+        document.getElementById('delivery-code-status').textContent = '';
+      }
+    }
+  } catch (error) {
+    // Status is informational only — the reset button still works.
+  }
+
+  btn.addEventListener('click', async () => {
+    const confirmMsg = t('affiliateDashboard.deliveryCode.resetConfirm',
+      'Reset your delivery code? The old code stops working immediately.');
+    if (!window.confirm(confirmMsg)) return;
+    const res = await authenticatedFetch(`/api/v1/affiliates/${affiliateId}/delivery-code/reset`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({})
+    });
+    if (res.ok) {
+      const data = await res.json();
+      const out = document.getElementById('delivery-code-result');
+      const note = t('affiliateDashboard.deliveryCode.shownOnceNote',
+        'Your new code is shown only once — store it somewhere safe:');
+      out.textContent = `${note} ${data.deliveryCode}`;
+      out.hidden = false;
+    }
+  });
 }
 
 // Initialize when DOM is ready or immediately if already ready
