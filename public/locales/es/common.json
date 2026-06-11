@@ -1248,6 +1248,17 @@
       "viewDetails": "Ver Detalles"
     }
   },
+  "payment": {
+    "holdNotice": {
+      "subject": "Acción necesaria: recoja su ropa en la tienda",
+      "heading": "Por favor recoja su ropa en la tienda",
+      "body": "No hemos podido confirmar el pago de su pedido, por lo que su ropa limpia se guarda de forma segura en la tienda. Los recordatorios se han detenido. Pase por la tienda, pague y recoja su bolsa cuando le convenga.",
+      "amountDue": "Importe a pagar",
+      "orderNumber": "Número de pedido",
+      "storeContact": "Dirección de la tienda",
+      "cta": "Pagar y recoger en la tienda"
+    }
+  },
   "emails": {
     "greeting": "Hola {{name}},",
     "footer": "Gracias por elegir WaveMAX Laundry Services.",

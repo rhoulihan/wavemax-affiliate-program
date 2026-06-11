@@ -377,4 +377,52 @@ exports.sendV2PickupReadyNotification = async (order, customer, affiliate) => {
     throw error;
   }
 };
+/**
+ * Send the V2 "come to the store" hold notice (spec §6.5).
+ *
+ * Fired exactly once, after the final payment reminder. Reuses the stored
+ * order state — never regenerates payment links. The template lives in the
+ * language-agnostic v2/ directory; loadTemplate() falls back to it for every
+ * languagePreference (same convention as v2/payment-request).
+ *
+ * @param {Object} opts
+ * @param {Object} opts.customer - Customer doc (email, names, languagePreference)
+ * @param {Object} opts.order    - Order doc (orderId, paymentAmount, actualWeight)
+ * @returns {Promise<boolean>} true on send
+ */
+exports.sendV2ComeToStoreNotice = async ({ customer, order }) => {
+  try {
+    const SystemConfig = require('../../../models/SystemConfig');
+    const language = customer.languagePreference || 'en';
+    const template = await loadTemplate('v2/come-to-store', language);
+
+    const storeAddress = await SystemConfig.getValue('store_pickup_address', '');
+    const amount = (order.paymentAmount || order.actualTotal || 0).toFixed(2);
+
+    const emailData = {
+      customerName: customer.name || `${customer.firstName} ${customer.lastName}`,
+      orderId: order.orderId,
+      shortOrderId: order.orderId.replace('ORD-', '').replace('ORD', ''),
+      amount,
+      actualWeight: order.actualWeight,
+      storeAddress
+    };
+
+    let html = template;
+    Object.keys(emailData).forEach((key) => {
+      const regex = new RegExp(`{{${key}}}`, 'g');
+      html = html.replace(regex, emailData[key]);
+    });
+
+    const subject = `Action Needed: Pick Up Your Laundry In Store - Order #${emailData.shortOrderId}`;
+
+    await sendEmail(customer.email, subject, html);
+    logger.info(`V2 come-to-store notice sent to ${customer.email} for order ${order.orderId}`);
+    return true;
+  } catch (error) {
+    logger.error('Error sending V2 come-to-store notice:', error);
+    throw error;
+  }
+};
+
 module.exports = exports;

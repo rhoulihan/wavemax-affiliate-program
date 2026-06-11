@@ -1200,6 +1200,17 @@
       "viewDetails": "Ver Detalhes"
     }
   },
+  "payment": {
+    "holdNotice": {
+      "subject": "Ação necessária: retire sua roupa na loja",
+      "heading": "Por favor, retire sua roupa na loja",
+      "body": "Não conseguimos confirmar o pagamento do seu pedido, por isso sua roupa limpa está guardada com segurança na loja. Os lembretes foram interrompidos. Passe na loja, pague e retire sua sacola quando for conveniente.",
+      "amountDue": "Valor devido",
+      "orderNumber": "Número do pedido",
+      "storeContact": "Endereço da loja",
+      "cta": "Pagar e retirar na loja"
+    }
+  },
   "emails": {
     "greeting": "Olá {{name}},",
     "footer": "Obrigado por escolher WaveMAX Laundry Services.",

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pick Up Your Laundry In Store - WaveMAX Laundry</title>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background-color: #c62828; color: #ffffff !important; padding: 30px 20px; text-align: center; border-radius: 5px 5px 0 0; }
+        .header h1 { margin: 0; color: #ffffff !important; font-size: 28px; }
+        .content { background-color: #f9f9f9; padding: 30px 20px; border: 1px solid #ddd; }
+        .order-details { background-color: #ffffff !important; padding: 20px; margin: 20px 0; border-radius: 8px; border: 2px solid #c62828; }
+        .order-details h2 { color: #c62828; margin-top: 0; font-size: 24px; }
+        .detail-row { margin: 15px 0; font-size: 16px; }
+        .detail-label { font-weight: bold; color: #555; display: inline-block; min-width: 140px; }
+        .amount-due { background-color: #ffebee; padding: 20px; margin: 25px 0; border-radius: 8px; text-align: center; border: 2px solid #c62828; }
+        .amount-due h2 { color: #c62828; margin: 0 0 10px 0; font-size: 20px; }
+        .amount-value { font-size: 48px; font-weight: bold; color: #c62828; margin: 10px 0; }
+        .store-box { background-color: #e8f5e9; padding: 20px; margin: 25px 0; border-radius: 8px; border-left: 4px solid #2e7d32; }
+        .store-box h3 { color: #2e7d32; margin-top: 0; font-size: 18px; }
+        .instructions { background-color: #fff3cd; padding: 20px; margin: 25px 0; border-radius: 8px; border-left: 4px solid #ffc107; }
+        .instructions p { color: #856404; margin: 10px 0; }
+        .footer { background-color: #f5f5f5; padding: 20px; text-align: center; font-size: 12px; color: #666; border-radius: 0 0 5px 5px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Please Pick Up Your Laundry In Store</h1>
+        </div>
+        <div class="content">
+            <p style="font-size: 18px; margin-bottom: 10px;">Hello {{customerName}},</p>
+
+            <p style="font-size: 16px;">We haven't been able to confirm payment for your order, so your clean
+            laundry is being held safely at the store. Payment reminders have now stopped — no further emails
+            will be sent for this order.</p>
+
+            <div class="order-details">
+                <h2>Order Summary</h2>
+                <div class="detail-row">
+                    <span class="detail-label">Order ID:</span> <strong>{{orderId}}</strong>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Weight:</span> <strong>{{actualWeight}} lbs</strong>
+                </div>
+            </div>
+
+            <div class="amount-due">
+                <h2>Amount Due</h2>
+                <div class="amount-value">${{amount}}</div>
+            </div>
+
+            <div class="store-box">
+                <h3>Come to the store to pay and collect your laundry</h3>
+                <p style="font-size: 16px; margin: 0;"><strong>{{storeAddress}}</strong></p>
+            </div>
+
+            <div class="instructions">
+                <p><strong>What happens now?</strong></p>
+                <p>Your laundry stays safe with us until you come by. Pay in store (or use any of the payment
+                links from your earlier emails) and we'll hand your bag right over. If you already paid,
+                no action is needed — our system will confirm it shortly and your delivery will resume.</p>
+            </div>
+        </div>
+        <div class="footer">
+            <p>&copy; 2025 CRHS Enterprises, LLC. All rights reserved.</p>
+            <p>Order #{{shortOrderId}}</p>
+        </div>
+    </div>
+</body>
+</html>
