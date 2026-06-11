@@ -9,6 +9,9 @@ const paginationMiddleware = require('../utils/paginationMiddleware');
 const { customPasswordValidator } = require('../utils/passwordValidator');
 const { registrationLimiter, sensitiveOperationLimiter } = require('../middleware/rateLimiting');
 const { registrationAddressValidation, profileAddressValidation, handleValidationErrors } = require('../middleware/locationValidation');
+const uploadW9 = require('../middleware/uploadW9');
+const { fileUploadLimiter } = require('../middleware/rateLimiting');
+const w9Controller = require('../modules/onboarding/w9Controller');
 
 /**
  * @route   POST /api/affiliates/register
@@ -116,5 +119,12 @@ router.get('/:affiliateId/stats/ytd', authenticate, affiliateController.getAffil
  * @access  Private (self only, development/test environments)
  */
 router.delete('/:affiliateId/delete-all-data', authenticate, authorize(['affiliate']), affiliateController.deleteAffiliateData);
+
+/**
+ * @route   POST /api/v1/affiliates/:affiliateId/w9
+ * @desc    Upload (or re-upload) an encrypted W-9 — self affiliate or administrator
+ * @access  Private (CSRF-enforced; multipart field 'w9'; fileUploadLimiter)
+ */
+router.post('/:affiliateId/w9', fileUploadLimiter, authenticate, uploadW9, w9Controller.uploadW9);
 
 module.exports = router;

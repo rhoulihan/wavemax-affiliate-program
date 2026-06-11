@@ -48,6 +48,9 @@ async function storeEncrypted(buffer, { affiliateId, contentType, filename }) {
     throw new Error('storeEncrypted requires a non-empty Buffer');
   }
   if (!affiliateId) throw new Error('storeEncrypted requires an affiliateId');
+  // Defense-in-depth: never let '/', '..' or other path metacharacters in the
+  // id reach the storageKey path (resolvePath would also refuse, but fail here).
+  if (!/^[A-Za-z0-9-]+$/.test(affiliateId)) throw new Error('Invalid affiliateId');
 
   const sha256 = crypto.createHash('sha256').update(buffer).digest('hex');
   const { iv, authTag, data } = encryptBuffer(buffer);

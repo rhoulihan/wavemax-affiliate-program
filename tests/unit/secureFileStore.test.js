@@ -64,6 +64,15 @@ describe('secureFileStore', () => {
     await expect(secureFileStore.readDecrypted('../../etc/passwd')).rejects.toThrow(/invalid storage key/i);
   });
 
+  it('rejects affiliateIds containing path metacharacters', async () => {
+    await expect(secureFileStore.storeEncrypted(Buffer.from('x'), {
+      affiliateId: '../escape', contentType: 'application/pdf', filename: 'w9.pdf'
+    })).rejects.toThrow(/invalid affiliateid/i);
+    await expect(secureFileStore.storeEncrypted(Buffer.from('x'), {
+      affiliateId: 'AFF/..', contentType: 'application/pdf', filename: 'w9.pdf'
+    })).rejects.toThrow(/invalid affiliateid/i);
+  });
+
   it('deleteFile removes the file and is idempotent', async () => {
     const { storageKey } = await secureFileStore.storeEncrypted(Buffer.from('delete me'), {
       affiliateId: 'AFF-test-5', contentType: 'application/pdf', filename: 'w9.pdf'
