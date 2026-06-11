@@ -277,10 +277,11 @@ class PaymentEmailScanner {
    */
   async findOrderById(orderId) {
     try {
-      // Find order with matching orderId and paymentStatus = 'awaiting'
+      // Match awaiting AND confirming — a customer-self-reported ('confirming')
+      // order must still be auto-verified (spec §4.4 / §6.5 widening).
       const order = await Order.findOne({
         orderId: orderId,
-        paymentStatus: 'awaiting'
+        paymentStatus: { $in: ['awaiting', 'confirming'] }
       });
       
       return order;
@@ -362,15 +363,17 @@ class PaymentEmailScanner {
       await order.save();
       
       logger.info(`Payment verified for order ${payment.orderId}`);
-      
+
       // Send payment confirmation to customer
       await this.sendPaymentConfirmation(order);
-      
-      // If WDF is complete, send pickup notification
-      if (order.status === 'processed') {
-        await this.sendPickupNotification(order);
-      }
-      
+
+      // Path B (paid-then-processed): run the canonical ready gate. Idempotent;
+      // sole writer of readyForPickupAt; sends the affiliate "collect from
+      // store" notification itself (spec §6.5). Inline require avoids a cycle
+      // if the gate ever pulls in scanner-adjacent modules.
+      const orderReadyGateService = require('./orderReadyGateService');
+      await orderReadyGateService.applyReadyGate(order, { trigger: 'scanner_verify' });
+
       return true;
     } catch (error) {
       logger.error('Error verifying and updating order:', error);
@@ -399,21 +402,6 @@ class PaymentEmailScanner {
       // await emailService.sendV2PaymentConfirmation(order, customer);
     } catch (error) {
       logger.error('Error sending payment confirmation:', error);
-    }
-  }
-
-  /**
-   * Send pickup ready notification to affiliate
-   * @param {Object} order - Order document
-   */
-  async sendPickupNotification(order) {
-    try {
-      logger.info(`Sending pickup notification for order ${order._id}`);
-      
-      // This would trigger the existing pickup notification
-      // await emailService.sendPickupReadyNotification(order);
-    } catch (error) {
-      logger.error('Error sending pickup notification:', error);
     }
   }
 
@@ -466,9 +454,9 @@ class PaymentEmailScanner {
         errors: []
       };
       
-      // Get all orders awaiting payment
+      // Awaiting AND confirming (spec §6.5 widening)
       const pendingOrders = await Order.find({
-        paymentStatus: 'awaiting'
+        paymentStatus: { $in: ['awaiting', 'confirming'] }
       });
       
       logger.info(`Processing ${pendingOrders.length} pending orders`);
