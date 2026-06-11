@@ -651,7 +651,9 @@ exports.confirmPayment = async (req, res) => {
 
     // Validate payment amount if provided
     if (amount !== undefined) {
-      const expectedAmount = order.paymentAmount || order.actualTotal || order.estimatedTotal;
+      // estimatedTotal no longer exists on the Order model (at-intake flow,
+      // PR 4/7) — the sanity check works from paymentAmount/actualTotal.
+      const expectedAmount = order.paymentAmount || order.actualTotal;
 
       // Check if amount is way off (more than 100% difference)
       if (Math.abs(amount - expectedAmount) > expectedAmount) {
@@ -677,10 +679,6 @@ exports.confirmPayment = async (req, res) => {
     order.paymentNotes = `Customer confirmed payment via ${paymentMethod}. Details: ${paymentDetails || 'None provided'}. Awaiting manual verification.`;
     order.paymentMethod = paymentMethod || 'pending';
     await order.save();
-
-    // Immediately escalate to admin for manual verification
-    const paymentVerificationJob = require('../jobs/paymentVerificationJob');
-    await paymentVerificationJob.escalateToAdmin(order);
 
     // Also trigger an immediate payment check
     const paymentEmailScanner = require('../services/paymentEmailScanner');
