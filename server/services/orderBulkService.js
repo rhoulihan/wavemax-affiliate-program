@@ -9,6 +9,7 @@
 // batch iteration and the status-transition rules.
 
 const Order = require('../models/Order');
+const { canTransition } = require('../modules/orders/orderStateMachine');
 
 class BulkError extends Error {
   constructor(message, status = 400) {
@@ -22,12 +23,13 @@ class BulkError extends Error {
  * Bulk-apply `status` to every order in `orderIds`.
  * Returns { updated, failed, results: [{ orderId, success, message? }] }.
  */
-async function bulkUpdateStatus({ orderIds, status, user, checkStatusTransition }) {
+async function bulkUpdateStatus({ orderIds, status, user }) {
   if (!orderIds || !Array.isArray(orderIds) || orderIds.length === 0) {
     throw new BulkError('Order IDs must be provided as an array');
   }
 
-  const validStatuses = ['pending', 'scheduled', 'processing', 'processed', 'complete', 'cancelled'];
+  // ready_for_pickup is gate-only; in_progress is birth-only (shared TRANSITIONS).
+  const validStatuses = ['processed', 'picked_up', 'delivered', 'cancelled'];
   if (!validStatuses.includes(status)) {
     throw new BulkError('Invalid status');
   }
@@ -50,7 +52,7 @@ async function bulkUpdateStatus({ orderIds, status, user, checkStatusTransition 
 
   for (const order of orders) {
     try {
-      if (!checkStatusTransition(order.status, status)) {
+      if (!canTransition(order.status, status)) {
         results.push({
           orderId: order.orderId,
           success: false,
@@ -102,7 +104,7 @@ async function bulkCancel({ orderIds, user }) {
   const results = [];
 
   for (const order of orders) {
-    if (['processing', 'processed', 'complete', 'cancelled'].includes(order.status)) {
+    if (!canTransition(order.status, 'cancelled')) {
       results.push({
         orderId: order.orderId,
         success: false,

@@ -15,6 +15,8 @@ const ControllerHelpers = require('../utils/controllerHelpers');
 const AuthorizationHelpers = require('../middleware/authorizationHelpers');
 const Formatters = require('../utils/formatters');
 const logger = require('../utils/logger');
+const { canTransition } = require('../modules/orders/orderStateMachine');
+const { applyReadyGate } = require('../services/orderReadyGateService');
 
 // ============================================================================
 // Order Controllers
@@ -68,7 +70,6 @@ exports.getOrderDetails = ControllerHelpers.asyncWrapper(async (req, res) => {
     pickupDate: Formatters.date(order.pickupDate),
     pickupTime: order.pickupTime,
     specialPickupInstructions: order.specialPickupInstructions,
-    estimatedWeight: Formatters.weight(order.estimatedWeight),
     numberOfBags: order.numberOfBags,
     serviceNotes: order.serviceNotes,
     deliveryDate: Formatters.date(order.deliveryDate),
@@ -80,13 +81,11 @@ exports.getOrderDetails = ControllerHelpers.asyncWrapper(async (req, res) => {
     feeBreakdown: order.feeBreakdown,
     actualWeight: Formatters.weight(order.actualWeight),
     washInstructions: order.washInstructions,
-    estimatedTotal: Formatters.currency(order.estimatedTotal),
     actualTotal: Formatters.currency(order.actualTotal),
     addOns: order.addOns,
     addOnTotal: Formatters.currency(order.addOnTotal),
     wdfCreditApplied: Formatters.currency(order.wdfCreditApplied),
     wdfCreditGenerated: Formatters.currency(order.wdfCreditGenerated),
-    weightDifference: Formatters.weight(order.weightDifference),
     affiliateCommission: Formatters.currency(order.affiliateCommission),
     paymentStatus: Formatters.status(order.paymentStatus, 'payment'),
     createdAt: Formatters.datetime(order.createdAt),
@@ -139,16 +138,16 @@ exports.updateOrderStatus = async (req, res) => {
       });
     }
 
-    // Check for valid status transition
-    const validTransitions = {
-      pending: ['processing', 'cancelled'],
-      processing: ['processed', 'cancelled'],
-      processed: ['complete'],
-      complete: [],
-      cancelled: []
-    };
+    // ready_for_pickup has exactly one writer — orderReadyGateService.applyReadyGate.
+    // A direct PUT to it is always rejected (design §6.4).
+    if (status === 'ready_for_pickup') {
+      return res.status(400).json({
+        success: false,
+        message: 'ready_for_pickup is set by the payment gate and cannot be set directly'
+      });
+    }
 
-    if (!validTransitions[order.status].includes(status)) {
+    if (!canTransition(order.status, status)) {
       return res.status(400).json({
         success: false,
         message: `Invalid status transition from ${order.status} to ${status}`
@@ -159,60 +158,28 @@ exports.updateOrderStatus = async (req, res) => {
     const customer = await Customer.findOne({ customerId: order.customerId });
     const affiliate = await Affiliate.findOne({ affiliateId: order.affiliateId });
 
-    // Update order status
+    // Update order status (pre-save stamps the lifecycle timestamp set-once).
+    // Payment links/QRs are generated ONCE at intake (PR 7) — the inline
+    // payment-trigger block that used to live here is gone (design §6.4).
     order.status = status;
-
-    // Update actual weight when transitioning to processing or processed
-    if ((status === 'processing' || status === 'processed') && actualWeight) {
+    if (actualWeight) {
       order.actualWeight = parseFloat(actualWeight);
-      
-      
-      // Generate post-weigh payment request if this order is still pending payment
-      if (customer && order.paymentStatus === 'pending') {
-        // Calculate total with actual weight
-        const actualTotal = req.body.actualTotal || order.actualTotal || order.estimatedTotal;
-        
-        // Generate payment links
-        const paymentLinkService = require('../services/paymentLinkService');
-        const { links, qrCodes, shortOrderId, amount } = await paymentLinkService.generatePaymentLinks(
-          order._id,
-          actualTotal,
-          customer.name || `${customer.firstName} ${customer.lastName}`
-        );
-        
-        // Update order with payment information
-        order.paymentStatus = 'awaiting';
-        order.paymentAmount = parseFloat(amount);
-        order.paymentLinks = links;
-        order.paymentQRCodes = qrCodes;
-        order.paymentRequestedAt = new Date();
-        
-        logger.info(`Generated V2 payment links for order ${order.orderId} - Amount: $${amount}`);
-
-        // Send payment request email to customer
-        try {
-          await emailService.sendV2PaymentRequest({
-            customer,
-            order,
-            paymentAmount: parseFloat(amount),
-            paymentLinks: links,
-            qrCodes
-          });
-          logger.info(`V2 payment request email sent to ${customer.email} for order ${order.orderId}`);
-        } catch (emailError) {
-          logger.error('Error sending payment request email:', emailError);
-        }
-      }
     }
 
     await order.save();
 
+    // The processed transition runs the canonical ready gate:
+    // verified -> ready_for_pickup (Path B), unpaid -> held at store.
+    if (status === 'processed') {
+      await applyReadyGate(order, { trigger: 'status_put' });
+    }
+
     // Send status update email to customer
-    if (customer && ['scheduled', 'processing', 'processed', 'complete'].includes(status)) {
+    if (customer && ['processed', 'picked_up', 'delivered'].includes(status)) {
       await emailService.sendOrderStatusUpdateEmail(customer, order, status);
 
-      // If order is complete, also notify affiliate of commission
-      if (status === 'complete' && affiliate) {
+      // Commission realizes at delivered (design §6.4)
+      if (status === 'delivered' && affiliate) {
         await emailService.sendAffiliateCommissionEmail(affiliate, order, customer);
       }
     }
@@ -248,13 +215,19 @@ exports.cancelOrder = ControllerHelpers.asyncWrapper(async (req, res) => {
     return ControllerHelpers.sendError(res, 'Order not found', 404);
   }
 
-  // Check if order can be cancelled - only pending orders can be cancelled
-  if (order.status !== 'pending') {
-    return ControllerHelpers.sendError(res, 
-      `Orders in ${order.status} status cannot be cancelled. Only pending orders can be cancelled.`, 
+  // Cancellable only from in_progress or processed (shared TRANSITIONS map).
+  if (!canTransition(order.status, 'cancelled')) {
+    return ControllerHelpers.sendError(res,
+      `Orders in ${order.status} status cannot be cancelled. Only in_progress or processed orders can be cancelled.`,
       400
     );
   }
+
+  // PR 6 HANDOFF (explicit, do not implement here): when the durable Bag module
+  // lands (PR 6), cancellation must release this order's bag back to 'active'
+  // via bagService.releaseForCancelledOrder({ bagId: order.bagId }). The Bag
+  // model does not exist in this PR, so there is deliberately no call here —
+  // PR 6's plan adds it and its test.
 
   // Check authorization using AuthorizationHelpers
   if (!AuthorizationHelpers.canAccessOrder(req.user, order)) {
@@ -300,8 +273,7 @@ exports.bulkUpdateOrderStatus = async (req, res) => {
     const summary = await orderBulkService.bulkUpdateStatus({
       orderIds: req.body.orderIds,
       status: req.body.status,
-      user: req.user,
-      checkStatusTransition
+      user: req.user
     });
     res.status(200).json({ success: true, ...summary });
   } catch (err) {
@@ -399,11 +371,11 @@ exports.updatePaymentStatus = async (req, res) => {
       });
     }
 
-    // Check if order is complete (payment status can only be updated for complete orders)
-    if (order.status !== 'complete') {
+    // Check if order is delivered (payment status can only be updated for delivered orders)
+    if (order.status !== 'delivered') {
       return res.status(400).json({
         success: false,
-        message: 'Cannot update payment status for non-complete orders'
+        message: 'Cannot update payment status for non-delivered orders'
       });
     }
 
@@ -535,14 +507,11 @@ exports.searchOrders = ControllerHelpers.asyncWrapper(async (req, res) => {
       } : null,
       affiliateId: order.affiliateId,
       status: Formatters.status(order.status, 'order'),
-      estimatedWeight: Formatters.weight(order.estimatedWeight),
       actualWeight: Formatters.weight(order.actualWeight),
-      estimatedTotal: Formatters.currency(order.estimatedTotal),
       actualTotal: Formatters.currency(order.actualTotal),
       createdAt: Formatters.datetime(order.createdAt),
       wdfCreditApplied: Formatters.currency(order.wdfCreditApplied),
-      wdfCreditGenerated: Formatters.currency(order.wdfCreditGenerated),
-      weightDifference: Formatters.weight(order.weightDifference)
+      wdfCreditGenerated: Formatters.currency(order.wdfCreditGenerated)
     };
   });
 
@@ -585,17 +554,17 @@ exports.getOrderStatistics = async (req, res) => {
 
     // Orders by status
     const ordersByStatus = {
-      pending: 0,
-      scheduled: 0,
-      processing: 0,
+      in_progress: 0,
       processed: 0,
-      complete: 0,
+      ready_for_pickup: 0,
+      picked_up: 0,
+      delivered: 0,
       cancelled: 0
     };
 
     let totalRevenue = 0;
     let deliveredCount = 0;
-    let totalEstimatedWeight = 0;
+    let totalActualWeight = 0;
     let orderWithWeightCount = 0;
 
     orders.forEach(order => {
@@ -604,28 +573,28 @@ exports.getOrderStatistics = async (req, res) => {
         ordersByStatus[order.status]++;
       }
 
-      // Calculate revenue from complete orders
-      if (order.status === 'complete') {
-        totalRevenue += order.actualTotal || order.estimatedTotal || 0;
+      // Calculate revenue from delivered orders
+      if (order.status === 'delivered') {
+        totalRevenue += order.actualTotal || 0;
         deliveredCount++;
       }
 
       // Calculate average weight
-      if (order.estimatedWeight) {
-        totalEstimatedWeight += order.estimatedWeight;
+      if (order.actualWeight) {
+        totalActualWeight += order.actualWeight;
         orderWithWeightCount++;
       }
     });
 
     const averageOrderValue = deliveredCount > 0 ? totalRevenue / deliveredCount : 0;
-    const averageEstimatedWeight = orderWithWeightCount > 0 ? totalEstimatedWeight / orderWithWeightCount : 0;
+    const averageWeight = orderWithWeightCount > 0 ? totalActualWeight / orderWithWeightCount : 0;
 
     const statistics = {
       totalOrders,
       ordersByStatus,
       totalRevenue,
       averageOrderValue,
-      averageEstimatedWeight
+      averageWeight
     };
 
     res.status(200).json({
@@ -774,15 +743,9 @@ exports.verifyPaymentManually = async (req, res) => {
     order.paymentNotes = `Manually verified by admin${req.user.email ? ` (${req.user.email})` : ''}. ${notes || ''}`;
     await order.save();
     
-    // If order is ready, send pickup notification
-    if (order.status === 'processed') {
-      const customer = await Customer.findOne({ customerId: order.customerId });
-      const affiliate = await Affiliate.findOne({ affiliateId: order.affiliateId });
-      
-      // Send notifications
-      logger.info(`Sending pickup notification after manual verification for order ${orderId}`);
-      // await emailService.sendPickupReadyNotification(order, customer, affiliate);
-    }
+    // Run the canonical ready gate (Path B: paid-then-processed; idempotent;
+    // notifies the affiliate via sendOrderReadyNotification when it promotes).
+    await applyReadyGate(order, { trigger: 'manual_verify' });
     
     res.json({
       success: true,
@@ -802,21 +765,5 @@ exports.verifyPaymentManually = async (req, res) => {
     });
   }
 };
-
-/**
- * Helper function to check if status transition is valid
- */
-function checkStatusTransition(currentStatus, newStatus) {
-  const validTransitions = {
-    'pending': ['scheduled', 'processing', 'cancelled'],
-    'scheduled': ['processing', 'cancelled'],
-    'processing': ['processed'],
-    'processed': ['complete'],
-    'complete': [],
-    'cancelled': []
-  };
-
-  return validTransitions[currentStatus]?.includes(newStatus) || false;
-}
 
 module.exports = exports;
