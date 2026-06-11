@@ -163,6 +163,19 @@ exports.updateOrderStatus = async (req, res) => {
       order.actualWeight = parseFloat(actualWeight);
     }
 
+    // Spec §6.6: admin override to delivered = manual_confirm proof.
+    // Only when no proof exists — never clobber a code/PIN-confirmed proof.
+    if (status === 'delivered'
+        && ['admin', 'administrator'].includes(req.user.role)
+        && !(order.proofOfDelivery && order.proofOfDelivery.method)) {
+      order.proofOfDelivery = {
+        method: 'manual_confirm',
+        confirmedByRole: 'admin',
+        confirmedById: String(req.user.id),
+        confirmedAt: new Date()
+      };
+    }
+
     await order.save();
 
     // The processed transition runs the canonical ready gate:
