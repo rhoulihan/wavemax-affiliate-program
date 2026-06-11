@@ -7,8 +7,17 @@ const { authenticate, authorize } = require('../middleware/auth');
 const { checkRole } = require('../middleware/rbac');
 const { body } = require('express-validator');
 const { customPasswordValidator } = require('../utils/passwordValidator');
-const { registrationLimiter } = require('../middleware/rateLimiting');
+const { registrationLimiter, createCustomLimiter } = require('../middleware/rateLimiting');
 const { profileAddressValidation, handleValidationErrors } = require('../middleware/locationValidation');
+
+// Tight limiter on top of the global apiLimiter for the public claim
+// resolver (anti-enumeration, spec §9 — mirrors bagRoutes' bag-resolve).
+const claimResolveLimiter = createCustomLimiter({
+  windowMs: 15 * 60 * 1000,
+  max: 60,
+  name: 'claim-resolve',
+  skip: () => process.env.NODE_ENV === 'test'
+});
 
 /**
  * @route   GET /api/customers/check-rate-limit
@@ -37,9 +46,9 @@ router.get('/check-rate-limit', (req, res, next) => {
 /**
  * @route   GET /api/v1/customers/claim/:bagToken
  * @desc    Resolve a scanned bag token (claimable | claimed | invalid)
- * @access  Public (rate-limited globally; anti-enumeration)
+ * @access  Public (rate-limited; anti-enumeration)
  */
-router.get('/claim/:bagToken', customerController.resolveClaim);
+router.get('/claim/:bagToken', claimResolveLimiter, customerController.resolveClaim);
 
 /**
  * @route   POST /api/v1/customers/claim/:bagToken/register
