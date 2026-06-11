@@ -353,13 +353,11 @@ class Formatters {
 
     const statusMaps = {
       order: {
-        pending: 'Pending',
-        scheduled: 'Scheduled',
-        collected: 'Collected',
-        processing: 'Processing',
+        in_progress: 'In Progress',
         processed: 'Processed',
+        ready_for_pickup: 'Ready for Pickup',
+        picked_up: 'Picked Up',
         delivered: 'Delivered',
-        completed: 'Completed',
         cancelled: 'Cancelled'
       },
       payment: {
@@ -373,12 +371,10 @@ class Formatters {
         overpaid: 'Overpaid'
       },
       bag: {
-        pending: 'Pending',
-        collected: 'Collected',
-        processing: 'In Processing',
+        intake: 'Checked In',
         processed: 'Processed',
-        delivered: 'Delivered',
-        completed: 'Completed'
+        picked_up: 'Picked Up',
+        delivered: 'Delivered'
       }
     };
 

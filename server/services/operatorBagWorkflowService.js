@@ -4,7 +4,7 @@
 // QR code drives stage 1 (scanCustomer), bag QR codes drive stages 2+3
 // (scanBag/scanProcessed). weighBags is the commit point that locks the
 // total, triggers V2 payment request emails, and moves the order into
-// 'processing'. Controllers map BagWorkflowError to HTTP responses.
+// 'in_progress'. Controllers map BagWorkflowError to HTTP responses.
 
 const Order = require('../models/Order');
 const Customer = require('../models/Customer');
@@ -105,7 +105,7 @@ async function scanCustomer({ customerId, bagId, operatorId, req }) {
 
   const currentOrder = await Order.findOne({
     customerId: customer.customerId,
-    status: { $in: ['pending', 'processing', 'processed'] }
+    status: { $in: ['in_progress', 'processed'] }
   }).sort({ createdAt: -1 });
 
   if (!currentOrder) {
@@ -136,15 +136,15 @@ async function scanCustomer({ customerId, bagId, operatorId, req }) {
     }
     if (!currentOrder.bags) currentOrder.bags = [];
 
-    const existingBag = currentOrder.bags.find(b => b.bagId === effectiveBagId);
+    const existingBag = currentOrder.bags.find(b => b.bagToken === effectiveBagId);
     if (!existingBag) {
       currentOrder.bags.push({
-        bagId: effectiveBagId,
+        bagToken: effectiveBagId,
         bagNumber: extractedBagNumber || currentOrder.bags.length + 1,
-        status: 'processing',
+        status: 'intake',
         weight: 0,
-        scannedAt: { processing: new Date() },
-        scannedBy: { processing: operatorId }
+        scannedAt: { intake: new Date() },
+        scannedBy: { intake: operatorId }
       });
       await currentOrder.save();
       bagRegistered = true;
@@ -184,7 +184,6 @@ async function scanCustomer({ customerId, bagId, operatorId, req }) {
       bagsWeighed: currentOrder.bagsWeighed,
       bagsProcessed: currentOrder.bagsProcessed,
       bagsPickedUp: currentOrder.bagsPickedUp,
-      estimatedWeight: currentOrder.estimatedWeight,
       actualWeight: currentOrder.actualWeight,
       status: currentOrder.status,
       bags: currentOrder.bags || [],
@@ -211,7 +210,7 @@ async function scanBag({ qrCode }) {
 
   const currentOrder = await Order.findOne({
     customerId: customer.customerId,
-    status: { $in: ['pending', 'processing', 'processed'] }
+    status: { $in: ['in_progress', 'processed'] }
   })
     .sort({ createdAt: -1 })
     .populate('customer', 'firstName lastName phone email address');
@@ -236,10 +235,9 @@ async function receiveOrder({ orderId, bagWeights, totalWeight, operatorId, req 
   if (!order) throw new BagWorkflowError('order_not_found', 'Order not found', 404);
 
   order.actualWeight = totalWeight;
-  order.status = 'processing';
+  order.status = 'in_progress';
   order.assignedOperator = operatorId;
   order.processingStarted = new Date();
-  order.processingStartedAt = new Date();
   order.bagsWeighed = (order.bagsWeighed || 0) + bagWeights.length;
 
   if (!order.bagWeights) order.bagWeights = [];
@@ -259,7 +257,7 @@ async function receiveOrder({ orderId, bagWeights, totalWeight, operatorId, req 
     action: 'order_received',
     totalWeight,
     numberOfBags: bagWeights.length,
-    newStatus: 'processing'
+    newStatus: 'in_progress'
   }, req);
 
   return order;
@@ -269,41 +267,39 @@ async function weighBags({ orderId, bags, operatorId, req }) {
   const order = await Order.findOne({ orderId });
   if (!order) throw new BagWorkflowError('order_not_found', 'Order not found', 404);
 
-  for (const bagData of bags) {
-    const existingBagIndex = order.bags.findIndex(b => b.bagId === bagData.bagId);
+  // Input payload keeps its legacy `bagId` key (controller contract); schema side is bagToken.
+  for (const { bagId: inputBagToken, weight: inputWeight } of bags) {
+    const existingBagIndex = order.bags.findIndex(b => b.bagToken === inputBagToken);
     if (existingBagIndex >= 0) {
-      order.bags[existingBagIndex].weight = bagData.weight;
-      order.bags[existingBagIndex].status = 'processing';
-      if (!order.bags[existingBagIndex].scannedAt.processing) {
-        order.bags[existingBagIndex].scannedAt.processing = new Date();
+      order.bags[existingBagIndex].weight = inputWeight;
+      order.bags[existingBagIndex].status = 'intake';
+      if (!order.bags[existingBagIndex].scannedAt.intake) {
+        order.bags[existingBagIndex].scannedAt.intake = new Date();
       }
-      if (!order.bags[existingBagIndex].scannedBy.processing) {
-        order.bags[existingBagIndex].scannedBy.processing = operatorId;
+      if (!order.bags[existingBagIndex].scannedBy.intake) {
+        order.bags[existingBagIndex].scannedBy.intake = operatorId;
       }
     } else {
       order.bags.push({
-        bagId: bagData.bagId,
+        bagToken: inputBagToken,
         bagNumber: order.bags.length + 1,
-        status: 'processing',
-        weight: bagData.weight,
-        scannedAt: { processing: new Date() },
-        scannedBy: { processing: operatorId }
+        status: 'intake',
+        weight: inputWeight,
+        scannedAt: { intake: new Date() },
+        scannedBy: { intake: operatorId }
       });
     }
   }
 
   order.actualWeight = order.bags.reduce((sum, bag) => sum + (bag.weight || 0), 0);
-  order.status = 'processing';
+  order.status = 'in_progress';
   order.assignedOperator = operatorId;
-  if (!order.processingStartedAt) order.processingStartedAt = new Date();
   order.bagsWeighed = order.bags.filter(b => b.weight > 0).length;
 
   await order.save();
 
   // V2 payment request: fires only when the LAST bag is weighed.
   if (order.bagsWeighed === order.numberOfBags) {
-    order.weightDifference = order.actualWeight - order.estimatedWeight;
-
     const customer = await Customer.findOne({ customerId: order.customerId });
     if (customer) {
       const paymentAmount = order.paymentAmount
@@ -348,7 +344,7 @@ async function weighBags({ orderId, bags, operatorId, req }) {
       totalBags: order.bags.length,
       bagsWeighed: order.bags.length,
       bagsProcessed: order.bags.filter(b => b.status === 'processed').length,
-      bagsCompleted: order.bags.filter(b => b.status === 'completed').length
+      bagsCompleted: order.bags.filter(b => b.status === 'picked_up').length
     }
   };
 }
@@ -417,8 +413,8 @@ async function scanProcessed({ qrCode, operatorId, req }) {
 
   const order = await Order.findOne({
     customerId,
-    'bags.bagId': bagId,
-    status: { $in: ['processing', 'processed'] }
+    'bags.bagToken': bagId,
+    status: { $in: ['in_progress', 'processed'] }
   });
 
   if (!order) {
@@ -431,19 +427,19 @@ async function scanProcessed({ qrCode, operatorId, req }) {
   const customer = await Customer.findOne({ customerId: order.customerId });
   if (customer) order.customer = customer;
 
-  const bag = order.bags.find(b => b.bagId === bagId);
+  const bag = order.bags.find(b => b.bagToken === bagId);
 
   if (bag.status === 'processed') {
-    const allBagsProcessed = order.bags.every(b => b.status === 'processed' || b.status === 'completed');
+    const allBagsProcessed = order.bags.every(b => b.status === 'processed' || b.status === 'picked_up');
     if (allBagsProcessed) {
       return { action: 'show_pickup_modal', order, allBagsProcessed: true };
     }
-    const remainingBags = order.bags.filter(b => b.status === 'processing').length;
+    const remainingBags = order.bags.filter(b => b.status === 'intake').length;
     return {
       warning: 'duplicate_scan',
       message: `This bag has already been processed. ${remainingBags} bags still need processing.`,
       bag: {
-        bagId: bag.bagId,
+        bagId: bag.bagToken,
         bagNumber: bag.bagNumber,
         status: bag.status,
         processedAt: bag.scannedAt.processed
@@ -457,10 +453,10 @@ async function scanProcessed({ qrCode, operatorId, req }) {
   bag.scannedBy.processed = operatorId;
 
   order.bagsProcessed = order.bags.filter(
-    b => b.status === 'processed' || b.status === 'completed'
+    b => b.status === 'processed' || b.status === 'picked_up'
   ).length;
   const allBagsProcessed = order.bags.every(
-    b => b.status === 'processed' || b.status === 'completed'
+    b => b.status === 'processed' || b.status === 'picked_up'
   );
 
   if (allBagsProcessed) {
@@ -510,7 +506,7 @@ async function scanProcessed({ qrCode, operatorId, req }) {
   return {
     order,
     bag: {
-      bagId: bag.bagId,
+      bagId: bag.bagToken,
       bagNumber: bag.bagNumber,
       status: bag.status,
       weight: bag.weight
@@ -519,7 +515,7 @@ async function scanProcessed({ qrCode, operatorId, req }) {
       totalBags: order.bags.length,
       bagsWeighed: order.bags.length,
       bagsProcessed: order.bagsProcessed,
-      bagsCompleted: order.bags.filter(b => b.status === 'completed').length
+      bagsCompleted: order.bags.filter(b => b.status === 'picked_up').length
     }
   };
 }

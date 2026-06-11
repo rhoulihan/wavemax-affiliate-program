@@ -109,7 +109,7 @@ class PaymentVerificationJob {
       // Get orders awaiting payment that have been weighed (WDF complete)
       const pendingOrders = await Order.find({
         paymentStatus: 'awaiting',
-        status: { $in: ['processing', 'processed'] }, // Order has been weighed
+        status: { $in: ['in_progress', 'processed'] }, // Order has been weighed (born at intake)
         paymentCheckAttempts: { $lt: this.maxAttempts }
       });
       

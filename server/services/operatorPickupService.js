@@ -66,11 +66,10 @@ async function markOrderReady({ orderId, operatorId, req }) {
 
   order.processedAt = new Date();
   order.status = 'processed';
-  order.bagsProcessed = order.numberOfBags;
   await order.save();
 
   // Notify affiliate only when every bag is accounted for.
-  const affiliateNotified = order.affiliateId && order.bagsProcessed === order.numberOfBags;
+  const affiliateNotified = Boolean(order.affiliateId);
   if (affiliateNotified) {
     const affiliate = await Affiliate.findOne({ affiliateId: order.affiliateId });
 
@@ -85,7 +84,7 @@ async function markOrderReady({ orderId, operatorId, req }) {
         affiliateName: affiliate.contactPerson || affiliate.businessName,
         orderId: order.orderId,
         customerName,
-        numberOfBags: order.numberOfBags,
+        numberOfBags: 1,
         totalWeight: order.actualWeight
       });
     }
@@ -95,9 +94,7 @@ async function markOrderReady({ orderId, operatorId, req }) {
     operatorId,
     orderId,
     action: 'order_marked_ready',
-    affiliateNotified: order.bagsProcessed === order.numberOfBags,
-    bagsProcessed: order.bagsProcessed,
-    totalBags: order.numberOfBags,
+    affiliateNotified,
     newStatus: 'ready'
   }, req);
 
@@ -116,7 +113,7 @@ async function completePickup({ orderId, bagIds, operatorId, req }) {
     });
   }
 
-  const orderBagIds = new Set(order.bags.map(b => b.bagId));
+  const orderBagIds = new Set(order.bags.map(b => b.bagToken));
   for (const bagId of new Set(bagIds)) {
     if (!orderBagIds.has(bagId)) {
       throw new PickupError('invalid_bag', 'Invalid bag', 400, {
@@ -127,14 +124,12 @@ async function completePickup({ orderId, bagIds, operatorId, req }) {
 
   const now = new Date();
   for (const bag of order.bags) {
-    bag.status = 'completed';
-    bag.scannedAt.completed = now;
-    bag.scannedBy.completed = operatorId;
+    bag.status = 'picked_up';
+    bag.scannedAt.picked_up = now;
+    bag.scannedBy.picked_up = operatorId;
   }
 
-  order.status = 'complete';
-  order.completedAt = now;
-  order.bagsPickedUp = order.bags.length;
+  order.status = 'delivered';
 
   await order.save();
 
@@ -170,7 +165,7 @@ async function completePickup({ orderId, bagIds, operatorId, req }) {
     orderId,
     action: 'order_picked_up',
     numberOfBags: order.bags.length,
-    newStatus: 'complete'
+    newStatus: 'delivered'
   }, req);
 
   return order;
@@ -180,12 +175,9 @@ async function confirmPickup({ orderId, numberOfBags, operatorId, req }) {
   const order = await Order.findOne({ orderId });
   if (!order) throw new PickupError('order_not_found', 'Order not found', 404);
 
-  const bagsToPickup = numberOfBags || 1;
-  order.bagsPickedUp = Math.min(order.bagsPickedUp + bagsToPickup, order.numberOfBags);
-
-  if (order.bagsPickedUp >= order.numberOfBags) {
-    order.status = 'complete';
-    order.completedAt = new Date();
+  // One bag = one order: any confirm completes the order (legacy path; PR 9 deletes this).
+  {
+    order.status = 'delivered';
 
     if (order.customerId) {
       const customer = await Customer.findOne({ customerId: order.customerId });
@@ -197,7 +189,7 @@ async function confirmPickup({ orderId, numberOfBags, operatorId, req }) {
         await emailService.sendOrderPickedUpNotification(customer.email, {
           customerName: `${customer.firstName} ${customer.lastName}`,
           orderId: order.orderId,
-          numberOfBags: order.numberOfBags,
+          numberOfBags: 1,
           totalWeight: order.actualWeight,
           affiliateName: affiliateDisplayName(affiliate),
           businessName: affiliate ? affiliate.businessName : null
@@ -212,16 +204,14 @@ async function confirmPickup({ orderId, numberOfBags, operatorId, req }) {
     operatorId,
     orderId,
     action: 'bags_pickup_confirmed',
-    bagsPickedUp: bagsToPickup,
-    totalBagsPickedUp: order.bagsPickedUp,
-    orderComplete: order.status === 'complete',
+    orderComplete: order.status === 'delivered',
     newStatus: order.status
   }, req);
 
   return {
-    bagsPickedUp: order.bagsPickedUp,
-    totalBags: order.numberOfBags,
-    orderComplete: order.status === 'complete'
+    bagsPickedUp: 1,
+    totalBags: 1,
+    orderComplete: order.status === 'delivered'
   };
 }
 

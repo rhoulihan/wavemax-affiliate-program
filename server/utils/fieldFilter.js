@@ -67,24 +67,25 @@ const fieldDefinitions = {
 
   // Order fields visible to different roles
   order: {
-    customer: ['orderId', 'pickupDate', 'pickupTime',
-      'status', 'estimatedSize', 'actualWeight', 'estimatedTotal', 'actualTotal',
-      'deliveryFee', 'paymentStatus', 'createdAt', 
-      'wdfCreditApplied', 'wdfCreditGenerated', 'weightDifference'],
-    affiliate: ['orderId', 'customerId', 'pickupDate', 'pickupTime',
-      'status', 'estimatedSize', 'actualWeight', 'baseRate',
-      'deliveryFee', 'estimatedTotal', 'actualTotal', 'affiliateCommission',
-      'paymentStatus', 'specialPickupInstructions',
-      'washInstructions', 'createdAt', 'pickedUpAt',
-      'processedAt', 'readyForDeliveryAt', 'deliveredAt',
-      'wdfCreditApplied', 'wdfCreditGenerated', 'weightDifference'],
-    admin: ['_id', 'orderId', 'customerId', 'affiliateId', 'pickupDate', 'pickupTime',
-      'status', 'estimatedSize', 'actualWeight',
-      'baseRate', 'deliveryFee', 'estimatedTotal', 'actualTotal', 'affiliateCommission',
-      'paymentStatus', 'specialPickupInstructions',
-      'washInstructions', 'createdAt', 'pickedUpAt',
-      'processedAt', 'readyForDeliveryAt', 'deliveredAt', 'cancelledAt',
-      'wdfCreditApplied', 'wdfCreditGenerated', 'weightDifference']
+    customer: ['orderId',
+      'status', 'actualWeight', 'actualTotal',
+      'deliveryFee', 'paymentStatus', 'createdAt', 'intakeAt',
+      'readyForPickupAt', 'pickedUpAt', 'deliveredAt',
+      'wdfCreditApplied', 'wdfCreditGenerated'],
+    affiliate: ['orderId', 'customerId',
+      'status', 'actualWeight', 'baseRate',
+      'deliveryFee', 'actualTotal', 'affiliateCommission',
+      'paymentStatus', 'heldAtStore',
+      'washInstructions', 'createdAt', 'intakeAt', 'pickedUpAt',
+      'processedAt', 'readyForPickupAt', 'deliveredAt',
+      'wdfCreditApplied', 'wdfCreditGenerated'],
+    admin: ['_id', 'orderId', 'customerId', 'affiliateId',
+      'status', 'actualWeight',
+      'baseRate', 'deliveryFee', 'actualTotal', 'affiliateCommission',
+      'paymentStatus', 'paymentEscalated', 'heldAtStore',
+      'washInstructions', 'createdAt', 'intakeAt', 'pickedUpAt',
+      'processedAt', 'readyForPickupAt', 'deliveredAt', 'cancelledAt',
+      'wdfCreditApplied', 'wdfCreditGenerated']
   },
 
 
