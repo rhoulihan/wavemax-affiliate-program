@@ -15,6 +15,8 @@ describe('Affiliate API', () => {
   let csrfToken;
 
   beforeEach(async () => {
+    await require('../../server/modules/onboarding/AffiliateInvite').deleteMany({});
+
     // Create agent with session support
     agent = createAgent(app);
 
@@ -55,10 +57,22 @@ describe('Affiliate API', () => {
   });
 
   test('should register a new affiliate', async () => {
+    // Registration is invite-only: seed a pending invite for the email.
+    const AffiliateInvite = require('../../server/modules/onboarding/AffiliateInvite');
+    const encryptionUtil = require('../../server/utils/encryption');
+    const inviteToken = encryptionUtil.generateToken(32);
+    await AffiliateInvite.create({
+      tokenHash: AffiliateInvite.hashToken(inviteToken),
+      email: 'new@example.com',
+      expiresAt: new Date(Date.now() + 72 * 60 * 60 * 1000),
+      createdBy: new (require('mongoose').Types.ObjectId)()
+    });
+
     const res = await agent
       .post('/api/v1/affiliates/register')
       .set('X-CSRF-Token', csrfToken)
       .send({
+        inviteToken,
         firstName: 'New',
         lastName: 'Affiliate',
         email: 'new@example.com',

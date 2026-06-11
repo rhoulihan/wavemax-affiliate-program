@@ -16,9 +16,11 @@ const { registrationAddressValidation, profileAddressValidation, handleValidatio
  * @access  Public
  */
 router.post('/register', registrationLimiter, [
+  body('inviteToken').notEmpty().isString().withMessage('Invite token is required'),
   body('firstName').notEmpty().withMessage('First name is required'),
   body('lastName').notEmpty().withMessage('Last name is required'),
-  body('email').isEmail().withMessage('Valid email is required'),
+  // Email is OPTIONAL and IGNORED — the account email is forced from the invite.
+  body('email').optional({ checkFalsy: true }).isEmail().withMessage('Valid email is required'),
   body('phone').notEmpty().withMessage('Phone number is required'),
   ...registrationAddressValidation,
   body('minimumDeliveryFee').optional().isNumeric().withMessage('Minimum delivery fee must be a number'),
