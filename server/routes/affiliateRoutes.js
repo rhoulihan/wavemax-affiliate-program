@@ -123,8 +123,9 @@ router.delete('/:affiliateId/delete-all-data', authenticate, authorize(['affilia
 /**
  * @route   POST /api/v1/affiliates/:affiliateId/w9
  * @desc    Upload (or re-upload) an encrypted W-9 — self affiliate or administrator
- * @access  Private (CSRF-enforced; multipart field 'w9'; fileUploadLimiter)
+ * @access  Private (CSRF-enforced; multipart field 'w9'; fileUploadLimiter
+ *          runs AFTER authenticate so its user-keyed keyGenerator sees req.user)
  */
-router.post('/:affiliateId/w9', fileUploadLimiter, authenticate, uploadW9, w9Controller.uploadW9);
+router.post('/:affiliateId/w9', authenticate, fileUploadLimiter, uploadW9, w9Controller.uploadW9);
 
 module.exports = router;

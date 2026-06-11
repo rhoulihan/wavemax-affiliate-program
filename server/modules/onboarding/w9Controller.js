@@ -51,19 +51,11 @@ exports.uploadW9 = ControllerHelpers.asyncWrapper(async (req, res) => {
   const affiliate = await Affiliate.findOne({ affiliateId });
   if (!affiliate) return ControllerHelpers.sendError(res, 'Affiliate not found', 404);
 
-  // Re-upload cleanup: remove the previous encrypted file before replacing.
-  if (affiliate.w9Document && affiliate.w9Document.storageKey) {
-    try {
-      await secureFileStore.deleteFile(affiliate.w9Document.storageKey);
-    } catch (cleanupError) {
-      logger.warn('Failed to delete prior W-9 file (continuing)', {
-        affiliateId, storageKey: affiliate.w9Document.storageKey, error: cleanupError.message
-      });
-    }
-  }
-
-  // Filesystem failures must never leak paths into the HTTP response —
-  // log the detail, return a generic message (review-mandated hardening).
+  // Store the NEW file FIRST (review-mandated ordering): if the store fails,
+  // the prior w9Document metadata still points at an existing file — no
+  // dangling metadata, no broken admin downloads. Filesystem failures must
+  // never leak paths into the HTTP response — log the detail, return a
+  // generic message (review-mandated hardening).
   let storageKey, sha256;
   try {
     ({ storageKey, sha256 } = await secureFileStore.storeEncrypted(req.file.buffer, {
@@ -74,6 +66,18 @@ exports.uploadW9 = ControllerHelpers.asyncWrapper(async (req, res) => {
   } catch (storeError) {
     logger.error('W-9 encrypted store failed', { affiliateId, error: storeError.message });
     return ControllerHelpers.sendError(res, 'Unable to store W-9 document', 500);
+  }
+
+  // Re-upload cleanup: best-effort delete of the previous encrypted file
+  // AFTER the replacement is safely stored (spec §6.2 — no orphan files).
+  if (affiliate.w9Document && affiliate.w9Document.storageKey) {
+    try {
+      await secureFileStore.deleteFile(affiliate.w9Document.storageKey);
+    } catch (cleanupError) {
+      logger.warn('Failed to delete prior W-9 file (continuing)', {
+        affiliateId, storageKey: affiliate.w9Document.storageKey, error: cleanupError.message
+      });
+    }
   }
 
   const now = new Date();
