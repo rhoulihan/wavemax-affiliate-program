@@ -7,6 +7,7 @@ const SystemConfig = require('../../models/SystemConfig');
 const encryptionUtil = require('../../utils/encryption');
 const onboardingEmail = require('../../services/email/dispatcher/onboarding');
 const logger = require('../../utils/logger');
+const { logAuditEvent, AuditEvents } = require('../../utils/auditLogger');
 
 /**
  * Typed domain error. `code` is machine-readable; `statusCode` maps to HTTP.
@@ -131,6 +132,7 @@ async function resendInvite({ inviteId, adminId }) {
   await invite.save();
 
   logger.info('Affiliate invite re-sent', { inviteId: invite.inviteId, resendCount: invite.resendCount });
+  logAuditEvent(AuditEvents.INVITE_RESENT, { inviteId: invite.inviteId, adminId });
   return { invite, rawToken };
 }
 

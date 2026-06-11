@@ -92,6 +92,7 @@ const AuditEvents = {
   // Affiliate invites (invite-only onboarding, spec §9)
   INVITE_MINTED: 'INVITE_MINTED',
   INVITE_CONSUMED: 'INVITE_CONSUMED',
+  INVITE_RESENT: 'INVITE_RESENT',
   INVITE_REVOKED: 'INVITE_REVOKED'
 };
 

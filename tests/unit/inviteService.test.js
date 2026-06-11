@@ -3,8 +3,14 @@ jest.mock('../../server/services/email/dispatcher/onboarding', () => ({
   sendAffiliateInviteEmail: jest.fn().mockResolvedValue(true)
 }));
 
+jest.mock('../../server/utils/auditLogger', () => ({
+  logAuditEvent: jest.fn(),
+  AuditEvents: { INVITE_RESENT: 'INVITE_RESENT' }
+}));
+
 const mongoose = require('mongoose');
 const onboardingEmail = require('../../server/services/email/dispatcher/onboarding');
+const { logAuditEvent } = require('../../server/utils/auditLogger');
 const inviteService = require('../../server/modules/onboarding/inviteService');
 const { InviteError } = inviteService;
 const AffiliateInvite = require('../../server/modules/onboarding/AffiliateInvite');
@@ -118,6 +124,10 @@ describe('inviteService', () => {
       const revalidated = await inviteService.validateInvite(newRaw);
       expect(revalidated.resendCount).toBe(1);
       expect(onboardingEmail.sendAffiliateInviteEmail).toHaveBeenCalledTimes(2);
+      expect(logAuditEvent).toHaveBeenCalledWith(
+        'INVITE_RESENT',
+        { inviteId: invite.inviteId, adminId }
+      );
     });
 
     test('resend refreshes the expiry of an expired-but-pending invite', async () => {
