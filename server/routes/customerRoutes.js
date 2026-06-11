@@ -7,7 +7,7 @@ const { authenticate, authorize } = require('../middleware/auth');
 const { checkRole } = require('../middleware/rbac');
 const { body } = require('express-validator');
 const { customPasswordValidator } = require('../utils/passwordValidator');
-const { registrationLimiter, createCustomLimiter } = require('../middleware/rateLimiting');
+const { registrationLimiter, createCustomLimiter, sensitiveOperationLimiter } = require('../middleware/rateLimiting');
 const { profileAddressValidation, handleValidationErrors } = require('../middleware/locationValidation');
 
 // Tight limiter on top of the global apiLimiter for the public claim
@@ -132,6 +132,11 @@ router.get('/:customerId/orders', authenticate, customerController.getCustomerOr
  * @access  Private (self, affiliated affiliate, or admin)
  */
 router.get('/:customerId/dashboard', authenticate, customerController.getCustomerDashboardStats);
+
+// Delivery PIN (PR 9) — status is self-readable; reset regenerates and
+// returns the plaintext exactly once. CSRF enforced by default on the POST.
+router.get('/:customerId/delivery-pin', authenticate, authorize(['customer', 'administrator', 'admin']), customerController.getDeliveryPinStatus);
+router.post('/:customerId/delivery-pin/reset', authenticate, authorize(['customer']), sensitiveOperationLimiter, customerController.resetDeliveryPin);
 
 /**
  * @route   PUT /api/customers/:customerId/password
