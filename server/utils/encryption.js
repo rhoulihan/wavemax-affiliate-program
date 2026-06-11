@@ -184,4 +184,29 @@ exports.decryptField = (encryptedValue) => {
   }
 };
 
+/**
+ * Encrypt a binary Buffer with AES-256-GCM (spec §4.3 — W-9 file storage).
+ * Returns raw Buffers (not hex) — the secureFileStore frames them on disk.
+ * @param {Buffer} buf - Plaintext bytes
+ * @returns {{iv: Buffer, authTag: Buffer, data: Buffer}}
+ */
+exports.encryptBuffer = (buf) => {
+  const iv = crypto.randomBytes(16);
+  const cipher = crypto.createCipheriv('aes-256-gcm', Buffer.from(process.env.ENCRYPTION_KEY, 'hex'), iv);
+  const data = Buffer.concat([cipher.update(buf), cipher.final()]);
+  return { iv, authTag: cipher.getAuthTag(), data };
+};
+
+/**
+ * Decrypt a binary Buffer encrypted by encryptBuffer. Throws on a bad
+ * authTag (GCM integrity failure) — callers treat that as tampering.
+ * @param {{iv: Buffer, authTag: Buffer, data: Buffer}} parts
+ * @returns {Buffer} Plaintext bytes
+ */
+exports.decryptBuffer = ({ iv, authTag, data }) => {
+  const decipher = crypto.createDecipheriv('aes-256-gcm', Buffer.from(process.env.ENCRYPTION_KEY, 'hex'), iv);
+  decipher.setAuthTag(authTag);
+  return Buffer.concat([decipher.update(data), decipher.final()]);
+};
+
 module.exports = exports;
