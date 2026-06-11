@@ -45,8 +45,10 @@ async function autoDeliverPickedUpOrder(order, operatorId, req) {
   if (order.bags && order.bags[0]) {
     order.bags[0].status = 'delivered';
     order.bags[0].scannedAt.delivered = new Date();
-    // bags[].scannedBy.delivered is typed String ref Affiliate (door scans);
-    // re-intake is operator-confirmed, recorded in proofOfDelivery instead.
+    // bags[].scannedBy.delivered is typed String ref Affiliate — the affiliate
+    // physically delivered the bag; the operator confirmation lives in
+    // proofOfDelivery (parity with affiliateDeliveryService.confirmDelivery).
+    order.bags[0].scannedBy.delivered = order.affiliateId;
   }
   if (order.intake) {
     order.intake.deliveredAt = new Date();
@@ -55,9 +57,12 @@ async function autoDeliverPickedUpOrder(order, operatorId, req) {
 
   const customer = await Customer.findOne({ customerId: order.customerId });
   const affiliate = await Affiliate.findOne({ affiliateId: order.affiliateId });
+  const affiliateName = affiliate
+    ? (affiliate.businessName || `${affiliate.firstName} ${affiliate.lastName}`)
+    : null;
   try {
     if (customer) {
-      await emailService.sendCustomerDeliveredEmail(customer, order);
+      await emailService.sendCustomerDeliveredEmail(customer, order, { affiliateName });
     }
     if (affiliate && customer) {
       await emailService.sendAffiliateCommissionEmail(affiliate, order, customer);
