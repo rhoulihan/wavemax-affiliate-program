@@ -24,7 +24,6 @@ const {
 jest.mock('../../server/utils/emailService', () => ({
   sendV2PaymentRequest: jest.fn().mockResolvedValue(true),
   sendV2PaymentReminder: jest.fn().mockResolvedValue(true),
-  sendV2PaymentVerified: jest.fn().mockResolvedValue(true),
   sendOrderStatusUpdateEmail: jest.fn().mockResolvedValue(true),
   sendCustomerWelcomeEmail: jest.fn().mockResolvedValue(true),
   sendNewCustomerNotification: jest.fn().mockResolvedValue(true)

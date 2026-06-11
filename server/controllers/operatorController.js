@@ -6,9 +6,10 @@ const ControllerHelpers = require('../utils/controllerHelpers');
 const orderQueueService = require('../services/operatorOrderQueueService');
 const shiftStatsService = require('../services/operatorShiftStatsService');
 const supportService = require('../services/operatorSupportService');
-const pickupService = require('../services/operatorPickupService');
 const bagWorkflowService = require('../services/operatorBagWorkflowService');
 const orderIntakeService = require('../modules/orders/orderIntakeService');
+const orderAdvanceService = require('../modules/orders/orderAdvanceService');
+const extractBagToken = require('../modules/bags/extractBagToken');
 
 // Get order queue
 exports.getOrderQueue = ControllerHelpers.asyncWrapper(async (req, res) => {
@@ -231,7 +232,7 @@ exports.receiveOrder = async (req, res) => {
 exports.weighBags = async (req, res) => {
   try {
     const { order, reIntake } = await bagWorkflowService.weighBags({
-      bagToken: req.body.bagToken || req.body.bagId, // tolerate old field name one sprint
+      bagToken: req.body.bagToken,
       weight: req.body.weight,
       addOns: req.body.addOns,
       freshAddOnsFormPlaced: !!req.body.freshAddOnsFormPlaced,
@@ -248,52 +249,28 @@ exports.weighBags = async (req, res) => {
   }
 };
 
-// Mark bag as processed after WDF
-exports.markBagProcessed = async (req, res) => {
+// State-driven kiosk advance (PR 9): in_progress -> processed (gate runs),
+// ready_for_pickup -> picked_up (scan-OUT). Replaces scanProcessed /
+// completePickup. Accepts a raw bag token or the printed claim URL — in the
+// `bagToken` key only (the one-sprint old-field-name tolerance has ended).
+exports.advance = ControllerHelpers.asyncWrapper(async (req, res) => {
+  const bagToken = extractBagToken(req.body.bagToken);
+  if (!bagToken) return ControllerHelpers.sendError(res, 'A valid bag token is required', 400);
   try {
-    const result = await bagWorkflowService.markBagProcessed({
-      orderId: req.params.orderId,
-      operatorId: req.user.id,
-      req
-    });
-    res.json({
-      success: true,
-      message: `Bag ${result.bagsProcessed} of ${result.totalBags} marked as processed`,
-      ...result
-    });
+    const result = await orderAdvanceService.advance({ bagToken, operatorId: req.user.id, req });
+    ControllerHelpers.sendSuccess(res, { action: result.action, order: result.order },
+      `Order advanced to ${result.action}`);
   } catch (err) {
-    if (err.isBagWorkflowError) {
-      return res.status(err.status).json({ success: false, error: err.message, ...err.details });
+    if (err.isAdvanceError) {
+      return ControllerHelpers.sendError(res, err.message, err.status, { code: err.code });
     }
-    logger.error('Error marking bag as processed:', err);
-    res.status(500).json({ success: false, error: 'Failed to mark bag as processed' });
+    throw err;
   }
-};
+});
 
-// New endpoint for scanning processed bags
-exports.scanProcessed = async (req, res) => {
-  try {
-    const result = await bagWorkflowService.scanProcessed({
-      bagToken: req.body.bagToken || req.body.bagId || req.body.qrCode, // tolerate old field names one sprint
-      operatorId: req.user.id,
-      req
-    });
-    if (result.warning) {
-      return res.json({ success: false, ...result });
-    }
-    res.json({ success: true, ...result, message: 'Bag marked as processed' });
-  } catch (err) {
-    if (err.isBagWorkflowError) {
-      return res.status(err.status).json({ success: false, error: err.message, ...err.details });
-    }
-    logger.error('Error in scanProcessed:', err);
-    res.status(500).json({
-      success: false,
-      error: 'Failed to scan processed bag',
-      message: err.message
-    });
-  }
-};
+// Legacy kiosk endpoint — now a thin delegate onto the state-driven advance
+// engine (PR 9). Kept so already-deployed kiosk clients keep working.
+exports.scanProcessed = exports.advance;
 
 // Kiosk intake — operator JWT + CSRF. One bag = one order (spec §6.4 / §5).
 exports.intake = ControllerHelpers.asyncWrapper(async (req, res) => {
@@ -334,71 +311,6 @@ exports.intake = ControllerHelpers.asyncWrapper(async (req, res) => {
     throw err;
   }
 });
-
-// Mark order as ready for pickup (deprecated - use scanProcessed instead)
-exports.markOrderReady = async (req, res) => {
-  try {
-    const order = await pickupService.markOrderReady({
-      orderId: req.params.orderId,
-      operatorId: req.user.id,
-      req
-    });
-    res.json({ success: true, message: 'Order marked as ready for pickup', order });
-  } catch (err) {
-    if (err.isPickupError) {
-      return res.status(err.status).json({ success: false, error: err.message, ...err.details });
-    }
-    logger.error('Error marking order ready:', err);
-    res.status(500).json({ success: false, error: 'Failed to mark order as ready' });
-  }
-};
-
-// New endpoint for completing pickup with bag verification
-exports.completePickup = async (req, res) => {
-  try {
-    const order = await pickupService.completePickup({
-      orderId: req.body.orderId,
-      bagIds: req.body.bagIds,
-      operatorId: req.user.id,
-      req
-    });
-    res.json({
-      success: true,
-      message: 'Order completed successfully',
-      orderComplete: true,
-      order
-    });
-  } catch (err) {
-    if (err.isPickupError) {
-      return res.status(err.status).json({ success: false, error: err.message, ...err.details });
-    }
-    logger.error('Error completing pickup:', err);
-    res.status(500).json({
-      success: false,
-      error: 'Failed to complete pickup',
-      message: err.message
-    });
-  }
-};
-
-// Confirm pickup by affiliate (legacy)
-exports.confirmPickup = async (req, res) => {
-  try {
-    const result = await pickupService.confirmPickup({
-      orderId: req.body.orderId,
-      numberOfBags: req.body.numberOfBags,
-      operatorId: req.user.id,
-      req
-    });
-    res.json({ success: true, message: 'Pickup confirmed', ...result });
-  } catch (err) {
-    if (err.isPickupError) {
-      return res.status(err.status).json({ success: false, error: err.message, ...err.details });
-    }
-    logger.error('Error confirming pickup:', err);
-    res.status(500).json({ success: false, error: 'Failed to confirm pickup' });
-  }
-};
 
 // Get today's stats for scanner interface
 exports.getTodayStats = async (req, res) => {
