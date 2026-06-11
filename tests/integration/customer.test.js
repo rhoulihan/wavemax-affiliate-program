@@ -323,32 +323,20 @@ describe('Customer Integration Tests', () => {
           orderId: 'ORD001',
           customerId: 'CUST123',
           affiliateId: 'AFF123',
-          pickupDate: new Date('2025-05-26'),
-          pickupTime: 'morning',
-
-          status: 'complete',
-          estimatedWeight: 30,
-          numberOfBags: 2,
+          bagId: 'BAG-cust-orders-1',
+          status: 'delivered',
           actualWeight: 23.5,
           baseRate: 1.89,
-          deliveryFee: 35,
-          minimumDeliveryFee: 25,
-          perBagDeliveryFee: 5
+          feeBreakdown: { numberOfBags: 1, minimumFee: 25, perBagFee: 5, totalFee: 25, minimumApplied: true }
         },
         {
           orderId: 'ORD002',
           customerId: 'CUST123',
           affiliateId: 'AFF123',
-          pickupDate: new Date('2025-05-26'),
-          pickupTime: 'afternoon',
-
-          status: 'processing',
-          estimatedWeight: 50,
-          numberOfBags: 3,
+          bagId: 'BAG-cust-orders-2',
+          status: 'in_progress',
           baseRate: 1.89,
-          deliveryFee: 35,
-          minimumDeliveryFee: 25,
-          perBagDeliveryFee: 5
+          feeBreakdown: { numberOfBags: 1, minimumFee: 25, perBagFee: 5, totalFee: 25, minimumApplied: true }
         }
       ];
 
@@ -383,7 +371,7 @@ describe('Customer Integration Tests', () => {
       const response = await agent
         .get('/api/v1/customers/CUST123/orders')
         .set('Authorization', `Bearer ${customerToken}`)
-        .query({ status: 'complete' });
+        .query({ status: 'delivered' });
 
       expect(response.status).toBe(200);
       expect(response.body.orders).toHaveLength(1);
@@ -463,52 +451,34 @@ describe('Customer Integration Tests', () => {
           orderId: 'ORD001',
           customerId: 'CUST123',
           affiliateId: 'AFF123',
-          pickupDate: new Date('2025-05-01'),
-          pickupTime: 'morning',
-
-          status: 'complete',
-          estimatedWeight: 30,
-          numberOfBags: 2,
+          bagId: 'BAG-cust-dash-1',
+          status: 'delivered',
           actualWeight: 23.5,
           baseRate: 1.89,
-          deliveryFee: 35,
-          minimumDeliveryFee: 25,
-          perBagDeliveryFee: 5,
+          feeBreakdown: { numberOfBags: 1, minimumFee: 25, perBagFee: 5, totalFee: 25, minimumApplied: true },
           actualTotal: 50.40,
-          completedAt: new Date('2025-05-03')
+          deliveredAt: new Date('2025-05-03')
         },
         {
           orderId: 'ORD002',
           customerId: 'CUST123',
           affiliateId: 'AFF123',
-          pickupDate: new Date('2025-05-10'),
-          pickupTime: 'afternoon',
-
-          status: 'complete',
-          estimatedWeight: 50,
-          numberOfBags: 3,
+          bagId: 'BAG-cust-dash-2',
+          status: 'delivered',
           actualWeight: 35.0,
           baseRate: 1.89,
-          deliveryFee: 35,
-          minimumDeliveryFee: 25,
-          perBagDeliveryFee: 5,
+          feeBreakdown: { numberOfBags: 1, minimumFee: 25, perBagFee: 5, totalFee: 25, minimumApplied: true },
           actualTotal: 72.15,
-          completedAt: new Date('2025-05-12')
+          deliveredAt: new Date('2025-05-12')
         },
         {
           orderId: 'ORD003',
           customerId: 'CUST123',
           affiliateId: 'AFF123',
-          pickupDate: new Date('2025-05-20'),
-          pickupTime: 'morning',
-
-          status: 'processing',
-          estimatedWeight: 15,
-          numberOfBags: 1,
+          bagId: 'BAG-cust-dash-3',
+          status: 'in_progress',
           baseRate: 1.89,
-          deliveryFee: 35,
-          minimumDeliveryFee: 25,
-          perBagDeliveryFee: 5
+          feeBreakdown: { numberOfBags: 1, minimumFee: 25, perBagFee: 5, totalFee: 25, minimumApplied: true }
         }
       ];
 
@@ -561,15 +531,9 @@ describe('Customer Integration Tests', () => {
       const testOrder = await Order.create({
         customerId: 'CUST123',
         affiliateId: 'AFF123',
-        pickupDate: new Date(),
-        pickupTime: 'morning',
-
-        status: 'pending',
-        estimatedWeight: 30,
-        numberOfBags: 2,
-        deliveryFee: 25,
-        minimumDeliveryFee: 25,
-        perBagDeliveryFee: 5
+        bagId: 'BAG-cust-del-1',
+        status: 'in_progress',
+        feeBreakdown: { numberOfBags: 1, minimumFee: 25, perBagFee: 5, totalFee: 25, minimumApplied: true }
       });
 
 

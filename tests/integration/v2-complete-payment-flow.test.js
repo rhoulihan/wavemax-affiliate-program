@@ -109,10 +109,7 @@ describe('V2 Complete Payment Flow', () => {
           city: 'Austin',
           state: 'TX',
           zipCode: '78701',
-          pickupDate: new Date(Date.now() + 86400000).toISOString(),
-          pickupTime: 'morning',
           numberOfBags: 2,
-          estimatedWeight: 20,
           affiliateId: testAffiliate.affiliateId
         });
 
@@ -134,18 +131,15 @@ describe('V2 Complete Payment Flow', () => {
       const orderData = {
         customerId: testCustomer.customerId,
         affiliateId: testAffiliate.affiliateId,
-        pickupDate: new Date(Date.now() + 86400000),
-        pickupTime: 'morning',
-        numberOfBags: 2,
-        estimatedWeight: 20,
-        status: 'pending'
+        bagId: 'BAG-v2flow-1',
+        status: 'in_progress'
       };
 
       testOrder = await Order.create(orderData);
       
       expect(testOrder).toBeDefined();
       expect(testOrder.paymentStatus).toBe('pending');
-      expect(testOrder.status).toBe('pending');
+      expect(testOrder.status).toBe('in_progress');
     });
   });
 
@@ -156,21 +150,16 @@ describe('V2 Complete Payment Flow', () => {
         _id: new mongoose.Types.ObjectId(),
         customerId: TEST_IDS.customer,
         affiliateId: TEST_IDS.affiliate,
-        pickupDate: new Date(Date.now() + 86400000),
-        pickupTime: 'morning',
-        numberOfBags: 2,
-        estimatedWeight: 20,
-        status: 'pending',
-        paymentStatus: 'pending'
+        status: 'in_progress',
+        paymentStatus: 'pending',
+        // No delivery fee so the expected total is pure WDF: 10 lbs x $1.25 = $12.50
+        feeBreakdown: { numberOfBags: 1, minimumFee: 0, perBagFee: 0, totalFee: 0, minimumApplied: false }
       });
       
-      // Simulate operator weighing the bags
+      // Simulate the operator intake weigh (one bag = one order)
       order.actualWeight = 10; // 10 lbs
-      order.status = 'processing';
-      order.bagsWeighed = 2;
       order.bags = [
-        { bagId: 'bag-001', weight: 5, status: 'processing', bagNumber: 1 },
-        { bagId: 'bag-002', weight: 5, status: 'processing', bagNumber: 2 }
+        { bagToken: order.bagToken, weight: 10, status: 'intake', bagNumber: 1 }
       ];
       
       // Calculate actual total: 10 lbs * $1.25 = $12.50
@@ -198,17 +187,14 @@ describe('V2 Complete Payment Flow', () => {
     it('should parse Venmo payment confirmation email and verify payment', async () => {
       // Create test data if not available from previous tests
       if (!testOrder || !testOrder._id) {
-        testOrder = await Order.findOne({ status: 'processing' }) ||
+        testOrder = await Order.findOne({ status: 'in_progress' }) ||
                    await Order.create({
                      customerId: 'CUST-V2-TEST',
                      affiliateId: testAffiliate ? testAffiliate.affiliateId : 'AFF-TEST',
-                     pickupDate: new Date(),
-                     pickupTime: 'morning',
-                     numberOfBags: 2,
-                     estimatedWeight: 20,
+                     bagId: 'BAG-v2flow-2',
                      actualWeight: 10,
                      actualTotal: 12.50,
-                     status: 'processing',
+                     status: 'in_progress',
                      paymentStatus: 'awaiting',
                      paymentAmount: 12.50,
                      paymentRequestedAt: new Date()
@@ -293,18 +279,15 @@ describe('V2 Complete Payment Flow', () => {
           testOrder = await Order.create({
             customerId: 'CUST-V2-TEST',
             affiliateId: testAffiliate ? testAffiliate.affiliateId : 'AFF-TEST',
-            pickupDate: new Date(),
-            pickupTime: 'morning',
-            numberOfBags: 2,
-            estimatedWeight: 20,
+            bagId: 'BAG-v2flow-3',
+            bagToken: 'a'.repeat(32),
             actualWeight: 10,
             actualTotal: 12.50,
-            status: 'processing',
+            status: 'in_progress',
             paymentStatus: 'verified',
             paymentAmount: 12.50,
             bags: [
-              { bagId: 'bag-001', weight: 5, status: 'processing', bagNumber: 1 },
-              { bagId: 'bag-002', weight: 5, status: 'processing', bagNumber: 2 }
+              { bagToken: 'a'.repeat(32), weight: 10, status: 'intake', bagNumber: 1 }
             ]
           });
         }
@@ -317,9 +300,7 @@ describe('V2 Complete Payment Flow', () => {
       order.bags.forEach(bag => {
         bag.status = 'processed';
       });
-      order.bagsProcessed = 2;
       order.status = 'processed';
-      order.processedAt = new Date();
       await order.save();
 
       // Since payment is verified, send pickup ready notification
@@ -345,18 +326,15 @@ describe('V2 Complete Payment Flow', () => {
           testOrder = await Order.create({
             customerId: 'CUST-V2-TEST',
             affiliateId: testAffiliate ? testAffiliate.affiliateId : 'AFF-TEST',
-            pickupDate: new Date(),
-            pickupTime: 'morning',
-            numberOfBags: 2,
-            estimatedWeight: 20,
+            bagId: 'BAG-v2flow-4',
+            bagToken: 'b'.repeat(32),
             actualWeight: 10,
             actualTotal: 12.50,
             status: 'processed',
             paymentStatus: 'verified',
             paymentAmount: 12.50,
             bags: [
-              { bagId: 'bag-001', weight: 5, status: 'processed', bagNumber: 1 },
-              { bagId: 'bag-002', weight: 5, status: 'processed', bagNumber: 2 }
+              { bagToken: 'b'.repeat(32), weight: 10, status: 'processed', bagNumber: 1 }
             ]
           });
         }
@@ -369,18 +347,16 @@ describe('V2 Complete Payment Flow', () => {
         return;
       }
       
-      // Mark bags as picked up
+      // Mark the bag as picked up; delivery is the terminal state
       order.bags.forEach(bag => {
-        bag.status = 'completed';
+        bag.status = 'picked_up';
       });
-      order.bagsPickedUp = 2;
-      order.status = 'complete';
-      order.completedAt = new Date();
+      order.status = 'delivered';
       await order.save();
 
-      expect(order.status).toBe('complete');
+      expect(order.status).toBe('delivered');
       expect(order.paymentStatus).toBe('verified');
-      expect(order.completedAt).toBeDefined();
+      expect(order.deliveredAt).toBeDefined();
     });
   });
 
@@ -390,10 +366,7 @@ describe('V2 Complete Payment Flow', () => {
       const newOrder = await Order.create({
         customerId: testCustomer.customerId,
         affiliateId: testAffiliate.affiliateId,
-        pickupDate: new Date(),
-        pickupTime: 'afternoon',
-        numberOfBags: 1,
-        estimatedWeight: 10,
+        bagId: 'BAG-v2flow-5',
         actualWeight: 10,
         actualTotal: 12.50,
         paymentStatus: 'awaiting',

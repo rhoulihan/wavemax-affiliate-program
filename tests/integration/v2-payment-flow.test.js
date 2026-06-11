@@ -100,10 +100,7 @@ describe('V2 Payment Flow Integration Tests', () => {
           city: 'Austin',
           state: 'TX',
           zipCode: '78701',
-          pickupDate: new Date(Date.now() + 86400000).toISOString(),
-          pickupTime: 'morning',
           numberOfBags: 2,
-          estimatedWeight: 20,
           affiliateId: TEST_IDS.affiliate
         });
 
@@ -161,23 +158,15 @@ describe('V2 Payment Flow Integration Tests', () => {
         .set('x-csrf-token', csrfToken)
         .send({
           customerId: customer.customerId,
-          affiliateId: affiliate.affiliateId,
-          pickupDate: new Date(Date.now() + 86400000).toISOString(),
-          pickupTime: 'morning',
-          numberOfBags: 2,
-          estimatedWeight: 20
+          affiliateId: affiliate.affiliateId
         });
 
       if (response.status === 404 || response.status === 400) {
-        // Create order directly in DB for testing
+        // Create order directly in DB for testing (orders are born at intake)
         const order = await createTestOrder({
           customerId: customer.customerId,
           affiliateId: affiliate.affiliateId,
-          pickupDate: new Date(Date.now() + 86400000),
-          pickupTime: 'morning',
-          numberOfBags: 2,
-          estimatedWeight: 20,
-          status: 'pending',
+          status: 'in_progress',
           paymentStatus: 'pending'
         });
         expect(order).toBeDefined();
@@ -347,15 +336,11 @@ describe('V2 Payment Flow Integration Tests', () => {
         affiliateId: affiliate.affiliateId,
         orderId: 'TEST-REM-001',
         actualWeight: 20,
-        estimatedWeight: 20,
         paymentStatus: 'awaiting',
         paymentRequestedAt: new Date(Date.now() - 31 * 60000),
         paymentReminderCount: 0,
         paymentCheckAttempts: 6,  // 6 attempts = 30 minutes at 5-minute intervals
-        status: 'processing',
-        numberOfBags: 2,
-        pickupDate: new Date(Date.now() + 86400000),
-        pickupTime: 'morning'
+        status: 'in_progress'
       });
 
       const shouldRemind = paymentVerificationJob.shouldSendReminder(testOrder);
@@ -388,16 +373,12 @@ describe('V2 Payment Flow Integration Tests', () => {
         affiliateId: affiliate.affiliateId,
         orderId: 'TEST-REM-002',
         actualWeight: 20,
-        estimatedWeight: 20,
         paymentStatus: 'awaiting',
         paymentRequestedAt: new Date(Date.now() - 90 * 60000),
         paymentReminderCount: 1,
         paymentLastReminderAt: new Date(Date.now() - 60 * 60000),
         paymentCheckAttempts: 18,  // 18 attempts = 90 minutes (6 + 12 for next hour)
-        status: 'processing',
-        numberOfBags: 2,
-        pickupDate: new Date(Date.now() + 86400000),
-        pickupTime: 'morning'
+        status: 'in_progress'
       });
 
       const shouldRemind = paymentVerificationJob.shouldSendReminder(testOrder);
@@ -415,14 +396,10 @@ describe('V2 Payment Flow Integration Tests', () => {
         affiliateId: affiliate.affiliateId,
         orderId: 'TEST-ESC-001',
         actualWeight: 20,
-        estimatedWeight: 20,
         paymentStatus: 'awaiting',
         paymentRequestedAt: new Date(Date.now() - 241 * 60000),
         paymentReminderCount: 5,
-        status: 'processing',
-        numberOfBags: 2,
-        pickupDate: new Date(Date.now() + 86400000),
-        pickupTime: 'morning'
+        status: 'in_progress'
       });
 
       const emailSpy = jest.spyOn(emailService, 'sendV2PaymentTimeoutEscalation');
@@ -520,12 +497,8 @@ describe('V2 Payment Flow Integration Tests', () => {
         affiliateId: affiliate.affiliateId,
         orderId: 'TEST-HOLD-001',
         actualWeight: 20,
-        estimatedWeight: 20,
         paymentStatus: 'awaiting',
-        status: 'processed',
-        numberOfBags: 2,
-        pickupDate: new Date(Date.now() + 86400000),
-        pickupTime: 'morning'
+        status: 'processed'
       });
 
       // Should hold notification
@@ -634,10 +607,7 @@ describe('V2 Payment Flow Integration Tests', () => {
           zipCode: '12345',
           affiliateId: TEST_IDS.affiliate,
           creditCardToken: 'tok_test_123',
-          pickupDate: new Date(Date.now() + 86400000).toISOString(),
-          pickupTime: 'morning',
-          numberOfBags: 1,
-          estimatedWeight: 10
+          numberOfBags: 1
         });
 
       expect([201, 404, 400]).toContain(response.status);
@@ -672,10 +642,7 @@ describe('V2 Payment Flow Integration Tests', () => {
           state: 'TS',
           zipCode: '12345',
           affiliateId: TEST_IDS.affiliate,
-          pickupDate: new Date(Date.now() + 86400000).toISOString(),
-          pickupTime: 'morning',
-          numberOfBags: 1,
-          estimatedWeight: 10
+          numberOfBags: 1
         });
 
       expect([201, 404, 400]).toContain(response.status);

@@ -233,9 +233,9 @@ describe('Controllers - Additional Function Coverage', () => {
         req.user = { role: 'admin' };
 
         const mockOrders = [
-          { status: 'complete', actualTotal: 50, estimatedWeight: 10 },
-          { status: 'complete', actualTotal: 100, estimatedWeight: 15 },
-          { status: 'pending', estimatedTotal: 75, estimatedWeight: 12 }
+          { status: 'delivered', actualTotal: 50, actualWeight: 10 },
+          { status: 'delivered', actualTotal: 100, actualWeight: 15 },
+          { status: 'in_progress', actualWeight: 12 }
         ];
         
         Order.find.mockResolvedValue(mockOrders);
@@ -327,8 +327,8 @@ describe('Controllers - Additional Function Coverage', () => {
 
 
         const mockOrders = [
-          { status: 'complete', actualTotal: 500, affiliateCommission: 50, createdAt: new Date('2025-01-15') },
-          { status: 'complete', actualTotal: 500, affiliateCommission: 50, createdAt: new Date('2025-01-20') }
+          { status: 'delivered', actualTotal: 500, affiliateCommission: 50, createdAt: new Date('2025-01-15') },
+          { status: 'delivered', actualTotal: 500, affiliateCommission: 50, createdAt: new Date('2025-01-20') }
         ];
 
         Order.countDocuments = jest.fn()

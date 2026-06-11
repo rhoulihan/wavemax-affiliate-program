@@ -99,16 +99,11 @@ describe('Order Integration Tests', () => {
         orderId: 'ORD123456',
         customerId: 'CUST123',
         affiliateId: 'AFF123',
-        pickupDate: new Date('2025-05-26'),
-        pickupTime: 'morning',
-
-        status: 'processing',
-        estimatedWeight: 30,
-        numberOfBags: 2,
+        bagId: 'BAG-details-1',
+        status: 'in_progress',
+        actualWeight: 30,
         baseRate: 1.89,
-        deliveryFee: 35,
-        minimumDeliveryFee: 25,
-        perBagDeliveryFee: 5
+        feeBreakdown: { numberOfBags: 1, minimumFee: 25, perBagFee: 5, totalFee: 25, minimumApplied: true }
       });
       await testOrder.save();
     });
@@ -125,7 +120,7 @@ describe('Order Integration Tests', () => {
           orderId: 'ORD123456',
           customerId: 'CUST123',
           affiliateId: 'AFF123',
-          status: 'Processing',
+          status: 'In Progress',
           customer: {
             name: 'Jane Smith',
             email: 'jane@example.com'
@@ -182,16 +177,10 @@ describe('Order Integration Tests', () => {
         orderId: 'ORD123456',
         customerId: 'CUST123',
         affiliateId: 'AFF123',
-        pickupDate: new Date('2025-05-26'),
-        pickupTime: 'morning',
-
-        status: 'pending',
-        estimatedWeight: 30,
-        numberOfBags: 2,
+        bagId: 'BAG-status-1',
+        status: 'in_progress',
         baseRate: 1.89,
-        deliveryFee: 35,
-        minimumDeliveryFee: 25,
-        perBagDeliveryFee: 5
+        feeBreakdown: { numberOfBags: 1, minimumFee: 25, perBagFee: 5, totalFee: 25, minimumApplied: true }
       });
       await testOrder.save();
     });
@@ -202,30 +191,24 @@ describe('Order Integration Tests', () => {
         .set('Authorization', `Bearer ${affiliateToken}`)
         .set('X-CSRF-Token', csrfToken)
         .send({
-          status: 'processing'
+          status: 'processed'
         });
 
       expect(response.status).toBe(200);
       expect(response.body).toMatchObject({
         success: true,
         orderId: 'ORD123456',
-        status: 'processing',
+        status: 'processed',
         message: 'Order status updated successfully!'
       });
 
       // Verify status was updated
       const order = await Order.findOne({ orderId: 'ORD123456' });
-      expect(order.status).toBe('processing');
-      expect(order.processingStartedAt).toBeDefined();
+      expect(order.status).toBe('processed');
+      expect(order.processedAt).toBeDefined();
     });
 
-    it('should update weight when processing', async () => {
-      // First update to processing
-      await Order.updateOne(
-        { orderId: 'ORD123456' },
-        { status: 'processing' }
-      );
-
+    it('should update weight when marking processed', async () => {
       const response = await agent
         .put('/api/v1/orders/ORD123456/status')
         .set('Authorization', `Bearer ${affiliateToken}`)
@@ -236,7 +219,7 @@ describe('Order Integration Tests', () => {
         });
 
       expect(response.status).toBe(200);
-      
+
       // Verify weight was updated in the database
       const order = await Order.findOne({ orderId: 'ORD123456' });
       expect(order.actualWeight).toBe(25.5);
@@ -244,10 +227,10 @@ describe('Order Integration Tests', () => {
     });
 
     it('should prevent invalid status transitions', async () => {
-      // Update to complete first
+      // Update to delivered (terminal) first
       await Order.updateOne(
         { orderId: 'ORD123456' },
-        { status: 'complete' }
+        { status: 'delivered' }
       );
 
       const response = await agent
@@ -255,13 +238,34 @@ describe('Order Integration Tests', () => {
         .set('Authorization', `Bearer ${affiliateToken}`)
         .set('X-CSRF-Token', csrfToken)
         .send({
-          status: 'pending'
+          status: 'processed'
         });
 
       expect(response.status).toBe(400);
       expect(response.body).toMatchObject({
         success: false,
-        message: 'Invalid status transition from complete to pending'
+        message: 'Invalid status transition from delivered to processed'
+      });
+    });
+
+    it('should reject a direct PUT to ready_for_pickup (gate-only status)', async () => {
+      await Order.updateOne(
+        { orderId: 'ORD123456' },
+        { status: 'processed' }
+      );
+
+      const response = await agent
+        .put('/api/v1/orders/ORD123456/status')
+        .set('Authorization', `Bearer ${affiliateToken}`)
+        .set('X-CSRF-Token', csrfToken)
+        .send({
+          status: 'ready_for_pickup'
+        });
+
+      expect(response.status).toBe(400);
+      expect(response.body).toMatchObject({
+        success: false,
+        message: 'ready_for_pickup is set by the payment gate and cannot be set directly'
       });
     });
 
@@ -276,7 +280,7 @@ describe('Order Integration Tests', () => {
         .set('Authorization', `Bearer ${otherAffiliateToken}`)
         .set('X-CSRF-Token', csrfToken)
         .send({
-          status: 'processing'
+          status: 'processed'
         });
 
       expect(response.status).toBe(403);
@@ -292,7 +296,7 @@ describe('Order Integration Tests', () => {
         .set('Authorization', `Bearer ${customerToken}`)
         .set('X-CSRF-Token', csrfToken)
         .send({
-          status: 'processing'
+          status: 'processed'
         });
 
       expect(response.status).toBe(403);
@@ -307,16 +311,10 @@ describe('Order Integration Tests', () => {
         orderId: 'ORD123456',
         customerId: 'CUST123',
         affiliateId: 'AFF123',
-        pickupDate: new Date('2025-05-26'),
-        pickupTime: 'morning',
-
-        status: 'pending',
-        estimatedWeight: 30,
-        numberOfBags: 2,
+        bagId: 'BAG-cancel-1',
+        status: 'in_progress',
         baseRate: 1.89,
-        deliveryFee: 35,
-        minimumDeliveryFee: 25,
-        perBagDeliveryFee: 5
+        feeBreakdown: { numberOfBags: 1, minimumFee: 25, perBagFee: 5, totalFee: 25, minimumApplied: true }
       });
       await testOrder.save();
     });
@@ -352,10 +350,10 @@ describe('Order Integration Tests', () => {
     });
 
     it('should prevent cancelling non-cancellable orders', async () => {
-      // Update to processing first
+      // picked_up is past the cancellable window (in_progress|processed)
       await Order.updateOne(
         { orderId: 'ORD123456' },
-        { status: 'processing' }
+        { status: 'picked_up' }
       );
 
       const response = await agent
@@ -367,7 +365,7 @@ describe('Order Integration Tests', () => {
       expect(response.status).toBe(400);
       expect(response.body).toMatchObject({
         success: false,
-        message: 'Orders in processing status cannot be cancelled. Only pending orders can be cancelled.'
+        message: 'Orders in picked_up status cannot be cancelled. Only in_progress or processed orders can be cancelled.'
       });
     });
 
@@ -400,46 +398,28 @@ describe('Order Integration Tests', () => {
           orderId: 'ORD001',
           customerId: 'CUST123',
           affiliateId: 'AFF123',
-          pickupDate: new Date('2025-05-26'),
-          pickupTime: 'morning',
-
-          status: 'pending',
-          estimatedWeight: 30,
-          numberOfBags: 2,
+          bagId: 'BAG-bulk-1',
+          status: 'in_progress',
           baseRate: 1.89,
-          deliveryFee: 35,
-        minimumDeliveryFee: 25,
-        perBagDeliveryFee: 5
+          feeBreakdown: { numberOfBags: 1, minimumFee: 25, perBagFee: 5, totalFee: 25, minimumApplied: true }
         },
         {
           orderId: 'ORD002',
           customerId: 'CUST123',
           affiliateId: 'AFF123',
-          pickupDate: new Date('2025-05-26'),
-          pickupTime: 'morning',
-
-          status: 'pending',
-          estimatedWeight: 50,
-          numberOfBags: 3,
+          bagId: 'BAG-bulk-2',
+          status: 'in_progress',
           baseRate: 1.89,
-          deliveryFee: 35,
-        minimumDeliveryFee: 25,
-        perBagDeliveryFee: 5
+          feeBreakdown: { numberOfBags: 1, minimumFee: 25, perBagFee: 5, totalFee: 25, minimumApplied: true }
         },
         {
           orderId: 'ORD003',
           customerId: 'CUST123',
           affiliateId: 'AFF123',
-          pickupDate: new Date('2025-05-26'),
-          pickupTime: 'afternoon',
-
-          status: 'pending',
-          estimatedWeight: 15,
-          numberOfBags: 1,
+          bagId: 'BAG-bulk-3',
+          status: 'in_progress',
           baseRate: 1.89,
-          deliveryFee: 35,
-        minimumDeliveryFee: 25,
-        perBagDeliveryFee: 5
+          feeBreakdown: { numberOfBags: 1, minimumFee: 25, perBagFee: 5, totalFee: 25, minimumApplied: true }
         }
       ];
 
@@ -453,7 +433,7 @@ describe('Order Integration Tests', () => {
         .set('X-CSRF-Token', csrfToken)
         .send({
           orderIds: ['ORD001', 'ORD002'],
-          status: 'processing'
+          status: 'processed'
         });
 
       expect(response.status).toBe(200);
@@ -469,12 +449,12 @@ describe('Order Integration Tests', () => {
 
       // Verify orders were updated
       const updatedOrders = await Order.find({ orderId: { $in: ['ORD001', 'ORD002'] } });
-      expect(updatedOrders.every(order => order.status === 'processing')).toBe(true);
+      expect(updatedOrders.every(order => order.status === 'processed')).toBe(true);
     });
 
     it('should handle partial bulk update failures', async () => {
-      // Update one order to complete first
-      await Order.updateOne({ orderId: 'ORD001' }, { status: 'complete' });
+      // Update one order to delivered (terminal) first
+      await Order.updateOne({ orderId: 'ORD001' }, { status: 'delivered' });
 
       const response = await agent
         .put('/api/v1/orders/bulk/status')
@@ -482,7 +462,7 @@ describe('Order Integration Tests', () => {
         .set('X-CSRF-Token', csrfToken)
         .send({
           orderIds: ['ORD001', 'ORD002', 'ORD003'],
-          status: 'processing'
+          status: 'processed'
         });
 
       expect(response.status).toBe(200);
@@ -491,7 +471,7 @@ describe('Order Integration Tests', () => {
         updated: 2,
         failed: 1,
         results: expect.arrayContaining([
-          { orderId: 'ORD001', success: false, message: expect.stringContaining('Cannot transition from complete to processing') },
+          { orderId: 'ORD001', success: false, message: expect.stringContaining('Cannot transition from delivered to processed') },
           { orderId: 'ORD002', success: true, message: 'Order updated successfully' },
           { orderId: 'ORD003', success: true, message: 'Order updated successfully' }
         ])
@@ -528,17 +508,11 @@ describe('Order Integration Tests', () => {
           orderId: `ORD${String(i).padStart(3, '0')}`,
           customerId: 'CUST123',
           affiliateId: 'AFF123',
-          pickupDate: new Date(`2025-05-${String(i).padStart(2, '0')}`),
-          pickupTime: i % 3 === 0 ? 'morning' : i % 3 === 1 ? 'afternoon' : 'evening',
-
-          status: i <= 10 ? 'complete' : 'processing',
-          estimatedWeight: i % 3 === 0 ? 15 : i % 3 === 1 ? 30 : 50,
-          numberOfBags: i % 3 === 0 ? 1 : i % 3 === 1 ? 2 : 3,
+          bagId: `BAG-export-${i}`,
+          status: i <= 10 ? 'delivered' : 'in_progress',
           actualWeight: i <= 10 ? 20 + i : null,
           baseRate: 1.89,
-          deliveryFee: 35,
-        minimumDeliveryFee: 25,
-        perBagDeliveryFee: 5,
+          feeBreakdown: { numberOfBags: 1, minimumFee: 25, perBagFee: 5, totalFee: 25, minimumApplied: true },
           actualTotal: i <= 10 ? (20 + i) * 1.89 + 5.99 : null,
           createdAt: new Date(`2025-05-${String(i).padStart(2, '0')}`)
         });
@@ -571,7 +545,7 @@ describe('Order Integration Tests', () => {
         .set('Authorization', `Bearer ${affiliateToken}`)
         .query({
           format: 'json',
-          status: 'complete',
+          status: 'delivered',
           affiliateId: 'AFF123'
         });
 
@@ -581,14 +555,14 @@ describe('Order Integration Tests', () => {
         success: true,
         exportDate: expect.any(String),
         filters: {
-          status: 'complete',
+          status: 'delivered',
           affiliateId: 'AFF123'
         },
         totalOrders: 10,
         orders: expect.any(Array)
       });
       expect(response.body.orders).toHaveLength(10);
-      expect(response.body.orders.every(order => order.status === 'complete')).toBe(true);
+      expect(response.body.orders.every(order => order.status === 'delivered')).toBe(true);
     });
 
     it('should export orders as Excel', async () => {
@@ -632,19 +606,12 @@ describe('Order Integration Tests', () => {
         orderId: 'ORD123456',
         customerId: 'CUST123',
         affiliateId: 'AFF123',
-        pickupDate: new Date('2025-05-26'),
-        pickupTime: 'morning',
-
-        status: 'complete',
-        estimatedWeight: 30,
-        numberOfBags: 2,
+        bagId: 'BAG-payment-1',
+        status: 'delivered',
         actualWeight: 25.5,
         baseRate: 1.89,
-        deliveryFee: 35,
-        minimumDeliveryFee: 25,
-        perBagDeliveryFee: 5,
-        actualTotal: 54.19,
-        completedAt: new Date('2025-05-27'),
+        feeBreakdown: { numberOfBags: 1, minimumFee: 25, perBagFee: 5, totalFee: 25, minimumApplied: true },
+        deliveredAt: new Date('2025-05-27'),
         paymentStatus: 'pending'
       });
       await testOrder.save();
@@ -656,9 +623,9 @@ describe('Order Integration Tests', () => {
         .set('Authorization', `Bearer ${affiliateToken}`)
         .set('X-CSRF-Token', csrfToken)
         .send({
-          paymentStatus: 'completed',
-          paymentMethod: 'card',
-          paymentReference: 'ch_1234567890'
+          paymentStatus: 'verified',
+          paymentMethod: 'venmo',
+          paymentTransactionId: 'ch_1234567890'
         });
 
       expect(response.status).toBe(200);
@@ -667,17 +634,17 @@ describe('Order Integration Tests', () => {
         message: 'Payment status updated successfully',
         order: {
           orderId: 'ORD123456',
-          paymentStatus: 'completed',
-          paymentMethod: 'card',
-          paymentReference: 'ch_1234567890',
-          paymentDate: expect.any(String)
+          paymentStatus: 'verified',
+          paymentMethod: 'venmo',
+          paymentTransactionId: 'ch_1234567890',
+          paymentVerifiedAt: expect.any(String)
         }
       });
 
       // Verify payment was recorded
       const order = await Order.findOne({ orderId: 'ORD123456' });
-      expect(order.paymentStatus).toBe('completed');
-      expect(order.paymentDate).toBeDefined();
+      expect(order.paymentStatus).toBe('verified');
+      expect(order.paymentVerifiedAt).toBeDefined();
     });
 
     it('should handle payment failure', async () => {
@@ -687,57 +654,45 @@ describe('Order Integration Tests', () => {
         .set('X-CSRF-Token', csrfToken)
         .send({
           paymentStatus: 'failed',
-          paymentError: 'Insufficient funds'
+          paymentNotes: 'Insufficient funds'
         });
 
       expect(response.status).toBe(200);
       expect(response.body.order.paymentStatus).toBe('failed');
-      expect(response.body.order.paymentError).toBe('Insufficient funds');
+      expect(response.body.order.paymentNotes).toBe('Insufficient funds');
     });
 
-    it('should prevent payment status update on non-complete orders', async () => {
-      await Order.updateOne({ orderId: 'ORD123456' }, { status: 'processing' });
+    it('should prevent payment status update on non-delivered orders', async () => {
+      await Order.updateOne({ orderId: 'ORD123456' }, { status: 'in_progress' });
 
       const response = await agent
         .put('/api/v1/orders/ORD123456/payment-status')
         .set('Authorization', `Bearer ${affiliateToken}`)
         .set('X-CSRF-Token', csrfToken)
         .send({
-          paymentStatus: 'completed'
+          paymentStatus: 'verified'
         });
 
       expect(response.status).toBe(400);
       expect(response.body).toMatchObject({
         success: false,
-        message: 'Cannot update payment status for non-complete orders'
+        message: 'Cannot update payment status for non-delivered orders'
       });
     });
 
-    it('should record refund', async () => {
-      // First mark as completed
-      await Order.updateOne(
-        { orderId: 'ORD123456' },
-        { paymentStatus: 'completed', paymentDate: new Date() }
-      );
-
+    it('should reject payment statuses outside the schema enum', async () => {
       const response = await agent
         .put('/api/v1/orders/ORD123456/payment-status')
         .set('Authorization', `Bearer ${affiliateToken}`)
         .set('X-CSRF-Token', csrfToken)
         .send({
-          paymentStatus: 'refunded',
-          refundAmount: 54.19,
-          refundReason: 'Customer complaint',
-          refundReference: 'ref_1234567890'
+          paymentStatus: 'refunded'
         });
 
-      expect(response.status).toBe(200);
-      expect(response.body.order).toMatchObject({
-        paymentStatus: 'refunded',
-        refundAmount: 54.19,
-        refundReason: 'Customer complaint',
-        refundReference: 'ref_1234567890',
-        refundedAt: expect.any(String)
+      expect(response.status).toBe(400);
+      expect(response.body).toMatchObject({
+        success: false,
+        message: 'Invalid payment status'
       });
     });
   });
@@ -769,48 +724,30 @@ describe('Order Integration Tests', () => {
           orderId: 'ORD001',
           customerId: 'CUST001',
           affiliateId: 'AFF123',
-          pickupDate: new Date('2025-05-20'),
-          pickupTime: 'morning',
-
-          status: 'complete',
-          estimatedWeight: 30,
-          numberOfBags: 2,
+          bagId: 'BAG-filter-1',
+          status: 'delivered',
           actualWeight: 25.5,
           baseRate: 1.89,
-          deliveryFee: 35,
-        minimumDeliveryFee: 25,
-        perBagDeliveryFee: 5,
+          feeBreakdown: { numberOfBags: 1, minimumFee: 25, perBagFee: 5, totalFee: 25, minimumApplied: true },
           actualTotal: 54.19
         },
         {
           orderId: 'ORD002',
           customerId: 'CUST002',
           affiliateId: 'AFF123',
-          pickupDate: new Date('2025-05-21'),
-          pickupTime: 'afternoon',
-
-          status: 'processing',
-          estimatedWeight: 50,
-          numberOfBags: 3,
+          bagId: 'BAG-filter-2',
+          status: 'processed',
           baseRate: 1.89,
-          deliveryFee: 35,
-        minimumDeliveryFee: 25,
-        perBagDeliveryFee: 5
+          feeBreakdown: { numberOfBags: 1, minimumFee: 25, perBagFee: 5, totalFee: 25, minimumApplied: true }
         },
         {
           orderId: 'ORD003',
           customerId: 'CUST001',
           affiliateId: 'AFF123',
-          pickupDate: new Date('2025-05-26'),
-          pickupTime: 'evening',
-
-          status: 'pending',
-          estimatedWeight: 15,
-          numberOfBags: 1,
+          bagId: 'BAG-filter-3',
+          status: 'in_progress',
           baseRate: 1.89,
-          deliveryFee: 35,
-        minimumDeliveryFee: 25,
-        perBagDeliveryFee: 5
+          feeBreakdown: { numberOfBags: 1, minimumFee: 25, perBagFee: 5, totalFee: 25, minimumApplied: true }
         }
       ];
 
@@ -856,7 +793,7 @@ describe('Order Integration Tests', () => {
         .get('/api/v1/affiliates/AFF123/orders')
         .set('Authorization', `Bearer ${affiliateToken}`)
         .query({
-          status: 'complete',
+          status: 'delivered',
           date: 'month'
         });
 
@@ -865,25 +802,6 @@ describe('Order Integration Tests', () => {
       expect(response.body.orders).toBeDefined();
       // The affiliate orders endpoint uses different filtering logic
       expect(Array.isArray(response.body.orders)).toBe(true);
-    });
-
-    it('should filter by pickup time slots', async () => {
-      // Use the affiliate orders endpoint
-      const response = await agent
-        .get('/api/v1/affiliates/AFF123/orders')
-        .set('Authorization', `Bearer ${affiliateToken}`)
-        .query({
-          status: 'all' // Get all orders
-        });
-
-      expect(response.status).toBe(200);
-      expect(response.body.success).toBe(true);
-      expect(Array.isArray(response.body.orders)).toBe(true);
-      // Filter results manually since the endpoint doesn't support pickupTime filtering
-      const morningAfternoonOrders = response.body.orders.filter(order =>
-        ['morning', 'afternoon'].includes(order.pickupTime)
-      );
-      expect(morningAfternoonOrders.length).toBeGreaterThan(0);
     });
 
     it('should provide aggregated statistics with filters', async () => {
@@ -901,13 +819,13 @@ describe('Order Integration Tests', () => {
         statistics: {
           totalOrders: 3,
           ordersByStatus: {
-            pending: 1,
-            processing: 1,
-            complete: 1
+            in_progress: 1,
+            processed: 1,
+            delivered: 1
           },
           totalRevenue: 54.19,
           averageOrderValue: 54.19,
-          averageEstimatedWeight: expect.any(Number)
+          averageWeight: expect.any(Number)
         }
       });
     });
@@ -930,12 +848,9 @@ describe('Order Integration Tests', () => {
       const newOrder = new Order({
         customerId: 'CUST123',
         affiliateId: 'AFF123',
-        pickupDate: new Date('2025-05-26'),
-        pickupTime: 'morning',
-        estimatedWeight: 30,
-        numberOfBags: 2,
+        bagId: 'BAG-comm-1',
         feeBreakdown: { numberOfBags: 2, minimumFee: 25, perBagFee: 5, totalFee: 25, minimumApplied: true },
-        status: 'pending',
+        status: 'in_progress',
         paymentStatus: 'pending'
       });
       await newOrder.save();
@@ -944,7 +859,7 @@ describe('Order Integration Tests', () => {
       // Update order with actual weight (as admin/operator would)
       const order = await Order.findOne({ orderId });
       order.actualWeight = 25; // 25 lbs
-      order.status = 'complete';
+      order.status = 'delivered';
       await order.save();
 
       // Verify commission calculation
@@ -974,12 +889,10 @@ describe('Order Integration Tests', () => {
       const newOrder = new Order({
         customerId: 'CUST123',
         affiliateId: 'AFF123',
-        pickupDate: new Date('2025-05-26'),
-        pickupTime: 'morning',
-        estimatedWeight: 50,
-        numberOfBags: 3,
+        bagId: 'BAG-comm-2',
+        actualWeight: 50,
         feeBreakdown: { numberOfBags: 3, minimumFee: 25, perBagFee: 5, totalFee: 25, minimumApplied: true },
-        status: 'pending',
+        status: 'in_progress',
         paymentStatus: 'pending'
       });
       await newOrder.save();
@@ -993,15 +906,15 @@ describe('Order Integration Tests', () => {
       expect(order).toBeDefined();
       expect(order.orderId).toBe(newOrder.orderId);
 
-      // The estimated total should still be calculated based on whatever rate was used
+      // The actual total is calculated from actualWeight × baseRate + totalFee
       // Delivery fee: 3 bags × $5/bag = $15, but minimum $25 applies
       // If baseRate is 2.00: 50 × 2.00 + 25 = 125
       // If baseRate is 1.25: 50 × 1.25 + 25 = 87.50
       if (order.baseRate === 2.00) {
-        expect(order.estimatedTotal).toBeCloseTo(125, 2);
+        expect(order.actualTotal).toBeCloseTo(125, 2);
       } else {
         // Accept the default rate for now in integration tests
-        expect(order.estimatedTotal).toBeCloseTo(87.50, 2);
+        expect(order.actualTotal).toBeCloseTo(87.50, 2);
       }
 
       // Reset rate
@@ -1041,12 +954,9 @@ describe('Order Integration Tests', () => {
         const newOrder = new Order({
           customerId: customer.customerId,
           affiliateId: 'AFF123',
-          pickupDate: new Date('2025-05-26'),
-          pickupTime: 'morning',
-          estimatedWeight: 30,
-          numberOfBags: 2,
+          bagId: `BAG-comm-multi-${i}`,
           feeBreakdown: { numberOfBags: 2, minimumFee: 25, perBagFee: 5, totalFee: 25, minimumApplied: true },
-          status: 'pending',
+          status: 'in_progress',
           paymentStatus: 'pending'
         });
         await newOrder.save();
@@ -1060,7 +970,7 @@ describe('Order Integration Tests', () => {
           throw new Error(`Order not found with orderId: ${orderId}`);
         }
         order.actualWeight = 20; // 20 lbs each
-        order.status = 'complete';
+        order.status = 'delivered';
         await order.save();
       }
 
@@ -1081,12 +991,9 @@ describe('Order Integration Tests', () => {
       const newOrder = new Order({
         customerId: 'CUST123',
         affiliateId: 'AFF123',
-        pickupDate: new Date('2025-05-26'),
-        pickupTime: 'morning',
-        estimatedWeight: 15,
-        numberOfBags: 1,
+        bagId: 'BAG-comm-3',
         feeBreakdown: { numberOfBags: 1, minimumFee: 50, perBagFee: 10, totalFee: 50, minimumApplied: true },
-        status: 'pending',
+        status: 'in_progress',
         paymentStatus: 'pending'
       });
       await newOrder.save();
@@ -1094,7 +1001,7 @@ describe('Order Integration Tests', () => {
       // Update with actual weight
       const order = await Order.findOne({ orderId: newOrder.orderId });
       order.actualWeight = 15;
-      order.status = 'complete';
+      order.status = 'delivered';
       await order.save();
 
       const updatedOrder = await Order.findOne({ orderId: newOrder.orderId });
