@@ -158,4 +158,93 @@ describe('Payment ready gate (PR 8 integration)', () => {
       expect(updated.heldAtStore).toBe(false);
     });
   });
+
+  describe('REGRESSION: confirming order auto-verifies and promotes (the $in widening)', () => {
+    it('cron run on a confirming+processed order with a matching inbound payment -> verified + ready_for_pickup', async () => {
+      const order = await createOrder({ status: 'processed', paymentStatus: 'confirming' });
+      mailcowService.searchEmails.mockResolvedValue([venmoEmailFor(order)]);
+
+      await paymentVerificationJob.checkPendingPayments();
+
+      const updated = await Order.findById(order._id);
+      expect(updated.paymentStatus).toBe('verified');           // findOrderById matched 'confirming'
+      expect(updated.status).toBe('ready_for_pickup');          // gate promoted (Path B)
+      expect(updated.readyForPickupAt).toBeInstanceOf(Date);
+      expect(updated.heldAtStore).toBe(false);
+    });
+  });
+
+  describe('REGRESSION: payment after escalation still verifies and promotes', () => {
+    it('escalated order is skipped by the reminder cadence but a late payment verifies via the scanner', async () => {
+      const order = await createOrder({
+        status: 'processed', paymentStatus: 'awaiting',
+        paymentEscalated: true, heldAtStore: true,
+        holdNoticeSentAt: new Date(Date.now() - HOUR),
+        paymentReminderCount: 8,
+        paymentLastReminderAt: new Date(Date.now() - 5 * HOUR)
+      });
+
+      // 1) Reminder cadence excludes it — no reminder, no second hold notice.
+      const reminderSpy = jest.spyOn(emailService, 'sendV2PaymentReminder');
+      const holdSpy = jest.spyOn(emailService, 'sendV2ComeToStoreNotice');
+      await paymentVerificationJob.checkPendingPayments();
+      expect(reminderSpy).not.toHaveBeenCalled();
+      expect(holdSpy).not.toHaveBeenCalled();
+      reminderSpy.mockRestore();
+      holdSpy.mockRestore();
+
+      // 2) ...but the inbox path still verifies the late payment (no "too late" state).
+      mailcowService.searchEmails.mockResolvedValue([venmoEmailFor(order)]);
+      const verified = await paymentEmailScanner.checkOrderPayment(order._id);
+      expect(verified).toBe(true);
+
+      const updated = await Order.findById(order._id);
+      expect(updated.paymentStatus).toBe('verified');
+      expect(updated.status).toBe('ready_for_pickup');
+      expect(updated.heldAtStore).toBe(false);
+    });
+  });
+
+  describe('REGRESSION: held-at-store and the full escalation run', () => {
+    it('processed + unpaid -> heldAtStore=true, NOT ready_for_pickup, readyForPickupAt unset', async () => {
+      const order = await createOrder({ status: 'processed', paymentStatus: 'awaiting' });
+
+      const fresh = await Order.findById(order._id);
+      await orderReadyGateService.applyReadyGate(fresh, { trigger: 'processed' });
+
+      const updated = await Order.findById(order._id);
+      expect(updated.status).toBe('processed');
+      expect(updated.heldAtStore).toBe(true);
+      expect(updated.readyForPickupAt).toBeUndefined();
+    });
+
+    it('a full cron run at reminder 7-of-8 due sends the 8th reminder + hold notice, then goes quiet — never failed', async () => {
+      const order = await createOrder({
+        status: 'processed', paymentStatus: 'awaiting',
+        paymentReminderCount: 7,
+        paymentLastReminderAt: new Date(Date.now() - 2 * HOUR)
+      });
+      const reminderSpy = jest.spyOn(emailService, 'sendV2PaymentReminder').mockResolvedValue(true);
+      const holdSpy = jest.spyOn(emailService, 'sendV2ComeToStoreNotice').mockResolvedValue(true);
+      const adminSpy = jest.spyOn(emailService, 'sendV2PaymentTimeoutEscalation').mockResolvedValue(true);
+
+      await paymentVerificationJob.checkPendingPayments();   // run 1: 8th reminder + escalation
+      await paymentVerificationJob.checkPendingPayments();   // run 2: must be a no-op
+
+      expect(reminderSpy).toHaveBeenCalledTimes(1);
+      expect(holdSpy).toHaveBeenCalledTimes(1);
+      expect(adminSpy).toHaveBeenCalledTimes(1);
+
+      const updated = await Order.findById(order._id);
+      expect(updated.paymentReminderCount).toBe(8);
+      expect(updated.paymentEscalated).toBe(true);
+      expect(updated.holdNoticeSentAt).toBeInstanceOf(Date);
+      expect(updated.heldAtStore).toBe(true);
+      expect(updated.paymentStatus).toBe('awaiting');        // NEVER 'failed'
+
+      reminderSpy.mockRestore();
+      holdSpy.mockRestore();
+      adminSpy.mockRestore();
+    });
+  });
 });
