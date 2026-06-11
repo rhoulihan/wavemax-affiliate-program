@@ -8,7 +8,7 @@ const { checkRole } = require('../middleware/rbac');
 const { body } = require('express-validator');
 const { customPasswordValidator } = require('../utils/passwordValidator');
 const { registrationLimiter } = require('../middleware/rateLimiting');
-const { registrationAddressValidation, profileAddressValidation, handleValidationErrors } = require('../middleware/locationValidation');
+const { profileAddressValidation, handleValidationErrors } = require('../middleware/locationValidation');
 
 /**
  * @route   GET /api/customers/check-rate-limit
@@ -35,17 +35,26 @@ router.get('/check-rate-limit', (req, res, next) => {
 });
 
 /**
- * @route   POST /api/customers/register
- * @desc    Register a new customer
- * @access  Public
+ * @route   GET /api/v1/customers/claim/:bagToken
+ * @desc    Resolve a scanned bag token (claimable | claimed | invalid)
+ * @access  Public (rate-limited globally; anti-enumeration)
  */
-router.post('/register', registrationLimiter, [
-  body('affiliateId').notEmpty().withMessage('Affiliate ID is required'),
+router.get('/claim/:bagToken', customerController.resolveClaim);
+
+/**
+ * @route   POST /api/v1/customers/claim/:bagToken/register
+ * @desc    Register a new customer against an issued bag (affiliate derived from the bag)
+ * @access  Public (registrationLimiter; CSRF-exempt registration class)
+ */
+router.post('/claim/:bagToken/register', registrationLimiter, [
   body('firstName').notEmpty().withMessage('First name is required'),
   body('lastName').notEmpty().withMessage('Last name is required'),
   body('email').isEmail().withMessage('Valid email is required'),
   body('phone').notEmpty().withMessage('Phone number is required'),
-  ...registrationAddressValidation,
+  body('address').notEmpty().withMessage('Address is required'),
+  body('city').notEmpty().withMessage('City is required'),
+  body('state').notEmpty().withMessage('State is required'),
+  body('zipCode').notEmpty().withMessage('ZIP code is required'),
   // Only require username/password if NOT using OAuth (no socialToken)
   body('username').custom((value, { req }) => {
     if (!req.body.socialToken && !value) {
@@ -55,12 +64,11 @@ router.post('/register', registrationLimiter, [
   }),
   body('password').custom((value, { req }) => {
     if (!req.body.socialToken) {
-      // Apply password validation only for non-OAuth registrations
       return customPasswordValidator()(value, { req });
     }
     return true;
   })
-], handleValidationErrors, customerController.registerCustomer);
+], handleValidationErrors, customerController.claimRegister);
 
 
 /**

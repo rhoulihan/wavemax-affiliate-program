@@ -129,9 +129,8 @@ const CSRF_CONFIG = {
   // Registration endpoints - will add CAPTCHA instead of CSRF
   REGISTRATION_ENDPOINTS: [
     '/api/affiliates/register',
-    '/api/customers/register',
     '/api/v1/affiliates/register',
-    '/api/v1/customers/register',
+    '/api/v1/customers/claim/:bagToken/register',
     '/api/v1/auth/social/register',
     '/api/v1/auth/customer/social/register'
   ],

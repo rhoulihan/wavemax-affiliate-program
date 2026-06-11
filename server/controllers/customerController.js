@@ -10,6 +10,7 @@ const { validationResult } = require('express-validator');
 
 // Extracted services
 const customerRegistrationService = require('../services/customerRegistrationService');
+const bagClaimService = require('../services/bagClaimService');
 
 // Utility modules
 const ControllerHelpers = require('../utils/controllerHelpers');
@@ -21,23 +22,54 @@ const Formatters = require('../utils/formatters');
 // ============================================================================
 
 /**
- * Register a new customer
- * Refactored to use ControllerHelpers for error handling and response formatting
+ * Resolve a scanned bag token into a claim-page state.
+ * Public; anti-enumeration — minted/retired/unknown all map to 'invalid'.
+ * @route GET /api/v1/customers/claim/:bagToken
  */
-exports.registerCustomer = ControllerHelpers.asyncWrapper(async (req, res) => {
+exports.resolveClaim = ControllerHelpers.asyncWrapper(async (req, res) => {
+  const resolved = await bagClaimService.resolveClaimToken(req.params.bagToken);
+  if (resolved.state === 'claimable') {
+    const { affiliate } = resolved;
+    return ControllerHelpers.sendSuccess(res, {
+      state: 'claimable',
+      affiliate: {
+        businessName: affiliate.businessName,
+        firstName: affiliate.firstName,
+        lastName: affiliate.lastName,
+        city: affiliate.city,
+        state: affiliate.state
+      }
+    });
+  }
+  if (resolved.state === 'claimed') {
+    // order slot populated by PR 9 ({ status, awaitingDelivery }); no customer PII
+    return ControllerHelpers.sendSuccess(res, { state: 'claimed', order: resolved.order });
+  }
+  return ControllerHelpers.sendSuccess(res, { state: 'invalid' });
+});
+
+/**
+ * Claim-bound customer registration — the affiliate is derived from the bag.
+ * @route POST /api/v1/customers/claim/:bagToken/register
+ */
+exports.claimRegister = ControllerHelpers.asyncWrapper(async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return ControllerHelpers.sendError(res, 'Validation failed', 400, errors.array());
   }
 
   try {
-    const { customer, affiliate, token } = await customerRegistrationService.registerCustomer(req.body);
+    const { customer, affiliate, bag, token } = await customerRegistrationService.registerCustomer({
+      ...req.body,
+      bagToken: req.params.bagToken
+    });
 
     return ControllerHelpers.sendSuccess(
       res,
       {
         customerId: customer.customerId,
         token,
+        bag: { bagId: bag.bagId },
         customerData: {
           firstName: customer.firstName,
           lastName: customer.lastName,
@@ -52,10 +84,7 @@ exports.registerCustomer = ControllerHelpers.asyncWrapper(async (req, res) => {
         affiliateData: {
           businessName: affiliate.businessName,
           firstName: affiliate.firstName,
-          lastName: affiliate.lastName,
-          email: affiliate.email,
-          phone: affiliate.phone,
-          serviceArea: affiliate.serviceArea
+          lastName: affiliate.lastName
         }
       },
       'Customer registration successful',
