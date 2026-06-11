@@ -51,7 +51,7 @@ async function confirmDelivery({ bagToken, code, geo, req }) {
     throw new DeliveryError('not_picked_up', 'This order is not out for delivery', 409);
   }
 
-  const key = codeAttemptLockout.attemptKey({ scope: 'deliver', bagToken, ip: req && req.ip });
+  const key = codeAttemptLockout.attemptKey({ scope: 'deliver', bagToken, req });
   const maxAttempts = await SystemConfig.getValue('delivery_code_max_attempts', 5);
   if (await codeAttemptLockout.isLockedOut(key, maxAttempts)) {
     throw new DeliveryError('locked_out', 'Too many attempts — please try again later', 429);

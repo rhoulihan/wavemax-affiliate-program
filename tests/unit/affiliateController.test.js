@@ -196,6 +196,7 @@ describe('Affiliate Controller', () => {
       expect(res.json).toHaveBeenCalledWith({
         success: true,
         affiliateId: 'AFF123456',
+        deliveryCode: expect.any(String), // one-time delivery role code (PR 9)
         message: 'Affiliate registered successfully!'
       });
     });

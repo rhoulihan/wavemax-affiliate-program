@@ -52,12 +52,12 @@ describe('bagClaimService', () => {
       expect(result.affiliate.email).toBeUndefined();
     });
 
-    it("maps active to 'claimed' with a null order slot (populated by PR 9)", async () => {
+    it("maps active to 'claimed' and omits order when no open order", async () => {
       await bagService.issueBatch({ batchId, adminId: affiliate._id });
       await bagService.claim({ token, customerId: 'CUST-1' });
       const result = await bagClaimService.resolveClaimToken(token);
       expect(result.state).toBe('claimed');
-      expect(result.order).toBeNull();
+      expect(result.order).toBeUndefined();
       // no customer PII on the claim-path response
       expect(result.customer).toBeUndefined();
     });

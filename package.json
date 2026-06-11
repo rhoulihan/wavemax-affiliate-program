@@ -23,6 +23,7 @@
     "generate:sample-data": "node scripts/setup/generate-sample-data.js",
     "setup:database": "node scripts/setup/setup-database.js",
     "init:defaults": "node scripts/setup/init-defaults.js",
+    "ensure-indexes": "node scripts/ensure-indexes.js",
     "generate:sample-data:clean": "node scripts/setup/generate-sample-data.js --clean",
     "build:explorer": "node design-explorer/build.js"
   },

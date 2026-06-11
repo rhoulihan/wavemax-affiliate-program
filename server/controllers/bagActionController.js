@@ -34,7 +34,7 @@ function sendTypedError(res, err) {
 }
 
 async function resolveOperatorByCode({ operatorCode, bagToken, req }) {
-  const key = codeAttemptLockout.attemptKey({ scope: 'op', bagToken, ip: req.ip });
+  const key = codeAttemptLockout.attemptKey({ scope: 'op', bagToken, req });
   const maxAttempts = await SystemConfig.getValue('operator_scan_code_max_attempts', 5);
   if (await codeAttemptLockout.isLockedOut(key, maxAttempts)) {
     throw new BagActionError('locked_out', 'Too many attempts — please try again later', 429);
@@ -44,7 +44,7 @@ async function resolveOperatorByCode({ operatorCode, bagToken, req }) {
     : null;
   if (!operator) {
     await codeAttemptLockout.registerFailure(key);
-    logAuditEvent(AuditEvents.OPERATOR_CODE_FAILED, { ip: req.ip, path: req.path }, req);
+    logAuditEvent(AuditEvents.OPERATOR_CODE_FAILED, { ip: codeAttemptLockout.clientIp(req), path: req.path }, req);
     throw new BagActionError('invalid_code', 'Invalid code', 401);
   }
   await codeAttemptLockout.clearFailures(key);

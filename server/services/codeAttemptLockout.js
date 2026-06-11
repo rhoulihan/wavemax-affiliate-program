@@ -8,7 +8,10 @@
 // counts requests).
 //
 // Key shape: "<scope>:<sha256(bagToken)[0..16]>:<ip>" — the raw token never
-// touches the store.
+// touches the store. The IP is the real client IP: Cloudflare sits in front
+// of nginx (trust proxy = 1), so req.ip is the CF edge IP — keying on it
+// would lock out every user behind one edge. Use cf-connecting-ip first
+// (same pattern as server/middleware/accessGate.js clientIp).
 
 const crypto = require('crypto');
 const mongoose = require('mongoose');
@@ -26,10 +29,16 @@ function getStore() {
   return store;
 }
 
-function attemptKey({ scope, bagToken, ip }) {
+/** Real client IP behind Cloudflare (accessGate.js precedent). */
+function clientIp(req) {
+  if (!req) return '';
+  return String((req.headers && req.headers['cf-connecting-ip']) || req.ip || '').trim();
+}
+
+function attemptKey({ scope, bagToken, req }) {
   const tokenDigest = crypto.createHash('sha256')
     .update(String(bagToken || '')).digest('hex').slice(0, 16);
-  return `${scope}:${tokenDigest}:${ip || 'no-ip'}`;
+  return `${scope}:${tokenDigest}:${clientIp(req) || 'no-ip'}`;
 }
 
 /** Record a failed attempt; returns the running failure count. */
@@ -53,4 +62,4 @@ async function clearFailures(key) {
   return getStore().resetKey(key);
 }
 
-module.exports = { attemptKey, registerFailure, isLockedOut, clearFailures, WINDOW_MS };
+module.exports = { attemptKey, clientIp, registerFailure, isLockedOut, clearFailures, WINDOW_MS };
