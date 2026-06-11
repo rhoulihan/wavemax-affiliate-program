@@ -101,13 +101,30 @@ describe('PaymentVerificationJob', () => {
   });
 
   describe('Job initialization', () => {
-    it('should start when V2 payment system is enabled', async () => {
+    it('should prefer payment_scan_interval_ms over the legacy payment_check_interval', async () => {
+      // initializeDefaults (tests/setup.js beforeEach) seeds the canonical
+      // payment_scan_interval_ms = 120000 (2 min); this file's beforeAll seeded
+      // the legacy payment_check_interval = 300000 (5 min). The new key wins.
       await paymentVerificationJob.start();
-      
+
       expect(paymentVerificationJob.job).toBeDefined();
-      expect(paymentVerificationJob.checkInterval).toBe(5);
+      expect(paymentVerificationJob.checkInterval).toBe(2);
+      // Detection cap still reads the legacy key — PR 8 decouples the counters.
       expect(paymentVerificationJob.maxAttempts).toBe(48);
-      
+
+      paymentVerificationJob.stop();
+    });
+
+    it('should fall back to legacy payment_check_interval when payment_scan_interval_ms is absent', async () => {
+      // The global afterEach wiped the beforeAll rows; recreate only the legacy key
+      // and remove the canonical one that initializeDefaults just seeded.
+      await SystemConfig.deleteMany({ key: 'payment_scan_interval_ms' });
+      await SystemConfig.create({ key: 'payment_check_interval', value: 300000, dataType: 'number', category: 'payment' });
+
+      await paymentVerificationJob.start();
+
+      expect(paymentVerificationJob.checkInterval).toBe(5);
+
       paymentVerificationJob.stop();
     });
 

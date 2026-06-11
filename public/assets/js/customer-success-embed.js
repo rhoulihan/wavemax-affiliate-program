@@ -148,26 +148,6 @@
       if (bagsPurchasedEl) {
         const bagCount = customerData.numberOfBags || customerData.bagsPurchased || 1;
         bagsPurchasedEl.textContent = bagCount;
-        
-        // Fetch bag fee from system config to calculate credit (only for v1)
-        const baseUrl = window.EMBED_CONFIG?.baseUrl || window.location.origin;
-        fetch(`${baseUrl}/api/v1/system/config/public`, {
-          credentials: 'include'
-        })
-          .then(response => response.json())
-          .then(configs => {
-            const bagFeeConfig = configs.find(c => c.key === 'laundry_bag_fee');
-            if (bagFeeConfig && bagFeeConfig.currentValue) {
-              const bagFee = bagFeeConfig.currentValue;
-              const totalCredit = bagFee * bagCount;
-              const bagCreditEl = document.getElementById('bagCreditAmount');
-              if (bagCreditEl) bagCreditEl.textContent = `$${totalCredit.toFixed(2)}`;
-            }
-          })
-          .catch(error => {
-            console.error('Error fetching bag fee:', error);
-            // Keep default $10.00 if fetch fails
-          });
       }
 
       // Load affiliate information if available
