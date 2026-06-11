@@ -732,4 +732,84 @@ exports.sendCustomerPasswordResetEmail = async (customer, resetUrl) => {
   }
 };
 
+/**
+ * Notification B (spec §6.6) — customer "your laundry was delivered".
+ * Sent at order `delivered`: affiliate door confirm, customer PIN
+ * confirm, or the re-intake auto-deliver (method 'reintake').
+ * Best-effort: returns false on failure, never throws.
+ */
+exports.sendCustomerDeliveredEmail = async (customer, order) => {
+  try {
+    const language = customer.languagePreference || 'en';
+    const template = await loadTemplate('customer-order-delivered', language);
+
+    const translations = {
+      en: {
+        EMAIL_TITLE: 'Your Laundry Was Delivered',
+        EMAIL_HEADER: 'Laundry Delivered!',
+        GREETING: `Hello ${customer.firstName},`,
+        DELIVERED_MESSAGE: 'Your clean laundry has been delivered. The bag is back with you and ready for next time.',
+        ORDER_ID_LABEL: 'Order ID',
+        DELIVERED_AT_LABEL: 'Delivered',
+        THANKS_MESSAGE: 'Thank you for choosing WaveMAX Laundry!',
+        CLOSING_MESSAGE: 'Best regards,<br>The WaveMAX Laundry Team',
+        FOOTER_RIGHTS: 'All rights reserved.',
+        FOOTER_AUTOMATED_MESSAGE: 'This is an automated message. Please do not reply to this email.'
+      },
+      es: {
+        EMAIL_TITLE: 'Su ropa fue entregada',
+        EMAIL_HEADER: '¡Ropa entregada!',
+        GREETING: `Hola ${customer.firstName},`,
+        DELIVERED_MESSAGE: 'Su ropa limpia ha sido entregada. La bolsa está de vuelta con usted y lista para la próxima vez.',
+        ORDER_ID_LABEL: 'ID del Pedido',
+        DELIVERED_AT_LABEL: 'Entregado',
+        THANKS_MESSAGE: '¡Gracias por elegir WaveMAX Laundry!',
+        CLOSING_MESSAGE: 'Saludos cordiales,<br>El Equipo de WaveMAX Laundry',
+        FOOTER_RIGHTS: 'Todos los derechos reservados.',
+        FOOTER_AUTOMATED_MESSAGE: 'Este es un mensaje automatizado. Por favor no responda a este correo.'
+      },
+      pt: {
+        EMAIL_TITLE: 'Sua roupa foi entregue',
+        EMAIL_HEADER: 'Roupa entregue!',
+        GREETING: `Olá ${customer.firstName},`,
+        DELIVERED_MESSAGE: 'Sua roupa limpa foi entregue. A sacola está de volta com você e pronta para a próxima vez.',
+        ORDER_ID_LABEL: 'ID do Pedido',
+        DELIVERED_AT_LABEL: 'Entregue',
+        THANKS_MESSAGE: 'Obrigado por escolher a WaveMAX Laundry!',
+        CLOSING_MESSAGE: 'Atenciosamente,<br>Equipe WaveMAX Laundry',
+        FOOTER_RIGHTS: 'Todos os direitos reservados.',
+        FOOTER_AUTOMATED_MESSAGE: 'Esta é uma mensagem automática. Por favor, não responda a este e-mail.'
+      },
+      de: {
+        EMAIL_TITLE: 'Ihre Wäsche wurde geliefert',
+        EMAIL_HEADER: 'Wäsche geliefert!',
+        GREETING: `Hallo ${customer.firstName},`,
+        DELIVERED_MESSAGE: 'Ihre saubere Wäsche wurde geliefert. Der Beutel ist wieder bei Ihnen und bereit für das nächste Mal.',
+        ORDER_ID_LABEL: 'Auftragsnummer',
+        DELIVERED_AT_LABEL: 'Geliefert',
+        THANKS_MESSAGE: 'Vielen Dank, dass Sie WaveMAX Laundry gewählt haben!',
+        CLOSING_MESSAGE: 'Mit freundlichen Grüßen,<br>Ihr WaveMAX Laundry Team',
+        FOOTER_RIGHTS: 'Alle Rechte vorbehalten.',
+        FOOTER_AUTOMATED_MESSAGE: 'Dies ist eine automatische Nachricht. Bitte antworten Sie nicht auf diese E-Mail.'
+      }
+    };
+    const t = translations[language] || translations.en;
+
+    const deliveredAt = order.deliveredAt ? new Date(order.deliveredAt) : new Date();
+    const html = fillTemplate(template, {
+      ...t,
+      ORDER_ID: order.orderId,
+      DELIVERED_AT: deliveredAt.toLocaleString(),
+      CURRENT_YEAR: String(new Date().getFullYear())
+    });
+
+    await sendEmail(customer.email, t.EMAIL_TITLE, html);
+    logger.info(`Customer delivered email sent to ${customer.email} for order ${order.orderId}`);
+    return true;
+  } catch (error) {
+    logger.error('Error sending customer delivered email:', error);
+    return false;
+  }
+};
+
 module.exports = exports;
