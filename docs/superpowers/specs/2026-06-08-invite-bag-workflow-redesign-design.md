@@ -830,7 +830,7 @@ One concern per PR, ≤500-line diffs, tests green at every merge (deletions pai
 - [ ] PR 4 — order enum + `orderStateMachine` + gate helper; transition tests pass
 - [ ] PR 5 — `AffiliateInvite` + invite flow + invite-bound registration
 - [ ] PR 6 — `Bag` + mint/issue/label + claim flow + `/claim` page (both maps + `excludedRoutes`)
-- [ ] PR 7 — operator intake creates the order (one bag = one order, idempotent)
+- [x] PR 7 — operator intake creates the order (one bag = one order, idempotent)
 - [ ] PR 8 — payment retune (60/8, come-to-store, held-at-store, escalated not failed)
 - [ ] PR 9 — advance/scan-out + delivery (customer PIN / vendor code) + re-intake (operator code) on the bag URL; kiosk re-pointed; three role codes wired
 - [ ] PR 10 — W-9 upload/encrypted-storage/review + `multer` + payment-lock integration
