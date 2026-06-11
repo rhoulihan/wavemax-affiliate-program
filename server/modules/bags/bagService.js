@@ -8,6 +8,7 @@ const Bag = require('./Bag');
 const Affiliate = require('../../models/Affiliate');
 const SystemConfig = require('../../models/SystemConfig');
 const encryptionUtil = require('../../utils/encryption');
+const { getOpenOrderContext } = require('../orders/openOrderContext');
 const { logAuditEvent, AuditEvents } = require('../../utils/auditLogger');
 const logger = require('../../utils/logger');
 
@@ -110,7 +111,18 @@ async function resolveByToken(token) {
   const bag = await Bag.findOne({ tokenHash: Bag.hashToken(token) });
   if (!bag) return null;
   if (bag.status === 'issued') return { bag, outcome: 'unclaimed' };
-  if (bag.status === 'active') return { bag, outcome: 'claimed' };
+  if (bag.status === 'active') {
+    // PR 7: open-order context drives the kiosk/claim-page branch
+    // (intake | advance | deliver-or-reintake). PII-free by construction.
+    const ctx = await getOpenOrderContext(bag.bagId);
+    return {
+      bag,
+      outcome: 'claimed',
+      customerId: bag.customerId,
+      nextAction: ctx.nextAction,
+      ...(ctx.order ? { order: ctx.order } : {})
+    };
+  }
   return null; // minted / retired — non-resolvable
 }
 

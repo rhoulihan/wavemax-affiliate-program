@@ -722,6 +722,30 @@
       "accountInactive": "Konto inaktiv. Kontaktieren Sie Ihren Vorgesetzten.",
       "outsideShiftHours": "Anmeldung nur während der Schichtzeiten erlaubt",
       "shiftEnded": "Ihre Schicht ist beendet. Bitte melden Sie sich während Ihrer Schichtzeiten an."
+    },
+    "intake": {
+      "title": "Beutel-Annahme",
+      "weightLabel": "Gewicht (lbs)",
+      "weightPlaceholder": "Gewicht in Pfund eingeben",
+      "addOnsHeading": "Zusatzleistungen (vom Papierformular)",
+      "addOns": {
+        "premiumDetergent": "Premium-Waschmittel",
+        "fabricSoftener": "Weichspüler",
+        "stainRemover": "Fleckenentferner"
+      },
+      "freshFormAck": "Ein neues Zusatzleistungs-Formular wurde in die Beuteltasche gelegt",
+      "submit": "Auftrag erstellen",
+      "cancel": "Abbrechen",
+      "created": "Auftrag erstellt — Zahlungsaufforderung gesendet",
+      "processedScan": "Beutel als bearbeitet markiert",
+      "alreadyProcessed": "Dieser Beutel wurde bereits bearbeitet",
+      "reintakePrompt": "Der letzte Auftrag dieses Beutels ist noch in Zustellung. Als zugestellt markieren und neuen Auftrag starten?",
+      "reintakeConfirm": "Zugestellt markieren & neuen Auftrag starten",
+      "error": {
+        "bagNotActive": "Dieser Beutel wurde noch nicht von einem Kunden beansprucht",
+        "orderAlreadyOpen": "Für diesen Beutel ist bereits ein Auftrag offen",
+        "bagNotFound": "Beutel nicht erkannt"
+      }
     }
   },
   "administrator": {

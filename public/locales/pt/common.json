@@ -722,6 +722,30 @@
       "accountInactive": "Conta inativa. Contate seu supervisor.",
       "outsideShiftHours": "Login permitido apenas durante horas do turno",
       "shiftEnded": "Seu turno terminou. Por favor faça login durante suas horas de turno."
+    },
+    "intake": {
+      "title": "Recebimento de Sacola",
+      "weightLabel": "Peso (lbs)",
+      "weightPlaceholder": "Digite o peso em libras",
+      "addOnsHeading": "Adicionais (do formulário em papel)",
+      "addOns": {
+        "premiumDetergent": "Detergente Premium",
+        "fabricSoftener": "Amaciante de Roupas",
+        "stainRemover": "Removedor de Manchas"
+      },
+      "freshFormAck": "Um novo formulário de adicionais foi colocado no bolso da sacola",
+      "submit": "Criar Pedido",
+      "cancel": "Cancelar",
+      "created": "Pedido criado — solicitação de pagamento enviada",
+      "processedScan": "Sacola marcada como processada",
+      "alreadyProcessed": "Esta sacola já foi processada",
+      "reintakePrompt": "O último pedido desta sacola ainda está em entrega. Marcar como entregue e iniciar um novo pedido?",
+      "reintakeConfirm": "Marcar entregue e criar novo pedido",
+      "error": {
+        "bagNotActive": "Esta sacola ainda não foi reivindicada por um cliente",
+        "orderAlreadyOpen": "Já existe um pedido aberto para esta sacola",
+        "bagNotFound": "Sacola não reconhecida"
+      }
     }
   },
   "administrator": {

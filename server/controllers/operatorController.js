@@ -8,6 +8,7 @@ const shiftStatsService = require('../services/operatorShiftStatsService');
 const supportService = require('../services/operatorSupportService');
 const pickupService = require('../services/operatorPickupService');
 const bagWorkflowService = require('../services/operatorBagWorkflowService');
+const orderIntakeService = require('../modules/orders/orderIntakeService');
 
 // Get order queue
 exports.getOrderQueue = ControllerHelpers.asyncWrapper(async (req, res) => {
@@ -166,12 +167,11 @@ exports.addCustomerNote = async (req, res) => {
 exports.scanCustomer = async (req, res) => {
   try {
     const result = await bagWorkflowService.scanCustomer({
-      customerId: req.body.customerId,
-      bagId: req.body.bagId,
+      bagToken: req.body.bagToken || req.body.bagId || req.body.customerId, // tolerate old field names one sprint
       operatorId: req.user.id,
       req
     });
-    res.json({ success: true, currentOrder: true, ...result });
+    res.json({ success: true, ...result });
   } catch (err) {
     if (err.isBagWorkflowError) {
       return res.status(err.status).json({ success: false, error: err.message, ...err.details });
@@ -230,15 +230,17 @@ exports.receiveOrder = async (req, res) => {
 // New endpoint for weighing bags with bag tracking
 exports.weighBags = async (req, res) => {
   try {
-    const { order, orderProgress } = await bagWorkflowService.weighBags({
-      orderId: req.body.orderId,
-      bags: req.body.bags,
+    const { order, reIntake } = await bagWorkflowService.weighBags({
+      bagToken: req.body.bagToken || req.body.bagId, // tolerate old field name one sprint
+      weight: req.body.weight,
+      addOns: req.body.addOns,
+      freshAddOnsFormPlaced: !!req.body.freshAddOnsFormPlaced,
       operatorId: req.user.id,
       req
     });
-    res.json({ success: true, order, orderProgress, message: 'Bags weighed successfully' });
+    res.json({ success: true, order, reIntake, message: 'Order created at intake' });
   } catch (err) {
-    if (err.isBagWorkflowError) {
+    if (err.isBagWorkflowError || err.isIntakeError) {
       return res.status(err.status).json({ success: false, error: err.message, ...err.details });
     }
     logger.error('Error weighing bags:', err);
@@ -272,17 +274,14 @@ exports.markBagProcessed = async (req, res) => {
 exports.scanProcessed = async (req, res) => {
   try {
     const result = await bagWorkflowService.scanProcessed({
-      qrCode: req.body.qrCode,
+      bagToken: req.body.bagToken || req.body.bagId || req.body.qrCode, // tolerate old field names one sprint
       operatorId: req.user.id,
       req
     });
     if (result.warning) {
       return res.json({ success: false, ...result });
     }
-    if (result.action === 'show_pickup_modal') {
-      return res.json({ success: true, ...result, message: 'All bags processed - ready for pickup' });
-    }
-    res.json({ success: true, ...result, message: `Bag ${result.bag.bagNumber} marked as processed` });
+    res.json({ success: true, ...result, message: 'Bag marked as processed' });
   } catch (err) {
     if (err.isBagWorkflowError) {
       return res.status(err.status).json({ success: false, error: err.message, ...err.details });
@@ -296,6 +295,45 @@ exports.scanProcessed = async (req, res) => {
   }
 };
 
+// Kiosk intake — operator JWT + CSRF. One bag = one order (spec §6.4 / §5).
+exports.intake = ControllerHelpers.asyncWrapper(async (req, res) => {
+  const { bagToken, weight, addOns, freshAddOnsFormPlaced } = req.body;
+  if (!bagToken) {
+    return ControllerHelpers.sendError(res, 'bagToken is required', 400);
+  }
+  try {
+    const { order, reIntake } = await orderIntakeService.createOrderFromBag({
+      bagToken,
+      weight,
+      addOns,
+      freshAddOnsFormPlaced: !!freshAddOnsFormPlaced,
+      operatorId: req.user.id,
+      req
+    });
+    ControllerHelpers.sendSuccess(res, {
+      order: {
+        orderId: order.orderId,
+        status: order.status,
+        customerId: order.customerId,
+        affiliateId: order.affiliateId,
+        actualWeight: order.actualWeight,
+        addOns: order.addOns,
+        addOnTotal: order.addOnTotal,
+        feeBreakdown: order.feeBreakdown,
+        actualTotal: order.actualTotal,
+        paymentAmount: order.paymentAmount,
+        affiliateCommission: order.affiliateCommission,
+        paymentStatus: order.paymentStatus
+      },
+      reIntake
+    }, 'Order created at intake', 201);
+  } catch (err) {
+    if (err.isIntakeError || err.isBagWorkflowError) {
+      return ControllerHelpers.sendError(res, err.message, err.status, { code: err.code, ...err.details });
+    }
+    throw err;
+  }
+});
 
 // Mark order as ready for pickup (deprecated - use scanProcessed instead)
 exports.markOrderReady = async (req, res) => {

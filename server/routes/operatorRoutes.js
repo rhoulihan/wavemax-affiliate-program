@@ -72,6 +72,15 @@ router.post('/customers/:customerId/notes', operatorController.addCustomerNote);
 
 // Scanner Interface Routes
 router.post('/scan-customer', operatorController.scanCustomer);
+// Kiosk order-at-intake (spec §5). STRICT operator-only: the role hierarchy
+// lets administrators through checkRole(['operator']), but the kiosk seam is
+// operator JWT only.
+router.post('/intake', (req, res, next) => {
+  if (!req.user || req.user.role !== 'operator') {
+    return res.status(403).json({ success: false, message: 'Access denied: operator role required' });
+  }
+  next();
+}, operatorController.intake);
 router.post('/scan-bag', operatorController.scanBag);
 router.post('/orders/:orderId/receive', operatorController.receiveOrder);
 router.post('/orders/weigh-bags', operatorController.weighBags); // New bag tracking endpoint

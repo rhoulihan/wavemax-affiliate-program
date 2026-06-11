@@ -754,6 +754,30 @@
       "accountInactive": "Account inactive. Contact your supervisor.",
       "outsideShiftHours": "Login only allowed during shift hours",
       "shiftEnded": "Your shift has ended. Please login again during your shift hours."
+    },
+    "intake": {
+      "title": "Bag Intake",
+      "weightLabel": "Weight (lbs)",
+      "weightPlaceholder": "Enter weight in pounds",
+      "addOnsHeading": "Add-ons (from the paper form)",
+      "addOns": {
+        "premiumDetergent": "Premium Detergent",
+        "fabricSoftener": "Fabric Softener",
+        "stainRemover": "Stain Remover"
+      },
+      "freshFormAck": "A fresh add-ons form has been placed in the bag pocket",
+      "submit": "Create Order",
+      "cancel": "Cancel",
+      "created": "Order created — payment request sent",
+      "processedScan": "Bag marked processed",
+      "alreadyProcessed": "This bag has already been processed",
+      "reintakePrompt": "This bag's last order is still out for delivery. Mark it delivered and start a new order?",
+      "reintakeConfirm": "Mark delivered & start new order",
+      "error": {
+        "bagNotActive": "This bag has not been claimed by a customer yet",
+        "orderAlreadyOpen": "An order is already open for this bag",
+        "bagNotFound": "Bag not recognized"
+      }
     }
   },
   "administrator": {

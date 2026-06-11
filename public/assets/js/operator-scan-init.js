@@ -17,6 +17,13 @@
     let operatorData = null;
     let statsInterval = null;
 
+    // i18n helper — i18n.js returns the key itself when a translation is
+    // missing; fall back to readable English in that case.
+    function t(key, fallback) {
+        var translated = (window.i18n && typeof window.i18n.t === 'function') ? window.i18n.t(key) : key;
+        return (translated && translated !== key) ? translated : (fallback || key);
+    }
+
     // DOM elements
     const scanInput = document.getElementById('scanInput');
     const orderModal = document.getElementById('orderModal');
@@ -892,63 +899,217 @@
             console.log('Processing scan with token:', token ? 'Present' : 'Missing');
             console.log('CSRF token status:', CsrfUtils.getToken() ? 'Present' : 'Missing');
             
-            // Parse the scan data - supports multiple formats:
-            // Format 1: customerId#bagId (e.g., CUST-xxx#1)
-            // Format 2: customerId-bagNumber (e.g., CUST-xxx-1)
-            let customerId = scanData;
-            let bagId = null;
-            
-            if (scanData.includes('#')) {
-                // Format: CUST-xxx#1
-                const parts = scanData.split('#');
-                customerId = parts[0];
-                bagId = parts[1];
-                console.log('Parsed scan data (# format) - Customer ID:', customerId, 'Bag ID:', bagId);
-            } else if (scanData.match(/^CUST-[a-f0-9-]+-\d+$/)) {
-                // Format: CUST-xxx-1 (customer ID with bag number at end)
-                const lastDashIndex = scanData.lastIndexOf('-');
-                customerId = scanData.substring(0, lastDashIndex);
-                bagId = scanData.substring(lastDashIndex + 1);
-                console.log('Parsed scan data (- format) - Customer ID:', customerId, 'Bag ID:', bagId);
-            } else {
-                console.log('No bag ID in scan data, using full string as customer ID');
-            }
-            
-            // Use scan-customer endpoint - bags have customer IDs on them
-            const data = await ApiClient.post('/api/v1/operators/scan-customer', 
-                { 
-                    customerId: customerId,
-                    bagId: bagId
-                },
-                {
-                    showError: false,
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
-                }
-            );
-            console.log('API Response:', data);
-            
-            if (data.success) {
-                console.log('Scan successful, calling handleScanResponse');
-                console.log('Data from server:', JSON.stringify(data));
-                // Pass the customerId and bagId along with the response
-                data.scannedCustomerId = customerId;
-                if (bagId && !data.scannedBagId) {
-                    // Ensure bagId is passed if it was in the scan
-                    data.scannedBagId = bagId;
-                }
-                handleScanResponse(data);
-            } else {
-                console.log('Scan failed:', data.message);
+            // Extract the durable-bag token (raw 32-hex or printed claim URL).
+            const bagToken = window.BagTokenParser.extractBagToken(scanData);
+            if (!bagToken) {
                 hideConfirmation();
-                showError(data.message || 'Invalid scan');
+                showError(t('operator.intake.error.bagNotFound', 'Bag not recognized'));
+                return;
+            }
+
+            // Canonical scan-context resolver (PR 6). Drives the kiosk branch.
+            // ApiClient throws on non-2xx and on success:false bodies, so any
+            // resolver failure (e.g. the anti-enumeration 404) lands in catch.
+            const resolveData = await ApiClient.get(`/api/v1/bags/resolve/${bagToken}`, { showError: false });
+            hideConfirmation();
+
+            if (resolveData.outcome === 'unclaimed') {
+                showError(t('operator.intake.error.bagNotActive', 'This bag has not been claimed by a customer yet'));
+                return;
+            }
+
+            const nextAction = resolveData.order && resolveData.order.nextAction
+                ? resolveData.order.nextAction
+                : 'intake'; // claimed bag with no open order -> intake
+
+            switch (nextAction) {
+                case 'intake':
+                    showIntakeModal(bagToken, resolveData, false);
+                    break;
+                case 'advance':
+                    await sendScanProcessed(bagToken);
+                    break;
+                case 'deliver-or-reintake':
+                    // Kiosk = operator context: the bag is physically back at the
+                    // store. Explicit confirm before closing the picked_up order.
+                    showReintakeConfirm(bagToken, resolveData);
+                    break;
+                default:
+                    showError(t('operator.intake.error.bagNotActive', 'This bag has not been claimed by a customer yet'));
             }
         } catch (error) {
             console.error('Scan error:', error);
             hideConfirmation();
-            showError('Network error. Please try again.');
+            if (error.status === 404) {
+                // Anti-enumeration 404: unknown / minted / retired tokens.
+                showError(t('operator.intake.error.bagNotFound', 'Bag not recognized'));
+            } else {
+                showError('Network error. Please try again.');
+            }
         }
+    }
+
+    // Intake modal — weight + add-ons (operator ENTERS from the paper form)
+    // + required fresh-form-placed ack (spec §6.4).
+    function showIntakeModal(bagToken, resolveData, isReintake) {
+        modalTitle.textContent = t('operator.intake.title', 'Bag Intake');
+        // No affiliate slot here: the claimed-outcome resolve response carries
+        // {outcome, customerId, nextAction, order} — no affiliate object — so
+        // the slot could never populate on the intake path.
+        modalBody.innerHTML = `
+            <div class="weight-input-section">
+                <div class="bag-weight-input">
+                    <label for="intakeWeight" id="intakeWeightLabel"></label>
+                    <input type="number" id="intakeWeight" class="weight-input" step="0.1" min="0.1">
+                </div>
+            </div>
+            <div class="add-ons-confirmation">
+                <h5 id="intakeAddOnsHeading"></h5>
+                <label><input type="checkbox" id="intakeAddOnDetergent"> <span id="intakeAddOnDetergentLabel"></span></label><br>
+                <label><input type="checkbox" id="intakeAddOnSoftener"> <span id="intakeAddOnSoftenerLabel"></span></label><br>
+                <label><input type="checkbox" id="intakeAddOnStain"> <span id="intakeAddOnStainLabel"></span></label>
+            </div>
+            <div class="add-ons-confirmation">
+                <label><input type="checkbox" id="intakeFreshFormAck"> <span id="intakeFreshFormAckLabel"></span></label>
+            </div>
+            <div class="action-buttons">
+                <button class="btn btn-secondary" id="intakeCancelBtn"></button>
+                <button class="btn btn-primary" id="intakeSubmitBtn" disabled></button>
+            </div>
+        `;
+
+        // Translated copy via textContent (CSP/XSS-safe).
+        document.getElementById('intakeWeightLabel').textContent = t('operator.intake.weightLabel', 'Weight (lbs)');
+        document.getElementById('intakeWeight').setAttribute('placeholder', t('operator.intake.weightPlaceholder', 'Enter weight in pounds'));
+        document.getElementById('intakeAddOnsHeading').textContent = t('operator.intake.addOnsHeading', 'Add-ons (from the paper form)');
+        document.getElementById('intakeAddOnDetergentLabel').textContent = t('operator.intake.addOns.premiumDetergent', 'Premium Detergent');
+        document.getElementById('intakeAddOnSoftenerLabel').textContent = t('operator.intake.addOns.fabricSoftener', 'Fabric Softener');
+        document.getElementById('intakeAddOnStainLabel').textContent = t('operator.intake.addOns.stainRemover', 'Stain Remover');
+        document.getElementById('intakeFreshFormAckLabel').textContent = t('operator.intake.freshFormAck', 'A fresh add-ons form has been placed in the bag pocket');
+        document.getElementById('intakeCancelBtn').textContent = t('operator.intake.cancel', 'Cancel');
+        document.getElementById('intakeSubmitBtn').textContent = t('operator.intake.submit', 'Create Order');
+
+        orderModal.classList.add('weight-input-modal-active', 'active');
+        toggleActionBar(false);
+
+        const weightInput = document.getElementById('intakeWeight');
+        const ackBox = document.getElementById('intakeFreshFormAck');
+        const submitBtn = document.getElementById('intakeSubmitBtn');
+
+        function validate() {
+            const w = parseFloat(weightInput.value);
+            submitBtn.disabled = !(w > 0 && ackBox.checked);
+        }
+        weightInput.addEventListener('input', validate);
+        ackBox.addEventListener('change', validate);
+        document.getElementById('intakeCancelBtn').addEventListener('click', closeModal);
+        submitBtn.addEventListener('click', function() { submitIntake(bagToken, isReintake); });
+
+        setTimeout(function() { weightInput.focus(); }, 100);
+    }
+
+    async function submitIntake(bagToken, isReintake) {
+        const submitBtn = document.getElementById('intakeSubmitBtn');
+        if (submitBtn) submitBtn.disabled = true;
+
+        const body = {
+            bagToken: bagToken,
+            weight: parseFloat(document.getElementById('intakeWeight').value),
+            addOns: {
+                premiumDetergent: document.getElementById('intakeAddOnDetergent').checked,
+                fabricSoftener: document.getElementById('intakeAddOnSoftener').checked,
+                stainRemover: document.getElementById('intakeAddOnStain').checked
+            },
+            freshAddOnsFormPlaced: document.getElementById('intakeFreshFormAck').checked
+        };
+
+        try {
+            const token = localStorage.getItem('operatorToken');
+            await ApiClient.post('/api/v1/operators/intake', body, {
+                showError: false,
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            // ApiClient throws on non-2xx / success:false, so reaching here
+            // means the order was created.
+            closeModal();
+            showConfirmation(t('operator.intake.created', 'Order created — payment request sent'), '✅', 'success');
+            setTimeout(hideConfirmation, 3000);
+            await loadStats();
+        } catch (error) {
+            console.error('Intake submit error:', error);
+            if (submitBtn) submitBtn.disabled = false;
+            // The intake endpoint sends sendError(..., { code, ... });
+            // ApiClient carries the parsed body on error.data.
+            const body = error.data;
+            const code = (body && body.errors && body.errors.code) || null;
+            if (code === 'order_already_open') {
+                showError(t('operator.intake.error.orderAlreadyOpen', 'An order is already open for this bag'));
+            } else if (code === 'bag_not_active') {
+                showError(t('operator.intake.error.bagNotActive', 'This bag has not been claimed by a customer yet'));
+            } else if (code === 'invalid_bag') {
+                showError(t('operator.intake.error.bagNotFound', 'Bag not recognized'));
+            } else if (body && body.message) {
+                showError(body.message);
+            } else {
+                showError('Network error. Please try again.');
+            }
+        }
+    }
+
+    // Stage-2 scan: WDF done. PR 9 swaps this to /api/v1/operators/advance.
+    async function sendScanProcessed(bagToken) {
+        try {
+            const token = localStorage.getItem('operatorToken');
+            await ApiClient.post('/api/v1/operators/scan-processed',
+                { bagToken: bagToken },
+                { showError: false, headers: { 'Authorization': `Bearer ${token}` } }
+            );
+            // ApiClient throws on success:false, so reaching here means the
+            // bag advanced. duplicate_scan replies are 200 + success:false +
+            // warning, which ApiClient also throws — handled in catch below.
+            showConfirmation(t('operator.intake.processedScan', 'Bag marked processed'), '✅', 'success');
+            setTimeout(hideConfirmation, 3000);
+            await loadStats();
+        } catch (error) {
+            console.error('scan-processed error:', error);
+            const body = error.data;
+            if (body && body.warning === 'duplicate_scan') {
+                showConfirmation(t('operator.intake.alreadyProcessed', 'This bag has already been processed'), '⚠️', 'warning');
+                setTimeout(hideConfirmation, 3000);
+                await loadStats();
+            } else if (body && (body.message || body.error)) {
+                showError(body.message || body.error);
+            } else {
+                showError('Network error. Please try again.');
+            }
+        }
+    }
+
+    // picked_up bag back at the store: explicit confirm, then intake
+    // (the server auto-delivers the prior order — spec §6.4 re-intake).
+    function showReintakeConfirm(bagToken, resolveData) {
+        modalTitle.textContent = t('operator.intake.title', 'Bag Intake');
+        modalBody.innerHTML = `
+            <div class="process-confirm-section">
+                <h5 id="reintakePromptText"></h5>
+            </div>
+            <div class="action-buttons">
+                <button class="btn btn-secondary" id="reintakeCancelBtn"></button>
+                <button class="btn btn-primary" id="reintakeConfirmBtn"></button>
+            </div>
+        `;
+        document.getElementById('reintakePromptText').textContent =
+            t('operator.intake.reintakePrompt', "This bag's last order is still out for delivery. Mark it delivered and start a new order?");
+        document.getElementById('reintakeCancelBtn').textContent = t('operator.intake.cancel', 'Cancel');
+        document.getElementById('reintakeConfirmBtn').textContent = t('operator.intake.reintakeConfirm', 'Mark delivered & start new order');
+
+        orderModal.classList.add('active');
+        toggleActionBar(false);
+
+        document.getElementById('reintakeCancelBtn').addEventListener('click', closeModal);
+        document.getElementById('reintakeConfirmBtn').addEventListener('click', function() {
+            showIntakeModal(bagToken, resolveData, true);
+        });
     }
 
     // Handle scan response based on order status

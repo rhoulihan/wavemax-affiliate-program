@@ -716,6 +716,30 @@
       "accountInactive": "Cuenta inactiva. Contacte a su supervisor.",
       "outsideShiftHours": "Inicio de sesión solo permitido durante horas de turno",
       "shiftEnded": "Su turno ha terminado. Por favor inicie sesión durante sus horas de turno."
+    },
+    "intake": {
+      "title": "Recepción de Bolsa",
+      "weightLabel": "Peso (lbs)",
+      "weightPlaceholder": "Ingrese el peso en libras",
+      "addOnsHeading": "Servicios adicionales (del formulario en papel)",
+      "addOns": {
+        "premiumDetergent": "Detergente Premium",
+        "fabricSoftener": "Suavizante de Telas",
+        "stainRemover": "Quitamanchas"
+      },
+      "freshFormAck": "Se colocó un formulario de adicionales nuevo en el bolsillo de la bolsa",
+      "submit": "Crear Pedido",
+      "cancel": "Cancelar",
+      "created": "Pedido creado — solicitud de pago enviada",
+      "processedScan": "Bolsa marcada como procesada",
+      "alreadyProcessed": "Esta bolsa ya fue procesada",
+      "reintakePrompt": "El último pedido de esta bolsa sigue en reparto. ¿Marcarlo como entregado y comenzar un pedido nuevo?",
+      "reintakeConfirm": "Marcar entregado y crear pedido nuevo",
+      "error": {
+        "bagNotActive": "Esta bolsa aún no ha sido reclamada por un cliente",
+        "orderAlreadyOpen": "Ya existe un pedido abierto para esta bolsa",
+        "bagNotFound": "Bolsa no reconocida"
+      }
     }
   },
   "administrator": {
