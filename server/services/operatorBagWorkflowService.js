@@ -11,10 +11,10 @@ const Customer = require('../models/Customer');
 const Affiliate = require('../models/Affiliate');
 const emailService = require('../utils/emailService');
 const { logAuditEvent, AuditEvents } = require('../utils/auditLogger');
-const logger = require('../utils/logger');
 const bagService = require('../modules/bags/bagService');
 const orderIntakeService = require('../modules/orders/orderIntakeService');
-const pickupService = require('./operatorPickupService');
+const { applyTransition } = require('../modules/orders/orderStateMachine');
+const { applyReadyGate } = require('./orderReadyGateService');
 
 class BagWorkflowError extends Error {
   constructor(code, message, status = 400, details = {}) {
@@ -185,122 +185,72 @@ async function markBagProcessed({ orderId, operatorId, req }) {
   };
 }
 
-async function scanProcessed({ qrCode, operatorId, req }) {
-  logger.info('scanProcessed called with:', { qrCode, operatorId });
-
-  if (!qrCode || !qrCode.includes('#')) {
-    throw new BagWorkflowError('invalid_qr', 'Invalid QR code format', 400, {
-      message: 'Expected format: customerId#bagId'
+// Stage-2 scan: WDF done. Token-resolved; the ready gate owns promotion,
+// held-at-store, and the affiliate notification (spec §6.4/§6.5).
+// PR 9 replaces this with a thin delegate to orderAdvanceService.advance.
+async function scanProcessed({ bagToken, operatorId, req }) {
+  const resolved = await bagService.resolveByToken(bagToken);
+  if (!resolved || !resolved.bag) {
+    throw new BagWorkflowError('bag_not_found', 'Bag not found', 404, {
+      message: 'Bag not recognized'
     });
   }
-
-  const [customerId, bagId] = qrCode.split('#');
+  const bag = resolved.bag;
 
   const order = await Order.findOne({
-    customerId,
-    'bags.bagToken': bagId,
+    bagId: bag.bagId,
     status: { $in: ['in_progress', 'processed'] }
-  });
+  }).sort({ createdAt: -1 });
 
   if (!order) {
-    throw new BagWorkflowError('bag_not_found', 'Bag not found', 404, {
-      message: 'This bag is not associated with any active order'
+    throw new BagWorkflowError('no_active_order', 'No active order for this bag', 404, {
+      message: 'This bag has no order awaiting processing'
     });
   }
 
-  // Order has no schema ref to Customer; attach one for downstream emails.
-  const customer = await Customer.findOne({ customerId: order.customerId });
-  if (customer) order.customer = customer;
-
-  const bag = order.bags.find(b => b.bagToken === bagId);
-
-  if (bag.status === 'processed') {
-    const allBagsProcessed = order.bags.every(b => b.status === 'processed' || b.status === 'picked_up');
-    if (allBagsProcessed) {
-      return { action: 'show_pickup_modal', order, allBagsProcessed: true };
-    }
-    const remainingBags = order.bags.filter(b => b.status === 'intake').length;
+  if (order.status === 'processed') {
     return {
       warning: 'duplicate_scan',
-      message: `This bag has already been processed. ${remainingBags} bags still need processing.`,
-      bag: {
-        bagId: bag.bagToken,
-        bagNumber: bag.bagNumber,
-        status: bag.status,
-        processedAt: bag.scannedAt.processed
-      },
-      remainingCount: remainingBags
+      message: 'This bag has already been processed.',
+      order: {
+        orderId: order.orderId,
+        status: order.status,
+        heldAtStore: order.heldAtStore
+      }
     };
   }
 
-  bag.status = 'processed';
-  bag.scannedAt.processed = new Date();
-  bag.scannedBy.processed = operatorId;
-
-  order.bagsProcessed = order.bags.filter(
-    b => b.status === 'processed' || b.status === 'picked_up'
-  ).length;
-  const allBagsProcessed = order.bags.every(
-    b => b.status === 'processed' || b.status === 'picked_up'
-  );
-
-  if (allBagsProcessed) {
-    order.processedAt = new Date();
-    order.status = 'processed';
-
-    if (order.paymentStatus === 'verified' || order.paymentStatus === 'paid') {
-      // Paid — notify affiliate only; customer is notified after actual pickup.
-      if (order.affiliateId) {
-        const affiliate = await Affiliate.findOne({ affiliateId: order.affiliateId });
-        if (affiliate && affiliate.email) {
-          await emailService.sendOrderReadyNotification(affiliate.email, {
-            orderId: order.orderId,
-            customerName: `${order.customer.firstName} ${order.customer.lastName}`,
-            customerPhone: order.customer.phone,
-            numberOfBags: order.numberOfBags,
-            totalWeight: order.actualWeight,
-            finalTotal: order.actualTotal || order.estimatedTotal,
-            address: `${order.customer.address.street}, ${order.customer.address.city}, ${order.customer.address.state} ${order.customer.address.zip}`
-          });
-          logger.info(`Ready for pickup notification sent to affiliate ${affiliate.email} for order ${order.orderId}`);
-        }
-      }
-    } else {
-      // Unpaid — nudge the customer before anything ships.
-      await pickupService.sendPaymentReminder(order);
-      logger.info(`Order ${order.orderId} processed but awaiting payment. Reminder sent.`);
-    }
+  const now = new Date();
+  if (order.bags && order.bags[0]) {
+    order.bags[0].status = 'processed';
+    order.bags[0].scannedAt.processed = now;
+    order.bags[0].scannedBy.processed = operatorId;
   }
-
+  if (order.intake) {
+    order.intake.processedAt = now;
+    order.intake.processedBy = operatorId;
+  }
+  applyTransition(order, 'processed'); // validates in_progress -> processed; pre-save stamps processedAt
   await order.save();
+
+  // Gate owns ready_for_pickup / heldAtStore / affiliate notify. It saves internally.
+  await applyReadyGate(order, { trigger: 'processed_scan' });
 
   await logAuditEvent(AuditEvents.ORDER_STATUS_CHANGED, {
     operatorId,
     orderId: order.orderId,
+    bagId: bag.bagId,
     action: 'bag_processed',
-    bagId,
-    bagNumber: bag.bagNumber,
-    bagsProcessed: order.bagsProcessed,
-    totalBags: order.bags.length,
-    allBagsProcessed
+    newStatus: order.status,
+    heldAtStore: order.heldAtStore
   }, req);
 
-  if (allBagsProcessed) {
-    return { action: 'show_pickup_modal', order, allBagsProcessed: true };
-  }
   return {
-    order,
-    bag: {
-      bagId: bag.bagToken,
-      bagNumber: bag.bagNumber,
-      status: bag.status,
-      weight: bag.weight
-    },
-    orderProgress: {
-      totalBags: order.bags.length,
-      bagsWeighed: order.bags.length,
-      bagsProcessed: order.bagsProcessed,
-      bagsCompleted: order.bags.filter(b => b.status === 'picked_up').length
+    order: {
+      orderId: order.orderId,
+      status: order.status,
+      heldAtStore: order.heldAtStore,
+      readyForPickupAt: order.readyForPickupAt
     }
   };
 }

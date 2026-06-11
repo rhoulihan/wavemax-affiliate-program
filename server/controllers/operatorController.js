@@ -274,17 +274,14 @@ exports.markBagProcessed = async (req, res) => {
 exports.scanProcessed = async (req, res) => {
   try {
     const result = await bagWorkflowService.scanProcessed({
-      qrCode: req.body.qrCode,
+      bagToken: req.body.bagToken || req.body.bagId || req.body.qrCode, // tolerate old field names one sprint
       operatorId: req.user.id,
       req
     });
     if (result.warning) {
       return res.json({ success: false, ...result });
     }
-    if (result.action === 'show_pickup_modal') {
-      return res.json({ success: true, ...result, message: 'All bags processed - ready for pickup' });
-    }
-    res.json({ success: true, ...result, message: `Bag ${result.bag.bagNumber} marked as processed` });
+    res.json({ success: true, ...result, message: 'Bag marked as processed' });
   } catch (err) {
     if (err.isBagWorkflowError) {
       return res.status(err.status).json({ success: false, error: err.message, ...err.details });
