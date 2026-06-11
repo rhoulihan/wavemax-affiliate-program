@@ -80,7 +80,7 @@ router.post('/:orderId/cancel', authenticate, orderController.cancelOrder);
  * @access  Private (affiliate or admin)
  */
 router.put('/:orderId/payment-status', authenticate, [
-  body('paymentStatus').isIn(['pending', 'paid', 'failed', 'refunded']).withMessage('Invalid payment status')
+  body('paymentStatus').isIn(['pending', 'awaiting', 'confirming', 'verified', 'failed']).withMessage('Invalid payment status')
 ], orderController.updatePaymentStatus);
 
 /**

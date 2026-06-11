@@ -60,11 +60,8 @@ describe('PaymentEmailScanner', () => {
     testOrder = await Order.create({
       customerId: testCustomer.customerId,
       affiliateId: testAffiliate.affiliateId,
-      pickupDate: new Date(),
-      pickupTime: 'morning',
-      estimatedWeight: 20,
+      bagId: 'BAG-paym-1',
       actualWeight: 22,
-      numberOfBags: 2,
       status: 'processed',
       paymentStatus: 'awaiting',
       paymentAmount: 55.50,
@@ -240,11 +237,8 @@ describe('PaymentEmailScanner', () => {
       const freshOrder = await Order.create({
         customerId: testCustomer.customerId,
         affiliateId: testAffiliate.affiliateId,
-        pickupDate: new Date(),
-        pickupTime: 'afternoon',
-        estimatedWeight: 44,
+        bagId: 'BAG-paym-2',
         actualWeight: 44,  // Set weight to match expected payment (44 * 1.25 = 55)
-        numberOfBags: 2,
         status: 'processed',
         paymentStatus: 'awaiting',
         paymentRequestedAt: new Date()
@@ -401,10 +395,7 @@ describe('PaymentEmailScanner', () => {
       const order2 = await Order.create({
         customerId: testCustomer.customerId,
         affiliateId: testAffiliate.affiliateId,
-        pickupDate: new Date(),
-        pickupTime: 'afternoon',
-        estimatedWeight: 15,
-        numberOfBags: 1,
+        bagId: 'BAG-paym-3',
         status: 'processed',
         paymentStatus: 'awaiting',
         paymentAmount: 35.00,

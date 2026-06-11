@@ -62,8 +62,8 @@ describe('Order Controller', () => {
         orderId: 'ORD123',
         customerId: 'CUST123',
         affiliateId: 'AFF123',
-        status: 'processing',
-        pickupDate: '2025-05-26'};
+        status: 'in_progress',
+        bagId: 'BAG-unit-1'};
 
       const mockCustomer = {
         customerId: 'CUST123',
@@ -154,7 +154,7 @@ describe('Order Controller', () => {
         orderId: 'ORD123',
         customerId: 'CUST123',
         affiliateId: 'AFF123',
-        status: 'pending',
+        status: 'in_progress',
         save: jest.fn()
       };
 
@@ -162,7 +162,7 @@ describe('Order Controller', () => {
       const mockAffiliate = { affiliateId: 'AFF123' };
 
       req.params.orderId = 'ORD123';
-      req.body = { status: 'processing' }; // Use valid status
+      req.body = { status: 'processed' }; // Use valid status
       req.user = { role: 'affiliate', affiliateId: 'AFF123' };
 
       Order.findOne.mockResolvedValue(mockOrder);
@@ -172,14 +172,14 @@ describe('Order Controller', () => {
 
       await orderController.updateOrderStatus(req, res);
 
-      expect(mockOrder.status).toBe('processing');
+      expect(mockOrder.status).toBe('processed');
       expect(mockOrder.save).toHaveBeenCalled();
       expect(emailService.sendOrderStatusUpdateEmail).toHaveBeenCalled();
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.json).toHaveBeenCalledWith(
         expectSuccessResponse({
           orderId: 'ORD123',
-          status: 'processing',
+          status: 'processed',
           actualWeight: undefined,
           actualTotal: undefined,
           affiliateCommission: undefined
@@ -187,15 +187,15 @@ describe('Order Controller', () => {
       );
     });
 
-    it('should update actual weight when processing', async () => {
+    it('should update actual weight when marking processed', async () => {
       const mockOrder = {
         orderId: 'ORD123',
-        status: 'pending', // Use valid status
+        status: 'in_progress', // Use valid status
         save: jest.fn()
       };
 
       req.params.orderId = 'ORD123';
-      req.body = { status: 'processing', actualWeight: 25.5 };
+      req.body = { status: 'processed', actualWeight: 25.5 };
       req.user = { role: 'admin' };
 
       Order.findOne.mockResolvedValue(mockOrder);
@@ -205,7 +205,7 @@ describe('Order Controller', () => {
 
       await orderController.updateOrderStatus(req, res);
 
-      expect(mockOrder.status).toBe('processing');
+      expect(mockOrder.status).toBe('processed');
       expect(mockOrder.actualWeight).toBe(25.5);
       expect(mockOrder.save).toHaveBeenCalled();
     });
@@ -213,11 +213,11 @@ describe('Order Controller', () => {
     it('should validate status transitions', async () => {
       const mockOrder = {
         orderId: 'ORD123',
-        status: 'complete'
+        status: 'delivered'
       };
 
       req.params.orderId = 'ORD123';
-      req.body = { status: 'pending' };
+      req.body = { status: 'processed' };
       req.user = { role: 'admin' };
 
       Order.findOne.mockResolvedValue(mockOrder);
@@ -226,14 +226,14 @@ describe('Order Controller', () => {
 
       expect(res.status).toHaveBeenCalledWith(400);
       expect(res.json).toHaveBeenCalledWith(
-        expectErrorResponse('Invalid status transition from complete to pending')
+        expectErrorResponse('Invalid status transition from delivered to processed')
       );
     });
 
-    it('should send commission email when complete', async () => {
+    it('should send commission email when delivered', async () => {
       const mockOrder = {
         orderId: 'ORD123',
-        status: 'processed', // Use valid status (ready for delivery)
+        status: 'picked_up', // delivered is reachable only from picked_up
         save: jest.fn()
       };
 
@@ -241,7 +241,7 @@ describe('Order Controller', () => {
       const mockAffiliate = { affiliateId: 'AFF123' };
 
       req.params.orderId = 'ORD123';
-      req.body = { status: 'complete' };
+      req.body = { status: 'delivered' };
       req.user = { role: 'admin' };
 
       Order.findOne.mockResolvedValue(mockOrder);
@@ -266,7 +266,7 @@ describe('Order Controller', () => {
         orderId: 'ORD123',
         customerId: 'CUST123',
         affiliateId: 'AFF123',
-        status: 'pending',
+        status: 'in_progress',
         save: jest.fn()
       };
 
@@ -302,7 +302,7 @@ describe('Order Controller', () => {
     it('should prevent cancelling non-cancellable orders', async () => {
       const mockOrder = {
         orderId: 'ORD123',
-        status: 'processing'
+        status: 'picked_up'
       };
 
       req.params.orderId = 'ORD123';
@@ -314,7 +314,7 @@ describe('Order Controller', () => {
 
       expect(res.status).toHaveBeenCalledWith(400);
       expect(res.json).toHaveBeenCalledWith(
-        expectErrorResponse('Orders in processing status cannot be cancelled. Only pending orders can be cancelled.')
+        expectErrorResponse('Orders in picked_up status cannot be cancelled. Only in_progress or processed orders can be cancelled.')
       );
     });
   });

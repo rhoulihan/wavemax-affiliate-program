@@ -171,12 +171,12 @@ describe('Order Controller - Additional Coverage', () => {
   describe('updateOrderStatus edge cases', () => {
     it('should handle invalid status transitions', async () => {
       req.params.orderId = 'ORD001';
-      req.body.status = 'pending'; // Invalid transition from complete
+      req.body.status = 'processed'; // Invalid transition from delivered
       req.user = { role: 'admin' }; // Need admin role to update status
 
       const mockOrder = {
         orderId: 'ORD001',
-        status: 'complete',
+        status: 'delivered',
       save: jest.fn()
       };
 
@@ -188,7 +188,7 @@ describe('Order Controller - Additional Coverage', () => {
       expect(res.status).toHaveBeenCalledWith(400);
       expect(res.json).toHaveBeenCalledWith({
         success: false,
-        message: 'Invalid status transition from complete to pending'
+        message: 'Invalid status transition from delivered to processed'
       });
     });
   });
@@ -218,7 +218,7 @@ describe('Order Controller - Additional Coverage', () => {
       const mockOrder = {
         orderId: 'ORD001',
         customerId: 'CUST123',
-        status: 'complete', // Cannot cancel completed orders
+        status: 'delivered', // Cannot cancel delivered orders
         save: jest.fn().mockResolvedValue(true)
       };
 
@@ -230,7 +230,7 @@ describe('Order Controller - Additional Coverage', () => {
       expect(res.status).toHaveBeenCalledWith(400);
       expect(res.json).toHaveBeenCalledWith({
         success: false,
-        message: 'Orders in complete status cannot be cancelled. Only pending orders can be cancelled.'
+        message: 'Orders in delivered status cannot be cancelled. Only in_progress or processed orders can be cancelled.'
       });
     });
   });
@@ -257,13 +257,13 @@ describe('Order Controller - Additional Coverage', () => {
       });
     });
 
-    it('should prevent payment updates on non-complete orders', async () => {
+    it('should prevent payment updates on non-delivered orders', async () => {
       req.params.orderId = 'ORD001';
-      req.body.paymentStatus = 'completed';
+      req.body.paymentStatus = 'verified';
 
       const mockOrder = {
         orderId: 'ORD001',
-        status: 'pending', // Not complete
+        status: 'in_progress', // Not delivered
         save: jest.fn().mockResolvedValue(true)
       };
 
@@ -275,42 +275,7 @@ describe('Order Controller - Additional Coverage', () => {
       expect(res.status).toHaveBeenCalledWith(400);
       expect(res.json).toHaveBeenCalledWith({
         success: false,
-        message: 'Cannot update payment status for non-complete orders'
-      });
-    });
-
-    it('should record refund fields on complete orders', async () => {
-      req.params.orderId = 'ORD001';
-      req.body.paymentStatus = 'verified';
-      req.body.refundAmount = 50;
-      req.body.refundReason = 'Customer request';
-
-      const mockOrder = {
-        orderId: 'ORD001',
-        status: 'complete',
-        paymentStatus: 'verified',
-        save: jest.fn().mockResolvedValue(true)
-      };
-
-      Order.findOne = createFindOneMock(mockOrder);
-
-      const handler = extractHandler(orderController.updatePaymentStatus);
-      await handler(req, res, next);
-
-      expect(mockOrder.save).toHaveBeenCalled();
-      expect(mockOrder.refundAmount).toBe(50);
-      expect(mockOrder.refundReason).toBe('Customer request');
-      expect(mockOrder.refundedAt).toBeInstanceOf(Date);
-      expect(res.status).toHaveBeenCalledWith(200);
-      expect(res.json).toHaveBeenCalledWith({
-        success: true,
-        message: 'Payment status updated successfully',
-        order: expect.objectContaining({
-          orderId: 'ORD001',
-          paymentStatus: 'verified',
-          refundAmount: 50,
-          refundReason: 'Customer request'
-        })
+        message: 'Cannot update payment status for non-delivered orders'
       });
     });
   });
@@ -320,7 +285,7 @@ describe('Order Controller - Additional Coverage', () => {
       const next = jest.fn();
       req.body = {
         orderIds: 'not-an-array', // Should be array
-        status: 'processing'
+        status: 'processed'
       };
       req.user = { role: 'operator' };
 
@@ -338,7 +303,7 @@ describe('Order Controller - Additional Coverage', () => {
       const next = jest.fn();
       req.body = {
         orderIds: [],
-        status: 'processing'
+        status: 'processed'
       };
       req.user = { role: 'operator' };
 
@@ -356,7 +321,7 @@ describe('Order Controller - Additional Coverage', () => {
       const next = jest.fn();
       req.body = {
         orderIds: ['ORD001'],
-        status: 'processing'
+        status: 'processed'
       };
       req.user = { role: 'customer' }; // Wrong role
 

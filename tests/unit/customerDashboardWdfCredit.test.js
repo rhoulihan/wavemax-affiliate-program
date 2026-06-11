@@ -204,26 +204,18 @@ describe('Customer Dashboard WDF Credit Display', () => {
           orderId: 'ORD-STAT-001',
           customerId: testCustomer.customerId,
           affiliateId: testAffiliate.affiliateId,
-          pickupDate: new Date(),
-          pickupTime: 'morning',
-          estimatedWeight: 20,
+          bagId: 'BAG-dash-1',
           actualWeight: 25,
-          wdfCreditGenerated: 6.25,
-          weightDifference: 5,
-          status: 'complete',
-          estimatedTotal: 35,
+          status: 'delivered',
           actualTotal: 41.25
         },
         {
           orderId: 'ORD-STAT-002',
           customerId: testCustomer.customerId,
           affiliateId: testAffiliate.affiliateId,
-          pickupDate: new Date(),
-          pickupTime: 'afternoon',
-          estimatedWeight: 30,
+          bagId: 'BAG-dash-2',
           wdfCreditApplied: 6.25,
-          status: 'pending',
-          estimatedTotal: 38.75 // After credit applied
+          status: 'in_progress'
         }
       ]);
 

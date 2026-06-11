@@ -76,11 +76,8 @@ describe('PaymentVerificationJob', () => {
     testOrder = await Order.create({
       customerId: testCustomer.customerId,
       affiliateId: testAffiliate.affiliateId,
-      pickupDate: new Date(),
-      pickupTime: 'morning',
-      estimatedWeight: 20,
+      bagId: 'BAG-paym-1',
       actualWeight: 22,
-      numberOfBags: 2,
       status: 'processed', // WDF complete
       paymentStatus: 'awaiting',
       paymentAmount: 50.00,
@@ -310,10 +307,7 @@ describe('PaymentVerificationJob', () => {
       const v1Order = await Order.create({
         customerId: v1Customer.customerId,
         affiliateId: testAffiliate.affiliateId,
-        pickupDate: new Date(),
-        pickupTime: 'afternoon',
-        estimatedWeight: 15,
-        numberOfBags: 1,
+        bagId: 'BAG-paym-2',
         status: 'processed',
         paymentCheckAttempts: 0
       });

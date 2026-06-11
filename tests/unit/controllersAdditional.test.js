@@ -260,8 +260,8 @@ describe('Controllers - Additional Function Coverage', () => {
         req.user = { role: 'affiliate', affiliateId: 'AFF123' };
 
         const mockOrders = [
-          { status: 'complete', actualTotal: 100, estimatedWeight: 20, affiliateId: 'AFF123' },
-          { status: 'complete', actualTotal: 200, estimatedWeight: 30, affiliateId: 'AFF123' }
+          { status: 'delivered', actualTotal: 100, actualWeight: 20, affiliateId: 'AFF123' },
+          { status: 'delivered', actualTotal: 200, actualWeight: 30, affiliateId: 'AFF123' }
         ];
         
         Order.find.mockResolvedValue(mockOrders);
@@ -342,7 +342,7 @@ describe('Controllers - Additional Function Coverage', () => {
 
         expect(Order.find).toHaveBeenCalledWith({
           affiliateId: 'AFF123',
-          status: 'complete'
+          status: 'delivered'
         });
         expect(res.json).toHaveBeenCalledWith({
           success: true,

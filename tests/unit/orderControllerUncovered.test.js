@@ -76,7 +76,9 @@ describe('Order Controller - Uncovered Functions', () => {
     };
     next = jest.fn();
     jest.clearAllMocks();
-    jest.resetModules();
+    // NOTE: no jest.resetModules() here — exportOrders lazy-requires
+    // orderExportService, and resetting the registry would hand it a fresh
+    // (unconfigured) auto-mocked Order model instead of the one stubbed below.
     Order.countDocuments = jest.fn();
   });
 
@@ -86,8 +88,8 @@ describe('Order Controller - Uncovered Functions', () => {
         orderId: 'ORD001',
         customerId: { customerId: 'CUST001', firstName: 'John', lastName: 'Doe' },
         affiliateId: { businessName: 'Test Business' },
-        estimatedTotal: 50,
-        status: 'complete',
+        actualTotal: 50,
+        status: 'delivered',
         createdAt: new Date('2025-01-01')
       }
     ];
@@ -183,7 +185,7 @@ describe('Order Controller - Uncovered Functions', () => {
       ];
       
       const mockOrders = [
-        { orderId: 'ORD001', customerId: 'CUST001', status: 'complete', createdAt: new Date() }
+        { orderId: 'ORD001', customerId: 'CUST001', status: 'delivered', createdAt: new Date() }
       ];
 
       // First call to find customers by search term
@@ -227,7 +229,7 @@ describe('Order Controller - Uncovered Functions', () => {
       req.user.role = 'admin';
 
       const mockOrders = [
-        { orderId: 'ORD001', customerId: 'CUST001', status: 'complete', createdAt: new Date() }
+        { orderId: 'ORD001', customerId: 'CUST001', status: 'delivered', createdAt: new Date() }
       ];
       
       Order.countDocuments.mockResolvedValue(1);

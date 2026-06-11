@@ -336,7 +336,7 @@ describe('Test Routes', () => {
         _id: 'mongoId123',
         orderId: 'ORD-123',
         customerId: 'CUST-123',
-        status: 'pending'
+        status: 'in_progress'
       };
 
       Order.findOne = createFindOneMock(mockOrder);
@@ -445,14 +445,14 @@ describe('Test Routes', () => {
       emailService.sendV2PaymentRequest = jest.fn().mockResolvedValue(true);
     });
 
-    it('should advance order to processing stage (weigh action)', async () => {
+    it('should record intake weight on the order (weigh action)', async () => {
       const mockOrder = {
         _id: 'mongoId123',
         orderId: 'ORD-123',
         customerId: 'CUST-123',
-        numberOfBags: 2,
+        bagToken: 'a'.repeat(32),
         bags: [],
-        status: 'pending',
+        status: 'in_progress',
         isV2Order: true,
         baseRate: 1.25,
         save: jest.fn().mockResolvedValue(true)
@@ -465,20 +465,21 @@ describe('Test Routes', () => {
         .post('/api/test/order/advance-stage')
         .send({
           orderId: 'ORD-123',
-          currentStage: 'pending',
-          nextStage: 'processing',
+          currentStage: 'intake',
+          nextStage: 'in_progress',
           action: 'weigh',
           weights: [15, 20],
           actualWeight: 35
         });
 
       expect(response.status).toBe(200);
-      expect(mockOrder.status).toBe('processing');
-      expect(mockOrder.bags).toHaveLength(2);
+      expect(mockOrder.status).toBe('in_progress');
+      expect(mockOrder.bags).toHaveLength(1);
+      expect(mockOrder.actualWeight).toBe(35);
       expect(mockOrder.save).toHaveBeenCalled();
     });
 
-    it('should send V2 payment request email when weighing all bags', async () => {
+    it('should send V2 payment request email after weighing', async () => {
       const mockCustomer = {
         _id: 'customerId123',
         customerId: 'CUST-123',
@@ -491,10 +492,9 @@ describe('Test Routes', () => {
         _id: 'mongoId123',
         orderId: 'ORD-123',
         customerId: 'CUST-123',
-        numberOfBags: 2,
+        bagToken: 'b'.repeat(32),
         bags: [],
-        bagsWeighed: 0,
-        status: 'pending',
+        status: 'in_progress',
         isV2Order: true,
         baseRate: 1.25,
         actualWeight: 0,
@@ -503,9 +503,8 @@ describe('Test Routes', () => {
         save: jest.fn().mockResolvedValue(true)
       };
 
-      // Mock the save function to update bagsWeighed
+      // Mock the save function to set the computed payment amount
       mockOrder.save.mockImplementation(async function() {
-        this.bagsWeighed = this.numberOfBags;
         this.paymentAmount = 45.50;
         return true;
       }.bind(mockOrder));
@@ -525,7 +524,7 @@ describe('Test Routes', () => {
         });
 
       expect(response.status).toBe(200);
-      expect(mockOrder.status).toBe('processing');
+      expect(mockOrder.status).toBe('in_progress');
       expect(emailService.sendV2PaymentRequest).toHaveBeenCalled();
       expect(mockOrder.paymentLinks).toBeDefined();
       expect(mockOrder.paymentQRCodes).toBeDefined();
@@ -535,12 +534,10 @@ describe('Test Routes', () => {
       const mockOrder = {
         _id: 'mongoId123',
         orderId: 'ORD-123',
-        numberOfBags: 2,
         bags: [
-          { bagId: 'BAG-1', status: 'processing', scannedAt: {} },
-          { bagId: 'BAG-2', status: 'processing', scannedAt: {} }
+          { bagToken: 'c'.repeat(32), bagNumber: 1, status: 'intake', scannedAt: {} }
         ],
-        status: 'processing',
+        status: 'in_progress',
         save: jest.fn().mockResolvedValue(true)
       };
 
@@ -560,14 +557,12 @@ describe('Test Routes', () => {
       expect(mockOrder.save).toHaveBeenCalled();
     });
 
-    it('should advance order to complete stage (pickup action)', async () => {
+    it('should advance order to delivered stage (pickup action)', async () => {
       const mockOrder = {
         _id: 'mongoId123',
         orderId: 'ORD-123',
-        numberOfBags: 2,
         bags: [
-          { bagId: 'BAG-1', status: 'processed', scannedAt: {} },
-          { bagId: 'BAG-2', status: 'processed', scannedAt: {} }
+          { bagToken: 'd'.repeat(32), bagNumber: 1, status: 'processed', scannedAt: {} }
         ],
         status: 'processed',
         isV2Order: true,
@@ -585,9 +580,9 @@ describe('Test Routes', () => {
         });
 
       expect(response.status).toBe(200);
-      expect(mockOrder.status).toBe('complete');
+      expect(mockOrder.status).toBe('delivered');
       expect(mockOrder.paymentStatus).toBe('verified');
-      expect(mockOrder.bags[0].status).toBe('completed');
+      expect(mockOrder.bags[0].status).toBe('picked_up');
       expect(mockOrder.save).toHaveBeenCalled();
     });
 

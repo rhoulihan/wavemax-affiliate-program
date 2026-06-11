@@ -359,13 +359,11 @@ describe('Formatters', () => {
 
   describe('status', () => {
     it('should format order status', () => {
-      expect(Formatters.status('pending', 'order')).toBe('Pending');
-      expect(Formatters.status('scheduled', 'order')).toBe('Scheduled');
-      expect(Formatters.status('collected', 'order')).toBe('Collected');
-      expect(Formatters.status('processing', 'order')).toBe('Processing');
+      expect(Formatters.status('in_progress', 'order')).toBe('In Progress');
       expect(Formatters.status('processed', 'order')).toBe('Processed');
+      expect(Formatters.status('ready_for_pickup', 'order')).toBe('Ready for Pickup');
+      expect(Formatters.status('picked_up', 'order')).toBe('Picked Up');
       expect(Formatters.status('delivered', 'order')).toBe('Delivered');
-      expect(Formatters.status('completed', 'order')).toBe('Completed');
       expect(Formatters.status('cancelled', 'order')).toBe('Cancelled');
     });
 
@@ -379,12 +377,10 @@ describe('Formatters', () => {
     });
 
     it('should format bag status', () => {
-      expect(Formatters.status('pending', 'bag')).toBe('Pending');
-      expect(Formatters.status('collected', 'bag')).toBe('Collected');
-      expect(Formatters.status('processing', 'bag')).toBe('In Processing');
+      expect(Formatters.status('intake', 'bag')).toBe('Checked In');
       expect(Formatters.status('processed', 'bag')).toBe('Processed');
+      expect(Formatters.status('picked_up', 'bag')).toBe('Picked Up');
       expect(Formatters.status('delivered', 'bag')).toBe('Delivered');
-      expect(Formatters.status('completed', 'bag')).toBe('Completed');
     });
 
     it('should handle unknown status with capitalization', () => {

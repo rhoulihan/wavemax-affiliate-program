@@ -222,8 +222,8 @@ describe('QuickBooks Controller', () => {
     const mockOrders = [
       {
         orderId: 'ORD-001',
-        status: 'complete',
-        completedAt: new Date('2025-01-15'),
+        status: 'delivered',
+        deliveredAt: new Date('2025-01-15'),
         totalPrice: 100,
         affiliate: {
           affiliateId: {
@@ -241,8 +241,8 @@ describe('QuickBooks Controller', () => {
       },
       {
         orderId: 'ORD-002',
-        status: 'complete',
-        completedAt: new Date('2025-01-16'),
+        status: 'delivered',
+        deliveredAt: new Date('2025-01-16'),
         totalPrice: 200,
         affiliate: {
           affiliateId: {
@@ -283,8 +283,8 @@ describe('QuickBooks Controller', () => {
       await quickbooksController.exportPaymentSummary(req, res);
 
       expect(Order.find).toHaveBeenCalledWith({
-        status: 'complete',
-        completedAt: {
+        status: 'delivered',
+        deliveredAt: {
           $gte: new Date('2025-01-01'),
           $lte: expect.any(Date)
         },
@@ -313,13 +313,13 @@ describe('QuickBooks Controller', () => {
               orders: [
                 {
                   orderId: 'ORD-001',
-                  completedAt: new Date('2025-01-15'),
+                  deliveredAt: new Date('2025-01-15'),
                   orderTotal: 100,
                   commission: 10
                 },
                 {
                   orderId: 'ORD-002',
-                  completedAt: new Date('2025-01-16'),
+                  deliveredAt: new Date('2025-01-16'),
                   orderTotal: 200,
                   commission: 20
                 }
@@ -482,8 +482,8 @@ describe('QuickBooks Controller', () => {
       {
         orderId: 'ORD-001',
         customerId: 'CUST-001',
-        status: 'complete',
-        completedAt: new Date('2025-01-15'),
+        status: 'delivered',
+        deliveredAt: new Date('2025-01-15'),
         actualTotal: 100,
         estimatedTotal: 100,
         affiliateId: 'AFF-001',
@@ -493,8 +493,8 @@ describe('QuickBooks Controller', () => {
       {
         orderId: 'ORD-002',
         customerId: 'CUST-002',
-        status: 'complete',
-        completedAt: new Date('2025-01-16'),
+        status: 'delivered',
+        deliveredAt: new Date('2025-01-16'),
         actualTotal: 200,
         estimatedTotal: 200,
         affiliateId: 'AFF-001',
@@ -542,8 +542,8 @@ describe('QuickBooks Controller', () => {
       expect(Affiliate.findOne).toHaveBeenCalledWith({ affiliateId: 'AFF-001' });
 
       expect(Order.find).toHaveBeenCalledWith({
-        status: 'complete',
-        completedAt: {
+        status: 'delivered',
+        deliveredAt: {
           $gte: new Date('2025-01-01'),
           $lte: expect.any(Date)
         },
