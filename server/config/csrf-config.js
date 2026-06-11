@@ -166,7 +166,11 @@ const CSRF_CONFIG = {
     '/api/v1/operators/orders/:orderId/claim',
     '/api/v1/operators/orders/:orderId/status',
     '/api/v1/operators/orders/:orderId/quality-check',
-    '/api/v1/operators/shift/status'
+    '/api/v1/operators/shift/status',
+
+    // Bag admin mutations (mint/issue — spec §5)
+    '/api/v1/bags/mint',
+    '/api/v1/bags/batch/:batchId/issue'
   ],
 
   // HIGH priority endpoints (Phase 2)
