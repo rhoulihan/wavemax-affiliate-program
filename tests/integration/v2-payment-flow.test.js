@@ -85,41 +85,12 @@ describe('V2 Payment Flow Integration Tests', () => {
   });
 
   describe('V2 Customer Registration', () => {
-    it('should register a V2 customer without payment', async () => {
-      const response = await agent
-        .post('/api/customers/register')
-        .set('x-csrf-token', csrfToken)
-        .send({
-          email: 'v2customer@test.com',
-          password: 'TestPass@2024!',
-          firstName: 'V2Test',
-          lastName: 'Customer',
-          phone: '555-0199',
-          username: 'v2testcustomer',
-          address: '123 Test St',
-          city: 'Austin',
-          state: 'TX',
-          zipCode: '78701',
-          numberOfBags: 2,
-          affiliateId: TEST_IDS.affiliate
-        });
+    it('should create the V2 customer fixture (registration is claim-based, covered by customerClaim.test.js)', async () => {
+      const customer = await ensureTestCustomer();
+      expect(customer).toBeDefined();
+      expect(customer.customerId).toBeDefined();
 
-      if (response.status === 400) {
-        console.log('Registration error:', response.body);
-        // Customer might already exist, try to get the existing customer
-        const customer = await Customer.findOne({ email: 'v2customer@test.com' });
-        if (customer) {
-          customerId = customer.customerId;
-          authToken = 'test-token';
-          return;
-        }
-      }
-      
-      expect(response.status).toBe(201);
-      expect(response.body.success).toBe(true);
-      // Response structure may have changed
-      
-      customerId = response.body.customerId || 'CUST123';
+      customerId = customer.customerId;
       authToken = 'test-token'; // Token not returned in registration
     });
 
@@ -581,77 +552,8 @@ describe('V2 Payment Flow Integration Tests', () => {
     });
   });
 
-  describe('Feature Toggle', () => {
-    it('should use V1 flow when payment_version is v1', async () => {
-      await SystemConfig.findOneAndUpdate(
-        { key: 'payment_version' },
-        { value: 'v1' }
-      );
-
-      // Get fresh CSRF token
-      csrfToken = await getCsrfToken(app, agent);
-      
-      const response = await agent
-        .post('/api/customers/register')
-        .set('x-csrf-token', csrfToken)
-        .send({
-          email: 'v1customer@test.com',
-          password: 'TestPass@2024!',
-          firstName: 'V1Test',
-          lastName: 'Customer',
-          phone: '555-0198',
-          username: 'v1testcustomer',
-          address: '123 Test St',
-          city: 'Test City',
-          state: 'TS',
-          zipCode: '12345',
-          affiliateId: TEST_IDS.affiliate,
-          creditCardToken: 'tok_test_123',
-          numberOfBags: 1
-        });
-
-      expect([201, 404, 400]).toContain(response.status);
-      if (response.status === 201 && response.body.customerData) {
-        expect(response.body.customerData.registrationVersion).toBe('v1');
-      } else if (response.status === 201 && response.body.user) {
-        expect(response.body.user.registrationVersion).toBe('v1');
-      }
-    });
-
-    it('should use V2 flow when payment_version is v2', async () => {
-      await SystemConfig.findOneAndUpdate(
-        { key: 'payment_version' },
-        { value: 'v2' }
-      );
-
-      // Get fresh CSRF token
-      csrfToken = await getCsrfToken(app, agent);
-      
-      const response = await agent
-        .post('/api/customers/register')
-        .set('x-csrf-token', csrfToken)
-        .send({
-          email: 'v2customer2@test.com',
-          password: 'TestPass@2024!',
-          firstName: 'V2Test2',
-          lastName: 'Customer',
-          phone: '555-0197',
-          username: 'v2testcustomer2',
-          address: '456 Test Ave',
-          city: 'Test City',
-          state: 'TS',
-          zipCode: '12345',
-          affiliateId: TEST_IDS.affiliate,
-          numberOfBags: 1
-        });
-
-      expect([201, 404, 400]).toContain(response.status);
-      if (response.status === 201 && response.body.customerData) {
-        expect(response.body.customerData.registrationVersion).toBe('v2');
-      } else if (response.status === 201 && response.body.user) {
-        expect(response.body.user.registrationVersion).toBe('v2');
-      }
-    });
-  });
+  // 'Feature Toggle' describe removed: it exercised payment_version-driven
+  // behavior of the legacy POST /api/customers/register route, which is gone —
+  // registration is claim-based now (see tests/integration/customerClaim.test.js).
 
 });

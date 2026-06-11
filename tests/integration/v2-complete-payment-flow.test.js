@@ -1,4 +1,5 @@
 const request = require('supertest');
+const crypto = require('crypto');
 const mongoose = require('mongoose');
 const app = require('../../server');
 const Customer = require('../../server/models/Customer');
@@ -93,35 +94,29 @@ describe('V2 Complete Payment Flow', () => {
     await SystemConfig.deleteMany({});
   });
 
-  describe('Step 1: Customer Registration', () => {
-    it('should register V2 customer without payment', async () => {
-      const response = await agent
-        .post('/api/customers/register')
-        .set('x-csrf-token', csrfToken)
-        .send({
-          firstName: 'John',
-          lastName: 'Houlihan',
-          email: 'john.houlihan@test.com',
-          phone: '555-1234',
-          username: 'johnhoulihan',
-          password: 'TestPass@2024!',
-          address: '123 Main St',
-          city: 'Austin',
-          state: 'TX',
-          zipCode: '78701',
-          numberOfBags: 2,
-          affiliateId: testAffiliate.affiliateId
-        });
+  describe('Step 1: Customer Fixture', () => {
+    it('should create the V2 customer fixture (registration is claim-based, covered by customerClaim.test.js)', async () => {
+      const salt = crypto.randomBytes(16).toString('hex');
+      const hash = crypto.pbkdf2Sync('TestPass@2024!', salt, 1000, 64, 'sha512').toString('hex');
 
-      if (response.status !== 201) {
-        console.log('Registration failed:', response.body);
-      }
-      expect(response.status).toBe(201);
-      expect(response.body.success).toBe(true);
-      // Response structure may have changed - just verify success
-      
-      testCustomer = await Customer.findOne({ username: 'johnhoulihan' });
+      testCustomer = await Customer.create({
+        customerId: 'CUST-v2flow-fixture',
+        affiliateId: testAffiliate.affiliateId,
+        firstName: 'John',
+        lastName: 'Houlihan',
+        email: 'john.houlihan@test.com',
+        phone: '555-1234',
+        username: 'johnhoulihan',
+        passwordHash: hash,
+        passwordSalt: salt,
+        address: '123 Main St',
+        city: 'Austin',
+        state: 'TX',
+        zipCode: '78701'
+      });
+
       expect(testCustomer).toBeDefined();
+      expect(testCustomer.affiliateId).toBe(testAffiliate.affiliateId);
     });
   });
 

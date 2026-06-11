@@ -83,7 +83,7 @@ describe('CSRF Configuration', () => {
     it('should exclude registration endpoints from CSRF', () => {
       // Registration endpoints should use CAPTCHA instead
       expect(CSRF_CONFIG.REGISTRATION_ENDPOINTS).toContain('/api/affiliates/register');
-      expect(CSRF_CONFIG.REGISTRATION_ENDPOINTS).toContain('/api/customers/register');
+      expect(CSRF_CONFIG.REGISTRATION_ENDPOINTS).toContain('/api/v1/customers/claim/:bagToken/register');
     });
   });
 
@@ -175,7 +175,7 @@ describe('CSRF Configuration', () => {
 
       it('should not enforce CSRF for customer registration', () => {
         req.method = 'POST';
-        req.path = '/api/v1/customers/register';
+        req.path = '/api/v1/customers/claim/abc123/register';
         expect(shouldEnforceCsrf(req)).toBe(false);
       });
     });

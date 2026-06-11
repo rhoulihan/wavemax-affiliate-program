@@ -15,6 +15,9 @@ jest.mock('../../server/models/Customer');
 jest.mock('../../server/models/RefreshToken');
 jest.mock('jsonwebtoken');
 jest.mock('../../server/middleware/sanitization');
+jest.mock('../../server/services/bagClaimService');
+
+const bagClaimService = require('../../server/services/bagClaimService');
 
 // Helper function to extract handler from wrapped middleware
 const extractHandler = (middleware) => {
@@ -374,7 +377,7 @@ describe('Enhanced Auth Controller - OAuth Methods', () => {
     beforeEach(() => {
       req.body = {
         socialToken: 'valid-customer-jwt-token',
-        affiliateId: 'AFF123456',
+        bagToken: 'a'.repeat(32),
         phone: '+1234567890',
         address: '456 Customer St',
         city: 'Customer City',
@@ -394,7 +397,13 @@ describe('Enhanced Auth Controller - OAuth Methods', () => {
       sanitizeInput.mockImplementation(data => data);
       Customer.findOne = jest.fn().mockResolvedValue(null);
       Customer.countDocuments = jest.fn().mockResolvedValue(10);
-      Affiliate.findOne = jest.fn().mockResolvedValue({ affiliateId: 'AFF123456' });
+      // Affiliate now derives from the bag (spec §6.3) — mock the claim path.
+      bagClaimService.resolveClaimToken.mockResolvedValue({
+        state: 'claimable',
+        bag: { token: 'a'.repeat(32) },
+        affiliate: { affiliateId: 'AFF123456' }
+      });
+      bagClaimService.claimForCustomer.mockResolvedValue({});
     });
 
     test('should complete customer social registration successfully', async () => {
@@ -417,16 +426,16 @@ describe('Enhanced Auth Controller - OAuth Methods', () => {
       expect(res.status).toHaveBeenCalledWith(201);
     });
 
-    test('should validate affiliate existence', async () => {
-      Affiliate.findOne = jest.fn().mockResolvedValue(null);
+    test('should reject a non-claimable bag', async () => {
+      bagClaimService.resolveClaimToken.mockResolvedValue({ state: 'invalid' });
 
       const handler = extractHandler(authController.completeSocialCustomerRegistration);
       await handler(req, res, next);
 
-      expect(res.status).toHaveBeenCalledWith(400);
+      expect(res.status).toHaveBeenCalledWith(409);
       expect(res.json).toHaveBeenCalledWith({
         success: false,
-        message: 'Invalid affiliate ID'
+        message: 'This bag cannot be claimed'
       });
     });
 

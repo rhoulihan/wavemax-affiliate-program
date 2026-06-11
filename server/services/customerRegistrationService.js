@@ -1,31 +1,30 @@
 // Customer registration service
 //
-// Orchestrates post-weigh customer registration: uniqueness checks, password
-// hashing (or OAuth username generation), saving the document, optional
-// encrypted payment-info storage, JWT issuance, and welcome-email delivery.
-//
-// Extracted from customerController.registerCustomer in Phase 2 so the
-// controller only handles HTTP plumbing.
+// Claim-based registration (spec §6.3): the customer registers by scanning a
+// durable bag's QR. The affiliate is derived server-side from the bag —
+// never from client input. Order of operations for the claim race: save the
+// customer, then claim; on race loss, compensating delete (no Mongo
+// transaction — standalone-mongod portable, spec §13 #4).
 
 const jwt = require('jsonwebtoken');
 const { v4: uuidv4 } = require('uuid');
 
-const Affiliate = require('../models/Affiliate');
 const Customer = require('../models/Customer');
+const bagClaimService = require('./bagClaimService');
 const encryptionUtil = require('../utils/encryption');
 const emailService = require('../utils/emailService');
 const Formatters = require('../utils/formatters');
 const logger = require('../utils/logger');
 
 /**
- * Error type used to communicate expected failures (duplicate email, invalid
- * affiliate, etc.) back to the HTTP layer. The controller maps these to JSON
+ * Error type used to communicate expected failures (duplicate email, bag not
+ * claimable, etc.) back to the HTTP layer. The controller maps these to JSON
  * error responses; unexpected failures bubble up normally.
  */
 class RegistrationError extends Error {
   constructor(code, message, extras = {}) {
     super(message);
-    this.code = code;        // 'invalid_affiliate' | 'duplicate_email_and_username' | 'duplicate_email' | 'duplicate_username'
+    this.code = code;        // 'bag_not_claimable' | 'bag_already_claimed' | 'duplicate_email_and_username' | 'duplicate_email' | 'duplicate_username'
     this.status = extras.status || 400;
     this.extras = extras;
     this.isRegistrationError = true;
@@ -33,13 +32,13 @@ class RegistrationError extends Error {
 }
 
 /**
- * Register a new customer against `affiliateId`.
- * Returns `{ customer, affiliate, token }` on success, or throws a
+ * Register a new customer against a scanned bag token.
+ * Returns `{ customer, affiliate, bag, token }` on success, or throws a
  * RegistrationError on expected failure cases.
  */
 async function registerCustomer(payload) {
   const {
-    affiliateId,
+    bagToken,
     firstName,
     lastName,
     email,
@@ -52,21 +51,19 @@ async function registerCustomer(payload) {
     affiliateSpecialInstructions,
     username,
     password,
-    cardholderName,
-    cardNumber,
-    expiryDate,
-    cvv,
-    billingZip,
-    savePaymentInfo,
     languagePreference,
     socialToken,
     socialProvider
   } = payload;
 
-  const affiliate = await Affiliate.findOne({ affiliateId });
-  if (!affiliate) {
-    throw new RegistrationError('invalid_affiliate', 'Invalid affiliate ID');
+  // Server-trust: the affiliate comes from the bag, never the payload.
+  const resolved = await bagClaimService.resolveClaimToken(bagToken);
+  if (resolved.state !== 'claimable') {
+    throw new RegistrationError('bag_not_claimable', 'This bag cannot be claimed', {
+      status: 409, state: resolved.state
+    });
   }
+  const { bag, affiliate } = resolved;
 
   const [existingEmail, existingUsername] = await Promise.all([
     Customer.findOne({ email }),
@@ -96,7 +93,7 @@ async function registerCustomer(payload) {
     if (!username) {
       finalUsername = email.split('@')[0] + '_' + Date.now().toString(36);
     }
-    logger.info(`OAuth registration for email: ${email}, generated username: ${finalUsername}`);
+    logger.info(`OAuth claim registration for email: ${email}, generated username: ${finalUsername}`);
   } else {
     const { salt, hash } = encryptionUtil.hashPassword(password);
     passwordSalt = salt;
@@ -105,7 +102,7 @@ async function registerCustomer(payload) {
 
   const newCustomer = new Customer({
     customerId: `CUST-${uuidv4()}`,
-    affiliateId,
+    affiliateId: affiliate.affiliateId,   // derived from the bag
     firstName: Formatters.name(firstName),
     lastName: Formatters.name(lastName),
     email: email.toLowerCase(),
@@ -123,17 +120,19 @@ async function registerCustomer(payload) {
     registrationMethod: socialToken ? (socialProvider || 'social') : 'traditional'
   });
 
-  if (savePaymentInfo && cardNumber) {
-    newCustomer.encryptedPaymentInfo = encryptionUtil.encrypt({
-      cardholderName,
-      cardNumber,
-      expiryDate,
-      cvv,
-      billingZip: billingZip || zipCode
-    });
-  }
-
   await newCustomer.save();
+
+  // Save-then-claim with a compensating delete on race loss (spec §13 #4).
+  let claimedBag;
+  try {
+    claimedBag = await bagClaimService.claimForCustomer(bag, newCustomer.customerId);
+  } catch (err) {
+    await Customer.deleteOne({ _id: newCustomer._id });
+    if (err.isClaimError) {
+      throw new RegistrationError('bag_already_claimed', 'This bag has already been claimed', { status: 409 });
+    }
+    throw err;
+  }
 
   const token = jwt.sign(
     { id: newCustomer._id, customerId: newCustomer.customerId, role: 'customer' },
@@ -144,17 +143,17 @@ async function registerCustomer(payload) {
   // Emails are best-effort — never fail registration on SMTP hiccup.
   await sendWelcomeEmails(newCustomer, affiliate);
 
-  return { customer: newCustomer, affiliate, token };
+  return { customer: newCustomer, affiliate, bag: claimedBag, token };
 }
 
 async function sendWelcomeEmails(customer, affiliate) {
   try {
-    await emailService.sendCustomerWelcomeEmail(customer, affiliate);
+    await emailService.sendCustomerWelcomeEmail(customer, affiliate, { numberOfBags: 0, totalCredit: 0, bagFee: 0 });
   } catch (emailError) {
     logger.error('Failed to send welcome email:', emailError);
   }
   try {
-    await emailService.sendAffiliateNewCustomerEmail(affiliate, customer);
+    await emailService.sendAffiliateNewCustomerEmail(affiliate, customer, { numberOfBags: 0, totalCredit: 0, bagFee: 0 });
   } catch (emailError) {
     logger.error('Failed to send affiliate notification:', emailError);
   }

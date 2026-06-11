@@ -1,4 +1,25 @@
 {
+  "claim": {
+    "title": "Wäschebeutel registrieren",
+    "subtitle": "Sie registrieren sich bei",
+    "resolving": "Beutel wird überprüft...",
+    "cta": "Konto erstellen",
+    "ctaOAuthGoogle": "Mit Google registrieren",
+    "ctaOAuthFacebook": "Mit Facebook registrieren",
+    "alreadyClaimedTitle": "Dieser Beutel ist bereits registriert",
+    "alreadyClaimedBody": "Dieser Beutel ist mit einem bestehenden Konto verknüpft. Melden Sie sich an, um Ihren Bestellstatus zu sehen.",
+    "alreadyClaimedCta": "Anmelden",
+    "invalidTitle": "Beutel nicht erkannt",
+    "invalidBody": "Wir konnten diesen Beutel nicht erkennen. Bitte wenden Sie sich an Ihren Wäscheservice-Anbieter.",
+    "raceLost": "Jemand hat diesen Beutel gerade registriert. Falls Sie das auf einem anderen Gerät waren, melden Sie sich bitte an."
+  },
+  "bag": {
+    "label": {
+      "affiliateHeading": "WaveMAX Wäscherei: Abholung & Lieferung",
+      "bagRef": "Beutel-Ref.",
+      "printInstructions": "Drucken Sie dieses Blatt, schneiden Sie entlang der Linien und bringen Sie an jedem Beutel ein Etikett an."
+    }
+  },
   "affiliateRegister": {
     "invite": {
       "invalidOrExpired": "Dieser Einladungslink ist ungültig oder abgelaufen. Bitte kontaktieren Sie WaveMAX, um eine neue Einladung anzufordern.",

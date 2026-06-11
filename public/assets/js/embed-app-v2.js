@@ -51,6 +51,7 @@ const EMBED_PAGES = {
     '/affiliate-dashboard': '/affiliate-dashboard-embed.html',
     '/customer-login': '/customer-login-embed.html',
     '/customer-register': '/customer-register-embed.html',
+    '/claim': '/claim-embed.html',
     '/customer-success': '/customer-success-embed.html',
     '/forgot-password': '/forgot-password-embed.html',
     '/reset-password': '/reset-password-embed.html',
@@ -486,6 +487,7 @@ async function loadPage(route) {
             '/affiliate-landing',  // Requires specific affiliate code
             '/customer-login',     // Entry point that may have affiliate ID
             '/customer-register',  // Entry point that may have affiliate ID
+            '/claim',              // Requires a ?bag= token parameter
             '/affiliate-login',    // Entry point
             '/affiliate-register', // Entry point
             '/administrator-login' // Entry point
@@ -585,6 +587,7 @@ function initializePageScripts(route) {
         '/affiliate-dashboard': ['/assets/js/i18n.js', '/assets/js/language-switcher.js', '/assets/js/address-validation-component.js', '/assets/js/pricing-preview-component.js', 'https://cdnjs.cloudflare.com/ajax/libs/awesomplete/1.1.5/awesomplete.min.js', '/assets/js/service-area-autocomplete.js', '/assets/js/csrf-utils.js', '/assets/js/api-client.js', '/assets/js/affiliate-dashboard-init.js', '/assets/js/affiliate-dashboard-embed.js', '/assets/js/affiliate-dashboard-i18n.js'],
         '/customer-login': ['/assets/js/embed-config.js', '/assets/js/i18n.js', '/assets/js/language-switcher.js', '/assets/js/modal-utils.js', '/assets/js/csrf-utils.js', '/assets/js/swirl-spinner.js', '/assets/js/api-client.js', '/assets/js/customer-login-init.js'],
         '/customer-register': ['/assets/js/i18n.js', '/assets/js/language-switcher.js', '/assets/js/csrf-utils.js', '/assets/js/modal-utils.js', '/assets/js/swirl-spinner.js', '/assets/js/api-client.js', '/assets/js/address-validation-component.js', 'https://cdnjs.cloudflare.com/ajax/libs/awesomplete/1.1.5/awesomplete.min.js', '/assets/js/service-area-autocomplete.js', '/assets/js/customer-register.js', '/assets/js/customer-register-navigation.js'],
+        '/claim': ['/assets/js/i18n.js', '/assets/js/language-switcher.js', '/assets/js/claim.js'],
         '/customer-success': ['/assets/js/i18n.js', '/assets/js/language-switcher.js', '/assets/js/customer-success-embed.js'],
         '/forgot-password': ['/assets/js/embed-config.js', '/assets/js/i18n.js', '/assets/js/language-switcher.js', '/assets/js/modal-utils.js', '/assets/js/csrf-utils.js', '/assets/js/swirl-spinner.js', '/assets/js/api-client.js', '/assets/js/forgot-password-init.js'],
         '/reset-password': ['/assets/js/embed-config.js', '/assets/js/i18n.js', '/assets/js/language-switcher.js', '/assets/js/modal-utils.js', '/assets/js/csrf-utils.js', '/assets/js/swirl-spinner.js', '/assets/js/api-client.js', '/assets/js/reset-password-init.js'],

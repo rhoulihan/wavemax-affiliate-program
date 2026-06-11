@@ -1,4 +1,25 @@
 {
+  "claim": {
+    "title": "Claim your laundry bag",
+    "subtitle": "You're signing up with",
+    "resolving": "Checking your bag...",
+    "cta": "Create my account",
+    "ctaOAuthGoogle": "Sign up with Google",
+    "ctaOAuthFacebook": "Sign up with Facebook",
+    "alreadyClaimedTitle": "This bag is already claimed",
+    "alreadyClaimedBody": "This bag is linked to an existing account. Log in to see your order status.",
+    "alreadyClaimedCta": "Log in",
+    "invalidTitle": "Bag not recognized",
+    "invalidBody": "We couldn't recognize this bag. Please contact your laundry service provider.",
+    "raceLost": "Someone just claimed this bag. If that was you on another device, please log in."
+  },
+  "bag": {
+    "label": {
+      "affiliateHeading": "WaveMAX Laundry Pickup & Delivery",
+      "bagRef": "Bag ref",
+      "printInstructions": "Print this sheet, cut along the lines, and attach one label to each bag."
+    }
+  },
   "affiliateRegister": {
     "invite": {
       "invalidOrExpired": "This invitation link is invalid or has expired. Please contact WaveMAX to request a new invitation.",

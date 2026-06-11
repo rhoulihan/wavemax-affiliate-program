@@ -129,9 +129,8 @@ const CSRF_CONFIG = {
   // Registration endpoints - will add CAPTCHA instead of CSRF
   REGISTRATION_ENDPOINTS: [
     '/api/affiliates/register',
-    '/api/customers/register',
     '/api/v1/affiliates/register',
-    '/api/v1/customers/register',
+    '/api/v1/customers/claim/:bagToken/register',
     '/api/v1/auth/social/register',
     '/api/v1/auth/customer/social/register'
   ],
@@ -166,7 +165,11 @@ const CSRF_CONFIG = {
     '/api/v1/operators/orders/:orderId/claim',
     '/api/v1/operators/orders/:orderId/status',
     '/api/v1/operators/orders/:orderId/quality-check',
-    '/api/v1/operators/shift/status'
+    '/api/v1/operators/shift/status',
+
+    // Bag admin mutations (mint/issue — spec §5)
+    '/api/v1/bags/mint',
+    '/api/v1/bags/batch/:batchId/issue'
   ],
 
   // HIGH priority endpoints (Phase 2)

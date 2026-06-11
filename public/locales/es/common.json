@@ -1,4 +1,25 @@
 {
+  "claim": {
+    "title": "Reclama tu bolsa de lavandería",
+    "subtitle": "Te estás registrando con",
+    "resolving": "Verificando tu bolsa...",
+    "cta": "Crear mi cuenta",
+    "ctaOAuthGoogle": "Registrarse con Google",
+    "ctaOAuthFacebook": "Registrarse con Facebook",
+    "alreadyClaimedTitle": "Esta bolsa ya está reclamada",
+    "alreadyClaimedBody": "Esta bolsa está vinculada a una cuenta existente. Inicia sesión para ver el estado de tu pedido.",
+    "alreadyClaimedCta": "Iniciar sesión",
+    "invalidTitle": "Bolsa no reconocida",
+    "invalidBody": "No pudimos reconocer esta bolsa. Comunícate con tu proveedor de servicio de lavandería.",
+    "raceLost": "Alguien acaba de reclamar esta bolsa. Si fuiste tú en otro dispositivo, inicia sesión."
+  },
+  "bag": {
+    "label": {
+      "affiliateHeading": "WaveMAX Lavandería: Recogida y Entrega",
+      "bagRef": "Ref. de bolsa",
+      "printInstructions": "Imprime esta hoja, recorta por las líneas y coloca una etiqueta en cada bolsa."
+    }
+  },
   "affiliateRegister": {
     "invite": {
       "invalidOrExpired": "Este enlace de invitación no es válido o ha expirado. Comuníquese con WaveMAX para solicitar una nueva invitación.",

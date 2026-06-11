@@ -75,47 +75,6 @@ describe('V2 Controller Logic', () => {
     await SystemConfig.deleteMany({});
   });
 
-  describe('V2 Customer Registration', () => {
-    it('should register customer with V2 settings when payment_version is v2', async () => {
-      const req = {
-        body: {
-          firstName: 'John',
-          lastName: 'Doe',
-          email: 'john@test.com',
-          phone: '555-1234',
-          address: '123 Main St',
-          city: 'Austin',
-          state: 'TX',
-          zipCode: '78701',
-          username: `johndoe${Date.now()}`,
-          password: 'securepass123',
-          affiliateId: testAffiliate.affiliateId,
-          pickupDate: '2026-01-27',
-          pickupTime: 'morning',
-          estimatedWeight: 25
-        }
-      };
-      
-      const res = {
-        status: jest.fn().mockReturnThis(),
-        json: jest.fn()
-      };
-      
-      const next = jest.fn();
-      
-      emailService.sendCustomerWelcomeEmail = jest.fn().mockResolvedValue(true);
-      emailService.sendNewCustomerNotification = jest.fn().mockResolvedValue(true);
-      
-      const handler = customerController.registerCustomer;
-      await handler(req, res, next);
-      
-      expect(res.status).toHaveBeenCalledWith(201);
-
-      const customer = await Customer.findOne({ email: 'john@test.com' });
-      expect(customer).toBeDefined();
-    });
-  });
-
   describe('V2 Order Processing', () => {
     let testCustomer, testOrder;
     

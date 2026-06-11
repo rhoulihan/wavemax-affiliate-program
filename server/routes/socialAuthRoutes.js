@@ -278,7 +278,7 @@ router.get('/customer/facebook/callback',
  */
 router.post('/customer/social/register', [
   body('socialToken').notEmpty().withMessage('Social authentication token is required'),
-  body('affiliateId').notEmpty().withMessage('Affiliate ID is required'),
+  body('bagToken').notEmpty().withMessage('Bag token is required'),
   body('phone').notEmpty().withMessage('Phone number is required'),
   body('address').notEmpty().withMessage('Address is required'),
   body('city').notEmpty().withMessage('City is required'),

@@ -12,6 +12,7 @@ jest.mock('../../server/utils/emailService');
 jest.mock('../../server/utils/auditLogger');
 jest.mock('../../server/utils/encryption');
 jest.mock('jsonwebtoken');
+jest.mock('../../server/services/bagClaimService');
 
 // Require modules AFTER mocking
 const authController = require('../../server/controllers/authController');
@@ -25,6 +26,7 @@ const TokenBlacklist = require('../../server/models/TokenBlacklist');
 const emailService = require('../../server/utils/emailService');
 const encryptionUtil = require('../../server/utils/encryption');
 const { logAuditEvent, logLoginAttempt } = require('../../server/utils/auditLogger');
+const bagClaimService = require('../../server/services/bagClaimService');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 
@@ -544,6 +546,13 @@ describe('Auth Controller - Additional Coverage', () => {
       Customer.mockImplementation(() => ({}));
       // Reset email service mock
       emailService.sendCustomerWelcomeEmail = jest.fn().mockResolvedValue(true);
+      // Affiliate now derives from the bag (spec §6.3) — mock the claim path.
+      bagClaimService.resolveClaimToken.mockResolvedValue({
+        state: 'claimable',
+        bag: { token: 'a'.repeat(32) },
+        affiliate: { affiliateId: 'AFF001' }
+      });
+      bagClaimService.claimForCustomer.mockResolvedValue({});
     });
     
     it('should complete customer social registration', async () => {
@@ -564,7 +573,7 @@ describe('Auth Controller - Additional Coverage', () => {
         city: 'Anytown',
         state: 'CA',
         zipCode: '12345',
-        affiliateCode: 'AFF001',
+        bagToken: 'a'.repeat(32),
         languagePreference: 'en'
       };
 
@@ -621,7 +630,7 @@ describe('Auth Controller - Additional Coverage', () => {
       });
     });
 
-    it('should handle invalid affiliate code', async () => {
+    it('should handle a non-claimable bag', async () => {
       const socialData = {
         provider: 'google',
         socialId: 'google123',
@@ -629,12 +638,12 @@ describe('Auth Controller - Additional Coverage', () => {
         firstName: 'Jane',
         lastName: 'Doe'
       };
-      
+
       jwt.verify.mockReturnValue(socialData);
-      
+
       req.body = {
         socialToken: 'valid-social-token',
-        affiliateCode: 'INVALID',
+        bagToken: 'b'.repeat(32),
         phone: '1234567890',
         address: '123 Main St',
         city: 'City',
@@ -642,16 +651,16 @@ describe('Auth Controller - Additional Coverage', () => {
         zipCode: '12345'
       };
 
-      Affiliate.findOne.mockResolvedValue(null);
+      bagClaimService.resolveClaimToken.mockResolvedValue({ state: 'invalid' });
 
       const handler = extractHandler(authController.completeSocialCustomerRegistration);
       await handler(req, res, next);
 
-      // The actual response might be different - let's check what was called
-      expect(res.status).toHaveBeenCalledWith(400);
+      expect(res.status).toHaveBeenCalledWith(409);
       expect(res.json).toHaveBeenCalledWith(
         expect.objectContaining({
-          success: false
+          success: false,
+          message: 'This bag cannot be claimed'
         })
       );
     });

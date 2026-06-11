@@ -7,7 +7,7 @@
 // socialAuthAffiliateService since the rules are identical.
 
 const Customer = require('../models/Customer');
-const Affiliate = require('../models/Affiliate');
+const bagClaimService = require('./bagClaimService');
 const encryptionUtil = require('../utils/encryption');
 const emailService = require('../utils/emailService');
 const { logAuditEvent, AuditEvents } = require('../utils/auditLogger');
@@ -39,7 +39,7 @@ async function findAvailableCustomerUsername(socialData) {
 }
 
 async function completeSocialCustomerRegistration({ payload, ip, cryptoWrapper, req }) {
-  const { socialToken, affiliateId, ...rest } = payload;
+  const { socialToken, bagToken, ...rest } = payload;
 
   let socialData;
   try {
@@ -69,15 +69,17 @@ async function completeSocialCustomerRegistration({ payload, ip, cryptoWrapper, 
     );
   }
 
-  const affiliate = await Affiliate.findOne({ affiliateId });
-  if (!affiliate) {
-    throw new SocialAuthCustomerError('invalid_affiliate', 'Invalid affiliate ID');
+  // Server-trust: the affiliate comes from the bag, never the payload (spec §6.3).
+  const resolved = await bagClaimService.resolveClaimToken(bagToken);
+  if (resolved.state !== 'claimable') {
+    throw new SocialAuthCustomerError('bag_not_claimable', 'This bag cannot be claimed', 409);
   }
+  const { bag, affiliate } = resolved;
 
   const { salt, hash } = encryptionUtil.hashPassword(generatedPassword);
 
   const customer = new Customer({
-    affiliateId,
+    affiliateId: affiliate.affiliateId,
     firstName: socialData.firstName,
     lastName: socialData.lastName,
     email: socialData.email,
@@ -107,6 +109,17 @@ async function completeSocialCustomerRegistration({ payload, ip, cryptoWrapper, 
   });
 
   await customer.save();
+
+  // Save-then-claim with a compensating delete on race loss (spec §13 #4).
+  try {
+    await bagClaimService.claimForCustomer(bag, customer.customerId);
+  } catch (claimErr) {
+    await Customer.deleteOne({ _id: customer._id });
+    if (claimErr.isClaimError) {
+      throw new SocialAuthCustomerError('bag_already_claimed', 'This bag has already been claimed', 409);
+    }
+    throw claimErr;
+  }
 
   try {
     await emailService.sendCustomerWelcomeEmail(customer);

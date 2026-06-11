@@ -1,4 +1,25 @@
 {
+  "claim": {
+    "title": "Resgate sua sacola de lavanderia",
+    "subtitle": "Você está se cadastrando com",
+    "resolving": "Verificando sua sacola...",
+    "cta": "Criar minha conta",
+    "ctaOAuthGoogle": "Cadastrar com Google",
+    "ctaOAuthFacebook": "Cadastrar com Facebook",
+    "alreadyClaimedTitle": "Esta sacola já foi resgatada",
+    "alreadyClaimedBody": "Esta sacola está vinculada a uma conta existente. Faça login para ver o status do seu pedido.",
+    "alreadyClaimedCta": "Entrar",
+    "invalidTitle": "Sacola não reconhecida",
+    "invalidBody": "Não foi possível reconhecer esta sacola. Entre em contato com seu provedor de serviço de lavanderia.",
+    "raceLost": "Alguém acabou de resgatar esta sacola. Se foi você em outro dispositivo, faça login."
+  },
+  "bag": {
+    "label": {
+      "affiliateHeading": "WaveMAX Lavanderia: Coleta e Entrega",
+      "bagRef": "Ref. da sacola",
+      "printInstructions": "Imprima esta folha, recorte pelas linhas e fixe uma etiqueta em cada sacola."
+    }
+  },
   "affiliateRegister": {
     "invite": {
       "invalidOrExpired": "Este link de convite é inválido ou expirou. Entre em contato com a WaveMAX para solicitar um novo convite.",
