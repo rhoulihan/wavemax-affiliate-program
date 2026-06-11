@@ -167,12 +167,11 @@ exports.addCustomerNote = async (req, res) => {
 exports.scanCustomer = async (req, res) => {
   try {
     const result = await bagWorkflowService.scanCustomer({
-      customerId: req.body.customerId,
-      bagId: req.body.bagId,
+      bagToken: req.body.bagToken || req.body.bagId || req.body.customerId, // tolerate old field names one sprint
       operatorId: req.user.id,
       req
     });
-    res.json({ success: true, currentOrder: true, ...result });
+    res.json({ success: true, ...result });
   } catch (err) {
     if (err.isBagWorkflowError) {
       return res.status(err.status).json({ success: false, error: err.message, ...err.details });
@@ -231,15 +230,17 @@ exports.receiveOrder = async (req, res) => {
 // New endpoint for weighing bags with bag tracking
 exports.weighBags = async (req, res) => {
   try {
-    const { order, orderProgress } = await bagWorkflowService.weighBags({
-      orderId: req.body.orderId,
-      bags: req.body.bags,
+    const { order, reIntake } = await bagWorkflowService.weighBags({
+      bagToken: req.body.bagToken || req.body.bagId, // tolerate old field name one sprint
+      weight: req.body.weight,
+      addOns: req.body.addOns,
+      freshAddOnsFormPlaced: !!req.body.freshAddOnsFormPlaced,
       operatorId: req.user.id,
       req
     });
-    res.json({ success: true, order, orderProgress, message: 'Bags weighed successfully' });
+    res.json({ success: true, order, reIntake, message: 'Order created at intake' });
   } catch (err) {
-    if (err.isBagWorkflowError) {
+    if (err.isBagWorkflowError || err.isIntakeError) {
       return res.status(err.status).json({ success: false, error: err.message, ...err.details });
     }
     logger.error('Error weighing bags:', err);

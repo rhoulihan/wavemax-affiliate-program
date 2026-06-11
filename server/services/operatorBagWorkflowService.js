@@ -1,10 +1,10 @@
-// Operator bag-workflow service
+// Operator bag-workflow service (redesign interim — spec §6.4).
 //
-// Three-stage scanning pipeline: weigh → process → complete. The customer's
-// QR code drives stage 1 (scanCustomer), bag QR codes drive stages 2+3
-// (scanBag/scanProcessed). weighBags is the commit point that locks the
-// total, triggers V2 payment request emails, and moves the order into
-// 'in_progress'. Controllers map BagWorkflowError to HTTP responses.
+// Order birth moved to orderIntakeService.createOrderFromBag; scan context
+// comes from bagService.resolveByToken. scanCustomer/weighBags survive one
+// sprint as deprecated delegates (move-then-delete house rule); PR 9
+// replaces scanProcessed with an orderAdvanceService delegate and deletes
+// the stranded legacy functions. Controllers map BagWorkflowError to HTTP.
 
 const Order = require('../models/Order');
 const Customer = require('../models/Customer');
@@ -12,7 +12,8 @@ const Affiliate = require('../models/Affiliate');
 const emailService = require('../utils/emailService');
 const { logAuditEvent, AuditEvents } = require('../utils/auditLogger');
 const logger = require('../utils/logger');
-const QRCode = require('qrcode');
+const bagService = require('../modules/bags/bagService');
+const orderIntakeService = require('../modules/orders/orderIntakeService');
 const pickupService = require('./operatorPickupService');
 
 class BagWorkflowError extends Error {
@@ -25,174 +26,34 @@ class BagWorkflowError extends Error {
   }
 }
 
-// Venmo business-profile + WaveMAX usernames. Known issue: Venmo app adds
-// business profile + username as two recipients when scanning QR.
-async function generatePaymentURLs(order) {
-  const amount = order.paymentAmount.toFixed(2);
-  const orderNote = `WaveMAX Order ${order.orderId}`;
-  const links = {
-    venmo: `https://venmo.com/wavemaxatx?txn=pay&amount=${amount}&note=${encodeURIComponent(orderNote)}`,
-    paypal: `https://www.paypal.me/WaveMAXLaundry/${amount}?locale.x=en_US&country.x=US`,
-    cashapp: `https://cash.app/$WaveMAXLaundry/${amount}?note=${encodeURIComponent(orderNote)}`
-  };
-
-  const qrCodes = {};
-  for (const [service, url] of Object.entries(links)) {
-    try {
-      logger.info(`Generating ${service} QR code for URL:`, url);
-      qrCodes[service] = await QRCode.toDataURL(url, {
-        width: 300,
-        margin: 1,
-        color: { dark: '#000000', light: '#FFFFFF' }
-      });
-    } catch (error) {
-      logger.error(`Failed to generate QR code for ${service}:`, error);
-      qrCodes[service] = null;
-    }
-  }
-  return { links, qrCodes };
-}
-
-function parseCustomerQr(customerId) {
-  // Two flavors: bare CUST-<uuid>, or CUST-<uuid>-<bagNumber> from printed labels.
-  let cleanCustomerId = customerId;
-  let extractedBagNumber = null;
-
-  const bagNumberMatch = customerId.match(/^(cust-[a-f0-9-]+)-(\d+)$/i);
-  if (bagNumberMatch) {
-    cleanCustomerId = bagNumberMatch[1];
-    extractedBagNumber = parseInt(bagNumberMatch[2], 10);
-  }
-
-  // Normalize: CUST- prefix uppercase, UUID lowercase.
-  cleanCustomerId = cleanCustomerId.replace(/^cust-/i, 'CUST-').toLowerCase();
-  cleanCustomerId = cleanCustomerId.replace(/^cust-/, 'CUST-');
-
-  return { cleanCustomerId, extractedBagNumber };
-}
-
-async function findCustomerFlexible(cleanCustomerId) {
-  let customer = await Customer.findOne({ customerId: cleanCustomerId });
-  if (customer) return customer;
-  // Fallback to case-insensitive match in case the normalization missed a variant.
-  const escaped = cleanCustomerId.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  return Customer.findOne({
-    customerId: { $regex: new RegExp('^' + escaped + '$', 'i') }
-  });
-}
-
-function deriveScanAction(order) {
-  if (order.bagsWeighed < order.numberOfBags) return 'weight_input';
-  if (order.bagsProcessed < order.numberOfBags) return 'process_complete';
-  if (order.bagsPickedUp < order.numberOfBags) return 'pickup_scan';
-  return 'status_check';
-}
-
-async function scanCustomer({ customerId, bagId, operatorId, req }) {
-  logger.info('scanCustomer called with:', { customerId, bagId });
-
-  const { cleanCustomerId, extractedBagNumber } = parseCustomerQr(customerId);
-  logger.info(`Normalized customer ID: ${cleanCustomerId}`);
-
-  const customer = await findCustomerFlexible(cleanCustomerId);
-  if (!customer) {
-    throw new BagWorkflowError('customer_not_found', 'Customer not found', 404, {
-      message: 'Invalid customer ID',
-      searchedId: cleanCustomerId,
-      originalId: customerId
+// DEPRECATED kiosk shim (move-then-delete; PR 9 removes it).
+// Scan context now comes from GET /api/v1/bags/resolve/:token — this
+// shim keeps the export alive one sprint for stragglers.
+async function scanCustomer({ bagToken, operatorId, req }) {
+  const resolved = await bagService.resolveByToken(bagToken);
+  if (!resolved || !resolved.bag) {
+    throw new BagWorkflowError('bag_not_found', 'Bag not found', 404, {
+      message: 'Bag not recognized'
     });
   }
-
-  const currentOrder = await Order.findOne({
-    customerId: customer.customerId,
-    status: { $in: ['in_progress', 'processed'] }
-  }).sort({ createdAt: -1 });
-
-  if (!currentOrder) {
-    throw new BagWorkflowError('no_active_order', 'No active order', 404, {
-      message: 'No active order found for this customer',
-      customer: {
-        name: `${customer.firstName} ${customer.lastName}`,
-        customerId: customer.customerId
-      }
-    });
-  }
-
-  let action = deriveScanAction(currentOrder);
-
-  let affiliateName = 'N/A';
-  if (currentOrder.affiliateId) {
-    const affiliate = await Affiliate.findOne({ affiliateId: currentOrder.affiliateId });
-    if (affiliate) affiliateName = affiliate.businessName;
-  }
-
-  let bagRegistered = false;
-  let bagAlreadyExists = false;
-  let effectiveBagId = bagId;
-
-  if (effectiveBagId || extractedBagNumber) {
-    if (!effectiveBagId && extractedBagNumber) {
-      effectiveBagId = `${currentOrder.orderId}-BAG${extractedBagNumber}`;
-    }
-    if (!currentOrder.bags) currentOrder.bags = [];
-
-    const existingBag = currentOrder.bags.find(b => b.bagToken === effectiveBagId);
-    if (!existingBag) {
-      currentOrder.bags.push({
-        bagToken: effectiveBagId,
-        bagNumber: extractedBagNumber || currentOrder.bags.length + 1,
-        status: 'intake',
-        weight: 0,
-        scannedAt: { intake: new Date() },
-        scannedBy: { intake: operatorId }
-      });
-      await currentOrder.save();
-      bagRegistered = true;
-      logger.info(`Bag ${effectiveBagId} registered for order ${currentOrder.orderId}. Total bags scanned: ${currentOrder.bags.length}/${currentOrder.numberOfBags}`);
-    } else {
-      bagAlreadyExists = true;
-      logger.info(`Bag ${effectiveBagId} already exists in order ${currentOrder.orderId}`);
-    }
-  }
-
-  const scannedBagCount = currentOrder.bags ? currentOrder.bags.length : 0;
-  if (scannedBagCount === currentOrder.numberOfBags && currentOrder.bagsWeighed < currentOrder.numberOfBags) {
-    action = 'weight_input';
-  } else if (scannedBagCount < currentOrder.numberOfBags) {
-    action = 'scan_required';
-  }
-
   await logAuditEvent(AuditEvents.SENSITIVE_DATA_ACCESS, {
     operatorId,
-    customerId: customer.customerId,
-    orderId: currentOrder.orderId,
-    action: 'customer_card_scanned',
-    scanAction: action
+    bagId: resolved.bag.bagId,
+    action: 'bag_scanned',
+    outcome: resolved.outcome
   }, req);
-
   return {
-    action,
-    bagRegistered,
-    bagAlreadyExists,
-    scannedBagId: effectiveBagId,
-    order: {
-      orderId: currentOrder.orderId,
-      customerName: `${customer.firstName} ${customer.lastName}`,
-      affiliateName,
-      numberOfBags: currentOrder.numberOfBags,
-      bagsScanned: scannedBagCount,
-      bagsWeighed: currentOrder.bagsWeighed,
-      bagsProcessed: currentOrder.bagsProcessed,
-      bagsPickedUp: currentOrder.bagsPickedUp,
-      actualWeight: currentOrder.actualWeight,
-      status: currentOrder.status,
-      bags: currentOrder.bags || [],
-      addOns: currentOrder.addOns,
-      addOnTotal: currentOrder.addOnTotal
+    outcome: resolved.outcome,
+    bag: {
+      bagId: resolved.bag.bagId,
+      status: resolved.bag.status,
+      customerId: resolved.bag.customerId,
+      affiliateId: resolved.bag.affiliateId
     }
   };
 }
 
+// LEGACY — stranded (references pre-redesign Order fields), deleted in PR 9.
 async function scanBag({ qrCode }) {
   // Legacy QR (bare customer ID) — callers should fall through to scanCustomer.
   if (!qrCode || !qrCode.includes('#')) {
@@ -230,6 +91,7 @@ async function scanBag({ qrCode }) {
   };
 }
 
+// LEGACY — stranded (references pre-redesign Order fields), deleted in PR 9.
 async function receiveOrder({ orderId, bagWeights, totalWeight, operatorId, req }) {
   const order = await Order.findOne({ orderId });
   if (!order) throw new BagWorkflowError('order_not_found', 'Order not found', 404);
@@ -263,92 +125,15 @@ async function receiveOrder({ orderId, bagWeights, totalWeight, operatorId, req 
   return order;
 }
 
-async function weighBags({ orderId, bags, operatorId, req }) {
-  const order = await Order.findOne({ orderId });
-  if (!order) throw new BagWorkflowError('order_not_found', 'Order not found', 404);
-
-  // Input payload keeps its legacy `bagId` key (controller contract); schema side is bagToken.
-  for (const { bagId: inputBagToken, weight: inputWeight } of bags) {
-    const existingBagIndex = order.bags.findIndex(b => b.bagToken === inputBagToken);
-    if (existingBagIndex >= 0) {
-      order.bags[existingBagIndex].weight = inputWeight;
-      order.bags[existingBagIndex].status = 'intake';
-      if (!order.bags[existingBagIndex].scannedAt.intake) {
-        order.bags[existingBagIndex].scannedAt.intake = new Date();
-      }
-      if (!order.bags[existingBagIndex].scannedBy.intake) {
-        order.bags[existingBagIndex].scannedBy.intake = operatorId;
-      }
-    } else {
-      order.bags.push({
-        bagToken: inputBagToken,
-        bagNumber: order.bags.length + 1,
-        status: 'intake',
-        weight: inputWeight,
-        scannedAt: { intake: new Date() },
-        scannedBy: { intake: operatorId }
-      });
-    }
-  }
-
-  order.actualWeight = order.bags.reduce((sum, bag) => sum + (bag.weight || 0), 0);
-  order.status = 'in_progress';
-  order.assignedOperator = operatorId;
-  order.bagsWeighed = order.bags.filter(b => b.weight > 0).length;
-
-  await order.save();
-
-  // V2 payment request: fires only when the LAST bag is weighed.
-  if (order.bagsWeighed === order.numberOfBags) {
-    const customer = await Customer.findOne({ customerId: order.customerId });
-    if (customer) {
-      const paymentAmount = order.paymentAmount
-        || order.actualTotal
-        || (order.actualWeight * (order.baseRate || 1.25) + (order.addOnTotal || 0));
-
-      const paymentURLs = await generatePaymentURLs({ ...order.toObject(), paymentAmount });
-      order.paymentLinks = paymentURLs.links;
-      order.paymentQRCodes = paymentURLs.qrCodes;
-      order.paymentStatus = 'awaiting';
-      order.paymentRequestedAt = new Date();
-      order.paymentAmount = paymentAmount;
-      await order.save();
-
-      try {
-        await emailService.sendV2PaymentRequest({
-          customer,
-          order,
-          paymentAmount,
-          paymentLinks: paymentURLs.links,
-          qrCodes: paymentURLs.qrCodes
-        });
-        logger.info(`V2 Payment request sent for order ${order.orderId}, amount: $${paymentAmount}`);
-      } catch (emailError) {
-        logger.error(`Failed to send payment request email for order ${order.orderId}:`, emailError);
-      }
-    }
-  }
-
-  await logAuditEvent(AuditEvents.ORDER_STATUS_CHANGED, {
-    operatorId,
-    orderId,
-    action: 'bags_weighed',
-    totalWeight: order.actualWeight,
-    numberOfBags: order.bags.length,
-    newBags: bags.length
-  }, req);
-
-  return {
-    order,
-    orderProgress: {
-      totalBags: order.bags.length,
-      bagsWeighed: order.bags.length,
-      bagsProcessed: order.bags.filter(b => b.status === 'processed').length,
-      bagsCompleted: order.bags.filter(b => b.status === 'picked_up').length
-    }
-  };
+// DEPRECATED kiosk shim (move-then-delete; PR 9 removes it).
+// Order birth lives in orderIntakeService.createOrderFromBag.
+async function weighBags({ bagToken, weight, addOns, freshAddOnsFormPlaced, operatorId, req }) {
+  return orderIntakeService.createOrderFromBag({
+    bagToken, weight, addOns, freshAddOnsFormPlaced, operatorId, req
+  });
 }
 
+// LEGACY — stranded (references pre-redesign Order fields), deleted in PR 9.
 async function markBagProcessed({ orderId, operatorId, req }) {
   const order = await Order.findOne({ orderId });
   if (!order) throw new BagWorkflowError('order_not_found', 'Order not found', 404);
@@ -522,11 +307,10 @@ async function scanProcessed({ qrCode, operatorId, req }) {
 
 module.exports = {
   scanCustomer,
-  scanBag,
-  receiveOrder,
+  scanBag,        // LEGACY — stranded, deleted in PR 9
+  receiveOrder,   // LEGACY — stranded, deleted in PR 9
   weighBags,
-  markBagProcessed,
+  markBagProcessed, // LEGACY — stranded, deleted in PR 9
   scanProcessed,
-  generatePaymentURLs,
   BagWorkflowError
 };
