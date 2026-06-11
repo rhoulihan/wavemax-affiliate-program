@@ -18,7 +18,7 @@ const w9Controller = require('../modules/onboarding/w9Controller');
  * @desc    Register a new affiliate
  * @access  Public
  */
-router.post('/register', registrationLimiter, [
+router.post('/register', registrationLimiter, uploadW9, [
   body('inviteToken').notEmpty().isString().withMessage('Invite token is required'),
   body('firstName').notEmpty().withMessage('First name is required'),
   body('lastName').notEmpty().withMessage('Last name is required'),
