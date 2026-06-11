@@ -97,13 +97,18 @@ exports.sendV2PaymentRequest = async ({ customer, order, paymentAmount, paymentL
 /**
  * Send V2 payment reminder email
  */
-exports.sendV2PaymentReminder = async ({ customer, order, reminderNumber, paymentAmount, paymentLinks, qrCodes }) => {
+exports.sendV2PaymentReminder = async ({ customer, order, reminderNumber, paymentAmount, paymentLinks, qrCodes, maxReminders }) => {
   try {
+    const SystemConfig = require('../../../models/SystemConfig');
     const language = customer.languagePreference || 'en';
 
-    // Load V2 reminder template (correct path with emails directory)
-    const v2TemplatePath = path.join(__dirname, '../templates/emails/v2/payment-reminder.html');
-    let template = await readFile(v2TemplatePath, 'utf8');
+    // v2/ templates are language-agnostic; loadTemplate falls back to
+    // templates/emails/v2/payment-reminder.html for every language.
+    let template = await loadTemplate('v2/payment-reminder', language);
+
+    // Reminder cap comes from SystemConfig (spec §8) unless the caller
+    // (paymentVerificationJob) already resolved it.
+    const reminderCap = maxReminders || await SystemConfig.getValue('payment_reminder_max_attempts', 8);
     
     // Calculate breakdown amounts (same as payment request)
     const wdfAmount = order.actualWeight * (order.baseRate || 1.25);
@@ -111,12 +116,11 @@ exports.sendV2PaymentReminder = async ({ customer, order, reminderNumber, paymen
     const deliveryFee = order.feeBreakdown?.totalFee || 0;
     const totalAmount = paymentAmount || order.paymentAmount || order.actualTotal || (wdfAmount + addOnsAmount + deliveryFee);
 
-    // Calculate time-based values
+    // Elapsed time only — there is no 24h deadline. The end of the road is
+    // the come-to-store notice after the final reminder (spec §6.5).
     const paymentRequestedAt = order.paymentRequestedAt ? new Date(order.paymentRequestedAt) : new Date();
     const now = new Date();
     const hoursElapsed = Math.floor((now - paymentRequestedAt) / (1000 * 60 * 60));
-    const paymentDeadlineHours = 24; // 24 hour payment window
-    const hoursRemaining = Math.max(0, paymentDeadlineHours - hoursElapsed);
 
     const emailData = {
       customerName: customer.name || `${customer.firstName} ${customer.lastName}`,
@@ -124,6 +128,7 @@ exports.sendV2PaymentReminder = async ({ customer, order, reminderNumber, paymen
       shortOrderId: order.orderId.replace('ORD-', '').replace('ORD', ''),
       amount: totalAmount.toFixed(2),
       actualWeight: order.actualWeight,
+      numberOfBags: 1, // one bag = one order (redesign)
       // Breakdown amounts
       wdfAmount: wdfAmount.toFixed(2),
       wdfRate: (order.baseRate || 1.25).toFixed(2),
@@ -135,7 +140,6 @@ exports.sendV2PaymentReminder = async ({ customer, order, reminderNumber, paymen
       reminderNumber: reminderNumber || 1,
       paymentRequestedTime: paymentRequestedAt.toLocaleString(),
       hoursElapsed: hoursElapsed,
-      hoursRemaining: hoursRemaining,
       confirmationLink: `https://wavemax.promo/embed-app-v2.html?route=/customer-dashboard&affid=${order.affiliateId}&confirmPayment=${order.orderId}`,
       dashboardLink: `https://wavemax.promo/embed-app-v2.html?route=/customer-dashboard&affid=${order.affiliateId}`,
       customerLoginLink: `https://wavemax.promo/embed-app-v2.html?route=/customer-login&affid=${order.affiliateId}`,
@@ -145,8 +149,8 @@ exports.sendV2PaymentReminder = async ({ customer, order, reminderNumber, paymen
       venmoQR: qrCodes?.venmo || order.paymentQRCodes?.venmo || '',
       paypalQR: qrCodes?.paypal || order.paymentQRCodes?.paypal || '',
       cashappQR: qrCodes?.cashapp || order.paymentQRCodes?.cashapp || '',
-      isUrgent: reminderNumber >= 2 || hoursRemaining <= 6,
-      maxReminders: 3
+      isUrgent: (reminderNumber || 1) >= reminderCap - 1, // last two reminders are urgent
+      maxReminders: reminderCap
     };
     
     // Handle conditional sections for urgency
