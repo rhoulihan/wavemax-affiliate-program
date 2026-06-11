@@ -14,13 +14,22 @@ const ControllerHelpers = require('../utils/controllerHelpers');
 const AuthorizationHelpers = require('../middleware/authorizationHelpers');
 const Formatters = require('../utils/formatters');
 const logger = require('../utils/logger');
+const inviteService = require('../modules/onboarding/inviteService');
+const { InviteError } = inviteService;
+const { logAuditEvent, AuditEvents } = require('../utils/auditLogger');
 
 /**
- * Register a new affiliate
+ * Register a new affiliate — INVITE-BOUND (spec §6.2).
+ *
+ * Contract:
+ *  - `inviteToken` is required; it must resolve to a pending, unexpired invite.
+ *  - The account email is ALWAYS `invite.email`; any client-sent email is ignored.
+ *  - After the affiliate saves, the invite is consumed atomically (single-use).
+ *    Losing that race deletes the just-created affiliate and returns 409.
+ *  - JSON-only in this PR; the multipart W-9 field arrives in PR 10.
  */
 exports.registerAffiliate = async (req, res) => {
   try {
-    // Check for validation errors
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       logger.info('[Registration] Validation errors:', JSON.stringify(errors.array(), null, 2));
@@ -31,9 +40,9 @@ exports.registerAffiliate = async (req, res) => {
     }
 
     const {
+      inviteToken,
       firstName,
       lastName,
-      email,
       phone,
       businessName,
       address,
@@ -50,7 +59,23 @@ exports.registerAffiliate = async (req, res) => {
       languagePreference
     } = req.body;
 
-    // Check if email or username already exists
+    // Invite gate — also the source of truth for the email (client email ignored).
+    let invite;
+    try {
+      invite = await inviteService.validateInvite(inviteToken);
+    } catch (inviteError) {
+      if (inviteError instanceof InviteError) {
+        return res.status(inviteError.statusCode).json({
+          success: false,
+          message: 'This invitation is no longer valid.',
+          reason: inviteError.code === 'expired' ? 'expired' : 'invalid'
+        });
+      }
+      throw inviteError;
+    }
+    const email = invite.email;
+
+    // Check if email or username already exists (email keyed on the invite email)
     const existingEmail = await Affiliate.findOne({ email });
     const existingUsername = await Affiliate.findOne({ username });
 
@@ -80,7 +105,7 @@ exports.registerAffiliate = async (req, res) => {
     // Hash password
     const { salt, hash } = encryptionUtil.hashPassword(password);
 
-    // Create new affiliate
+    // Create new affiliate (email from the invite — never from the client)
     const newAffiliate = new Affiliate({
       firstName,
       lastName,
@@ -110,6 +135,24 @@ exports.registerAffiliate = async (req, res) => {
     }
 
     await newAffiliate.save();
+
+    // Atomic single-use consume. A null result means another registration
+    // already used this invite — roll back the affiliate we just created.
+    const consumed = await inviteService.consumeInvite(inviteToken, newAffiliate.affiliateId);
+    if (!consumed) {
+      await Affiliate.deleteOne({ _id: newAffiliate._id });
+      return res.status(409).json({
+        success: false,
+        message: 'This invitation has already been used.',
+        reason: 'already_used'
+      });
+    }
+
+    logAuditEvent(AuditEvents.INVITE_CONSUMED, {
+      inviteId: consumed.inviteId,
+      affiliateId: newAffiliate.affiliateId,
+      email
+    }, req);
 
     // Send welcome email
     try {

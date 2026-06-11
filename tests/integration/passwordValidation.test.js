@@ -14,8 +14,24 @@ describe('Password Validation Integration Tests', () => {
   let agent;
   let csrfToken;
 
+  // Registration is invite-only — mint a pending invite and return its raw token.
+  const ensureInvite = async (email) => {
+    const AffiliateInvite = require('../../server/modules/onboarding/AffiliateInvite');
+    const encryptionUtil = require('../../server/utils/encryption');
+    const mongoose = require('mongoose');
+    const raw = encryptionUtil.generateToken(32);
+    await AffiliateInvite.create({
+      tokenHash: AffiliateInvite.hashToken(raw),
+      email: email.toLowerCase(),
+      expiresAt: new Date(Date.now() + 72 * 60 * 60 * 1000),
+      createdBy: new mongoose.Types.ObjectId()
+    });
+    return raw;
+  };
+
   beforeEach(async () => {
     // Clean up test data
+    await require('../../server/modules/onboarding/AffiliateInvite').deleteMany({});
     await Affiliate.deleteMany({});
     await Customer.deleteMany({});
     await Administrator.deleteMany({});
@@ -90,8 +106,10 @@ describe('Password Validation Integration Tests', () => {
       for (let i = 0; i < strongPasswords.length; i++) {
         const strongPassword = strongPasswords[i];
         const email = `test${i}@example.com`;
+        const inviteToken = await ensureInvite(email);
 
         const registrationData = {
+          inviteToken,
           firstName: 'Test',
           lastName: 'User',
           email: email,
@@ -749,8 +767,10 @@ describe('Password Validation Integration Tests', () => {
     test('should accept passwords with mixed character distribution', async () => {
       const strongPassword = 'M1x3d&Ch@r$Distr1but10n!';
       const email = 'mixed@example.com';
+      const inviteToken = await ensureInvite(email);
 
       const registrationData = {
+        inviteToken,
         firstName: 'Mixed',
         lastName: 'Distribution',
         email: email,
@@ -780,8 +800,10 @@ describe('Password Validation Integration Tests', () => {
 
     test('should handle Unicode characters in passwords appropriately', async () => {
       const unicodePassword = 'Üñ1c0d3&P@ssw0rd!';
+      const inviteToken = await ensureInvite('unicode@example.com');
 
       const registrationData = {
+        inviteToken,
         firstName: 'Unicode',
         lastName: 'Test',
         email: 'unicode@example.com',

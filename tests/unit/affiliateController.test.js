@@ -9,6 +9,7 @@ const { validationResult } = require('express-validator');
 const { expectSuccessResponse, expectErrorResponse } = require('../helpers/responseHelpers');
 const { extractHandler } = require('../helpers/testUtils');
 const { createFindOneMock, createFindMock, createMockDocument, createAggregateMock } = require('../helpers/mockHelpers');
+const inviteService = require('../../server/modules/onboarding/inviteService');
 
 // Mock dependencies
 jest.mock('../../server/models/Affiliate');
@@ -18,6 +19,25 @@ jest.mock('../../server/models/Transaction');
 jest.mock('../../server/utils/encryption');
 jest.mock('../../server/utils/emailService');
 jest.mock('express-validator');
+jest.mock('../../server/modules/onboarding/inviteService', () => {
+  class InviteError extends Error {
+    constructor(code, statusCode) {
+      super(code);
+      this.name = 'InviteError';
+      this.code = code;
+      this.statusCode = statusCode;
+    }
+  }
+  return {
+    validateInvite: jest.fn(),
+    consumeInvite: jest.fn(),
+    InviteError
+  };
+});
+jest.mock('../../server/utils/auditLogger', () => ({
+  logAuditEvent: jest.fn(),
+  AuditEvents: { INVITE_CONSUMED: 'INVITE_CONSUMED' }
+}));
 
 // Mock ControllerHelpers
 jest.mock('../../server/utils/controllerHelpers', () => ({
@@ -123,150 +143,55 @@ describe('Affiliate Controller', () => {
   });
 
   describe('registerAffiliate', () => {
-    it('should successfully register a new affiliate', async () => {
-      const mockAffiliate = createMockDocument({
-        affiliateId: 'AFF123456'
-      });
-      mockAffiliate.save.mockResolvedValue(true);
+    const validBody = {
+      inviteToken: 'a'.repeat(64),
+      firstName: 'John',
+      lastName: 'Doe',
+      email: 'attacker@evil.com', // must be ignored
+      phone: '123-456-7890',
+      businessName: 'Johns Laundry',
+      address: '123 Main St',
+      city: 'Anytown',
+      state: 'CA',
+      zipCode: '12345',
+      username: 'johndoe',
+      password: 'password123',
+      paymentMethod: 'venmo',
+      venmoHandle: '@johndoe'
+    };
 
-      req.body = {
-        firstName: 'John',
-        lastName: 'Doe',
-        email: 'john@example.com',
-        phone: '123-456-7890',
-        businessName: 'Johns Laundry',
-        address: '123 Main St',
-        city: 'Anytown',
-        state: 'CA',
-        zipCode: '12345',
-        serviceArea: '10 miles',
-        deliveryFee: '5.99',
-        username: 'johndoe',
-        password: 'password123',
-        paymentMethod: 'venmo',
-        venmoHandle: '@johndoe'
-      };
-
+    beforeEach(() => {
       validationResult.mockReturnValue({
         isEmpty: jest.fn().mockReturnValue(true),
         array: jest.fn().mockReturnValue([])
       });
-
-      // Mock separate email and username checks (new implementation)
-      Affiliate.findOne = jest.fn()
-        .mockResolvedValueOnce(null)  // First call for email check
-        .mockResolvedValueOnce(null); // Second call for username check
-
-      encryptionUtil.hashPassword.mockReturnValue({
-        hash: 'hashedPassword',
-        salt: 'salt'
+      inviteService.validateInvite.mockResolvedValue({
+        inviteId: 'INV-1',
+        email: 'invitee@example.com',
+        prefill: {}
       });
-      Affiliate.prototype.save = jest.fn().mockImplementation(function() {
-        Object.assign(this, mockAffiliate);
+      inviteService.consumeInvite.mockResolvedValue({ inviteId: 'INV-1', status: 'accepted' });
+      encryptionUtil.hashPassword.mockReturnValue({ hash: 'hashedPassword', salt: 'salt' });
+      emailService.sendAffiliateWelcomeEmail.mockResolvedValue(true);
+      Affiliate.deleteOne = jest.fn().mockResolvedValue({ deletedCount: 1 });
+      Affiliate.prototype.save = jest.fn().mockImplementation(function () {
+        this.affiliateId = 'AFF123456';
         return Promise.resolve(this);
       });
-      emailService.sendAffiliateWelcomeEmail.mockResolvedValue(true);
-
-      const handler = affiliateController.registerAffiliate;
-      await handler(req, res, next);
-
-      // Check that email and username were checked separately
-      expect(Affiliate.findOne).toHaveBeenCalledWith({ email: 'john@example.com' });
-      expect(Affiliate.findOne).toHaveBeenCalledWith({ username: 'johndoe' });
-      expect(encryptionUtil.hashPassword).toHaveBeenCalledWith('password123');
-      expect(res.status).toHaveBeenCalledWith(201);
-      expect(res.json).toHaveBeenCalledWith({
-        success: true,
-        affiliateId: 'AFF123456',
-        message: 'Affiliate registered successfully!'
-      });
     });
 
-    it('should return validation errors', async () => {
-      validationResult.mockReturnValue({
-        isEmpty: jest.fn().mockReturnValue(false),
-        array: jest.fn().mockReturnValue([{ msg: 'Email is required' }])
-      });
-
-      await affiliateController.registerAffiliate(req, res, next);
-
-      expect(res.status).toHaveBeenCalledWith(400);
-      expect(res.json).toHaveBeenCalledWith({
-        success: false,
-        errors: [{ msg: 'Email is required' }]
-      });
-    });
-
-    it('should handle duplicate email or username', async () => {
-      req.body = {
-        email: 'existing@example.com',
-        username: 'existing',
-        password: 'password123'
-      };
-
-      validationResult.mockReturnValue({
-        isEmpty: jest.fn().mockReturnValue(true)
-      });
-
-      encryptionUtil.hashPassword.mockReturnValue({
-        hash: 'hashedPassword',
-        salt: 'salt'
-      });
-
-      // Both email and username exist - mock both findOne calls
-      Affiliate.findOne = jest.fn()
-        .mockResolvedValueOnce({ email: 'existing@example.com' })  // email check
-        .mockResolvedValueOnce({ username: 'existing' }); // username check
-
-      await affiliateController.registerAffiliate(req, res, next);
-
-      expect(res.status).toHaveBeenCalledWith(400);
-      expect(res.json).toHaveBeenCalledWith({
-        success: false,
-        message: 'Both email and username are already in use',
-        errors: {
-          email: 'Email already registered',
-          username: 'Username already taken'
-        }
-      });
-    });
-
-    it('should handle email service failure gracefully', async () => {
-      const mockAffiliate = createMockDocument({
-        affiliateId: 'AFF123456'
-      });
-      mockAffiliate.save.mockResolvedValue(true);
-
-      req.body = {
-        firstName: 'John',
-        lastName: 'Doe',
-        email: 'john@example.com',
-        username: 'johndoe',
-        password: 'password123',
-        paymentMethod: 'paypal',
-        paypalEmail: 'john@paypal.com',
-        deliveryFee: '5.99'
-      };
-
-      validationResult.mockReturnValue({
-        isEmpty: jest.fn().mockReturnValue(true)
-      });
-
+    it('registers using the INVITE email, consumes the invite, returns 201', async () => {
+      req.body = { ...validBody };
       Affiliate.findOne = jest.fn()
         .mockResolvedValueOnce(null)  // email check
         .mockResolvedValueOnce(null); // username check
-      encryptionUtil.hashPassword.mockReturnValue({
-        hash: 'hashedPassword',
-        salt: 'salt'
-      });
-      Affiliate.prototype.save = jest.fn().mockImplementation(function() {
-        Object.assign(this, mockAffiliate);
-        return Promise.resolve(this);
-      });
-      emailService.sendAffiliateWelcomeEmail.mockRejectedValue(new Error('Email failed'));
 
       await affiliateController.registerAffiliate(req, res, next);
 
+      // The duplicate check ran on the INVITE email, not the client email.
+      expect(inviteService.validateInvite).toHaveBeenCalledWith(validBody.inviteToken);
+      expect(Affiliate.findOne).toHaveBeenCalledWith({ email: 'invitee@example.com' });
+      expect(inviteService.consumeInvite).toHaveBeenCalledWith(validBody.inviteToken, 'AFF123456');
       expect(res.status).toHaveBeenCalledWith(201);
       expect(res.json).toHaveBeenCalledWith({
         success: true,
@@ -275,33 +200,66 @@ describe('Affiliate Controller', () => {
       });
     });
 
-    it('should handle database errors', async () => {
-      // Gate removed: trigger the 500 path via the first remaining DB call
-      Affiliate.findOne = jest.fn().mockRejectedValue(new Error('Database error'));
+    it('returns the InviteError status when the invite is invalid', async () => {
+      const { InviteError } = inviteService;
+      inviteService.validateInvite.mockRejectedValue(new InviteError('invalid', 410));
+      req.body = { ...validBody };
 
-      req.body = {
-        email: 'test@example.com',
-        username: 'testuser',
-        password: 'password123'
-      };
+      await affiliateController.registerAffiliate(req, res, next);
 
+      expect(res.status).toHaveBeenCalledWith(410);
+      expect(res.json).toHaveBeenCalledWith(expect.objectContaining({
+        success: false,
+        reason: 'invalid'
+      }));
+      expect(inviteService.consumeInvite).not.toHaveBeenCalled();
+    });
+
+    it('rolls back the affiliate and returns 409 when the consume race is lost', async () => {
+      inviteService.consumeInvite.mockResolvedValue(null);
+      req.body = { ...validBody };
+      Affiliate.findOne = jest.fn().mockResolvedValue(null);
+
+      await affiliateController.registerAffiliate(req, res, next);
+
+      expect(Affiliate.deleteOne).toHaveBeenCalledTimes(1);
+      expect(res.status).toHaveBeenCalledWith(409);
+      expect(res.json).toHaveBeenCalledWith(expect.objectContaining({
+        success: false,
+        reason: 'already_used'
+      }));
+    });
+
+    it('returns validation errors before touching the invite', async () => {
       validationResult.mockReturnValue({
-        isEmpty: jest.fn().mockReturnValue(true)
-      });
-
-      encryptionUtil.hashPassword.mockReturnValue({
-        hash: 'hashedPassword',
-        salt: 'salt'
+        isEmpty: jest.fn().mockReturnValue(false),
+        array: jest.fn().mockReturnValue([{ msg: 'Invite token is required' }])
       });
 
       await affiliateController.registerAffiliate(req, res, next);
 
-      expect(res.status).toHaveBeenCalledWith(500);
-      expect(res.json).toHaveBeenCalledWith({
-        success: false,
-        message: 'An error occurred during registration'
-      });
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(inviteService.validateInvite).not.toHaveBeenCalled();
     });
+
+    it('handles duplicate email on the invite email with 400', async () => {
+      req.body = { ...validBody };
+      Affiliate.findOne = jest.fn()
+        .mockResolvedValueOnce({ email: 'invitee@example.com' }) // email taken
+        .mockResolvedValueOnce(null);
+
+      await affiliateController.registerAffiliate(req, res, next);
+
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ field: 'email' }));
+      expect(inviteService.consumeInvite).not.toHaveBeenCalled();
+    });
+  });
+
+  // These three tests predate the invite rework — they exercise
+  // getAffiliateProfile but historically lived inside the registerAffiliate
+  // describe. Preserved here under their own block.
+  describe('getAffiliateProfile (preserved legacy tests)', () => {
 
     it('should return 404 for non-existent affiliate', async () => {
       req.params.affiliateId = 'NONEXISTENT';

@@ -6,6 +6,8 @@ const { authenticate } = require('../middleware/auth');
 const { checkRole, checkAdminPermission } = require('../middleware/rbac');
 const { body } = require('express-validator');
 const { customPasswordValidator } = require('../utils/passwordValidator');
+const inviteController = require('../modules/onboarding/inviteController');
+const { sensitiveOperationLimiter } = require('../middleware/rateLimiting');
 
 // All routes require authentication and administrator role
 router.use(authenticate);
@@ -37,6 +39,32 @@ router.post('/affiliates/:affiliateId/lock-payments',
 router.post('/affiliates/:affiliateId/unlock-payments',
   checkAdminPermission(['manage_affiliates']),
   administratorController.unlockAffiliatePayments);
+
+// Affiliate invites (invite-only onboarding) — spec §5 / §6.2.
+// CSRF is enforced globally on POST by conditionalCsrf.
+router.post('/affiliate-invites',
+  checkAdminPermission(['manage_affiliates']),
+  sensitiveOperationLimiter,
+  [
+    body('email').isEmail().withMessage('Valid email is required'),
+    body('prefill.firstName').optional().isString().trim().isLength({ max: 50 }),
+    body('prefill.lastName').optional().isString().trim().isLength({ max: 50 }),
+    body('prefill.businessName').optional().isString().trim().isLength({ max: 100 }),
+    body('prefill.phone').optional().isString().trim().isLength({ max: 25 }),
+    body('ttlHours').optional().isInt({ min: 1, max: 336 })
+  ],
+  inviteController.mintInvite);
+router.get('/affiliate-invites',
+  checkAdminPermission(['manage_affiliates']),
+  inviteController.listInvites);
+router.post('/affiliate-invites/:inviteId/resend',
+  checkAdminPermission(['manage_affiliates']),
+  sensitiveOperationLimiter,
+  inviteController.resendInvite);
+router.post('/affiliate-invites/:inviteId/revoke',
+  checkAdminPermission(['manage_affiliates']),
+  sensitiveOperationLimiter,
+  inviteController.revokeInvite);
 
 // Analytics (must come before /:id routes)
 router.get('/analytics/orders', checkAdminPermission(['view_analytics']), administratorController.getOrderAnalytics);

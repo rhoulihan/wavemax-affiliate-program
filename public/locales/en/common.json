@@ -1,4 +1,10 @@
 {
+  "affiliateRegister": {
+    "invite": {
+      "invalidOrExpired": "This invitation link is invalid or has expired. Please contact WaveMAX to request a new invitation.",
+      "emailLocked": "Your email is set by your invitation and cannot be changed."
+    }
+  },
   "common": {
     "buttons": {
       "getStarted": "Get Started",
@@ -295,7 +301,7 @@
       "title": "Ready to start earning?",
       "customerTitle": "Ready for Fresh, Clean Laundry?",
       "description": "Join our affiliate program and start earning commissions by offering laundry services to your customers.",
-      "createAccount": "Become an Affiliate",
+      "inviteOnly": "Affiliates join by invitation — contact WaveMAX to get started.",
       "login": "Affiliate Login",
       "subtitle": {
         "full": "Let {{affiliateName}} handle the pickup and delivery while WaveMAX ensures professional cleaning",

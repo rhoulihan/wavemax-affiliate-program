@@ -1198,6 +1198,7 @@
           // Manually collect all form fields to ensure nothing is missed
           // This is necessary because hidden sections may not be included in FormData
           const formFields = [
+            'inviteToken',
             'firstName', 'lastName', 'email', 'phone', 'businessName',
             'address', 'city', 'state', 'zipCode',
             'minimumDeliveryFee', 'perBagDeliveryFee',
@@ -1310,27 +1311,6 @@
 
             try {
               const errorData = JSON.parse(errorText);
-
-              // Check for beta restriction
-              if (errorData.isBetaRestriction) {
-                // Hide spinner
-                if (formSpinner) {
-                  formSpinner.hide();
-                  formSpinner = null;
-                }
-
-                // Show beta restriction message
-                if (window.ErrorHandler && window.ErrorHandler.showError) {
-                  window.ErrorHandler.showError(errorData.message || 'We are currently in closed beta. Please check back in a few days.');
-                } else {
-                  alert(errorData.message || 'We are currently in closed beta. Please check back in a few days.');
-                }
-
-                // Clear the form to prevent resubmission
-                form.reset();
-                isSubmitting = false;
-                return; // Exit early, don't continue with normal error handling
-              }
 
               // Handle validation errors
               if (errorData.errors && Array.isArray(errorData.errors)) {
