@@ -63,6 +63,15 @@ async function createOrderFromBag({ bagToken, weight, addOns, freshAddOnsFormPla
     status: { $nin: ['delivered', 'cancelled'] }
   }).sort({ createdAt: -1 });
   const reIntake = !!(openOrder && openOrder.status === 'picked_up');
+  if (openOrder && !reIntake) {
+    // Bag never left the store — advance the existing order, don't re-intake.
+    throw new IntakeError(
+      'order_already_open',
+      `Order ${openOrder.orderId} is already open for this bag (${openOrder.status})`,
+      409,
+      { orderId: openOrder.orderId, status: openOrder.status }
+    );
+  }
 
   // Lifetime counters (++orderCount / lastIntakeAt) — PR 6 static.
   await bagService.linkToOrderAtIntake({ token: bagToken, operatorId });

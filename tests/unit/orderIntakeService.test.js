@@ -134,4 +134,57 @@ describe('orderIntakeService.createOrderFromBag', () => {
     const freshCustomer = await Customer.findOne({ customerId: customer.customerId });
     expect(freshCustomer.wdfCredit).toBe(0);
   });
+
+  describe('guards', () => {
+    it('rejects an unknown token with a generic 404 (anti-enumeration)', async () => {
+      await expect(createOrderFromBag({
+        bagToken: 'f'.repeat(32), weight: 10, addOns: {}, freshAddOnsFormPlaced: false, operatorId
+      })).rejects.toMatchObject({ isIntakeError: true, code: 'invalid_bag', status: 404 });
+    });
+
+    it('rejects a non-active (issued) bag with 409 bag_not_active', async () => {
+      bag.status = 'issued';
+      bag.customerId = null;
+      await bag.save();
+      await expect(createOrderFromBag({
+        bagToken: TOKEN, weight: 10, addOns: {}, freshAddOnsFormPlaced: false, operatorId
+      })).rejects.toMatchObject({ isIntakeError: true, code: 'bag_not_active', status: 409 });
+    });
+
+    it.each(['in_progress', 'processed', 'ready_for_pickup'])(
+      'rejects intake while an at-store order is open (%s) with 409 order_already_open',
+      async (openStatus) => {
+        await createOrderFromBag({
+          bagToken: TOKEN, weight: 10, addOns: {}, freshAddOnsFormPlaced: false, operatorId
+        });
+        // Force the open order into the at-store status under test.
+        await Order.updateOne({ bagId: bag.bagId }, { $set: { status: openStatus } });
+
+        await expect(createOrderFromBag({
+          bagToken: TOKEN, weight: 12, addOns: {}, freshAddOnsFormPlaced: false, operatorId
+        })).rejects.toMatchObject({ isIntakeError: true, code: 'order_already_open', status: 409 });
+
+        expect(await Order.countDocuments({ bagId: bag.bagId })).toBe(1); // no second order
+      }
+    );
+
+    it('allows intake when prior orders are delivered or cancelled', async () => {
+      await createOrderFromBag({
+        bagToken: TOKEN, weight: 10, addOns: {}, freshAddOnsFormPlaced: false, operatorId
+      });
+      await Order.updateOne({ bagId: bag.bagId }, { $set: { status: 'delivered' } });
+
+      const { order } = await createOrderFromBag({
+        bagToken: TOKEN, weight: 8, addOns: {}, freshAddOnsFormPlaced: false, operatorId
+      });
+      expect(order.status).toBe('in_progress');
+      expect(await Order.countDocuments({ bagId: bag.bagId })).toBe(2);
+    });
+
+    it.each([0, -1, 'abc', undefined])('rejects invalid weight %p with 400', async (badWeight) => {
+      await expect(createOrderFromBag({
+        bagToken: TOKEN, weight: badWeight, addOns: {}, freshAddOnsFormPlaced: false, operatorId
+      })).rejects.toMatchObject({ isIntakeError: true, code: 'invalid_weight', status: 400 });
+    });
+  });
 });
