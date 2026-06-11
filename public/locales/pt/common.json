@@ -1,4 +1,10 @@
 {
+  "affiliateRegister": {
+    "invite": {
+      "invalidOrExpired": "Este link de convite é inválido ou expirou. Entre em contato com a WaveMAX para solicitar um novo convite.",
+      "emailLocked": "Seu e-mail é definido pelo seu convite e não pode ser alterado."
+    }
+  },
   "common": {
     "buttons": {
       "getStarted": "Começar",
@@ -291,7 +297,7 @@
       "title": "Pronto para começar a ganhar?",
       "customerTitle": "Pronto para roupas limpas e frescas?",
       "description": "Junte-se ao nosso programa de afiliados e comece a ganhar comissões oferecendo serviços de lavanderia aos seus clientes.",
-      "createAccount": "Torne-se um afiliado",
+      "inviteOnly": "Os afiliados entram por convite — entre em contato com a WaveMAX para começar.",
       "login": "Login de Afiliado",
       "subtitle": {
         "full": "Deixe {{affiliateName}} cuidar da coleta e entrega enquanto a WaveMAX garante a limpeza profissional",

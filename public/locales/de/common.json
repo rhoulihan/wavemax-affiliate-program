@@ -1,4 +1,10 @@
 {
+  "affiliateRegister": {
+    "invite": {
+      "invalidOrExpired": "Dieser Einladungslink ist ungültig oder abgelaufen. Bitte kontaktieren Sie WaveMAX, um eine neue Einladung anzufordern.",
+      "emailLocked": "Ihre E-Mail-Adresse ist durch Ihre Einladung festgelegt und kann nicht geändert werden."
+    }
+  },
   "common": {
     "buttons": {
       "getStarted": "Loslegen",
@@ -291,7 +297,7 @@
       "title": "Bereit, Geld zu verdienen?",
       "customerTitle": "Bereit für frische, saubere Wäsche?",
       "description": "Treten Sie unserem Partnerprogramm bei und verdienen Sie Provisionen, indem Sie Ihren Kunden Wäscheservice anbieten.",
-      "createAccount": "Werden Sie Partner",
+      "inviteOnly": "Partner werden nur auf Einladung aufgenommen — kontaktieren Sie WaveMAX, um zu starten.",
       "login": "Partner-Login",
       "subtitle": {
         "full": "Lassen Sie {{affiliateName}} die Abholung und Lieferung übernehmen, während WaveMAX die professionelle Reinigung sicherstellt",
