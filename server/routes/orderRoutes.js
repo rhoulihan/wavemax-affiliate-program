@@ -3,7 +3,7 @@
 const express = require('express');
 const router = express.Router();
 const orderController = require('../controllers/orderController');
-const { authenticate, authorize } = require('../middleware/auth');
+const { authenticate } = require('../middleware/auth');
 const { checkRole } = require('../middleware/rbac');
 const { body } = require('express-validator');
 
@@ -27,6 +27,16 @@ router.get('/search', authenticate, orderController.searchOrders);
  * @access  Private (affiliate or admin)
  */
 router.get('/statistics', authenticate, orderController.getOrderStatistics);
+
+/**
+ * @route   GET /api/v1/orders/held
+ * @desc    Held-at-store orders (processed + unpaid) — spec §5
+ * @access  admin / administrator / operator (all), affiliate (own)
+ */
+router.get('/held',
+  authenticate,
+  checkRole(['admin', 'administrator', 'operator', 'affiliate']),
+  orderController.getHeldOrders);
 
 /**
  * @route   PUT /api/orders/bulk/status
@@ -102,5 +112,15 @@ router.put('/:orderId/verify-payment', authenticate, checkRole(['admin', 'admini
   body('transactionId').optional(),
   body('notes').optional()
 ], orderController.verifyPaymentManually);
+
+/**
+ * @route   POST /api/v1/orders/:orderId/resend-payment-request
+ * @desc    Re-send the stored-link payment request; reset reminder clock — spec §5
+ * @access  admin / administrator (CSRF default-enforced)
+ */
+router.post('/:orderId/resend-payment-request',
+  authenticate,
+  checkRole(['admin', 'administrator']),
+  orderController.resendPaymentRequest);
 
 module.exports = router;
