@@ -8,6 +8,7 @@ const shiftStatsService = require('../services/operatorShiftStatsService');
 const supportService = require('../services/operatorSupportService');
 const pickupService = require('../services/operatorPickupService');
 const bagWorkflowService = require('../services/operatorBagWorkflowService');
+const orderIntakeService = require('../modules/orders/orderIntakeService');
 
 // Get order queue
 exports.getOrderQueue = ControllerHelpers.asyncWrapper(async (req, res) => {
@@ -296,6 +297,45 @@ exports.scanProcessed = async (req, res) => {
   }
 };
 
+// Kiosk intake — operator JWT + CSRF. One bag = one order (spec §6.4 / §5).
+exports.intake = ControllerHelpers.asyncWrapper(async (req, res) => {
+  const { bagToken, weight, addOns, freshAddOnsFormPlaced } = req.body;
+  if (!bagToken) {
+    return ControllerHelpers.sendError(res, 'bagToken is required', 400);
+  }
+  try {
+    const { order, reIntake } = await orderIntakeService.createOrderFromBag({
+      bagToken,
+      weight,
+      addOns,
+      freshAddOnsFormPlaced: !!freshAddOnsFormPlaced,
+      operatorId: req.user.id,
+      req
+    });
+    ControllerHelpers.sendSuccess(res, {
+      order: {
+        orderId: order.orderId,
+        status: order.status,
+        customerId: order.customerId,
+        affiliateId: order.affiliateId,
+        actualWeight: order.actualWeight,
+        addOns: order.addOns,
+        addOnTotal: order.addOnTotal,
+        feeBreakdown: order.feeBreakdown,
+        actualTotal: order.actualTotal,
+        paymentAmount: order.paymentAmount,
+        affiliateCommission: order.affiliateCommission,
+        paymentStatus: order.paymentStatus
+      },
+      reIntake
+    }, 'Order created at intake', 201);
+  } catch (err) {
+    if (err.isIntakeError || err.isBagWorkflowError) {
+      return ControllerHelpers.sendError(res, err.message, err.status, { code: err.code, ...err.details });
+    }
+    throw err;
+  }
+});
 
 // Mark order as ready for pickup (deprecated - use scanProcessed instead)
 exports.markOrderReady = async (req, res) => {
