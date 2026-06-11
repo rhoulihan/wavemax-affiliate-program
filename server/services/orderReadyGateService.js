@@ -4,8 +4,8 @@
 //
 // This service is the SOLE writer of Order.readyForPickupAt (never the model
 // pre-save, never a direct PUT) and the only path into 'ready_for_pickup'.
-// orderStateMachine.maybeReadyForPickup is a thin delegate onto applyReadyGate.
-// Callers (this PR): orderController.updateOrderStatus (processed transition)
+// This service is required directly by callers (no delegate on the state
+// machine — that would create a static require cycle). Callers (this PR): orderController.updateOrderStatus (processed transition)
 // and orderController.verifyPaymentManually. PR 7 adds the kiosk processed scan;
 // PR 8 adds the IMAP scanner / verification-job verify path.
 

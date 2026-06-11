@@ -4,10 +4,7 @@
 const Affiliate = require('../models/Affiliate');
 const Customer = require('../models/Customer');
 const Order = require('../models/Order');
-const SystemConfig = require('../models/SystemConfig');
-const encryptionUtil = require('../utils/encryption');
 const emailService = require('../utils/emailService');
-const jwt = require('jsonwebtoken');
 const { escapeRegex } = require('../utils/securityUtils');
 
 // Utility modules for consistent error handling and responses
@@ -436,7 +433,7 @@ exports.updatePaymentStatus = async (req, res) => {
  */
 exports.searchOrders = ControllerHelpers.asyncWrapper(async (req, res) => {
   const { search, affiliateId, startDate, endDate, status } = req.query;
-  
+
   // Parse pagination parameters
   const pagination = ControllerHelpers.parsePagination(req.query);
 
@@ -447,7 +444,7 @@ exports.searchOrders = ControllerHelpers.asyncWrapper(async (req, res) => {
     'startDate': 'createdAt',
     'endDate': 'createdAt'
   };
-  
+
   const query = ControllerHelpers.buildQuery({ status, affiliateId }, allowedFields);
 
   // Date range filter
@@ -525,7 +522,7 @@ exports.searchOrders = ControllerHelpers.asyncWrapper(async (req, res) => {
  */
 exports.getOrderStatistics = async (req, res) => {
   try {
-    const { affiliateId, includeStats = 'true' } = req.query;
+    const { affiliateId } = req.query;
 
     // Build query
     const query = {};
@@ -569,7 +566,7 @@ exports.getOrderStatistics = async (req, res) => {
 
     orders.forEach(order => {
       // Count by status
-      if (ordersByStatus.hasOwnProperty(order.status)) {
+      if (Object.prototype.hasOwnProperty.call(ordersByStatus, order.status)) {
         ordersByStatus[order.status]++;
       }
 
@@ -616,7 +613,7 @@ exports.getOrderStatistics = async (req, res) => {
 exports.confirmPayment = async (req, res) => {
   try {
     const { orderId, paymentMethod, paymentDetails, amount } = req.body;
-    
+
     // Find order by short ID or full ID
     let order;
     if (orderId.length === 8) {
@@ -633,7 +630,7 @@ exports.confirmPayment = async (req, res) => {
       // Full order ID
       order = await Order.findById(orderId);
     }
-    
+
     if (!order) {
       return res.status(404).json({
         success: false,
@@ -641,7 +638,7 @@ exports.confirmPayment = async (req, res) => {
         error: 'Order not found'
       });
     }
-    
+
     // Check if payment is already verified - return 409 for duplicate
     if (order.paymentStatus === 'verified') {
       return res.status(409).json({
@@ -651,11 +648,11 @@ exports.confirmPayment = async (req, res) => {
         alreadyVerified: true
       });
     }
-    
+
     // Validate payment amount if provided
     if (amount !== undefined) {
       const expectedAmount = order.paymentAmount || order.actualTotal || order.estimatedTotal;
-      
+
       // Check if amount is way off (more than 100% difference)
       if (Math.abs(amount - expectedAmount) > expectedAmount) {
         return res.status(400).json({
@@ -667,28 +664,28 @@ exports.confirmPayment = async (req, res) => {
         });
       }
     }
-    
+
     // Log customer confirmation
     logger.info(`Customer confirmed payment for order ${order._id}:`, {
       paymentMethod,
       paymentDetails
     });
-    
+
     // Update order with customer confirmation
     order.paymentStatus = 'confirming';
     order.paymentConfirmedAt = new Date();
     order.paymentNotes = `Customer confirmed payment via ${paymentMethod}. Details: ${paymentDetails || 'None provided'}. Awaiting manual verification.`;
     order.paymentMethod = paymentMethod || 'pending';
     await order.save();
-    
+
     // Immediately escalate to admin for manual verification
     const paymentVerificationJob = require('../jobs/paymentVerificationJob');
     await paymentVerificationJob.escalateToAdmin(order);
-    
+
     // Also trigger an immediate payment check
     const paymentEmailScanner = require('../services/paymentEmailScanner');
     const verified = await paymentEmailScanner.checkOrderPayment(order._id);
-    
+
     if (verified) {
       return res.json({
         success: true,
@@ -696,13 +693,13 @@ exports.confirmPayment = async (req, res) => {
         verified: true
       });
     }
-    
+
     res.json({
       success: true,
       message: 'Thank you for confirming your payment. We are verifying it now and will update you shortly.',
       escalated: true
     });
-    
+
   } catch (error) {
     logger.error('Payment confirmation error:', error);
     res.status(500).json({
@@ -719,7 +716,7 @@ exports.verifyPaymentManually = async (req, res) => {
   try {
     const { orderId } = req.params;
     const { transactionId, notes } = req.body;
-    
+
     // Admin only
     if (!AuthorizationHelpers.isAdmin(req.user)) {
       return res.status(403).json({
@@ -727,7 +724,7 @@ exports.verifyPaymentManually = async (req, res) => {
         message: 'Unauthorized - admin access required'
       });
     }
-    
+
     const order = await Order.findById(orderId);
     if (!order) {
       return res.status(404).json({
@@ -735,18 +732,18 @@ exports.verifyPaymentManually = async (req, res) => {
         message: 'Order not found'
       });
     }
-    
+
     // Update payment status
     order.paymentStatus = 'verified';
     order.paymentVerifiedAt = new Date();
     order.paymentTransactionId = transactionId || `MANUAL-${Date.now()}`;
     order.paymentNotes = `Manually verified by admin${req.user.email ? ` (${req.user.email})` : ''}. ${notes || ''}`;
     await order.save();
-    
+
     // Run the canonical ready gate (Path B: paid-then-processed; idempotent;
     // notifies the affiliate via sendOrderReadyNotification when it promotes).
     await applyReadyGate(order, { trigger: 'manual_verify' });
-    
+
     res.json({
       success: true,
       message: 'Payment verified successfully',
@@ -756,7 +753,7 @@ exports.verifyPaymentManually = async (req, res) => {
         paymentVerifiedAt: order.paymentVerifiedAt
       }
     });
-    
+
   } catch (error) {
     logger.error('Manual payment verification error:', error);
     res.status(500).json({

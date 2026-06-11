@@ -64,15 +64,7 @@ function applyTransition(order, to) {
   return order;
 }
 
-/**
- * The GATE — thin delegate (design §6.4). orderReadyGateService.applyReadyGate
- * owns the logic: promotes processed+verified to ready_for_pickup, stamps
- * readyForPickupAt (sole writer), toggles heldAtStore, saves, and reuses
- * sendOrderReadyNotification. Lazy require avoids a load-time cycle (the gate
- * service requires this module for applyTransition).
- */
-function maybeReadyForPickup(order, ctx) {
-  return require('../../services/orderReadyGateService').applyReadyGate(order, ctx);
-}
-
-module.exports = { TRANSITIONS, canTransition, applyTransition, maybeReadyForPickup, TransitionError };
+// Callers needing the ready gate require server/services/orderReadyGateService
+// directly (applyReadyGate is canonical; a delegate here would create a static
+// require cycle — the gate service requires this module for applyTransition).
+module.exports = { TRANSITIONS, canTransition, applyTransition, TransitionError };
