@@ -68,6 +68,13 @@
     "invite": {
       "invalidOrExpired": "Este link de convite é inválido ou expirou. Entre em contato com a WaveMAX para solicitar um novo convite.",
       "emailLocked": "Seu e-mail é definido pelo seu convite e não pode ser alterado."
+    },
+    "w9": {
+      "uploadLabel": "Envie seu formulário W-9 preenchido",
+      "fileTypeHint": "PDF, JPG ou PNG, máximo de {{max}} MB",
+      "tooLarge": "O arquivo é muito grande. O tamanho máximo é {{max}} MB.",
+      "wrongType": "Apenas arquivos PDF, JPG ou PNG são aceitos.",
+      "optionalNote": "Você também pode enviar seu W-9 mais tarde, mas os pagamentos de comissão são pausados ao atingir $600 de ganhos anuais até que ele esteja arquivado."
     }
   },
   "common": {
