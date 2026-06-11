@@ -65,7 +65,7 @@ class PaymentEmailScanner {
 
       // Get unread payment emails
       const emails = await imapScanner.getUnreadEmails();
-      
+
       if (!emails || emails.length === 0) {
         logger.info('No new payment emails found');
         imapScanner.disconnect();
@@ -73,19 +73,19 @@ class PaymentEmailScanner {
       }
 
       logger.info(`Found ${emails.length} unread payment emails`);
-      
+
       const verifiedPayments = [];
-      
+
       for (const email of emails) {
         try {
           logger.info(`Processing email: From: ${email.from}, Subject: ${email.subject}`);
           const payment = await this.parsePaymentEmail(email);
-          
+
           if (payment) {
             logger.info(`Parsed payment: Order ${payment.orderNumber}, Amount: $${payment.amount}, Provider: ${payment.provider}`);
             // Verify and update order
             const verified = await this.verifyAndUpdateOrder(payment);
-            
+
             if (verified) {
               logger.info(`Payment verified for order ${payment.orderNumber}`);
               verifiedPayments.push(payment);
@@ -103,7 +103,7 @@ class PaymentEmailScanner {
           logger.error(`Error processing email ${email.uid}:`, error);
         }
       }
-      
+
       logger.info(`Verified ${verifiedPayments.length} payments`);
       imapScanner.disconnect();
       return verifiedPayments;
@@ -122,21 +122,21 @@ class PaymentEmailScanner {
     try {
       const { from, fromAddress, subject, text, html, date } = email;
       const body = text || html || '';
-      
+
       // Check if this is a forwarded email
       const isForwarded = subject && (
-        subject.toLowerCase().includes('fwd:') || 
+        subject.toLowerCase().includes('fwd:') ||
         subject.toLowerCase().includes('forwarded')
       );
-      
+
       // For forwarded emails, look for the provider in the subject or body
       let provider = null;
-      
+
       if (isForwarded) {
         // Check subject for payment provider
         const subjectLower = subject.toLowerCase();
         const bodyLower = (text || html || '').toLowerCase();
-        
+
         if (subjectLower.includes('venmo') || bodyLower.includes('venmo@venmo.com')) {
           provider = 'venmo';
         } else if (subjectLower.includes('paypal') || bodyLower.includes('@paypal.com')) {
@@ -148,32 +148,32 @@ class PaymentEmailScanner {
         // For direct emails, check sender domain
         provider = this.identifyProvider(fromAddress || from);
       }
-      
+
       if (!provider) {
         logger.info(`Not a payment email from known provider: ${from} (subject: ${subject})`);
         return null;
       }
-      
+
       // Use text body preferentially, fall back to HTML if needed
       const content = text || this.stripHtml(html || body || '');
-      
+
       // Extract payment details using provider-specific patterns
       const patterns = this.providers[provider].patterns;
-      
+
       // Extract order ID from note/memo - try primary pattern first, then fallback
       let orderIdMatch = content.match(patterns.orderIdInNote);
       if (!orderIdMatch && patterns.orderIdFallback) {
         orderIdMatch = content.match(patterns.orderIdFallback);
       }
-      
+
       if (!orderIdMatch) {
         logger.info('No order ID found in payment note');
         return null;
       }
-      
+
       // Extract the full order ID (ORD-[UUID])
       const orderId = orderIdMatch[1];
-      
+
       // Extract amount - handle Venmo's special format
       let amount = null;
       if (provider === 'venmo') {
@@ -193,26 +193,26 @@ class PaymentEmailScanner {
         const amountMatch = content.match(patterns.amount);
         amount = amountMatch ? parseFloat(amountMatch[1].replace(',', '')) : null;
       }
-      
+
       // Extract sender info - try primary pattern first, then fallback
       let senderMatch = content.match(patterns.sender);
       if (!senderMatch && patterns.senderFallback) {
         senderMatch = content.match(patterns.senderFallback);
       }
       const sender = senderMatch ? senderMatch[1].trim() : 'Unknown';
-      
+
       // Extract transaction ID if available
       const transactionMatch = content.match(patterns.transactionId);
       const transactionId = transactionMatch ? transactionMatch[1] : `${provider}-${Date.now()}`;
-      
+
       // Find order by full order ID
       const order = await this.findOrderById(orderId);
-      
+
       if (!order) {
         logger.info(`No matching order found for ID: ${orderId}`);
         return null;
       }
-      
+
       return {
         orderId: order.orderId,  // Use the orderId field, not _id
         orderNumber: orderId,
@@ -238,9 +238,9 @@ class PaymentEmailScanner {
    */
   identifyProvider(from) {
     if (!from) return null;
-    
+
     const fromLower = from.toLowerCase();
-    
+
     for (const [provider, config] of Object.entries(this.providers)) {
       for (const domain of config.domains) {
         if (fromLower.includes(domain)) {
@@ -248,7 +248,7 @@ class PaymentEmailScanner {
         }
       }
     }
-    
+
     return null;
   }
 
@@ -265,7 +265,7 @@ class PaymentEmailScanner {
       .replace(/&lt;/g, '<')
       .replace(/&gt;/g, '>')
       .replace(/&quot;/g, '"')
-      .replace(/&#39;/g, "'")
+      .replace(/&#39;/g, '\'')
       .replace(/\s+/g, ' ')
       .trim();
   }
@@ -277,12 +277,13 @@ class PaymentEmailScanner {
    */
   async findOrderById(orderId) {
     try {
-      // Find order with matching orderId and paymentStatus = 'awaiting'
+      // Match awaiting AND confirming — a customer-self-reported ('confirming')
+      // order must still be auto-verified (spec §4.4 / §6.5 widening).
       const order = await Order.findOne({
         orderId: orderId,
-        paymentStatus: 'awaiting'
+        paymentStatus: { $in: ['awaiting', 'confirming'] }
       });
-      
+
       return order;
     } catch (error) {
       logger.error('Error finding order by ID:', error);
@@ -299,55 +300,55 @@ class PaymentEmailScanner {
     try {
       // Find order by orderId field (not _id)
       const order = await Order.findOne({ orderId: payment.orderId });
-      
+
       if (!order) {
         logger.error('Order not found:', payment.orderId);
         return false;
       }
-      
+
       // Check if already verified - this would be a duplicate payment
       if (order.paymentStatus === 'verified') {
         logger.info('Order already verified - duplicate payment detected:', payment.orderId);
-        
+
         // Notify admin about duplicate payment
         try {
           await this.notifyAdminPaymentIssue(order, payment, order.paymentAmount || order.actualTotal, 'duplicate');
         } catch (error) {
           logger.error('Error notifying admin about duplicate payment:', error);
         }
-        
+
         return true;
       }
-      
+
       // Verify amount - payment must be >= order amount
       const expectedAmount = order.paymentAmount || order.actualTotal || order.estimatedTotal;
       const paymentDifference = payment.amount - expectedAmount;
-      
+
       if (payment.amount < expectedAmount) {
         // Payment is less than required - notify admin but don't verify
         logger.warn(`Payment insufficient. Expected: $${expectedAmount}, Received: $${payment.amount}`);
-        
+
         // Notify admin about insufficient payment
         try {
           await this.notifyAdminPaymentIssue(order, payment, expectedAmount, 'underpayment');
         } catch (error) {
           logger.error('Error notifying admin about underpayment:', error);
         }
-        
+
         return false; // Don't verify the payment
       }
-      
+
       // Payment is sufficient (exact or overpayment)
       // Update order with payment verification
       order.paymentStatus = 'verified';
       order.paymentVerifiedAt = new Date();
       order.paymentTransactionId = payment.transactionId;
       order.paymentMethod = payment.provider;
-      
+
       if (paymentDifference > 0) {
         // Customer overpaid - note this and notify admin
         order.paymentNotes = `Payment verified. Amount variance: Overpayment of $${paymentDifference.toFixed(2)} received`;
-        
+
         // Notify admin about overpayment
         try {
           await this.notifyAdminPaymentIssue(order, payment, expectedAmount, 'overpayment');
@@ -358,19 +359,21 @@ class PaymentEmailScanner {
         // Exact payment
         order.paymentNotes = `Payment verified via email from ${payment.sender}`;
       }
-      
+
       await order.save();
-      
+
       logger.info(`Payment verified for order ${payment.orderId}`);
-      
+
       // Send payment confirmation to customer
       await this.sendPaymentConfirmation(order);
-      
-      // If WDF is complete, send pickup notification
-      if (order.status === 'processed') {
-        await this.sendPickupNotification(order);
-      }
-      
+
+      // Path B (paid-then-processed): run the canonical ready gate. Idempotent;
+      // sole writer of readyForPickupAt; sends the affiliate "collect from
+      // store" notification itself (spec §6.5). Inline require avoids a cycle
+      // if the gate ever pulls in scanner-adjacent modules.
+      const orderReadyGateService = require('./orderReadyGateService');
+      await orderReadyGateService.applyReadyGate(order, { trigger: 'scanner_verify' });
+
       return true;
     } catch (error) {
       logger.error('Error verifying and updating order:', error);
@@ -385,35 +388,20 @@ class PaymentEmailScanner {
   async sendPaymentConfirmation(order) {
     try {
       const customer = await Customer.findOne({ customerId: order.customerId });
-      
+
       if (!customer) {
         logger.error('Customer not found for payment confirmation');
         return;
       }
-      
+
       // Use emailService to send confirmation
       // This would be implemented in emailService
       logger.info(`Sending payment confirmation to ${customer.email}`);
-      
+
       // Placeholder for actual email sending
       // await emailService.sendV2PaymentConfirmation(order, customer);
     } catch (error) {
       logger.error('Error sending payment confirmation:', error);
-    }
-  }
-
-  /**
-   * Send pickup ready notification to affiliate
-   * @param {Object} order - Order document
-   */
-  async sendPickupNotification(order) {
-    try {
-      logger.info(`Sending pickup notification for order ${order._id}`);
-      
-      // This would trigger the existing pickup notification
-      // await emailService.sendPickupReadyNotification(order);
-    } catch (error) {
-      logger.error('Error sending pickup notification:', error);
     }
   }
 
@@ -425,27 +413,27 @@ class PaymentEmailScanner {
   async checkOrderPayment(orderId) {
     try {
       const order = await Order.findById(orderId);
-      
+
       if (!order || order.paymentStatus === 'verified') {
         return order?.paymentStatus === 'verified';
       }
-      
+
       // Search emails for this order ID (using the full ORD-UUID format)
       const emails = await mailcowService.searchEmails(order.orderId);
-      
+
       for (const email of emails) {
         const payment = await this.parsePaymentEmail(email);
-        
+
         if (payment && payment.orderId === order.orderId) {
           const verified = await this.verifyAndUpdateOrder(payment);
-          
+
           if (verified) {
             await mailcowService.markEmailAsProcessed(email.id || email.uid);
             return true;
           }
         }
       }
-      
+
       return false;
     } catch (error) {
       logger.error('Error checking order payment:', error);
@@ -465,20 +453,20 @@ class PaymentEmailScanner {
         failed: 0,
         errors: []
       };
-      
-      // Get all orders awaiting payment
+
+      // Awaiting AND confirming (spec §6.5 widening)
       const pendingOrders = await Order.find({
-        paymentStatus: 'awaiting'
+        paymentStatus: { $in: ['awaiting', 'confirming'] }
       });
-      
+
       logger.info(`Processing ${pendingOrders.length} pending orders`);
-      
+
       for (const order of pendingOrders) {
         try {
           const verified = await this.checkOrderPayment(order._id);
-          
+
           results.processed++;
-          
+
           if (verified) {
             results.verified++;
           }
@@ -490,7 +478,7 @@ class PaymentEmailScanner {
           });
         }
       }
-      
+
       return results;
     } catch (error) {
       logger.error('Error processing pending payments:', error);
@@ -515,9 +503,9 @@ class PaymentEmailScanner {
       }
 
       const paymentDifference = Math.abs(payment.amount - expectedAmount);
-      
+
       let subject, issueDescription, actionRequired;
-      
+
       if (issueType === 'duplicate') {
         subject = `Duplicate Payment Received - Order ${order.orderId || order._id.toString().slice(-8).toUpperCase()}`;
         issueDescription = `Customer has made a duplicate payment of $${payment.amount.toFixed(2)} for an already paid order`;
@@ -532,9 +520,9 @@ class PaymentEmailScanner {
         actionRequired = 'Payment verification was blocked. Please follow up with the customer for the remaining amount.';
       }
 
-      const alertTitle = issueType === 'duplicate' ? 'Duplicate Payment' : 
-                         issueType === 'overpayment' ? 'Overpayment' : 'Underpayment';
-      
+      const alertTitle = issueType === 'duplicate' ? 'Duplicate Payment' :
+        issueType === 'overpayment' ? 'Overpayment' : 'Underpayment';
+
       const emailContent = `
         <h2>Payment ${alertTitle} Alert</h2>
         

@@ -651,7 +651,9 @@ exports.confirmPayment = async (req, res) => {
 
     // Validate payment amount if provided
     if (amount !== undefined) {
-      const expectedAmount = order.paymentAmount || order.actualTotal || order.estimatedTotal;
+      // estimatedTotal no longer exists on the Order model (at-intake flow,
+      // PR 4/7) — the sanity check works from paymentAmount/actualTotal.
+      const expectedAmount = order.paymentAmount || order.actualTotal;
 
       // Check if amount is way off (more than 100% difference)
       if (Math.abs(amount - expectedAmount) > expectedAmount) {
@@ -677,10 +679,6 @@ exports.confirmPayment = async (req, res) => {
     order.paymentNotes = `Customer confirmed payment via ${paymentMethod}. Details: ${paymentDetails || 'None provided'}. Awaiting manual verification.`;
     order.paymentMethod = paymentMethod || 'pending';
     await order.save();
-
-    // Immediately escalate to admin for manual verification
-    const paymentVerificationJob = require('../jobs/paymentVerificationJob');
-    await paymentVerificationJob.escalateToAdmin(order);
 
     // Also trigger an immediate payment check
     const paymentEmailScanner = require('../services/paymentEmailScanner');
@@ -708,6 +706,58 @@ exports.confirmPayment = async (req, res) => {
     });
   }
 };
+
+/**
+ * GET /api/v1/orders/held — held-at-store list (spec §5).
+ * RBAC (spec §9): admin/administrator/operator see all; affiliate sees own;
+ * customers are rejected at the route (checkRole).
+ */
+exports.getHeldOrders = ControllerHelpers.asyncWrapper(async (req, res) => {
+  const filter = { status: 'processed', heldAtStore: true };
+  if (req.user.role === 'affiliate') {
+    filter.affiliateId = req.user.affiliateId; // own only — ignore query params
+  }
+  const orders = await Order.find(filter).sort({ processedAt: 1 });
+  return ControllerHelpers.sendSuccess(res, { orders }, 'Held orders retrieved');
+});
+
+/**
+ * POST /api/v1/orders/:orderId/resend-payment-request — admin re-send of the
+ * payment request using the STORED links/QRs (never regenerated, spec §6.5),
+ * resetting the reminder clock so the cadence restarts.
+ */
+exports.resendPaymentRequest = ControllerHelpers.asyncWrapper(async (req, res) => {
+  const order = await Order.findOne({ orderId: req.params.orderId });
+  if (!order) return ControllerHelpers.sendError(res, 'Order not found', 404);
+  if (order.paymentStatus === 'verified') {
+    return ControllerHelpers.sendError(res, 'Order is already paid', 400);
+  }
+  if (!order.paymentLinks || !order.paymentLinks.venmo) {
+    return ControllerHelpers.sendError(res, 'Order has no stored payment links', 400);
+  }
+
+  const customer = await Customer.findOne({ customerId: order.customerId });
+  if (!customer) return ControllerHelpers.sendError(res, 'Customer not found', 404);
+
+  await emailService.sendV2PaymentRequest({
+    customer,
+    order,
+    paymentAmount: order.paymentAmount,
+    paymentLinks: order.paymentLinks,
+    qrCodes: order.paymentQRCodes
+  });
+
+  // Reset the reminder clock (spec §5): count back to zero, cadence restarts
+  // from now, escalation cleared so reminders resume. holdNoticeSentAt is
+  // deliberately NOT cleared — the come-to-store notice is one-time forever.
+  order.paymentReminderCount = 0;
+  order.paymentLastReminderAt = new Date();
+  order.paymentEscalated = false;
+  await order.save();
+
+  logger.info('Payment request re-sent', { orderId: order.orderId, by: req.user.id });
+  return ControllerHelpers.sendSuccess(res, { orderId: order.orderId }, 'Payment request re-sent');
+});
 
 /**
  * Manual payment verification by admin

@@ -297,20 +297,20 @@ describe('V2 Payment Flow Integration Tests', () => {
   });
 
   describe('Payment Reminder System', () => {
-    it('should send reminder after 30 minutes', async () => {
+    it('should send the first reminder once the 60-minute interval elapses (PR 8 time-based cadence)', async () => {
       // Setup test scenario
       const { customer, affiliate } = await setupV2PaymentScenario();
       
-      // Create an order with payment pending for 30+ minutes
+      // Create an order with payment pending past the reminder interval
       const testOrder = await createTestOrder({
         customerId: customer.customerId,
         affiliateId: affiliate.affiliateId,
         orderId: 'TEST-REM-001',
         actualWeight: 20,
         paymentStatus: 'awaiting',
-        paymentRequestedAt: new Date(Date.now() - 31 * 60000),
+        paymentRequestedAt: new Date(Date.now() - 61 * 60000),
         paymentReminderCount: 0,
-        paymentCheckAttempts: 6,  // 6 attempts = 30 minutes at 5-minute intervals
+        paymentCheckAttempts: 6,  // detection counter — irrelevant to reminders (decoupled in PR 8)
         status: 'in_progress'
       });
 

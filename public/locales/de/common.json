@@ -1265,6 +1265,17 @@
       "viewDetails": "Details anzeigen"
     }
   },
+  "payment": {
+    "holdNotice": {
+      "subject": "Handlung erforderlich: Holen Sie Ihre Wäsche im Geschäft ab",
+      "heading": "Bitte holen Sie Ihre Wäsche im Geschäft ab",
+      "body": "Wir konnten die Zahlung für Ihre Bestellung nicht bestätigen, daher wird Ihre saubere Wäsche sicher im Geschäft aufbewahrt. Die Erinnerungen wurden gestoppt. Kommen Sie vorbei, bezahlen Sie und holen Sie Ihre Tasche ab, wann es Ihnen passt.",
+      "amountDue": "Fälliger Betrag",
+      "orderNumber": "Bestellnummer",
+      "storeContact": "Adresse des Geschäfts",
+      "cta": "Im Geschäft bezahlen & abholen"
+    }
+  },
   "emails": {
     "greeting": "Hallo {{name}},",
     "footer": "Vielen Dank, dass Sie sich für WaveMAX Laundry Services entschieden haben.",
