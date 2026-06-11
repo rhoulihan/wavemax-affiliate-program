@@ -827,12 +827,12 @@ One concern per PR, ≤500-line diffs, tests green at every merge (deletions pai
 - [x] PR 1 — V1 Paygistix removed; CSP scrubbed; suite green
 - [x] PR 2 — scheduling / Pickup Now / BetaRequest / `?affid` removed
 - [x] PR 3 — SystemConfig keys seeded; legacy keys retired; `laundry_bag_fee` deleted
-- [ ] PR 4 — order enum + `orderStateMachine` + gate helper; transition tests pass
-- [ ] PR 5 — `AffiliateInvite` + invite flow + invite-bound registration
-- [ ] PR 6 — `Bag` + mint/issue/label + claim flow + `/claim` page (both maps + `excludedRoutes`)
+- [x] PR 4 — order enum + `orderStateMachine` + gate helper; transition tests pass
+- [x] PR 5 — `AffiliateInvite` + invite flow + invite-bound registration
+- [x] PR 6 — `Bag` + mint/issue/label + claim flow + `/claim` page (both maps + `excludedRoutes`)
 - [x] PR 7 — operator intake creates the order (one bag = one order, idempotent)
-- [ ] PR 8 — payment retune (60/8, come-to-store, held-at-store, escalated not failed)
-- [ ] PR 9 — advance/scan-out + delivery (customer PIN / vendor code) + re-intake (operator code) on the bag URL; kiosk re-pointed; three role codes wired
+- [x] PR 8 — payment retune (60/8, come-to-store, held-at-store, escalated not failed)
+- [x] PR 9 — advance/scan-out + delivery (customer PIN / vendor code) + re-intake (operator code) on the bag URL; kiosk re-pointed; three role codes wired
 - [ ] PR 10 — W-9 upload/encrypted-storage/review + `multer` + payment-lock integration
 - [ ] PR 11 — all 4 languages shipped; new pages measured mobile + desktop
 
