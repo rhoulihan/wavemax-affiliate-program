@@ -1,4 +1,22 @@
 {
+  "affiliateDashboard": {
+    "deliveryCode": {
+      "title": "Código de entrega",
+      "current": "Tu código de entrega está configurado",
+      "reset": "Restablecer código de entrega",
+      "resetConfirm": "¿Restablecer tu código de entrega? El código anterior deja de funcionar de inmediato.",
+      "shownOnceNote": "Tu nuevo código se muestra solo una vez — guárdalo en un lugar seguro:"
+    },
+    "deliverHelp": "Para entregar o consultar una bolsa, escanea el código QR de la bolsa con la cámara de tu teléfono."
+  },
+  "customerDashboard": {
+    "deliveryPin": {
+      "title": "PIN de entrega",
+      "current": "Tu PIN de entrega está configurado",
+      "reset": "Restablecer PIN de entrega",
+      "shownOnceNote": "Tu nuevo PIN se muestra solo una vez. También se incluye en cada correo \"en camino\":"
+    }
+  },
   "claim": {
     "title": "Reclama tu bolsa de lavandería",
     "subtitle": "Te estás registrando con",

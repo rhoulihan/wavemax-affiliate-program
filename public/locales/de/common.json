@@ -1,4 +1,22 @@
 {
+  "affiliateDashboard": {
+    "deliveryCode": {
+      "title": "Liefercode",
+      "current": "Ihr Liefercode ist eingerichtet",
+      "reset": "Liefercode zurücksetzen",
+      "resetConfirm": "Liefercode zurücksetzen? Der alte Code funktioniert sofort nicht mehr.",
+      "shownOnceNote": "Ihr neuer Code wird nur einmal angezeigt — bewahren Sie ihn sicher auf:"
+    },
+    "deliverHelp": "Um eine Tasche zuzustellen oder zu prüfen, scannen Sie den QR-Code der Tasche mit Ihrer Handykamera."
+  },
+  "customerDashboard": {
+    "deliveryPin": {
+      "title": "Liefer-PIN",
+      "current": "Ihre Liefer-PIN ist eingerichtet",
+      "reset": "Liefer-PIN zurücksetzen",
+      "shownOnceNote": "Ihre neue PIN wird nur einmal angezeigt. Sie ist außerdem in jeder \"unterwegs\"-E-Mail enthalten:"
+    }
+  },
   "claim": {
     "title": "Wäschebeutel registrieren",
     "subtitle": "Sie registrieren sich bei",

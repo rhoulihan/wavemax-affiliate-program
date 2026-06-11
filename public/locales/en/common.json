@@ -1,4 +1,22 @@
 {
+  "affiliateDashboard": {
+    "deliveryCode": {
+      "title": "Delivery code",
+      "current": "Your delivery code is set",
+      "reset": "Reset delivery code",
+      "resetConfirm": "Reset your delivery code? The old code stops working immediately.",
+      "shownOnceNote": "Your new code is shown only once — store it somewhere safe:"
+    },
+    "deliverHelp": "To deliver or check a bag, scan the bag's QR code with your phone camera."
+  },
+  "customerDashboard": {
+    "deliveryPin": {
+      "title": "Delivery PIN",
+      "current": "Your delivery PIN is set",
+      "reset": "Reset delivery PIN",
+      "shownOnceNote": "Your new PIN is shown only once. It is also included in each \"on the way\" email:"
+    }
+  },
   "claim": {
     "title": "Claim your laundry bag",
     "subtitle": "You're signing up with",

@@ -106,6 +106,9 @@ async function initializeDashboard() {
       });
     }
 
+    // PR 9: delivery PIN card
+    initDeliveryPinCard(customerId);
+
     // Load dashboard data
     await loadDashboardData();
 
@@ -621,6 +624,36 @@ async function deleteAllData() {
     console.error('Delete error:', error);
     alert('An error occurred while deleting data');
   }
+}
+
+// ---- PR 9: delivery PIN card -----------------------------------------------
+async function initDeliveryPinCard(customerId) {
+  const btn = document.getElementById('delivery-pin-reset-btn');
+  if (!btn) return;
+  btn.addEventListener('click', async () => {
+    const token = localStorage.getItem('customerToken');
+    const authenticatedFetch = window.CsrfUtils ? window.CsrfUtils.createAuthenticatedFetch(() => token) : fetch;
+    const t = (key, fallback) => {
+      if (window.i18n && typeof window.i18n.t === 'function') {
+        const v = window.i18n.t(key);
+        if (v && v !== key) return v;
+      }
+      return fallback;
+    };
+    const res = await authenticatedFetch(`/api/v1/customers/${customerId}/delivery-pin/reset`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({})
+    });
+    if (res.ok) {
+      const data = await res.json();
+      const out = document.getElementById('delivery-pin-result');
+      const note = t('customerDashboard.deliveryPin.shownOnceNote',
+        'Your new PIN is shown only once. It is also included in each "on the way" email:');
+      out.textContent = `${note} ${data.deliveryPin}`;
+      out.hidden = false;
+    }
+  });
 }
 
 // Expose necessary functions to window
