@@ -6,6 +6,7 @@ const Affiliate = require('../models/Affiliate');
 const Customer = require('../models/Customer');
 const SystemConfig = require('../models/SystemConfig');
 const bagService = require('../modules/bags/bagService');
+const { getOpenOrderContext } = require('../modules/orders/openOrderContext');
 const roleCodes = require('../utils/roleCodes');
 
 class ClaimError extends Error {
@@ -38,9 +39,16 @@ async function resolveClaimToken(bagToken) {
     return { state: 'claimable', bag, affiliate };
   }
 
-  // outcome === 'claimed' — order context arrives with PR 7/9:
-  // order: { status, awaitingDelivery } (awaitingDelivery true iff picked_up)
-  return { state: 'claimed', bag, order: null };
+  // outcome === 'claimed' — PR 9: same open-order context the bags resolver
+  // returns (PR 7's helper). order: { status, awaitingDelivery, nextAction },
+  // PII-free; awaitingDelivery true iff picked_up.
+  const ctx = await getOpenOrderContext(bag.bagId);
+  return {
+    state: 'claimed',
+    bag,
+    nextAction: ctx.nextAction,
+    ...(ctx.order ? { order: ctx.order } : {})
+  };
 }
 
 /**

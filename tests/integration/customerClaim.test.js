@@ -67,13 +67,15 @@ describe('Customer claim', () => {
       expect(JSON.stringify(res.body)).not.toContain(affiliate.email);
     });
 
-    it("returns 'claimed' with a null order slot and NO customer PII", async () => {
+    it("returns 'claimed' with no order context (no open order) and NO customer PII", async () => {
       const token = await issuedBag(affiliate);
       await bagService.claim({ token, customerId: 'CUST-existing' });
       const res = await request(app).get(`/api/v1/customers/claim/${token}`);
       expect(res.status).toBe(200);
       expect(res.body.state).toBe('claimed');
-      expect(res.body.order).toBeNull();
+      // PR 9: the order slot carries open-order context; with no open order
+      // it is absent (falsy) — full shape pinned in bagResolveContext.test.js.
+      expect(res.body.order).toBeFalsy();
       expect(JSON.stringify(res.body)).not.toContain('CUST-existing');
     });
 
