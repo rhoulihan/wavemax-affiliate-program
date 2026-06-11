@@ -9,6 +9,16 @@ const Administrator = require('../../server/models/Administrator');
 const Operator = require('../../server/models/Operator');
 const { hashPassword } = require('../../server/utils/encryption');
 const { getCsrfToken, createAgent } = require('../helpers/csrfHelper');
+const bagService = require('../../server/modules/bags/bagService');
+
+// Claim-based registration: each test needs its own issued bag (a bag claims once).
+async function issuedBagToken(affiliate) {
+  const { batchId, bags } = await bagService.mintBatch({
+    affiliateId: affiliate.affiliateId, quantity: 1, adminId: affiliate._id
+  });
+  await bagService.issueBatch({ batchId, adminId: affiliate._id });
+  return bags[0].token;
+}
 
 describe('Password Validation Integration Tests', () => {
   let agent;
@@ -292,12 +302,12 @@ describe('Password Validation Integration Tests', () => {
         address: '456 Customer St',
         city: 'Austin',
         state: 'TX',
-        zipCode: '78701',
-        affiliateId: testAffiliate.affiliateId
+        zipCode: '78701'
       };
 
+      const bagToken = await issuedBagToken(testAffiliate);
       const response = await agent
-        .post('/api/v1/customers/register')
+        .post(`/api/v1/customers/claim/${bagToken}/register`)
         .set('x-csrf-token', csrfToken)
         .send(customerData);
 
@@ -346,12 +356,12 @@ describe('Password Validation Integration Tests', () => {
         address: '456 Customer St',
         city: 'Austin',
         state: 'TX',
-        zipCode: '78701',
-        affiliateId: testAffiliate.affiliateId
+        zipCode: '78701'
       };
 
+      const bagToken = await issuedBagToken(testAffiliate);
       const response = await agent
-        .post('/api/v1/customers/register')
+        .post(`/api/v1/customers/claim/${bagToken}/register`)
         .set('x-csrf-token', csrfToken)
         .send(customerData);
 
