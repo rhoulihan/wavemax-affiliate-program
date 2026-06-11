@@ -17,6 +17,8 @@ const logger = require('../utils/logger');
 const inviteService = require('../modules/onboarding/inviteService');
 const { InviteError } = inviteService;
 const { logAuditEvent, AuditEvents } = require('../utils/auditLogger');
+const SystemConfig = require('../models/SystemConfig');
+const roleCodes = require('../utils/roleCodes');
 
 /**
  * Register a new affiliate — INVITE-BOUND (spec §6.2).
@@ -134,6 +136,12 @@ exports.registerAffiliate = async (req, res) => {
       // The encryption middleware will handle this automatically
     }
 
+    // PR 9: provision the vendor delivery code at invited registration (§4.6).
+    const deliveryCodeLength = await SystemConfig.getValue('affiliate_delivery_code_length', 6);
+    const deliveryCode = roleCodes.generateCode(deliveryCodeLength);
+    newAffiliate.affiliateDeliveryCodeHash = roleCodes.hashCode(deliveryCode);
+    newAffiliate.affiliateDeliveryCodeSetAt = new Date();
+
     await newAffiliate.save();
 
     // Atomic single-use consume. A null result means another registration
@@ -166,6 +174,7 @@ exports.registerAffiliate = async (req, res) => {
     res.status(201).json({
       success: true,
       affiliateId: newAffiliate.affiliateId,
+      deliveryCode, // shown exactly once
       message: 'Affiliate registered successfully!'
     });
   } catch (error) {
@@ -1048,5 +1057,51 @@ exports.getPublicAffiliateInfoById = async (req, res) => {
     });
   }
 };
+
+function canManageAffiliateCode(req, affiliateId) {
+  if (req.user.role === 'administrator' || req.user.role === 'admin') return true;
+  return req.user.role === 'affiliate' && req.user.affiliateId === affiliateId;
+}
+
+/**
+ * GET /api/v1/affiliates/:affiliateId/delivery-code — status (self/admin).
+ */
+exports.getDeliveryCodeStatus = ControllerHelpers.asyncWrapper(async (req, res) => {
+  const { affiliateId } = req.params;
+  if (!canManageAffiliateCode(req, affiliateId)) {
+    return ControllerHelpers.sendError(res, 'Unauthorized', 403);
+  }
+  const affiliate = await Affiliate.findOne({ affiliateId }).select('+affiliateDeliveryCodeHash');
+  if (!affiliate) return ControllerHelpers.sendError(res, 'Affiliate not found', 404);
+  ControllerHelpers.sendSuccess(res, {
+    deliveryCodeSet: !!affiliate.affiliateDeliveryCodeHash,
+    deliveryCodeSetAt: affiliate.affiliateDeliveryCodeSetAt || null
+  }, 'Delivery code status');
+});
+
+/**
+ * POST /api/v1/affiliates/:affiliateId/delivery-code/reset — regenerate
+ * (self/admin, CSRF). Returns the new plaintext code exactly once.
+ */
+exports.resetDeliveryCode = ControllerHelpers.asyncWrapper(async (req, res) => {
+  const { affiliateId } = req.params;
+  if (!canManageAffiliateCode(req, affiliateId)) {
+    return ControllerHelpers.sendError(res, 'Unauthorized', 403);
+  }
+  const affiliate = await Affiliate.findOne({ affiliateId });
+  if (!affiliate) return ControllerHelpers.sendError(res, 'Affiliate not found', 404);
+
+  const codeLength = await SystemConfig.getValue('affiliate_delivery_code_length', 6);
+  const deliveryCode = roleCodes.generateCode(codeLength);
+  affiliate.affiliateDeliveryCodeHash = roleCodes.hashCode(deliveryCode);
+  affiliate.affiliateDeliveryCodeSetAt = new Date();
+  await affiliate.save();
+
+  logAuditEvent(AuditEvents.DELIVERY_CODE_RESET, { affiliateId, userId: req.user.id }, req);
+  ControllerHelpers.sendSuccess(res, {
+    deliveryCode,
+    deliveryCodeSetAt: affiliate.affiliateDeliveryCodeSetAt
+  }, 'Delivery code reset');
+});
 
 module.exports = exports;

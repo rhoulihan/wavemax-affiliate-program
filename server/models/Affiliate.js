@@ -36,6 +36,12 @@ const affiliateSchema = new mongoose.Schema({
     min: 0,
     max: 50
   },
+  // Vendor (affiliate) delivery code — short secret used to confirm door
+  // deliveries on the overloaded claim URL (spec §4.6/§6.6). Verified only
+  // against THIS order's affiliate. "pbkdf2hash:salt" via utils/roleCodes.
+  // NOT the login password.
+  affiliateDeliveryCodeHash: { type: String, select: false },
+  affiliateDeliveryCodeSetAt: Date,
   username: { type: String, required: true, unique: true },
   passwordSalt: {
     type: String,
