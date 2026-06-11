@@ -202,4 +202,40 @@ describe('Affiliate invites API', () => {
       expect(res.status).toBe(409);
     });
   });
+
+  describe('GET /api/v1/affiliate-invites/:token/validate (public)', () => {
+    test('valid pending token → 200 { valid, email, prefill }, no auth needed', async () => {
+      const { raw } = await seedInvite({ email: 'valid@example.com' });
+      const res = await agent.get(`/api/v1/affiliate-invites/${raw}/validate`);
+
+      expect(res.status).toBe(200);
+      expect(res.body.valid).toBe(true);
+      expect(res.body.email).toBe('valid@example.com');
+      expect(res.body.prefill).toMatchObject({ firstName: 'Ina', lastName: 'Vite' });
+    });
+
+    test('expired token → 410 reason "expired"', async () => {
+      const { raw } = await seedInvite({ expiresAt: new Date(Date.now() - 1000) });
+      const res = await agent.get(`/api/v1/affiliate-invites/${raw}/validate`);
+      expect(res.status).toBe(410);
+      expect(res.body).toEqual({ success: false, valid: false, reason: 'expired' });
+    });
+
+    test('unknown / revoked / accepted tokens all return the identical generic 410 (anti-enumeration)', async () => {
+      const { raw: revokedRaw } = await seedInvite({ email: 'r@example.com', status: 'revoked' });
+      const { raw: acceptedRaw } = await seedInvite({ email: 'a@example.com', status: 'accepted' });
+      const unknownRaw = 'ab'.repeat(32);
+
+      const responses = await Promise.all([
+        agent.get(`/api/v1/affiliate-invites/${unknownRaw}/validate`),
+        agent.get(`/api/v1/affiliate-invites/${revokedRaw}/validate`),
+        agent.get(`/api/v1/affiliate-invites/${acceptedRaw}/validate`)
+      ]);
+
+      for (const res of responses) {
+        expect(res.status).toBe(410);
+        expect(res.body).toEqual({ success: false, valid: false, reason: 'invalid' });
+      }
+    });
+  });
 });
