@@ -54,7 +54,8 @@ exports.issueBatch = asyncWrapper(async (req, res) => {
  * Canonical scan-context resolver (spec §5). Anti-enumeration: unknown,
  * minted, and retired tokens share one generic 404. Never returns customer
  * PII; `customerId` only on 'claimed' to drive login routing. The `order`
- * slot is the designed shape populated by PR 7/9 — null until then.
+ * slot is populated HERE for open orders ({status, awaitingDelivery,
+ * nextAction}); the customer claim resolver gains the same context in PR 9.
  */
 exports.resolveBag = asyncWrapper(async (req, res) => {
   const resolved = await bagService.resolveByToken(req.params.token);
@@ -69,7 +70,12 @@ exports.resolveBag = asyncWrapper(async (req, res) => {
     return sendSuccess(res, { outcome, affiliate: { name }, order: null });
   }
   // claimed
-  return sendSuccess(res, { outcome, customerId: bag.customerId, order: null });
+  return sendSuccess(res, {
+    outcome,
+    customerId: bag.customerId,
+    nextAction: resolved.nextAction,
+    order: resolved.order || null
+  });
 });
 
 /** GET /api/v1/bags — affiliate (own) / administrator */
