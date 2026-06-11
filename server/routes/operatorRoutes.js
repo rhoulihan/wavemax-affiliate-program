@@ -46,7 +46,7 @@ router.patch('/:id', authenticate, async (req, res, next) => {
 });
 router.delete('/:id', checkRole(['administrator']), checkAdminPermission(['operators.delete']), administratorController.deleteOperator);
 router.post('/:id/reset-password', checkRole(['administrator']), checkAdminPermission(['operators.update']), administratorController.resetOperatorPassword);
-router.post('/:id/reset-pin', checkRole(['administrator']), checkAdminPermission(['operators.update']), administratorController.resetOperatorPin);
+router.post('/:operatorId/scan-code/reset', checkRole(['administrator']), checkAdminPermission(['operators.update']), administratorController.resetOperatorScanCode);
 router.patch('/:id/stats', checkRole(['administrator']), checkAdminPermission(['operators.update']), administratorController.updateOperatorStats);
 
 // Operator-specific routes (require operator role)

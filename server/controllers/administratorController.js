@@ -245,7 +245,7 @@ exports.createOperator = async (req, res) => {
       });
     }
 
-    const operator = await operatorAdminService.createOperator({
+    const { scanCode, ...operator } = await operatorAdminService.createOperator({
       payload: req.body,
       adminId: req.user.id,
       req
@@ -253,7 +253,8 @@ exports.createOperator = async (req, res) => {
     res.status(201).json({
       success: true,
       message: 'Operator created successfully',
-      operator
+      operator,
+      scanCode
     });
   } catch (err) {
     if (err.isOperatorAdminError) {
@@ -628,24 +629,24 @@ exports.deleteOperator = async (req, res) => {
 };
 
 /**
- * Reset operator PIN/password
+ * Reset operator scan code (admin). Returns the new code exactly once.
  */
-exports.resetOperatorPin = async (req, res) => {
+exports.resetOperatorScanCode = async (req, res) => {
   try {
-    await operatorAdminService.resetOperatorPin({
-      id: req.params.id,
-      newPassword: req.body.newPassword,
-      adminId: req.user.id
+    const result = await operatorAdminService.resetOperatorScanCode({
+      id: req.params.operatorId,
+      adminId: req.user.id,
+      req
     });
-    res.json({ success: true, message: 'PIN reset successfully' });
+    res.json({ success: true, message: 'Scan code reset successfully', ...result });
   } catch (err) {
     if (err.isOperatorAdminError) {
       return res.status(err.status).json({ success: false, message: err.message });
     }
-    logger.error('Error resetting operator PIN:', err);
+    logger.error('Error resetting operator scan code:', err);
     res.status(500).json({
       success: false,
-      message: 'An error occurred while resetting the PIN'
+      message: 'An error occurred while resetting the scan code'
     });
   }
 };

@@ -158,7 +158,7 @@ const CSRF_CONFIG = {
     // Admin operations
     '/api/v1/administrators/operators',
     '/api/v1/administrators/operators/:operatorId',
-    '/api/v1/administrators/operators/:operatorId/reset-pin',
+    '/api/v1/operators/:operatorId/scan-code/reset',
     '/api/v1/administrators/config',
 
     // Operator critical actions

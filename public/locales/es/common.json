@@ -1410,5 +1410,13 @@
       "message": "Tu solicitud de eliminación de datos está siendo procesada. Por favor revisa más tarde para actualizaciones.",
       "delayed": "Nota: Esta solicitud ha estado pendiente por más de 24 horas. Si tienes preocupaciones, por favor contacta soporte."
     }
+  },
+  "admin": {
+    "operators": {
+      "scanCode": {
+        "reset": "Restablecer código de escaneo",
+        "shownOnceNote": "Nuevo código de escaneo (se muestra solo una vez):"
+      }
+    }
   }
 }

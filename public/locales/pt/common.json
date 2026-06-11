@@ -1362,5 +1362,13 @@
       "message": "Sua solicitação de exclusão de dados está sendo processada. Verifique novamente mais tarde para atualizações.",
       "delayed": "Nota: Esta solicitação está pendente há mais de 24 horas. Se você tiver preocupações, entre em contato com o suporte."
     }
+  },
+  "admin": {
+    "operators": {
+      "scanCode": {
+        "reset": "Redefinir código de escaneamento",
+        "shownOnceNote": "Novo código de escaneamento (exibido apenas uma vez):"
+      }
+    }
   }
 }

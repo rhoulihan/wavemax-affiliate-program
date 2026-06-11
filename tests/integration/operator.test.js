@@ -747,7 +747,7 @@ describe('Operator Integration Tests', () => {
     });
   });
 
-  describe('POST /api/v1/operators/:id/reset-pin', () => {
+  describe('POST /api/v1/operators/:operatorId/scan-code/reset', () => {
     let targetOperator;
 
     beforeEach(async () => {
@@ -762,44 +762,32 @@ describe('Operator Integration Tests', () => {
       });
     });
 
-    it('should reset operator PIN/password', async () => {
+    it('should reset the operator scan code and return it once', async () => {
       const response = await adminAgent
-        .post(`/api/v1/operators/${targetOperator._id}/reset-pin`)
+        .post(`/api/v1/operators/${targetOperator._id}/scan-code/reset`)
         .set('Authorization', `Bearer ${adminToken}`)
         .set('x-csrf-token', adminCsrfToken)
-        .send({
-          newPassword: 'NewPin417!'
-        });
+        .send({});
 
       expect(response.status).toBe(200);
       expect(response.body.success).toBe(true);
-      expect(response.body.message).toContain('PIN reset successfully');
-
-      // Verify PIN was reset successfully
-      // The response confirms the reset
-      expect(response.body.success).toBe(true);
+      expect(response.body.message).toContain('Scan code reset successfully');
+      expect(response.body.scanCode).toMatch(/^[ABCDEFGHJKMNPQRSTUVWXYZ23456789]{8}$/);
     });
 
-    it('should clear login attempts on PIN reset', async () => {
-      // Lock the account
-      targetOperator.loginAttempts = 5;
-      targetOperator.lockUntil = new Date(Date.now() + 30 * 60 * 1000);
-      await targetOperator.save();
-
+    it('should persist a new scanCodeHmac matching the returned code', async () => {
       const response = await adminAgent
-        .post(`/api/v1/operators/${targetOperator._id}/reset-pin`)
+        .post(`/api/v1/operators/${targetOperator._id}/scan-code/reset`)
         .set('Authorization', `Bearer ${adminToken}`)
         .set('x-csrf-token', adminCsrfToken)
-        .send({
-          newPassword: 'NewPin417!'
-        });
+        .send({});
 
       expect(response.status).toBe(200);
 
-      // Verify account is unlocked
+      const roleCodes = require('../../server/utils/roleCodes');
       const updatedOperator = await Operator.findById(targetOperator._id);
-      expect(updatedOperator.loginAttempts).toBe(0);
-      expect(updatedOperator.lockUntil).toBeUndefined();
+      expect(updatedOperator.scanCodeHmac).toBe(roleCodes.hmacCode(response.body.scanCode));
+      expect(updatedOperator.scanCodeSetAt).toBeInstanceOf(Date);
     });
   });
 

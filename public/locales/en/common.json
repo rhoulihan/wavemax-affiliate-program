@@ -1414,5 +1414,13 @@
       "message": "Your data deletion request is being processed. Please check back later for updates.",
       "delayed": "Note: This request has been pending for over 24 hours. If you have concerns, please contact support."
     }
+  },
+  "admin": {
+    "operators": {
+      "scanCode": {
+        "reset": "Reset scan code",
+        "shownOnceNote": "New scan code (shown only once):"
+      }
+    }
   }
 }

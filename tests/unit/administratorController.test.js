@@ -179,6 +179,7 @@ jest.mock('../../server/models/Transaction', () => ({
 }));
 
 jest.mock('../../server/utils/auditLogger');
+jest.mock('../../server/utils/roleCodes');
 jest.mock('../../server/utils/emailService', () => ({
   sendPasswordResetEmail: jest.fn(),
   sendAffiliateWelcomeEmail: jest.fn(),
@@ -331,7 +332,13 @@ describe('Administrator Controller', () => {
     });
 
     fieldFilter.mockImplementation((data) => data);
-    
+
+    // Default role-code mocks (crypto is fully mocked in this file)
+    const roleCodes = require('../../server/utils/roleCodes');
+    roleCodes.generateCode.mockReturnValue('ABCDEFGH');
+    roleCodes.hmacCode.mockReturnValue('a'.repeat(64));
+    SystemConfig.getValue.mockResolvedValue(8);
+
     // Default password validation to pass
     validatePasswordStrength.mockReturnValue({ success: true });
     
@@ -595,7 +602,8 @@ describe('Administrator Controller', () => {
       expect(res.json).toHaveBeenCalledWith({
         success: true,
         message: 'Operator created successfully',
-        operator: expect.any(Object)
+        operator: expect.any(Object),
+        scanCode: expect.any(String) // shown exactly once at creation (PR 9)
       });
     });
 
@@ -1625,42 +1633,39 @@ describe('Administrator Controller', () => {
     });
   });
 
-  describe('resetOperatorPin', () => {
-    test('should reset operator PIN', async () => {
-      req.params.id = 'op-id';
-      req.body = { newPassword: 'NewPin1234!' };
+  describe('resetOperatorScanCode', () => {
+    test('should reset operator scan code and return it once', async () => {
+      req.params.operatorId = 'op-id';
+      req.body = {};
 
       const mockOperator = {
         _id: 'op-id',
         operatorId: 'OP001',
         email: 'operator@example.com',
-        password: undefined,
-        loginAttempts: 5,
-        lockUntil: new Date(Date.now() + 3600000),
         save: jest.fn().mockResolvedValue(true)
       };
 
       Operator.findById.mockResolvedValue(mockOperator);
 
-      await administratorController.resetOperatorPin(req, res, next);
+      await administratorController.resetOperatorScanCode(req, res, next);
 
-      expect(mockOperator.password).toBe('NewPin1234!');
-      expect(mockOperator.loginAttempts).toBe(0);
-      expect(mockOperator.lockUntil).toBeUndefined();
+      expect(mockOperator.scanCodeHmac).toBe('a'.repeat(64));
+      expect(mockOperator.scanCodeSetAt).toBeInstanceOf(Date);
       expect(mockOperator.save).toHaveBeenCalled();
-      expect(res.json).toHaveBeenCalledWith({
+      expect(res.json).toHaveBeenCalledWith(expect.objectContaining({
         success: true,
-        message: 'PIN reset successfully'
-      });
+        message: 'Scan code reset successfully',
+        scanCode: 'ABCDEFGH'
+      }));
     });
 
     test('should handle operator not found', async () => {
-      req.params.id = 'op-id';
-      req.body = { newPassword: 'NewPin1234!' };
+      req.params.operatorId = 'op-id';
+      req.body = {};
 
       Operator.findById.mockResolvedValue(null);
 
-      await administratorController.resetOperatorPin(req, res, next);
+      await administratorController.resetOperatorScanCode(req, res, next);
 
       expect(res.status).toHaveBeenCalledWith(404);
       expect(res.json).toHaveBeenCalledWith({
@@ -1670,12 +1675,12 @@ describe('Administrator Controller', () => {
     });
 
     test('should handle errors', async () => {
-      req.params.id = 'op-id';
-      req.body = { newPassword: 'NewPin1234!' };
+      req.params.operatorId = 'op-id';
+      req.body = {};
 
       Operator.findById.mockRejectedValue(new Error('DB Error'));
 
-      await administratorController.resetOperatorPin(req, res, next);
+      await administratorController.resetOperatorScanCode(req, res, next);
 
       expect(res.status).toHaveBeenCalledWith(500);
       expect(res.json).toHaveBeenCalledWith(expect.objectContaining({

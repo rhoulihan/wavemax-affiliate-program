@@ -1427,5 +1427,13 @@
       "message": "Ihre Datenlöschungsanfrage wird bearbeitet. Bitte prüfen Sie später auf Updates.",
       "delayed": "Hinweis: Diese Anfrage ist seit über 24 Stunden ausstehend. Bei Bedenken wenden Sie sich bitte an den Support."
     }
+  },
+  "admin": {
+    "operators": {
+      "scanCode": {
+        "reset": "Scan-Code zurücksetzen",
+        "shownOnceNote": "Neuer Scan-Code (wird nur einmal angezeigt):"
+      }
+    }
   }
 }
