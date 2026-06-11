@@ -188,7 +188,22 @@ async function createOrderFromBag({ bagToken, weight, addOns, freshAddOnsFormPla
   });
 
   // 5. Save — pre-save computes actualTotal / paymentAmount / affiliateCommission.
-  await order.save();
+  // The partial unique index on open Order.bagId backstops the read-then-write
+  // open-order guard above: when two kiosks race the same bag, exactly one
+  // save wins and the loser's E11000 maps to the same clean 409.
+  try {
+    await order.save();
+  } catch (err) {
+    if (err && err.code === 11000 && /bagId/.test(err.message || '')) {
+      throw new IntakeError(
+        'order_already_open',
+        'An order is already open for this bag',
+        409,
+        { bagId: bag.bagId }
+      );
+    }
+    throw err;
+  }
 
   if (wdfCreditToApply !== 0) {
     customer.wdfCredit = 0;
