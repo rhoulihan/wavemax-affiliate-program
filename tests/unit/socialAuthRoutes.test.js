@@ -133,12 +133,12 @@ describe('Social Auth Routes - Simple Tests', () => {
     });
 
     app.post('/api/auth/customer/social/register', (req, res) => {
-      const requiredFields = ['socialToken', 'affiliateId', 'phone', 'address', 'city', 'state', 'zipCode', 'serviceFrequency'];
+      const requiredFields = ['socialToken', 'bagToken', 'phone', 'address', 'city', 'state', 'zipCode', 'serviceFrequency'];
       const errors = [];
 
       requiredFields.forEach(field => {
         if (!req.body[field]) {
-          const fieldName = field === 'affiliateId' ? 'Affiliate ID' :
+          const fieldName = field === 'bagToken' ? 'Bag token' :
             field === 'phone' ? 'Phone number' :
               field.charAt(0).toUpperCase() + field.slice(1);
           errors.push({ msg: `${fieldName} is required`, param: field });
@@ -449,7 +449,7 @@ describe('Social Auth Routes - Simple Tests', () => {
         .post('/api/auth/customer/social/register')
         .send({
           socialToken: 'valid-token',
-          affiliateId: 'AFF123',
+          bagToken: 'a'.repeat(32),
           phone: '123-456-7890',
           address: '123 Main St',
           city: 'Austin',
@@ -472,7 +472,7 @@ describe('Social Auth Routes - Simple Tests', () => {
 
       expect(response.status).toBe(400);
       expect(response.body.errors).toBeDefined();
-      expect(response.body.errors.some(err => err.msg === 'Affiliate ID is required')).toBe(true);
+      expect(response.body.errors.some(err => err.msg === 'Bag token is required')).toBe(true);
       expect(response.body.errors.some(err => err.msg === 'Phone number is required')).toBe(true);
     });
 
@@ -481,7 +481,7 @@ describe('Social Auth Routes - Simple Tests', () => {
         .post('/api/auth/customer/social/register')
         .send({
           socialToken: 'valid-token',
-          affiliateId: 'AFF123',
+          bagToken: 'a'.repeat(32),
           phone: '123-456-7890',
           address: '123 Main St',
           city: 'Austin',
