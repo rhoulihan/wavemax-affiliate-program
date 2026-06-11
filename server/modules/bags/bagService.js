@@ -99,8 +99,94 @@ async function issueBatch({ batchId, adminId, req = null }) {
   return { batchId, issued: result.modifiedCount };
 }
 
+/**
+ * Canonical scan resolver. Anti-enumeration: minted, retired, and unknown
+ * tokens all resolve to null — callers return one generic error for all
+ * three (spec §9). Returns { bag, outcome } where outcome is
+ * 'unclaimed' (issued) or 'claimed' (active).
+ */
+async function resolveByToken(token) {
+  if (!token || typeof token !== 'string') return null;
+  const bag = await Bag.findOne({ tokenHash: Bag.hashToken(token) });
+  if (!bag) return null;
+  if (bag.status === 'issued') return { bag, outcome: 'unclaimed' };
+  if (bag.status === 'active') return { bag, outcome: 'claimed' };
+  return null; // minted / retired — non-resolvable
+}
+
+/**
+ * Atomic claim (issued -> active). Returns the updated bag or null on race
+ * loss / non-issued status. Audit fires only on success.
+ */
+async function claim({ token, customerId, req = null }) {
+  const claimed = await Bag.claim(token, customerId);
+  if (claimed) {
+    logAuditEvent(AuditEvents.BAG_CLAIMED, {
+      bagId: claimed.bagId, customerId, affiliateId: claimed.affiliateId
+    }, req);
+  }
+  return claimed;
+}
+
+/**
+ * Operator intake resolution (consumed by PR 7's orderIntakeService).
+ * Resolves an ACTIVE bag by token, atomically increments the lifetime
+ * intake counters, and returns the denormalized link ids.
+ *
+ * NOTE for PR 7: the open-order check lives in createOrderFromBag, and MUST
+ * count only status NOT IN ['delivered','cancelled'] as open — a cancelled
+ * order never blocks re-intake (the bag itself stays 'active' on cancel).
+ */
+async function linkToOrderAtIntake({ token, operatorId }) {
+  if (!token || typeof token !== 'string') {
+    throw new BagError('bag_not_active', 409, 'Bag is not active');
+  }
+  const bag = await Bag.findOneAndUpdate(
+    { tokenHash: Bag.hashToken(token), status: 'active' },
+    { $inc: { orderCount: 1 }, $set: { lastIntakeAt: new Date() } },
+    { new: true }
+  );
+  if (!bag) {
+    throw new BagError('bag_not_active', 409, 'Bag is not active');
+  }
+  logger.info('Bag linked at intake', { bagId: bag.bagId, operatorId: String(operatorId) });
+  return { bag, customerId: bag.customerId, affiliateId: bag.affiliateId };
+}
+
+/**
+ * Paginated inventory listing for admin / affiliate dashboards.
+ * Never returns token or tokenHash — the raw token leaves the service only
+ * in the mint response (label printing).
+ */
+async function getInventory({ affiliateId, status, page = 1, limit = 50 } = {}) {
+  const filter = {};
+  if (affiliateId) filter.affiliateId = affiliateId;
+  if (status) filter.status = status;
+  const pageNum = Math.max(parseInt(page, 10) || 1, 1);
+  const pageSize = Math.min(Math.max(parseInt(limit, 10) || 50, 1), 200);
+  const [bags, total] = await Promise.all([
+    Bag.find(filter)
+      .select('-token -tokenHash')
+      .sort({ createdAt: -1 })
+      .skip((pageNum - 1) * pageSize)
+      .limit(pageSize),
+    Bag.countDocuments(filter)
+  ]);
+  return {
+    bags,
+    pagination: { total, page: pageNum, totalPages: Math.max(Math.ceil(total / pageSize), 1) }
+  };
+}
+
+// FUTURE (spec §6.1 — hooks only, do NOT implement this phase):
+//   reassign({ token, toCustomerId, adminId }), retire({ token, adminId, reason })
+
 module.exports = {
   BagError,
   mintBatch,
-  issueBatch
+  issueBatch,
+  resolveByToken,
+  claim,
+  linkToOrderAtIntake,
+  getInventory
 };

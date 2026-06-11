@@ -123,3 +123,105 @@ describe('bagService mint/issue', () => {
     });
   });
 });
+
+describe('bagService resolve/claim/link/inventory', () => {
+  let affiliate;
+  let token;
+  let batchId;
+
+  beforeEach(async () => {
+    await Bag.deleteMany({});
+    await Affiliate.deleteMany({});
+    affiliate = await createAffiliate('2');
+    const minted = await bagService.mintBatch({
+      affiliateId: affiliate.affiliateId, quantity: 2, adminId: affiliate._id
+    });
+    batchId = minted.batchId;
+    token = minted.bags[0].token;
+  });
+
+  describe('resolveByToken', () => {
+    it('returns null for an unknown token (anti-enumeration)', async () => {
+      expect(await bagService.resolveByToken('f'.repeat(32))).toBeNull();
+      expect(await bagService.resolveByToken('')).toBeNull();
+      expect(await bagService.resolveByToken(null)).toBeNull();
+    });
+
+    it('returns null for a minted (not yet issued) bag', async () => {
+      expect(await bagService.resolveByToken(token)).toBeNull();
+    });
+
+    it('returns outcome unclaimed for an issued bag', async () => {
+      await bagService.issueBatch({ batchId, adminId: affiliate._id });
+      const result = await bagService.resolveByToken(token);
+      expect(result.outcome).toBe('unclaimed');
+      expect(result.bag.affiliateId).toBe(affiliate.affiliateId);
+    });
+
+    it('returns outcome claimed for an active bag', async () => {
+      await bagService.issueBatch({ batchId, adminId: affiliate._id });
+      await bagService.claim({ token, customerId: 'CUST-1' });
+      const result = await bagService.resolveByToken(token);
+      expect(result.outcome).toBe('claimed');
+      expect(result.bag.customerId).toBe('CUST-1');
+    });
+  });
+
+  describe('claim', () => {
+    it('claims an issued bag and audits BAG_CLAIMED', async () => {
+      await bagService.issueBatch({ batchId, adminId: affiliate._id });
+      const claimed = await bagService.claim({ token, customerId: 'CUST-1' });
+      expect(claimed.status).toBe('active');
+      expect(logAuditEvent).toHaveBeenCalledWith(
+        AuditEvents.BAG_CLAIMED,
+        expect.objectContaining({ bagId: claimed.bagId, customerId: 'CUST-1' }),
+        null
+      );
+    });
+
+    it('returns null on race loss / non-issued bag (no audit)', async () => {
+      expect(await bagService.claim({ token, customerId: 'CUST-1' })).toBeNull(); // still minted
+    });
+  });
+
+  describe('linkToOrderAtIntake', () => {
+    it('resolves an active bag, returns ids, increments counters', async () => {
+      await bagService.issueBatch({ batchId, adminId: affiliate._id });
+      await bagService.claim({ token, customerId: 'CUST-1' });
+      const result = await bagService.linkToOrderAtIntake({ token, operatorId: 'op-1' });
+      expect(result.customerId).toBe('CUST-1');
+      expect(result.affiliateId).toBe(affiliate.affiliateId);
+      expect(result.bag.orderCount).toBe(1);
+      expect(result.bag.lastIntakeAt).toBeInstanceOf(Date);
+      const again = await bagService.linkToOrderAtIntake({ token, operatorId: 'op-1' });
+      expect(again.bag.orderCount).toBe(2);
+    });
+
+    it('throws bag_not_active 409 for issued (unclaimed) and unknown bags', async () => {
+      await bagService.issueBatch({ batchId, adminId: affiliate._id });
+      await expect(bagService.linkToOrderAtIntake({ token, operatorId: 'op-1' }))
+        .rejects.toMatchObject({ isBagError: true, code: 'bag_not_active', status: 409 });
+      await expect(bagService.linkToOrderAtIntake({ token: 'f'.repeat(32), operatorId: 'op-1' }))
+        .rejects.toMatchObject({ isBagError: true, code: 'bag_not_active', status: 409 });
+    });
+  });
+
+  describe('getInventory', () => {
+    it('filters by affiliate + status, paginates, and never leaks tokens', async () => {
+      await bagService.issueBatch({ batchId, adminId: affiliate._id });
+      const other = await createAffiliate('3');
+      await bagService.mintBatch({ affiliateId: other.affiliateId, quantity: 1, adminId: other._id });
+
+      const page = await bagService.getInventory({ affiliateId: affiliate.affiliateId, status: 'issued', page: 1 });
+      expect(page.bags).toHaveLength(2);
+      expect(page.pagination).toMatchObject({ total: 2, page: 1, totalPages: 1 });
+      for (const bag of page.bags) {
+        expect(bag.token).toBeUndefined();
+        expect(bag.tokenHash).toBeUndefined();
+      }
+
+      const all = await bagService.getInventory({});
+      expect(all.pagination.total).toBe(3);
+    });
+  });
+});
