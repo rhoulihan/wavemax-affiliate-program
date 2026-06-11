@@ -97,10 +97,8 @@ describe('Order API - Add-on Functionality Integration Tests', () => {
       const order = await Order.create({
         customerId: 'CUST_ADDON_001',
         affiliateId: 'AFF_ADDON_001',
-        pickupDate: '2026-01-27',
-        pickupTime: 'morning',
-        estimatedWeight: 25,
-        numberOfBags: 2,
+        bagId: 'BAG-addons-int-1',
+        actualWeight: 25,
         feeBreakdown: {
           numberOfBags: 2,
           minimumFee: 15,

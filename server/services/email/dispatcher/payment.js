@@ -210,12 +210,12 @@ exports.sendV2PaymentVerified = async (order, customer, paymentData) => {
       shortOrderId: order._id.toString().slice(-8).toUpperCase(),
       amount: (order.paymentAmount || order.actualTotal).toFixed(2),
       actualWeight: order.actualWeight,
-      numberOfBags: order.numberOfBags,
+      numberOfBags: 1,
       paymentMethod: order.paymentMethod,
       transactionId: order.paymentTransactionId || 'N/A',
       verifiedTime: new Date(order.paymentVerifiedAt).toLocaleString(),
-      isProcessing: order.status === 'processing',
-      subtotal: ((order.actualWeight || order.estimatedWeight) * (order.baseRate || 1.25)).toFixed(2),
+      isProcessing: order.status === 'in_progress',
+      subtotal: ((order.actualWeight || 0) * (order.baseRate || 1.25)).toFixed(2),
       addOnsTotal: order.addOnTotal ? order.addOnTotal.toFixed(2) : null
     };
     

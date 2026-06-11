@@ -201,12 +201,8 @@ describe('Affiliate API', () => {
       orderId: 'ORD001',
       customerId: 'CUST001',
       affiliateId: testAffiliate.affiliateId,
-      pickupDate: new Date('2025-05-26'),
-      pickupTime: 'morning',
-
-      status: 'complete',
-      estimatedWeight: 30,
-      numberOfBags: 2,
+      bagId: 'BAG-aff-1',
+      status: 'delivered',
       actualWeight: 23.5,
       baseRate: 1.89,
       feeBreakdown: {
@@ -223,12 +219,8 @@ describe('Affiliate API', () => {
       orderId: 'ORD002',
       customerId: 'CUST002',
       affiliateId: testAffiliate.affiliateId,
-      pickupDate: new Date('2025-05-26'),
-      pickupTime: 'afternoon',
-
-      status: 'processing',
-      estimatedWeight: 50,
-      numberOfBags: 3,
+      bagId: 'BAG-aff-2',
+      status: 'in_progress',
       baseRate: 1.89,
       feeBreakdown: {
         numberOfBags: 3,
@@ -320,13 +312,9 @@ describe('Affiliate API', () => {
     const testOrder = await Order.create({
       customerId: testCustomer.customerId,
       affiliateId: testAffiliate.affiliateId,
-      pickupDate: new Date(),
-      pickupTime: 'morning',
-
-      status: 'pending',
-      estimatedWeight: 30,
-      numberOfBags: 2,
-      deliveryFee: 20
+      bagId: 'BAG-aff-del-1',
+      status: 'in_progress',
+      feeBreakdown: { numberOfBags: 1, minimumFee: 25, perBagFee: 5, totalFee: 25, minimumApplied: true }
     });
 
 

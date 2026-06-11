@@ -185,59 +185,47 @@ describe('QuickBooks Export Integration Tests', () => {
         orderId: 'ORD-QB-001',
         customerId: testCustomers[0].customerId,
         affiliateId: testAffiliates[0].affiliateId,
-        pickupDate: new Date(baseDate.getTime() - 6 * 24 * 60 * 60 * 1000),
-        pickupTime: 'morning',
-        estimatedWeight: 15,
-        actualWeight: 15,
-        affiliateCommission: 1.50,  // Setting realistic commission for debugging
+        bagId: 'BAG-qb-1',
+        actualWeight: 15,        affiliateCommission: 1.50,  // Setting realistic commission for debugging
         baseRate: 1.00,
         actualTotal: 150.00,
-        status: 'complete',
-        completedAt: new Date(baseDate.getTime() - 5 * 24 * 60 * 60 * 1000) // 5 days ago
+        status: 'delivered',
+        deliveredAt: new Date(baseDate.getTime() - 5 * 24 * 60 * 60 * 1000) // 5 days ago
       }),
       Order.create({
         orderId: 'ORD-QB-002',
         customerId: testCustomers[1].customerId,
         affiliateId: testAffiliates[0].affiliateId,
-        pickupDate: new Date(baseDate.getTime() - 4 * 24 * 60 * 60 * 1000),
-        pickupTime: 'afternoon',
-        estimatedWeight: 20,
-        actualWeight: 20,
-        affiliateCommission: 2.00,  // Setting realistic commission for debugging
+        bagId: 'BAG-qb-2',
+        actualWeight: 20,        affiliateCommission: 2.00,  // Setting realistic commission for debugging
         baseRate: 1.00,
         actualTotal: 200.00,
-        status: 'complete',
-        completedAt: new Date(baseDate.getTime() - 3 * 24 * 60 * 60 * 1000) // 3 days ago
+        status: 'delivered',
+        deliveredAt: new Date(baseDate.getTime() - 3 * 24 * 60 * 60 * 1000) // 3 days ago
       }),
       // Orders for Jane Smith (AFF-QB-002)
       Order.create({
         orderId: 'ORD-QB-003',
         customerId: testCustomers[0].customerId,
         affiliateId: testAffiliates[1].affiliateId,
-        pickupDate: new Date(baseDate.getTime() - 3 * 24 * 60 * 60 * 1000),
-        pickupTime: 'evening',
-        estimatedWeight: 25,
-        actualWeight: 25,
-        affiliateCommission: 2.50,  // Setting realistic commission for debugging
+        bagId: 'BAG-qb-3',
+        actualWeight: 25,        affiliateCommission: 2.50,  // Setting realistic commission for debugging
         baseRate: 1.00,
         actualTotal: 250.00,
-        status: 'complete',
-        completedAt: new Date(baseDate.getTime() - 2 * 24 * 60 * 60 * 1000) // 2 days ago
+        status: 'delivered',
+        deliveredAt: new Date(baseDate.getTime() - 2 * 24 * 60 * 60 * 1000) // 2 days ago
       }),
       // Order for unverified affiliate (should not appear in payment exports)
       Order.create({
         orderId: 'ORD-QB-004',
         customerId: testCustomers[0].customerId,
         affiliateId: testAffiliates[2].affiliateId,
-        pickupDate: new Date(baseDate.getTime() - 2 * 24 * 60 * 60 * 1000),
-        pickupTime: 'morning',
-        estimatedWeight: 30,
-        actualWeight: 30,
-        affiliateCommission: 3.00,  // Setting realistic commission for debugging
+        bagId: 'BAG-qb-4',
+        actualWeight: 30,        affiliateCommission: 3.00,  // Setting realistic commission for debugging
         baseRate: 1.00,
         actualTotal: 300.00,
-        status: 'complete',
-        completedAt: new Date(baseDate.getTime() - 1 * 24 * 60 * 60 * 1000) // 1 day ago
+        status: 'delivered',
+        deliveredAt: new Date(baseDate.getTime() - 1 * 24 * 60 * 60 * 1000) // 1 day ago
       })
     ]);
   });

@@ -406,20 +406,16 @@ describe('System Config API Tests', () => {
       const mockOrder = new Order({
         customerId: '507f1f77bcf86cd799439011',
         affiliateId: '507f1f77bcf86cd799439012',
-        pickupDate: new Date(),
-        pickupTime: 'morning',
-
-        estimatedWeight: 30,
-        numberOfBags: 2,
-        deliveryFee: 5.00,
-        paymentMethod: 'card' // Based on the Order model enum
+        bagId: 'BAG-sysconfig-1',
+        actualWeight: 30,
+        feeBreakdown: { numberOfBags: 1, minimumFee: 5, perBagFee: 5, totalFee: 5, minimumApplied: false }
       });
 
       // The pre-save hook should fetch the rate
       await mockOrder.save();
 
       expect(mockOrder.baseRate).toBe(2.00);
-      expect(mockOrder.estimatedTotal).toBeGreaterThan(0);
+      expect(mockOrder.actualTotal).toBeGreaterThan(0);
 
       // Reset to default
       await SystemConfig.setValue('wdf_base_rate_per_pound', 1.25);

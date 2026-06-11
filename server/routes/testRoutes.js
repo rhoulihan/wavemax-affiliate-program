@@ -179,7 +179,7 @@ router.post('/customer', async (req, res) => {
 // Create test order
 router.post('/order', async (req, res) => {
     try {
-        let { customerId, recreate, numberOfBags = 1, orderType = 'v2', isV2Order = true } = req.body;
+        let { customerId, recreate } = req.body;
 
         // Find customer
         let customer;
@@ -216,29 +216,24 @@ router.post('/order', async (req, res) => {
             affiliateId: customer.affiliateId
         }) : null;
         
-        // Calculate delivery fee
+        // Calculate delivery fee (one bag = one order)
         const minimumFee = affiliate?.minimumDeliveryFee || 1;
         const perBagFee = affiliate?.perBagDeliveryFee || 1;
-        const calculatedFee = numberOfBags * perBagFee;
-        const totalFee = Math.max(minimumFee, calculatedFee);
-        
-        // Create new test order with delivery fee and fabric softener add-on
+        const totalFee = Math.max(minimumFee, perBagFee);
+
+        // Create new test order in the redesigned shape (born at intake)
         const orderData = {
             // orderId will be auto-generated as ORD-[UUID]
             customerId: customer.customerId,
             affiliateId: customer.affiliateId,
-            pickupDate: new Date(Date.now() + 24 * 60 * 60 * 1000), // Tomorrow
-            pickupTime: 'morning',
-            estimatedWeight: numberOfBags * 10, // Estimate 10 lbs per bag
-            status: 'pending',
-            specialPickupInstructions: 'Test order for operator scanning',
+            bagId: `BAG-${require('uuid').v4()}`,
+            bagToken: require('crypto').randomBytes(16).toString('hex'),
             isTestOrder: true, // Mark as test order for cleanup
-            numberOfBags: numberOfBags,
-            baseRate: 1.25, // V2 rate per pound
-            paymentMethod: 'card',
-            // Add delivery fee breakdown
+            baseRate: 1.25, // rate per pound
+            paymentStatus: 'pending',
+            // Delivery fee breakdown
             feeBreakdown: {
-                numberOfBags: numberOfBags,
+                numberOfBags: 1,
                 minimumFee: minimumFee,
                 perBagFee: perBagFee,
                 totalFee: totalFee,
@@ -251,21 +246,6 @@ router.post('/order', async (req, res) => {
                 stainRemover: false
             }
         };
-
-        // Set V2-specific fields
-        if (isV2Order) {
-            orderData.isV2Order = true;
-            orderData.orderType = 'v2';
-            orderData.paymentStatus = 'pending';
-            orderData.paymentStatus = 'pending';
-            // V2 orders don't have upfront payment, amount calculated after weighing
-            orderData.estimatedTotal = 0;
-        } else {
-            // Regular WDF order
-            orderData.baseRate = 2.99;
-            orderData.estimatedTotal = orderData.estimatedWeight * 2.99;
-            orderData.paymentStatus = 'pending';
-        }
 
         const order = new Order(orderData);
         await order.save();
@@ -351,28 +331,24 @@ router.post('/order/advance-stage', async (req, res) => {
             case 'weigh':
                 // Simulate drop-off and weighing
                 if (!order.bags || order.bags.length === 0) {
-                    // Initialize bags if not already present
-                    order.bags = [];
-                    for (let i = 0; i < order.numberOfBags; i++) {
-                        order.bags.push({
-                            bagNumber: i + 1,
-                            bagId: `BAG-${order.orderId}-${i + 1}`,
-                            weight: weights ? weights[i] : 30, // Use provided weight or default to 30 lbs
-                            status: 'processing',
-                            scannedAt: {
-                                processing: new Date()
-                            },
-                            scannedBy: {}  // Initialize empty for test mode
-                        });
-                    }
+                    // Initialize the single bag (one bag = one order)
+                    order.bags = [{
+                        bagNumber: 1,
+                        bagToken: order.bagToken,
+                        weight: weights ? weights[0] : 30, // Use provided weight or default to 30 lbs
+                        status: 'intake',
+                        scannedAt: {
+                            intake: new Date()
+                        },
+                        scannedBy: {}  // Initialize empty for test mode
+                    }];
                 }
 
                 // Set actual weight and calculate total
-                order.actualWeight = actualWeight || (order.numberOfBags * 30);
-                order.bagsWeighed = order.numberOfBags;
+                order.actualWeight = actualWeight || 30;
 
-                // Calculate pricing for V2 orders
-                if (order.isV2Order) {
+                // Calculate post-weigh pricing
+                {
                     const basePrice = order.actualWeight * (order.baseRate || 1.25);
 
                     // Add delivery fee
@@ -382,17 +358,16 @@ router.post('/order/advance-stage', async (req, res) => {
                     const fabricSoftenerFee = order.addOns?.fabricSoftener ? 2.00 : 0;
 
                     order.actualTotal = basePrice + deliveryFee + fabricSoftenerFee;
-                    order.wdfCredit = 0; // No WDF credit initially
                 }
 
-                order.status = 'processing';
+                order.status = 'in_progress';
                 order.receivedAt = new Date();
 
                 // Save order first to calculate paymentAmount
                 await order.save();
 
-                // V2 Payment Flow: Send payment request email after weighing
-                if (order.isV2Order && order.bagsWeighed === order.numberOfBags) {
+                // Post-weigh payment flow: send payment request email after weighing
+                {
                     const Customer = require('../models/Customer');
                     const customer = await Customer.findOne({ customerId: order.customerId });
 
@@ -435,7 +410,6 @@ router.post('/order/advance-stage', async (req, res) => {
                         bag.scannedAt.processed = new Date();
                     });
                 }
-                order.bagsProcessed = order.numberOfBags;
                 order.status = 'processed';
                 order.processedAt = new Date();
                 break;
@@ -444,14 +418,12 @@ router.post('/order/advance-stage', async (req, res) => {
                 // Simulate customer pickup
                 if (order.bags && order.bags.length > 0) {
                     order.bags.forEach(bag => {
-                        bag.status = 'completed';
+                        bag.status = 'picked_up';
                         if (!bag.scannedAt) bag.scannedAt = {};
-                        bag.scannedAt.completed = new Date();
+                        bag.scannedAt.picked_up = new Date();
                     });
                 }
-                order.bagsPickedUp = order.numberOfBags;
-                order.status = 'complete';
-                order.completedAt = new Date();
+                order.status = 'delivered';
 
                 // Mark payment as completed for testing
                 order.paymentStatus = 'verified';

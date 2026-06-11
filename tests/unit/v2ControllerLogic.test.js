@@ -143,76 +143,11 @@ describe('V2 Controller Logic', () => {
       testOrder = await Order.create({
         customerId: testCustomer.customerId,
         affiliateId: testAffiliate.affiliateId,
-        pickupDate: new Date(),
-        pickupTime: 'morning',
-        estimatedWeight: 20,
-        numberOfBags: 2,
-        status: 'pending',
+        bagId: 'BAG-v2cl-1',
+        status: 'in_progress',
         paymentStatus: 'pending',
         paymentMethod: 'pending'
       });
-    });
-
-    it('should generate payment links when order is weighed (WDF complete)', async () => {
-      paymentLinkService.generatePaymentLinks.mockResolvedValue({
-        links: {
-          venmo: 'venmo://paycharge?txn=pay&recipients=@wavemax&amount=50',
-          paypal: 'https://paypal.me/wavemax/50',
-          cashapp: 'https://cash.app/$wavemax/50'
-        },
-        qrCodes: {
-          venmo: 'data:image/png;base64,qr1',
-          paypal: 'data:image/png;base64,qr2',
-          cashapp: 'data:image/png;base64,qr3'
-        },
-        shortOrderId: testOrder._id.toString().slice(-8).toUpperCase(),
-        amount: 50.00
-      });
-      
-      emailService.sendV2PaymentRequest = jest.fn().mockResolvedValue(true);
-      
-      const req = {
-        params: { orderId: testOrder._id.toString() },
-        body: {
-          status: 'processing',
-          actualWeight: 22,
-          actualTotal: 50.00
-        },
-        user: {
-          role: 'operator',
-          affiliateId: testAffiliate.affiliateId
-        }
-      };
-      
-      const res = {
-        status: jest.fn().mockReturnThis(),
-        json: jest.fn()
-      };
-      
-      const next = jest.fn();
-      
-      const handler = orderController.updateOrderStatus;
-      await handler(req, res, next);
-      
-      // Verify payment links were generated
-      expect(paymentLinkService.generatePaymentLinks).toHaveBeenCalledWith(
-        testOrder._id,
-        50.00,
-        expect.any(String)
-      );
-      
-      // Verify order was updated
-      const updatedOrder = await Order.findById(testOrder._id);
-      expect(updatedOrder.paymentStatus).toBe('awaiting');
-      expect(updatedOrder.paymentLinks).toBeDefined();
-      expect(updatedOrder.paymentLinks.venmo).toContain('venmo://');
-      expect(updatedOrder.paymentQRCodes).toBeDefined();
-      // paymentAmount is recalculated by Order model: actualWeight * baseRate = 22 * 1.25 = 27.5
-      expect(updatedOrder.paymentAmount).toBe(27.5);
-      expect(updatedOrder.paymentRequestedAt).toBeDefined();
-      
-      // Note: Email service is not yet implemented, so we skip this check
-      // expect(emailService.sendV2PaymentRequest).toHaveBeenCalled();
     });
 
     it('should handle payment confirmation from customer', async () => {
@@ -300,7 +235,6 @@ describe('V2 Controller Logic', () => {
     });
 
     it('should not send pickup notification until payment is verified', async () => {
-      testOrder.status = 'processing';
       testOrder.actualWeight = 25;
       testOrder.actualTotal = 60.00;
       testOrder.paymentStatus = 'awaiting';
@@ -332,92 +266,12 @@ describe('V2 Controller Logic', () => {
       
       // Should NOT send pickup notification (payment not verified)
       expect(emailService.sendPickupReadyNotification).not.toHaveBeenCalled();
-      
-      // Now verify payment
-      testOrder.paymentStatus = 'verified';
-      await testOrder.save();
-      
-      // Update status again
-      req.body.status = 'complete';
-      await handler(req, res, next);
-      
-      // Pickup notification is not yet implemented (commented out in controller)
-      // expect(emailService.sendPickupReadyNotification).toHaveBeenCalled();
+
+      // The ready gate holds the unpaid processed order at the store instead
+      const updatedOrder = await Order.findById(testOrder._id);
+      expect(updatedOrder.status).toBe('processed');
+      expect(updatedOrder.heldAtStore).toBe(true);
     });
   });
 
-  describe('Edge Cases and Error Handling', () => {
-    it('should handle payment link generation failure gracefully', async () => {
-      const testCustomer = await Customer.create({
-        name: 'Error Test',
-        firstName: 'Error',
-        lastName: 'Test',
-        email: 'error@test.com',
-        phone: '555-7777',
-        address: '222 Error St',
-        city: 'Error City',
-        state: 'TX',
-        zipCode: '22222',
-        username: `error${Date.now()}`,
-        passwordHash: crypto.randomBytes(32).toString('hex'),
-        passwordSalt: crypto.randomBytes(16).toString('hex'),
-        affiliateId: testAffiliate._id,
-        registrationVersion: 'v2'
-      });
-      
-      const testOrder = await Order.create({
-        customerId: testCustomer.customerId,
-        affiliateId: testAffiliate.affiliateId,
-        pickupDate: new Date(),
-        pickupTime: 'morning',
-        estimatedWeight: 15,
-        numberOfBags: 1,
-        status: 'pending',
-        paymentStatus: 'pending'
-      });
-      
-      // Mock payment link service to fail
-      paymentLinkService.generatePaymentLinks.mockRejectedValue(
-        new Error('QR code generation failed')
-      );
-      
-      const req = {
-        params: { orderId: testOrder._id.toString() },
-        body: {
-          status: 'processing',
-          actualWeight: 15,
-          actualTotal: 35.00
-        },
-        user: {
-          role: 'operator',
-          affiliateId: testAffiliate.affiliateId
-        }
-      };
-      
-      const res = {
-        status: jest.fn().mockReturnThis(),
-        json: jest.fn()
-      };
-      
-      const next = jest.fn();
-      
-      const handler = extractHandler(orderController.updateOrderStatus);
-      await handler(req, res, next);
-      
-      // When payment link generation fails, the controller returns an error
-      expect(res.status).toHaveBeenCalledWith(500);
-      expect(res.json).toHaveBeenCalledWith(
-        expect.objectContaining({
-          success: false,
-          message: 'An error occurred while updating the order status'
-        })
-      );
-      
-      // Order should remain unchanged due to error
-      const updatedOrder = await Order.findById(testOrder._id);
-      expect(updatedOrder.status).toBe('pending');
-      expect(updatedOrder.actualWeight).toBeUndefined(); // Not updated due to error
-      expect(updatedOrder.paymentStatus).toBe('pending'); // Not 'awaiting' due to error
-    });
-  });
 });

@@ -204,12 +204,7 @@ describe('Model Tests', () => {
       const orderData = {
         customerId: 'CUST123',
         affiliateId: 'AFF123',
-        pickupDate: new Date('2025-05-26'),
-        pickupTime: 'morning',
-
-        estimatedWeight: 30,
-        numberOfBags: 2,
-        deliveryFee: 5.99
+        bagId: 'BAG-models-1'
       };
 
       const order = new Order(orderData);
@@ -217,46 +212,19 @@ describe('Model Tests', () => {
 
       expect(saved._id).toBeDefined();
       expect(saved.orderId).toMatch(/^ORD-[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/);
-      expect(saved.status).toBe('pending'); // Default status
+      expect(saved.status).toBe('in_progress'); // Default status
       expect(saved.baseRate).toBe(1.25);
       expect(saved.paymentStatus).toBe('pending');
-    });
-
-    it('should calculate estimated total correctly', async () => {
-      const order = new Order({
-        customerId: 'CUST123',
-        affiliateId: 'AFF123',
-        pickupDate: new Date(),
-        pickupTime: 'morning',
-
-        estimatedWeight: 30,
-        numberOfBags: 2,
-        feeBreakdown: {
-          numberOfBags: 2,
-          minimumFee: 10,
-          perBagFee: 2,
-          totalFee: 10,
-          minimumApplied: true
-        }
-      });
-
-      await order.save();
-
-      // 30 lbs * $1.25 + $10 fee
-      expect(order.estimatedTotal).toBeCloseTo(47.50, 2);
+      expect(saved.intakeAt).toBeDefined();
     });
 
     it('should calculate actual total and commission when weight is set', async () => {
       const order = new Order({
         customerId: 'CUST123',
         affiliateId: 'AFF123',
-        pickupDate: new Date(),
-        pickupTime: 'morning',
-
-        estimatedWeight: 50,
-        numberOfBags: 3,
+        bagId: 'BAG-models-2',
         feeBreakdown: {
-          numberOfBags: 3,
+          numberOfBags: 1,
           minimumFee: 10,
           perBagFee: 2,
           totalFee: 10,
@@ -277,35 +245,24 @@ describe('Model Tests', () => {
       const order = new Order({
         customerId: 'CUST123',
         affiliateId: 'AFF123',
-        pickupDate: new Date(),
-        pickupTime: 'morning',
-
-        estimatedWeight: 15,
-        numberOfBags: 1,
-        deliveryFee: 5.99
+        bagId: 'BAG-models-3'
       });
 
       await order.save();
 
-      // Update status to processing
-      // Note: The model doesn't have automatic timestamp updates
-      // In production, the controller would set these timestamps
-      order.status = 'processing';
-      order.processingStartedAt = new Date();
-      await order.save();
-      expect(order.processingStartedAt).toBeDefined();
-
-      // Update status to processed (ready for delivery)
+      // The pre-save hook stamps lifecycle timestamps set-once on status change
       order.status = 'processed';
-      order.processedAt = new Date();
       await order.save();
       expect(order.processedAt).toBeDefined();
 
-      // Update status to complete
-      order.status = 'complete';
-      order.completedAt = new Date();
+      order.status = 'picked_up';
       await order.save();
-      expect(order.completedAt).toBeDefined();
+      expect(order.pickedUpAt).toBeDefined();
+
+      order.status = 'delivered';
+      await order.save();
+      expect(order.deliveredAt).toBeDefined();
+      expect(order.commissionRealized).toBe(true);
     });
   });
 

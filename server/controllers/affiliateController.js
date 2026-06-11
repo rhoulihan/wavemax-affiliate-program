@@ -331,7 +331,7 @@ exports.getAffiliateEarnings = async (req, res) => {
     // Find all delivered orders for this affiliate within the date range
     const orders = await Order.find({
       affiliateId,
-      status: 'complete',
+      status: 'delivered',
       deliveredAt: { $gte: startDate, $lte: endDate }
     }).sort({ deliveredAt: -1 });
 
@@ -599,7 +599,7 @@ exports.getAffiliateOrders = async (req, res) => {
 
     // Calculate total earnings from delivered orders
     const totalEarnings = orders.reduce((sum, order) => {
-      if (order.status === 'complete' && order.affiliateCommission) {
+      if (order.status === 'delivered' && order.affiliateCommission) {
         return sum + order.affiliateCommission;
       }
       return sum;
@@ -720,15 +720,13 @@ exports.getAffiliateYtdStats = async (req, res) => {
 
     const yearStart = new Date(new Date().getFullYear(), 0, 1);
 
-    // Order schema uses `completedAt` for final pickup + `status: 'complete'`
-    // (see Order.js). `deliveredAt` isn't a real field — dashboard stats above
-    // filter on it anyway and silently get zero. Use completedAt as the
-    // ground truth for YTD.
+    // deliveredAt (renames completedAt) is the ground truth for YTD —
+    // commission realizes at 'delivered' (design §4.4/§6.4).
     const orders = await Order.find({
       affiliateId,
-      status: 'complete',
-      completedAt: { $gte: yearStart }
-    }).select('affiliateCommission actualTotal completedAt');
+      status: 'delivered',
+      deliveredAt: { $gte: yearStart }
+    }).select('affiliateCommission actualTotal deliveredAt');
 
     let totalEarnings = 0;
     let totalRevenue = 0;
@@ -772,13 +770,13 @@ exports.getAffiliateDashboardStats = async (req, res) => {
     // Get active orders count
     const activeOrderCount = await Order.countDocuments({
       affiliateId,
-      status: { $in: ['scheduled', 'picked_up', 'processing', 'ready_for_delivery'] }
+      status: { $in: ['in_progress', 'processed', 'ready_for_pickup', 'picked_up'] }
     });
 
     // Get total earnings
     const deliveredOrders = await Order.find({
       affiliateId,
-      status: 'complete'
+      status: 'delivered'
     });
 
     let totalEarnings = 0;

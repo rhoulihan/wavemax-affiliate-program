@@ -112,8 +112,8 @@ describe('Admin Dashboard Functions', () => {
         thisWeek: [{ count: 100 }],
         thisMonth: [{ count: 450 }],
         statusDistribution: [
-          { _id: 'pending', count: 20 },
-          { _id: 'complete', count: 380 }
+          { _id: 'in_progress', count: 20 },
+          { _id: 'delivered', count: 380 }
         ],
         processingStatusDistribution: [
           { _id: 'washing', count: 10 },
@@ -151,7 +151,7 @@ describe('Admin Dashboard Functions', () => {
         {
           orderId: 'ORD001',
           affiliateId: 'AFF001',
-          status: 'complete',
+          status: 'delivered',
           updatedAt: new Date()
         }
       ];
@@ -188,7 +188,7 @@ describe('Admin Dashboard Functions', () => {
       Customer.countDocuments.mockResolvedValue(100);
       Order.countDocuments.mockImplementation(query => {
         if (query.status?.$in) return Promise.resolve(15);
-        if (query.status === 'complete') return Promise.resolve(380);
+        if (query.status === 'delivered') return Promise.resolve(380);
         if (query.processingStartedAt) return Promise.resolve(2);
         return Promise.resolve(0);
       });
@@ -411,7 +411,7 @@ describe('Admin Dashboard Functions', () => {
       };
       
       const mockOrdersReport = [
-        { orderId: 'ORD001', status: 'complete' }
+        { orderId: 'ORD001', status: 'delivered' }
       ];
       
       // Mock internal function
@@ -583,7 +583,7 @@ describe('Admin Dashboard Functions', () => {
           orderId: 'ORD001',
           customerId: 'CUST001',
           affiliateId: { firstName: 'Jane', lastName: 'Smith' },
-          status: 'complete',
+          status: 'delivered',
           orderProcessingStatus: 'completed',
           assignedOperator: { firstName: 'John', lastName: 'Doe' },
           processingTimeMinutes: 45,
@@ -635,7 +635,7 @@ describe('Admin Dashboard Functions', () => {
         orderId: 'ORD001',
         customerID: 'CUST001',
         affiliateName: 'Jane Smith',
-        status: 'complete',
+        status: 'delivered',
         operator: 'John Doe'
       });
     });

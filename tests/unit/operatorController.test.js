@@ -174,7 +174,6 @@ describe('Operator Controller', () => {
       const mockOrder = {
         orderId: 'ORD123',
         orderProcessingStatus: 'quality_check',
-        numberOfBags: 2,
  save: jest.fn().mockResolvedValue(true)};
 
       req.params.orderId = 'ORD123';
@@ -186,7 +185,6 @@ describe('Operator Controller', () => {
       // Note: markOrderReady is deprecated and doesn't update orderProcessingStatus
       expect(mockOrder.orderProcessingStatus).toBe('quality_check'); // Unchanged
       expect(mockOrder.status).toBe('processed');
-      expect(mockOrder.bagsProcessed).toBe(2);
       expect(mockOrder.processedAt).toBeDefined();
       expect(res.json).toHaveBeenCalledWith({
         success: true,
@@ -200,7 +198,6 @@ describe('Operator Controller', () => {
         orderId: 'ORD123',
         affiliateId: 'AFF123',
         customerId: 'CUST123',
-        numberOfBags: 2,
         actualWeight: 25,
  save: jest.fn().mockResolvedValue(true)};
 
@@ -234,7 +231,7 @@ describe('Operator Controller', () => {
           affiliateName: 'Test Affiliate',
           orderId: 'ORD123',
           customerName: 'John Doe',
-          numberOfBags: 2,
+          numberOfBags: 1,
           totalWeight: 25
         })
       );

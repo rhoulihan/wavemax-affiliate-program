@@ -1,10 +1,16 @@
 // Order Model for WaveMAX Laundry Affiliate Program
+//
+// Redesigned per docs/superpowers/specs/2026-06-08-invite-bag-workflow-redesign-design.md §4.4:
+// orders are created at store intake (one durable bag = one order), priced from
+// actualWeight only (no customer estimate exists), and move through
+// in_progress -> processed -> ready_for_pickup -> picked_up -> delivered.
+// ready_for_pickup is gated on payment (orderReadyGateService.applyReadyGate is
+// the SOLE writer of readyForPickupAt — never this pre-save, never a direct PUT).
 
 const mongoose = require('mongoose');
 const { v4: uuidv4 } = require('uuid');
 const SystemConfig = require('./SystemConfig');
 
-// Order Schema
 const orderSchema = new mongoose.Schema({
   orderId: {
     type: String,
@@ -13,121 +19,101 @@ const orderSchema = new mongoose.Schema({
   },
   customerId: { type: String, required: true, ref: 'Customer' },
   affiliateId: { type: String, required: true, ref: 'Affiliate' },
-  // Pickup information
-  pickupDate: { type: Date, required: true },
-  pickupTime: {
-    type: String,
-    enum: ['morning', 'afternoon', 'evening'],
-    required: true
-  },
-  specialPickupInstructions: String,
-  estimatedWeight: {
-    type: Number,
-    required: true,
-    min: 0.1
-  },
+
+  // Durable bag reference (one bag = one order) — design §4.1 "one identifier per role":
+  bagId: { type: String, required: true, ref: 'Bag', index: true },  // == Bag.bagId (BAG-uuid); the JOIN key
+  bagToken: { type: String, index: true },                           // == Bag.token (32 hex); denormalized SCAN key
+
   // Order status
   status: {
     type: String,
-    enum: ['pending', 'processing', 'processed', 'complete', 'cancelled'],
-    default: 'pending'
+    enum: ['in_progress', 'processed', 'ready_for_pickup', 'picked_up', 'delivered', 'cancelled'],
+    default: 'in_progress'
   },
+
   // Laundry details
   actualWeight: Number,
   washInstructions: String,
-  // Bag information
-  numberOfBags: { type: Number, default: 1, min: 1 },
-  bagsWeighed: { type: Number, default: 0 },
-  bagsProcessed: { type: Number, default: 0 }, // Bags scanned after WDF process
-  bagsPickedUp: { type: Number, default: 0 },
-  // Individual bag weights (legacy - kept for backward compatibility)
-  bagWeights: [{
-    bagNumber: Number,
-    weight: Number,
-    receivedAt: Date
-  }],
-  // New bag tracking system
+
+  // Per-order intake snapshot (resets every order; lives here, NOT on the durable Bag)
+  intake: {
+    weight: { type: Number, default: 0 },
+    weighedAt: Date,
+    weighedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'Operator' },
+    processedAt: Date,
+    processedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'Operator' },
+    pickedUpAt: Date,                                                // operator scans bag OUT of store
+    pickedUpBy: { type: mongoose.Schema.Types.ObjectId, ref: 'Operator' },
+    deliveredAt: Date,                                               // affiliate scans at customer door
+    deliveredBy: { type: String, ref: 'Affiliate' },                 // affiliateId string
+    addOnFormPlaced: { type: Boolean, default: false },              // operator ack: fresh form in pocket
+    addOnFormPlacedAt: Date
+  },
+
+  // One-element bags[] kept as an array so the 3-stage scanner can iterate.
+  // The reference field is bagToken — NEVER bagId — and carries Bag.token (32 hex).
   bags: [{
-    bagId: {
-      type: String,
-      required: true,
-      index: true
-    },
-    bagNumber: {
-      type: Number,
-      required: true
-    },
+    bagToken: { type: String, required: true, index: true },
+    bagNumber: { type: Number, required: true },                     // always 1 (one bag = one order)
     status: {
       type: String,
-      enum: ['processing', 'processed', 'completed'],
-      default: 'processing'
+      enum: ['intake', 'processed', 'picked_up', 'delivered'],
+      default: 'intake'
     },
-    weight: {
-      type: Number,
-      default: 0
-    },
-    scannedAt: {
-      processing: Date,
-      processed: Date,
-      completed: Date
-    },
+    weight: { type: Number, default: 0 },
+    scannedAt: { intake: Date, processed: Date, picked_up: Date, delivered: Date },
     scannedBy: {
-      processing: { type: mongoose.Schema.Types.ObjectId, ref: 'Operator' },
+      intake: { type: mongoose.Schema.Types.ObjectId, ref: 'Operator' },
       processed: { type: mongoose.Schema.Types.ObjectId, ref: 'Operator' },
-      completed: { type: mongoose.Schema.Types.ObjectId, ref: 'Operator' }
+      picked_up: { type: mongoose.Schema.Types.ObjectId, ref: 'Operator' },
+      delivered: { type: String, ref: 'Affiliate' }                  // affiliate door-scan
     }
   }],
-  // Add-on services
+
+  // Add-on services — entered by the operator at intake from the paper form
   addOns: {
     premiumDetergent: { type: Boolean, default: false },
     fabricSoftener: { type: Boolean, default: false },
     stainRemover: { type: Boolean, default: false }
   },
-  addOnTotal: { type: Number, default: 0 }, // Calculated cost of add-ons
-  // Payment information
-  baseRate: { type: Number }, // Per pound WDF rate - fetched from SystemConfig
-  // Fee breakdown structure
+  addOnTotal: { type: Number, default: 0 },
+  addOnsEnteredBy: { type: mongoose.Schema.Types.ObjectId, ref: 'Operator' },
+  addOnsEnteredAt: Date,
+  freshAddOnsFormPlaced: { type: Boolean, default: false },          // operator ack: fresh form in pocket
+  freshAddOnsFormAckBy: { type: mongoose.Schema.Types.ObjectId, ref: 'Operator' },
+  freshAddOnsFormAckAt: Date,
+
+  // Pricing
+  baseRate: { type: Number },                                        // per-pound WDF rate from SystemConfig
   feeBreakdown: {
     numberOfBags: Number,
     minimumFee: Number,
     perBagFee: Number,
-    totalFee: Number, // The actual fee charged (greater of minimum or calculated)
+    totalFee: Number,                                                // the actual fee charged
     minimumApplied: Boolean
   },
-  estimatedTotal: Number,
   actualTotal: Number,
-  // WDF Credit tracking
-  wdfCreditApplied: { type: Number, default: 0 }, // Amount of credit applied to this order
-  wdfCreditGenerated: { type: Number, default: 0 }, // Credit generated by weight difference
-  weightDifference: { type: Number, default: 0 }, // actualWeight - estimatedWeight
+  wdfCreditApplied: { type: Number, default: 0 },                    // carry-in credit applied at intake
+  wdfCreditGenerated: { type: Number, default: 0 },                  // always 0 — no estimate variance exists
   affiliateCommission: { type: Number, default: 0 },
-  // Refund tracking (applies to any Paygistix payment)
-  refundAmount: Number,
-  refundReason: String,
-  refundReference: String,
-  refundedAt: Date,
+
+  // Commission realization (realized at 'delivered', not 'picked_up')
+  commissionRealized: { type: Boolean, default: false },
+  commissionRealizedAt: Date,
+
   // Operator processing fields
-  assignedOperator: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Operator'
-  },
+  assignedOperator: { type: mongoose.Schema.Types.ObjectId, ref: 'Operator' },
   operatorNotes: String,
-  qualityCheckPassed: {
-    type: Boolean,
-    default: null
-  },
-  qualityCheckBy: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Operator'
-  },
+  qualityCheckPassed: { type: Boolean, default: null },
+  qualityCheckBy: { type: mongoose.Schema.Types.ObjectId, ref: 'Operator' },
   qualityCheckNotes: String,
-  processingTimeMinutes: Number, // Auto-calculated
+  processingTimeMinutes: Number,
 
   // WDF / delivery fee breakdown extras
   wdfAmount: Number,
   mdfAmount: Number,
 
-  // Post-weigh payment state
+  // Post-weigh payment state (enum unchanged — escalation is the boolean below, §4.4)
   paymentStatus: {
     type: String,
     enum: ['pending', 'awaiting', 'confirming', 'verified', 'failed'],
@@ -138,37 +124,18 @@ const orderSchema = new mongoose.Schema({
     enum: ['venmo', 'paypal', 'cashapp', 'multiple', 'pending', 'credit_card'],
     default: 'pending'
   },
-  paymentAmount: {
-    type: Number,
-    default: 0
-  },
+  paymentAmount: { type: Number, default: 0 },
   paymentRequestedAt: Date,
-  paymentConfirmedAt: Date, // When customer clicked "already paid"
+  paymentConfirmedAt: Date,                                          // customer clicked "already paid"
   paymentVerifiedAt: Date,
   paymentTransactionId: String,
-  paymentLinks: {
-    venmo: String,
-    paypal: String,
-    cashapp: String
-  },
-  paymentQRCodes: {
-    venmo: String, // Base64 encoded
-    paypal: String,
-    cashapp: String
-  },
-  paymentCheckAttempts: {
-    type: Number,
-    default: 0
-  },
+  paymentLinks: { venmo: String, paypal: String, cashapp: String },
+  paymentQRCodes: { venmo: String, paypal: String, cashapp: String },
+  paymentCheckAttempts: { type: Number, default: 0 },                // IMAP detection counter (PR 8 decouples cadence)
   lastPaymentCheck: Date,
-  paymentNotes: String, // For storing verification details
-  paymentReminderCount: {
-    type: Number,
-    default: 0
-  },
+  paymentNotes: String,
+  paymentReminderCount: { type: Number, default: 0 },                // reminder counter (PR 8: hourly, cap 8)
   paymentLastReminderAt: Date,
-
-  // Payment reminder tracking
   paymentReminders: [{
     sentAt: { type: Date, required: true },
     reminderNumber: { type: Number, required: true },
@@ -177,24 +144,40 @@ const orderSchema = new mongoose.Schema({
   }],
   lastReminderSentAt: Date,
   reminderCount: { type: Number, default: 0 },
-  
+
+  // Payment-hold escalation (design §4.4 — escalated is NOT a paymentStatus value)
+  paymentEscalated: { type: Boolean, default: false },               // set true after the 8th reminder (PR 8)
+  holdNoticeSentAt: { type: Date },                                  // "come to store" notice sent once (PR 8)
+  heldAtStore: { type: Boolean, default: false },                    // processed but unpaid -> physically held
+
+  // Proof of delivery (design §4.4)
+  proofOfDelivery: {
+    method: { type: String, enum: ['customer_pin', 'affiliate_code', 'reintake', 'manual_confirm'] },
+    confirmedByRole: { type: String, enum: ['customer', 'affiliate', 'operator', 'admin'] },
+    confirmedById: { type: String },                                 // customerId / affiliateId / operatorId
+    confirmedAt: Date,
+    geo: { type: { type: String, enum: ['Point'] }, coordinates: { type: [Number] } }, // [lng, lat], optional
+    photoKey: String,                                                // FUTURE hook — not built now
+    note: { type: String, maxlength: 500 }
+  },
+
   // Test order flag for cleanup
   isTestOrder: { type: Boolean, default: false },
 
-  // Immediate Pickup ("Pickup Now!") fields
-  isImmediatePickup: { type: Boolean, default: false },
-  pickupDeadline: { type: Date }, // Calculated pickup deadline for immediate orders
-  immediatePickupRequestedAt: { type: Date }, // When "Pickup Now!" was clicked
-  
-  // Timestamps
-  createdAt: { type: Date, default: Date.now }, // When order was created (pending state)
-  processingStartedAt: Date, // When order was received and WDF started
-  processedAt: Date, // When order is ready for affiliate pickup
-  completedAt: Date, // When affiliate delivered the order
+  // Lifecycle timestamps
+  createdAt: { type: Date, default: Date.now },
+  intakeAt: Date,                                                    // == createdAt for the new flow; explicit for clarity
+  processedAt: Date,
+  readyForPickupAt: Date,  // SOLE writer = orderReadyGateService.applyReadyGate — never this pre-save, never a direct PUT
+  pickedUpAt: Date,                                                  // operator scan-OUT
+  deliveredAt: Date,                                                 // renames completedAt
   cancelledAt: Date
 }, { timestamps: true });
 
-// Middleware for calculating estimated total before saving
+// Pricing + lifecycle pre-save engine (design §4.4 rewrite).
+// Pricing inputs (feeBreakdown, addOns, actualWeight, wdfCreditApplied) must be
+// set BEFORE the first .save() — this hook READS feeBreakdown.totalFee, it does
+// not compute the delivery fee (intake owns that via orderPricingService, PR 7).
 orderSchema.pre('save', async function(next) {
   // Fetch current WDF rate from system config if not explicitly set
   if (this.isNew && !this.baseRate) {
@@ -206,39 +189,32 @@ orderSchema.pre('save', async function(next) {
     }
   }
 
-  // Calculate add-on total if add-ons are selected
-  if (this.isNew || this.isModified('addOns') || this.isModified('estimatedWeight') || this.isModified('actualWeight')) {
-    const weight = this.actualWeight || this.estimatedWeight;
+  if (this.isNew && !this.intakeAt) {
+    this.intakeAt = this.createdAt || new Date();
+  }
+
+  // Add-on total — based on actualWeight ONLY (no estimate exists in the at-intake flow)
+  if (this.isNew || this.isModified('addOns') || this.isModified('actualWeight')) {
+    const weight = this.actualWeight || 0;
     const selectedAddOns = Object.values(this.addOns || {}).filter(selected => selected === true).length;
     this.addOnTotal = parseFloat((selectedAddOns * weight * 0.10).toFixed(2));
   }
 
-  if (this.isNew || this.isModified('estimatedWeight') || this.isModified('baseRate') || this.isModified('feeBreakdown') || this.isModified('wdfCreditApplied') || this.isModified('addOns')) {
-    // Calculate estimated total using the provided estimated weight
-    const totalFee = this.feeBreakdown?.totalFee || 0;
-    const wdfTotal = this.estimatedWeight * this.baseRate;
-    const subtotal = wdfTotal + totalFee + (this.addOnTotal || 0);
-    // Apply WDF credit (subtract if positive credit, add if negative/debit)
-    this.estimatedTotal = parseFloat((subtotal - (this.wdfCreditApplied || 0)).toFixed(2));
-  }
-
-  // Calculate actual total if actual weight is available
-  if (this.isModified('actualWeight') && this.actualWeight) {
+  // Actual total / payment amount / commission — actualWeight only; fee READ from feeBreakdown
+  if (this.actualWeight &&
+      (this.isNew || this.isModified('actualWeight') || this.isModified('addOns') ||
+       this.isModified('feeBreakdown') || this.isModified('wdfCreditApplied') || this.isModified('baseRate'))) {
     const totalFee = this.feeBreakdown?.totalFee || 0;
     const wdfTotal = this.actualWeight * this.baseRate;
     const subtotal = wdfTotal + totalFee + (this.addOnTotal || 0);
-    // Apply WDF credit (subtract if positive credit, add if negative/debit)
+    // Apply carry-in WDF credit (subtract if positive credit, add if negative/debit)
     this.actualTotal = parseFloat((subtotal - (this.wdfCreditApplied || 0)).toFixed(2));
-    
-    // Payment amount is the gross total without credits (credits are applied to customer, not invoice)
+    // Payment amount is the gross total without credits (credits apply to the customer, not the invoice)
     this.paymentAmount = parseFloat((wdfTotal + totalFee + (this.addOnTotal || 0)).toFixed(2));
-    
-    // Calculate affiliate commission (10% of WDF + full delivery fee)
-    // Commission = (WDF amount × 10%) + delivery fee
-    // NOTE: Add-ons and credits are NOT included in commission calculation
-    const wdfAmount = this.actualWeight * this.baseRate;
-    const wdfCommission = wdfAmount * 0.1;
-    this.affiliateCommission = parseFloat((wdfCommission + totalFee).toFixed(2));
+    // Affiliate commission = (WDF x 10%) + delivery fee. Add-ons and credits are NOT included.
+    this.affiliateCommission = parseFloat(((wdfTotal * 0.1) + totalFee).toFixed(2));
+    // No estimate-vs-actual variance exists in the at-intake flow.
+    this.wdfCreditGenerated = 0;
   }
 
   // Stamp paymentVerifiedAt when payment becomes verified
@@ -246,18 +222,24 @@ orderSchema.pre('save', async function(next) {
     this.paymentVerifiedAt = new Date();
   }
 
-  // Update status timestamps
+  // Lifecycle timestamps, set-once. 'ready_for_pickup' is deliberately absent:
+  // readyForPickupAt has a single writer — orderReadyGateService.applyReadyGate
+  // (design §4.4 / settled §13 #3).
   if (this.isModified('status')) {
     const now = new Date();
     switch (this.status) {
-    case 'processing':
-      if (!this.processingStartedAt) this.processingStartedAt = now;
-      break;
     case 'processed':
       if (!this.processedAt) this.processedAt = now;
       break;
-    case 'complete':
-      if (!this.completedAt) this.completedAt = now;
+    case 'picked_up':
+      if (!this.pickedUpAt) this.pickedUpAt = now;
+      break;
+    case 'delivered':
+      if (!this.deliveredAt) this.deliveredAt = now;
+      if (!this.commissionRealized) {
+        this.commissionRealized = true;
+        this.commissionRealizedAt = now;
+      }
       break;
     case 'cancelled':
       if (!this.cancelledAt) this.cancelledAt = now;

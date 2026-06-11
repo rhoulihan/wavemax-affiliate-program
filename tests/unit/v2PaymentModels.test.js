@@ -81,10 +81,7 @@ describe('V2 Payment System Model Updates', () => {
       const order = await Order.create({
         customerId: customer._id,
         affiliateId: affiliate._id,
-        pickupDate: new Date(),
-        pickupTime: 'morning',
-        estimatedWeight: 20,
-        numberOfBags: 2
+        bagId: 'BAG-v2pm-1'
       });
 
       // Check V2 payment defaults
@@ -102,10 +99,7 @@ describe('V2 Payment System Model Updates', () => {
       const order = await Order.create({
         customerId: customer._id,
         affiliateId: affiliate._id,
-        pickupDate: new Date(),
-        pickupTime: 'afternoon',
-        estimatedWeight: 25,
-        numberOfBags: 2,
+        bagId: 'BAG-v2pm-2',
         paymentStatus: 'awaiting',
         paymentAmount: 45.50,
         paymentRequestedAt: new Date()
@@ -144,10 +138,7 @@ describe('V2 Payment System Model Updates', () => {
       const order = await Order.create({
         customerId: customer._id,
         affiliateId: affiliate._id,
-        pickupDate: new Date(),
-        pickupTime: 'afternoon',
-        estimatedWeight: 30,
-        numberOfBags: 2,
+        bagId: 'BAG-v2pm-3',
         paymentLinks: paymentLinks,
         paymentQRCodes: qrCodes
       });
@@ -165,10 +156,7 @@ describe('V2 Payment System Model Updates', () => {
       const order = await Order.create({
         customerId: customer._id,
         affiliateId: affiliate._id,
-        pickupDate: new Date(),
-        pickupTime: 'evening',
-        estimatedWeight: 15,
-        numberOfBags: 1,
+        bagId: 'BAG-v2pm-4',
         paymentStatus: 'awaiting',
         paymentCheckAttempts: 5,
         lastPaymentCheck: new Date()
@@ -190,10 +178,7 @@ describe('V2 Payment System Model Updates', () => {
       const order = new Order({
         customerId: customer._id,
         affiliateId: affiliate._id,
-        pickupDate: new Date(),
-        pickupTime: '8:00 PM - 10:00 PM',
-        estimatedWeight: 20,
-        numberOfBags: 2,
+        bagId: 'BAG-v2pm-5',
         paymentStatus: 'invalid_status' // Invalid enum value
       });
 
@@ -204,10 +189,7 @@ describe('V2 Payment System Model Updates', () => {
       const order = new Order({
         customerId: customer._id,
         affiliateId: affiliate._id,
-        pickupDate: new Date(),
-        pickupTime: 'evening',
-        estimatedWeight: 18,
-        numberOfBags: 2,
+        bagId: 'BAG-v2pm-6',
         paymentMethod: 'bitcoin' // Invalid enum value
       });
 
@@ -218,10 +200,7 @@ describe('V2 Payment System Model Updates', () => {
       const order = await Order.create({
         customerId: customer._id,
         affiliateId: affiliate._id,
-        pickupDate: new Date(),
-        pickupTime: 'morning',
-        estimatedWeight: 22,
-        numberOfBags: 2,
+        bagId: 'BAG-v2pm-7',
         paymentNotes: 'Payment verified via email confirmation from Venmo'
       });
 

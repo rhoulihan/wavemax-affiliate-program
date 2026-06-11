@@ -250,7 +250,7 @@ exports.getCustomerDashboardStats = [
             totalWeight: { $sum: '$actualWeight' },
             completedOrders: {
               $sum: {
-                $cond: [{ $eq: ['$status', 'complete'] }, 1, 0]
+                $cond: [{ $eq: ['$status', 'delivered'] }, 1, 0]
               }
             }
           }
@@ -258,12 +258,12 @@ exports.getCustomerDashboardStats = [
       ]),
       Order.findOne({
         customerId,
-        status: { $in: ['pending', 'scheduled', 'processing', 'processed'] }
+        status: { $in: ['in_progress', 'processed', 'ready_for_pickup', 'picked_up'] }
       }).sort('-createdAt'),
-      // Count active orders (not complete or cancelled)
+      // Count active orders (not delivered or cancelled)
       Order.countDocuments({
         customerId,
-        status: { $in: ['pending', 'scheduled', 'processing', 'processed'] }
+        status: { $in: ['in_progress', 'processed', 'ready_for_pickup', 'picked_up'] }
       })
     ]);
 
@@ -391,7 +391,7 @@ exports.deleteCustomerData = [
     // Check for active orders
     const activeOrders = await Order.countDocuments({
       customerId,
-      status: { $in: ['pending', 'scheduled', 'processing', 'processed'] }
+      status: { $in: ['in_progress', 'processed', 'ready_for_pickup', 'picked_up'] }
     });
 
     if (activeOrders > 0) {

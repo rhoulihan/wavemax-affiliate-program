@@ -14,10 +14,8 @@ describe('Order Model - Add-on Functionality', () => {
         orderId: 'ORD001',
         customerId: 'CUST001',
         affiliateId: 'AFF001',
-        pickupDate: new Date(),
-        pickupTime: 'morning',
-        estimatedWeight: 20,
-        numberOfBags: 2,
+        bagId: 'BAG-addon-1',
+        actualWeight: 20,
         feeBreakdown: {
           numberOfBags: 2,
           minimumFee: 10,
@@ -37,7 +35,7 @@ describe('Order Model - Add-on Functionality', () => {
       // 1 add-on × 20 lbs × $0.10 = $2.00
       expect(order.addOnTotal).toBe(2.00);
       // Total = (20 × 1.25) + 10 + 2 = 37.00
-      expect(order.estimatedTotal).toBe(37.00);
+      expect(order.actualTotal).toBe(37.00);
     });
 
     it('should calculate add-on total correctly with multiple add-ons selected', async () => {
@@ -45,10 +43,8 @@ describe('Order Model - Add-on Functionality', () => {
         orderId: 'ORD002',
         customerId: 'CUST001',
         affiliateId: 'AFF001',
-        pickupDate: new Date(),
-        pickupTime: 'afternoon',
-        estimatedWeight: 30,
-        numberOfBags: 3,
+        bagId: 'BAG-addon-2',
+        actualWeight: 30,
         feeBreakdown: {
           numberOfBags: 3,
           minimumFee: 10,
@@ -68,7 +64,7 @@ describe('Order Model - Add-on Functionality', () => {
       // 3 add-ons × 30 lbs × $0.10 = $9.00
       expect(order.addOnTotal).toBe(9.00);
       // Total = (30 × 1.25) + 15 + 9 = 61.50
-      expect(order.estimatedTotal).toBe(61.50);
+      expect(order.actualTotal).toBe(61.50);
     });
 
     it('should calculate zero add-on total when no add-ons selected', async () => {
@@ -76,10 +72,8 @@ describe('Order Model - Add-on Functionality', () => {
         orderId: 'ORD003',
         customerId: 'CUST001',
         affiliateId: 'AFF001',
-        pickupDate: new Date(),
-        pickupTime: 'evening',
-        estimatedWeight: 25,
-        numberOfBags: 2,
+        bagId: 'BAG-addon-3',
+        actualWeight: 25,
         feeBreakdown: {
           numberOfBags: 2,
           minimumFee: 10,
@@ -98,7 +92,7 @@ describe('Order Model - Add-on Functionality', () => {
 
       expect(order.addOnTotal).toBe(0);
       // Total = (25 × 1.25) + 10 + 0 = 41.25
-      expect(order.estimatedTotal).toBe(41.25);
+      expect(order.actualTotal).toBe(41.25);
     });
 
     it('should handle missing add-ons object gracefully', async () => {
@@ -106,10 +100,8 @@ describe('Order Model - Add-on Functionality', () => {
         orderId: 'ORD004',
         customerId: 'CUST001',
         affiliateId: 'AFF001',
-        pickupDate: new Date(),
-        pickupTime: 'morning',
-        estimatedWeight: 20,
-        numberOfBags: 2,
+        bagId: 'BAG-addon-4',
+        actualWeight: 20,
         feeBreakdown: {
           numberOfBags: 2,
           minimumFee: 10,
@@ -123,7 +115,7 @@ describe('Order Model - Add-on Functionality', () => {
       await order.save();
 
       expect(order.addOnTotal).toBe(0);
-      expect(order.estimatedTotal).toBe(35.00); // (20 × 1.25) + 10
+      expect(order.actualTotal).toBe(35.00); // (20 × 1.25) + 10
     });
 
     it('should recalculate add-on total when weight changes', async () => {
@@ -131,10 +123,8 @@ describe('Order Model - Add-on Functionality', () => {
         orderId: 'ORD005',
         customerId: 'CUST001',
         affiliateId: 'AFF001',
-        pickupDate: new Date(),
-        pickupTime: 'morning',
-        estimatedWeight: 20,
-        numberOfBags: 2,
+        bagId: 'BAG-addon-5',
+        actualWeight: 20,
         feeBreakdown: {
           numberOfBags: 2,
           minimumFee: 10,
@@ -155,25 +145,22 @@ describe('Order Model - Add-on Functionality', () => {
       expect(order.addOnTotal).toBe(4.00);
 
       // Update weight
-      order.estimatedWeight = 30;
+      order.actualWeight = 30;
       await order.save();
 
       // Updated: 2 add-ons × 30 lbs × $0.10 = $6.00
       expect(order.addOnTotal).toBe(6.00);
       // Total = (30 × 1.25) + 10 + 6 = 53.50
-      expect(order.estimatedTotal).toBe(53.50);
+      expect(order.actualTotal).toBe(53.50);
     });
 
-    it('should use actual weight for add-on calculation when available', async () => {
+    it('should calculate add-on totals from actual weight', async () => {
       const order = new Order({
         orderId: 'ORD006',
         customerId: 'CUST001',
         affiliateId: 'AFF001',
-        pickupDate: new Date(),
-        pickupTime: 'morning',
-        estimatedWeight: 20,
+        bagId: 'BAG-addon-6',
         actualWeight: 25,
-        numberOfBags: 2,
         feeBreakdown: {
           numberOfBags: 2,
           minimumFee: 10,
@@ -198,16 +185,13 @@ describe('Order Model - Add-on Functionality', () => {
   });
 
   describe('Add-on Impact on Totals and Commission', () => {
-    it('should include add-ons in estimated total but not in commission', async () => {
+    it('should include add-ons in actual total but not in commission', async () => {
       const order = new Order({
         orderId: 'ORD007',
         customerId: 'CUST001',
         affiliateId: 'AFF001',
-        pickupDate: new Date(),
-        pickupTime: 'morning',
-        estimatedWeight: 20,
+        bagId: 'BAG-addon-7',
         actualWeight: 20,
-        numberOfBags: 2,
         feeBreakdown: {
           numberOfBags: 2,
           minimumFee: 10,
@@ -239,10 +223,8 @@ describe('Order Model - Add-on Functionality', () => {
         orderId: 'ORD008',
         customerId: 'CUST001',
         affiliateId: 'AFF001',
-        pickupDate: new Date(),
-        pickupTime: 'morning',
-        estimatedWeight: 30,
-        numberOfBags: 3,
+        bagId: 'BAG-addon-8',
+        actualWeight: 30,
         feeBreakdown: {
           numberOfBags: 3,
           minimumFee: 10,
@@ -264,7 +246,7 @@ describe('Order Model - Add-on Functionality', () => {
       expect(order.addOnTotal).toBe(9.00);
       
       // Total: (30 × 1.25) + 15 + 9 - 5 = 56.50
-      expect(order.estimatedTotal).toBe(56.50);
+      expect(order.actualTotal).toBe(56.50);
     });
 
     it('should handle all edge cases for add-on calculations', async () => {
@@ -273,10 +255,8 @@ describe('Order Model - Add-on Functionality', () => {
         orderId: 'ORD009',
         customerId: 'CUST001',
         affiliateId: 'AFF001',
-        pickupDate: new Date(),
-        pickupTime: 'morning',
-        estimatedWeight: 0.1,
-        numberOfBags: 1,
+        bagId: 'BAG-addon-9',
+        actualWeight: 0.1,
         feeBreakdown: {
           numberOfBags: 1,
           minimumFee: 10,
@@ -301,10 +281,8 @@ describe('Order Model - Add-on Functionality', () => {
         orderId: 'ORD010',
         customerId: 'CUST001',
         affiliateId: 'AFF001',
-        pickupDate: new Date(),
-        pickupTime: 'morning',
-        estimatedWeight: 100,
-        numberOfBags: 10,
+        bagId: 'BAG-addon-10',
+        actualWeight: 100,
         feeBreakdown: {
           numberOfBags: 10,
           minimumFee: 10,
@@ -332,10 +310,8 @@ describe('Order Model - Add-on Functionality', () => {
         orderId: 'ORD011',
         customerId: 'CUST001',
         affiliateId: 'AFF001',
-        pickupDate: new Date(),
-        pickupTime: 'morning',
-        estimatedWeight: 20,
-        numberOfBags: 2,
+        bagId: 'BAG-addon-11',
+        actualWeight: 20,
         feeBreakdown: {
           numberOfBags: 2,
           minimumFee: 10,
@@ -360,10 +336,8 @@ describe('Order Model - Add-on Functionality', () => {
         orderId: 'ORD012',
         customerId: 'CUST001',
         affiliateId: 'AFF001',
-        pickupDate: new Date(),
-        pickupTime: 'morning',
-        estimatedWeight: 20,
-        numberOfBags: 2,
+        bagId: 'BAG-addon-12',
+        actualWeight: 20,
         feeBreakdown: {
           numberOfBags: 2,
           minimumFee: 10,

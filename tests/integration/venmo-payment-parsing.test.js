@@ -38,13 +38,10 @@ describe('Venmo Payment Email Parsing', () => {
       orderId: 'ORD-12345678-1234-1234-1234-123456789012', // UUID format
       customerId: testCustomer.customerId,
       affiliateId: 'AFF-TEST',
-      pickupDate: new Date(),
-      pickupTime: 'morning',
-      estimatedWeight: 10,
+      bagId: 'BAG-venmo-1',
       actualWeight: 0, // Set to 0 to prevent recalculation
       actualTotal: 2.35,
-      numberOfBags: 1,
-      status: 'processing',
+      status: 'in_progress',
       paymentStatus: 'awaiting',
       paymentAmount: 2.35,
       paymentRequestedAt: new Date()

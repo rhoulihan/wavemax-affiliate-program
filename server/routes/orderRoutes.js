@@ -35,7 +35,7 @@ router.get('/statistics', authenticate, orderController.getOrderStatistics);
  */
 router.put('/bulk/status', authenticate, [
   body('orderIds').isArray().withMessage('Order IDs must be an array'),
-  body('status').isIn(['scheduled', 'picked_up', 'processing', 'ready_for_delivery', 'complete', 'cancelled']).withMessage('Invalid status')
+  body('status').isIn(['processed', 'picked_up', 'delivered', 'cancelled']).withMessage('Invalid status')
 ], orderController.bulkUpdateOrderStatus);
 
 /**
@@ -80,7 +80,7 @@ router.post('/:orderId/cancel', authenticate, orderController.cancelOrder);
  * @access  Private (affiliate or admin)
  */
 router.put('/:orderId/payment-status', authenticate, [
-  body('paymentStatus').isIn(['pending', 'paid', 'failed', 'refunded']).withMessage('Invalid payment status')
+  body('paymentStatus').isIn(['pending', 'awaiting', 'confirming', 'verified', 'failed']).withMessage('Invalid payment status')
 ], orderController.updatePaymentStatus);
 
 /**

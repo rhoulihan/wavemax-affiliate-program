@@ -1,3 +1,9 @@
+// SKIPPED in PR 4 (order-model redesign): this suite exercises the kiosk
+// multi-bag machinery (numberOfBags/bagsWeighed counters, customer-QR parse)
+// that the redesigned Order model removed. operatorBagWorkflowService is
+// re-pointed to orderIntakeService/orderAdvanceService in PR 7, which ships
+// replacement coverage (tests/integration/operatorIntake.test.js).
+// See docs/superpowers/specs/2026-06-08-invite-bag-workflow-redesign-design.md §6.4.
 const operatorController = require('../../server/controllers/operatorController');
 const { expectSuccessResponse, expectErrorResponse } = require('../helpers/responseHelpers');
 const { createFindOneMock, createFindMock, createMockDocument } = require('../helpers/mockHelpers');
@@ -27,7 +33,7 @@ beforeEach(() => {
   jest.clearAllMocks();
 });
 
-describe('Bag Tracking System', () => {
+describe.skip('Bag Tracking System', () => {
   describe('scanBag', () => {
     it('should parse new QR format correctly', async () => {
       // Mock data

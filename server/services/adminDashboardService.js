@@ -48,14 +48,14 @@ async function getDashboard() {
         ],
         averageProcessingTime: [
           { $match: {
-            status: 'complete',
-            processingStartedAt: { $exists: true },
-            completedAt: { $exists: true }
+            status: 'delivered',
+            intakeAt: { $exists: true },
+            deliveredAt: { $exists: true }
           } },
           { $project: {
             processingTime: {
               $divide: [
-                { $subtract: ['$completedAt', '$processingStartedAt'] },
+                { $subtract: ['$deliveredAt', '$intakeAt'] },
                 1000 * 60
               ]
             }
@@ -128,13 +128,13 @@ async function getDashboard() {
     activeAffiliates: await Affiliate.countDocuments({ isActive: true }),
     totalCustomers: await Customer.countDocuments(),
     ordersInProgress: await Order.countDocuments({
-      status: { $in: ['pending', 'scheduled', 'processing', 'processed'] }
+      status: { $in: ['in_progress', 'processed', 'ready_for_pickup', 'picked_up'] }
     }),
-    completedOrders: await Order.countDocuments({ status: 'complete' }),
+    completedOrders: await Order.countDocuments({ status: 'delivered' }),
     // Orders stuck in processing for > 24h — surfaces queue backups.
     processingDelays: await Order.countDocuments({
-      status: 'processing',
-      processingStartedAt: { $lte: new Date(Date.now() - 24 * 60 * 60 * 1000) }
+      status: 'in_progress',
+      intakeAt: { $lte: new Date(Date.now() - 24 * 60 * 60 * 1000) }
     })
   };
 
@@ -187,7 +187,7 @@ async function getOrderAnalytics({ startDate, endDate, groupBy = 'day' }) {
           $cond: [
             {
               $and: [
-                { $eq: ['$status', 'complete'] },
+                { $eq: ['$status', 'delivered'] },
                 { $ne: ['$processingStarted', null] },
                 { $ne: ['$processingCompleted', null] }
               ]
@@ -202,12 +202,12 @@ async function getOrderAnalytics({ startDate, endDate, groupBy = 'day' }) {
       $group: {
         _id: { $dateToString: { format, date: '$createdAt' } },
         totalOrders: { $sum: 1 },
-        completedOrders: { $sum: { $cond: [{ $eq: ['$status', 'complete'] }, 1, 0] } },
+        completedOrders: { $sum: { $cond: [{ $eq: ['$status', 'delivered'] }, 1, 0] } },
         cancelledOrders: { $sum: { $cond: [{ $eq: ['$status', 'cancelled'] }, 1, 0] } },
         totalRevenue: { $sum: '$actualTotal' },
         averageOrderValue: { $avg: '$actualTotal' },
         averageProcessingTime: {
-          $avg: { $cond: [{ $eq: ['$status', 'complete'] }, '$completionTimeMinutes', null] }
+          $avg: { $cond: [{ $eq: ['$status', 'delivered'] }, '$completionTimeMinutes', null] }
         },
         totalWeight: { $sum: '$actualWeight' }
       }

@@ -138,8 +138,8 @@ exports.exportPaymentSummary = async (req, res) => {
 
     // Get orders for the period with valid affiliate commissions
     const orders = await Order.find({
-      status: 'complete',
-      completedAt: { $gte: start, $lte: end },
+      status: 'delivered',
+      deliveredAt: { $gte: start, $lte: end },
       affiliateId: { $exists: true },
       affiliateCommission: { $gt: 0 }
     });
@@ -181,7 +181,7 @@ exports.exportPaymentSummary = async (req, res) => {
       }
       affiliatePayments[affiliateId].orders.push({
         orderId: order.orderId,
-        completedAt: order.completedAt,
+        deliveredAt: order.deliveredAt,
         orderTotal: order.actualTotal || order.estimatedTotal,
         commission: order.affiliateCommission
       });
@@ -311,11 +311,11 @@ exports.exportCommissionDetail = async (req, res) => {
 
     // Get orders for this affiliate
     const orders = await Order.find({
-      status: 'complete',
-      completedAt: { $gte: start, $lte: end },
+      status: 'delivered',
+      deliveredAt: { $gte: start, $lte: end },
       affiliateId: affiliate.affiliateId,
       affiliateCommission: { $gt: 0 }
-    }).sort({ completedAt: 1 });
+    }).sort({ deliveredAt: 1 });
     
     // Manually populate customer data
     const customerIds = [...new Set(orders.map(o => o.customerId))];
@@ -357,7 +357,7 @@ exports.exportCommissionDetail = async (req, res) => {
         },
         orders: orders.map(order => ({
           orderId: order.orderId,
-          completedAt: order.completedAt,
+          deliveredAt: order.deliveredAt,
           customerName: order.customerData ? `${order.customerData.firstName} ${order.customerData.lastName}` : 'Unknown',
           orderTotal: order.actualTotal || order.estimatedTotal,
           commission: order.affiliateCommission,
@@ -384,7 +384,7 @@ exports.exportCommissionDetail = async (req, res) => {
 
       const records = orders.map(order => ({
         orderId: order.orderId,
-        date: order.completedAt.toISOString().split('T')[0],
+        date: order.deliveredAt.toISOString().split('T')[0],
         customer: order.customerData ? `${order.customerData.firstName} ${order.customerData.lastName}` : 'Unknown',
         orderTotal: (order.actualTotal || order.estimatedTotal || 0).toFixed(2),
         commissionRate: '10%', // Default commission rate

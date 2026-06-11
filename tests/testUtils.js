@@ -97,18 +97,19 @@ async function createTestCustomer(affiliateId, data = {}) {
 }
 
 async function createTestOrder(customerId, affiliateId, data = {}) {
+  const bagToken = data.bagToken || require('crypto').randomBytes(16).toString('hex');
   const orderData = {
     orderId: `TEST_ORD_${Date.now()}`,
     customerId: customerId,
     affiliateId: affiliateId,
-    pickupDate: data.pickupDate || new Date(Date.now() + 86400000),
-    pickupTime: data.pickupTime || 'morning',
-    estimatedWeight: data.estimatedWeight || 20,
-    numberOfBags: data.numberOfBags || 2,
-    estimatedTotal: data.estimatedTotal || 30.00,
-    bagCreditApplied: data.bagCreditApplied || 0,
+    bagId: data.bagId || `BAG-${require('uuid').v4()}`,
+    bagToken,
+    actualWeight: data.actualWeight !== undefined ? data.actualWeight : 20,
+    feeBreakdown: data.feeBreakdown || {
+      numberOfBags: 1, minimumFee: 10, perBagFee: 2, totalFee: 10, minimumApplied: true
+    },
     wdfCreditApplied: data.wdfCreditApplied || 0,
-    status: data.status || 'pending',
+    status: data.status || 'in_progress',
     ...data
   };
 

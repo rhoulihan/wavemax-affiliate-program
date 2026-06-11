@@ -86,40 +86,36 @@ describe('Field Filter WDF Credit Support', () => {
       orderId: 'ORD-001',
       customerId: 'CUST-001',
       affiliateId: 'AFF-001',
-      pickupDate: new Date(),
-      pickupTime: 'morning',
-      status: 'complete',
-      estimatedWeight: 20,
+      bagId: 'BAG-ff-1',
+      status: 'delivered',
       actualWeight: 25,
-      estimatedTotal: 35,
       actualTotal: 41.25,
       wdfCreditApplied: 5.00,
-      wdfCreditGenerated: 6.25,
-      weightDifference: 5,
-      specialPickupInstructions: 'Ring doorbell',
-      paymentStatus: 'completed'
+      wdfCreditGenerated: 0,
+      washInstructions: 'Cold wash only',
+      paymentStatus: 'verified'
     , save: jest.fn().mockResolvedValue(true)};
 
     it('should include WDF fields for customer viewing own order', () => {
       const filtered = getFilteredData('order', mockOrder, 'customer');
       
       expect(filtered).toHaveProperty('wdfCreditApplied', 5.00);
-      expect(filtered).toHaveProperty('wdfCreditGenerated', 6.25);
-      expect(filtered).toHaveProperty('weightDifference', 5);
+      expect(filtered).toHaveProperty('wdfCreditGenerated', 0);
+      expect(filtered).not.toHaveProperty('weightDifference');
       
-      // Should not include instructions
-      expect(filtered).not.toHaveProperty('specialPickupInstructions');
+      // Should not include operator wash instructions
+      expect(filtered).not.toHaveProperty('washInstructions');
     });
 
     it('should include WDF fields for affiliate viewing order', () => {
       const filtered = getFilteredData('order', mockOrder, 'affiliate');
       
       expect(filtered).toHaveProperty('wdfCreditApplied', 5.00);
-      expect(filtered).toHaveProperty('wdfCreditGenerated', 6.25);
-      expect(filtered).toHaveProperty('weightDifference', 5);
+      expect(filtered).toHaveProperty('wdfCreditGenerated', 0);
+      expect(filtered).not.toHaveProperty('weightDifference');
       
       // Affiliate should see more fields
-      expect(filtered).toHaveProperty('specialPickupInstructions');
+      expect(filtered).toHaveProperty('washInstructions');
       expect(filtered).toHaveProperty('customerId');
     });
 
@@ -127,8 +123,8 @@ describe('Field Filter WDF Credit Support', () => {
       const filtered = getFilteredData('order', mockOrder, 'admin');
       
       expect(filtered).toHaveProperty('wdfCreditApplied', 5.00);
-      expect(filtered).toHaveProperty('wdfCreditGenerated', 6.25);
-      expect(filtered).toHaveProperty('weightDifference', 5);
+      expect(filtered).toHaveProperty('wdfCreditGenerated', 0);
+      expect(filtered).not.toHaveProperty('weightDifference');
       
       // Admin should see all fields
       expect(filtered).toHaveProperty('_id');
@@ -154,15 +150,15 @@ describe('Field Filter WDF Credit Support', () => {
     it('should have WDF credit fields defined in order field definitions', () => {
       expect(fieldDefinitions.order.customer).toContain('wdfCreditApplied');
       expect(fieldDefinitions.order.customer).toContain('wdfCreditGenerated');
-      expect(fieldDefinitions.order.customer).toContain('weightDifference');
+      expect(fieldDefinitions.order.customer).not.toContain('weightDifference');
       
       expect(fieldDefinitions.order.affiliate).toContain('wdfCreditApplied');
       expect(fieldDefinitions.order.affiliate).toContain('wdfCreditGenerated');
-      expect(fieldDefinitions.order.affiliate).toContain('weightDifference');
+      expect(fieldDefinitions.order.affiliate).not.toContain('weightDifference');
       
       expect(fieldDefinitions.order.admin).toContain('wdfCreditApplied');
       expect(fieldDefinitions.order.admin).toContain('wdfCreditGenerated');
-      expect(fieldDefinitions.order.admin).toContain('weightDifference');
+      expect(fieldDefinitions.order.admin).not.toContain('weightDifference');
     });
   });
 
@@ -197,14 +193,12 @@ describe('Field Filter WDF Credit Support', () => {
         {
           orderId: 'ORD-001',
           wdfCreditApplied: 5,
-          wdfCreditGenerated: 0,
-          weightDifference: 0
+          wdfCreditGenerated: 0
         },
         {
           orderId: 'ORD-002',
           wdfCreditApplied: 0,
-          wdfCreditGenerated: 7.5,
-          weightDifference: 6
+          wdfCreditGenerated: 7.5
         }
       ];
 
@@ -238,15 +232,13 @@ describe('Field Filter WDF Credit Support', () => {
       const order = {
         orderId: 'ORD-003',
         wdfCreditApplied: 0,
-        wdfCreditGenerated: 0,
-        weightDifference: 0
+        wdfCreditGenerated: 0
       };
 
       const filtered = getFilteredData('order', order, 'customer');
       
       expect(filtered).toHaveProperty('wdfCreditApplied', 0);
       expect(filtered).toHaveProperty('wdfCreditGenerated', 0);
-      expect(filtered).toHaveProperty('weightDifference', 0);
     });
   });
 });
