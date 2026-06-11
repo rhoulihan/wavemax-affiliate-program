@@ -54,7 +54,7 @@ exports.sendAffiliateInviteEmail = async function sendAffiliateInviteEmail({
 // ---------------------------------------------------------------------------
 
 const escapeHtml = (s) => String(s).replace(/[&<>"']/g,
-  (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', '\'': '&#39;' }[c]));
 
 const W9_STATUS_TRANSLATIONS = {
   en: {
@@ -159,7 +159,7 @@ exports.sendAffiliateW9StatusEmail = async (affiliate, status, { reason } = {}) 
     const s = t[status] || t.received;
 
     const reasonBlock = (status === 'rejected' && reason)
-      ? `<p style="background:#fef2f2;border-left:4px solid #C74634;padding:12px;">`
+      ? '<p style="background:#fef2f2;border-left:4px solid #C74634;padding:12px;">'
         + `<strong>${t.reasonLabel}</strong> ${escapeHtml(reason)}</p>`
       : '';
 
