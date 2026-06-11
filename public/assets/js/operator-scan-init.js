@@ -908,13 +908,11 @@
             }
 
             // Canonical scan-context resolver (PR 6). Drives the kiosk branch.
+            // ApiClient throws on non-2xx and on success:false bodies, so any
+            // resolver failure (e.g. the anti-enumeration 404) lands in catch.
             const resolveData = await ApiClient.get(`/api/v1/bags/resolve/${bagToken}`, { showError: false });
             hideConfirmation();
 
-            if (!resolveData || resolveData.success === false) {
-                showError(t('operator.intake.error.bagNotFound', 'Bag not recognized'));
-                return;
-            }
             if (resolveData.outcome === 'unclaimed') {
                 showError(t('operator.intake.error.bagNotActive', 'This bag has not been claimed by a customer yet'));
                 return;
@@ -942,7 +940,12 @@
         } catch (error) {
             console.error('Scan error:', error);
             hideConfirmation();
-            showError('Network error. Please try again.');
+            if (error.status === 404) {
+                // Anti-enumeration 404: unknown / minted / retired tokens.
+                showError(t('operator.intake.error.bagNotFound', 'Bag not recognized'));
+            } else {
+                showError('Network error. Please try again.');
+            }
         }
     }
 
@@ -950,13 +953,10 @@
     // + required fresh-form-placed ack (spec §6.4).
     function showIntakeModal(bagToken, resolveData, isReintake) {
         modalTitle.textContent = t('operator.intake.title', 'Bag Intake');
+        // No affiliate slot here: the claimed-outcome resolve response carries
+        // {outcome, customerId, nextAction, order} — no affiliate object — so
+        // the slot could never populate on the intake path.
         modalBody.innerHTML = `
-            <div class="order-info">
-                <div class="info-item">
-                    <div class="info-label" data-role="affiliate-label"></div>
-                    <div class="info-value" id="intakeAffiliateName"></div>
-                </div>
-            </div>
             <div class="weight-input-section">
                 <div class="bag-weight-input">
                     <label for="intakeWeight" id="intakeWeightLabel"></label>
@@ -978,9 +978,7 @@
             </div>
         `;
 
-        // Translated copy + server-sourced strings via textContent (CSP/XSS-safe).
-        document.getElementById('intakeAffiliateName').textContent =
-            (resolveData.affiliate && resolveData.affiliate.name) ? resolveData.affiliate.name : '';
+        // Translated copy via textContent (CSP/XSS-safe).
         document.getElementById('intakeWeightLabel').textContent = t('operator.intake.weightLabel', 'Weight (lbs)');
         document.getElementById('intakeWeight').setAttribute('placeholder', t('operator.intake.weightPlaceholder', 'Enter weight in pounds'));
         document.getElementById('intakeAddOnsHeading').textContent = t('operator.intake.addOnsHeading', 'Add-ons (from the paper form)');
@@ -1027,30 +1025,34 @@
 
         try {
             const token = localStorage.getItem('operatorToken');
-            const data = await ApiClient.post('/api/v1/operators/intake', body, {
+            await ApiClient.post('/api/v1/operators/intake', body, {
                 showError: false,
                 headers: { 'Authorization': `Bearer ${token}` }
             });
-            if (data && data.success) {
-                closeModal();
-                showConfirmation(t('operator.intake.created', 'Order created — payment request sent'), '✅', 'success');
-                setTimeout(hideConfirmation, 3000);
-                await loadStats();
-            } else {
-                const code = data && data.errors ? data.errors.code : null;
-                if (submitBtn) submitBtn.disabled = false;
-                if (code === 'order_already_open') {
-                    showError(t('operator.intake.error.orderAlreadyOpen', 'An order is already open for this bag'));
-                } else if (code === 'bag_not_active') {
-                    showError(t('operator.intake.error.bagNotActive', 'This bag has not been claimed by a customer yet'));
-                } else {
-                    showError((data && data.message) || t('operator.intake.error.bagNotFound', 'Bag not recognized'));
-                }
-            }
+            // ApiClient throws on non-2xx / success:false, so reaching here
+            // means the order was created.
+            closeModal();
+            showConfirmation(t('operator.intake.created', 'Order created — payment request sent'), '✅', 'success');
+            setTimeout(hideConfirmation, 3000);
+            await loadStats();
         } catch (error) {
             console.error('Intake submit error:', error);
             if (submitBtn) submitBtn.disabled = false;
-            showError('Network error. Please try again.');
+            // The intake endpoint sends sendError(..., { code, ... });
+            // ApiClient carries the parsed body on error.data.
+            const body = error.data;
+            const code = (body && body.errors && body.errors.code) || null;
+            if (code === 'order_already_open') {
+                showError(t('operator.intake.error.orderAlreadyOpen', 'An order is already open for this bag'));
+            } else if (code === 'bag_not_active') {
+                showError(t('operator.intake.error.bagNotActive', 'This bag has not been claimed by a customer yet'));
+            } else if (code === 'invalid_bag') {
+                showError(t('operator.intake.error.bagNotFound', 'Bag not recognized'));
+            } else if (body && body.message) {
+                showError(body.message);
+            } else {
+                showError('Network error. Please try again.');
+            }
         }
     }
 
@@ -1058,22 +1060,28 @@
     async function sendScanProcessed(bagToken) {
         try {
             const token = localStorage.getItem('operatorToken');
-            const data = await ApiClient.post('/api/v1/operators/scan-processed',
+            await ApiClient.post('/api/v1/operators/scan-processed',
                 { bagToken: bagToken },
                 { showError: false, headers: { 'Authorization': `Bearer ${token}` } }
             );
-            if (data && data.success) {
-                showConfirmation(t('operator.intake.processedScan', 'Bag marked processed'), '✅', 'success');
-            } else if (data && data.warning === 'duplicate_scan') {
-                showConfirmation(t('operator.intake.alreadyProcessed', 'This bag has already been processed'), '⚠️', 'warning');
-            } else {
-                showError((data && data.message) || 'Scan failed');
-            }
+            // ApiClient throws on success:false, so reaching here means the
+            // bag advanced. duplicate_scan replies are 200 + success:false +
+            // warning, which ApiClient also throws — handled in catch below.
+            showConfirmation(t('operator.intake.processedScan', 'Bag marked processed'), '✅', 'success');
             setTimeout(hideConfirmation, 3000);
             await loadStats();
         } catch (error) {
             console.error('scan-processed error:', error);
-            showError('Network error. Please try again.');
+            const body = error.data;
+            if (body && body.warning === 'duplicate_scan') {
+                showConfirmation(t('operator.intake.alreadyProcessed', 'This bag has already been processed'), '⚠️', 'warning');
+                setTimeout(hideConfirmation, 3000);
+                await loadStats();
+            } else if (body && (body.message || body.error)) {
+                showError(body.message || body.error);
+            } else {
+                showError('Network error. Please try again.');
+            }
         }
     }
 
