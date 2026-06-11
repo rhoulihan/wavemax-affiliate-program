@@ -10,6 +10,7 @@ const Order = require('../../models/Order');
 const Customer = require('../../models/Customer');
 const Affiliate = require('../../models/Affiliate');
 const bagService = require('../bags/bagService');
+const { applyTransition } = require('./orderStateMachine');
 const { calculateDeliveryFee } = require('../../services/orderPricingService');
 const paymentLinkService = require('../../services/paymentLinkService');
 const emailService = require('../../utils/emailService');
@@ -24,6 +25,55 @@ class IntakeError extends Error {
     this.details = details;
     this.isIntakeError = true;
   }
+}
+
+/**
+ * Re-intake rule (spec §6.4 step 1): a picked_up order whose bag is being
+ * scanned back IN was delivered but never confirmed — close it as
+ * delivered exactly once, realize commission, notify, then the caller
+ * opens the new order.
+ */
+async function autoDeliverPickedUpOrder(order, operatorId, req) {
+  applyTransition(order, 'delivered'); // validates picked_up -> delivered; pre-save stamps deliveredAt + commissionRealizedAt set-once
+  order.commissionRealized = true;
+  order.proofOfDelivery = {
+    method: 'reintake',
+    confirmedByRole: 'operator',
+    confirmedById: String(operatorId),
+    confirmedAt: new Date()
+  };
+  if (order.bags && order.bags[0]) {
+    order.bags[0].status = 'delivered';
+    order.bags[0].scannedAt.delivered = new Date();
+    // bags[].scannedBy.delivered is typed String ref Affiliate (door scans);
+    // re-intake is operator-confirmed, recorded in proofOfDelivery instead.
+  }
+  if (order.intake) {
+    order.intake.deliveredAt = new Date();
+  }
+  await order.save();
+
+  const customer = await Customer.findOne({ customerId: order.customerId });
+  const affiliate = await Affiliate.findOne({ affiliateId: order.affiliateId });
+  try {
+    if (customer) {
+      await emailService.sendCustomerDeliveredEmail(customer, order);
+    }
+    if (affiliate && customer) {
+      await emailService.sendAffiliateCommissionEmail(affiliate, order, customer);
+    }
+  } catch (emailError) {
+    logger.error(`Re-intake delivery emails failed for order ${order.orderId}:`, emailError);
+  }
+
+  await logAuditEvent(AuditEvents.ORDER_REINTAKE, {
+    operatorId,
+    orderId: order.orderId,
+    bagId: order.bagId,
+    action: 'auto_delivered_on_reintake'
+  }, req);
+
+  logger.info(`Re-intake: order ${order.orderId} auto-delivered (bag ${order.bagId})`);
 }
 
 /**
@@ -71,6 +121,9 @@ async function createOrderFromBag({ bagToken, weight, addOns, freshAddOnsFormPla
       409,
       { orderId: openOrder.orderId, status: openOrder.status }
     );
+  }
+  if (reIntake) {
+    await autoDeliverPickedUpOrder(openOrder, operatorId, req);
   }
 
   // Lifetime counters (++orderCount / lastIntakeAt) — PR 6 static.

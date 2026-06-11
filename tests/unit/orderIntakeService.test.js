@@ -187,4 +187,67 @@ describe('orderIntakeService.createOrderFromBag', () => {
       })).rejects.toMatchObject({ isIntakeError: true, code: 'invalid_weight', status: 400 });
     });
   });
+
+  describe('re-intake (picked_up open order)', () => {
+    let priorOrder;
+
+    beforeEach(async () => {
+      const { order } = await createOrderFromBag({
+        bagToken: TOKEN, weight: 10, addOns: {}, freshAddOnsFormPlaced: false, operatorId
+      });
+      // Simulate operator scan-out (PR 9 owns the real path): force picked_up.
+      await Order.updateOne({ orderId: order.orderId }, { $set: { status: 'picked_up' } });
+      priorOrder = await Order.findOne({ orderId: order.orderId });
+      jest.clearAllMocks();
+    });
+
+    it('auto-delivers the prior order with method reintake, realizes commission once, then opens a new order', async () => {
+      const { order: newOrder, reIntake } = await createOrderFromBag({
+        bagToken: TOKEN, weight: 7, addOns: {}, freshAddOnsFormPlaced: true, operatorId
+      });
+
+      expect(reIntake).toBe(true);
+
+      const delivered = await Order.findOne({ orderId: priorOrder.orderId });
+      expect(delivered.status).toBe('delivered');
+      expect(delivered.deliveredAt).toBeInstanceOf(Date);
+      expect(delivered.proofOfDelivery.method).toBe('reintake');
+      expect(delivered.proofOfDelivery.confirmedByRole).toBe('operator');
+      expect(delivered.proofOfDelivery.confirmedById).toBe(String(operatorId));
+      expect(delivered.commissionRealized).toBe(true);
+      expect(delivered.commissionRealizedAt).toBeInstanceOf(Date);
+      expect(delivered.bags[0].status).toBe('delivered');
+
+      expect(newOrder.status).toBe('in_progress');
+      expect(newOrder.orderId).not.toBe(priorOrder.orderId);
+      expect(await Order.countDocuments({ bagId: bag.bagId })).toBe(2);
+
+      // Delivered email (Notification B) + commission email fire on auto-deliver.
+      expect(emailService.sendCustomerDeliveredEmail).toHaveBeenCalledTimes(1);
+      expect(emailService.sendAffiliateCommissionEmail).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not double-close on a double scan (one delivered + one in_progress)', async () => {
+      await createOrderFromBag({
+        bagToken: TOKEN, weight: 7, addOns: {}, freshAddOnsFormPlaced: false, operatorId
+      });
+      // Second scan now hits the NEW open in_progress order -> 409, not another auto-deliver.
+      await expect(createOrderFromBag({
+        bagToken: TOKEN, weight: 7, addOns: {}, freshAddOnsFormPlaced: false, operatorId
+      })).rejects.toMatchObject({ code: 'order_already_open', status: 409 });
+
+      expect(await Order.countDocuments({ bagId: bag.bagId, status: 'delivered' })).toBe(1);
+      expect(await Order.countDocuments({ bagId: bag.bagId, status: 'in_progress' })).toBe(1);
+    });
+
+    it('still delivers the prior order when emails throw (best-effort)', async () => {
+      emailService.sendCustomerDeliveredEmail.mockRejectedValueOnce(new Error('smtp down'));
+      const { order: newOrder } = await createOrderFromBag({
+        bagToken: TOKEN, weight: 7, addOns: {}, freshAddOnsFormPlaced: false, operatorId
+      });
+      const delivered = await Order.findOne({ orderId: priorOrder.orderId });
+      expect(delivered.status).toBe('delivered');
+      expect(newOrder.status).toBe('in_progress');
+    });
+  });
 });
