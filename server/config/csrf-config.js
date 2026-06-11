@@ -87,6 +87,13 @@ const CSRF_CONFIG = {
     // from the design-explorer pages; abuse is bounded by conciergeLimiter.
     '/api/concierge',
 
+    // Overloaded bag-URL actions (PR 9) — public, gated by role codes +
+    // tight rate limit + per-bag/IP attempt lockout instead of CSRF (the
+    // phone's native camera opens the page with no session/cookie).
+    '/api/v1/bags/:bagToken/intake',
+    '/api/v1/bags/:bagToken/advance',
+    '/api/v1/bags/:bagToken/confirm-delivery',
+
     // Test endpoints (development only)
     '/api/v1/test/customer',
     '/api/v1/test/order',
