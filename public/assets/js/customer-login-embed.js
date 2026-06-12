@@ -296,12 +296,7 @@
                   // No customer account for this social identity. Open registration
                   // was retired (PR 6/PR 11): customers sign up by scanning the QR
                   // code on an issued WaveMAX laundry bag. Stay on the login page.
-                  const noAccountMessage = 'No account was found for this sign-in. To create a customer account, scan the QR code on your WaveMAX laundry bag to get started.';
-                  if (window.ModalSystem) {
-                    window.ModalSystem.alert(noAccountMessage, 'Account Not Found');
-                  } else {
-                    alert(noAccountMessage);
-                  }
+                  showNoAccountNotice();
 
                 } else if (data.result.type === 'social-auth-account-conflict') {
                   console.log('Processing social-auth-account-conflict from database');
@@ -414,6 +409,19 @@
   }
 
   // Initialize everything when DOM is ready
+  // No customer account exists for this sign-in. Open registration was retired
+  // (PR 6/PR 11): customers sign up by scanning the QR code on an issued
+  // WaveMAX laundry bag. Shown by the popup OAuth path and by the non-popup
+  // fallback redirect (?noAccount=true).
+  function showNoAccountNotice() {
+    const noAccountMessage = 'No account was found for this sign-in. To create a customer account, scan the QR code on your WaveMAX laundry bag to get started.';
+    if (window.ModalSystem) {
+      window.ModalSystem.alert(noAccountMessage, 'Account Not Found');
+    } else {
+      alert(noAccountMessage);
+    }
+  }
+
   function init() {
     console.log('Customer login embed initializing');
     console.log('Document ready state:', document.readyState);
@@ -423,6 +431,11 @@
     // Check URL parameters
     const urlParams = new URLSearchParams(window.location.search);
     console.log('All URL parameters:', Array.from(urlParams.entries()));
+
+    // Non-popup OAuth fallback redirect: no account exists for the sign-in
+    if (urlParams.get('noAccount') === 'true') {
+      showNoAccountNotice();
+    }
 
     // Store redirect parameter if present
     const redirectParam = urlParams.get('redirect');
