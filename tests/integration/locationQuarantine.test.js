@@ -134,8 +134,9 @@ describe('Location quarantine middleware', () => {
         expect(response.headers.location || '').not.toMatch(/wavemaxlaundry\.com/);
       });
 
-      it('allows /customer-register-embed.html', async () => {
-        const response = await request(app).get('/customer-register-embed.html').redirects(0);
+      it('allows /customer-login-embed.html', async () => {
+        // (was customer-register-embed.html, retired in PR 11 — claim-only registration)
+        const response = await request(app).get('/customer-login-embed.html').redirects(0);
         expect(response.headers.location || '').not.toMatch(/wavemaxlaundry\.com/);
       });
 

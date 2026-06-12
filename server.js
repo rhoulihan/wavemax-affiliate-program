@@ -297,7 +297,6 @@ app.use((req, res, next) => {
     '/affiliate-register-embed.html',
     '/affiliate-login-embed.html',
     '/affiliate-dashboard-embed.html',
-    '/customer-register-embed.html',
     '/customer-login-embed.html',
     '/customer-dashboard-embed.html',
     '/forgot-password-embed.html',

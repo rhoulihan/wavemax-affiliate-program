@@ -152,21 +152,12 @@
     updateLinks();
   }
 
-  // Function to update registration and login links
+  // Function to update the login link.
+  // Customer registration is bag-claim-only since PR 6 — customers sign up by
+  // scanning the QR on an issued bag (/claim?bag=<token>), so the landing page
+  // no longer links to a registration form.
   function updateLinks() {
     const baseUrl = window.location.origin;
-
-    // Update registration links
-    const registerLinks = [
-      document.getElementById('registerLink'),
-      document.getElementById('registerLinkBottom')
-    ];
-
-    registerLinks.forEach(link => {
-      if (link) {
-        link.href = `${baseUrl}/embed-app-v2.html?route=/customer-register`;
-      }
-    });
 
     // Update login link
     const loginLink = document.getElementById('loginLink');

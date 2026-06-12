@@ -292,15 +292,16 @@
                   window.location.href = `/embed-app-v2.html?route=${redirectTo}`;
 
                 } else if (data.result.type === 'social-auth-success') {
-                  console.log('Customer does not exist, redirecting to registration');
-                  // New customer - redirect to registration with social token
+                  console.log('Customer does not exist — registration is bag-claim-only');
+                  // No customer account for this social identity. Open registration
+                  // was retired (PR 6/PR 11): customers sign up by scanning the QR
+                  // code on an issued WaveMAX laundry bag. Stay on the login page.
+                  const noAccountMessage = 'No account was found for this sign-in. To create a customer account, scan the QR code on your WaveMAX laundry bag to get started.';
                   if (window.ModalSystem) {
-                    window.ModalSystem.alert('Account not found. You will be redirected to registration to create a new customer account.', 'Account Not Found');
+                    window.ModalSystem.alert(noAccountMessage, 'Account Not Found');
                   } else {
-                    alert('Account not found. You will be redirected to registration to create a new customer account.');
+                    alert(noAccountMessage);
                   }
-                  // Use embed-app-v2 routing which will determine V1 vs V2 based on payment version
-                  window.location.href = `/embed-app-v2.html?route=/customer-register&socialToken=${data.result.socialToken}&provider=${data.result.provider}`;
 
                 } else if (data.result.type === 'social-auth-account-conflict') {
                   console.log('Processing social-auth-account-conflict from database');
