@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bitte holen Sie Ihre Wäsche im Geschäft ab - WaveMAX Laundry</title>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background-color: #c62828; color: #ffffff !important; padding: 30px 20px; text-align: center; border-radius: 5px 5px 0 0; }
+        .header h1 { margin: 0; color: #ffffff !important; font-size: 28px; }
+        .content { background-color: #f9f9f9; padding: 30px 20px; border: 1px solid #ddd; }
+        .order-details { background-color: #ffffff !important; padding: 20px; margin: 20px 0; border-radius: 8px; border: 2px solid #c62828; }
+        .order-details h2 { color: #c62828; margin-top: 0; font-size: 24px; }
+        .detail-row { margin: 15px 0; font-size: 16px; }
+        .detail-label { font-weight: bold; color: #555; display: inline-block; min-width: 140px; }
+        .amount-due { background-color: #ffebee; padding: 20px; margin: 25px 0; border-radius: 8px; text-align: center; border: 2px solid #c62828; }
+        .amount-due h2 { color: #c62828; margin: 0 0 10px 0; font-size: 20px; }
+        .amount-value { font-size: 48px; font-weight: bold; color: #c62828; margin: 10px 0; }
+        .store-box { background-color: #e8f5e9; padding: 20px; margin: 25px 0; border-radius: 8px; border-left: 4px solid #2e7d32; }
+        .store-box h3 { color: #2e7d32; margin-top: 0; font-size: 18px; }
+        .instructions { background-color: #fff3cd; padding: 20px; margin: 25px 0; border-radius: 8px; border-left: 4px solid #ffc107; }
+        .instructions p { color: #856404; margin: 10px 0; }
+        .footer { background-color: #f5f5f5; padding: 20px; text-align: center; font-size: 12px; color: #666; border-radius: 0 0 5px 5px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Bitte holen Sie Ihre Wäsche im Geschäft ab</h1>
+        </div>
+        <div class="content">
+            <p style="font-size: 18px; margin-bottom: 10px;">Hallo {{customerName}},</p>
+
+            <p style="font-size: 16px;">wir konnten die Zahlung für Ihre Bestellung nicht bestätigen, daher wird Ihre
+            saubere Wäsche sicher im Geschäft aufbewahrt. Die Zahlungserinnerungen wurden eingestellt — für diese
+            Bestellung werden keine weiteren E-Mails gesendet.</p>
+
+            <div class="order-details">
+                <h2>Bestellübersicht</h2>
+                <div class="detail-row">
+                    <span class="detail-label">Bestell-ID:</span> <strong>{{orderId}}</strong>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Gewicht:</span> <strong>{{actualWeight}} lbs</strong>
+                </div>
+            </div>
+
+            <div class="amount-due">
+                <h2>Fälliger Betrag</h2>
+                <div class="amount-value">${{amount}}</div>
+            </div>
+
+            <div class="store-box">
+                <h3>Kommen Sie ins Geschäft, um zu zahlen und Ihre Wäsche abzuholen</h3>
+                <p style="font-size: 16px; margin: 0;"><strong>{{storeAddress}}</strong></p>
+            </div>
+
+            <div class="instructions">
+                <p><strong>Wie geht es weiter?</strong></p>
+                <p>Ihre Wäsche bleibt sicher bei uns, bis Sie vorbeikommen. Zahlen Sie im Geschäft (oder nutzen Sie
+                einen der Zahlungslinks aus Ihren früheren E-Mails), und wir übergeben Ihnen Ihre Tasche sofort.
+                Wenn Sie bereits gezahlt haben, ist nichts weiter nötig — unser System bestätigt dies in Kürze und
+                Ihre Lieferung wird fortgesetzt.</p>
+            </div>
+        </div>
+        <div class="footer">
+            <p>&copy; 2025 CRHS Enterprises, LLC. Alle Rechte vorbehalten.</p>
+            <p>Bestellung #{{shortOrderId}}</p>
+        </div>
+    </div>
+</body>
+</html>

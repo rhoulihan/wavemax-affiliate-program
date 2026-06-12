@@ -309,6 +309,17 @@
                     </div>
                 </div>
 
+                <!-- W-9 Upload (optional, spec §6.2) (Initially Hidden) -->
+                <div id="w9Section" class="form-section-hidden">
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <label for="w9" class="block text-gray-700 font-semibold mb-2" data-i18n="affiliateRegister.w9.uploadLabel">Upload your completed W-9</label>
+                        <input type="file" id="w9" name="w9" accept=".pdf,.jpg,.jpeg,.png" class="w-full px-4 py-2 border rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <p class="text-xs text-gray-500 mt-1" data-i18n="affiliateRegister.w9.fileTypeHint" data-i18n-param-max="10">PDF, JPG, or PNG, max 10 MB</p>
+                        <p id="w9FileError" class="hidden text-sm text-red-600 mt-1" role="alert"></p>
+                        <p class="text-sm text-gray-600 mt-2" data-i18n="affiliateRegister.w9.optionalNote">You can also upload your W-9 later, but commission payouts pause at $600 in annual earnings until it is on file.</p>
+                    </div>
+                </div>
+
                 <!-- Terms and Conditions (Always visible) (Initially Hidden) -->
                 <div id="termsSection" class="form-section-hidden">
                     <div class="bg-gray-50 p-4 rounded-lg">

@@ -94,10 +94,12 @@
       "previous": "Zurück",
       "close": "Schließen",
       "confirm": "Bestätigen",
+      "refresh": "Aktualisieren",
+      "applyFilters": "Filter anwenden",
+      "clearFilters": "Filter zurücksetzen",
       "register": "Registrieren",
       "learnMore": "Mehr erfahren",
       "customerLogin": "Kundenlogin",
-      "signUpToday": "Heute registrieren",
       "registerNow": "Jetzt registrieren",
       "copy": "Kopieren",
       "understand": "Ich verstehe"
@@ -118,7 +120,13 @@
       "termsAndConditions": "Allgemeine Geschäftsbedingungen",
       "privacyPolicy": "Datenschutzerklärung",
       "allRightsReserved": "Alle Rechte vorbehalten",
-      "lastUpdated": "Zuletzt aktualisiert:"
+      "lastUpdated": "Zuletzt aktualisiert:",
+      "all": "Alle",
+      "active": "Aktiv",
+      "inactive": "Inaktiv",
+      "allAffiliates": "Alle Partner",
+      "name": "Name",
+      "affiliateId": "Partner-ID"
     },
     "username": "Benutzername",
     "usernameDesc": "Ihre eindeutige Anmelde-ID",
@@ -147,6 +155,7 @@
       "confirmAction": "Sind Sie sicher, dass Sie fortfahren möchten?",
       "loginFailed": "Anmeldung fehlgeschlagen. Bitte überprüfen Sie Ihre Anmeldedaten und versuchen Sie es erneut.",
       "loginSuccess": "Anmeldung erfolgreich!",
+      "signingIn": "Anmeldung läuft...",
       "logoutSuccess": "Sie wurden erfolgreich abgemeldet.",
       "registrationSuccess": "Registrierung erfolgreich!",
       "registrationFailed": "Registrierung fehlgeschlagen. Bitte versuchen Sie es erneut.",
@@ -202,14 +211,6 @@
       }
     },
     "howItWorks": {
-      "step1": {
-        "socialSignupText": "Melden Sie sich schnell mit Ihrem Social-Media-Konto an",
-        "socialConnectedMessage": "Großartig! Wir haben Ihr soziales Konto verbunden. Füllen Sie einfach das untenstehende Formular aus, um die Registrierung abzuschließen - keine Zahlung erforderlich!",
-        "title": "Registrieren",
-        "description": "Erstellen Sie Ihr Partnerkonto in wenigen Minuten"
-      },
-      "socialSignupText": "Melden Sie sich schnell mit Ihrem Social-Media-Konto an",
-      "socialConnectedMessage": "Großartig! Wir haben Ihr soziales Konto verbunden. Füllen Sie einfach das untenstehende Formular aus, um die Registrierung abzuschließen - keine Zahlung erforderlich!",
       "title": "So funktioniert unser Service",
       "subtitle": "Einfacher Prozess",
       "steps": {
@@ -229,6 +230,10 @@
           "description": "Ihre Kleidung wird professionell gereinigt und frisch, gefaltet und tragfertig zurückgegeben - normalerweise innerhalb von 24-48 Stunden."
         }
       },
+      "step1": {
+        "title": "Registrieren",
+        "description": "Erstellen Sie Ihr Partnerkonto in wenigen Minuten"
+      },
       "step2": {
         "title": "Teilen Sie Ihren Link",
         "description": "Erhalten Sie Ihren einzigartigen Empfehlungslink und Werbematerialien"
@@ -244,8 +249,6 @@
     },
     "process": {
       "step1": {
-        "socialSignupText": "Melden Sie sich schnell mit Ihrem Social-Media-Konto an",
-        "socialConnectedMessage": "Großartig! Wir haben Ihr soziales Konto verbunden. Füllen Sie einfach das untenstehende Formular aus, um die Registrierung abzuschließen - keine Zahlung erforderlich!",
         "title": "Abholung planen",
         "description": "Nutzen Sie unsere einfache App, um eine Abholzeit zu planen, die zu Ihrem Zeitplan passt"
       },
@@ -368,6 +371,7 @@
     "cta": {
       "title": "Bereit, Geld zu verdienen?",
       "customerTitle": "Bereit für frische, saubere Wäsche?",
+      "scanBagToJoin": "Um zu starten, fragen Sie Ihren Lieferpartner nach einem WaveMAX-Wäschesack und scannen Sie dessen QR-Code, um Ihr Konto zu erstellen.",
       "description": "Treten Sie unserem Partnerprogramm bei und verdienen Sie Provisionen, indem Sie Ihren Kunden Wäscheservice anbieten.",
       "inviteOnly": "Partner werden nur auf Einladung aufgenommen — kontaktieren Sie WaveMAX, um zu starten.",
       "login": "Partner-Login",
@@ -537,7 +541,29 @@
         "w9Verified": "W-9 Verifiziert",
         "w9VerifiedMessage": "Ihr W-9 wurde verifiziert. Sie können Zahlungen erhalten.",
         "w9Rejected": "W-9 Abgelehnt",
-        "w9RejectedMessage": "Ihr W-9 wurde abgelehnt. Bitte reichen Sie ein neues ein."
+        "w9RejectedMessage": "Ihr W-9 wurde abgelehnt. Bitte reichen Sie ein neues ein.",
+        "completeW9WithDocuSign": "W9-Formular mit DocuSign ausfüllen",
+        "signingInProgress": "W9-Signierung läuft...",
+        "docusignHelp": "Klicken Sie auf die Schaltfläche oben, um Ihr W9-Formular sicher über die E-Signatur-Plattform von DocuSign auszufüllen. Sie werden zu DocuSign weitergeleitet, um Ihr Formular elektronisch auszufüllen und zu signieren.",
+        "needBlankW9": "Benötigen Sie ein leeres W9-Formular?",
+        "resumeW9Signing": "W9-Signierung fortsetzen",
+        "signingError": "W9-Signierung konnte nicht gestartet werden. Bitte versuchen Sie es erneut.",
+        "signingComplete": "W9-Formular erfolgreich signiert!",
+        "w9SigningComplete": "Ihr W9-Formular wurde erfolgreich signiert! Es wird von unserem Team geprüft.",
+        "w9SigningCancelled": "Die W9-Signierung wurde abgebrochen.",
+        "w9SigningDeclined": "Die W9-Signierung wurde abgelehnt.",
+        "w9SessionTimeout": "Ihre Signiersitzung ist abgelaufen. Bitte versuchen Sie es erneut.",
+        "docusignSent": "W9-Formular gesendet - Signatur ausstehend",
+        "docusignDelivered": "W9-Formular geöffnet - in Bearbeitung",
+        "docusignCompleted": "W9-Formular signiert - wird geprüft",
+        "docusignDeclined": "W9-Signierung abgelehnt",
+        "docusignVoided": "W9-Anfrage storniert",
+        "popupBlocked": "Bitte erlauben Sie Pop-ups für diese Website, um die W9-Signierung abzuschließen.",
+        "signingTimeout": "Die W9-Signiersitzung ist abgelaufen. Bitte versuchen Sie es erneut.",
+        "signingCancelled": "Die W9-Signierung wurde abgebrochen.",
+        "authorizationRequired": "DocuSign-Autorisierung erforderlich. Ein neues Fenster wird geöffnet, damit Sie den Zugriff gewähren können.",
+        "authorizationSuccess": "DocuSign-Autorisierung erfolgreich! W9-Signierung wird gestartet...",
+        "authorizationCancelled": "Die Autorisierung wurde abgebrochen."
       },
       "tabs": {
         "pickups": "Abholungen & Lieferungen",
@@ -633,6 +659,12 @@
       "nextStep4": "Verfolgen Sie Ihre Empfehlungen und Provisionen in Echtzeit",
       "nextStep5": "Erhalten Sie monatliche Zahlungen über Ihre bevorzugte Zahlungsmethode",
       "loginToDashboard": "Zum Dashboard anmelden"
+    },
+    "bags": {
+      "inventory": {
+        "title": "Meine Beutel",
+        "empty": "Noch keine Beutel"
+      }
     }
   },
   "customer": {
@@ -643,104 +675,6 @@
       "orEmail": "Oder mit E-Mail und Passwort anmelden",
       "emailOrUsername": "Benutzername oder E-Mail-Adresse",
       "noAccount": "Haben Sie noch kein Konto?"
-    },
-    "register": {
-      "title": "Erstellen Sie Ihr Konto",
-      "subtitle": "Registrieren Sie sich für bequeme Wäscheabholung & Lieferung",
-      "quickRegistration": "Schnelle Registrierung mit Social Media",
-      "socialSignupText": "Registrieren Sie sich schnell mit Ihrem Social-Media-Konto - wir füllen Ihre Informationen automatisch aus!",
-      "continueWithGoogle": "Mit Google fortfahren",
-      "continueWithFacebook": "Mit Facebook fortfahren",
-      "orManually": "Oder füllen Sie das Formular manuell aus",
-      "personalInfo": "Persönliche Informationen",
-      "firstName": "Vorname *",
-      "lastName": "Nachname *",
-      "email": "E-Mail-Adresse *",
-      "phone": "Telefonnummer *",
-      "addressInfo": "Adressinformationen",
-      "address": "Straßenadresse *",
-      "city": "Stadt *",
-      "state": "Bundesland *",
-      "zipCode": "Postleitzahl *",
-      "servicePreferences": "Service-Präferenzen",
-      "specialInstructions": "Spezielle Anweisungen für Wäsche (Optional)",
-      "specialInstructionsPlaceholder": "Allergien, spezielle Waschmittelanfragen usw.",
-      "affiliateSpecialInstructions": "Spezielle Anweisungen für Partner (Optional)",
-      "affiliateSpecialInstructionsPlaceholder": "Abhol-/Lieferpräferenzen, Zugangscodes, bevorzugte Zeiten usw.",
-      "laundryBags": "Wäschesäcke",
-      "important": "Wichtig:",
-      "bagRequirement": "Wäschesäcke sind für unseren Service erforderlich. Jeder Sack kostet $10,00 und wird:",
-      "bagCharged": "Bei der Registrierung berechnet",
-      "bagDelivered": "Von Ihrem Partner geliefert",
-      "bagCredited": "Bei Ihrer ersten Bestellung gutgeschrieben",
-      "numberOfBags": "Anzahl benötigter Säcke *",
-      "bagRecommendation": "Die meisten Haushalte benötigen 2-3 Säcke für den regulären Wäscheservice.",
-      "totalBagFee": "Gesamtgebühr für Säcke:",
-      "bagCreditNote": "Dieser Betrag wird bei Ihrer ersten Bestellung gutgeschrieben.",
-      "accountSetup": "Kontoeinrichtung",
-      "username": "Benutzername *",
-      "usernameHelp": "Ihre eindeutige Anmeldekennung",
-      "password": "Passwort *",
-      "confirmPassword": "Passwort bestätigen *",
-      "passwordRequirements": "Das Passwort muss enthalten:",
-      "passwordLength": "Mindestens 8 Zeichen",
-      "passwordUppercase": "Einen Großbuchstaben",
-      "passwordLowercase": "Einen Kleinbuchstaben",
-      "passwordNumber": "Eine Zahl",
-      "passwordSpecial": "Ein Sonderzeichen (!@#$%^&*)",
-      "passwordsMatch": "Passwörter stimmen überein",
-      "paymentInfo": "Zahlungsinformationen",
-      "paymentSecure": "Alle Zahlungsinformationen werden sicher verschlüsselt.",
-      "cardholderName": "Name des Karteninhabers *",
-      "cardNumber": "Kartennummer *",
-      "expiryDate": "Ablaufdatum *",
-      "cvv": "CVV *",
-      "billingZip": "Postleitzahl für Rechnungsadresse *",
-      "savePaymentInfo": "Zahlungsinformationen für zukünftige Bestellungen speichern",
-      "serviceAgreement": "Servicevereinbarung",
-      "serviceSummary": "Service-Zusammenfassung",
-      "deliveryFeeLabel": "Liefergebühr:",
-      "wdfServiceLabel": "Waschen, Trocknen, Falten Service:",
-      "laundryBagsLabel": "Wäschesäcke:",
-      "creditedOnFirstOrder": "(gutgeschrieben bei erster Bestellung)",
-      "finalCostNote": "Die endgültigen Kosten hängen vom Gewicht Ihrer Wäsche ab.",
-      "submitButton": "Für Wäscheservice registrieren",
-      "contactInfo": "Kontaktinformationen",
-      "accountInfo": "Kontoinformationen",
-      "referralCode": "Empfehlungscode (Optional)",
-      "termsAgree": "Ich stimme den",
-      "alreadyHaveAccount": "Haben Sie bereits ein Konto?",
-      "socialAccountConnected": "Social-Media-Konto verbunden!",
-      "successfullyConnectedWith": "Erfolgreich verbunden mit {{provider}}",
-      "socialConnected": "Konto verbunden",
-      "autoFilledMessage": "Ihre Informationen wurden automatisch unten ausgefüllt. Vervollständigen Sie die restlichen Felder, um Ihre Registrierung abzuschließen.",
-      "bagNote": "Diese Gebühr wird bei Ihrer ersten Bestellung gutgeschrieben.",
-      "loadingPayment": "Zahlungsformular wird geladen...",
-      "pricing": {
-        "startingAt": "Ab ${{price}}",
-        "feeStructure": "(Min: ${{minFee}}, dann ${{perBagFee}}/Tasche)",
-        "wdfRate": "${{rate}}/lb (inkl. Servicegebühren)"
-      },
-      "v2": {
-        "noPaymentRequired": "Keine Zahlung Erforderlich",
-        "subtitle": "Melden Sie sich für den Premium-Wäscheabhol- und Lieferservice an - zahlen Sie nach dem Wiegen Ihrer Wäsche!",
-        "howItWorks": "So funktioniert unser V2-Zahlungssystem",
-        "step1": "Jetzt ohne Kreditkarte anmelden",
-        "socialSignupText": "Melden Sie sich schnell mit Ihrem Social-Media-Konto an",
-        "socialConnectedMessage": "Großartig! Wir haben Ihr soziales Konto verbunden. Füllen Sie einfach das untenstehende Formular aus, um die Registrierung abzuschließen - keine Zahlung erforderlich!",
-        "step2": "Erhalten Sie Ihre kostenlosen Wäschesäcke",
-        "step3": "Geben Sie Ihren Wäschebeutel an Ihren Partner — Ihre Bestellung wird erstellt, wenn er im Geschäft ankommt",
-        "step4": "Wir wiegen Ihre Wäsche und senden Ihnen Zahlungslinks",
-        "step5": "Bezahlen Sie bequem über Venmo, PayPal oder CashApp",
-        "step6": "Erhalten Sie Ihre frische, saubere Wäsche!",
-        "submitButton": "Kostenlos anmelden - Keine Zahlung erforderlich",
-        "noCardRequired": "Keine Kreditkarte erforderlich • Zahlen Sie nach dem Wiegen Ihrer Wäsche"
-      },
-      "terms": "Mit der Registrierung stimmen Sie unseren",
-      "termsLink": "Nutzungsbedingungen",
-      "and": "und",
-      "privacyLink": "Datenschutzrichtlinien",
-      "processing": "Ihre Registrierung wird bearbeitet..."
     },
     "dashboard": {
       "title": "Kunden-Dashboard",
@@ -763,11 +697,14 @@
       "subtitle": "Operator-Portal",
       "pinCode": "PIN-Code eingeben",
       "pinPlaceholder": "4-6 stellige PIN eingeben",
+      "email": "E-Mail-Adresse",
+      "password": "Passwort",
       "clockIn": "Einstempeln",
       "clockingIn": "Einstempeln...",
       "needHelp": "Benötigen Sie Hilfe? Kontaktieren Sie Ihren Vorgesetzten",
       "shiftNoticeTitle": "Schichthinweis:",
       "shiftNoticeText": "Sie können sich nur während Ihrer geplanten Schichtzeiten anmelden. Alle Aktivitäten werden überwacht.",
+      "invalidCredentials": "Ungültige E-Mail-Adresse oder ungültiges Passwort",
       "invalidPin": "Ungültige PIN. Bitte versuchen Sie es erneut.",
       "accountLocked": "Konto gesperrt. Bitte versuchen Sie es später erneut.",
       "accountInactive": "Konto inaktiv. Kontaktieren Sie Ihren Vorgesetzten.",
@@ -1011,153 +948,37 @@
         "docusignAuthRequired": "DocuSign-Autorisierung erforderlich. Bitte autorisieren Sie die DocuSign-Integration in den Systemeinstellungen.",
         "docusignTemplateError": "DocuSign W9-Vorlage nicht konfiguriert. Bitte überprüfen Sie die Vorlagen-ID in den Systemeinstellungen."
       },
-      "w9review": {
-        "title": "W-9 Dokumentenprüfung",
-        "pendingReview": "Ausstehende Prüfung",
-        "verifiedDocuments": "Verifizierte Dokumente",
-        "rejectedDocuments": "Abgelehnte Dokumente",
-        "filterByStatus": "Nach Status filtern",
-        "searchAffiliate": "Partner suchen",
-        "searchPlaceholder": "Name, E-Mail oder Partner-ID",
-        "filters": {
-          "all": "Alle",
-          "pending": "Ausstehend",
-          "verified": "Verifiziert",
-          "rejected": "Abgelehnt"
-        },
-        "table": {
-          "affiliateName": "Partnername",
-          "businessName": "Firmenname (rechtlich)",
-          "taxIdType": "Steuer-ID-Typ",
-          "submittedDate": "Eingereicht am",
-          "status": "Status",
-          "actions": "Aktionen"
-        },
-        "actions": {
-          "view": "Anzeigen",
-          "verify": "Verifizieren",
-          "reject": "Ablehnen",
-          "download": "Herunterladen"
-        },
-        "statusBadge": {
-          "pending": "Ausstehend",
-          "verified": "Verifiziert",
-          "rejected": "Abgelehnt"
-        },
-        "modal": {
-          "title": "W-9 Dokumentendetails",
-          "personalInfo": "Persönliche Informationen",
-          "fullName": "Vollständiger Name",
-          "businessName": "Firmenname",
-          "businessNamePlaceholder": "Leer lassen, wenn persönlicher Name verwendet wird",
-          "taxInfo": "Steuerinformationen",
-          "taxIdType": "Steuer-ID-Typ",
-          "taxId": "Steuer-ID",
-          "taxIdLast4": "Steuer-ID (Letzte 4 Ziffern)",
-          "taxIdLast4Placeholder": "1234",
-          "quickbooksVendorId": "QuickBooks-Lieferanten-ID",
-          "quickbooksVendorIdPlaceholder": "QB-VENDOR-123",
-          "notes": "Verifizierungsnotizen",
-          "notesPlaceholder": "Optionale Notizen zur Verifizierung",
-          "documentStatus": "Dokumentenstatus",
-          "currentStatus": "Aktueller Status",
-          "submittedOn": "Eingereicht am",
-          "lastReviewedOn": "Zuletzt geprüft am",
-          "reviewedBy": "Geprüft von",
-          "rejectionReason": "Ablehnungsgrund",
-          "documentPreview": "Dokumentenvorschau",
-          "actions": "Aktionen",
-          "verifyButton": "Dokument verifizieren",
-          "rejectButton": "Dokument ablehnen",
-          "downloadButton": "PDF herunterladen",
-          "close": "Schließen"
-        },
-        "confirmModal": {
-          "verifyTitle": "W-9 Dokument verifizieren",
-          "verifyMessage": "Sind Sie sicher, dass Sie dieses W-9 Dokument verifizieren möchten?",
-          "rejectTitle": "W-9 Dokument ablehnen",
-          "rejectMessage": "Bitte geben Sie einen Grund für die Ablehnung an:",
-          "rejectReasonPlaceholder": "Bitte geben Sie einen klaren Grund für die Ablehnung an",
-          "rejectionHelp": "Diese Nachricht wird an den Partner gesendet",
-          "confirm": "Bestätigen",
-          "cancel": "Abbrechen"
-        },
-        "messages": {
-          "verifySuccess": "W-9 Dokument erfolgreich verifiziert",
-          "rejectSuccess": "W-9 Dokument abgelehnt",
-          "operationFailed": "Vorgang fehlgeschlagen. Bitte versuchen Sie es erneut.",
-          "rejectionReasonRequired": "Ablehnungsgrund ist erforderlich"
-        },
-        "noDocuments": "Keine W-9 Dokumente gefunden",
-        "stats": {
-          "pending": "Ausstehend",
-          "verified": "Verifiziert",
-          "rejected": "Abgelehnt"
-        }
-      },
       "quickbooks": {
         "title": "QuickBooks Integration",
+        "vendorExport": "Lieferantenexport",
+        "vendorExportDesc": "Alle Partner mit verifiziertem W-9 als QuickBooks-Lieferanten exportieren",
         "exportVendors": "Lieferanten exportieren",
         "paymentSummary": "Zahlungsübersicht",
+        "paymentSummaryDesc": "Provisionszahlungen für einen Zeitraum exportieren",
+        "paymentSummaryTitle": "Zahlungsübersicht exportieren",
+        "selectDateRange": "Zeitraum auswählen",
         "commissionDetail": "Provisionsdetails",
+        "commissionDetailDesc": "Detaillierten Provisionsbericht für einen bestimmten Partner exportieren",
+        "commissionDetailTitle": "Provisionsdetails exportieren",
+        "selectAffiliate": "Partner auswählen",
+        "searchAffiliate": "Partner suchen",
+        "searchAffiliatePlaceholder": "Zum Suchen tippen...",
+        "selected": "Ausgewählt",
         "exportHistory": "Exportverlauf",
-        "vendorExport": {
-          "title": "Lieferanten nach QuickBooks exportieren",
-          "description": "Exportieren Sie alle Partner mit verifizierten W-9 Dokumenten als Lieferanten nach QuickBooks.",
-          "exportButton": "Lieferanten exportieren",
-          "exporting": "Exportiere...",
-          "includeInactive": "Inaktive Partner einschließen",
-          "stats": {
-            "totalAffiliates": "Partner gesamt",
-            "verifiedW9": "Verifizierte W-9",
-            "readyToExport": "Bereit zum Export"
-          }
-        },
-        "paymentSummaryExport": {
-          "title": "Zahlungsübersicht exportieren",
-          "description": "Exportieren Sie die Zahlungsübersicht für einen bestimmten Zeitraum.",
-          "dateRange": "Datumsbereich",
-          "startDate": "Startdatum",
-          "endDate": "Enddatum",
-          "exportFormat": "Exportformat",
-          "exportButton": "Übersicht exportieren",
-          "exporting": "Exportiere..."
-        },
-        "commissionDetailExport": {
-          "title": "Provisionsdetails exportieren",
-          "description": "Exportieren Sie detaillierte Provisionsdaten für einen bestimmten Partner und Zeitraum.",
-          "selectAffiliate": "Partner auswählen",
-          "selectAffiliatePlaceholder": "Partner auswählen...",
-          "searchAffiliatePlaceholder": "Zum Suchen eingeben...",
-          "dateRange": "Datumsbereich",
-          "startDate": "Startdatum",
-          "endDate": "Enddatum",
-          "exportButton": "Details exportieren",
-          "exporting": "Exportiere..."
-        },
-        "exportHistoryTable": {
-          "title": "Jüngste Exporte",
-          "exportType": "Exporttyp",
-          "exportDate": "Exportdatum",
-          "exportedBy": "Exportiert von",
-          "recordCount": "Datensätze",
-          "status": "Status",
-          "actions": "Aktionen",
-          "download": "Herunterladen",
-          "noExports": "Noch keine Exporte"
-        },
-        "exportTypes": {
-          "vendors": "Lieferanten",
-          "paymentSummary": "Zahlungsübersicht",
-          "commissionDetail": "Provisionsdetails"
-        },
-        "messages": {
-          "exportSuccess": "Export erfolgreich abgeschlossen",
-          "exportFailed": "Export fehlgeschlagen. Bitte versuchen Sie es erneut.",
-          "noDataToExport": "Keine Daten zum Exportieren gefunden",
-          "dateRangeRequired": "Bitte wählen Sie Start- und Enddatum",
-          "affiliateRequired": "Bitte wählen Sie einen Partner"
-        }
+        "noExports": "Keine Exporte gefunden",
+        "exportId": "Export-ID",
+        "type": "Typ",
+        "date": "Datum",
+        "exportedBy": "Exportiert von",
+        "details": "Details",
+        "startDate": "Startdatum",
+        "endDate": "Enddatum",
+        "exportFormat": "Exportformat",
+        "export": "Exportieren",
+        "exportSuccess": "Export erfolgreich! Details finden Sie im Exportverlauf.",
+        "exportFailed": "Export fehlgeschlagen",
+        "selectAffiliateError": "Bitte wählen Sie einen Partner aus",
+        "noAffiliatesFound": "Keine Partner gefunden"
       },
       "auditlog": {
         "title": "W-9 Audit-Protokoll",
@@ -1190,24 +1011,42 @@
         "configSaveFailed": "Fehler beim Speichern der Konfiguration",
         "invalidJson": "Ungültiges JSON für",
         "enabled": "Aktiviert",
-        "disabled": "Deaktiviert"
+        "disabled": "Deaktiviert",
+        "docusignTitle": "DocuSign-Integration",
+        "docusignDesc": "Autorisieren Sie DocuSign, um W9-Formulare an Partner senden zu können.",
+        "checkingAuth": "Autorisierungsstatus wird geprüft...",
+        "authorizeDocuSign": "DocuSign autorisieren",
+        "docusignAuthorized": "DocuSign ist autorisiert und einsatzbereit.",
+        "docusignNotAuthorized": "DocuSign ist nicht autorisiert. Klicken Sie auf die Schaltfläche unten, um zu autorisieren.",
+        "docusignCheckError": "Fehler beim Prüfen des Autorisierungsstatus.",
+        "docusignAuthSuccess": "DocuSign-Autorisierung erfolgreich!",
+        "noConfigData": "Keine Konfigurationsdaten verfügbar",
+        "loadError": "Fehler beim Laden der Konfiguration",
+        "systemSettings": "Systemeinstellungen",
+        "envVariables": "Umgebungsvariablen",
+        "envTitle": "Umgebungsvariablen",
+        "loadingEnv": "Umgebungsvariablen werden geladen...",
+        "envLoadError": "Fehler beim Laden der Umgebungsvariablen",
+        "noEnvVars": "Keine Umgebungsvariablen gefunden"
       },
       "loading": {
         "dashboard": "Dashboard-Daten werden geladen...",
         "operators": "Operatoren werden geladen...",
+        "customers": "Kunden werden geladen...",
         "analytics": "Analysen werden geladen...",
         "affiliates": "Partner werden geladen...",
-        "w9review": "W-9 Dokumente werden geladen...",
-        "quickbooks": "QuickBooks-Daten werden geladen...",
+        "w9documents": "W-9-Dokumente werden geladen...",
+        "exportHistory": "Exportverlauf wird geladen...",
         "config": "Konfiguration wird geladen..."
       },
       "errors": {
         "dashboardLoadFailed": "Dashboard-Daten konnten nicht geladen werden",
         "operatorsLoadFailed": "Operatoren konnten nicht geladen werden",
+        "customersLoadFailed": "Kunden konnten nicht geladen werden",
         "analyticsLoadFailed": "Fehler beim Laden der Analysen",
         "affiliatesLoadFailed": "Fehler beim Laden der Partner",
-        "w9reviewLoadFailed": "Fehler beim Laden der W-9 Dokumente",
-        "quickbooksLoadFailed": "Fehler beim Laden der QuickBooks-Daten",
+        "w9LoadFailed": "W-9-Dokumente konnten nicht geladen werden",
+        "exportHistoryLoadFailed": "Exportverlauf konnte nicht geladen werden",
         "configLoadFailed": "Fehler beim Laden der Systemkonfiguration",
         "networkError": "Netzwerkfehler. Bitte versuchen Sie es erneut."
       },
@@ -1244,6 +1083,9 @@
       "premiumDetergent": "Premium-Waschmittel",
       "fabricSoftener": "Weichspüler",
       "stainRemover": "Fleckenentferner",
+      "premiumDetergentCompact": "Premium-<br>Waschmittel",
+      "fabricSoftenerCompact": "Weich-<br>spüler",
+      "stainRemoverCompact": "Flecken-<br>entferner",
       "addOnsLabel": "Zusätze:",
       "specialInstructions": "Besondere Anweisungen (Optional)",
       "estimatedBags": "Geschätzte Anzahl Taschen",
@@ -1270,6 +1112,7 @@
         "weightNote": "Ungefähres Gewicht (wir wiegen es genau in unserer Einrichtung)",
         "pricingTitle": "Transparente Preise",
         "baseRate": "Waschen, Trocknen, Falten: ${{rate}}/lb",
+        "addOns": "Zusatzleistungen",
         "minimumCharge": "Mindestgebühr: ${{amount}}",
         "pricingNote": "Endpreis wird nach dem Wiegen berechnet",
         "submitButton": "Kostenlose Abholung Planen",
@@ -1303,8 +1146,11 @@
       "estimatedSize": "Geschätzte Wäschemenge:",
       "wdfService": "Waschen, Trocknen, Falten Service:",
       "deliveryFee": "Abhol-/Liefergebühr:",
+      "addOns": "Zusatzleistungen:",
+      "bagCredit": "Beutelguthaben (erste Bestellung):",
       "estimatedTotal": "Geschätzter Gesamtbetrag:",
       "nextSteps": "Nächste Schritte",
+      "step1": "Halten Sie Ihre Wäsche zur vereinbarten Zeit zur Abholung bereit",
       "step2": "Ihr Partner wird Sie benachrichtigen, wenn er unterwegs ist",
       "step3": "Wir wiegen Ihre Wäsche und teilen Ihnen die endgültigen Kosten mit",
       "step4": "Saubere Wäsche wird am geplanten Liefertermin geliefert",
@@ -1442,7 +1288,17 @@
     "validatingAddress": "Ihre Adresse wird überprüft...",
     "processingRegistration": "Ihre Registrierung wird bearbeitet...",
     "loading": "Wird geladen...",
-    "pleaseWait": "Bitte warten..."
+    "pleaseWait": "Bitte warten...",
+    "creatingAccount": "Bitte warten Sie, während wir Ihr Konto erstellen",
+    "checkingServiceArea": "Wir prüfen, ob Ihre Adresse in unserem Servicegebiet liegt",
+    "schedulingPickup": "Ihre Abholung wird geplant...",
+    "confirmingPickup": "Bitte warten Sie, während wir Ihre Abholzeit bestätigen",
+    "preparingPayment": "Zahlung wird vorbereitet",
+    "openingPaymentWindow": "Zahlungsfenster wird geöffnet",
+    "completePaymentPopup": "Bitte schließen Sie Ihre Zahlung im Pop-up-Fenster ab...",
+    "processingPayment": "Zahlung wird verarbeitet",
+    "loadingDashboard": "Ihr Dashboard wird geladen...",
+    "fetchingInfo": "Bitte warten Sie, während wir Ihre Daten abrufen"
   },
   "deletionStatus": {
     "title": "Datenlöschungsstatus - WaveMAX",
@@ -1485,6 +1341,63 @@
         "reset": "Scan-Code zurücksetzen",
         "shownOnceNote": "Neuer Scan-Code (wird nur einmal angezeigt):"
       }
+    },
+    "bags": {
+      "mint": {
+        "title": "Beutel erstellen",
+        "affiliate": "Partner",
+        "quantity": "Anzahl",
+        "submit": "Charge erstellen",
+        "success": "Charge erstellt"
+      },
+      "issue": {
+        "confirm": "Diese Charge an den Partner ausgeben?"
+      },
+      "inventory": {
+        "status": {
+          "minted": "Erstellt",
+          "issued": "Ausgegeben",
+          "active": "Aktiv",
+          "retired": "Stillgelegt"
+        }
+      }
+    },
+    "invites": {
+      "title": "Partner-Einladungen",
+      "send": "Einladung senden",
+      "email": "E-Mail",
+      "resend": "Erneut senden",
+      "revoke": "Widerrufen",
+      "empty": "Noch keine Einladungen",
+      "status": {
+        "pending": "Ausstehend",
+        "accepted": "Angenommen",
+        "expired": "Abgelaufen",
+        "revoked": "Widerrufen"
+      }
+    },
+    "w9": {
+      "title": "W-9-Prüfung",
+      "pending": "Prüfung ausstehend",
+      "verify": "Verifizieren",
+      "reject": "Ablehnen",
+      "download": "Herunterladen",
+      "empty": "Keine ausstehenden W-9"
+    }
+  },
+  "email": {
+    "onTheWay": {
+      "deliveryPinNote": "Bestätigen Sie den Erhalt an Ihrer Tür mit Ihrer Liefer-PIN {{pin}}."
+    }
+  },
+  "order": {
+    "status": {
+      "in_progress": "In Bearbeitung",
+      "processed": "Bearbeitet",
+      "ready_for_pickup": "Abholbereit",
+      "picked_up": "Unterwegs",
+      "delivered": "Geliefert",
+      "cancelled": "Storniert"
     }
   }
 }

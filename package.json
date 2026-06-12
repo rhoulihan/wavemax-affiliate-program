@@ -25,7 +25,8 @@
     "init:defaults": "node scripts/setup/init-defaults.js",
     "ensure-indexes": "node scripts/ensure-indexes.js",
     "generate:sample-data:clean": "node scripts/setup/generate-sample-data.js --clean",
-    "build:explorer": "node design-explorer/build.js"
+    "build:explorer": "node design-explorer/build.js",
+    "check:i18n": "node scripts/check-i18n-parity.js"
   },
   "repository": {
     "type": "git",

@@ -178,6 +178,14 @@ describe('Customer claim', () => {
         .send(registrationBody({ affiliateId: affiliate.affiliateId }));
       expect(res.status).toBe(404);
     });
+
+    it('the legacy customer-register page is gone (PR 11)', async () => {
+      // The page was dead-on-submit once the route above was removed in PR 6;
+      // PR 11 retires the HTML + embed route. Stale bookmarks must 404, not
+      // serve a form that can never submit.
+      const res = await request(app).get('/customer-register-embed.html');
+      expect(res.status).toBe(404);
+    });
   });
 
   describe('POST /api/v1/auth/customer/social/register (bag-bound)', () => {

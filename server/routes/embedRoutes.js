@@ -27,12 +27,6 @@ router.get('/affiliate-register-embed.html', serveHTMLWithNonce('affiliate-regis
 // Customer Login
 router.get('/customer-login-embed.html', serveHTMLWithNonce('customer-login-embed.html'));
 
-// Customer Register
-router.get('/customer-register-embed.html', serveHTMLWithNonce('customer-register-embed.html'));
-
-// Customer Success
-router.get('/customer-success-embed.html', serveHTMLWithNonce('customer-success-embed.html'));
-
 // Forgot Password
 router.get('/forgot-password-embed.html', serveHTMLWithNonce('forgot-password-embed.html'));
 

@@ -44,6 +44,75 @@
   // But we'll prepare for future implementation
   const csrfFetch = window.CsrfUtils && window.CsrfUtils.csrfFetch ? window.CsrfUtils.csrfFetch : fetch;
 
+  // --- Optional W-9 upload (spec §6.2) ---
+  // Mirrors the server's uploadW9 middleware: pdf/jpeg/png only, 10 MB cap
+  // (server cap comes from SystemConfig w9_max_upload_mb, default 10).
+  const W9_MAX_MB = 10;
+  const W9_ALLOWED_MIME = ['application/pdf', 'image/jpeg', 'image/png'];
+  const W9_ALLOWED_EXT = /\.(pdf|jpe?g|png)$/i;
+
+  function w9Translate(key, params) {
+    if (window.i18n && typeof window.i18n.t === 'function') {
+      const translated = window.i18n.t(key, params || {});
+      if (translated && translated !== key) {
+        return translated;
+      }
+    }
+    // English fallback when i18n hasn't loaded
+    const defaults = {
+      'affiliateRegister.w9.tooLarge': `That file is too large. The maximum size is ${W9_MAX_MB} MB.`,
+      'affiliateRegister.w9.wrongType': 'Only PDF, JPG, or PNG files are accepted.'
+    };
+    return defaults[key] || key;
+  }
+
+  function getSelectedW9File() {
+    const input = document.getElementById('w9');
+    return input && input.files && input.files.length > 0 ? input.files[0] : null;
+  }
+
+  // Returns null when the file is acceptable (or absent — the upload is
+  // optional); otherwise the translated error message.
+  function validateW9File(file) {
+    if (!file) {
+      return null;
+    }
+    const typeOk = W9_ALLOWED_MIME.includes(file.type) ||
+      (!file.type && W9_ALLOWED_EXT.test(file.name || ''));
+    if (!typeOk) {
+      return w9Translate('affiliateRegister.w9.wrongType');
+    }
+    if (file.size > W9_MAX_MB * 1024 * 1024) {
+      return w9Translate('affiliateRegister.w9.tooLarge', { max: W9_MAX_MB });
+    }
+    return null;
+  }
+
+  function showW9FieldError(message) {
+    const errorEl = document.getElementById('w9FileError');
+    if (!errorEl) {
+      return;
+    }
+    if (message) {
+      errorEl.textContent = message;
+      errorEl.classList.remove('hidden');
+    } else {
+      errorEl.textContent = '';
+      errorEl.classList.add('hidden');
+    }
+  }
+
+  function setupW9Upload() {
+    const input = document.getElementById('w9');
+    if (!input || input.dataset.w9Initialized === 'true') {
+      return;
+    }
+    input.dataset.w9Initialized = 'true';
+    input.addEventListener('change', function() {
+      showW9FieldError(validateW9File(getSelectedW9File()));
+    });
+  }
+
   function initializeAffiliateRegistration() {
     console.log('[Init] Starting affiliate registration initialization');
     console.log('[Init] Document readyState:', document.readyState);
@@ -1096,7 +1165,8 @@
         const embedContainer = document.querySelector('.embed-container');
         const spinnerContainer = embedContainer || form.closest('.bg-white') || form;
 
-        const formSpinner = window.SwirlSpinner ? 
+        // let (not const): error paths below null it out after hiding
+        let formSpinner = window.SwirlSpinner ?
           new window.SwirlSpinner({
             container: spinnerContainer,
             size: 'large',
@@ -1188,10 +1258,27 @@
             }
           }
 
+          // Optional W-9 file — traditional registration only; the social
+          // endpoint does not accept multipart (upload later via dashboard).
+          const w9File = isSocialRegistration ? null : getSelectedW9File();
+          const w9ValidationError = validateW9File(w9File);
+          if (w9ValidationError) {
+            showW9FieldError(w9ValidationError);
+            window.ErrorHandler.showError(w9ValidationError);
+            if (formSpinner) formSpinner.hide();
+            isSubmitting = false; // Reset flag
+            return;
+          }
+
           // Collect form data (reuse the formData from above)
           const affiliateData = {};
 
           formData.forEach((value, key) => {
+            // The W-9 File object is sent as a multipart part, never as a
+            // scalar field — keep it out of the JSON payload.
+            if (key === 'w9') {
+              return;
+            }
             affiliateData[key] = value;
           });
 
@@ -1294,15 +1381,36 @@
             ? `${baseUrl}/api/v1/auth/social/register`
             : `${baseUrl}/api/v1/affiliates/register`;
 
-          // API call to the server with proper base URL
-          const response = await csrfFetch(endpoint, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            credentials: 'include',
-            body: JSON.stringify(affiliateData)
-          });
+          // API call to the server with proper base URL.
+          // With a W-9 attached the body is multipart FormData (the backend
+          // register route accepts both); the browser sets the boundary
+          // Content-Type itself. Without a file the JSON path is unchanged.
+          let response;
+          if (w9File) {
+            const multipartBody = new FormData();
+            Object.keys(affiliateData).forEach((key) => {
+              const value = affiliateData[key];
+              if (value === undefined || value === null) {
+                return;
+              }
+              multipartBody.append(key, typeof value === 'string' ? value : String(value));
+            });
+            multipartBody.append('w9', w9File, w9File.name);
+            response = await csrfFetch(endpoint, {
+              method: 'POST',
+              credentials: 'include',
+              body: multipartBody
+            });
+          } else {
+            response = await csrfFetch(endpoint, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              credentials: 'include',
+              body: JSON.stringify(affiliateData)
+            });
+          }
 
           if (!response.ok) {
             console.error('Registration failed with status:', response.status);
@@ -1344,6 +1452,29 @@
 
                 isSubmitting = false;
                 return; // Exit early
+              }
+
+              // W-9 upload rejections from the server's uploadW9 middleware —
+              // surface the translated message inline and via ErrorHandler.
+              if (errorData.code === 'W9_FILE_TOO_LARGE' || errorData.code === 'W9_INVALID_FILE_TYPE') {
+                const w9Message = errorData.code === 'W9_FILE_TOO_LARGE'
+                  ? w9Translate('affiliateRegister.w9.tooLarge', { max: W9_MAX_MB })
+                  : w9Translate('affiliateRegister.w9.wrongType');
+                showW9FieldError(w9Message);
+
+                if (formSpinner) {
+                  formSpinner.hide();
+                  formSpinner = null;
+                }
+
+                if (window.ErrorHandler && window.ErrorHandler.showError) {
+                  window.ErrorHandler.showError(w9Message);
+                } else {
+                  alert(w9Message);
+                }
+
+                isSubmitting = false;
+                return;
               }
 
               // Show generic error message from server if available
@@ -1872,6 +2003,7 @@
           const sectionsToHide = [
             'serviceInfoSection',
             'paymentInfoSection',
+            'w9Section',
             'termsSection',
             'submitSection'
           ];
@@ -2009,6 +2141,7 @@
         const sectionsToShow = [
           'serviceInfoSection',
           'paymentInfoSection',
+          'w9Section',
           'termsSection',
           'submitSection'
         ];
@@ -2062,6 +2195,7 @@
     // Set up navigation buttons
     setupAccountSetupNavigation();
     setupAddressValidation();
+    setupW9Upload();
 
     // Add click handler directly to submit button as a fallback
     const submitButton = document.getElementById('registerSubmitButton');

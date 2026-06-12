@@ -100,7 +100,6 @@
       "register": "Register",
       "learnMore": "Learn More",
       "customerLogin": "Customer Login",
-      "signUpToday": "Sign Up Today",
       "registerNow": "Register now",
       "copy": "Copy",
       "understand": "I Understand"
@@ -372,6 +371,7 @@
     "cta": {
       "title": "Ready to start earning?",
       "customerTitle": "Ready for Fresh, Clean Laundry?",
+      "scanBagToJoin": "To get started, ask your delivery provider for a WaveMAX laundry bag and scan its QR code to create your account.",
       "description": "Join our affiliate program and start earning commissions by offering laundry services to your customers.",
       "inviteOnly": "Affiliates join by invitation — contact WaveMAX to get started.",
       "login": "Affiliate Login",
@@ -659,6 +659,12 @@
       "nextStep4": "Track your referrals and commissions in real-time",
       "nextStep5": "Get paid monthly via your preferred payment method",
       "loginToDashboard": "Login to Dashboard"
+    },
+    "bags": {
+      "inventory": {
+        "title": "My bags",
+        "empty": "No bags yet"
+      }
     }
   },
   "customer": {
@@ -669,107 +675,6 @@
       "orEmail": "Or sign in with email and password",
       "emailOrUsername": "Username or Email Address",
       "noAccount": "Don't have an account?"
-    },
-    "register": {
-      "title": "Create Your Account",
-      "subtitle": "Sign up for convenient laundry pickup & delivery",
-      "quickRegistration": "Quick Registration with Social Media",
-      "socialSignupText": "Sign up quickly using your social media account - we'll automatically fill in your information!",
-      "continueWithGoogle": "Continue with Google",
-      "continueWithFacebook": "Continue with Facebook",
-      "orManually": "Or fill out the form manually",
-      "personalInfo": "Personal Information",
-      "firstName": "First Name *",
-      "lastName": "Last Name *",
-      "email": "Email Address *",
-      "phone": "Phone Number *",
-      "addressInfo": "Address Information",
-      "address": "Street Address *",
-      "city": "City *",
-      "state": "State *",
-      "zipCode": "ZIP Code *",
-      "servicePreferences": "Service Preferences",
-      "specialInstructions": "Special Instructions for Laundry (Optional)",
-      "specialInstructionsPlaceholder": "Allergies, special detergent requests, etc.",
-      "affiliateSpecialInstructions": "Special Instructions for Affiliate (Optional)",
-      "affiliateSpecialInstructionsPlaceholder": "Pickup/delivery preferences, gate codes, preferred times, etc.",
-      "laundryBags": "Laundry Bags",
-      "important": "Important:",
-      "bagRequirement": "Laundry bags are required for our service. Each bag costs $10.00 and will be:",
-      "bagCharged": "Charged when you register",
-      "bagDelivered": "Delivered by your affiliate",
-      "bagCredited": "Credited back on your first order",
-      "numberOfBags": "Number of Bags Needed *",
-      "bagRecommendation": "Most households need 2-3 bags for regular laundry service.",
-      "totalBagFee": "Total Bag Fee:",
-      "bagCreditNote": "This amount will be credited on your first order.",
-      "accountSetup": "Account Setup",
-      "username": "Username *",
-      "usernameHelp": "Your unique login identifier",
-      "password": "Password *",
-      "confirmPassword": "Confirm Password *",
-      "passwordRequirements": "Password must contain:",
-      "passwordLength": "At least 8 characters",
-      "passwordUppercase": "One uppercase letter",
-      "passwordLowercase": "One lowercase letter",
-      "passwordNumber": "One number",
-      "passwordSpecial": "One special character (!@#$%^&*)",
-      "passwordsMatch": "Passwords match",
-      "paymentInfo": "Payment Information",
-      "paymentSecure": "All payment information will be securely encrypted.",
-      "cardholderName": "Cardholder Name *",
-      "cardNumber": "Card Number *",
-      "expiryDate": "Expiry Date *",
-      "cvv": "CVV *",
-      "billingZip": "Billing ZIP Code *",
-      "savePaymentInfo": "Save payment information for future orders",
-      "serviceAgreement": "Service Agreement",
-      "serviceSummary": "Service Summary",
-      "deliveryFeeLabel": "Delivery Fee:",
-      "wdfServiceLabel": "Wash, Dry, Fold Service:",
-      "laundryBagsLabel": "Laundry Bags:",
-      "creditedOnFirstOrder": "(credited on first order)",
-      "finalCostNote": "Final cost will depend on the weight of your laundry.",
-      "submitButton": "Register for Laundry Service",
-      "contactInfo": "Contact Information",
-      "accountInfo": "Account Information",
-      "referralCode": "Referral Code (Optional)",
-      "termsAgree": "I agree to the",
-      "alreadyHaveAccount": "Already have an account?",
-      "socialAccountConnected": "Social Media Account Connected!",
-      "successfullyConnectedWith": "Successfully Connected with {{provider}}",
-      "socialConnected": "Account Connected",
-      "autoFilledMessage": "Your information has been automatically filled in below. Complete the remaining fields to finish your registration.",
-      "bagNote": "This fee will be credited on your first order.",
-      "loadingPayment": "Loading payment form...",
-      "next": "Next →",
-      "completeAndPay": "Complete and Pay",
-      "back": "← Back",
-      "pricing": {
-        "startingAt": "Starting at ${{price}}",
-        "feeStructure": "(Min: ${{minFee}}, then ${{perBagFee}}/bag)",
-        "wdfRate": "${{rate}}/lb (includes service fees)"
-      },
-      "v2": {
-        "noPaymentRequired": "No Payment Required",
-        "subtitle": "Sign up for premium laundry pickup and delivery service - pay after we weigh your laundry!",
-        "howItWorks": "How Our V2 Payment System Works",
-        "step1": "Sign up now with no credit card required",
-        "socialSignupText": "Sign up quickly using your social media account",
-        "socialConnectedMessage": "Great! We've connected your social account. Just complete the form below to finish registration - no payment required!",
-        "step2": "Receive your free laundry bags",
-        "step3": "Give your laundry bag to your affiliate — your order is created when it reaches the store",
-        "step4": "We weigh your laundry and send you payment links",
-        "step5": "Pay conveniently via Credit Card or Venmo",
-        "step6": "Receive your fresh, clean laundry!",
-        "submitButton": "Sign Up for Free - No Payment Required",
-        "noCardRequired": "No credit card needed • Pay after we weigh your laundry"
-      },
-      "terms": "By registering, you agree to our",
-      "termsLink": "Terms of Service",
-      "and": "and",
-      "privacyLink": "Privacy Policy",
-      "processing": "Processing your registration..."
     },
     "dashboard": {
       "title": "Customer Dashboard",
@@ -1042,42 +947,6 @@
         "w9SendError": "Error sending W9 form. Please try again.",
         "docusignAuthRequired": "DocuSign authorization required. Please authorize DocuSign integration in system settings.",
         "docusignTemplateError": "DocuSign W9 template not configured. Please check template ID in system settings."
-      },
-      "w9review": {
-        "title": "W-9 Document Review",
-        "filterByStatus": "Filter by Status",
-        "searchAffiliate": "Search Affiliate",
-        "searchPlaceholder": "Name, Email, or Affiliate ID",
-        "pending": "Pending",
-        "pendingReview": "Pending Review",
-        "verified": "Verified",
-        "rejected": "Rejected",
-        "download": "Download",
-        "verify": "Verify",
-        "reject": "Reject",
-        "noDocuments": "No W-9 documents found",
-        "downloadFailed": "Failed to download W-9 document",
-        "verifyTitle": "Verify W-9 Document",
-        "verifyButton": "Verify W-9",
-        "verifySuccess": "W-9 document verified successfully",
-        "verifyFailed": "Failed to verify W-9 document",
-        "rejectTitle": "Reject W-9 Document",
-        "rejectButton": "Reject W-9",
-        "rejectSuccess": "W-9 document rejected successfully",
-        "rejectFailed": "Failed to reject W-9 document",
-        "affiliateInfo": "Affiliate Information",
-        "taxIdType": "Tax ID Type",
-        "taxIdLast4": "Tax ID (Last 4 Digits)",
-        "taxIdLast4Placeholder": "1234",
-        "businessName": "Legal Business Name (if different)",
-        "businessNamePlaceholder": "Leave blank if using personal name",
-        "quickbooksVendorId": "QuickBooks Vendor ID",
-        "quickbooksVendorIdPlaceholder": "QB-VENDOR-123",
-        "notes": "Verification Notes",
-        "notesPlaceholder": "Optional notes about the verification",
-        "rejectionReason": "Rejection Reason",
-        "rejectionReasonPlaceholder": "Please provide a clear reason for rejection",
-        "rejectionHelp": "This message will be sent to the affiliate"
       },
       "quickbooks": {
         "title": "QuickBooks Export",
@@ -1472,6 +1341,63 @@
         "reset": "Reset scan code",
         "shownOnceNote": "New scan code (shown only once):"
       }
+    },
+    "bags": {
+      "mint": {
+        "title": "Mint bags",
+        "affiliate": "Affiliate",
+        "quantity": "Quantity",
+        "submit": "Mint batch",
+        "success": "Batch minted"
+      },
+      "issue": {
+        "confirm": "Issue this batch to the affiliate?"
+      },
+      "inventory": {
+        "status": {
+          "minted": "Minted",
+          "issued": "Issued",
+          "active": "Active",
+          "retired": "Retired"
+        }
+      }
+    },
+    "invites": {
+      "title": "Affiliate invites",
+      "send": "Send invite",
+      "email": "Email",
+      "resend": "Resend",
+      "revoke": "Revoke",
+      "empty": "No invites yet",
+      "status": {
+        "pending": "Pending",
+        "accepted": "Accepted",
+        "expired": "Expired",
+        "revoked": "Revoked"
+      }
+    },
+    "w9": {
+      "title": "W-9 review",
+      "pending": "Pending review",
+      "verify": "Verify",
+      "reject": "Reject",
+      "download": "Download",
+      "empty": "No W-9 submissions pending"
+    }
+  },
+  "email": {
+    "onTheWay": {
+      "deliveryPinNote": "Use your delivery PIN {{pin}} to confirm receipt at your door."
+    }
+  },
+  "order": {
+    "status": {
+      "in_progress": "In progress",
+      "processed": "Processed",
+      "ready_for_pickup": "Ready for pickup",
+      "picked_up": "Out for delivery",
+      "delivered": "Delivered",
+      "cancelled": "Cancelled"
     }
   }
 }

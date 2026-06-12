@@ -32,6 +32,7 @@ const ASSETS = [
   ['js',  'public/assets/js/iframe-bridge-v2.js',           'public/assets/js/iframe-bridge-v2.min.js'],
   ['js',  'public/assets/js/parent-iframe-bridge-v3.js',    'public/assets/js/parent-iframe-bridge-v3.min.js'],
   ['js',  'public/assets/js/franchise-page-helpers.js',     'public/assets/js/franchise-page-helpers.min.js'],
+  ['js',  'public/assets/js/embed-app-v2.js',               'public/assets/js/embed-app-v2.min.js'],
 ];
 
 function banner(src) {

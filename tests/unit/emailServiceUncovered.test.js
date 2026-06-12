@@ -286,61 +286,6 @@ const { createFindOneMock, createFindMock, createMockDocument, createAggregateMo
     });
   });
 
-  describe('sendOrderPickedUpNotification', () => {
-    it('should send order picked up notification successfully', async () => {
-      const customerEmail = 'customer@test.com';
-      const data = {
-        customerName: 'Jane Smith',
-        orderId: 'ORD789',
-        pickupTime: new Date(),
-        totalAmount: 75.50,
-        receiptUrl: 'https://test.com/receipt/123'
-      };
-
-      await emailService.sendOrderPickedUpNotification(customerEmail, data);
-
-      expect(mockTransporter.sendMail).toHaveBeenCalledWith(
-        expect.objectContaining({
-          to: 'customer@test.com',
-          subject: expect.stringContaining('Your Fresh Laundry'),
-          html: expect.stringContaining('Your freshly cleaned laundry')
-        })
-      );
-    });
-
-    it.skip('should handle email error and log it', async () => {
-      // Create a fresh mock that rejects
-      jest.resetModules();
-      jest.doMock('../../server/utils/logger', () => mockLogger);
-      const failingTransporter = {
-        sendMail: jest.fn(() => Promise.reject(new Error('Network error')))
-      };
-      
-      jest.doMock('nodemailer', () => ({
-        createTransport: jest.fn(() => failingTransporter)
-      }));
-      
-      // Set up environment for the error test
-      process.env.EMAIL_PROVIDER = 'smtp';
-      process.env.EMAIL_FROM = 'noreply@test.com';
-      
-      // Re-require email service with failing transporter
-      const emailServiceWithError = require('../../server/utils/emailService');
-      
-      const customerEmail = 'customer@test.com';
-      const data = {
-        orderId: 'ORD789'
-      };
-
-      await emailServiceWithError.sendOrderPickedUpNotification(customerEmail, data);
-
-      expect(consoleErrorSpy).toHaveBeenCalledWith(
-        expect.stringContaining('Error sending email'),
-        expect.any(Error)
-      );
-    });
-  });
-
   describe('Console Email Provider', () => {
     beforeEach(() => {
       jest.resetModules();

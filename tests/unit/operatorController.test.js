@@ -43,8 +43,7 @@ jest.mock('../../server/utils/logger', () => ({
   debug: jest.fn()
 }));
 jest.mock('../../server/utils/emailService', () => ({
-  sendOrderReadyNotification: jest.fn(),
-  sendOrderPickedUpNotification: jest.fn()
+  sendOrderReadyNotification: jest.fn()
 }));
 jest.mock('../../server/utils/formatters', () => ({
   fullName: (first, last) => `${first} ${last}`,

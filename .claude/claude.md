@@ -2,7 +2,7 @@
 
 > Reference documentation for the codebase. Operational rules live in root `CLAUDE.md`; session startup in `init.prompt`. This file is the architecture source of truth — models, API surface, business logic, security model, integrations.
 
-> **Note:** project is mid-refactor (see `docs/refactor/REFACTORING_PLAN.md`). V1 payment code (Paygistix, `Payment` model, `CallbackPool`, `PaymentToken`, v1 registration) is being **deleted** in Phase 2, not migrated. Sections below marked *V1 (legacy, being removed)* describe dead code being cleaned up.
+> **Note:** the invite-only + durable-bags + order-at-intake redesign is built (spec: `docs/superpowers/specs/2026-06-08-invite-bag-workflow-redesign-design.md` — §4 models, §5 API, §6 subsystems are authoritative). V1 Paygistix, customer scheduling/Pickup Now, BetaRequest, DocuSign W-9, and `?affid` referrals are **removed**. Sections below carrying a *Replaced (redesign)* note describe the pre-redesign system — read them only as history; trust the spec + code.
 
 ---
 
@@ -32,11 +32,11 @@ Node.js/Express application managing a laundry service affiliate network. Affili
 
 - **Multi-role**: Administrators, Affiliates, Customers, Operators
 - **OAuth**: Google, Facebook, LinkedIn social auth
-- **Payment** (post-refactor): Post-weigh payment via Venmo/PayPal/CashApp (V2 flow; V1 Paygistix being removed in Phase 2)
-- **Geospatial service areas**: Location-based affiliate matching
-- **QR code bag tracking**: Three-stage workflow (weighing → processing → pickup)
-- **Commission system**: 10% WDF + 100% delivery fee
-- **W-9 tax compliance**: DocuSign integration
+- **Payment**: post-weigh Venmo/PayPal/CashApp links generated once at store intake; hourly reminders ×8, then held-at-store escalation (spec §6.5; V1 Paygistix deleted)
+- **Bag-bound relationships**: customers bind to an affiliate by claiming a durable bag QR — *replaced* location-based service-area matching (spec §6.3; service area no longer enforced)
+- **Durable bag QR tracking**: one reusable bag per customer, one order per store intake; order lifecycle `in_progress → processed → ready_for_pickup → picked_up → delivered` (spec §6.4)
+- **Commission system**: 10% WDF + 100% delivery fee, realized at `delivered`
+- **W-9 tax compliance**: encrypted in-app W-9 file upload + admin review — *replaced* the DocuSign flow (spec §6.2)
 - **i18n**: English, Spanish, Portuguese, German
 - **CSP v2 compliant**: Strict Content Security Policy for iframe embedding
 
@@ -45,12 +45,12 @@ Node.js/Express application managing a laundry service affiliate network. Affili
 ```
 wavemax-affiliate-program/
 ├── server/                    # Node.js/Express backend
-│   ├── config/               # CSRF, Passport OAuth, Paygistix (legacy)
+│   ├── config/               # CSRF, Passport OAuth
 │   ├── controllers/          # API endpoint controllers
 │   ├── middleware/           # auth, RBAC, security, rate limiting
 │   ├── models/               # Mongoose data models
 │   ├── routes/               # Express route definitions
-│   ├── services/             # Business logic (email, payments, docusign)
+│   ├── services/             # Business logic (email, payments, secure file store)
 │   ├── utils/                # Encryption, logging, helpers
 │   ├── jobs/                 # Background jobs
 │   └── templates/            # Email templates (multi-language)
@@ -79,7 +79,7 @@ File counts change with the active refactor; trust `ls` / `git ls-files` over do
 
 **Testing:** Jest 29.7.0 · Supertest · MongoDB Memory Server
 
-**External:** Paygistix *(V1, legacy)* · OAuth (Google/Facebook/LinkedIn) · DocuSign · Mailcow SMTP / Brevo · OpenStreetMap Nominatim
+**External:** OAuth (Google/Facebook/LinkedIn) · Mailcow SMTP / Brevo · OpenStreetMap Nominatim
 
 ---
 
@@ -114,6 +114,8 @@ Mongoose models live in `server/models/`. Encrypted fields use AES-256-GCM via `
 
 ### Affiliate Model
 **File**: `server/models/Affiliate.js`
+
+> **Replaced (redesign §4.6/§6.2):** the `w9Information` subdocument (DocuSign fields) is gone — flat fields now: `w9Status`, `w9OnFileAt`, `w9Document` (encrypted-file metadata; bytes live under `W9_STORAGE_PATH`, never in the DB), `w9SubmittedAt/VerifiedAt/VerifiedBy/RejectedAt/RejectedReason`, plus `paymentLockReason`. Registration is invite-only (spec §6.2). The block below predates the redesign — trust the spec + `server/models/Affiliate.js`.
 
 ```javascript
 {
@@ -205,6 +207,8 @@ Mongoose models live in `server/models/`. Encrypted fields use AES-256-GCM via `
 
 ### Order Model
 **File**: `server/models/Order.js`
+
+> **Replaced (redesign §4.4):** status enum is now `in_progress / processed / ready_for_pickup / picked_up / delivered / cancelled`; scheduling fields (`pickupDate`, `pickupTime`, `estimatedWeight`), `numberOfBags`, and the multi-bag `bags[]` machinery are removed; one durable bag per order via top-level `bagId`/`bagToken`. The block below predates the redesign — trust the spec + `server/models/Order.js`.
 
 ```javascript
 {
@@ -314,8 +318,7 @@ Mongoose models live in `server/models/`. Encrypted fields use AES-256-GCM via `
 
 ### Versioning
 
-- `/api/v1/` — current stable
-- `/api/v2/` — new customer registration (post-weigh payment flow)
+- `/api/v1/` — current stable (the former `/api/v2` customer-registration surface was removed with the QR-claim redesign)
 - `/api/` — redirects to v1
 
 ### Authentication (`server/routes/authRoutes.js`)
@@ -358,6 +361,8 @@ DELETE /api/v1/affiliates/:affiliateId/delete-all-data
 
 ### Customer (`server/routes/customerRoutes.js`)
 
+> **Replaced (redesign §5/§6.3):** customer registration is QR-claim only — `GET /api/v1/customers/claim/:bagToken` + `POST /api/v1/customers/claim/:bagToken/register`. The V1/V2 register routes below are gone.
+
 ```
 POST   /api/v1/customers/register         # V1 — legacy, being removed
 POST   /api/v2/customers/register         # V2 — post-weigh payment
@@ -369,6 +374,8 @@ DELETE /api/v1/customers/:customerId/delete-all-data
 ```
 
 ### Order (`server/routes/orderRoutes.js`)
+
+> **Replaced (redesign §5/§6.4):** `POST /api/v1/orders` is removed — orders are created at operator intake (`POST /api/v1/operators/intake` or `POST /api/v1/bags/:bagToken/intake`).
 
 ```
 POST   /api/v1/orders
@@ -402,6 +409,8 @@ PUT    /api/v1/administrators/config
 ```
 
 ### W-9 (`server/routes/w9Routes.js`)
+
+> **Replaced (redesign §6.2):** the DocuSign signing/webhook endpoints below were never built; the shipped surface is upload/review (`POST /api/v1/affiliates/:affiliateId/w9`, `GET /api/v1/w9/status`, `GET /api/v1/w9/admin/pending`, `GET /api/v1/w9/admin/:affiliateId/document`, verify/reject).
 
 ```
 POST   /api/v1/w9/initiate-signing         # DocuSign
@@ -479,7 +488,7 @@ Key source: `ENCRYPTION_KEY` env var (64-char hex).
 ### Security Headers
 
 Helmet.js in `server.js`:
-- **CSP:** `default-src 'self'`; `script-src 'self' https://cdn.jsdelivr.net 'nonce-{nonce}'`; `style-src` same; `frame-src 'self' https://safepay.paymentlogistics.net` *(Paygistix, legacy)*; `frame-ancestors 'self' https://www.wavemaxlaundry.com`
+- **CSP:** `default-src 'self'`; `script-src 'self' https://cdn.jsdelivr.net 'nonce-{nonce}'`; `style-src` same; `frame-ancestors 'self' https://www.wavemaxlaundry.com` (full directive lists live in `server.js`)
 - **HSTS:** 1 year, `includeSubDomains`, `preload`
 - **Referrer-Policy:** `strict-origin-when-cross-origin`
 
@@ -522,7 +531,7 @@ const EMBED_PAGES = {
   '/administrator-login': '/administrator-login-embed.html',
   '/administrator-dashboard': '/administrator-dashboard-embed.html',
   '/operator-scan': '/operator-scan-embed.html',
-  '/schedule-pickup': '/schedule-pickup-embed.html',
+  '/claim': '/claim-embed.html',
   '/terms-of-service': '/terms-and-conditions-embed.html',
   '/privacy-policy': '/privacy-policy.html',
   '/refund-policy': '/refund-policy.html'
@@ -596,6 +605,8 @@ totalFee = Math.max(minimumDeliveryFee, numberOfBags * perBagDeliveryFee);
 
 ### WDF Credit System
 
+> **Replaced (redesign §4.4):** there is no customer weight estimate — orders are born at intake with `actualWeight`, so estimate-variance credit generation is gone (`wdfCreditGenerated = 0` in the new flow). Carry-in `wdfCreditApplied` still applies at intake.
+
 Weight variance between estimate and actual generates a credit or debit on the customer account, applied to the next order.
 
 ```javascript
@@ -616,6 +627,8 @@ customer.wdfCreditUpdatedAt = Date.now();
 
 ### Bag Tracking Workflow
 
+> **Replaced (redesign §4.1/§6.4):** the QR is an opaque 32-hex bag token in a claim URL (never `customerId#bagId`); the durable Bag lives across orders (`minted → issued → active`), and order stages are `intake → processed → picked_up → delivered`.
+
 **QR code format:** `customerId#bagId` (e.g. `CUST-12345#BAG001`).
 
 Three-stage state machine per bag:
@@ -628,6 +641,8 @@ Three-stage state machine per bag:
 
 ### Payment Flow (V2 — current)
 
+> **Replaced (redesign §6.5):** no scheduling — links are generated once at intake; reminders run hourly, max 8, then a "come to the store" notice (`paymentEscalated`, never auto-cancel); `ready_for_pickup` is gated on processed AND payment-verified.
+
 1. Customer registers (OAuth or traditional). No upfront payment.
 2. Customer schedules pickup → order created, `v2PaymentStatus = 'pending'`
 3. Affiliate picks up and weighs
@@ -638,7 +653,7 @@ Three-stage state machine per bag:
 8. Order proceeds to WDF processing
 9. Automated reminders at 24h / 72h / 7d if still unpaid
 
-*V1 flow (upfront Paygistix payment at registration) is being deleted in Phase 2.*
+*V1 flow (upfront Paygistix payment at registration) was deleted in the redesign.*
 
 ---
 
@@ -649,19 +664,22 @@ Three-stage state machine per bag:
 | **OAuth Google** | `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET`; callback `/api/v1/auth/google/callback`; scopes `email, profile` | `server/config/passport-config.js` |
 | **OAuth Facebook** | `FACEBOOK_APP_ID` / `FACEBOOK_APP_SECRET`; callback `/api/v1/auth/facebook/callback`; perms `email, public_profile` | `server/config/passport-config.js` |
 | **OAuth LinkedIn** | `LINKEDIN_CLIENT_ID` / `LINKEDIN_CLIENT_SECRET`; callback `/api/v1/auth/linkedin/callback`; scopes `r_emailaddress, r_liteprofile` | `server/config/passport-config.js` |
-| **DocuSign (W-9)** | `DOCUSIGN_INTEGRATION_KEY`, `DOCUSIGN_USER_ID`, `DOCUSIGN_ACCOUNT_ID`, `DOCUSIGN_BASE_URL`, `DOCUSIGN_W9_TEMPLATE_ID` | `server/services/docusignService.js` |
+| **W-9 storage (in-app)** | `W9_STORAGE_PATH` (encrypted files on DRBD-replicated local FS) | `server/services/secureFileStore.js` |
 | **Email (Mailcow SMTP)** | `EMAIL_PROVIDER=smtp`, `EMAIL_HOST=mail.wavemax.promo`, `EMAIL_PORT=587`, `EMAIL_FROM` | `server/services/emailService.js` |
 | **Email (Brevo alt.)** | `EMAIL_PROVIDER=brevo`, `BREVO_API_KEY`, `BREVO_FROM_EMAIL` | `server/services/emailService.js` |
 | **Geocoding (Nominatim)** | `https://nominatim.openstreetmap.org`, 1 req/sec, UA `WaveMAX-Affiliate-Program` | `server/middleware/locationValidation.js` |
-| *V1* **Paygistix** | `PAYGISTIX_MERCHANT_ID`, `PAYGISTIX_FORM_ACTION_URL`, pool of 10 callback URLs | `server/services/paygistixService.js` — *being removed in Phase 2* |
 
 All env variable names are in `.env.example`. Email templates live under `server/templates/emails/{lang}/`.
+
+> **Replaced (redesign §6.2):** DocuSign is not used — W-9s are uploaded in-app, AES-256-GCM-encrypted to `W9_STORAGE_PATH` via `server/services/secureFileStore.js`, and admin-reviewed.
 
 ### DocuSign W-9 Workflow
 
 1. `POST /api/v1/w9/initiate-signing` → creates envelope with pre-filled W-9 → returns signing URL
 2. `POST /api/v1/w9/webhook/docusign` (DocuSign callback) → updates `w9Information.docusignStatus` → notifies admin
 3. Admin verifies/rejects via `POST /api/v1/w9/admin/:affiliateId/verify|reject` → sets `w9Information.status`
+
+> **Replaced (redesign §6.3, settled #8):** service area is no longer enforced — no geocoding/radius check at claim or registration.
 
 ### Geocoding Usage
 
@@ -822,13 +840,8 @@ EMAIL_PORT=587
 EMAIL_USER=no-reply@wavemax.promo
 EMAIL_PASS=...
 
-# DocuSign
-DOCUSIGN_INTEGRATION_KEY=...
-DOCUSIGN_USER_ID=...
-DOCUSIGN_ACCOUNT_ID=...
-
-# Payment (V1, legacy — being removed in Phase 2)
-PAYGISTIX_MERCHANT_ID=wmaxaustWEB
+# W-9 storage (encrypted uploads on DRBD-replicated local FS)
+W9_STORAGE_PATH=/var/lib/wavemax/w9
 ```
 
 See `.env.example` for the full set.
@@ -852,7 +865,6 @@ npm run create-admin      # Create default admin account
 Manual alternative in a Node script:
 ```javascript
 await SystemConfig.initializeDefaults();
-await callbackPoolManager.initializePool();   // V1 only — legacy
 ```
 
 ### Nginx Reverse Proxy
@@ -929,11 +941,6 @@ OAuth callbacks:
   Google:            /api/v1/auth/google/callback
   Facebook:          /api/v1/auth/facebook/callback
   LinkedIn:          /api/v1/auth/linkedin/callback
-
-DocuSign webhook:    /api/v1/w9/webhook/docusign
-
-V1 Paygistix (legacy):
-  Gateway URL:       https://safepay.paymentlogistics.net/transaction.asp
 ```
 
 ### Role Hierarchy
@@ -948,11 +955,11 @@ admin (super admin)
 
 ### Workflow Cheat Sheet
 
-- **Affiliate registration:** Register → W-9 submission → Admin verification → Active
-- **Customer registration (V2, current):** Register (no payment) → Active
-- **Order lifecycle:** `pending → processing → processed → complete`
-- **Bag workflow:** `processing (weighed) → processed (WDF done) → completed (picked up)`
-- **Payment (V2) flow:** `pending → awaiting → confirming → verified`
+- **Affiliate onboarding:** Admin invite → invited registration (email locked) → W-9 upload → admin verify → Active
+- **Customer onboarding:** scan bag QR → claim registration (affiliate derived from bag) → Active
+- **Order lifecycle:** `in_progress → processed → ready_for_pickup → picked_up → delivered` (cancel from in_progress/processed only)
+- **Bag (durable):** `minted → issued → active` (stays active across orders); per-order stages `intake → processed → picked_up → delivered`
+- **Payment flow:** `pending → awaiting → confirming → verified`; hourly reminders ×8 → come-to-store notice (`paymentEscalated`, held at store)
 
 ### Common Pitfalls
 

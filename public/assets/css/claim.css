@@ -1,4 +1,35 @@
 /* /claim page — strict CSP, no inline styles. */
+
+/* Local copies of the few Tailwind utilities this page uses (the 256 KB CDN
+   Tailwind build was 99.9% unused and render-blocking — removed for the
+   Lighthouse quality bar). Values match Tailwind 2 defaults. */
+.bg-white { background-color: #ffffff; }
+.font-sans { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; }
+.max-w-md { max-width: 28rem; }
+.mx-auto { margin-left: auto; margin-right: auto; }
+.rounded-lg { border-radius: 0.5rem; }
+.shadow-md { box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); }
+.overflow-hidden { overflow: hidden; }
+.p-6 { padding: 1.5rem; }
+.text-center { text-align: center; }
+.text-white { color: #ffffff; }
+.text-gray-600 { color: #4b5563; }
+.text-2xl { font-size: 1.5rem; line-height: 2rem; }
+.font-bold { font-weight: 700; }
+.mt-2 { margin-top: 0.5rem; }
+.mb-2 { margin-bottom: 0.5rem; }
+.mb-4 { margin-bottom: 1rem; }
+.mb-6 { margin-bottom: 1.5rem; }
+.gap-3 { gap: 0.75rem; }
+.grid { display: grid; }
+.grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.inline-block { display: inline-block; }
+
+/* Brand header band (was undefined on this page — other embed pages define it
+   in their own per-page stylesheets). */
+.wavemax-blue { background-color: #1e3a8a; }
+
 .claim-input {
   width: 100%;
   border: 1px solid #d1d5db;
