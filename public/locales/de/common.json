@@ -68,6 +68,13 @@
     "invite": {
       "invalidOrExpired": "Dieser Einladungslink ist ungültig oder abgelaufen. Bitte kontaktieren Sie WaveMAX, um eine neue Einladung anzufordern.",
       "emailLocked": "Ihre E-Mail-Adresse ist durch Ihre Einladung festgelegt und kann nicht geändert werden."
+    },
+    "w9": {
+      "uploadLabel": "Laden Sie Ihr ausgefülltes W-9 hoch",
+      "fileTypeHint": "PDF, JPG oder PNG, max. {{max}} MB",
+      "tooLarge": "Die Datei ist zu groß. Die maximale Größe beträgt {{max}} MB.",
+      "wrongType": "Es werden nur PDF-, JPG- oder PNG-Dateien akzeptiert.",
+      "optionalNote": "Sie können Ihr W-9 auch später hochladen, aber Provisionsauszahlungen pausieren ab 600 $ Jahreseinnahmen, bis es hinterlegt ist."
     }
   },
   "common": {

@@ -11,6 +11,7 @@ const Customer = require('../../models/Customer');
 const Affiliate = require('../../models/Affiliate');
 const bagService = require('../bags/bagService');
 const { applyTransition } = require('./orderStateMachine');
+const { applyW9ThresholdCheck } = require('../onboarding/w9ThresholdService');
 const { calculateDeliveryFee } = require('../../services/orderPricingService');
 const paymentLinkService = require('../../services/paymentLinkService');
 const emailService = require('../../utils/emailService');
@@ -70,6 +71,10 @@ async function autoDeliverPickedUpOrder(order, operatorId, req) {
   } catch (emailError) {
     logger.error(`Re-intake delivery emails failed for order ${order.orderId}:`, emailError);
   }
+
+  // Commission just realized — best-effort W-9 threshold re-check (spec §6.2/§8);
+  // never blocks the re-intake (the service swallows its own errors).
+  await applyW9ThresholdCheck(order.affiliateId, { req });
 
   await logAuditEvent(AuditEvents.ORDER_REINTAKE, {
     operatorId,

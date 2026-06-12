@@ -132,14 +132,29 @@ const affiliateSchema = new mongoose.Schema({
     enum: ['en', 'es', 'pt', 'de'],
     default: 'en'
   },
-  // W-9 tax info (collected out-of-band; admin sets status here)
+  // W-9 tax info (in-app encrypted upload + admin review — spec §4.3)
   w9Status: {
     type: String,
-    enum: ['not_required', 'required', 'on_file', 'rejected'],
+    enum: ['not_required', 'required', 'pending_review', 'on_file', 'rejected'],
     default: 'not_required'
   },
   w9OnFileAt: Date,
   taxIdLast4: String,                  // last 4 digits, for admin display only
+  // Encrypted W-9 document metadata — the bytes live in secureFileStore
+  // under W9_STORAGE_PATH, never in the DB (spec §13 #7).
+  w9Document: {
+    storageKey: String,                // e.g. aff/<affiliateId>/<uuid>.enc
+    filename: String,                  // sanitized original filename
+    contentType: { type: String, enum: ['application/pdf', 'image/jpeg', 'image/png'] },
+    sizeBytes: Number,
+    sha256: String,                    // integrity hash of the plaintext bytes
+    submittedAt: Date
+  },
+  w9SubmittedAt: Date,
+  w9VerifiedAt: Date,
+  w9VerifiedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'Administrator' },
+  w9RejectedAt: Date,
+  w9RejectedReason: String,
   // Payment processing lock (set automatically when YTD earnings cross the W-9
   // reporting threshold; cleared manually by an admin after the W-9 is on file)
   paymentProcessingLocked: { type: Boolean, default: false },

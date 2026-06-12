@@ -937,6 +937,7 @@ if (process.env.NODE_ENV !== 'production' || process.env.ENABLE_TEST_ROUTES === 
   apiV1Router.use('/test', testRoutes);
 }
 apiV1Router.use('/quickbooks', quickbooksRoutes);  // QuickBooks export functionality
+apiV1Router.use('/w9', require('./server/routes/w9Routes'));  // W-9 upload/review (PR10)
 
 // Environment endpoint
 apiV1Router.get('/environment', (req, res) => {

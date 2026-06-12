@@ -68,6 +68,13 @@
     "invite": {
       "invalidOrExpired": "This invitation link is invalid or has expired. Please contact WaveMAX to request a new invitation.",
       "emailLocked": "Your email is set by your invitation and cannot be changed."
+    },
+    "w9": {
+      "uploadLabel": "Upload your completed W-9",
+      "fileTypeHint": "PDF, JPG, or PNG, max {{max}} MB",
+      "tooLarge": "That file is too large. The maximum size is {{max}} MB.",
+      "wrongType": "Only PDF, JPG, or PNG files are accepted.",
+      "optionalNote": "You can also upload your W-9 later, but commission payouts pause at $600 in annual earnings until it is on file."
     }
   },
   "common": {
