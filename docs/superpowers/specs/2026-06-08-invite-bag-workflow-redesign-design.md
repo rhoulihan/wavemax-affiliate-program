@@ -834,7 +834,7 @@ One concern per PR, ≤500-line diffs, tests green at every merge (deletions pai
 - [x] PR 8 — payment retune (60/8, come-to-store, held-at-store, escalated not failed)
 - [x] PR 9 — advance/scan-out + delivery (customer PIN / vendor code) + re-intake (operator code) on the bag URL; kiosk re-pointed; three role codes wired
 - [x] PR 10 — W-9 upload/encrypted-storage/review + `multer` + payment-lock integration
-- [ ] PR 11 — all 4 languages shipped; new pages measured mobile + desktop
+- [x] PR 11 — all 4 languages shipped; new pages measured mobile + desktop (claim: desktop 99/100/100/100, mobile 96/100/100/100, median-of-3 local)
 
 **Deploy / launch checklist (verify on the production host, not just in tests):**
 
