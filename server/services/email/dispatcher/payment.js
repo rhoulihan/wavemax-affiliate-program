@@ -3,11 +3,7 @@
 
 const { loadTemplate } = require('../template-manager');
 const { sendEmail } = require('../transport');
-const fs = require('fs');
-const path = require('path');
 const logger = require('../../../utils/logger');
-const { promisify } = require('util');
-const readFile = promisify(fs.readFile);
 // ============================================
 // V2 Payment System Email Methods
 // ============================================
@@ -20,12 +16,7 @@ exports.sendV2PaymentRequest = async ({ customer, order, paymentAmount, paymentL
     const language = customer.languagePreference || 'en';
     const template = await loadTemplate('v2/payment-request', language);
 
-    // If template doesn't exist, load from v2 folder (correct path with emails directory)
-    let finalTemplate = template;
-    if (template.includes('[EMAIL_CONTENT]')) {
-      const v2TemplatePath = path.join(__dirname, '../templates/emails/v2/payment-request.html');
-      finalTemplate = await readFile(v2TemplatePath, 'utf8');
-    }
+    const finalTemplate = template;
 
     // Calculate breakdown amounts
     const wdfAmount = order.actualWeight * (order.baseRate || 1.25);
