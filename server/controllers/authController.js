@@ -1590,8 +1590,11 @@ exports.handleCustomerSocialCallback = async (req, res) => {
       `);
     }
 
-    // Redirect to customer registration page with social data
-    res.redirect(`/customer-register-embed.html?socialToken=${socialToken}&provider=${user.provider}`);
+    // No customer account exists for this social identity. Open registration was
+    // retired (PR 6/PR 11) — customers register by claiming a bag QR token, which
+    // can't be threaded through an OAuth redirect. Send the user back to the login
+    // page, which explains the bag-claim signup path.
+    res.redirect('/embed-app-v2.html?route=/customer-login&noAccount=true');
 
   } catch (error) {
     logger.error('Customer social callback error:', error);
@@ -1629,7 +1632,7 @@ exports.handleCustomerSocialCallback = async (req, res) => {
       `);
     }
 
-    res.redirect('/customer-register-embed.html?error=social_auth_error');
+    res.redirect('/embed-app-v2.html?route=/customer-login&error=social_auth_error');
   }
 };
 

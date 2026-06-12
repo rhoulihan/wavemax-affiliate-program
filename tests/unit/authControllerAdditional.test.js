@@ -363,6 +363,32 @@ describe('Auth Controller - Additional Coverage', () => {
         expect.stringContaining('social-token-123')
       );
     });
+
+    it('should redirect a new customer to the login page in the non-popup fallback (registration is bag-claim-only)', async () => {
+      // No state / popup param and a non-OAuth referer → isPopup is false
+      req.query = {};
+      req.user = {
+        provider: 'google',
+        socialId: 'google123',
+        email: 'jane@example.com',
+        firstName: 'Jane',
+        lastName: 'Doe',
+        isNewUser: true,
+        displayName: 'Jane Doe'
+      };
+
+      jwt.sign.mockReturnValue('social-token-123');
+
+      const handler = extractHandler(authController.handleCustomerSocialCallback);
+      await handler(req, res, next);
+
+      // Open registration was retired (PR 6/PR 11): the fallback must not point
+      // at the deleted customer-register page.
+      expect(res.redirect).toHaveBeenCalledWith(
+        '/embed-app-v2.html?route=/customer-login&noAccount=true'
+      );
+      expect(res.send).not.toHaveBeenCalled();
+    });
   });
 
   describe('completeSocialRegistration', () => {
