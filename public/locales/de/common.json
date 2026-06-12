@@ -167,8 +167,18 @@
       "authenticationTimeout": "Authentifizierung abgelaufen. Bitte versuchen Sie es erneut.",
       "accountNotFound": "Konto nicht gefunden. Sie werden zur Registrierung weitergeleitet, um ein neues Konto zu erstellen.",
       "processingError": "Fehler bei der Verarbeitung des Authentifizierungsergebnisses",
-      "copied": "Kopiert!"
-    }
+      "copied": "Kopiert!",
+      "validation": "Bitte überprüfen Sie das Formular und korrigieren Sie etwaige Fehler."
+    },
+    "userTypes": {
+      "affiliate": "Partner",
+      "customer": "Kunde",
+      "administrator": "Administrator",
+      "operator": "Operator"
+    },
+    "email": "E-Mail-Adresse",
+    "newPassword": "Neues Passwort",
+    "copyright": "© 2024 WaveMAX Laundry. Alle Rechte vorbehalten."
   },
   "landing": {
     "header": {
@@ -913,7 +923,10 @@
         "today": "Heute",
         "last7Days": "Letzte 7 Tage",
         "last30Days": "Letzte 30 Tage",
-        "noData": "Keine Analysedaten verfügbar"
+        "noData": "Keine Analysedaten verfügbar",
+        "status": "Status",
+        "count": "Anzahl",
+        "percentage": "Prozentsatz"
       },
       "orderStatus": {
         "pending": "Ausstehend",
@@ -1453,5 +1466,47 @@
       "delivered": "Geliefert",
       "cancelled": "Storniert"
     }
+  },
+  "forgotPassword": {
+    "title": "Passwort zurücksetzen",
+    "heading": "Passwort vergessen?",
+    "description": "Geben Sie Ihre E-Mail-Adresse ein und wir senden Ihnen Anweisungen zum Zurücksetzen Ihres Passworts.",
+    "userTypeLabel": "Ich bin:",
+    "selectUserType": "Benutzertyp auswählen",
+    "sendInstructions": "Anweisungen zum Zurücksetzen senden",
+    "rememberPassword": "Erinnern Sie sich an Ihr Passwort?",
+    "backToLogin": "Zurück zur Anmeldung",
+    "checkEmail": "Überprüfen Sie Ihre E-Mails",
+    "emailSent": "Wir haben Anweisungen zum Zurücksetzen des Passworts an Ihre E-Mail-Adresse gesendet.",
+    "emailSentTo": "Wir haben Anweisungen zum Zurücksetzen des Passworts an ${email} gesendet.",
+    "sendingEmail": "E-Mail wird gesendet..."
+  },
+  "resetPassword": {
+    "title": "Passwort zurücksetzen",
+    "invalidToken": "Ungültiger oder abgelaufener Link",
+    "invalidTokenDesc": "Dieser Link zum Zurücksetzen des Passworts ist ungültig oder abgelaufen. Bitte fordern Sie einen neuen an.",
+    "requestNewLink": "Neuen Link anfordern",
+    "heading": "Neues Passwort erstellen",
+    "description": "Geben Sie unten Ihr neues Passwort ein. Stellen Sie sicher, dass es sicher ist!",
+    "resetButton": "Passwort zurücksetzen",
+    "resetting": "Passwort wird zurückgesetzt...",
+    "successTitle": "Passwort erfolgreich zurückgesetzt!",
+    "successDesc": "Ihr Passwort wurde erfolgreich zurückgesetzt. Sie können sich jetzt mit Ihrem neuen Passwort anmelden.",
+    "goToLogin": "Zur Anmeldung"
+  },
+  "validation": {
+    "userTypeRequired": "Bitte wählen Sie Ihren Benutzertyp",
+    "emailRequired": "E-Mail ist erforderlich",
+    "emailInvalid": "Bitte geben Sie eine gültige E-Mail-Adresse ein",
+    "passwordRequired": "Passwort ist erforderlich",
+    "passwordMatch": "Die Passwörter stimmen nicht überein",
+    "passwordsMatch": "Passwörter stimmen überein",
+    "passwordWeak": "Das Passwort erfüllt nicht die Anforderungen",
+    "minLength": "Mindestens 8 Zeichen",
+    "uppercase": "Ein Großbuchstabe",
+    "lowercase": "Ein Kleinbuchstabe",
+    "number": "Eine Zahl",
+    "special": "Ein Sonderzeichen",
+    "requiredFields": "Bitte füllen Sie alle Pflichtfelder aus"
   }
 }

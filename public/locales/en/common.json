@@ -167,8 +167,18 @@
       "authenticationTimeout": "Authentication timed out. Please try again.",
       "accountNotFound": "Account not found. You will be redirected to registration to create a new account.",
       "processingError": "Error processing authentication result",
-      "copied": "Copied!"
-    }
+      "copied": "Copied!",
+      "validation": "Please check the form and correct any errors."
+    },
+    "userTypes": {
+      "affiliate": "Affiliate",
+      "customer": "Customer",
+      "administrator": "Administrator",
+      "operator": "Operator"
+    },
+    "email": "Email Address",
+    "newPassword": "New Password",
+    "copyright": "© 2024 WaveMAX Laundry. All rights reserved."
   },
   "landing": {
     "header": {
@@ -913,7 +923,10 @@
         "today": "Today",
         "last7Days": "Last 7 Days",
         "last30Days": "Last 30 Days",
-        "noData": "No analytics data available"
+        "noData": "No analytics data available",
+        "status": "Status",
+        "count": "Count",
+        "percentage": "Percentage"
       },
       "orderStatus": {
         "pending": "Pending",
@@ -1453,5 +1466,47 @@
       "delivered": "Delivered",
       "cancelled": "Cancelled"
     }
+  },
+  "forgotPassword": {
+    "title": "Reset Your Password",
+    "heading": "Forgot Your Password?",
+    "description": "Enter your email address and we'll send you instructions to reset your password.",
+    "userTypeLabel": "I am a:",
+    "selectUserType": "Select user type",
+    "sendInstructions": "Send Reset Instructions",
+    "rememberPassword": "Remember your password?",
+    "backToLogin": "Back to Login",
+    "checkEmail": "Check Your Email",
+    "emailSent": "We've sent password reset instructions to your email address.",
+    "emailSentTo": "We've sent password reset instructions to ${email}.",
+    "sendingEmail": "Sending email..."
+  },
+  "resetPassword": {
+    "title": "Reset Password",
+    "invalidToken": "Invalid or Expired Link",
+    "invalidTokenDesc": "This password reset link is invalid or has expired. Please request a new one.",
+    "requestNewLink": "Request New Link",
+    "heading": "Create New Password",
+    "description": "Enter your new password below. Make sure it's secure!",
+    "resetButton": "Reset Password",
+    "resetting": "Resetting password...",
+    "successTitle": "Password Reset Successful!",
+    "successDesc": "Your password has been successfully reset. You can now log in with your new password.",
+    "goToLogin": "Go to Login"
+  },
+  "validation": {
+    "userTypeRequired": "Please select your user type",
+    "emailRequired": "Email is required",
+    "emailInvalid": "Please enter a valid email address",
+    "passwordRequired": "Password is required",
+    "passwordMatch": "Passwords do not match",
+    "passwordsMatch": "Passwords match",
+    "passwordWeak": "Password does not meet requirements",
+    "minLength": "At least 8 characters",
+    "uppercase": "One uppercase letter",
+    "lowercase": "One lowercase letter",
+    "number": "One number",
+    "special": "One special character",
+    "requiredFields": "Please fill in all required fields"
   }
 }

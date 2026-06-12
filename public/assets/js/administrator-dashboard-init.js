@@ -1740,7 +1740,7 @@
         console.error('Affiliates API error:', data);
         document.getElementById('affiliatesList').innerHTML = `
           <p class="p-20 text-center text-danger">
-            ${data.message || t('administrator.dashboard.affiliates.loadError', 'Error loading affiliates')}
+            ${data.message || t('administrator.dashboard.errors.affiliatesLoadFailed', 'Error loading affiliates')}
           </p>
         `;
       }
@@ -1748,7 +1748,7 @@
       console.error('Error loading affiliates:', error);
       document.getElementById('affiliatesList').innerHTML = `
         <p class="p-20 text-center text-danger">
-          ${t('administrator.dashboard.affiliates.loadError', 'Error loading affiliates')}
+          ${t('administrator.dashboard.errors.affiliatesLoadFailed', 'Error loading affiliates')}
         </p>
       `;
     }
@@ -2366,7 +2366,7 @@
         try {
           await navigator.clipboard.writeText(input.value);
           const originalText = copyLandingPageBtn.textContent;
-          copyLandingPageBtn.textContent = t('common.buttons.copied', 'Copied!');
+          copyLandingPageBtn.textContent = t('common.messages.copied', 'Copied!');
           setTimeout(() => {
             copyLandingPageBtn.textContent = originalText;
           }, 2000);
@@ -2375,7 +2375,7 @@
           input.select();
           document.execCommand('copy');
           const originalText = copyLandingPageBtn.textContent;
-          copyLandingPageBtn.textContent = t('common.buttons.copied', 'Copied!');
+          copyLandingPageBtn.textContent = t('common.messages.copied', 'Copied!');
           setTimeout(() => {
             copyLandingPageBtn.textContent = originalText;
           }, 2000);
@@ -3330,7 +3330,7 @@
 
   // Logout
   document.getElementById('logoutBtn').addEventListener('click', () => {
-    if (confirm(t('administrator.dashboard.confirmLogout', 'Are you sure you want to logout?'))) {
+    if (confirm(t('administrator.dashboard.logout.message', 'Are you sure you want to logout?'))) {
       localStorage.removeItem('adminToken');
       localStorage.removeItem('adminRefreshToken');
       localStorage.removeItem('adminData');

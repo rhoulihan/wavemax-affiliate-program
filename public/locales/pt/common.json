@@ -167,8 +167,18 @@
       "authenticationTimeout": "Tempo de autenticação esgotado. Por favor, tente novamente.",
       "accountNotFound": "Conta não encontrada. Você será redirecionado para o registro para criar uma nova conta.",
       "processingError": "Erro ao processar o resultado da autenticação",
-      "copied": "Copiado!"
-    }
+      "copied": "Copiado!",
+      "validation": "Por favor, verifique o formulário e corrija quaisquer erros."
+    },
+    "userTypes": {
+      "affiliate": "Afiliado",
+      "customer": "Cliente",
+      "administrator": "Administrador",
+      "operator": "Operador"
+    },
+    "email": "Endereço de e-mail",
+    "newPassword": "Nova senha",
+    "copyright": "© 2024 WaveMAX Laundry. Todos os direitos reservados."
   },
   "landing": {
     "header": {
@@ -913,7 +923,10 @@
         "today": "Hoje",
         "last7Days": "Últimos 7 Dias",
         "last30Days": "Últimos 30 Dias",
-        "noData": "Nenhum dado de análise disponível"
+        "noData": "Nenhum dado de análise disponível",
+        "status": "Status",
+        "count": "Quantidade",
+        "percentage": "Porcentagem"
       },
       "orderStatus": {
         "pending": "Pendente",
@@ -1453,5 +1466,47 @@
       "delivered": "Entregue",
       "cancelled": "Cancelado"
     }
+  },
+  "forgotPassword": {
+    "title": "Redefinir sua senha",
+    "heading": "Esqueceu sua senha?",
+    "description": "Digite seu endereço de e-mail e enviaremos instruções para redefinir sua senha.",
+    "userTypeLabel": "Eu sou:",
+    "selectUserType": "Selecione o tipo de usuário",
+    "sendInstructions": "Enviar instruções de redefinição",
+    "rememberPassword": "Lembrou sua senha?",
+    "backToLogin": "Voltar ao login",
+    "checkEmail": "Verifique seu e-mail",
+    "emailSent": "Enviamos instruções de redefinição de senha para seu endereço de e-mail.",
+    "emailSentTo": "Enviamos instruções de redefinição de senha para ${email}.",
+    "sendingEmail": "Enviando e-mail..."
+  },
+  "resetPassword": {
+    "title": "Redefinir senha",
+    "invalidToken": "Link inválido ou expirado",
+    "invalidTokenDesc": "Este link de redefinição de senha é inválido ou expirou. Por favor, solicite um novo.",
+    "requestNewLink": "Solicitar novo link",
+    "heading": "Criar nova senha",
+    "description": "Digite sua nova senha abaixo. Certifique-se de que seja segura!",
+    "resetButton": "Redefinir senha",
+    "resetting": "Redefinindo senha...",
+    "successTitle": "Senha redefinida com sucesso!",
+    "successDesc": "Sua senha foi redefinida com sucesso. Agora você pode fazer login com sua nova senha.",
+    "goToLogin": "Ir para o login"
+  },
+  "validation": {
+    "userTypeRequired": "Por favor, selecione seu tipo de usuário",
+    "emailRequired": "O e-mail é obrigatório",
+    "emailInvalid": "Por favor, digite um endereço de e-mail válido",
+    "passwordRequired": "A senha é obrigatória",
+    "passwordMatch": "As senhas não coincidem",
+    "passwordsMatch": "As senhas coincidem",
+    "passwordWeak": "A senha não atende aos requisitos",
+    "minLength": "Pelo menos 8 caracteres",
+    "uppercase": "Uma letra maiúscula",
+    "lowercase": "Uma letra minúscula",
+    "number": "Um número",
+    "special": "Um caractere especial",
+    "requiredFields": "Por favor, preencha todos os campos obrigatórios"
   }
 }

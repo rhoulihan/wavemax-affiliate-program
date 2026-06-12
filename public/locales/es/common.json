@@ -167,8 +167,18 @@
       "authenticationTimeout": "Se agotó el tiempo de autenticación. Por favor intenta nuevamente.",
       "accountNotFound": "Cuenta no encontrada. Serás redirigido al registro para crear una nueva cuenta.",
       "processingError": "Error al procesar el resultado de autenticación",
-      "copied": "¡Copiado!"
-    }
+      "copied": "¡Copiado!",
+      "validation": "Por favor, revise el formulario y corrija cualquier error."
+    },
+    "userTypes": {
+      "affiliate": "Afiliado",
+      "customer": "Cliente",
+      "administrator": "Administrador",
+      "operator": "Operador"
+    },
+    "email": "Correo electrónico",
+    "newPassword": "Nueva contraseña",
+    "copyright": "© 2024 WaveMAX Laundry. Todos los derechos reservados."
   },
   "landing": {
     "header": {
@@ -913,7 +923,10 @@
         "today": "Hoy",
         "last7Days": "Últimos 7 Días",
         "last30Days": "Últimos 30 Días",
-        "noData": "No hay datos de análisis disponibles"
+        "noData": "No hay datos de análisis disponibles",
+        "status": "Estado",
+        "count": "Cantidad",
+        "percentage": "Porcentaje"
       },
       "orderStatus": {
         "pending": "Pendiente",
@@ -1453,5 +1466,47 @@
       "delivered": "Entregado",
       "cancelled": "Cancelado"
     }
+  },
+  "forgotPassword": {
+    "title": "Restablecer su contraseña",
+    "heading": "¿Olvidó su contraseña?",
+    "description": "Ingrese su correo electrónico y le enviaremos instrucciones para restablecer su contraseña.",
+    "userTypeLabel": "Soy:",
+    "selectUserType": "Seleccione el tipo de usuario",
+    "sendInstructions": "Enviar instrucciones de restablecimiento",
+    "rememberPassword": "¿Recuerda su contraseña?",
+    "backToLogin": "Volver al inicio de sesión",
+    "checkEmail": "Revise su correo electrónico",
+    "emailSent": "Hemos enviado instrucciones para restablecer la contraseña a su correo electrónico.",
+    "emailSentTo": "Hemos enviado instrucciones para restablecer la contraseña a ${email}.",
+    "sendingEmail": "Enviando correo..."
+  },
+  "resetPassword": {
+    "title": "Restablecer contraseña",
+    "invalidToken": "Enlace inválido o caducado",
+    "invalidTokenDesc": "Este enlace de restablecimiento de contraseña es inválido o ha caducado. Por favor, solicite uno nuevo.",
+    "requestNewLink": "Solicitar nuevo enlace",
+    "heading": "Crear nueva contraseña",
+    "description": "Ingrese su nueva contraseña a continuación. ¡Asegúrese de que sea segura!",
+    "resetButton": "Restablecer contraseña",
+    "resetting": "Restableciendo contraseña...",
+    "successTitle": "¡Contraseña restablecida con éxito!",
+    "successDesc": "Su contraseña se ha restablecido correctamente. Ahora puede iniciar sesión con su nueva contraseña.",
+    "goToLogin": "Ir al inicio de sesión"
+  },
+  "validation": {
+    "userTypeRequired": "Por favor, seleccione su tipo de usuario",
+    "emailRequired": "El correo electrónico es obligatorio",
+    "emailInvalid": "Por favor, ingrese un correo electrónico válido",
+    "passwordRequired": "La contraseña es obligatoria",
+    "passwordMatch": "Las contraseñas no coinciden",
+    "passwordsMatch": "Las contraseñas coinciden",
+    "passwordWeak": "La contraseña no cumple con los requisitos",
+    "minLength": "Al menos 8 caracteres",
+    "uppercase": "Una letra mayúscula",
+    "lowercase": "Una letra minúscula",
+    "number": "Un número",
+    "special": "Un carácter especial",
+    "requiredFields": "Por favor, complete todos los campos obligatorios"
   }
 }

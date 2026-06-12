@@ -273,7 +273,7 @@
             } catch (error) {
                 console.error('[ResetPassword] Error:', error);
                 showAlert(
-                    window.i18n?.t('errors.networkError') || 
+                    window.i18n?.t('errors.network') || 
                     'Unable to connect to the server. Please check your connection and try again.',
                     'error'
                 );
