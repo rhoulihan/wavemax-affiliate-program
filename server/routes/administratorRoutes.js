@@ -32,6 +32,30 @@ router.post('/operators/:operatorId/reset-password', checkAdminPermission(['oper
 // Affiliates list (for dropdowns, filters, etc.)
 router.get('/affiliates', checkAdminPermission(['view_analytics']), administratorController.getAffiliatesList);
 
+// Manual affiliate creation (no invite) — zero-commission 'location'
+// collection points by default; 'standard' accepted. CSRF: CRITICAL_ENDPOINTS.
+const manualAffiliateController = require('../modules/onboarding/manualAffiliateController');
+router.post('/affiliates',
+  checkAdminPermission(['manage_affiliates']),
+  sensitiveOperationLimiter,
+  [
+    body('firstName').notEmpty().trim().isLength({ max: 50 }).withMessage('First name is required'),
+    body('lastName').notEmpty().trim().isLength({ max: 50 }).withMessage('Last name is required'),
+    body('email').isEmail().withMessage('Valid email is required'),
+    body('phone').notEmpty().trim().isLength({ max: 25 }).withMessage('Phone is required'),
+    body('businessName').optional().isString().trim().isLength({ max: 100 }),
+    body('address').notEmpty().trim().isLength({ max: 200 }).withMessage('Address is required'),
+    body('city').notEmpty().trim().isLength({ max: 100 }).withMessage('City is required'),
+    body('state').notEmpty().trim().isLength({ max: 50 }).withMessage('State is required'),
+    body('zipCode').notEmpty().trim().isLength({ max: 20 }).withMessage('ZIP code is required'),
+    body('username').notEmpty().trim().isLength({ min: 3, max: 50 }).withMessage('Username is required'),
+    body('languagePreference').optional().isIn(['en', 'es', 'pt', 'de']),
+    body('affiliateType').optional().isIn(['standard', 'location']),
+    body('minimumDeliveryFee').optional().isFloat({ min: 0, max: 100 }),
+    body('perBagDeliveryFee').optional().isFloat({ min: 0, max: 50 })
+  ],
+  manualAffiliateController.createAffiliateManually);
+
 // Commission payment lock/unlock (W-9 compliance)
 router.post('/affiliates/:affiliateId/lock-payments',
   checkAdminPermission(['manage_affiliates']),

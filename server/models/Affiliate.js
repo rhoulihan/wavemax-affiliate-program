@@ -12,6 +12,15 @@ const affiliateSchema = new mongoose.Schema({
     default: () => 'AFF-' + uuidv4(),
     unique: true
   },
+  // 'standard' = independent commission-earning affiliate.
+  // 'location'  = WaveMAX-operated collection point (a contact + address where
+  // bags are dropped/collected on a schedule) — earns ZERO commission, ever.
+  // Created manually by an administrator, never via invite.
+  affiliateType: {
+    type: String,
+    enum: ['standard', 'location'],
+    default: 'standard'
+  },
   firstName: { type: String, required: true },
   lastName: { type: String, required: true },
   email: { type: String, required: true, unique: true },

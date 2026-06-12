@@ -97,6 +97,13 @@ const orderSchema = new mongoose.Schema({
   wdfCreditGenerated: { type: Number, default: 0 },                  // always 0 — no estimate variance exists
   affiliateCommission: { type: Number, default: 0 },
 
+  // Snapshot of Affiliate.affiliateType === 'location' at order creation
+  // (orderIntakeService sets it where the affiliate is already in hand).
+  // When true the pre-save computes affiliateCommission to 0 — WDF share AND
+  // delivery-fee share — on every recompute, so weight edits can't resurrect
+  // a commission for a WaveMAX-operated collection point.
+  zeroCommission: { type: Boolean, default: false },
+
   // Commission realization (realized at 'delivered', not 'picked_up')
   commissionRealized: { type: Boolean, default: false },
   commissionRealizedAt: Date,
@@ -229,7 +236,10 @@ orderSchema.pre('save', async function(next) {
     // Payment amount is the gross total without credits (credits apply to the customer, not the invoice)
     this.paymentAmount = parseFloat((wdfTotal + totalFee + (this.addOnTotal || 0)).toFixed(2));
     // Affiliate commission = (WDF x 10%) + delivery fee. Add-ons and credits are NOT included.
-    this.affiliateCommission = parseFloat(((wdfTotal * 0.1) + totalFee).toFixed(2));
+    // Location affiliates (WaveMAX-operated collection points) earn nothing.
+    this.affiliateCommission = this.zeroCommission
+      ? 0
+      : parseFloat(((wdfTotal * 0.1) + totalFee).toFixed(2));
     // No estimate-vs-actual variance exists in the at-intake flow.
     this.wdfCreditGenerated = 0;
   }

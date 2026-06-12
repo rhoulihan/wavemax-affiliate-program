@@ -105,6 +105,9 @@ const AuditEvents = {
   PREVIEW_UNLOCK_FAILED: 'PREVIEW_UNLOCK_FAILED',
   PREVIEW_REVOKED: 'PREVIEW_REVOKED',
 
+  // Admin-created affiliates (no invite — e.g. zero-commission location accounts)
+  AFFILIATE_CREATED_MANUALLY: 'AFFILIATE_CREATED_MANUALLY',
+
   // Affiliate invites (invite-only onboarding, spec §9)
   INVITE_MINTED: 'INVITE_MINTED',
   INVITE_CONSUMED: 'INVITE_CONSUMED',

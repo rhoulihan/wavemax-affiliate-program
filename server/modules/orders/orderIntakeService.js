@@ -177,6 +177,10 @@ async function createOrderFromBag({ bagToken, weight, addOns, freshAddOnsFormPla
     freshAddOnsFormAckBy: freshAddOnsFormPlaced ? operatorId : undefined,
     freshAddOnsFormAckAt: freshAddOnsFormPlaced ? now : undefined,
     feeBreakdown: { ...feeCalculation },   // pre-save READS totalFee — omit and everything zeroes
+    // Location affiliates (WaveMAX-operated collection points) earn ZERO
+    // commission — snapshot the flag here where the affiliate is in hand;
+    // the Order pre-save respects it on every recompute.
+    zeroCommission: affiliate.affiliateType === 'location',
     wdfCreditApplied: wdfCreditToApply,
     intakeAt: now,
     assignedOperator: operatorId,

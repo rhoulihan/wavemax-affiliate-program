@@ -2047,6 +2047,67 @@
         }
       });
     }
+
+    const locationForm = document.getElementById('locationAffiliateForm');
+    if (locationForm && !locationForm.hasAttribute('data-initialized')) {
+      locationForm.setAttribute('data-initialized', 'true');
+      locationForm.addEventListener('submit', handleCreateLocationAffiliate);
+    }
+  }
+
+  // Manual creation of a zero-commission 'location' affiliate (no invite).
+  // The response carries TWO one-time secrets (temporary password + delivery
+  // code) — revealed once via textContent, never logged.
+  async function handleCreateLocationAffiliate(e) {
+    e.preventDefault();
+    const submitBtn = document.getElementById('createLocationAffiliateBtn');
+    const value = (id) => (document.getElementById(id).value || '').trim();
+
+    const body = {
+      affiliateType: 'location',
+      firstName: value('locAffFirstName'),
+      lastName: value('locAffLastName'),
+      email: value('locAffEmail'),
+      phone: value('locAffPhone'),
+      address: value('locAffAddress'),
+      city: value('locAffCity'),
+      state: value('locAffState'),
+      zipCode: value('locAffZipCode'),
+      username: value('locAffUsername'),
+      languagePreference: value('locAffLanguage') || 'en'
+    };
+    const businessName = value('locAffBusinessName');
+    if (businessName) body.businessName = businessName;
+
+    try {
+      submitBtn.disabled = true;
+      const response = await adminFetch('/api/v1/administrators/affiliates', {
+        method: 'POST',
+        body: JSON.stringify(body)
+      });
+      const data = await response.json();
+      if (response.ok && data.success) {
+        // One-time reveal — textContent only (CSP-safe, no HTML injection)
+        document.getElementById('locAffRevealId').textContent = data.affiliateId;
+        document.getElementById('locAffRevealPassword').textContent = data.temporaryPassword;
+        document.getElementById('locAffRevealCode').textContent = data.deliveryCode;
+        document.getElementById('locationAffiliateReveal').classList.remove('hidden');
+        document.getElementById('locationAffiliateForm').reset();
+        showNotification(t('admin.locationAffiliate.createSuccess', 'Location affiliate created'), 'success');
+      } else {
+        let message = data.message || t('admin.locationAffiliate.createError', 'Failed to create location affiliate');
+        if (Array.isArray(data.errors) && data.errors.length > 0) {
+          const detail = data.errors[0].msg || data.errors[0].code;
+          if (detail) message = `${message}: ${detail}`;
+        }
+        showNotification(message, 'error');
+      }
+    } catch (error) {
+      console.error('Error creating location affiliate:', error);
+      showNotification(t('admin.locationAffiliate.createError', 'Failed to create location affiliate'), 'error');
+    } finally {
+      submitBtn.disabled = false;
+    }
   }
 
   async function handleMintInvite(e) {
@@ -2158,10 +2219,15 @@
                         const w9Badge = w9Badges[w9Status] || { cls: 'inactive', label: w9Status };
                         const w9StatusDisplay = `<span class="status-badge ${w9Badge.cls}">${escapeHtml(w9Badge.label)}</span>`;
 
+                        // Zero-commission WaveMAX-operated collection points
+                        const locationBadge = aff.affiliateType === 'location'
+                            ? ` <span class="status-badge inactive">${escapeHtml(t('admin.locationAffiliate.badge', 'Location'))}</span>`
+                            : '';
+
                         return `
                         <tr>
                             <td>${aff.affiliateId}</td>
-                            <td>${name}</td>
+                            <td>${name}${locationBadge}</td>
                             <td>${totalCustomers}</td>
                             <td>${totalOrders}</td>
                             <td>$${totalRevenue.toFixed(2)}</td>

@@ -163,6 +163,7 @@ const CSRF_CONFIG = {
     '/api/v1/customers/:customerId/delete-all-data',
 
     // Admin operations
+    '/api/v1/administrators/affiliates',
     '/api/v1/administrators/operators',
     '/api/v1/administrators/operators/:operatorId',
     '/api/v1/operators/:operatorId/scan-code/reset',

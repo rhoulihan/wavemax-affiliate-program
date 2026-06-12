@@ -285,6 +285,101 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Manual creation of zero-commission location affiliates (no invite) -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title" data-i18n="admin.locationAffiliate.title">Add location affiliate</h2>
+                </div>
+                <div class="padding-20">
+                    <p class="text-muted" data-i18n="admin.locationAffiliate.description">WaveMAX-operated collection point with a contact where bags are dropped off and collected on a schedule. Earns no commission. Created directly — no invite email is sent.</p>
+                    <form id="locationAffiliateForm">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="locAffFirstName" data-i18n="admin.locationAffiliate.firstName">Contact first name</label>
+                                <input type="text" id="locAffFirstName" class="form-control" required maxlength="50">
+                            </div>
+                            <div class="form-group">
+                                <label for="locAffLastName" data-i18n="admin.locationAffiliate.lastName">Contact last name</label>
+                                <input type="text" id="locAffLastName" class="form-control" required maxlength="50">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="locAffEmail" data-i18n="admin.locationAffiliate.email">Email</label>
+                                <input type="email" id="locAffEmail" class="form-control" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="locAffPhone" data-i18n="admin.locationAffiliate.phone">Phone</label>
+                                <input type="tel" id="locAffPhone" class="form-control" required maxlength="25">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="locAffBusinessName" data-i18n="admin.locationAffiliate.businessName">Location name (optional)</label>
+                                <input type="text" id="locAffBusinessName" class="form-control" maxlength="100">
+                            </div>
+                            <div class="form-group">
+                                <label for="locAffUsername" data-i18n="admin.locationAffiliate.username">Username</label>
+                                <input type="text" id="locAffUsername" class="form-control" required minlength="3" maxlength="50">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="locAffAddress" data-i18n="admin.locationAffiliate.address">Street address</label>
+                                <input type="text" id="locAffAddress" class="form-control" required maxlength="200">
+                            </div>
+                            <div class="form-group">
+                                <label for="locAffCity" data-i18n="admin.locationAffiliate.city">City</label>
+                                <input type="text" id="locAffCity" class="form-control" required maxlength="100">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="locAffState" data-i18n="admin.locationAffiliate.state">State</label>
+                                <input type="text" id="locAffState" class="form-control" required maxlength="50">
+                            </div>
+                            <div class="form-group">
+                                <label for="locAffZipCode" data-i18n="admin.locationAffiliate.zipCode">ZIP code</label>
+                                <input type="text" id="locAffZipCode" class="form-control" required maxlength="20">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="locAffLanguage" data-i18n="admin.locationAffiliate.language">Language</label>
+                                <select id="locAffLanguage" class="form-control">
+                                    <option value="en">English</option>
+                                    <option value="es">Español</option>
+                                    <option value="pt">Português</option>
+                                    <option value="de">Deutsch</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>&nbsp;</label>
+                                <div class="flex-center gap-10">
+                                    <button type="submit" class="btn btn-primary" id="createLocationAffiliateBtn" data-i18n="admin.locationAffiliate.create">Create location affiliate</button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="locationAffiliateReveal" class="hidden">
+                        <hr>
+                        <p><strong data-i18n="admin.locationAffiliate.revealWarning">Save these now — they are shown only once and cannot be retrieved later.</strong></p>
+                        <p>
+                            <span data-i18n="admin.locationAffiliate.affiliateId">Affiliate ID</span>:
+                            <code id="locAffRevealId"></code>
+                        </p>
+                        <p>
+                            <span data-i18n="admin.locationAffiliate.temporaryPassword">Temporary password</span>:
+                            <code id="locAffRevealPassword"></code>
+                        </p>
+                        <p>
+                            <span data-i18n="admin.locationAffiliate.deliveryCode">Delivery code</span>:
+                            <code id="locAffRevealCode"></code>
+                        </p>
+                    </div>
+                </div>
+            </div>
         </div>
 
 
