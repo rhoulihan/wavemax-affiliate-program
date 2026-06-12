@@ -802,7 +802,8 @@
         "w9review": "Revisión W-9",
         "quickbooks": "QuickBooks",
         "auditlog": "Registro de Auditoría",
-        "config": "Configuración"
+        "config": "Configuración",
+        "invites": "Invitaciones"
       },
       "subtabs": {
         "overview": "Resumen",
@@ -1374,7 +1375,18 @@
         "accepted": "Aceptada",
         "expired": "Caducada",
         "revoked": "Revocada"
-      }
+      },
+      "emailPlaceholder": "afiliado@ejemplo.com",
+      "sentAt": "Enviada",
+      "expiresAt": "Expira",
+      "actions": "Acciones",
+      "sendSuccess": "Invitación enviada a",
+      "sendError": "No se pudo enviar la invitación",
+      "resendSuccess": "Invitación reenviada",
+      "revokeSuccess": "Invitación revocada",
+      "revokeConfirm": "¿Revocar la invitación para",
+      "loadError": "No se pudieron cargar las invitaciones",
+      "actionError": "La acción sobre la invitación falló"
     },
     "w9": {
       "title": "Revisión de W-9",
@@ -1382,7 +1394,26 @@
       "verify": "Verificar",
       "reject": "Rechazar",
       "download": "Descargar",
-      "empty": "No hay W-9 pendientes"
+      "empty": "No hay W-9 pendientes",
+      "affiliate": "Afiliado",
+      "submitted": "Enviado",
+      "filename": "Documento",
+      "actions": "Acciones",
+      "verifyConfirm": "¿Marcar este W-9 como verificado para",
+      "verifySuccess": "W-9 verificado",
+      "rejectReasonPrompt": "Motivo de rechazo (obligatorio) para",
+      "rejectReasonRequired": "Se requiere un motivo de rechazo",
+      "rejectSuccess": "W-9 rechazado",
+      "downloadError": "No se pudo descargar el documento W-9",
+      "loadError": "No se pudieron cargar las revisiones W-9 pendientes",
+      "actionError": "La acción sobre el W-9 falló",
+      "statusBadge": {
+        "not_required": "No requerido",
+        "required": "Requerido",
+        "pending_review": "Pendiente de revisión",
+        "on_file": "Archivado",
+        "rejected": "Rechazado"
+      }
     }
   },
   "email": {

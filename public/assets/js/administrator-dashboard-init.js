@@ -6,6 +6,27 @@
     return window.i18n && window.i18n.t ? window.i18n.t(key) : fallback;
   }
 
+  // Escape server-provided strings before HTML interpolation (CSP/XSS hygiene)
+  function escapeHtml(value) {
+    return String(value == null ? '' : value)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  // The SPA router injects this script after DOMContentLoaded already fired,
+  // so a bare DOMContentLoaded listener never runs. Run immediately when the
+  // document is already parsed.
+  function onDomReady(fn) {
+    if (document.readyState !== 'loading') {
+      fn();
+    } else {
+      document.addEventListener('DOMContentLoaded', fn);
+    }
+  }
+
   // Safe style manipulation helper
   function setElementDisplay(element, show) {
     if (!element) return;
@@ -241,7 +262,7 @@
 
   // Clear loading states from all containers
   function clearLoadingStates() {
-    const loadingContainers = ['dashboardStats', 'recentActivity', 'operatorsList', 'kpiOverview', 'orderAnalytics', 'affiliatesList', 'systemConfigForm'];
+    const loadingContainers = ['dashboardStats', 'recentActivity', 'operatorsList', 'kpiOverview', 'orderAnalytics', 'affiliatesList', 'invitesList', 'w9PendingList', 'systemConfigForm'];
     loadingContainers.forEach(id => {
       const element = document.getElementById(id);
       if (element && element.querySelector('.loading')) {
@@ -271,6 +292,9 @@
       break;
     case 'affiliates':
       await loadAffiliates();
+      break;
+    case 'invites':
+      await loadInvites();
       break;
     case 'quickbooks':
       await loadQuickBooksTab();
@@ -1728,6 +1752,364 @@
         </p>
       `;
     }
+
+    // W-9 review surface lives in the same tab — load it regardless of the
+    // analytics call outcome.
+    setupW9ReviewHandlers();
+    await loadW9Pending();
+  }
+
+  // ========================================
+  // W-9 Review (admin/pending list + verify / reject / audited download)
+  // ========================================
+
+  async function loadW9Pending() {
+    const container = document.getElementById('w9PendingList');
+    if (!container) return;
+    try {
+      const response = await adminFetch('/api/v1/w9/admin/pending');
+      const data = await response.json();
+      if (response.ok && data.success) {
+        renderW9PendingList(data.affiliates || []);
+      } else {
+        container.innerHTML = `<p class="p-20 text-center text-danger">${escapeHtml(data.message || t('admin.w9.loadError', 'Failed to load pending W-9 reviews'))}</p>`;
+      }
+    } catch (error) {
+      console.error('Error loading pending W-9 reviews:', error);
+      container.innerHTML = `<p class="p-20 text-center text-danger">${t('admin.w9.loadError', 'Failed to load pending W-9 reviews')}</p>`;
+    }
+  }
+
+  function renderW9PendingList(affiliates) {
+    const container = document.getElementById('w9PendingList');
+    if (!container) return;
+
+    if (!affiliates || affiliates.length === 0) {
+      container.innerHTML = `<p class="p-20 text-center text-muted">${t('admin.w9.empty', 'No W-9 submissions pending')}</p>`;
+      return;
+    }
+
+    const tableHtml = `
+      <table>
+        <thead>
+          <tr>
+            <th>${t('admin.w9.affiliate', 'Affiliate')}</th>
+            <th>${t('admin.invites.email', 'Email')}</th>
+            <th>${t('admin.w9.submitted', 'Submitted')}</th>
+            <th>${t('admin.w9.filename', 'Document')}</th>
+            <th>${t('admin.w9.actions', 'Actions')}</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${affiliates.map(aff => {
+            const name = `${aff.firstName || ''} ${aff.lastName || ''}`.trim() || aff.affiliateId;
+            const submitted = aff.w9SubmittedAt ? new Date(aff.w9SubmittedAt).toLocaleString() : '-';
+            const filename = (aff.w9Document && aff.w9Document.filename) || 'w9';
+            return `
+              <tr>
+                <td>
+                  <div>${escapeHtml(name)}</div>
+                  ${aff.businessName ? `<div class="text-sm text-muted">${escapeHtml(aff.businessName)}</div>` : ''}
+                  <div class="text-sm text-light">${escapeHtml(aff.affiliateId)}</div>
+                </td>
+                <td>${escapeHtml(aff.email)}</td>
+                <td>${escapeHtml(submitted)}</td>
+                <td>${escapeHtml(filename)}</td>
+                <td>
+                  <button class="btn btn-sm btn-secondary w9-download-btn" data-affiliate-id="${escapeHtml(aff.affiliateId)}" data-filename="${escapeHtml(filename)}">${t('admin.w9.download', 'Download')}</button>
+                  <button class="btn btn-sm btn-primary w9-verify-btn" data-affiliate-id="${escapeHtml(aff.affiliateId)}" data-name="${escapeHtml(name)}">${t('admin.w9.verify', 'Verify')}</button>
+                  <button class="btn btn-sm btn-secondary w9-reject-btn" data-affiliate-id="${escapeHtml(aff.affiliateId)}" data-name="${escapeHtml(name)}">${t('admin.w9.reject', 'Reject')}</button>
+                </td>
+              </tr>
+            `;
+          }).join('')}
+        </tbody>
+      </table>
+    `;
+    container.innerHTML = tableHtml;
+  }
+
+  function setupW9ReviewHandlers() {
+    const refreshBtn = document.getElementById('refreshW9PendingBtn');
+    if (refreshBtn && !refreshBtn.hasAttribute('data-initialized')) {
+      refreshBtn.setAttribute('data-initialized', 'true');
+      refreshBtn.addEventListener('click', loadW9Pending);
+    }
+
+    const container = document.getElementById('w9PendingList');
+    if (container && !container.hasAttribute('data-initialized')) {
+      container.setAttribute('data-initialized', 'true');
+      container.addEventListener('click', async (e) => {
+        const button = e.target.closest('button');
+        if (!button || button.disabled) return;
+        const affiliateId = button.getAttribute('data-affiliate-id');
+        if (!affiliateId) return;
+
+        if (button.classList.contains('w9-download-btn')) {
+          await downloadW9Document(affiliateId, button.getAttribute('data-filename') || 'w9', button);
+        } else if (button.classList.contains('w9-verify-btn')) {
+          await verifyW9(affiliateId, button.getAttribute('data-name') || affiliateId, button);
+        } else if (button.classList.contains('w9-reject-btn')) {
+          await rejectW9(affiliateId, button.getAttribute('data-name') || affiliateId, button);
+        }
+      });
+    }
+  }
+
+  // Token-authenticated fetch -> blob -> object-URL download (the endpoint is
+  // a JWT-protected attachment; a plain <a href> would arrive unauthenticated).
+  async function downloadW9Document(affiliateId, filename, button) {
+    try {
+      button.disabled = true;
+      const response = await adminFetch(`/api/v1/w9/admin/${encodeURIComponent(affiliateId)}/document`);
+      if (!response || !response.ok) {
+        let message = t('admin.w9.downloadError', 'Unable to download the W-9 document');
+        try {
+          const err = await response.json();
+          if (err && err.message) message = err.message;
+        } catch (e) { /* non-JSON body */ }
+        showNotification(message, 'error');
+        return;
+      }
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      a.remove();
+    } catch (error) {
+      console.error('Error downloading W-9 document:', error);
+      showNotification(t('admin.w9.downloadError', 'Unable to download the W-9 document'), 'error');
+    } finally {
+      button.disabled = false;
+    }
+  }
+
+  async function verifyW9(affiliateId, name, button) {
+    const confirmMessage = `${t('admin.w9.verifyConfirm', 'Mark this W-9 as verified for')} ${name}?`;
+    if (!confirm(confirmMessage)) return;
+    try {
+      button.disabled = true;
+      const response = await adminFetch(`/api/v1/w9/admin/${encodeURIComponent(affiliateId)}/verify`, {
+        method: 'POST',
+        body: JSON.stringify({})
+      });
+      const data = await response.json();
+      if (response.ok && data.success) {
+        showNotification(t('admin.w9.verifySuccess', 'W-9 verified'), 'success');
+        await loadW9Pending();
+        await loadAffiliates();
+      } else {
+        showNotification(data.message || t('admin.w9.actionError', 'W-9 action failed'), 'error');
+      }
+    } catch (error) {
+      console.error('Error verifying W-9:', error);
+      showNotification(t('admin.w9.actionError', 'W-9 action failed'), 'error');
+    } finally {
+      button.disabled = false;
+    }
+  }
+
+  async function rejectW9(affiliateId, name, button) {
+    const reason = prompt(`${t('admin.w9.rejectReasonPrompt', 'Rejection reason (required) for')} ${name}:`);
+    if (reason === null) return; // cancelled
+    if (!reason.trim()) {
+      showNotification(t('admin.w9.rejectReasonRequired', 'A rejection reason is required'), 'error');
+      return;
+    }
+    try {
+      button.disabled = true;
+      const response = await adminFetch(`/api/v1/w9/admin/${encodeURIComponent(affiliateId)}/reject`, {
+        method: 'POST',
+        body: JSON.stringify({ reason: reason.trim() })
+      });
+      const data = await response.json();
+      if (response.ok && data.success) {
+        showNotification(t('admin.w9.rejectSuccess', 'W-9 rejected'), 'success');
+        await loadW9Pending();
+        await loadAffiliates();
+      } else {
+        showNotification(data.message || t('admin.w9.actionError', 'W-9 action failed'), 'error');
+      }
+    } catch (error) {
+      console.error('Error rejecting W-9:', error);
+      showNotification(t('admin.w9.actionError', 'W-9 action failed'), 'error');
+    } finally {
+      button.disabled = false;
+    }
+  }
+
+  // ========================================
+  // Affiliate Invites (mint / list / resend / revoke)
+  // ========================================
+
+  async function loadInvites() {
+    setupInvitesEventHandlers();
+    const container = document.getElementById('invitesList');
+    if (!container) return;
+    try {
+      const response = await adminFetch('/api/v1/administrators/affiliate-invites');
+      const data = await response.json();
+      if (response.ok && data.success) {
+        renderInvitesList(data.invites || []);
+      } else {
+        container.innerHTML = `<p class="p-20 text-center text-danger">${escapeHtml(data.message || t('admin.invites.loadError', 'Failed to load invites'))}</p>`;
+      }
+    } catch (error) {
+      console.error('Error loading invites:', error);
+      container.innerHTML = `<p class="p-20 text-center text-danger">${t('admin.invites.loadError', 'Failed to load invites')}</p>`;
+    }
+  }
+
+  function renderInvitesList(invites) {
+    const container = document.getElementById('invitesList');
+    if (!container) return;
+
+    if (!invites || invites.length === 0) {
+      container.innerHTML = `<p class="p-20 text-center text-muted">${t('admin.invites.empty', 'No invites yet')}</p>`;
+      return;
+    }
+
+    const statusBadges = {
+      pending: { cls: 'pending', label: t('admin.invites.status.pending', 'Pending') },
+      accepted: { cls: 'active', label: t('admin.invites.status.accepted', 'Accepted') },
+      expired: { cls: 'inactive', label: t('admin.invites.status.expired', 'Expired') },
+      revoked: { cls: 'inactive', label: t('admin.invites.status.revoked', 'Revoked') }
+    };
+
+    const tableHtml = `
+      <table>
+        <thead>
+          <tr>
+            <th>${t('admin.invites.email', 'Email')}</th>
+            <th>${t('administrator.dashboard.customers.status', 'Status')}</th>
+            <th>${t('admin.invites.sentAt', 'Sent')}</th>
+            <th>${t('admin.invites.expiresAt', 'Expires')}</th>
+            <th>${t('admin.invites.actions', 'Actions')}</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${invites.map(invite => {
+            const badge = statusBadges[invite.status] || { cls: 'inactive', label: invite.status };
+            const sentAt = invite.sentAt ? new Date(invite.sentAt).toLocaleString() : '-';
+            const expiresAt = invite.expiresAt ? new Date(invite.expiresAt).toLocaleString() : '-';
+            const actions = invite.status === 'pending' ? `
+              <button class="btn btn-sm btn-secondary invite-resend-btn" data-invite-id="${escapeHtml(invite.inviteId)}">${t('admin.invites.resend', 'Resend')}</button>
+              <button class="btn btn-sm btn-secondary invite-revoke-btn" data-invite-id="${escapeHtml(invite.inviteId)}" data-email="${escapeHtml(invite.email)}">${t('admin.invites.revoke', 'Revoke')}</button>
+            ` : '';
+            return `
+              <tr>
+                <td>${escapeHtml(invite.email)}</td>
+                <td><span class="status-badge ${badge.cls}">${escapeHtml(badge.label)}</span></td>
+                <td>${escapeHtml(sentAt)}</td>
+                <td>${escapeHtml(expiresAt)}</td>
+                <td>${actions}</td>
+              </tr>
+            `;
+          }).join('')}
+        </tbody>
+      </table>
+    `;
+    container.innerHTML = tableHtml;
+  }
+
+  function setupInvitesEventHandlers() {
+    const form = document.getElementById('mintInviteForm');
+    if (form && !form.hasAttribute('data-initialized')) {
+      form.setAttribute('data-initialized', 'true');
+      form.addEventListener('submit', handleMintInvite);
+    }
+
+    const refreshBtn = document.getElementById('refreshInvitesBtn');
+    if (refreshBtn && !refreshBtn.hasAttribute('data-initialized')) {
+      refreshBtn.setAttribute('data-initialized', 'true');
+      refreshBtn.addEventListener('click', loadInvites);
+    }
+
+    const container = document.getElementById('invitesList');
+    if (container && !container.hasAttribute('data-initialized')) {
+      container.setAttribute('data-initialized', 'true');
+      container.addEventListener('click', async (e) => {
+        const button = e.target.closest('button');
+        if (!button || button.disabled) return;
+        const inviteId = button.getAttribute('data-invite-id');
+        if (!inviteId) return;
+
+        if (button.classList.contains('invite-resend-btn')) {
+          await inviteAction(inviteId, 'resend', button);
+        } else if (button.classList.contains('invite-revoke-btn')) {
+          const confirmMessage = `${t('admin.invites.revokeConfirm', 'Revoke the invite for')} ${button.getAttribute('data-email') || inviteId}?`;
+          if (!confirm(confirmMessage)) return;
+          await inviteAction(inviteId, 'revoke', button);
+        }
+      });
+    }
+  }
+
+  async function handleMintInvite(e) {
+    e.preventDefault();
+    const emailInput = document.getElementById('inviteEmailInput');
+    const submitBtn = document.getElementById('sendInviteBtn');
+    const email = (emailInput.value || '').trim();
+    if (!email) return;
+
+    try {
+      submitBtn.disabled = true;
+      const response = await adminFetch('/api/v1/administrators/affiliate-invites', {
+        method: 'POST',
+        body: JSON.stringify({ email })
+      });
+      const data = await response.json();
+      if (response.ok && data.success) {
+        showNotification(`${t('admin.invites.sendSuccess', 'Invite sent to')} ${data.invite.email}`, 'success');
+        emailInput.value = '';
+        await loadInvites();
+      } else {
+        // 400 validation -> { errors: [{ msg }] }; service errors -> { message, errors: [{ code }] }
+        let message = data.message || t('admin.invites.sendError', 'Failed to send invite');
+        if (Array.isArray(data.errors) && data.errors.length > 0) {
+          const detail = data.errors[0].msg || data.errors[0].code;
+          if (detail) message = `${message}: ${detail}`;
+        }
+        showNotification(message, 'error');
+      }
+    } catch (error) {
+      console.error('Error sending invite:', error);
+      showNotification(t('admin.invites.sendError', 'Failed to send invite'), 'error');
+    } finally {
+      submitBtn.disabled = false;
+    }
+  }
+
+  async function inviteAction(inviteId, action, button) {
+    try {
+      button.disabled = true;
+      const response = await adminFetch(`/api/v1/administrators/affiliate-invites/${encodeURIComponent(inviteId)}/${action}`, {
+        method: 'POST',
+        body: JSON.stringify({})
+      });
+      const data = await response.json();
+      if (response.ok && data.success) {
+        const successKey = action === 'resend' ? 'admin.invites.resendSuccess' : 'admin.invites.revokeSuccess';
+        const successFallback = action === 'resend' ? 'Invite re-sent' : 'Invite revoked';
+        showNotification(t(successKey, successFallback), 'success');
+        await loadInvites();
+      } else {
+        let message = data.message || t('admin.invites.actionError', 'Invite action failed');
+        if (Array.isArray(data.errors) && data.errors.length > 0 && data.errors[0].code) {
+          message = `${message}: ${data.errors[0].code}`;
+        }
+        showNotification(message, 'error');
+      }
+    } catch (error) {
+      console.error(`Error on invite ${action}:`, error);
+      showNotification(t('admin.invites.actionError', 'Invite action failed'), 'error');
+    } finally {
+      button.disabled = false;
+    }
   }
 
   // Render affiliates list
@@ -1762,32 +2144,19 @@
                         const totalOrders = metrics.totalOrders || 0;
                         const totalRevenue = metrics.totalRevenue || 0;
                         const totalCommission = metrics.totalCommission || 0;
-                        const w9Status = aff.w9Status || 'not_submitted';
+                        const w9Status = aff.w9Status || 'not_required';
 
-                        // Determine W9 status display
-                        let w9StatusDisplay = '';
-                        if (w9Status === 'pending_review') {
-                            w9StatusDisplay = '<span class="status-badge pending">Pending Review</span>';
-                        } else if (w9Status === 'verified') {
-                            w9StatusDisplay = '<span class="status-badge active">Verified</span>';
-                        } else if (w9Status === 'rejected') {
-                            w9StatusDisplay = '<span class="status-badge inactive">Rejected</span>';
-                        } else if (w9Status === 'expired') {
-                            w9StatusDisplay = '<span class="status-badge inactive">Expired</span>';
-                        } else if (totalRevenue >= 600) {
-                            // Show Send W9 button for affiliates with >$600 revenue and no W9
-                            w9StatusDisplay = `
-                                <span class="status-badge inactive">Not Submitted</span>
-                                <button class="btn btn-sm btn-primary mt-1 send-w9-btn"
-                                        data-affiliate-id="${aff.affiliateId}"
-                                        data-email="${aff.email}"
-                                        data-name="${name}">
-                                    Send W9
-                                </button>
-                            `;
-                        } else {
-                            w9StatusDisplay = '<span class="status-badge inactive">Not Required</span>';
-                        }
+                        // Determine W9 status display (enum: not_required / required /
+                        // pending_review / on_file / rejected — server/models/Affiliate.js)
+                        const w9Badges = {
+                            not_required: { cls: 'inactive', label: t('admin.w9.statusBadge.not_required', 'Not Required') },
+                            required: { cls: 'pending', label: t('admin.w9.statusBadge.required', 'Required') },
+                            pending_review: { cls: 'pending', label: t('admin.w9.statusBadge.pending_review', 'Pending Review') },
+                            on_file: { cls: 'active', label: t('admin.w9.statusBadge.on_file', 'On File') },
+                            rejected: { cls: 'inactive', label: t('admin.w9.statusBadge.rejected', 'Rejected') }
+                        };
+                        const w9Badge = w9Badges[w9Status] || { cls: 'inactive', label: w9Status };
+                        const w9StatusDisplay = `<span class="status-badge ${w9Badge.cls}">${escapeHtml(w9Badge.label)}</span>`;
 
                         return `
                         <tr>
@@ -3141,8 +3510,10 @@
   // This duplicate function has been removed - using the correct one above
   // The correct confirmLogout function is defined earlier in the file
 
-  // Add event listeners for modal buttons
-  document.addEventListener('DOMContentLoaded', function() {
+  // Add event listeners for modal buttons.
+  // NOTE: must use onDomReady — the SPA router injects this script after
+  // DOMContentLoaded has already fired, so a bare listener never runs.
+  onDomReady(function() {
     // Payment Summary Modal
     const closePaymentSummaryBtn = document.getElementById('closePaymentSummaryModal');
     if (closePaymentSummaryBtn) {
@@ -3196,8 +3567,12 @@
     });
   });
 
-  // Initialize i18n and language switcher (moved from inline script)
-  document.addEventListener('DOMContentLoaded', async function() {
+  // Initialize i18n and language switcher (moved from inline script).
+  // onDomReady (not a bare DOMContentLoaded listener): when the SPA router
+  // injects this script the document is already parsed, so the callback —
+  // including the single i18n.init() call and the marketing email modal
+  // listeners — must run immediately or it never runs at all.
+  onDomReady(async function() {
     await window.i18n.init({ debugMode: false });
 
     // Only create language switcher if container exists

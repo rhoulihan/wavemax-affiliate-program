@@ -802,7 +802,8 @@
         "w9review": "Revisão W-9",
         "quickbooks": "QuickBooks",
         "auditlog": "Registro de Auditoria",
-        "config": "Configuração"
+        "config": "Configuração",
+        "invites": "Convites"
       },
       "subtabs": {
         "overview": "Visão Geral",
@@ -1374,7 +1375,18 @@
         "accepted": "Aceito",
         "expired": "Expirado",
         "revoked": "Revogado"
-      }
+      },
+      "emailPlaceholder": "afiliado@exemplo.com",
+      "sentAt": "Enviado",
+      "expiresAt": "Expira",
+      "actions": "Ações",
+      "sendSuccess": "Convite enviado para",
+      "sendError": "Falha ao enviar o convite",
+      "resendSuccess": "Convite reenviado",
+      "revokeSuccess": "Convite revogado",
+      "revokeConfirm": "Revogar o convite de",
+      "loadError": "Falha ao carregar os convites",
+      "actionError": "A ação no convite falhou"
     },
     "w9": {
       "title": "Revisão de W-9",
@@ -1382,7 +1394,26 @@
       "verify": "Verificar",
       "reject": "Rejeitar",
       "download": "Baixar",
-      "empty": "Nenhum W-9 pendente"
+      "empty": "Nenhum W-9 pendente",
+      "affiliate": "Afiliado",
+      "submitted": "Enviado",
+      "filename": "Documento",
+      "actions": "Ações",
+      "verifyConfirm": "Marcar este W-9 como verificado para",
+      "verifySuccess": "W-9 verificado",
+      "rejectReasonPrompt": "Motivo da rejeição (obrigatório) para",
+      "rejectReasonRequired": "É necessário informar o motivo da rejeição",
+      "rejectSuccess": "W-9 rejeitado",
+      "downloadError": "Não foi possível baixar o documento W-9",
+      "loadError": "Falha ao carregar as revisões W-9 pendentes",
+      "actionError": "A ação no W-9 falhou",
+      "statusBadge": {
+        "not_required": "Não exigido",
+        "required": "Exigido",
+        "pending_review": "Aguardando revisão",
+        "on_file": "Arquivado",
+        "rejected": "Rejeitado"
+      }
     }
   },
   "email": {

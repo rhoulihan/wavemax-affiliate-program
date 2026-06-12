@@ -802,7 +802,8 @@
         "w9review": "W-9 Prüfung",
         "quickbooks": "QuickBooks",
         "auditlog": "Audit-Protokoll",
-        "config": "Konfiguration"
+        "config": "Konfiguration",
+        "invites": "Einladungen"
       },
       "subtabs": {
         "overview": "Übersicht",
@@ -1374,7 +1375,18 @@
         "accepted": "Angenommen",
         "expired": "Abgelaufen",
         "revoked": "Widerrufen"
-      }
+      },
+      "emailPlaceholder": "partner@beispiel.de",
+      "sentAt": "Gesendet",
+      "expiresAt": "Läuft ab",
+      "actions": "Aktionen",
+      "sendSuccess": "Einladung gesendet an",
+      "sendError": "Die Einladung konnte nicht gesendet werden",
+      "resendSuccess": "Einladung erneut gesendet",
+      "revokeSuccess": "Einladung widerrufen",
+      "revokeConfirm": "Möchten Sie die Einladung widerrufen für",
+      "loadError": "Die Einladungen konnten nicht geladen werden",
+      "actionError": "Die Aktion für die Einladung ist fehlgeschlagen"
     },
     "w9": {
       "title": "W-9-Prüfung",
@@ -1382,7 +1394,26 @@
       "verify": "Verifizieren",
       "reject": "Ablehnen",
       "download": "Herunterladen",
-      "empty": "Keine ausstehenden W-9"
+      "empty": "Keine ausstehenden W-9",
+      "affiliate": "Partner",
+      "submitted": "Eingereicht",
+      "filename": "Dokument",
+      "actions": "Aktionen",
+      "verifyConfirm": "Möchten Sie dieses W-9 als verifiziert markieren für",
+      "verifySuccess": "W-9 verifiziert",
+      "rejectReasonPrompt": "Ablehnungsgrund (erforderlich) für",
+      "rejectReasonRequired": "Ein Ablehnungsgrund ist erforderlich",
+      "rejectSuccess": "W-9 abgelehnt",
+      "downloadError": "Das W-9-Dokument konnte nicht heruntergeladen werden",
+      "loadError": "Die ausstehenden W-9-Prüfungen konnten nicht geladen werden",
+      "actionError": "Die W-9-Aktion ist fehlgeschlagen",
+      "statusBadge": {
+        "not_required": "Nicht erforderlich",
+        "required": "Erforderlich",
+        "pending_review": "Prüfung ausstehend",
+        "on_file": "Hinterlegt",
+        "rejected": "Abgelehnt"
+      }
     }
   },
   "email": {

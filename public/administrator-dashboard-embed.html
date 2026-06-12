@@ -28,6 +28,7 @@
             <button class="nav-tab" data-tab="operators" data-i18n="administrator.dashboard.tabs.operators">Operators</button>
             <button class="nav-tab" data-tab="customers" data-i18n="administrator.dashboard.tabs.customers">Customers</button>
             <button class="nav-tab" data-tab="affiliates" data-i18n="administrator.dashboard.tabs.affiliates">Affiliates</button>
+            <button class="nav-tab" data-tab="invites" data-i18n="administrator.dashboard.tabs.invites">Invites</button>
             <button class="nav-tab" data-tab="quickbooks" data-i18n="administrator.dashboard.tabs.quickbooks">QuickBooks</button>
             <button class="nav-tab" data-tab="config" data-i18n="administrator.dashboard.tabs.config">Config</button>
         </nav>
@@ -234,6 +235,51 @@
                     </button>
                 </div>
                 <div id="affiliatesList">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- W-9 Review (pending submissions) -->
+            <div class="card margin-top-20">
+                <div class="card-header">
+                    <h2 class="card-title" data-i18n="admin.w9.title">W-9 review</h2>
+                    <button class="btn btn-secondary" id="refreshW9PendingBtn" data-i18n="common.buttons.refresh">Refresh</button>
+                </div>
+                <div id="w9PendingList">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Invites Tab -->
+        <div class="tab-content" id="invites-tab">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title" data-i18n="admin.invites.title">Affiliate invites</h2>
+                    <button class="btn btn-secondary" id="refreshInvitesBtn" data-i18n="common.buttons.refresh">Refresh</button>
+                </div>
+                <div class="padding-20 border-bottom-e9ecef">
+                    <form id="mintInviteForm">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="inviteEmailInput" data-i18n="admin.invites.email">Email</label>
+                                <input type="email" id="inviteEmailInput" class="form-control" required
+                                       placeholder="affiliate@example.com" data-i18n-placeholder="admin.invites.emailPlaceholder">
+                            </div>
+                            <div class="form-group">
+                                <label>&nbsp;</label>
+                                <div class="flex-center gap-10">
+                                    <button type="submit" class="btn btn-primary" id="sendInviteBtn" data-i18n="admin.invites.send">Send invite</button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div id="invitesList">
                     <div class="loading">
                         <div class="spinner"></div>
                     </div>
@@ -546,7 +592,7 @@
     <!-- Label Printing Utils - Must load after QRCode and jsPDF -->
     <script src="/assets/js/label-print-utils.js" nonce="{{nonce}}"></script>
     
-    <script src="/assets/js/administrator-dashboard-init.js?v=20250623" nonce="{{nonce}}"></script>
+    <script src="/assets/js/administrator-dashboard-init.js?v=20260612" nonce="{{nonce}}"></script>
     <script src="/assets/js/administrator-dashboard-i18n.js" nonce="{{nonce}}"></script>
 
     <!-- Send Marketing Email Modal -->

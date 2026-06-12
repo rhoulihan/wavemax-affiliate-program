@@ -802,7 +802,8 @@
         "w9review": "W-9 Review",
         "quickbooks": "QuickBooks",
         "auditlog": "Audit Log",
-        "config": "Configuration"
+        "config": "Configuration",
+        "invites": "Invites"
       },
       "subtabs": {
         "overview": "Overview",
@@ -1374,7 +1375,18 @@
         "accepted": "Accepted",
         "expired": "Expired",
         "revoked": "Revoked"
-      }
+      },
+      "emailPlaceholder": "affiliate@example.com",
+      "sentAt": "Sent",
+      "expiresAt": "Expires",
+      "actions": "Actions",
+      "sendSuccess": "Invite sent to",
+      "sendError": "Failed to send invite",
+      "resendSuccess": "Invite re-sent",
+      "revokeSuccess": "Invite revoked",
+      "revokeConfirm": "Revoke the invite for",
+      "loadError": "Failed to load invites",
+      "actionError": "Invite action failed"
     },
     "w9": {
       "title": "W-9 review",
@@ -1382,7 +1394,26 @@
       "verify": "Verify",
       "reject": "Reject",
       "download": "Download",
-      "empty": "No W-9 submissions pending"
+      "empty": "No W-9 submissions pending",
+      "affiliate": "Affiliate",
+      "submitted": "Submitted",
+      "filename": "Document",
+      "actions": "Actions",
+      "verifyConfirm": "Mark this W-9 as verified for",
+      "verifySuccess": "W-9 verified",
+      "rejectReasonPrompt": "Rejection reason (required) for",
+      "rejectReasonRequired": "A rejection reason is required",
+      "rejectSuccess": "W-9 rejected",
+      "downloadError": "Unable to download the W-9 document",
+      "loadError": "Failed to load pending W-9 reviews",
+      "actionError": "W-9 action failed",
+      "statusBadge": {
+        "not_required": "Not Required",
+        "required": "Required",
+        "pending_review": "Pending Review",
+        "on_file": "On File",
+        "rejected": "Rejected"
+      }
     }
   },
   "email": {
