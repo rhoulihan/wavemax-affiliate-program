@@ -1,6 +1,6 @@
 /**
  * WaveMAX Internationalization (i18n) Library
- * Supports: English (en), Spanish (es), Portuguese (pt)
+ * Supports: English (en), Spanish (es), Portuguese (pt), German (de)
  */
 
 (function(window) {
