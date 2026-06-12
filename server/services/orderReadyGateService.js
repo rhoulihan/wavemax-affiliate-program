@@ -69,7 +69,8 @@ async function applyReadyGate(order, { trigger } = {}) {
         orderId: order.orderId,
         customerName,
         numberOfBags: 1,            // one bag = one order
-        totalWeight: order.actualWeight
+        totalWeight: order.actualWeight,
+        language: affiliate.languagePreference
       });
     }
   } catch (emailError) {

@@ -22,7 +22,6 @@ jest.mock('../../server/utils/emailService', () => ({
   sendOperatorPasswordResetEmail: jest.fn(),
   sendServiceDownAlert: jest.fn(),
   sendOrderReadyNotification: jest.fn(),
-  sendOrderPickedUpNotification: jest.fn(),
   sendEmail: jest.fn(),
   sendPasswordResetEmail: jest.fn()
 }));
@@ -54,7 +53,6 @@ describe('Email Service Mock', () => {
     emailService.sendOperatorPasswordResetEmail.mockResolvedValue({ MessageId: 'test-message-id' });
     emailService.sendServiceDownAlert.mockResolvedValue({ MessageId: 'test-message-id' });
     emailService.sendOrderReadyNotification.mockResolvedValue({ MessageId: 'test-message-id' });
-    emailService.sendOrderPickedUpNotification.mockResolvedValue({ MessageId: 'test-message-id' });
     emailService.sendEmail.mockResolvedValue({ MessageId: 'test-message-id' });
     emailService.sendPasswordResetEmail.mockResolvedValue({ MessageId: 'test-message-id' });
   });
@@ -80,7 +78,6 @@ describe('Email Service Mock', () => {
       expect(typeof emailService.sendOperatorPasswordResetEmail).toBe('function');
       expect(typeof emailService.sendServiceDownAlert).toBe('function');
       expect(typeof emailService.sendOrderReadyNotification).toBe('function');
-      expect(typeof emailService.sendOrderPickedUpNotification).toBe('function');
       expect(typeof emailService.sendEmail).toBe('function');
       expect(typeof emailService.sendPasswordResetEmail).toBe('function');
     });
@@ -117,7 +114,6 @@ describe('Email Service Mock', () => {
       // Service alert functions
       expect(await emailService.sendServiceDownAlert({})).toEqual(expectedResponse);
       expect(await emailService.sendOrderReadyNotification('', {})).toEqual(expectedResponse);
-      expect(await emailService.sendOrderPickedUpNotification('', {})).toEqual(expectedResponse);
       
       // Generic functions
       expect(await emailService.sendEmail({})).toEqual(expectedResponse);
