@@ -12,7 +12,7 @@ This codebase is mid-refactor. Canonical documents:
 - **Plan:** [`docs/refactor/REFACTORING_PLAN.md`](docs/refactor/REFACTORING_PLAN.md) — phased execution
 - **Active todo:** [`tasks/todo.md`](tasks/todo.md) — current phase checklist
 
-**Scope context:** clean-slate redeploy. Production data is **not** being preserved. V1 payment code (Paygistix, `Payment` model, `CallbackPool`, `PaymentToken`, `v1` registration/pickup pages) is being **deleted**, not migrated. The `.claude/CLAUDE.md` handbook still describes V1 as live — treat it as current-state reference until Phase 2 removes V1 code.
+**Scope context:** clean-slate redeploy — **the invite-only onboarding + durable-bags + order-at-intake redesign is built** (canonical spec: [`docs/superpowers/specs/2026-06-08-invite-bag-workflow-redesign-design.md`](docs/superpowers/specs/2026-06-08-invite-bag-workflow-redesign-design.md)). V1 Paygistix, customer scheduling / Pickup Now, BetaRequest, and the `?affid` referral funnel are removed. Superseded `.claude/CLAUDE.md` handbook sections carry a *Replaced (redesign)* note pointing at the spec.
 
 **Critical security finding:** `keys/docusign_private.pem` is committed to a public GitHub repo. Treat as compromised. See plan §0.1.
 
@@ -54,7 +54,7 @@ This codebase is mid-refactor. Canonical documents:
 ### Security
 
 - `keys/`, `temp/`, `secure/`, `*.pem`, `*.key` — never committed.
-- Third-party tokens (DocuSign, OAuth access/refresh) encrypted at rest via `server/utils/encryption.js` (AES-256-GCM).
+- Third-party tokens (OAuth access/refresh) and W-9 uploads encrypted at rest via `server/utils/encryption.js` (AES-256-GCM).
 - `testRoutes.js` gated behind `NODE_ENV !== 'production'`.
 - No inline scripts/styles; nonce-based CSP only.
 
