@@ -63,7 +63,6 @@ async function claimForCustomer(bag, customerId, req = null) {
   }
 
   // PR 9: every claim provisions the customer's delivery PIN (spec §4.5).
-  // Covers both the traditional and OAuth claim paths in one hook point.
   const pinLength = await SystemConfig.getValue('customer_delivery_pin_length', 6);
   const deliveryPin = roleCodes.generateCode(pinLength);
   await Customer.updateOne(

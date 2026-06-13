@@ -1,7 +1,6 @@
 const mongoose = require('mongoose');
 const Administrator = require('../../server/models/Administrator');
 const Operator = require('../../server/models/Operator');
-const DataDeletionRequest = require('../../server/models/DataDeletionRequest');
 const encryptionUtil = require('../../server/utils/encryption');
 
 describe('Model Methods', () => {
@@ -154,101 +153,6 @@ describe('Model Methods', () => {
         
         expect(operator.isPasswordInHistory('Pass2')).toBe(true);
         expect(operator.isPasswordInHistory('Pass4')).toBe(false);
-      });
-    });
-  });
-
-  describe('DataDeletionRequest Model', () => {
-    describe('markAsFailed method', () => {
-      it('should mark request as failed with errors', async () => {
-        const request = new DataDeletionRequest({
-          facebookUserId: 'FB123',
-          confirmationCode: 'CODE123',
-          userType: 'affiliate',
-          signedRequest: 'signed_request_data'
-        });
-        
-        const errors = ['Error 1', 'Error 2'];
-        
-        // Mock save method
-        request.save = jest.fn().mockResolvedValue(request);
-        
-        await request.markAsFailed(errors);
-        
-        expect(request.status).toBe('failed');
-        expect(request.deletionDetails.errors).toEqual(errors);
-        expect(request.save).toHaveBeenCalled();
-      });
-      
-      it('should mark request as failed without errors', async () => {
-        const request = new DataDeletionRequest({
-          facebookUserId: 'FB123',
-          confirmationCode: 'CODE123',
-          userType: 'affiliate',
-          signedRequest: 'signed_request_data'
-        });
-        
-        // Mock save method
-        request.save = jest.fn().mockResolvedValue(request);
-        
-        await request.markAsFailed();
-        
-        expect(request.status).toBe('failed');
-        expect(request.deletionDetails.errors).toEqual([]);
-        expect(request.save).toHaveBeenCalled();
-      });
-    });
-    
-    describe('findStaleRequests static method', () => {
-      beforeEach(() => {
-        // Mock the find method
-        DataDeletionRequest.find = jest.fn();
-      });
-      
-      it('should find pending requests older than default 24 hours', () => {
-        const mockDate = new Date('2024-01-01T12:00:00Z');
-        jest.spyOn(global, 'Date').mockImplementation(() => mockDate);
-        
-        DataDeletionRequest.findStaleRequests();
-        
-        const expectedCutoff = new Date('2023-12-31T12:00:00Z'); // 24 hours before
-        
-        expect(DataDeletionRequest.find).toHaveBeenCalledWith({
-          status: 'pending',
-          requestedAt: { $lt: expectedCutoff }
-        });
-        
-        global.Date.mockRestore();
-      });
-      
-      it('should find pending requests older than specified hours', () => {
-        const mockDate = new Date('2024-01-01T12:00:00Z');
-        jest.spyOn(global, 'Date').mockImplementation(() => mockDate);
-        
-        DataDeletionRequest.findStaleRequests(48);
-        
-        const expectedCutoff = new Date('2023-12-30T12:00:00Z'); // 48 hours before
-        
-        expect(DataDeletionRequest.find).toHaveBeenCalledWith({
-          status: 'pending',
-          requestedAt: { $lt: expectedCutoff }
-        });
-        
-        global.Date.mockRestore();
-      });
-      
-      it('should handle zero hours parameter', () => {
-        const mockDate = new Date('2024-01-01T12:00:00Z');
-        jest.spyOn(global, 'Date').mockImplementation(() => mockDate);
-        
-        DataDeletionRequest.findStaleRequests(0);
-        
-        expect(DataDeletionRequest.find).toHaveBeenCalledWith({
-          status: 'pending',
-          requestedAt: { $lt: mockDate }
-        });
-        
-        global.Date.mockRestore();
       });
     });
   });

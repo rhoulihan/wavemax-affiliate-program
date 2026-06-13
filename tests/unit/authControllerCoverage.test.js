@@ -5,7 +5,6 @@ const Administrator = require('../../server/models/Administrator');
 const Operator = require('../../server/models/Operator');
 const RefreshToken = require('../../server/models/RefreshToken');
 const TokenBlacklist = require('../../server/models/TokenBlacklist');
-const OAuthSession = require('../../server/models/OAuthSession');
 const encryptionUtil = require('../../server/utils/encryption');
 const emailService = require('../../server/utils/emailService');
 const { logLoginAttempt, logAuditEvent } = require('../../server/utils/auditLogger');
@@ -19,7 +18,6 @@ jest.mock('../../server/models/Administrator');
 jest.mock('../../server/models/Operator');
 jest.mock('../../server/models/RefreshToken');
 jest.mock('../../server/models/TokenBlacklist');
-jest.mock('../../server/models/OAuthSession');
 jest.mock('../../server/utils/encryption');
 jest.mock('../../server/utils/emailService');
 jest.mock('../../server/utils/auditLogger');
@@ -40,9 +38,6 @@ describe('Auth Controller - Additional Coverage Tests Fixed', () => {
   let req, res, next;
 
   beforeEach(() => {
-    // Mock OAuthSession.createSession to prevent database calls
-    OAuthSession.createSession = jest.fn().mockResolvedValue(true);
-    
     // Mock RefreshToken operations
     RefreshToken.findOneAndUpdate = jest.fn().mockResolvedValue(null);
     RefreshToken.create = jest.fn().mockResolvedValue({ 
@@ -106,69 +101,6 @@ describe('Auth Controller - Additional Coverage Tests Fixed', () => {
   afterEach(() => {
     // Clear all mocks after each test
     jest.clearAllMocks();
-  });
-
-  describe('handleCustomerSocialCallback - Fixed Tests', () => {
-    beforeEach(() => {
-      // Use fake timers for these tests
-      jest.useFakeTimers();
-    });
-
-    afterEach(() => {
-      // Clean up timers
-      jest.runOnlyPendingTimers();
-      jest.useRealTimers();
-    });
-
-    it('should handle existing affiliate trying to register as customer', async () => {
-      req.user = {
-        provider: 'google',
-        socialId: 'google123',
-        email: 'affiliate@example.com',
-        isExistingAffiliate: true,
-        affiliate: {
-          _id: 'aff123',
-          affiliateId: 'AFF001',
-          email: 'affiliate@example.com'
-        }
-      };
-      req.query = {
-        state: 'customer_oauth_test-session-id'
-      };
-
-      const handler = extractHandler(authController.handleCustomerSocialCallback);
-      await handler(req, res, next);
-
-      expect(res.send).toHaveBeenCalledWith(
-        expect.stringContaining('social-auth-account-conflict')
-      );
-    });
-
-    it('should handle customer without affiliate', async () => {
-      req.user = {
-        _id: 'cust123',
-        customerId: 'CUST001',
-        email: 'customer@example.com',
-        firstName: 'Customer',
-        lastName: 'User',
-        isNewUser: false,
-        provider: 'google',
-        socialId: 'google123'
-      };
-      req.query = {
-        state: 'customer_oauth_test-session-id'
-      };
-
-      jwt.sign.mockReturnValue('token');
-      RefreshToken.prototype.save = jest.fn();
-
-      const handler = extractHandler(authController.handleCustomerSocialCallback);
-      await handler(req, res, next);
-
-      expect(res.send).toHaveBeenCalledWith(
-        expect.stringContaining('social-auth-login')
-      );
-    });
   });
 
   describe('resetPassword - Fixed Tests', () => {

@@ -44,7 +44,6 @@ describe('Per-account login lockout (H-5)', () => {
         state: 'TX', zipCode: '78753',
         minimumDeliveryFee: 25, perBagDeliveryFee: 5,
         paymentMethod: 'check',
-        registrationMethod: 'traditional',
         languagePreference: 'en',
         isActive: true
       });
@@ -126,7 +125,6 @@ describe('Per-account login lockout (H-5)', () => {
         address: '1 Test', city: 'Austin',
         state: 'TX', zipCode: '78753',
         serviceFrequency: 'weekly',
-        registrationMethod: 'traditional',
         languagePreference: 'en',
         isActive: true
       });

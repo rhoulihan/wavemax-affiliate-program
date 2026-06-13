@@ -225,23 +225,6 @@ exports.emailVerificationLimiter = rateLimit({
   store: createMongoStore(60 * 60 * 1000, 'email_verify')
 });
 
-// OAuth callback - prevent abuse
-exports.oauthCallbackLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 20, // 20 OAuth attempts per 15 minutes
-  message: {
-    success: false,
-    message: 'Too many OAuth authentication attempts, please try again later'
-  },
-  standardHeaders: true,
-  legacyHeaders: false,
-  // Don't throw ERR_ERL_DOUBLE_COUNT into the request (it surfaced on the
-  // Oracle-backed store and was escalating to unhandledRejection → worker
-  // crash-loop). The count may be off by one in rare cases; that's acceptable.
-  validate: { singleCount: false },
-  store: createMongoStore(15 * 60 * 1000, 'oauth')
-});
-
 // File upload - strict limits
 exports.fileUploadLimiter = rateLimit({
   windowMs: 60 * 60 * 1000, // 1 hour

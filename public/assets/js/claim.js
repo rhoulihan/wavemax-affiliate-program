@@ -6,7 +6,6 @@
   'use strict';
 
   var bagToken = new URLSearchParams(window.location.search).get('bag');
-  var oauth = { socialToken: null, provider: null };
 
   var SECTIONS = ['resolving', 'claimable', 'claimed', 'invalid'];
 
@@ -200,13 +199,8 @@
       zipCode: fields.zipCode.value.trim(),
       languagePreference: localStorage.getItem('selectedLanguage') || 'en'
     };
-    if (oauth.socialToken) {
-      payload.socialToken = oauth.socialToken;
-      payload.socialProvider = oauth.provider;
-    } else {
-      payload.username = fields.username.value.trim();
-      payload.password = fields.password.value;
-    }
+    payload.username = fields.username.value.trim();
+    payload.password = fields.password.value;
 
     fetch('/api/v1/customers/claim/' + encodeURIComponent(bagToken) + '/register', {
       method: 'POST',
@@ -240,48 +234,9 @@
       });
   }
 
-  function startOAuth(provider) {
-    var sessionId = 'oauth_claim_' + Date.now() + '_' + Math.random().toString(36).substring(2);
-    var url = '/api/v1/auth/customer/' + provider +
-      '?popup=true&state=' + sessionId + '&bag=' + encodeURIComponent(bagToken) + '&t=' + Date.now();
-    var popup = window.open(url, 'claimSocialAuth', 'width=500,height=600,scrollbars=yes,resizable=yes');
-    if (!popup || popup.closed) {
-      showFormError('Popup was blocked. Please allow popups and try again.');
-      return;
-    }
-    var polls = 0;
-    var timer = setInterval(function () {
-      polls++;
-      if (polls > 20) { clearInterval(timer); return; }
-      fetch('/api/v1/auth/oauth/result/' + sessionId)
-        .then(function (res) { return res.json(); })
-        .then(function (result) {
-          if (!result.completed) return;
-          clearInterval(timer);
-          try { if (popup && !popup.closed) popup.close(); } catch (e) { /* noop */ }
-          if (!result.success) { showFormError(result.message || 'Authentication failed.'); return; }
-          var data = result.data || {};
-          oauth.socialToken = data.socialToken;
-          oauth.provider = provider;
-          if (data.email) { document.getElementById('email').value = data.email; }
-          if (data.firstName) { document.getElementById('firstName').value = data.firstName; }
-          if (data.lastName) { document.getElementById('lastName').value = data.lastName; }
-          // OAuth authenticates — hide username/password
-          document.getElementById('claim-credentials').hidden = true;
-          document.getElementById('username').removeAttribute('required');
-          document.getElementById('password').removeAttribute('required');
-        })
-        .catch(function () { /* keep polling */ });
-    }, 3000);
-  }
-
   function init() {
     document.getElementById('claimRegistrationForm')
       .addEventListener('submit', submitRegistration);
-    document.getElementById('claimOAuthGoogle')
-      .addEventListener('click', function () { startOAuth('google'); });
-    document.getElementById('claimOAuthFacebook')
-      .addEventListener('click', function () { startOAuth('facebook'); });
     var login = document.getElementById('claim-login-link');
     if (login) login.href = '/embed-app-v2.html?route=/customer-login';
     // PR 9 panels (CSP: addEventListener only, no inline handlers)

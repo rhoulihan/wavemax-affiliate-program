@@ -3,7 +3,7 @@
 // JWT issuance + refresh-token rotation + blacklist logout. The login flows
 // stay in the controller (each has its own bespoke lockout/activation
 // rules), but every flow hands the user+role off to this service to mint
-// tokens. generateToken/generateRefreshToken are re-exported so the OAuth
+// tokens. generateToken/generateRefreshToken are re-exported so other
 // services can reuse them without importing from the controller.
 //
 // cryptoWrapper is passed in rather than imported so the controller's test

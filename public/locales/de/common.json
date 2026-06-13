@@ -22,8 +22,6 @@
     "subtitle": "Sie registrieren sich bei",
     "resolving": "Beutel wird überprüft...",
     "cta": "Konto erstellen",
-    "ctaOAuthGoogle": "Mit Google registrieren",
-    "ctaOAuthFacebook": "Mit Facebook registrieren",
     "alreadyClaimedTitle": "Dieser Beutel ist bereits registriert",
     "alreadyClaimedBody": "Dieser Beutel ist mit einem bestehenden Konto verknüpft. Melden Sie sich an, um Ihren Bestellstatus zu sehen.",
     "alreadyClaimedCta": "Anmelden",
@@ -404,20 +402,11 @@
     "login": {
       "title": "Partner-Login",
       "subtitle": "Melden Sie sich an, um auf Ihr Partner-Dashboard zuzugreifen",
-      "socialLogin": "Mit Ihrem Social-Media-Konto anmelden",
-      "orEmail": "Oder mit Benutzername und Passwort anmelden",
       "noAccount": "Haben Sie noch kein Partnerkonto?"
     },
     "register": {
       "title": "Partner-Registrierung",
       "subtitle": "Füllen Sie das folgende Formular aus, um sich als WaveMAX Laundry Partner zu registrieren.",
-      "quickRegistration": "Schnellregistrierung mit Social Media",
-      "socialSignupText": "Registrieren Sie sich schnell mit Ihrem Social-Media-Konto - wir füllen Ihre Informationen automatisch aus!",
-      "orManually": "Oder füllen Sie das Formular manuell aus",
-      "continueWithGoogle": "Mit Google fortfahren",
-      "continueWithFacebook": "Mit Facebook fortfahren",
-      "socialAccountConnected": "Social-Media-Konto verbunden!",
-      "successfullyConnectedWith": "Erfolgreich verbunden mit {{provider}}",
       "autoFilledMessage": "Ihre Informationen wurden automatisch unten ausgefüllt. Vervollständigen Sie die restlichen Felder, um Ihre Registrierung abzuschließen.",
       "businessInfo": "Geschäftsinformationen",
       "personalInfo": "Persönliche Informationen",
@@ -681,8 +670,6 @@
     "login": {
       "title": "Kunden-Login",
       "subtitle": "Melden Sie sich an, um Ihren Wäscheservice zu verwalten",
-      "socialLogin": "Mit Ihrem Social-Media-Konto anmelden",
-      "orEmail": "Oder mit E-Mail und Passwort anmelden",
       "emailOrUsername": "Benutzername oder E-Mail-Adresse",
       "noAccount": "Haben Sie noch kein Konto?"
     },
@@ -1298,7 +1285,6 @@
     "logout": "Abmelden"
   },
   "spinner": {
-    "connectingWith": "Verbindung mit {{provider}} wird hergestellt...",
     "validatingAddress": "Ihre Adresse wird überprüft...",
     "processingRegistration": "Ihre Registrierung wird bearbeitet...",
     "loading": "Wird geladen...",

@@ -27,8 +27,3 @@ body {
     right: 10px;
     z-index: 1000;
 }
-
-/* Social login section */
-#socialLoginSection {
-    position: relative;
-}

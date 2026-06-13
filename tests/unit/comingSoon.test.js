@@ -34,10 +34,10 @@ describe('comingSoon middleware', () => {
     }
   });
 
-  it('lets exempt paths through to normal handling (privacy/OAuth/well-known/assets/favicon/robots)', () => {
+  it('lets exempt paths through to normal handling (privacy/api/well-known/assets/favicon/robots)', () => {
     for (const path of [
       '/privacy-policy', '/privacy-policy/', '/privacy-policy.html', '/terms-and-conditions',
-      '/api/v1/auth/google/callback', '/api/health',
+      '/api/v1/health', '/api/health',
       '/.well-known/acme-challenge/abc', '/assets/css/wavemax-components.min.css',
       '/favicon.ico', '/robots.txt', '/sitemap.xml',
     ]) {

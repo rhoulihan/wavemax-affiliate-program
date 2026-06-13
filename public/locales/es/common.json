@@ -22,8 +22,6 @@
     "subtitle": "Te estás registrando con",
     "resolving": "Verificando tu bolsa...",
     "cta": "Crear mi cuenta",
-    "ctaOAuthGoogle": "Registrarse con Google",
-    "ctaOAuthFacebook": "Registrarse con Facebook",
     "alreadyClaimedTitle": "Esta bolsa ya está reclamada",
     "alreadyClaimedBody": "Esta bolsa está vinculada a una cuenta existente. Inicia sesión para ver el estado de tu pedido.",
     "alreadyClaimedCta": "Iniciar sesión",
@@ -404,20 +402,11 @@
     "login": {
       "title": "Acceso de Afiliado",
       "subtitle": "Inicia sesión para acceder a tu panel de afiliado",
-      "socialLogin": "Inicia sesión con tu cuenta de redes sociales",
-      "orEmail": "O inicia sesión con nombre de usuario y contraseña",
       "noAccount": "¿No tienes una cuenta de afiliado?"
     },
     "register": {
       "title": "Registro de Afiliado",
       "subtitle": "Complete el formulario a continuación para registrarse como socio afiliado de WaveMAX Laundry.",
-      "quickRegistration": "Registro Rápido con Redes Sociales",
-      "socialSignupText": "Regístrese rápidamente usando su cuenta de redes sociales - ¡completaremos automáticamente su información!",
-      "orManually": "O complete el formulario manualmente",
-      "continueWithGoogle": "Continuar con Google",
-      "continueWithFacebook": "Continuar con Facebook",
-      "socialAccountConnected": "¡Cuenta de Redes Sociales Conectada!",
-      "successfullyConnectedWith": "Conectado exitosamente con {{provider}}",
       "autoFilledMessage": "Su información se ha completado automáticamente a continuación. Complete los campos restantes para finalizar su registro.",
       "businessInfo": "Información Empresarial",
       "personalInfo": "Información Personal",
@@ -681,8 +670,6 @@
     "login": {
       "title": "Acceso de Cliente",
       "subtitle": "Inicia sesión para gestionar tu servicio de lavandería",
-      "socialLogin": "Inicia sesión con tu cuenta de redes sociales",
-      "orEmail": "O inicia sesión con correo electrónico y contraseña",
       "emailOrUsername": "Nombre de Usuario o Correo Electrónico",
       "noAccount": "¿No tienes una cuenta?"
     },
@@ -1298,7 +1285,6 @@
     "logout": "Cerrar Sesión"
   },
   "spinner": {
-    "connectingWith": "Conectando con {{provider}}...",
     "validatingAddress": "Validando tu dirección...",
     "processingRegistration": "Procesando tu registro...",
     "loading": "Cargando...",

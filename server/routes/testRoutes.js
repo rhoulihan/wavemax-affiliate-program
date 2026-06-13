@@ -124,7 +124,6 @@ router.post('/customer', async (req, res) => {
                 isActive: true,
                 minimumDeliveryFee: 1,  // Set to $1 for testing
                 perBagDeliveryFee: 1,   // Set to $1 for testing
-                registrationMethod: 'traditional',
                 paymentMethod: 'check',
                 passwordSalt: affSalt,
                 passwordHash: affHash
@@ -163,7 +162,6 @@ router.post('/customer', async (req, res) => {
             zipCode: req.body.address?.zipCode || '78701',
             isActive: true,
             affiliateId: testAffiliate.affiliateId || testAffiliate._id,
-            registrationMethod: 'traditional',
             passwordSalt: salt,
             passwordHash: hash
         });

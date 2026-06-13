@@ -51,9 +51,7 @@ async function registerCustomer(payload) {
     affiliateSpecialInstructions,
     username,
     password,
-    languagePreference,
-    socialToken,
-    socialProvider
+    languagePreference
   } = payload;
 
   // Server-trust: the affiliate comes from the bag, never the payload.
@@ -84,21 +82,7 @@ async function registerCustomer(payload) {
     throw new RegistrationError('duplicate_username', 'Username already taken', { field: 'username' });
   }
 
-  // OAuth vs traditional — OAuth skips password, auto-generates a username if absent.
-  let finalUsername = username;
-  let passwordSalt = null;
-  let passwordHash = null;
-
-  if (socialToken) {
-    if (!username) {
-      finalUsername = email.split('@')[0] + '_' + Date.now().toString(36);
-    }
-    logger.info(`OAuth claim registration for email: ${email}, generated username: ${finalUsername}`);
-  } else {
-    const { salt, hash } = encryptionUtil.hashPassword(password);
-    passwordSalt = salt;
-    passwordHash = hash;
-  }
+  const { salt: passwordSalt, hash: passwordHash } = encryptionUtil.hashPassword(password);
 
   const newCustomer = new Customer({
     customerId: `CUST-${uuidv4()}`,
@@ -113,11 +97,10 @@ async function registerCustomer(payload) {
     zipCode,
     specialInstructions,
     affiliateSpecialInstructions,
-    username: finalUsername,
+    username,
     passwordSalt,
     passwordHash,
-    languagePreference: languagePreference || 'en',
-    registrationMethod: socialToken ? (socialProvider || 'social') : 'traditional'
+    languagePreference: languagePreference || 'en'
   });
 
   await newCustomer.save();

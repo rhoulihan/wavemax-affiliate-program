@@ -265,7 +265,6 @@ exports.getAffiliateProfile = ControllerHelpers.asyncWrapper(async (req, res) =>
     minimumDeliveryFee: Formatters.currency(affiliate.minimumDeliveryFee),
     perBagDeliveryFee: Formatters.currency(affiliate.perBagDeliveryFee),
     paymentMethod: affiliate.paymentMethod,
-    registrationMethod: affiliate.registrationMethod,
     isActive: affiliate.isActive,
     dateRegistered: Formatters.datetime(affiliate.dateRegistered),
     lastLogin: Formatters.datetime(affiliate.lastLogin)

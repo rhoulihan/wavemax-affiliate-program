@@ -64,19 +64,8 @@ router.post('/claim/:bagToken/register', registrationLimiter, [
   body('city').notEmpty().withMessage('City is required'),
   body('state').notEmpty().withMessage('State is required'),
   body('zipCode').notEmpty().withMessage('ZIP code is required'),
-  // Only require username/password if NOT using OAuth (no socialToken)
-  body('username').custom((value, { req }) => {
-    if (!req.body.socialToken && !value) {
-      throw new Error('Username is required');
-    }
-    return true;
-  }),
-  body('password').custom((value, { req }) => {
-    if (!req.body.socialToken) {
-      return customPasswordValidator()(value, { req });
-    }
-    return true;
-  })
+  body('username').notEmpty().withMessage('Username is required'),
+  body('password').custom((value, { req }) => customPasswordValidator()(value, { req }))
 ], handleValidationErrors, customerController.claimRegister);
 
 

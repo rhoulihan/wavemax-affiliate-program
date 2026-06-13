@@ -44,23 +44,6 @@ body {
     border-color: #3b82f6;
 }
 
-/* Social login buttons */
-.social-login-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0.5rem 1rem;
-    border: 1px solid #e5e7eb;
-    border-radius: 0.5rem;
-    background-color: #ffffff;
-    transition: background-color 0.2s;
-    cursor: pointer;
-}
-
-.social-login-btn:hover {
-    background-color: #f9fafb;
-}
-
 /* Loading state */
 .loading-button {
     position: relative;

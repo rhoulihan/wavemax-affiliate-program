@@ -2857,7 +2857,7 @@
 
     // Group variables by category
     const categories = {
-      'Application': ['NODE_ENV', 'PORT', 'BASE_URL', 'FRONTEND_URL', 'BACKEND_URL', 'CORS_ORIGIN', 'OAUTH_CALLBACK_URI', 'TRUST_PROXY', 'COOKIE_SECURE'],
+      'Application': ['NODE_ENV', 'PORT', 'BASE_URL', 'FRONTEND_URL', 'BACKEND_URL', 'CORS_ORIGIN', 'TRUST_PROXY', 'COOKIE_SECURE'],
       'Database': ['MONGODB_URI'],
       'Security & Authentication': ['JWT_SECRET', 'SESSION_SECRET', 'ENCRYPTION_KEY'],
       'Email': ['EMAIL_PROVIDER', 'EMAIL_FROM', 'EMAIL_HOST', 'EMAIL_PORT', 'EMAIL_USER', 'EMAIL_PASS', 'EMAIL_SECURE'],
@@ -2866,7 +2866,6 @@
       'Stripe (Deprecated)': ['STRIPE_PUBLISHABLE_KEY', 'STRIPE_SECRET_KEY'],
       'Features': ['SHOW_DOCS', 'ENABLE_DELETE_DATA_FEATURE', 'CSRF_PHASE', 'RELAX_RATE_LIMITING'],
       'Rate Limiting': ['RATE_LIMIT_WINDOW_MS', 'RATE_LIMIT_MAX_REQUESTS', 'AUTH_RATE_LIMIT_MAX'],
-      'Social Login': ['GOOGLE_CLIENT_ID', 'GOOGLE_CLIENT_SECRET', 'FACEBOOK_APP_ID', 'FACEBOOK_APP_SECRET', 'LINKEDIN_CLIENT_ID', 'LINKEDIN_CLIENT_SECRET'],
       'Logging': ['LOG_LEVEL', 'LOG_DIR'],
       'Business Configuration': ['BAG_FEE'],
       'Default Accounts': ['DEFAULT_ADMIN_EMAIL'],

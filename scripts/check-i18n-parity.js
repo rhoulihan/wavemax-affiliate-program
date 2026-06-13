@@ -30,7 +30,7 @@ const DEFAULT_DISPATCHER_DIR = path.join(ROOT, 'server', 'services', 'email');
 
 // --- Spec §10 client-UI inventory (exact keys; en is the source of truth) ---
 const REQUIRED_KEYS = [
-  'claim.title', 'claim.subtitle', 'claim.cta', 'claim.ctaOAuthGoogle', 'claim.ctaOAuthFacebook',
+  'claim.title', 'claim.subtitle', 'claim.cta',
   'claim.alreadyClaimedTitle', 'claim.alreadyClaimedBody', 'claim.alreadyClaimedCta',
   'claim.invalidTitle', 'claim.invalidBody', 'claim.raceLost', 'claim.resolving',
   'claim.deliver.title', 'claim.deliver.codeLabel', 'claim.deliver.codePlaceholder',

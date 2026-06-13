@@ -18,8 +18,6 @@ const { conditionalCsrf, csrfTokenEndpoint } = require('./server/config/csrf-con
 
 // Import routes
 const authRoutes = require('./server/routes/authRoutes');
-const socialAuthRoutes = require('./server/routes/socialAuthRoutes');
-const facebookDataRoutes = require('./server/routes/facebookDataRoutes');
 const affiliateRoutes = require('./server/routes/affiliateRoutes');
 const customerRoutes = require('./server/routes/customerRoutes');
 const orderRoutes = require('./server/routes/orderRoutes');
@@ -37,7 +35,6 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 const logger = require('./server/utils/logger');
-const passport = require('./server/config/passport-config');
 
 const MongoStore = require('connect-mongo');
 
@@ -244,12 +241,11 @@ app.use((req, res, next) => {
   // frame-ancestors directive, which a browser will prefer over XFO).
   res.setHeader('X-Frame-Options', 'SAMEORIGIN');
 
-  // Cross-Origin-Opener-Policy. Helmet's default is 'same-origin' which
-  // would break the OAuth popup flow (popup needs to postMessage back to
-  // opener after provider returns). 'same-origin-allow-popups' keeps the
+  // Cross-Origin-Opener-Policy. 'same-origin-allow-popups' keeps
   // opener-isolation against reverse window.opener abuse from cross-origin
   // CHILD pages while still allowing same-origin popups to retain a
-  // reference. APP-003 / prod-lockdown-2026-05-20.
+  // reference. APP-003 / prod-lockdown-2026-05-20. (OAuth popup flow was
+  // removed; this MAY be tightened to 'same-origin' in a follow-up.)
   res.setHeader('Cross-Origin-Opener-Policy', 'same-origin-allow-popups');
 
   // Clear-Site-Data header for logout endpoints
@@ -529,7 +525,7 @@ app.use(accessGate);
 // Coming-soon placeholder for rundberglaundry.com (held pending the Section 6.1(a)
 // approval). Public + noindex (no cloaking); runs before the location quarantine
 // and content routes so it covers every marketing path. Exempt paths (privacy
-// policy for OAuth, API/OAuth callbacks, .well-known, assets, favicon/robots/
+// policy, API/health, .well-known, assets, favicon/robots/
 // sitemap) pass through to normal handling. crhsent.com is unaffected (gated above).
 const comingSoon = require('./server/middleware/comingSoon');
 app.use(comingSoon);
@@ -686,10 +682,6 @@ app.use((req, res, next) => {
   }
   next();
 });
-
-// Initialize Passport for social media authentication
-app.use(passport.initialize());
-app.use(passport.session());
 
 // Location quarantine — lock deployment down to Austin + affiliate-program
 // app. Activated by env var QUARANTINE_NON_AUSTIN=true. Mounted here so it
@@ -914,8 +906,6 @@ apiV1Router.get('/environment', (req, res) => {
 
 // Mount v1 routes
 apiV1Router.use('/auth', authRoutes);
-apiV1Router.use('/auth', socialAuthRoutes);  // Social auth routes
-apiV1Router.use('/auth/facebook', facebookDataRoutes);  // Facebook data deletion routes
 apiV1Router.use('/affiliates', affiliateRoutes);
 apiV1Router.use('/affiliate-invites', require('./server/routes/affiliateInviteRoutes'));  // Public invite validate (invite-only onboarding)
 apiV1Router.use('/customers', customerRoutes);

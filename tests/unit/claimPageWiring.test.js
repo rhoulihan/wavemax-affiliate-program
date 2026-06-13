@@ -33,7 +33,7 @@ describe('/claim page wiring', () => {
   it('ships claim.* and bag.label.* keys in all four languages', () => {
     const langs = ['en', 'es', 'pt', 'de'];
     const required = [
-      'title', 'subtitle', 'resolving', 'cta', 'ctaOAuthGoogle', 'ctaOAuthFacebook',
+      'title', 'subtitle', 'resolving', 'cta',
       'alreadyClaimedTitle', 'alreadyClaimedBody', 'alreadyClaimedCta',
       'invalidTitle', 'invalidBody', 'raceLost'
     ];

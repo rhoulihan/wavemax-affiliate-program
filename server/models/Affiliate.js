@@ -52,31 +52,13 @@ const affiliateSchema = new mongoose.Schema({
   affiliateDeliveryCodeHash: { type: String, select: false },
   affiliateDeliveryCodeSetAt: Date,
   username: { type: String, required: true, unique: true },
-  passwordSalt: {
-    type: String,
-    required: function() {
-      return this.registrationMethod === 'traditional' || !this.registrationMethod;
-    }
-  },
-  passwordHash: {
-    type: String,
-    required: function() {
-      return this.registrationMethod === 'traditional' || !this.registrationMethod;
-    }
-  },
+  passwordSalt: { type: String, required: true },
+  passwordHash: { type: String, required: true },
   // Encrypted payment fields
   paymentMethod: {
     type: String,
-    required: function() {
-      return this.registrationMethod === 'traditional' || !this.registrationMethod;
-    },
-    enum: ['check', 'paypal', 'venmo'],
-    default: function() {
-      if (this.registrationMethod && this.registrationMethod !== 'traditional') {
-        return 'check'; // Default for social registrations
-      }
-      return undefined;
-    }
+    required: true,
+    enum: ['check', 'paypal', 'venmo']
   },
   paypalEmail: {
     type: mongoose.Schema.Types.Mixed,
@@ -95,38 +77,6 @@ const affiliateSchema = new mongoose.Schema({
   // rate limiter alone doesn't catch. prod-lockdown-2026-05-20.
   loginAttempts: { type: Number, default: 0 },
   lockUntil: Date,
-  // Social media account connections
-  socialAccounts: {
-    google: {
-      id: String,
-      email: String,
-      name: String,
-      accessToken: String,
-      refreshToken: String,
-      linkedAt: Date
-    },
-    facebook: {
-      id: String,
-      email: String,
-      name: String,
-      accessToken: String,
-      linkedAt: Date
-    },
-    linkedin: {
-      id: String,
-      email: String,
-      name: String,
-      accessToken: String,
-      refreshToken: String,
-      linkedAt: Date
-    }
-  },
-  // Registration method
-  registrationMethod: {
-    type: String,
-    enum: ['traditional', 'google', 'facebook', 'linkedin', 'social'],
-    default: 'traditional'
-  },
   // Password reset fields
   resetToken: String,
   resetTokenExpiry: Date,
@@ -191,8 +141,10 @@ affiliateSchema.virtual('name').get(function() {
   return `${this.firstName} ${this.lastName}`;
 });
 
-// Middleware for password hashing before saving
-affiliateSchema.pre('save', function(next) {
+// Middleware for password hashing. Runs on validate (not save) so the derived
+// passwordSalt/passwordHash are populated before the required-field validators
+// run when a caller sets only the virtual `password`.
+affiliateSchema.pre('validate', function(next) {
   // Hash password if it's modified and provided as plain text, but only if passwordHash is not already set
   if (this.isModified('password') && this.password && !this.passwordHash) {
     const { salt, hash } = encryptionUtil.hashPassword(this.password);

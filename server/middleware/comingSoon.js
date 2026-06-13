@@ -2,9 +2,9 @@
 // pending the Section 6.1(a) approval. It serves the SAME page to everyone —
 // users and crawlers alike — so there is no cloaking; the page is marked noindex
 // so it is not discoverable while held. Exempt paths pass through to normal
-// handling: the privacy policy (an OAuth-provider precondition), the API / OAuth
-// callbacks, ACME cert renewal, static assets (so the privacy page styles), and
-// favicon/robots/sitemap. To take the site live, remove the host below and redeploy.
+// handling: the privacy policy, the API, ACME cert renewal, static assets (so
+// the privacy page styles), and favicon/robots/sitemap. To take the site live,
+// remove the host below and redeploy.
 const COMING_SOON_HOSTS = ['rundberglaundry.com', 'www.rundberglaundry.com'];
 
 function reqHost(req) {
@@ -17,7 +17,7 @@ function isExempt(p) {
     p === '/terms-of-service' || p === '/terms-of-service/' ||
     p === '/terms-and-conditions' || p === '/terms-and-conditions.html' ||
     p === '/design-explorer' || p.startsWith('/design-explorer/') || // token-gated design review tool (explorerGuard enforces the token)
-    p.startsWith('/api/') ||                 // health, app API, OAuth callbacks
+    p.startsWith('/api/') ||                 // health, app API
     p.startsWith('/.well-known/') ||         // ACME cert renewal, etc.
     p.startsWith('/assets/') ||              // so the exempt pages keep their styles
     p === '/favicon.ico' || p === '/robots.txt' || p === '/sitemap.xml'

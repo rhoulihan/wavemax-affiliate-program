@@ -42,7 +42,6 @@ async function createTestAffiliate(data = {}) {
     passwordSalt: passwordSalt,
     passwordHash: passwordHash,
     paymentMethod: data.paymentMethod || 'check',
-    registrationMethod: data.registrationMethod || 'traditional',
     referralCode: data.referralCode || `TEST${Date.now()}`,
     commissionRate: data.commissionRate || 10,
     isActive: data.isActive !== undefined ? data.isActive : true,

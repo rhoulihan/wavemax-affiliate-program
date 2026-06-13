@@ -65,9 +65,9 @@ describe('Security Headers (regression — prod-lockdown-2026-05-20)', () => {
 
     it('sets Cross-Origin-Opener-Policy: same-origin-allow-popups (APP-003)', async () => {
       const r = await probe();
-      // 'same-origin-allow-popups' preserves OAuth popup flow (popup can
-      // postMessage back to opener) while preventing reverse window.opener
-      // abuse from cross-origin children.
+      // 'same-origin-allow-popups' allows same-origin popups to retain an
+      // opener reference while preventing reverse window.opener abuse from
+      // cross-origin children.
       expect(r.headers['cross-origin-opener-policy']).toBe('same-origin-allow-popups');
     });
   });

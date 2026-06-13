@@ -518,16 +518,6 @@ async function loadAffiliateData(affiliateId) {
       // Store affiliate data in localStorage for other uses
       localStorage.setItem('currentAffiliate', JSON.stringify(data));
 
-      // Check if this is an OAuth account and hide change password section if so
-      if (data.registrationMethod && data.registrationMethod !== 'traditional') {
-        // This is an OAuth account, hide the change password section
-        const changePasswordSection = document.getElementById('changePasswordSection');
-        if (changePasswordSection) {
-          changePasswordSection.style.display = 'none';
-          console.log('Hiding change password section for OAuth account:', data.registrationMethod);
-        }
-      }
-
       // Initialize pricing preview component if available
       console.log('Checking for PricingPreviewComponent:', !!window.PricingPreviewComponent);
       if (window.PricingPreviewComponent) {

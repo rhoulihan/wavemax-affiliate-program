@@ -23,58 +23,8 @@ describe('Affiliate Model - Additional Coverage', () => {
     });
   });
 
-  describe('Payment Method Default', () => {
-    it('should default payment method to check for social registration', () => {
-      // Create a schema instance to test the default function
-      const schema = Affiliate.schema;
-      const paymentMethodPath = schema.path('paymentMethod');
-      
-      // Mock 'this' context for the default function
-      const context = {
-        registrationMethod: 'google'
-      };
-      
-      // Call the default function with the mocked context
-      const defaultValue = paymentMethodPath.options.default.call(context);
-      
-      expect(defaultValue).toBe('check');
-    });
-
-    it('should not set default payment method for traditional registration', () => {
-      // Create a schema instance to test the default function
-      const schema = Affiliate.schema;
-      const paymentMethodPath = schema.path('paymentMethod');
-      
-      // Mock 'this' context for the default function
-      const context = {
-        registrationMethod: 'traditional'
-      };
-      
-      // Call the default function with the mocked context
-      const defaultValue = paymentMethodPath.options.default.call(context);
-      
-      expect(defaultValue).toBeUndefined();
-    });
-
-    it('should not set default payment method when registrationMethod is not set', () => {
-      // Create a schema instance to test the default function
-      const schema = Affiliate.schema;
-      const paymentMethodPath = schema.path('paymentMethod');
-      
-      // Mock 'this' context for the default function
-      const context = {};
-      
-      // Call the default function with the mocked context
-      const defaultValue = paymentMethodPath.options.default.call(context);
-      
-      expect(defaultValue).toBeUndefined();
-    });
-  });
-
   describe('Pre-save hooks', () => {
     it('should test password hashing in pre-save hook', async () => {
-      // For social registration, passwordHash/Salt are not required
-      // So we can test the pre-save hook properly
       const affiliate = new Affiliate({
         email: 'test@example.com',
         username: 'testuser',
@@ -86,7 +36,6 @@ describe('Affiliate Model - Additional Coverage', () => {
         state: 'TX',
         zipCode: '12345',
         paymentMethod: 'check',
-        registrationMethod: 'social',  // Use social registration to avoid validation error
         password: 'plainTextPassword'
       });
       

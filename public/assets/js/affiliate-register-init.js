@@ -6,14 +6,10 @@
   console.log('[affiliate-register-init] SwirlSpinner available?', !!window.SwirlSpinner);
   console.log('[affiliate-register-init] Document readyState:', document.readyState);
 
-  // Global spinner reference to ensure it can be hidden
-  let globalSectionSpinner = null;
-  
   // Helper function to get translated spinner messages
   function getSpinnerMessage(key, params = {}) {
     // Default messages
     const defaults = {
-      'spinner.connectingWith': 'Connecting with {{provider}}...',
       'spinner.validatingAddress': 'Validating your address...',
       'spinner.processingRegistration': 'Processing your registration...',
       'messages.registrationSuccess': 'Registration successful!',
@@ -116,7 +112,6 @@
   function initializeAffiliateRegistration() {
     console.log('[Init] Starting affiliate registration initialization');
     console.log('[Init] Document readyState:', document.readyState);
-    console.log('[Init] Google button exists?', !!document.getElementById('googleRegister'));
 
     // Initialize form validation first
     if (window.FormValidation) {
@@ -145,95 +140,6 @@
       // Set the value
       languagePreferenceField.value = languagePreference;
       console.log('Language preference set to:', languagePreference);
-    }
-
-    // Function to show modal when existing affiliate tries to register
-    function showExistingAffiliateModal(result) {
-      const affiliate = result.affiliate;
-      const affiliateName = `${affiliate.firstName} ${affiliate.lastName}`;
-
-      // Create modal HTML - positioned at top of viewport for iframe visibility
-      const modalHTML = `
-      <div id="existingAffiliateModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 existing-affiliate-modal-overlay">
-        <div class="bg-white rounded-lg p-6 max-w-md mx-4 shadow-xl existing-affiliate-modal-content">
-          <div class="text-center mb-6">
-            <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-blue-100 mb-4">
-              <svg class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-              </svg>
-            </div>
-            <h3 class="text-lg font-medium text-gray-900 mb-2">Account Already Exists</h3>
-            <p class="text-sm text-gray-500 mb-4">
-              Welcome back, <strong>${affiliateName}</strong>! An affiliate account already exists with the email <strong>${affiliate.email}</strong> (ID: <strong>${affiliate.affiliateId}</strong>).
-            </p>
-            <p class="text-xs text-gray-400 mt-2">
-              To prevent duplicate accounts, each email address can only be associated with one affiliate account.
-            </p>
-          </div>
-          
-          <div class="space-y-3">
-            <button id="loginToDashboard" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-              Continue to Dashboard
-            </button>
-            <button id="chooseAnotherMethod" class="w-full flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-              Use Different Login Method
-            </button>
-          </div>
-        </div>
-      </div>
-    `;
-
-      // Add modal to page
-      document.body.insertAdjacentHTML('beforeend', modalHTML);
-
-      // Scroll to top of the page to ensure modal is visible
-      window.scrollTo(0, 0);
-
-      // Ensure modal is visible by also scrolling the document body to top
-      document.documentElement.scrollTop = 0;
-      document.body.scrollTop = 0;
-
-      // Add event listeners
-      document.getElementById('loginToDashboard').addEventListener('click', function() {
-        console.log('User chose to login to dashboard');
-
-        // Store the token and affiliate data before redirecting
-        if (result.token) {
-          localStorage.setItem('affiliateToken', result.token);
-          console.log('Stored affiliate token');
-        }
-        
-        if (result.affiliate) {
-          localStorage.setItem('currentAffiliate', JSON.stringify(result.affiliate));
-          console.log('Stored affiliate data:', result.affiliate);
-        }
-
-        // Get affiliate ID from result
-        const affiliateId = result.affiliate.affiliateId;
-        console.log('Redirecting to affiliate dashboard, affiliateId:', affiliateId);
-
-        // Always use direct window.location.href redirect like other successful logins
-        window.location.href = `/embed-app-v2.html?route=/affiliate-dashboard&id=${affiliateId}`;
-
-        // Close modal
-        document.getElementById('existingAffiliateModal').remove();
-      });
-
-      document.getElementById('chooseAnotherMethod').addEventListener('click', function() {
-        console.log('User chose to use different login method');
-        // Close modal and let user try another method
-        document.getElementById('existingAffiliateModal').remove();
-
-        // Optionally show a message about using a different account
-        alert('Please try logging in with a different Google account or use the username/password login method.');
-      });
-
-      // Close modal when clicking outside
-      document.getElementById('existingAffiliateModal').addEventListener('click', function(e) {
-        if (e.target === this) {
-          this.remove();
-        }
-      });
     }
 
     // Show/hide payment method fields based on selection
@@ -265,12 +171,8 @@
       });
     }
 
-    // Social registration button handlers
-    const googleRegister = document.getElementById('googleRegister');
-    const facebookRegister = document.getElementById('facebookRegister');
-
-    // Shared validation function for both OAuth and form submission
-    function validateFormFields(isSocialRegistration = false) {
+    // Shared validation function for form submission
+    function validateFormFields() {
       const requiredFields = [];
       let hasValidationErrors = false;
 
@@ -284,7 +186,7 @@
         }
       }
 
-      // Personal information always required (OAuth pre-fills these but they can be missing for validation during OAuth button click)
+      // Personal information always required
       requiredFields.push(
         { id: 'firstName', name: 'First Name' },
         { id: 'lastName', name: 'Last Name' },
@@ -318,17 +220,11 @@
       );
       // Note: Service area fields are checked separately below with component-generated IDs
 
-      // Only require username and password for traditional registration (NOT OAuth)
-      // Check if this is OAuth by looking for socialToken or window.isOAuthUser
-      const formData = new FormData(document.getElementById('affiliateRegistrationForm'));
-      const hasSocialToken = formData.get('socialToken') || window.isOAuthUser;
-
-      if (!isSocialRegistration && !hasSocialToken) {
-        requiredFields.push(
-          { id: 'username', name: 'Username' },
-          { id: 'password', name: 'Password' }
-        );
-      }
+      // Username and password are always required
+      requiredFields.push(
+        { id: 'username', name: 'Username' },
+        { id: 'password', name: 'Password' }
+      );
 
       const missingFields = [];
       for (const field of requiredFields) {
@@ -356,571 +252,6 @@
       }
 
       return missingFields;
-    }
-
-    // Track if OAuth is in progress to prevent multiple simultaneous attempts
-    let oauthInProgress = false;
-    
-    function handleSocialAuth(provider) {
-    // No validation required before OAuth - the point is to authenticate first and auto-populate the form
-      console.log(`🚀 Starting ${provider} OAuth authentication...`);
-      
-      // Prevent multiple OAuth processes
-      if (oauthInProgress) {
-        console.log('[OAuth] OAuth already in progress, ignoring duplicate request');
-        return;
-      }
-      oauthInProgress = true;
-
-      // Show large spinner centered on the entire form
-      const formContainer = document.getElementById('affiliateRegistrationForm');
-      console.log('[OAuth] SwirlSpinner available?', !!window.SwirlSpinner);
-      console.log('[OAuth] SwirlSpinnerUtils available?', !!window.SwirlSpinnerUtils);
-      console.log('[OAuth] Form container found?', !!formContainer);
-
-      // Define spinner in outer scope so it's accessible in the polling function
-      let sectionSpinner = null;
-      let originalFormPosition = null;
-
-      // Create function to hide spinner
-      const hideSpinner = function() {
-        console.log('[OAuth] hideSpinner called, checking spinners...');
-        if (sectionSpinner) {
-          console.log('[OAuth] Hiding local spinner');
-          sectionSpinner.hide();
-          sectionSpinner = null;
-        }
-        if (globalSectionSpinner) {
-          console.log('[OAuth] Hiding global spinner');
-          globalSectionSpinner.hide();
-          globalSectionSpinner = null;
-        }
-        
-        // Fallback: manually remove any spinner overlays from DOM
-        const overlays = document.querySelectorAll('.swirl-spinner-overlay');
-        console.log('[OAuth] Found', overlays.length, 'spinner overlays in DOM');
-        overlays.forEach(overlay => {
-          console.log('[OAuth] Manually removing spinner overlay');
-          overlay.remove();
-        });
-        
-        // Restore original form position if it was changed
-        if (formContainer && originalFormPosition !== null) {
-          formContainer.style.position = originalFormPosition;
-        }
-      };
-
-      if (formContainer) {
-        const rect = formContainer.getBoundingClientRect();
-        console.log('[OAuth] Form dimensions:', { width: rect.width, height: rect.height });
-        console.log('[OAuth] Form position style:', window.getComputedStyle(formContainer).position);
-
-        // Ensure the form container has relative positioning for the overlay to work properly
-        originalFormPosition = formContainer.style.position || '';
-        if (!originalFormPosition || originalFormPosition === 'static') {
-          formContainer.style.position = 'relative';
-        }
-
-        // Use SwirlSpinner
-        if (window.SwirlSpinner) {
-          try {
-            console.log('[OAuth] Creating SwirlSpinner with overlay on entire form...');
-            // Get translated message
-            const connectingMessage = getSpinnerMessage('spinner.connectingWith', {
-              provider: provider.charAt(0).toUpperCase() + provider.slice(1)
-            });
-            console.log('[OAuth] Using message:', connectingMessage);
-
-            sectionSpinner = new window.SwirlSpinner({
-              container: formContainer,
-              size: 'large',
-              overlay: true,
-              message: connectingMessage
-            }).show();
-            globalSectionSpinner = sectionSpinner; // Store global reference
-            console.log('[OAuth] SwirlSpinner created successfully and stored globally');
-            console.log('[OAuth] Spinner instance:', sectionSpinner);
-            console.log('[OAuth] Spinner isVisible:', sectionSpinner && sectionSpinner.isVisible ? sectionSpinner.isVisible() : 'N/A');
-
-            // Check if spinner element was actually added - look in both form and document
-            const spinnerElements = document.querySelectorAll('.swirl-spinner-overlay');
-            console.log('[OAuth] Spinner overlay elements found in document:', spinnerElements.length);
-            spinnerElements.forEach((el, index) => {
-              const computed = window.getComputedStyle(el);
-              console.log(`[OAuth] Spinner ${index} styles:`, {
-                display: computed.display,
-                visibility: computed.visibility,
-                zIndex: computed.zIndex,
-                position: computed.position
-              });
-            });
-          } catch (error) {
-            console.error('[OAuth] Error creating SwirlSpinner:', error);
-          }
-        } else {
-          console.error('[OAuth] SwirlSpinner not available! This should not happen.');
-        }
-      }
-
-      // For embedded context or iframe, always use popup window to avoid iframe restrictions
-      // Check if we're in iframe or if embed config says we're embedded
-      const inIframe = window.self !== window.top;
-      const shouldUsePopup = isEmbedded || inIframe || window.location.pathname.includes('embed');
-      
-      console.log('[OAuth] Context check:', {
-        isEmbedded,
-        inIframe,
-        pathname: window.location.pathname,
-        shouldUsePopup
-      });
-      
-      if (shouldUsePopup) {
-      // Generate unique session ID for database polling
-        const sessionId = 'oauth_' + Date.now() + '_' + Math.random().toString(36).substring(2);
-        console.log('Generated OAuth session ID:', sessionId);
-
-        const oauthUrl = `${baseUrl}/api/v1/auth/${provider}?popup=true&state=${sessionId}&t=${Date.now()}`;
-        console.log('🔗 Opening OAuth URL:', oauthUrl);
-
-        const popup = window.open(
-          oauthUrl,
-          'socialAuth',
-          'width=500,height=600,scrollbars=yes,resizable=yes'
-        );
-
-        console.log('Popup opened:', {
-          'popup exists': !!popup,
-          'popup.closed': popup ? popup.closed : 'N/A',
-          'popup type': typeof popup,
-          'popup URL': `${baseUrl}/api/v1/auth/${provider}?popup=true`
-        });
-
-        if (!popup || popup.closed) {
-          window.ErrorHandler.showError('Popup was blocked. Please allow popups for this site and try again.');
-          // Hide spinner
-          hideSpinner();
-          oauthInProgress = false;
-          return;
-        }
-
-        // Database polling approach (more reliable than postMessage)
-        let pollCount = 0;
-        const maxPolls = 120; // 6 minutes max (120 * 3 seconds)
-        let authResultReceived = false;
-
-        console.log('Starting database polling for OAuth result...');
-
-        const pollForResult = setInterval(async () => {
-          pollCount++;
-
-          try {
-          // Check if popup is closed
-            if (popup.closed) {
-              console.log('Popup closed, continuing to poll for result...');
-            }
-
-            // Poll the database for result
-            const response = await csrfFetch(`${baseUrl}/api/v1/auth/oauth-session/${sessionId}`);
-
-            // Handle 404 specifically - it's expected while waiting for OAuth completion
-            if (response.status === 404) {
-            // Session doesn't exist yet, continue polling
-              if (pollCount % 10 === 0) {
-                console.log('Waiting for OAuth authentication to complete...');
-              }
-              return;
-            }
-
-            console.log('🔍 Polling response:', {
-              ok: response.ok,
-              status: response.status,
-              statusText: response.statusText
-            });
-
-            if (response.ok) {
-              const data = await response.json();
-              console.log('📊 Response data:', data);
-              if (data.success && data.result) {
-                console.log('📨 OAuth result received from database:', data.result);
-                authResultReceived = true;
-                clearInterval(pollForResult);
-                console.log('[OAuth] Polling interval cleared');
-
-                if (popup && !popup.closed) {
-                  console.log('[OAuth] Attempting to close popup window');
-                  console.log('[OAuth] Popup state:', {
-                    closed: popup.closed,
-                    location: typeof popup.location,
-                    document: typeof popup.document
-                  });
-                  try {
-                    // Focus on the main window first
-                    window.focus();
-                    
-                    // Try to close the popup
-                    popup.close();
-                    console.log('[OAuth] Popup close command executed');
-                    
-                    // Check if it actually closed after a short delay
-                    setTimeout(() => {
-                      if (popup && !popup.closed) {
-                        console.warn('[OAuth] Popup did not close, it may have been closed by the user or browser restrictions apply');
-                      } else {
-                        console.log('[OAuth] Popup successfully closed');
-                      }
-                    }, 500);
-                  } catch (e) {
-                    console.error('[OAuth] Error closing popup:', e);
-                  }
-                } else {
-                  console.log('[OAuth] Popup already closed or null');
-                }
-
-                // Handle the result
-                try {
-                  if (data.result.type === 'social-auth-success') {
-                    console.log('Processing social-auth-success from database');
-                    console.log('Calling showSocialRegistrationCompletion with:', {
-                      socialToken: data.result.socialToken,
-                      provider: data.result.provider
-                    });
-                    showSocialRegistrationCompletion(data.result.socialToken, data.result.provider);
-                    // Hide spinner
-                    console.log('[OAuth] About to hide spinner, sectionSpinner exists?', !!sectionSpinner);
-                    console.log('[OAuth] globalSectionSpinner exists?', !!globalSectionSpinner);
-                    console.log('[OAuth] Spinner elements in DOM:', document.querySelectorAll('.swirl-spinner-overlay').length);
-                    hideSpinner();
-                    oauthInProgress = false;
-                    // Double-check spinner was hidden
-                    setTimeout(() => {
-                      console.log('[OAuth] After hideSpinner - Spinner elements in DOM:', document.querySelectorAll('.swirl-spinner-overlay').length);
-                    }, 100);
-                  } else if (data.result.type === 'social-auth-login') {
-                    console.log('Processing social-auth-login from database');
-                    console.log('User attempted to register but account already exists:', data.result.affiliate);
-                    // Show modal dialog asking user what they want to do
-                    showExistingAffiliateModal(data.result);
-                    // Hide spinner
-                    hideSpinner();
-                    oauthInProgress = false;
-                  } else if (data.result.type === 'social-auth-error') {
-                    console.log('Processing social-auth-error from database');
-                    window.ErrorHandler.showError(data.result.message || 'Social authentication failed');
-                    // Hide spinner
-                    hideSpinner();
-                    oauthInProgress = false;
-                  } else {
-                    console.log('Unknown result type:', data.result.type);
-                    // Hide spinner
-                    hideSpinner();
-                    oauthInProgress = false;
-                  }
-                } catch (resultError) {
-                  console.error('Error processing OAuth result:', resultError);
-                  window.ErrorHandler.showError('Error processing authentication result');
-                  // Hide spinner
-                  hideSpinner();
-                  oauthInProgress = false;
-                }
-                return;
-              }
-            }
-
-            // Check for timeout
-            if (pollCount > maxPolls) {
-              console.log('Database polling timeout exceeded');
-              clearInterval(pollForResult);
-              if (popup && !popup.closed) {
-                popup.close();
-              }
-              window.ErrorHandler.showError('Authentication timed out. Please try again.');
-              // Hide spinner
-              hideSpinner();
-              return;
-            }
-
-            // Log progress every 5 polls (15 seconds)
-            if (pollCount % 5 === 0) {
-              console.log(`🔄 Polling for OAuth result... (${pollCount}/${maxPolls})`);
-            }
-
-          } catch (error) {
-          // 404 is expected - it means the OAuth session hasn't been created yet
-          // This happens while the user is still on Google's auth page
-            if (error.message && error.message.includes('404')) {
-            // Session not created yet, this is normal - continue polling
-              if (pollCount % 10 === 0) {
-                console.log('Waiting for user to complete OAuth authentication...');
-              }
-              return;
-            }
-
-            console.error('Error polling for OAuth result:', error);
-
-            // Don't stop polling for network errors, just log them
-            if (pollCount % 10 === 0) {
-              console.log('Network error during polling, continuing...');
-            }
-          }
-        }, 3000); // Poll every 3 seconds instead of 1 second
-      } else {
-      // For non-embedded context, use direct navigation
-        window.location.href = `${baseUrl}/api/v1/auth/${provider}`;
-      }
-    }
-
-    // Attach OAuth handlers immediately - spinner will use fallback if needed
-    console.log('[Init] Attaching OAuth handlers (will use fallback spinner if needed)');
-    console.log('[Init] Google button element:', googleRegister);
-
-    if (googleRegister) {
-      // Check if handler already attached to prevent duplicates
-      if (!googleRegister.dataset.initialized) {
-        console.log('[Init] Adding click handler to Google button');
-        googleRegister.addEventListener('click', function() {
-          console.log('[OAuth] Google button clicked!');
-          handleSocialAuth('google');
-        });
-        googleRegister.dataset.initialized = 'true';
-      } else {
-        console.log('[Init] Google button already has handler, skipping');
-      }
-    } else {
-      console.error('[Init] Google register button not found!')
-    }
-
-    if (facebookRegister) {
-      if (!facebookRegister.dataset.initialized) {
-        facebookRegister.addEventListener('click', function() {
-          handleSocialAuth('facebook');
-        });
-        facebookRegister.dataset.initialized = 'true';
-      }
-    }
-
-    // Handle social registration completion
-    function handleSocialRegistrationCallback() {
-      const urlParams = new URLSearchParams(window.location.search);
-      const socialToken = urlParams.get('socialToken');
-      const provider = urlParams.get('provider');
-      const error = urlParams.get('error');
-
-      if (error) {
-        let errorMessage = 'Social authentication failed. Please try again.';
-        switch(error) {
-        case 'social_auth_failed':
-          errorMessage = 'Social authentication failed. Please try again or use traditional registration.';
-          break;
-        case 'social_auth_error':
-          errorMessage = 'An error occurred during social authentication. Please try again.';
-          break;
-        }
-        window.ErrorHandler.showError(errorMessage);
-        return;
-      }
-
-      if (socialToken && provider) {
-      // Pre-fill form with social data and show completion section
-        showSocialRegistrationCompletion(socialToken, provider);
-      }
-    }
-
-    function showSocialRegistrationCompletion(socialToken, provider) {
-      console.log('🎨 Showing social registration completion for provider:', provider);
-
-      // Update the social auth section to show connected status
-      const socialAuthSection = document.getElementById('socialAuthSection');
-      console.log('🔍 Found social auth section:', socialAuthSection);
-
-      if (socialAuthSection) {
-        console.log('✅ Updating social auth section with success message');
-        socialAuthSection.innerHTML = `
-        <h3 class="text-xl font-bold mb-4" data-i18n="affiliate.register.socialAccountConnected">Social Media Account Connected!</h3>
-        <div class="bg-green-50 border border-green-200 rounded-lg p-6">
-          <div class="flex items-center justify-center">
-            <svg class="w-8 h-8 text-green-500 mr-3" fill="currentColor" viewBox="0 0 20 20">
-              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
-            </svg>
-            <div>
-              <h4 class="text-green-700 font-semibold text-lg" data-i18n="affiliate.register.successfullyConnectedWith" data-i18n-param-provider="${provider.charAt(0).toUpperCase() + provider.slice(1)}">Successfully Connected with ${provider.charAt(0).toUpperCase() + provider.slice(1)}</h4>
-              <p class="text-green-600 text-sm mt-1" data-i18n="affiliate.register.autoFilledMessage">Your information has been automatically filled in below. Complete the remaining fields to finish your registration.</p>
-            </div>
-          </div>
-        </div>
-      `;
-
-        // Trigger i18n update for the new content
-        if (window.i18n && window.i18n.updateContent) {
-          window.i18n.updateContent();
-        }
-      }
-
-      // Hide account setup section and OAuth panel for OAuth users
-      const accountSetupSection = document.getElementById('accountSetupSection');
-      // socialAuthSection already declared above, no need to redeclare
-      
-      if (accountSetupSection) {
-        accountSetupSection.classList.add('form-section-hidden');
-        console.log('✅ Hidden account setup section for OAuth user');
-      }
-      
-      // Hide OAuth panel after successful OAuth
-      if (socialAuthSection) {
-        socialAuthSection.classList.add('form-section-hidden');
-        console.log('✅ Hidden OAuth panel after OAuth success');
-      }
-      
-      // Show personal and business info sections
-      const personalInfoSection = document.getElementById('personalInfoSection');
-      const businessInfoSection = document.getElementById('businessInfoSection');
-      
-      if (personalInfoSection) {
-        personalInfoSection.classList.remove('form-section-hidden');
-        console.log('✅ Showing personal info section for OAuth user');
-      }
-      
-      if (businessInfoSection) {
-        businessInfoSection.classList.remove('form-section-hidden');
-        console.log('✅ Showing business info section for OAuth user');
-      }
-
-      // Note: Account setup section will remain hidden for OAuth users
-      window.isOAuthUser = true;
-      window.accountSetupCompleted = true;
-
-      // Remove required attributes from username/password fields for OAuth users
-      const usernameField = document.getElementById('username');
-      const passwordField = document.getElementById('password');
-      const confirmPasswordField = document.getElementById('confirmPassword');
-
-      if (usernameField) usernameField.removeAttribute('required');
-      if (passwordField) passwordField.removeAttribute('required');
-      if (confirmPasswordField) confirmPasswordField.removeAttribute('required');
-
-      // Store social token for form submission
-      const form = document.getElementById('affiliateRegistrationForm');
-      console.log('📝 Found form:', form ? 'Yes' : 'No');
-      if (form) {
-      // Check if social token input already exists
-        let socialTokenInput = document.getElementById('socialToken');
-        if (!socialTokenInput) {
-          socialTokenInput = document.createElement('input');
-          socialTokenInput.type = 'hidden';
-          socialTokenInput.name = 'socialToken';
-          socialTokenInput.id = 'socialToken';
-          socialTokenInput.value = socialToken;
-          form.appendChild(socialTokenInput);
-          console.log('✅ Added social token to form');
-        } else {
-        // Update existing token
-          socialTokenInput.value = socialToken;
-          console.log('✅ Updated existing social token in form');
-        }
-      }
-
-      // Auto-populate form fields from social token (decode JWT payload)
-      try {
-        // Validate social token format
-        if (!socialToken || typeof socialToken !== 'string') {
-          console.error('❌ Invalid social token:', socialToken);
-          return;
-        }
-        
-        const parts = socialToken.split('.');
-        if (parts.length !== 3) {
-          console.error('❌ Invalid JWT format. Expected 3 parts, got:', parts.length);
-          console.log('Token:', socialToken);
-          return;
-        }
-        
-        // Try to decode the payload
-        let payload;
-        try {
-          // Ensure proper padding for base64 decode
-          const base64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
-          const padded = base64.padEnd(base64.length + (4 - base64.length % 4) % 4, '=');
-          payload = JSON.parse(atob(padded));
-        } catch (decodeError) {
-          console.error('❌ Failed to decode token payload:', decodeError);
-          console.log('Token part:', parts[1]);
-          throw decodeError;
-        }
-        
-        console.log('🔓 Decoded social token payload:', payload);
-        console.log('🔍 Available form fields:', {
-          firstName: !!document.getElementById('firstName'),
-          lastName: !!document.getElementById('lastName'),
-          email: !!document.getElementById('email')
-        });
-
-        // Auto-fill personal information
-        if (payload.firstName || payload.displayName) {
-          const firstNameField = document.getElementById('firstName');
-          console.log('🔍 First name field:', firstNameField);
-          if (firstNameField) {
-            // Use firstName if available, otherwise try to extract from displayName
-            let firstName = payload.firstName;
-            if (!firstName && payload.displayName) {
-              firstName = payload.displayName.split(' ')[0];
-            }
-            
-            if (firstName && !firstNameField.value) {
-              firstNameField.value = firstName;
-              firstNameField.style.backgroundColor = '#f0fdf4'; // Light green to indicate auto-filled
-              console.log('✅ Pre-filled firstName:', firstName);
-            }
-          }
-        }
-
-        if (payload.lastName || payload.displayName) {
-          const lastNameField = document.getElementById('lastName');
-          console.log('🔍 Last name field:', lastNameField);
-          if (lastNameField) {
-            // Use lastName if available, otherwise try to extract from displayName
-            let lastName = payload.lastName;
-            if (!lastName && payload.displayName) {
-              const nameParts = payload.displayName.split(' ');
-              if (nameParts.length > 1) {
-                lastName = nameParts.slice(1).join(' ');
-              }
-            }
-            
-            if (lastName && !lastNameField.value) {
-              lastNameField.value = lastName;
-              lastNameField.style.backgroundColor = '#f0fdf4'; // Light green to indicate auto-filled
-              console.log('✅ Pre-filled lastName:', lastName);
-            }
-          }
-        }
-
-        if (payload.email) {
-          const emailField = document.getElementById('email');
-          console.log('🔍 Email field:', emailField);
-          if (emailField && !emailField.value) {
-            emailField.value = payload.email;
-            emailField.readOnly = true; // Make it read-only since it comes from OAuth
-            emailField.style.backgroundColor = '#f0fdf4'; // Light green to indicate auto-filled
-            console.log('✅ Pre-filled email:', payload.email);
-          }
-        } else {
-          console.warn('⚠️ No email in social token payload');
-        }
-
-        // Log any fields that couldn't be populated
-        console.log('📊 Form population summary:', {
-          firstNamePopulated: !!document.getElementById('firstName')?.value,
-          lastNamePopulated: !!document.getElementById('lastName')?.value,
-          emailPopulated: !!document.getElementById('email')?.value
-        });
-
-      } catch (e) {
-        console.error('❌ Error decoding social token for pre-filling:', e);
-        console.log('🔍 Social token:', socialToken);
-      }
-
-      // Ensure form submit handler is attached after OAuth
-      console.log('✅ Attaching form submit handler after OAuth completion');
-      attachFormSubmitHandler();
     }
 
     // Password strength validation
@@ -1102,9 +433,6 @@
       });
     }
 
-    // Check for social registration callback on page load
-    handleSocialRegistrationCallback();
-
     // Function to attach form submit handler
     function attachFormSubmitHandler() {
       const form = document.getElementById('affiliateRegistrationForm');
@@ -1118,12 +446,8 @@
 
       // Check if handler already attached
       if (form.dataset.handlerAttached === 'true') {
-        console.log('[Form Init] Submit handler already attached, checking if it works...');
-        // For debugging: let's force re-attach if coming from OAuth
-        if (!window.location.search.includes('socialToken')) {
-          return;
-        }
-        console.log('[Form Init] OAuth flow detected, re-attaching handler anyway');
+        console.log('[Form Init] Submit handler already attached, skipping');
+        return;
       }
 
       console.log('[Form Init] Attaching submit handler to form');
@@ -1146,8 +470,8 @@
           return;
         }
         
-        // Check if account setup was completed (unless OAuth user)
-        if (!window.isOAuthUser && !window.accountSetupCompleted) {
+        // Check if account setup was completed
+        if (!window.accountSetupCompleted) {
           window.ErrorHandler.showError('Please complete the account setup first');
           const accountSetupSection = document.getElementById('accountSetupSection');
           if (accountSetupSection) {
@@ -1183,15 +507,11 @@
           }).show() : null;
 
         try {
-        // Determine if this is a social registration first
           const formData = new FormData(form);
-          const isSocialRegistration = formData.get('socialToken') || window.isOAuthUser;
 
           // Validate required fields
-          const missingFields = validateFormFields(isSocialRegistration);
+          const missingFields = validateFormFields();
           console.log('[Form Submit] Missing fields:', missingFields);
-          console.log('[Form Submit] Is OAuth user?', window.isOAuthUser);
-          console.log('[Form Submit] Has social token?', !!formData.get('socialToken'));
           console.log('[Form Submit] Address validated?', window.addressValidated);
           console.log('[Form Submit] Business info section display:', document.querySelector('#businessInfoSection')?.style.display);
 
@@ -1218,19 +538,17 @@
             return;
           }
 
-          // Check for username validation errors (only for traditional registration)
-          if (!isSocialRegistration) {
-            const usernameField = document.getElementById('username');
-            if (usernameField && usernameField.classList.contains('border-red-500')) {
-              const usernameHelp = usernameField.parentElement.querySelector('.username-validation-message');
-              const errorMessage = usernameHelp?.textContent || 'Please fix the username validation error';
-              window.ErrorHandler.showError(errorMessage);
-              // Hide spinner
-              if (formSpinner) formSpinner.hide();
-              isSubmitting = false; // Reset flag
-              usernameField.focus();
-              return;
-            }
+          // Check for username validation errors
+          const usernameField = document.getElementById('username');
+          if (usernameField && usernameField.classList.contains('border-red-500')) {
+            const usernameHelp = usernameField.parentElement.querySelector('.username-validation-message');
+            const errorMessage = usernameHelp?.textContent || 'Please fix the username validation error';
+            window.ErrorHandler.showError(errorMessage);
+            // Hide spinner
+            if (formSpinner) formSpinner.hide();
+            isSubmitting = false; // Reset flag
+            usernameField.focus();
+            return;
           }
 
           // Additional validation for payment method
@@ -1244,23 +562,20 @@
             return;
           }
 
-          // Check if passwords match (only for traditional registration)
-          if (!isSocialRegistration) {
-            const password = document.getElementById('password').value;
-            const confirmPassword = document.getElementById('confirmPassword').value;
+          // Check if passwords match
+          const password = document.getElementById('password').value;
+          const confirmPassword = document.getElementById('confirmPassword').value;
 
-            if (password !== confirmPassword) {
-              window.ErrorHandler.showError('Passwords do not match!');
-              // Hide spinner
-              if (formSpinner) formSpinner.hide();
-              isSubmitting = false; // Reset flag
-              return;
-            }
+          if (password !== confirmPassword) {
+            window.ErrorHandler.showError('Passwords do not match!');
+            // Hide spinner
+            if (formSpinner) formSpinner.hide();
+            isSubmitting = false; // Reset flag
+            return;
           }
 
-          // Optional W-9 file — traditional registration only; the social
-          // endpoint does not accept multipart (upload later via dashboard).
-          const w9File = isSocialRegistration ? null : getSelectedW9File();
+          // Optional W-9 file (multipart upload; backend register route accepts it).
+          const w9File = getSelectedW9File();
           const w9ValidationError = validateW9File(w9File);
           if (w9ValidationError) {
             showW9FieldError(w9ValidationError);
@@ -1290,16 +605,11 @@
             'address', 'city', 'state', 'zipCode',
             'minimumDeliveryFee', 'perBagDeliveryFee',
             'paymentMethod', 'accountNumber', 'routingNumber', 'paypalEmail',
-            'languagePreference', 'termsAgreement', 'socialToken'
+            'languagePreference', 'termsAgreement'
           ];
 
           formFields.forEach(fieldName => {
-            let element = document.getElementById(fieldName);
-
-            // Special handling for socialToken which might not have an ID
-            if (!element && fieldName === 'socialToken') {
-              element = form.querySelector('input[name="socialToken"]');
-            }
+            const element = document.getElementById(fieldName);
 
             if (element) {
             // Always include the value, even if empty, so the server knows the field exists
@@ -1374,12 +684,7 @@
             accountNumber: affiliateData.accountNumber,
             routingNumber: affiliateData.routingNumber
           });
-          console.log('Is social registration?', isSocialRegistration);
-
-          // Determine endpoint based on whether this is a social registration
-          const endpoint = isSocialRegistration
-            ? `${baseUrl}/api/v1/auth/social/register`
-            : `${baseUrl}/api/v1/affiliates/register`;
+          const endpoint = `${baseUrl}/api/v1/affiliates/register`;
 
           // API call to the server with proper base URL.
           // With a W-9 attached the body is multipart FormData (the backend
@@ -1629,10 +934,7 @@
     }
 
     // Call the function to attach handler
-    // Only call this on initial load, not after OAuth (OAuth calls it explicitly)
-    if (!window.location.search.includes('socialToken')) {
-      attachFormSubmitHandler();
-    }
+    attachFormSubmitHandler();
 
     // Listen for messages from parent window if embedded
     if (isEmbedded) {
@@ -1858,18 +1160,13 @@
         personalInfoBackButton.addEventListener('click', function() {
           console.log('[Navigation] Back to account setup clicked');
           
-          // Show account setup and OAuth panel
+          // Show account setup section
           const accountSetupSection = document.getElementById('accountSetupSection');
-          const socialAuthSection = document.getElementById('socialAuthSection');
-          
+
           if (accountSetupSection) {
             accountSetupSection.classList.remove('form-section-hidden');
           }
-          
-          if (socialAuthSection && !window.isOAuthUser) {
-            socialAuthSection.classList.remove('form-section-hidden');
-          }
-          
+
           // Hide personal and business info sections
           const personalInfoSection = document.getElementById('personalInfoSection');
           const businessInfoSection = document.getElementById('businessInfoSection');
@@ -1942,21 +1239,14 @@
             return;
           }
           
-          // All validations passed - hide account setup section and OAuth panel
+          // All validations passed - hide account setup section
           const accountSetupSection = document.getElementById('accountSetupSection');
-          const socialAuthSection = document.getElementById('socialAuthSection');
-          
+
           if (accountSetupSection) {
             accountSetupSection.classList.add('form-section-hidden');
             console.log('✅ Hidden account setup section after completion');
           }
-          
-          // Hide OAuth panel
-          if (socialAuthSection) {
-            socialAuthSection.classList.add('form-section-hidden');
-            console.log('✅ Hidden OAuth panel after account setup');
-          }
-          
+
           // Show personal and business info sections
           const personalInfoSection = document.getElementById('personalInfoSection');
           const businessInfoSection = document.getElementById('businessInfoSection');
@@ -2020,14 +1310,9 @@
           backButton.classList.add('hidden');
           backButton.style.display = 'none';
 
-          // Show the first sections again (OAuth, personal info, business info)
-          const socialAuthSection = document.getElementById('socialAuthSection');
+          // Show the first sections again (personal info, business info)
           const personalInfoSection = document.getElementById('personalInfoSection');
           const businessInfoSection = document.getElementById('businessInfoSection');
-
-          if (socialAuthSection) {
-            socialAuthSection.style.display = '';
-          }
 
           if (personalInfoSection) {
             personalInfoSection.style.display = '';
@@ -2116,11 +1401,6 @@
           });
         }
         
-        const socialAuthSection = document.getElementById('socialAuthSection');
-        if (socialAuthSection) {
-          socialAuthSection.style.display = 'none';
-        }
-        
         const personalInfoSection = document.getElementById('personalInfoSection');
         if (personalInfoSection) {
           personalInfoSection.style.display = 'none';
@@ -2129,14 +1409,7 @@
             field.removeAttribute('required');
           });
         }
-        
-        if (window.isOAuthUser) {
-          const accountSetup = document.getElementById('accountSetupSection');
-          if (accountSetup) {
-            accountSetup.style.display = 'none';
-          }
-        }
-        
+
         // Show all remaining sections (service info, payment, terms, submit)
         const sectionsToShow = [
           'serviceInfoSection',
@@ -2242,17 +1515,6 @@
     // DOM is already loaded
     initializeAffiliateRegistration();
     setupLanguagePreferenceTracking();
-    
-    // Also try after a delay for dynamically loaded content
-    setTimeout(() => {
-      console.log('[Init] Re-checking OAuth buttons after delay...');
-      const googleBtn = document.getElementById('googleRegister');
-      if (googleBtn && !googleBtn.hasAttribute('data-initialized')) {
-        console.log('[Init] Re-initializing OAuth handlers...');
-        initializeAffiliateRegistration();
-        googleBtn.setAttribute('data-initialized', 'true');
-      }
-    }, 500);
   }
 
 })(); // End IIFE

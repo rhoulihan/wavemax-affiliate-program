@@ -37,7 +37,7 @@ const {
   cookieOptions: {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',  // 'strict' breaks OAuth-popup-back navigation
+    sameSite: 'lax',
     path: '/'
   },
   size: 64,
@@ -64,23 +64,6 @@ const CSRF_CONFIG = {
     // Health check endpoints
     '/api/health',
     '/api/v1/health',
-
-    // OAuth endpoints (GET only - these handle their own security)
-    '/api/v1/auth/google',
-    '/api/v1/auth/facebook',
-    '/api/v1/auth/linkedin',
-    '/api/v1/auth/google/callback',
-    '/api/v1/auth/facebook/callback',
-    '/api/v1/auth/linkedin/callback',
-    '/api/v1/auth/customer/google',
-    '/api/v1/auth/customer/facebook',
-    '/api/v1/auth/customer/linkedin',
-    '/api/v1/auth/customer/google/callback',
-    '/api/v1/auth/customer/facebook/callback',
-    '/api/v1/auth/customer/linkedin/callback',
-
-    // Facebook data deletion webhook (external callback)
-    '/api/v1/auth/facebook/deletion-callback',
 
     // Public concierge — credential-free, no ambient cookie/session, so it is
     // not a CSRF target (an attacker's forged POST gains nothing). Same-origin
@@ -125,7 +108,6 @@ const CSRF_CONFIG = {
     '/api/v1/auth/forgot-password',
     '/api/v1/auth/reset-password',
     '/api/v1/auth/refresh-token',
-    '/api/v1/auth/oauth-session/:sessionId',
     // Password change endpoints (part of auth flow)
     '/api/v1/administrators/change-password',
     '/api/v1/affiliates/change-password',
@@ -137,9 +119,7 @@ const CSRF_CONFIG = {
   REGISTRATION_ENDPOINTS: [
     '/api/affiliates/register',
     '/api/v1/affiliates/register',
-    '/api/v1/customers/claim/:bagToken/register',
-    '/api/v1/auth/social/register',
-    '/api/v1/auth/customer/social/register'
+    '/api/v1/customers/claim/:bagToken/register'
   ],
 
   // CRITICAL endpoints that MUST have CSRF protection (Phase 1)

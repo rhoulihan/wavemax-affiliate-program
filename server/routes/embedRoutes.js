@@ -57,9 +57,6 @@ router.get('/affiliate-success-embed.html', serveHTMLWithNonce('affiliate-succes
 // Affiliate Landing
 router.get('/affiliate-landing-embed.html', serveHTMLWithNonce('affiliate-landing-embed.html'));
 
-// OAuth Success (CSP compliant)
-router.get('/oauth-success.html', serveHTMLWithNonce('oauth-success.html'));
-
 // Add more routes as we migrate pages...
 
 module.exports = router;

@@ -141,10 +141,6 @@ a {
     margin-top: 40px;
 }
 
-#socialAuthSection {
-    position: relative;
-}
-
 /* Address validation modal styles - MUST override Tailwind */
 .address-modal-overlay {
     position: fixed !important;

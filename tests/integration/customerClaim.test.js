@@ -188,37 +188,4 @@ describe('Customer claim', () => {
     });
   });
 
-  describe('POST /api/v1/auth/customer/social/register (bag-bound)', () => {
-    it('400s without a bagToken (validator swapped from affiliateId)', async () => {
-      const res = await request(app)
-        .post('/api/v1/auth/customer/social/register')
-        .send({
-          socialToken: 'whatever',
-          phone: '512-555-0103', address: '1 Oauth St', city: 'Austin',
-          state: 'TX', zipCode: '78701', serviceFrequency: 'weekly'
-        });
-      expect(res.status).toBe(400);
-      expect(res.body.errors.some((e) => e.msg === 'Bag token is required')).toBe(true);
-      expect(res.body.errors.some((e) => e.msg === 'Affiliate ID is required')).toBe(false);
-    });
-
-    it('409s a non-claimable bag before any customer is created', async () => {
-      const { bags } = await bagService.mintBatch({
-        affiliateId: affiliate.affiliateId, quantity: 1, adminId: affiliate._id
-      }); // minted, NOT issued
-      const res = await request(app)
-        .post('/api/v1/auth/customer/social/register')
-        .send({
-          socialToken: 'not-a-real-token',
-          bagToken: bags[0].token,
-          phone: '512-555-0103', address: '1 Oauth St', city: 'Austin',
-          state: 'TX', zipCode: '78701', serviceFrequency: 'weekly'
-        });
-      // invalid socialToken short-circuits at 400/401 OR bag check at 409 —
-      // assert the legacy invalid_affiliate message is gone either way:
-      expect([400, 401, 409]).toContain(res.status);
-      expect(res.body.message || '').not.toMatch(/Invalid affiliate ID/);
-      expect(await Customer.countDocuments({})).toBe(0);
-    });
-  });
 });

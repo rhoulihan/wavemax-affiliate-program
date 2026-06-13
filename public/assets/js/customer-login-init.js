@@ -11,9 +11,6 @@
     // CSRF-aware fetch
     const csrfFetch = window.CsrfUtils && window.CsrfUtils.csrfFetch ? window.CsrfUtils.csrfFetch : fetch;
 
-    // Track if OAuth is in progress
-    let oauthInProgress = false;
-
     // Initialize page when DOM is ready
     async function initializeCustomerLogin() {
         console.log('[CustomerLogin] DOM ready, initializing components');
@@ -38,10 +35,6 @@
         const rememberCheckbox = document.getElementById('remember');
         const forgotPasswordLink = document.querySelector('a[data-i18n="common.labels.forgotPassword"]');
         const submitButton = form.querySelector('button[type="submit"]');
-
-        // Social login buttons
-        const googleLoginBtn = document.getElementById('googleLogin');
-        const facebookLoginBtn = document.getElementById('facebookLogin');
 
         // Alert container (create if doesn't exist)
         let alertContainer = document.getElementById('alertContainer');
@@ -197,149 +190,6 @@
             e.preventDefault();
             navigateToForgotPassword();
         });
-
-        // Social login handlers
-        function handleSocialLogin(provider) {
-            if (oauthInProgress) {
-                console.log('[OAuth] Already in progress, ignoring');
-                return;
-            }
-            oauthInProgress = true;
-
-            console.log(`[CustomerLogin] Starting ${provider} OAuth`);
-            console.log('[OAuth] Button clicked, provider:', provider);
-            console.log('[OAuth] Current location:', window.location.href);
-            console.log('[OAuth] Base URL:', baseUrl);
-
-            // For embedded context, use popup
-            const inIframe = window.self !== window.top;
-            const shouldUsePopup = isEmbedded || inIframe;
-
-            if (shouldUsePopup) {
-                // Generate unique session ID
-                const sessionId = 'oauth_' + Date.now() + '_' + Math.random().toString(36).substring(2);
-                const oauthUrl = `${baseUrl}/api/v1/auth/customer/${provider}?popup=true&state=customer_${sessionId}&t=${Date.now()}`;
-                
-                console.log('[OAuth] Opening popup with URL:', oauthUrl);
-                console.log('[OAuth] Full URL breakdown:', {
-                    baseUrl: baseUrl,
-                    provider: provider,
-                    sessionId: sessionId,
-                    fullUrl: oauthUrl
-                });
-                
-                const popup = window.open(
-                    oauthUrl,
-                    'socialAuth',
-                    'width=500,height=600,scrollbars=yes,resizable=yes'
-                );
-                
-                console.log('[OAuth] Popup opened:', popup);
-
-                if (!popup || popup.closed) {
-                    showAlert('Popup was blocked. Please allow popups for this site and try again.');
-                    oauthInProgress = false;
-                    return;
-                }
-
-                // Show spinner
-                const spinner = window.SwirlSpinner ? 
-                    new window.SwirlSpinner({
-                        container: form.closest('.bg-white'),
-                        size: 'medium',
-                        overlay: true,
-                        message: `Connecting with ${provider}...`
-                    }).show() : null;
-
-                // Poll for result
-                let pollCount = 0;
-                const maxPolls = 120; // 2 minutes
-                const pollInterval = setInterval(async () => {
-                    pollCount++;
-
-                    try {
-                        // Check if popup is closed
-                        if (popup.closed) {
-                            console.log('[OAuth] Popup closed');
-                        }
-
-                        // Poll for result
-                        const response = await csrfFetch(`${baseUrl}/api/v1/auth/oauth-session/${sessionId}`);
-                        
-                        if (response.ok) {
-                            const data = await response.json();
-                            if (data.success && data.result) {
-                                clearInterval(pollInterval);
-                                console.log('[OAuth] Result received:', data.result);
-
-                                // Close popup
-                                if (popup && !popup.closed) {
-                                    popup.close();
-                                }
-
-                                // Hide spinner
-                                if (spinner) spinner.hide();
-                                oauthInProgress = false;
-
-                                // Handle result
-                                if (data.result.type === 'social-auth-login') {
-                                    // Successful login
-                                    if (data.result.token) {
-                                        localStorage.setItem('customerToken', data.result.token);
-                                    }
-                                    if (data.result.customer) {
-                                        localStorage.setItem('currentCustomer', JSON.stringify(data.result.customer));
-                                    }
-                                    showAlert('Login successful!', 'success');
-                                    setTimeout(() => {
-                                        navigateToDashboard();
-                                    }, 500);
-                                } else if (data.result.type === 'social-auth-success') {
-                                    // New customer needs to complete registration
-                                    showAlert('Please complete your registration with an affiliate', 'error');
-                                } else if (data.result.type === 'social-auth-account-conflict') {
-                                    // Account exists as affiliate
-                                    const affiliateName = data.result.affiliateData?.businessName || 
-                                                        `${data.result.affiliateData?.firstName} ${data.result.affiliateData?.lastName}`;
-                                    showAlert(
-                                        `This ${data.result.provider} account is already registered as an affiliate account (${affiliateName}). ` +
-                                        'Affiliate accounts cannot be used for customer logins. Please use a different social media account or create a new customer account.',
-                                        'error'
-                                    );
-                                } else if (data.result.type === 'social-auth-error') {
-                                    showAlert(data.result.message || 'Social authentication failed');
-                                }
-                            }
-                        }
-
-                        // Check timeout
-                        if (pollCount > maxPolls) {
-                            clearInterval(pollInterval);
-                            if (popup && !popup.closed) popup.close();
-                            if (spinner) spinner.hide();
-                            oauthInProgress = false;
-                            showAlert('Authentication timed out. Please try again.');
-                        }
-                    } catch (error) {
-                        // 404 is expected while waiting
-                        if (!error.message?.includes('404')) {
-                            console.error('[OAuth] Polling error:', error);
-                        }
-                    }
-                }, 1000);
-            } else {
-                // Direct navigation
-                window.location.href = `${baseUrl}/api/v1/auth/customer/${provider}`;
-            }
-        }
-
-        // Attach social login handlers
-        if (googleLoginBtn) {
-            googleLoginBtn.addEventListener('click', () => handleSocialLogin('google'));
-        }
-        if (facebookLoginBtn) {
-            facebookLoginBtn.addEventListener('click', () => handleSocialLogin('facebook'));
-        }
 
         // Handle enter key in form fields
         [emailOrUsernameInput, passwordInput].forEach(input => {

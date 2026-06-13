@@ -12,7 +12,7 @@ const logger = require('../utils/logger');
 const ALLOWED_ENV_VARS = [
   // Application
   'NODE_ENV', 'PORT', 'BASE_URL', 'FRONTEND_URL', 'BACKEND_URL',
-  'CORS_ORIGIN', 'OAUTH_CALLBACK_URI', 'TRUST_PROXY', 'COOKIE_SECURE',
+  'CORS_ORIGIN', 'TRUST_PROXY', 'COOKIE_SECURE',
   // Database
   'MONGODB_URI',
   // Security & Authentication
@@ -29,10 +29,6 @@ const ALLOWED_ENV_VARS = [
   'CSRF_PHASE', 'RELAX_RATE_LIMITING',
   // Rate limiting
   'RATE_LIMIT_WINDOW_MS', 'RATE_LIMIT_MAX_REQUESTS', 'AUTH_RATE_LIMIT_MAX',
-  // Social login
-  'GOOGLE_CLIENT_ID', 'GOOGLE_CLIENT_SECRET',
-  'FACEBOOK_APP_ID', 'FACEBOOK_APP_SECRET',
-  'LINKEDIN_CLIENT_ID', 'LINKEDIN_CLIENT_SECRET',
   // Logging
   'LOG_LEVEL', 'LOG_DIR',
   // Business configuration

@@ -22,8 +22,6 @@
     "subtitle": "Você está se cadastrando com",
     "resolving": "Verificando sua sacola...",
     "cta": "Criar minha conta",
-    "ctaOAuthGoogle": "Cadastrar com Google",
-    "ctaOAuthFacebook": "Cadastrar com Facebook",
     "alreadyClaimedTitle": "Esta sacola já foi resgatada",
     "alreadyClaimedBody": "Esta sacola está vinculada a uma conta existente. Faça login para ver o status do seu pedido.",
     "alreadyClaimedCta": "Entrar",
@@ -404,20 +402,11 @@
     "login": {
       "title": "Login de Afiliado",
       "subtitle": "Entre para acessar seu painel de afiliado",
-      "socialLogin": "Entre com sua conta de mídia social",
-      "orEmail": "Ou entre com nome de usuário e senha",
       "noAccount": "Não tem uma conta de afiliado?"
     },
     "register": {
       "title": "Registro de Afiliado",
       "subtitle": "Preencha o formulário abaixo para se registrar como parceiro afiliado da WaveMAX Laundry.",
-      "quickRegistration": "Registro Rápido com Redes Sociais",
-      "socialSignupText": "Registre-se rapidamente usando sua conta de rede social - preencheremos automaticamente suas informações!",
-      "orManually": "Ou preencha o formulário manualmente",
-      "continueWithGoogle": "Continuar com Google",
-      "continueWithFacebook": "Continuar com Facebook",
-      "socialAccountConnected": "Conta de Rede Social Conectada!",
-      "successfullyConnectedWith": "Conectado com sucesso com {{provider}}",
       "autoFilledMessage": "Suas informações foram preenchidas automaticamente abaixo. Complete os campos restantes para finalizar seu registro.",
       "businessInfo": "Informações Empresariais",
       "personalInfo": "Informações Pessoais",
@@ -681,8 +670,6 @@
     "login": {
       "title": "Login do Cliente",
       "subtitle": "Entre para gerenciar seu serviço de lavanderia",
-      "socialLogin": "Entre com sua conta de mídia social",
-      "orEmail": "Ou entre com e-mail e senha",
       "emailOrUsername": "Nome de Usuário ou E-mail",
       "noAccount": "Não tem uma conta?"
     },
@@ -1298,7 +1285,6 @@
     "logout": "Sair"
   },
   "spinner": {
-    "connectingWith": "Conectando com {{provider}}...",
     "validatingAddress": "Validando seu endereço...",
     "processingRegistration": "Processando seu registro...",
     "loading": "Carregando...",
