@@ -2197,23 +2197,10 @@
     setupAddressValidation();
     setupW9Upload();
 
-    // Add click handler directly to submit button as a fallback
-    const submitButton = document.getElementById('registerSubmitButton');
-    if (submitButton) {
-      console.log('[Init] Adding click handler to submit button');
-      submitButton.addEventListener('click', function(e) {
-        console.log('[Submit Button] Click detected');
-        const form = document.getElementById('affiliateRegistrationForm');
-        if (form) {
-        // Trigger form submit programmatically
-          const submitEvent = new Event('submit', {
-            bubbles: true,
-            cancelable: true
-          });
-          form.dispatchEvent(submitEvent);
-        }
-      });
-    }
+    // NOTE: the submit button is type="submit" inside the form, so a click
+    // already fires the form's native 'submit' event. A second synthetic
+    // dispatch here caused every click to fire the handler twice (the
+    // "Already submitting" warning). Native submit is the single canonical path.
   }
 
   // Track language preference changes

@@ -202,14 +202,14 @@ exports.registerAffiliate = async (req, res) => {
       email
     }, req);
 
-    // Send welcome email
-    try {
-      await emailService.sendAffiliateWelcomeEmail(newAffiliate);
-      // Email sent successfully - no need to check result
-    } catch (emailError) {
-      logger.warn('Welcome email could not be sent:', emailError);
-      // Continue with registration process even if email fails
-    }
+    // Send welcome email fire-and-forget — never block (or hang) the
+    // registration response on SMTP latency/availability. A slow or stalled
+    // mail server must not freeze the client's "Processing…" spinner.
+    Promise.resolve()
+      .then(() => emailService.sendAffiliateWelcomeEmail(newAffiliate))
+      .catch((emailError) => {
+        logger.warn('Welcome email could not be sent:', emailError);
+      });
 
     res.status(201).json({
       success: true,
