@@ -3,8 +3,11 @@
 // users and crawlers alike — so there is no cloaking; the page is marked noindex
 // so it is not discoverable while held. Exempt paths pass through to normal
 // handling: the privacy policy, the API, ACME cert renewal, static assets (so
-// the privacy page styles), and favicon/robots/sitemap. To take the site live,
-// remove the host below and redeploy.
+// the privacy page styles), favicon/robots/sitemap, and the privileged
+// affiliate-program app surfaces (the SPA shell, its *-embed.html fragments,
+// and /locales/ — all login-gated, so safe to expose while the public
+// franchise/marketing pages stay held). To take the whole site live, remove
+// the host below and redeploy.
 const COMING_SOON_HOSTS = ['rundberglaundry.com', 'www.rundberglaundry.com'];
 
 function reqHost(req) {
@@ -18,6 +21,12 @@ function isExempt(p) {
     p === '/terms-and-conditions' || p === '/terms-and-conditions.html' ||
     p === '/design-explorer' || p.startsWith('/design-explorer/') || // token-gated design review tool (explorerGuard enforces the token)
     p.startsWith('/api/') ||                 // health, app API
+    // Affiliate-program app surfaces — privileged, login-gated access, so they
+    // pass through while the public franchise/marketing pages stay held. The
+    // SPA shell, its embed page fragments, and the i18n locale files.
+    p === '/embed-app-v2.html' ||
+    p.endsWith('-embed.html') ||
+    p.startsWith('/locales/') ||
     p.startsWith('/.well-known/') ||         // ACME cert renewal, etc.
     p.startsWith('/assets/') ||              // so the exempt pages keep their styles
     p === '/favicon.ico' || p === '/robots.txt' || p === '/sitemap.xml'
