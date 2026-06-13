@@ -86,7 +86,7 @@
         // Handle messages from the iframe (basic version for comparison)
         window.addEventListener('message', function(event) {
             // Accept messages from any origin during development
-            // In production, you should check: if (event.origin !== 'https://wavemax.promo') return;
+            // In production, you should check: if (event.origin !== 'https://rundberglaundry.com') return;
             
             const iframe = document.getElementById('wavemax-iframe');
             const heightDisplay = document.getElementById('current-height');
@@ -135,7 +135,7 @@
                     data: {
                         parentUrl: window.location.href
                     }
-                }, 'https://wavemax.promo');
+                }, 'https://rundberglaundry.com');
             }, 1000);
         });
     </script>

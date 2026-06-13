@@ -19,7 +19,7 @@
 (function () {
   'use strict';
 
-  const SITE_ROOT = 'https://wavemax.promo';
+  const SITE_ROOT = 'https://rundberglaundry.com';
 
   // Map pageKey → URL segment + page-specific copy seeds.
   const PAGE_SPEC = {

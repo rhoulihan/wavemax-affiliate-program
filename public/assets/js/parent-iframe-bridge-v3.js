@@ -32,8 +32,8 @@
   // don't need per-environment config.
   const DEV_HOST_PATTERN = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/;
   const ALLOWED_ORIGINS = [
-    'https://wavemax.promo',
-    'https://affiliate.wavemax.promo',
+    'https://rundberglaundry.com',
+    'https://affiliate.rundberglaundry.com',
     // Per-location domains that proxy the Austin franchise content
     'https://atxwashateria.com',
     'https://atxwashdryfold.com',
@@ -64,7 +64,7 @@
   function findIframe() {
     return document.getElementById('wavemax-iframe') ||
            document.querySelector('iframe[data-wm-bridge]') ||
-           document.querySelector('iframe[src*="wavemax.promo"]');
+           document.querySelector('iframe[src*="rundberglaundry.com"]');
   }
 
   function init() {

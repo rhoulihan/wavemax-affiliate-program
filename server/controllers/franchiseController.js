@@ -200,10 +200,10 @@ exports.renderFranchisePage = (req, res, next) => {
   // distinct query intent. When the request comes in on one of them, we
   // override title/description/H1/schema with values tuned for that intent
   // and self-canonical so each domain ranks independently. Hits on
-  // wavemax.promo (and any unmapped host) fall through to the page-level
+  // rundberglaundry.com (and any unmapped host) fall through to the page-level
   // defaults computed by buildPageSeo() above.
   const hostHeader = String(req.hostname || req.headers.host || '').split(':')[0];
-  const host = stripWww(hostHeader) || 'wavemax.promo';
+  const host = stripWww(hostHeader) || 'rundberglaundry.com';
   const domainOverride = getDomainSeoOverride(host);
 
   // A request is on the domain's "apex experience" when the current page
@@ -221,11 +221,11 @@ exports.renderFranchisePage = (req, res, next) => {
   const heroH1      = isApexForDomain ? domainOverride.h1          : seo.heroH1;
   const keywords    = isApexForDomain ? domainOverride.keywords    : ((data.seo && data.seo.keywords) || '');
 
-  // Self-canonical: each host ranks for itself, not for wavemax.promo.
+  // Self-canonical: each host ranks for itself, not for rundberglaundry.com.
   // When we're serving the apex experience for a managed domain, canonical
   // is the user-facing apex URL ('/'), NOT the internally-rewritten path
   // — Google should index `atxwashdryfold.com/`, not /austin-tx/wash-dry-fold/.
-  const canonicalHost = host || 'wavemax.promo';
+  const canonicalHost = host || 'rundberglaundry.com';
   const canonical = isApexForDomain
     ? `https://${canonicalHost}/`
     : `https://${canonicalHost}/${slug}${page === '/' ? '/' : page + '/'}`;

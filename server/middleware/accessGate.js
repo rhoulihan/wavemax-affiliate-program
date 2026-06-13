@@ -1,5 +1,5 @@
 // Site access gate: password-protects the CRHS content on crhsent.com (and
-// www.crhsent.com). Every OTHER Express-served host (wavemax.promo, the
+// www.crhsent.com). Every OTHER Express-served host (rundberglaundry.com, the
 // embedded affiliate app, the per-location domains) passes through untouched.
 // Fully private: no search-crawler bypass, so gated content is not indexed.
 // No username — a single shared password (PBKDF2-hashed in the AccessGate
@@ -48,7 +48,7 @@ const TOKEN_TTL_MS = 60 * 60 * 1000;          // emailed link valid for 60 minut
 const SEND_THROTTLE_MS = 60 * 1000;           // min interval between link emails per IP
 const GATE_FROM = '"WaveMAX" <admin@rundberglaundry.com>';
 
-// Only these hosts are gated. Every other Express-served host (wavemax.promo,
+// Only these hosts are gated. Every other Express-served host (rundberglaundry.com,
 // the embedded affiliate app, the per-location domains) passes through
 // untouched — the gate protects the CRHS content on crhsent.com only.
 const GATED_HOSTS = ['crhsent.com', 'www.crhsent.com'];
@@ -225,7 +225,7 @@ function confirmEmailHtml(link) {
   const safeLink = esc(link);
   return `<div style="font-family:Arial,Helvetica,sans-serif;max-width:480px;margin:0 auto;color:#0f172a">
   <div style="background:#1e3a8a;text-align:center;padding:22px;border-radius:10px 10px 0 0">
-    <img src="https://wavemax.promo/assets/images/brand/logo-wavemax.png" alt="WaveMAX" style="height:40px">
+    <img src="https://rundberglaundry.com/assets/images/brand/logo-wavemax.png" alt="WaveMAX" style="height:40px">
   </div>
   <div style="padding:28px 24px;border:1px solid #e5e7eb;border-top:0;border-radius:0 0 10px 10px">
     <h2 style="font-size:18px;margin:0 0 8px">Your site access link</h2>

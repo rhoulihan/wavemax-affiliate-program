@@ -12,7 +12,7 @@
       defaultLanguage: 'en',
       supportedLanguages: ['en', 'es', 'pt', 'de'],
       fallbackLanguage: 'en',
-      translationsPath: window.location.hostname === 'localhost' || window.location.hostname.includes('wavemax.promo')
+      translationsPath: window.location.hostname === 'localhost' || window.location.hostname.includes('rundberglaundry.com')
         ? '/locales'
         : window.location.origin + '/locales',
       storageKey: 'wavemax-language',

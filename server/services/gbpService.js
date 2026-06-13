@@ -9,7 +9,7 @@
 // fields below. Authorization is by attestation, not by this data. We use this
 // only to (a) confirm the link points at a real business and (b) pre-fill the
 // preview. Reuses the referer-restricted Places key pattern from
-// googleReviewsService (the prod key is locked to the wavemax.promo referer).
+// googleReviewsService (the prod key is locked to the rundberglaundry.com referer).
 'use strict';
 
 const axios = require('axios');
@@ -22,7 +22,7 @@ const DETAILS_FIELD_MASK = [
   'googleMapsUri', 'rating', 'userRatingCount'
 ].join(',');
 const SEARCH_FIELD_MASK = 'places.id,places.displayName,places.formattedAddress,places.location';
-const REFERER = 'https://wavemax.promo/';
+const REFERER = 'https://rundberglaundry.com/';
 
 class GbpError extends Error {
   constructor(message, code) {

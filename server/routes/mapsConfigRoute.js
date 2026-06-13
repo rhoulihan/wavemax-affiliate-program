@@ -4,7 +4,7 @@ const router = express.Router();
 /**
  * Expose the browser-restricted Google Maps API key for use by the
  * locations modal on corporate pages. The key is HTTP-referer locked
- * to wavemax.promo, so this is safe to surface from the server.
+ * to rundberglaundry.com, so this is safe to surface from the server.
  *
  * Per-franchise host pages inject this same key via server-side
  * template substitution (franchiseController). Corporate pages are

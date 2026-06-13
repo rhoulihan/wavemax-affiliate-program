@@ -258,7 +258,7 @@ exports.sendCustomerWelcomeEmail = async (customer, affiliate, bagInfo = {}) => 
       customer_id: customer.customerId || '',
       affiliate_name: affiliateName,
       affiliate_phone: affiliate.phone || 'Contact for details',
-      affiliate_email: affiliate.email || 'support@wavemax.promo',
+      affiliate_email: affiliate.email || 'support@rundberglaundry.com',
       number_of_bags: numberOfBags,
       bag_fee: bagFee.toFixed(2),
       total_credit: totalCredit.toFixed(2),

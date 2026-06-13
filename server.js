@@ -160,7 +160,9 @@ if (process.env.NODE_ENV !== 'test') {
 if (process.env.NODE_ENV === 'production') {
   // Define allowed hosts
   const allowedHosts = [
-    'wavemax.promo',
+    'rundberglaundry.com',
+    'www.rundberglaundry.com',
+    'wavemax.promo',          // transition: still 301s during retirement
     'www.wavemax.promo',
     'affiliate.wavemax.promo',
     'localhost:3000' // For development if needed
@@ -175,7 +177,7 @@ if (process.env.NODE_ENV === 'production') {
         res.redirect(`https://${host}${req.url}`);
       } else {
         // Use default domain if host is invalid
-        res.redirect(`https://wavemax.promo${req.url}`);
+        res.redirect(`https://rundberglaundry.com${req.url}`);
       }
     } else {
       next();
@@ -247,7 +249,7 @@ app.use((req, res, next) => {
 
   // Override CORS and resource policy for parent bridge script. Franchise
   // host pages on wavemaxlaundry.com (or any other parent domain) load
-  // the bridge from wavemax.promo and need cross-origin permission.
+  // the bridge from rundberglaundry.com and need cross-origin permission.
   if (req.path === '/assets/js/parent-iframe-bridge-v3.js') {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
@@ -256,7 +258,7 @@ app.use((req, res, next) => {
 
   // Allow public static assets (images, CSS, JS, fonts, locales) to be
   // embedded by pages on other origins. LOCATION_DATA holds absolute URLs
-  // pointing at wavemax.promo's /assets/ tree; without this the per-
+  // pointing at rundberglaundry.com's /assets/ tree; without this the per-
   // location domains (atxwashateria.com, etc.) fail with
   // ERR_BLOCKED_BY_RESPONSE.NotSameOrigin even when the request itself
   // returns 200. Helmet's default Cross-Origin-Resource-Policy is
@@ -752,7 +754,7 @@ app.get('/monitoring-dashboard.html', (req, res) => {
 // committing them to source control. The browser-direct call to the
 // Places API needs the key in the page; key abuse is bounded by HTTP
 // referrer restrictions configured on the key in Google Cloud Console
-// (wavemax.promo, *.wavemax.promo, and localhost only). Both values
+// (rundberglaundry.com, the per-location domains, and localhost). Both values
 // are read from process.env so we can rotate by editing .env + pm2
 // restart, without redeploying or touching public/.
 //
@@ -1033,9 +1035,9 @@ app.get('/', (req, res) => {
 // Per-hostname robots.txt and sitemap.xml. Each managed host serves its
 // own — required for self-canonical multi-domain SEO. Hosts that aren't
 // in the override map fall back to a generic robots that allows everything
-// and points to wavemax.promo's sitemap.
+// and points to rundberglaundry.com's sitemap.
 app.get('/robots.txt', (req, res) => {
-  const host = (req.hostname || 'wavemax.promo').toLowerCase().replace(/^www\./, '');
+  const host = (req.hostname || 'rundberglaundry.com').toLowerCase().replace(/^www\./, '');
   res.type('text/plain');
   res.setHeader('Cache-Control', 'public, max-age=3600');
   res.send(
@@ -1072,7 +1074,7 @@ app.get('/robots.txt', (req, res) => {
 });
 
 app.get('/sitemap.xml', (req, res) => {
-  const host = (req.hostname || 'wavemax.promo').toLowerCase().replace(/^www\./, '');
+  const host = (req.hostname || 'rundberglaundry.com').toLowerCase().replace(/^www\./, '');
   const { isManagedHost } = require('./server/config/domainSeoOverrides');
   const now = new Date().toISOString().slice(0, 10);
 

@@ -12,7 +12,7 @@ const { REMINDER, AUTHORIZATION } = require('../config/franchisePreviewCopy');
 const logger = require('../utils/logger');
 
 const PREVIEW_FROM = process.env.FRANCHISE_PREVIEW_FROM || '"CRHS Enterprises" <admin@rundberglaundry.com>';
-const LOGO = 'https://wavemax.promo/assets/images/brand/logo-wavemax.png';
+const LOGO = 'https://rundberglaundry.com/assets/images/brand/logo-wavemax.png';
 
 function esc(s) {
   return String(s == null ? '' : s).replace(/[&<>"']/g, (c) => (

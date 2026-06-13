@@ -40,7 +40,7 @@ function createTransport() {
 
   // When connecting by IP, still tell TLS which hostname to validate against
   if (process.env.EMAIL_HOST && /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(process.env.EMAIL_HOST)) {
-    transportConfig.tls.servername = 'mail.wavemax.promo';
+    transportConfig.tls.servername = 'mail.rundberglaundry.com';
   }
 
   return nodemailer.createTransport(transportConfig);
@@ -61,7 +61,7 @@ async function sendEmail(to, subject, html, fromOverride) {
   logger.info('[sendEmail] Sending email to:', to);
   const transporter = createTransport();
 
-  const from = fromOverride || `"WaveMAX Laundry" <${process.env.EMAIL_FROM || process.env.EMAIL_USER || 'noreply@wavemax.promo'}>`;
+  const from = fromOverride || `"WaveMAX Laundry" <${process.env.EMAIL_FROM || process.env.EMAIL_USER || 'noreply@rundberglaundry.com'}>`;
   const mailOptions = { from, to, subject, html };
 
   try {

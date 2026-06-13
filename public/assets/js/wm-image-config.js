@@ -7,7 +7,7 @@
  * /wp-content/uploads/locations/{slug}/...). Those photos are still sourced
  * from the legacy WordPress host because that is currently the canonical
  * location-data store. When an authoritative replacement is wired up
- * (S3 / our own CDN / wavemax.promo upload pipeline), flipping every image
+ * (S3 / our own CDN / rundberglaundry.com upload pipeline), flipping every image
  * URL on the site is a one-line edit here.
  *
  * Usage from any other client script:

@@ -1,7 +1,7 @@
 /**
  * IMAP Email Scanner Service
  *
- * Connects to payments@wavemax.promo via IMAP to read inbound payment-
+ * Connects to payments@rundberglaundry.com via IMAP to read inbound payment-
  * confirmation emails (Venmo / PayPal / CashApp). Backing client is
  * `imapflow` — a maintained, promise-based replacement for the previous
  * `imap` package, which had been unmaintained since 2018 and pulled an
@@ -32,7 +32,7 @@ class IMAPEmailScanner {
     try {
       const host = await SystemConfig.getValue('imap_host', 'localhost');
       const port = parseInt(await SystemConfig.getValue('imap_port', '993'), 10);
-      const user = await SystemConfig.getValue('payment_notification_email', 'payments@wavemax.promo');
+      const user = await SystemConfig.getValue('payment_notification_email', 'payments@rundberglaundry.com');
 
       const encryptedPassword = await SystemConfig.getValue('payment_email_password', '');
       if (!encryptedPassword) {

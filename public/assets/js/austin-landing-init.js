@@ -221,8 +221,8 @@
   };
 
   /* ---------- SEO config (sent to parent via bridge) ---------- */
-  const PAGE_URL    = 'https://wavemax.promo/dev/austin-host-mock.html';
-  const HOST_URL    = 'https://wavemax.promo/austin-tx/';
+  const PAGE_URL    = 'https://rundberglaundry.com/dev/austin-host-mock.html';
+  const HOST_URL    = 'https://rundberglaundry.com/austin-tx/';
   const HERO_IMG    = window.wmLocationImage('austin-tx/hero-1.jpg');
   const BUSINESS_ID = 'https://www.wavemaxlaundry.com/austin-tx/#localbusiness';
 
@@ -261,7 +261,7 @@
         alternateName: 'WaveMAX Austin',
         url:           HOST_URL,
         telephone:     '+15125531674',
-        email:         'no-reply@wavemax.promo',
+        email:         'no-reply@rundberglaundry.com',
         priceRange:    '$',
         image:         [HERO_IMG],
         address: {
@@ -346,7 +346,7 @@
    *
    * The API key is restricted in Google Cloud Console to:
    *   - Places API (New) only
-   *   - HTTP referrer whitelist: wavemax.promo, www.wavemax.promo, localhost
+   *   - HTTP referrer whitelist: rundberglaundry.com, www.rundberglaundry.com, localhost
    * That's the standard pattern for browser-exposed Places keys — abuse is
    * bounded by referrer enforcement on Google's edge.
    */

@@ -74,7 +74,7 @@ class MailcowService {
     }
 
     try {
-      const paymentEmail = await SystemConfig.getValue('payment_notification_email', 'payments@wavemax.promo');
+      const paymentEmail = await SystemConfig.getValue('payment_notification_email', 'payments@rundberglaundry.com');
       
       // Mailcow API endpoint for retrieving messages
       // Note: Actual endpoint may vary based on Mailcow version
@@ -108,7 +108,7 @@ class MailcowService {
   async getUnreadEmailsAlternative(limit = 50) {
     try {
       // Try alternative API endpoint structure
-      const paymentEmail = await SystemConfig.getValue('payment_notification_email', 'payments@wavemax.promo');
+      const paymentEmail = await SystemConfig.getValue('payment_notification_email', 'payments@rundberglaundry.com');
       
       // Some Mailcow versions use different endpoint
       const response = await this.axios.get('/mailbox/messages', {
@@ -189,7 +189,7 @@ class MailcowService {
     }
 
     try {
-      const paymentEmail = await SystemConfig.getValue('payment_notification_email', 'payments@wavemax.promo');
+      const paymentEmail = await SystemConfig.getValue('payment_notification_email', 'payments@rundberglaundry.com');
       
       const response = await this.axios.get('/mail/search', {
         params: {
@@ -265,7 +265,7 @@ class MailcowService {
     }
 
     try {
-      const paymentEmail = await SystemConfig.getValue('payment_notification_email', 'payments@wavemax.promo');
+      const paymentEmail = await SystemConfig.getValue('payment_notification_email', 'payments@rundberglaundry.com');
       
       await this.axios.post('/mailbox/folder', {
         mailbox: paymentEmail,

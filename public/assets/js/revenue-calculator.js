@@ -67,8 +67,8 @@ async function initializeCalculator() {
   // Fetch WDF rate from API and recalculate if needed
   try {
     // Use relative URL when embedded
-    const baseUrl = window.location.origin.includes('wavemax.promo')
-      ? 'https://wavemax.promo'
+    const baseUrl = window.location.origin.includes('rundberglaundry.com')
+      ? 'https://rundberglaundry.com'
       : window.location.origin;
 
     const response = await fetch(`${baseUrl}/api/v1/system/config/public`);

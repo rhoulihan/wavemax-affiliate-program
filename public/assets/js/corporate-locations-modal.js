@@ -1,7 +1,7 @@
 /* corporate-locations-modal.js
  *
  * Self-contained locations modal for corporate-content pages on
- * wavemax.promo. Adapted from austin-host-mock.js's initLocationModal,
+ * rundberglaundry.com. Adapted from austin-host-mock.js's initLocationModal,
  * but stripped of franchise-host-specific dependencies so it runs
  * standalone on /franchise/, /about/, /testimonials/, etc.
  *

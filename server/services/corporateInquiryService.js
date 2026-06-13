@@ -2,7 +2,7 @@ const crypto = require('crypto');
 const emailService = require('../utils/emailService');
 const logger = require('../utils/logger');
 
-const ADMIN_EMAIL = process.env.CORPORATE_INQUIRY_RECIPIENT || 'administrator@wavemax.promo';
+const ADMIN_EMAIL = process.env.CORPORATE_INQUIRY_RECIPIENT || 'administrator@rundberglaundry.com';
 
 function escapeHtml(value) {
   if (value === null || value === undefined) return '';
@@ -40,7 +40,7 @@ async function sendCorporateInquiry({ topic, firstName, lastName, email, phone, 
   const html = `<!doctype html>
 <html>
   <body style="font-family: Arial, sans-serif; color: #143852;">
-    <h2>New corporate inquiry from wavemax.promo</h2>
+    <h2>New corporate inquiry from rundberglaundry.com</h2>
     <table cellpadding="6" cellspacing="0" border="0">
       <tr><td><strong>Topic:</strong></td><td>${escapeHtml(topic)}</td></tr>
       <tr><td><strong>Name:</strong></td><td>${escapeHtml(fullName)}</td></tr>
@@ -110,7 +110,7 @@ async function sendFranchiseLead({ firstName, lastName, email, phone, market, ti
 
     <p>In the meantime, you can browse the full Item 19 figures, the Jacksonville flagship cash-flow snapshot, and the structural reasons operators choose this category here:</p>
     <p>
-      <a href="https://wavemax.promo/why-invest-in-wavemax/" style="display:inline-block; padding:12px 24px; background:#f5a623; color:#143852; text-decoration:none; border-radius:4px; font-weight:700;">Why Invest in WaveMAX</a>
+      <a href="https://rundberglaundry.com/why-invest-in-wavemax/" style="display:inline-block; padding:12px 24px; background:#f5a623; color:#143852; text-decoration:none; border-radius:4px; font-weight:700;">Why Invest in WaveMAX</a>
     </p>
 
     <hr style="margin-top: 32px; border: 0; border-top: 1px solid #e3e8f0;">

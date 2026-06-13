@@ -39,7 +39,7 @@ async function renderLabelSheet(batchId) {
   const qrSize = await SystemConfig.getValue('bag_label_qr_size_px', 300);
   const columnsRaw = await SystemConfig.getValue('bag_label_columns', 3);
   const columns = Math.min(Math.max(parseInt(columnsRaw, 10) || 3, 1), 6);
-  const baseUrl = process.env.BASE_URL || 'https://wavemax.promo';
+  const baseUrl = process.env.BASE_URL || 'https://rundberglaundry.com';
 
   const cells = await Promise.all(bags.map(async (bag) => {
     const claimUrl = `${baseUrl}/embed-app-v2.html?route=/claim&bag=${bag.token}`;

@@ -61,7 +61,7 @@ async function generatePaymentURLs(order, paymentAmount) {
 // Get or create test customer
 router.get('/customer', async (req, res) => {
     try {
-        let customer = await Customer.findOne({ email: 'spam-me@wavemax.promo' });
+        let customer = await Customer.findOne({ email: 'spam-me@rundberglaundry.com' });
         
         if (!customer) {
             return res.status(404).json({ error: 'Test customer not found' });
@@ -77,7 +77,7 @@ router.get('/customer', async (req, res) => {
 // Create test customer
 router.post('/customer', async (req, res) => {
     try {
-        const testEmail = req.body.email || 'spam-me@wavemax.promo';
+        const testEmail = req.body.email || 'spam-me@rundberglaundry.com';
         
         // Check if test customer already exists
         let customer = await Customer.findOne({ email: testEmail });
@@ -191,7 +191,7 @@ router.post('/order', async (req, res) => {
         
         if (!customer) {
             // Try to find test customer by email (try both old and new test emails)
-            customer = await Customer.findOne({ email: 'spam-me@wavemax.promo' }) || 
+            customer = await Customer.findOne({ email: 'spam-me@rundberglaundry.com' }) || 
                       await Customer.findOne({ email: 'test.customer@wavemax.test' });
             if (!customer) {
                 return res.status(400).json({ error: 'Test customer not found' });
@@ -453,7 +453,7 @@ router.delete('/cleanup', async (req, res) => {
         await Order.deleteMany({ isTestOrder: true });
         
         // Find and delete test customers and affiliates with any test email
-        const testEmails = ['spam-me@wavemax.promo', 'test.customer@wavemax.test', 'test.affiliate@wavemax.test'];
+        const testEmails = ['spam-me@rundberglaundry.com', 'test.customer@wavemax.test', 'test.affiliate@wavemax.test'];
         const customers = await Customer.find({ email: { $in: testEmails } });
         
         // Delete orders for these customers

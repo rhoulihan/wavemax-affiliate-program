@@ -73,7 +73,7 @@ async function createTestCustomer() {
             body: JSON.stringify({
                 firstName: 'Test',
                 lastName: 'Customer',
-                email: 'spam-me@wavemax.promo',  // Use spam-me email
+                email: 'spam-me@rundberglaundry.com',  // Use spam-me email
                 phone: '512-555-0100',
                 address: {
                     street: '123 Test Street',
@@ -651,7 +651,7 @@ async function sendVenmoTestEmail() {
             method: 'POST',
             headers: headers,
             body: JSON.stringify({
-                to: 'payments@wavemax.promo',
+                to: 'payments@rundberglaundry.com',
                 subject: `Fwd: You received $${paymentAmount.toFixed(2)} from ${senderName}`,
                 html: emailBody,
                 orderId: testOrder.orderId || testOrder._id
@@ -791,7 +791,7 @@ async function sendDuplicatePayment(amount, senderName) {
             method: 'POST',
             headers: headers,
             body: JSON.stringify({
-                to: 'payments@wavemax.promo',
+                to: 'payments@rundberglaundry.com',
                 subject: `Fwd: You received $${amount.toFixed(2)} from ${senderName}`,
                 html: emailBody,
                 orderId: testOrder.orderId || testOrder._id

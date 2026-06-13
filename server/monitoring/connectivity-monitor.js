@@ -25,7 +25,7 @@ const SERVICES = [
   {
     name: 'Mailcow SMTP',
     type: 'smtp',
-    host: process.env.EMAIL_HOST || 'mail.wavemax.promo',
+    host: process.env.EMAIL_HOST || 'mail.rundberglaundry.com',
     port: process.env.EMAIL_PORT || 587,
     critical: false,
   },

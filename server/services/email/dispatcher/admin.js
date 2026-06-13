@@ -99,7 +99,7 @@ exports.sendAdministratorWelcomeEmail = async (administrator) => {
       LAST_NAME: administrator.lastName,
       ADMIN_ID: administrator.adminId,
       EMAIL: administrator.email,
-      LOGIN_URL: `${process.env.BASE_URL || 'https://wavemax.promo'}/embed-app-v2.html?login=admin`,
+      LOGIN_URL: `${process.env.BASE_URL || 'https://rundberglaundry.com'}/embed-app-v2.html?login=admin`,
       PERMISSIONS: administrator.permissions.join(', '),
       CURRENT_YEAR: new Date().getFullYear(),
       ...emailTranslations

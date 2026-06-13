@@ -101,7 +101,7 @@ exports.sendOperatorWelcomeEmail = async (operator, temporaryPin) => {
       email: operator.email,
       temporary_pin: temporaryPin,
       shift_hours: operator.shiftStart && operator.shiftEnd ? `${operator.shiftStart} - ${operator.shiftEnd}` : 'Not specified',
-      login_url: `${process.env.BASE_URL || 'https://wavemax.promo'}/embed-app-v2.html?login=operator`,
+      login_url: `${process.env.BASE_URL || 'https://rundberglaundry.com'}/embed-app-v2.html?login=operator`,
       current_year: new Date().getFullYear(),
       ...emailTranslations
     };
@@ -217,7 +217,7 @@ exports.sendOperatorPinResetEmail = async (operator, newPin) => {
       first_name: operator.firstName,
       employee_id: operator.employeeId,
       new_pin: newPin,
-      login_url: `${process.env.BASE_URL || 'https://wavemax.promo'}/embed-app-v2.html?login=operator`,
+      login_url: `${process.env.BASE_URL || 'https://rundberglaundry.com'}/embed-app-v2.html?login=operator`,
       current_year: new Date().getFullYear(),
       ...emailTranslations
     };
@@ -338,7 +338,7 @@ exports.sendOperatorShiftReminderEmail = async (operator) => {
       employee_id: operator.employeeId,
       shift_start: operator.shiftStart,
       shift_end: operator.shiftEnd,
-      login_url: `${process.env.BASE_URL || 'https://wavemax.promo'}/embed-app-v2.html?login=operator`,
+      login_url: `${process.env.BASE_URL || 'https://rundberglaundry.com'}/embed-app-v2.html?login=operator`,
       current_year: new Date().getFullYear(),
       ...emailTranslations
     };

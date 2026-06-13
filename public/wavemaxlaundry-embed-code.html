@@ -65,7 +65,7 @@
 (function() {
     // Function to build iframe URL with proper parameters
     function buildIframeUrl() {
-        const baseUrl = 'https://wavemax.promo/embed-app-v2.html';
+        const baseUrl = 'https://rundberglaundry.com/embed-app-v2.html';
         const currentUrl = new URL(window.location.href);
         const params = new URLSearchParams(currentUrl.search);
         
@@ -109,7 +109,7 @@
     // Handle messages from iframe
     window.addEventListener('message', function(event) {
         // Only accept messages from trusted domain
-        if (event.origin !== 'https://wavemax.promo') return;
+        if (event.origin !== 'https://rundberglaundry.com') return;
         
         const iframe = document.getElementById('wavemax-affiliate-iframe');
         
@@ -182,7 +182,7 @@
             <li>All parameters from the parent URL are properly passed to the iframe</li>
             <li>The iframe height adjusts automatically based on content</li>
             <li>Cross-origin communication is handled securely</li>
-            <li>Make sure to keep the <code>https://wavemax.promo</code> origin check for security</li>
+            <li>Make sure to keep the <code>https://rundberglaundry.com</code> origin check for security</li>
         </ul>
     </div>
 
@@ -196,7 +196,7 @@
 &lt;script&gt;
 (function(){
     function buildIframeUrl(){
-        const baseUrl='https://wavemax.promo/embed-app-v2.html';
+        const baseUrl='https://rundberglaundry.com/embed-app-v2.html';
         const params=new URLSearchParams(window.location.search);
         const iframeParams=new URLSearchParams();
         
@@ -218,7 +218,7 @@
     if(iframe)iframe.src=buildIframeUrl();
     
     window.addEventListener('message',function(e){
-        if(e.origin!=='https://wavemax.promo')return;
+        if(e.origin!=='https://rundberglaundry.com')return;
         const iframe=document.getElementById('wavemax-affiliate-iframe');
         if(e.data&&e.data.type==='resize'&&e.data.data&&e.data.data.height){
             iframe.style.height=e.data.data.height+'px';

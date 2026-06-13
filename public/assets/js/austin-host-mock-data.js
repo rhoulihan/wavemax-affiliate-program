@@ -12,7 +12,7 @@
  *
  * To enable live Google reviews:
  *   1. Get a Places API (New) key in Google Cloud Console
- *   2. Restrict it to Places API + HTTP referrers (*.wavemax.promo/*, etc.)
+ *   2. Restrict it to Places API + HTTP referrers (*.rundberglaundry.com/*, etc.)
  *   3. Find the WaveMAX Austin Place ID via Find Place From Text
  *   4. Paste the values into the two `||  ''` fallbacks below
  */
@@ -37,8 +37,8 @@
       phone:        "(512) 553-1674",
       phoneTel:     "tel:+15125531674",
       phoneTelRaw:  "+15125531674",
-      email:        "no-reply@wavemax.promo",
-      emailMailto:  "mailto:no-reply@wavemax.promo",
+      email:        "no-reply@rundberglaundry.com",
+      emailMailto:  "mailto:no-reply@rundberglaundry.com",
       address:      "825 E Rundberg Ln F1",
       city:         "Austin",
       state:        "TX",

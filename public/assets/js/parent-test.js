@@ -18,10 +18,10 @@
   if (iframeEl) iframeEl.src = iframeSrc;
 
   const ALLOWED_ORIGINS = [
-    'https://affiliate.wavemax.promo',
-    'http://affiliate.wavemax.promo',
-    'https://wavemax.promo',
-    'http://wavemax.promo',
+    'https://affiliate.rundberglaundry.com',
+    'http://affiliate.rundberglaundry.com',
+    'https://rundberglaundry.com',
+    'http://rundberglaundry.com',
     'http://localhost:3000',
     'http://localhost:4000',
     window.location.origin

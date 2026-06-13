@@ -38,7 +38,7 @@ async function fetchPlaceReviews(placeId) {
 
   try {
     // Referer is required because the production API key is restricted to
-    // referer-based access (wavemax.promo). Server-side fetches don't
+    // referer-based access (rundberglaundry.com). Server-side fetches don't
     // include a Referer header by default; if missing, Google rejects with
     // API_KEY_HTTP_REFERRER_BLOCKED. Setting it explicitly mirrors the
     // header a browser would send.
@@ -46,7 +46,7 @@ async function fetchPlaceReviews(placeId) {
       headers: {
         'X-Goog-Api-Key': apiKey,
         'X-Goog-FieldMask': FIELD_MASK,
-        'Referer': 'https://wavemax.promo/'
+        'Referer': 'https://rundberglaundry.com/'
       },
       timeout: 5000
     });

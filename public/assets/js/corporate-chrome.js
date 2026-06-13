@@ -1,6 +1,6 @@
 /* corporate-chrome.js
  *
- * Shared header + footer for the corporate-content pages on wavemax.promo
+ * Shared header + footer for the corporate-content pages on rundberglaundry.com
  * (/franchise/, /become-a-franchisee/, /about/, /testimonials/, etc.).
  *
  * Renders the SAME wmlnav-wrap chrome used by per-franchise host pages

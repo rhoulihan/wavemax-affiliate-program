@@ -128,14 +128,14 @@
     meta: {
       title:        'WaveMAX Austin · Bridge Verification',
       description:  'Reference build verification page demonstrating the parent-iframe bridge contract for the WaveMAX Austin franchisee.',
-      canonicalUrl: 'https://wavemax.promo/dev/austin-host-mock.html',
+      canonicalUrl: 'https://rundberglaundry.com/dev/austin-host-mock.html',
       author:       'WaveMAX Laundry Austin'
     },
     openGraph: {
       title:       'WaveMAX Austin · Bridge Verification',
       description: 'Reference parent-iframe bridge verification for the WaveMAX Austin franchisee.',
       type:        'website',
-      url:         'https://wavemax.promo/dev/austin-host-mock.html',
+      url:         'https://rundberglaundry.com/dev/austin-host-mock.html',
       siteName:    'WaveMAX Laundry',
       locale:      'en_US'
     },

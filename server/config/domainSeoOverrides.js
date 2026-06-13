@@ -3,7 +3,7 @@
  *
  * The 4 per-location domains all proxy the same Austin franchise content,
  * so without per-domain tuning Google would treat them as duplicate-content
- * variants of wavemax.promo and pick exactly one to surface. To rank
+ * variants of rundberglaundry.com and pick exactly one to surface. To rank
  * independently for different query intents, each domain ships a distinct
  * title, description, keyword set, H1, lead paragraph, FAQ subset, and
  * LocalBusiness schema entity — and self-canonicals.

@@ -126,7 +126,7 @@ module.exports = function gbpToLocationData(gbp, opts = {}) {
       hero: [],
       interior: [],
       landmarks: [],
-      ogImage: 'https://wavemax.promo/assets/images/brand/logo-wavemax.png',
+      ogImage: 'https://rundberglaundry.com/assets/images/brand/logo-wavemax.png',
       ogImageAlt: `${name} preview`
     },
     seo: defaultSeo(name, city, state),

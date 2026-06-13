@@ -394,8 +394,8 @@
    *   - faqPage        (the six on-page FAQs — drives Google rich results)
    *   - breadcrumb     (Home → Austin → WDF)
    */
-  const PAGE_URL    = 'https://wavemax.promo/dev/austin-host-mock.html?route=/wash-dry-fold';
-  const HOST_URL    = 'https://wavemax.promo/austin-tx/';
+  const PAGE_URL    = 'https://rundberglaundry.com/dev/austin-host-mock.html?route=/wash-dry-fold';
+  const HOST_URL    = 'https://rundberglaundry.com/austin-tx/';
   const HERO_IMG    = window.wmLocationImage('austin-tx/hero-3.jpg');
   const BUSINESS_ID = 'https://www.wavemaxlaundry.com/austin-tx/#localbusiness';
 
@@ -434,7 +434,7 @@
         alternateName: 'WaveMAX Austin',
         url:         HOST_URL,
         telephone:   '+15125531674',
-        email:       'no-reply@wavemax.promo',
+        email:       'no-reply@rundberglaundry.com',
         priceRange:  '$',
         image:       [HERO_IMG],
         address: {

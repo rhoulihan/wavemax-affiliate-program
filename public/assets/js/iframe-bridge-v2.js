@@ -10,7 +10,7 @@
     // messages use targetOrigin '*' — we don't send anything sensitive that
     // would warrant a fixed targetOrigin, and the parent-side bridge does
     // its own origin check on receipt. This lets the iframe work under any
-    // approved parent (production wavemaxlaundry.com, the wavemax.promo
+    // approved parent (production wavemaxlaundry.com, the rundberglaundry.com
     // staging origin, AND local dev hosts) without per-environment config.
     const DEV_HOST_PATTERN = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/;
 
@@ -18,8 +18,8 @@
         allowedOrigins: [
             'https://www.wavemaxlaundry.com',
             'https://wavemaxlaundry.com',
-            'https://wavemax.promo',
-            'https://affiliate.wavemax.promo',
+            'https://rundberglaundry.com',
+            'https://affiliate.rundberglaundry.com',
             // Per-location domains that proxy the Austin franchise content
             'https://atxwashateria.com',
             'https://atxwashdryfold.com',

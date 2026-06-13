@@ -8,8 +8,8 @@ const { sendEmail } = require('../transport');
  */
 exports.sendServiceDownAlert = async function({ serviceName, error, timestamp, serviceData }) {
   const mailOptions = {
-    from: `"WaveMAX Monitoring" <${process.env.EMAIL_FROM || 'no-reply@wavemax.promo'}>`,
-    to: process.env.ALERT_EMAIL || process.env.DEFAULT_ADMIN_EMAIL || 'admin@wavemax.promo',
+    from: `"WaveMAX Monitoring" <${process.env.EMAIL_FROM || 'no-reply@rundberglaundry.com'}>`,
+    to: process.env.ALERT_EMAIL || process.env.DEFAULT_ADMIN_EMAIL || 'admin@rundberglaundry.com',
     subject: `⚠️ CRITICAL: ${serviceName} Service Down - ${new Date().toISOString()}`,
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
@@ -40,7 +40,7 @@ exports.sendServiceDownAlert = async function({ serviceName, error, timestamp, s
           </div>
           
           <p style="margin-top: 20px;">
-            <a href="https://wavemax.promo/monitoring-dashboard.html" style="background-color: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px; display: inline-block;">View Monitoring Dashboard</a>
+            <a href="https://rundberglaundry.com/monitoring-dashboard.html" style="background-color: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px; display: inline-block;">View Monitoring Dashboard</a>
           </p>
         </div>
       </div>
@@ -61,7 +61,7 @@ Service Statistics:
 
 ACTION REQUIRED: This critical service requires immediate attention.
 
-View monitoring dashboard: https://wavemax.promo/monitoring-dashboard.html
+View monitoring dashboard: https://rundberglaundry.com/monitoring-dashboard.html
     `
   };
 

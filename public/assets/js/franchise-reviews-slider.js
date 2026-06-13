@@ -6,7 +6,7 @@
  *
  * Reviews are real — sampled from operating franchise locations using
  * the Places API. Each card is tagged with the city/state and links
- * back to that store's landing page on wavemax.promo.
+ * back to that store's landing page on rundberglaundry.com.
  */
 (function () {
   'use strict';

@@ -42,7 +42,7 @@ async function loadTemplate(templateName, language = 'en') {
  * Tolerates lower/UPPER/exact casing mismatches.
  */
 function fillTemplate(template, data) {
-  const baseUrl = process.env.BASE_URL || 'https://wavemax.promo';
+  const baseUrl = process.env.BASE_URL || 'https://rundberglaundry.com';
   data.BASE_URL = baseUrl;
 
   return template.replace(/\[([A-Za-z0-9_]+)\]/g, (match, placeholder) => {

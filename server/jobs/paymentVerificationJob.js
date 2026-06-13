@@ -283,7 +283,7 @@ class PaymentVerificationJob {
       const Affiliate = require('../models/Affiliate');
       const customer = await Customer.findOne({ customerId: order.customerId });
       const affiliate = await Affiliate.findOne({ affiliateId: order.affiliateId });
-      const adminEmail = await SystemConfig.getValue('admin_notification_email', 'admin@wavemax.promo');
+      const adminEmail = await SystemConfig.getValue('admin_notification_email', 'admin@rundberglaundry.com');
 
       const hoursSinceRequest = order.paymentRequestedAt
         ? Math.round((Date.now() - order.paymentRequestedAt.getTime()) / (1000 * 60 * 60))
