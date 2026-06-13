@@ -148,14 +148,6 @@ if (process.env.NODE_ENV !== 'test') {
         logger.error('Error initializing default accounts:', { error: error.message });
       }
 
-      // Initialize data retention service
-      try {
-        const DataRetentionService = require('./server/services/dataRetentionService');
-        DataRetentionService.initialize();
-        logger.info('Data retention service initialized');
-      } catch (error) {
-        logger.error('Error initializing data retention service:', { error: error.message });
-      }
     })
     .catch(err => {
       logger.error('MongoDB connection error:', { error: err.message });
