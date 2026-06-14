@@ -81,9 +81,11 @@ describe('labelSheetService — 4x6 thermal labels', () => {
     });
     await bagService.issueBatch({ batchId, adminId: affiliate._id });
     const html = await labelSheetService.renderLabelSheet(batchId);
-    expect(html).toContain('href="/assets/css/bag-labels.css"');
+    // external stylesheet + auto-print script, with a ?v= cache-buster
+    // (assets are served immutable/CDN-fronted)
+    expect(html).toMatch(/href="\/assets\/css\/bag-labels\.css(\?v=[^"]+)?"/);
     // external print script (script-src 'self' — no nonce needed), no inline JS/CSS
-    expect(html).toContain('src="/assets/js/print-labels.js"');
+    expect(html).toMatch(/src="\/assets\/js\/print-labels\.js(\?v=[^"]+)?"/);
     expect(html).not.toMatch(/ style="/i);
     expect(html).not.toMatch(/<style/i);
   });

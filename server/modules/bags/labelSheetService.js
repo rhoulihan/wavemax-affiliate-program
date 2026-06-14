@@ -33,6 +33,10 @@ function escapeHtml(value) {
 // remote assets). The thermal logo is a black vector (SVG) so it prints cleanly
 // on white thermal stock — the older PNG had white text that vanished on paper.
 const LOGO_PATH = path.join(__dirname, '../../../public/assets/images/brand/logo-wavemax-thermal.svg');
+// Cache-buster for the label's external CSS/JS — these are served immutable
+// (1y) and fronted by Cloudflare, so bump this whenever bag-labels.css or
+// print-labels.js changes or stale styling will print after a deploy.
+const ASSET_VERSION = '20260613';
 let logoDataUri = null;
 function getLogoDataUri() {
   if (logoDataUri === null) {
@@ -99,13 +103,13 @@ ${logoImg}      <p class="label-affiliate">${safeName}</p>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>WaveMAX Bag Labels — ${escapeHtml(batchId)}</title>
-  <link rel="stylesheet" href="/assets/css/bag-labels.css">
+  <link rel="stylesheet" href="/assets/css/bag-labels.css?v=${ASSET_VERSION}">
 </head>
 <body>
   <main class="label-stack">
 ${labels.join('\n')}
   </main>
-  <script src="/assets/js/print-labels.js"></script>
+  <script src="/assets/js/print-labels.js?v=${ASSET_VERSION}"></script>
 </body>
 </html>`;
 }
