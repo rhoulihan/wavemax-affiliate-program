@@ -30,19 +30,20 @@ function escapeHtml(value) {
 
 // Logo is read once and embedded as a data-URI so the printed label never
 // depends on a network fetch (thermal printers/print preview often won't load
-// remote assets). The thermal logo is a black vector (SVG) so it prints cleanly
-// on white thermal stock — the older PNG had white text that vanished on paper.
-const LOGO_PATH = path.join(__dirname, '../../../public/assets/images/brand/logo-wavemax-thermal.svg');
+// remote assets). The thermal logo is a solid-black PNG (the brand galaxy mark
+// + wordmark) so it prints cleanly on white thermal stock — the standard logo
+// has white text that vanished on paper.
+const LOGO_PATH = path.join(__dirname, '../../../public/assets/images/brand/logo-wavemax-thermal.png');
 // Cache-buster for the label's external CSS/JS — these are served immutable
 // (1y) and fronted by Cloudflare, so bump this whenever bag-labels.css or
 // print-labels.js changes or stale styling will print after a deploy.
-const ASSET_VERSION = '20260613';
+const ASSET_VERSION = '20260613b';
 let logoDataUri = null;
 function getLogoDataUri() {
   if (logoDataUri === null) {
     try {
       const buf = fs.readFileSync(LOGO_PATH);
-      logoDataUri = `data:image/svg+xml;base64,${buf.toString('base64')}`;
+      logoDataUri = `data:image/png;base64,${buf.toString('base64')}`;
     } catch {
       logoDataUri = ''; // missing asset → omit the logo rather than crash
     }

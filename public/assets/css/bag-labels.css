@@ -36,9 +36,9 @@ html, body {
    3.2in wide => ~1.1in tall, well within the 5.6in usable height once the QR
    (2in), affiliate name, customer line, and bag ref are stacked below it. */
 .label-logo {
-  width: 3.2in;
+  width: 3.5in;
   height: auto;
-  margin: 0.08in 0 0.16in;
+  margin: 0.12in 0 0.2in;
 }
 
 .label-affiliate {
