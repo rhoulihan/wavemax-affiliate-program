@@ -934,10 +934,6 @@
         "commission": "Commission",
         "w9Status": "W9 Status",
         "actions": "Actions",
-        "links": "Links",
-        "showLinks": "Show Marketing Links",
-        "marketingLinksTitle": "Marketing Links",
-        "marketingLinksDesc": "Share these links with your affiliate to promote customer registration.",
         "landingPageLink": "Affiliate Landing Page",
         "landingPageDesc": "Marketing page with revenue calculator and customer registration",
         "sendW9": "Send W9",
@@ -1436,6 +1432,16 @@
         "on_file": "On File",
         "rejected": "Rejected"
       }
+    },
+    "bagLabels": {
+      "button": "Print Labels",
+      "modalTitle": "Print bag labels for",
+      "quantityLabel": "How many labels?",
+      "printButton": "Print",
+      "cancel": "Cancel",
+      "success": "Bag labels generated.",
+      "error": "Could not generate bag labels.",
+      "quantityInvalid": "Enter a quantity between 1 and 200."
     }
   },
   "email": {

@@ -934,10 +934,6 @@
         "commission": "Comisión",
         "w9Status": "Estado del W9",
         "actions": "Acciones",
-        "links": "Enlaces",
-        "showLinks": "Mostrar Enlaces de Marketing",
-        "marketingLinksTitle": "Enlaces de Marketing",
-        "marketingLinksDesc": "Comparte estos enlaces con tu afiliado para promover el registro de clientes.",
         "landingPageLink": "Página de Destino del Afiliado",
         "landingPageDesc": "Página de marketing con calculadora de ingresos y registro de clientes",
         "sendW9": "Enviar W9",
@@ -1436,6 +1432,16 @@
         "on_file": "Archivado",
         "rejected": "Rechazado"
       }
+    },
+    "bagLabels": {
+      "button": "Imprimir etiquetas",
+      "modalTitle": "Imprimir etiquetas de bolsas para",
+      "quantityLabel": "¿Cuántas etiquetas?",
+      "printButton": "Imprimir",
+      "cancel": "Cancelar",
+      "success": "Etiquetas de bolsas generadas.",
+      "error": "No se pudieron generar las etiquetas de bolsas.",
+      "quantityInvalid": "Introduzca una cantidad entre 1 y 200."
     }
   },
   "email": {

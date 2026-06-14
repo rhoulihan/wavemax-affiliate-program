@@ -1,10 +1,19 @@
 // Label sheet renderer — print-optimized HTML (spec §6.1).
 //
-// No PDF dependency: a @media print grid (external stylesheet) that prints
-// cleanly via the browser's "Save as PDF". CSP-clean: zero inline
-// script/style; QR as data-URI <img> (img-src 'self' data: already allowed).
-// The QR payload is the full claim URL so a phone camera works with no app.
+// 4x6 thermal format (HP KE100): ONE 4in x 6in label per page. Each label,
+// top to bottom: WaveMAX logo (embedded data-URI so it always prints),
+// affiliate name (on EVERY label), the bag's claim QR (its durable identity),
+// a blank handwriting line for the customer name, and a small staff bag ref.
+//
+// No PDF dependency: an external @page/@media-print stylesheet drives the
+// browser's print-to-PDF / direct thermal print. CSP-clean: zero inline
+// script/style. The auto-print convenience is an EXTERNAL script
+// (/assets/js/print-labels.js — script-src 'self', no nonce required).
+// QR + logo are data-URI <img> (img-src 'self' data: already allowed); the
+// QR payload is the full claim URL so a phone camera works with no app.
 
+const fs = require('fs');
+const path = require('path');
 const QRCode = require('qrcode');
 const Bag = require('./Bag');
 const Affiliate = require('../../models/Affiliate');
@@ -19,12 +28,28 @@ function escapeHtml(value) {
     .replace(/'/g, '&#39;');
 }
 
+// Logo is read once and embedded as a data-URI so the printed label never
+// depends on a network fetch (thermal printers/print preview often won't load
+// remote assets). Colored logo grayscales fine on a mono thermal head.
+const LOGO_PATH = path.join(__dirname, '../../../public/assets/images/brand/logo-wavemax.png');
+let logoDataUri = null;
+function getLogoDataUri() {
+  if (logoDataUri === null) {
+    try {
+      const buf = fs.readFileSync(LOGO_PATH);
+      logoDataUri = `data:image/png;base64,${buf.toString('base64')}`;
+    } catch {
+      logoDataUri = ''; // missing asset → omit the logo rather than crash
+    }
+  }
+  return logoDataUri;
+}
+
 /**
- * Render the printable label sheet for one mint batch.
+ * Render the printable label sheet for one mint batch — one 4x6 label per page.
  * Returns an HTML string, or null when the batch has no bags.
- * Layout knobs come from SystemConfig: bag_label_columns (grid),
- * bag_label_qr_size_px (QR width). Cells use a .cols-N class — the
- * grid-template definition lives in /assets/css/bag-labels.css, never inline.
+ * QR width comes from SystemConfig bag_label_qr_size_px; the 4x6 page geometry
+ * lives in /assets/css/bag-labels.css, never inline.
  */
 async function renderLabelSheet(batchId) {
   const bags = await Bag.find({ batchId }).sort({ bagId: 1 });
@@ -37,22 +62,27 @@ async function renderLabelSheet(batchId) {
     : bags[0].affiliateId;
 
   const qrSize = await SystemConfig.getValue('bag_label_qr_size_px', 300);
-  const columnsRaw = await SystemConfig.getValue('bag_label_columns', 3);
-  const columns = Math.min(Math.max(parseInt(columnsRaw, 10) || 3, 1), 6);
   const baseUrl = process.env.BASE_URL || 'https://rundberglaundry.com';
+  const logo = getLogoDataUri();
+  const safeName = escapeHtml(affiliateName);
 
-  const cells = await Promise.all(bags.map(async (bag) => {
+  const labels = await Promise.all(bags.map(async (bag) => {
     const claimUrl = `${baseUrl}/embed-app-v2.html?route=/claim&bag=${bag.token}`;
     const qrDataUri = await QRCode.toDataURL(claimUrl, {
       width: qrSize,
       margin: 2,
       errorCorrectionLevel: 'M'
     });
-    return `      <div class="label-cell">
-        <p class="label-affiliate">${escapeHtml(affiliateName)}</p>
-        <img class="label-qr" src="${qrDataUri}" alt="Bag claim QR code">
-        <p class="label-ref">Bag ref: ${escapeHtml(bag.bagId.slice(-6))}</p>
-      </div>`;
+    const logoImg = logo
+      ? `      <img class="label-logo" src="${logo}" alt="WaveMAX Laundry">\n`
+      : '';
+    return `    <section class="label">
+${logoImg}      <p class="label-affiliate">${safeName}</p>
+      <img class="label-qr" src="${qrDataUri}" alt="Bag claim QR code">
+      <p class="label-customer">Customer name:</p>
+      <span class="label-customer-line"></span>
+      <p class="label-ref">Bag ref: ${escapeHtml(bag.bagId.slice(-6))}</p>
+    </section>`;
   }));
 
   return `<!DOCTYPE html>
@@ -64,14 +94,10 @@ async function renderLabelSheet(batchId) {
   <link rel="stylesheet" href="/assets/css/bag-labels.css">
 </head>
 <body>
-  <header class="sheet-header">
-    <h1>WaveMAX Laundry Pickup &amp; Delivery — Bag Labels</h1>
-    <p class="print-instructions">Print this sheet, cut along the lines, and attach one label to each bag.</p>
-    <p class="sheet-meta">${escapeHtml(affiliateName)} &middot; ${escapeHtml(batchId)} &middot; ${bags.length} labels</p>
-  </header>
-  <main class="label-grid cols-${columns}">
-${cells.join('\n')}
+  <main class="label-stack">
+${labels.join('\n')}
   </main>
+  <script src="/assets/js/print-labels.js"></script>
 </body>
 </html>`;
 }

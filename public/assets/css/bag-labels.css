@@ -1,42 +1,101 @@
-/* Bag label sheet — print-optimized grid (spec §6.1). No inline styles. */
+/* Bag labels — 4x6 thermal format (HP KE100), one label per page (spec §6.1).
+   Monochrome-friendly: black on white, no colored backgrounds. The colored
+   WaveMAX logo grayscales on the thermal head — expected. No inline styles. */
 * { box-sizing: border-box; }
 
-body {
+html, body {
   margin: 0;
-  padding: 16px;
+  padding: 0;
   font-family: 'Segoe UI', Arial, sans-serif;
-  color: #1e3a5f;
-  background: #ffffff;
+  color: #000;
+  background: #fff;
 }
 
-.sheet-header { text-align: center; margin-bottom: 16px; }
-.sheet-header h1 { font-size: 18px; margin: 0 0 4px; }
-.print-instructions { font-size: 13px; color: #475569; margin: 0 0 4px; }
-.sheet-meta { font-size: 12px; color: #64748b; margin: 0; }
-
-.label-grid { display: grid; gap: 12px; }
-.cols-1 { grid-template-columns: repeat(1, 1fr); }
-.cols-2 { grid-template-columns: repeat(2, 1fr); }
-.cols-3 { grid-template-columns: repeat(3, 1fr); }
-.cols-4 { grid-template-columns: repeat(4, 1fr); }
-.cols-5 { grid-template-columns: repeat(5, 1fr); }
-.cols-6 { grid-template-columns: repeat(6, 1fr); }
-
-.label-cell {
-  border: 1px dashed #94a3b8;
-  border-radius: 6px;
-  padding: 10px;
+/* One 4x6 label per page. */
+.label {
+  width: 4in;
+  height: 6in;
+  padding: 0.2in;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
   text-align: center;
+  page-break-after: always;
+  break-after: page;
   page-break-inside: avoid;
   break-inside: avoid;
+  overflow: hidden;
+}
+.label:last-child {
+  page-break-after: auto;
+  break-after: auto;
 }
 
-.label-affiliate { font-size: 14px; font-weight: 700; margin: 0 0 6px; word-break: break-word; }
-.label-qr { width: 100%; max-width: 220px; height: auto; }
-.label-ref { font-size: 11px; color: #475569; letter-spacing: 1px; margin: 6px 0 0; }
+.label-logo {
+  width: 1.4in;
+  height: auto;
+  margin: 0.05in 0 0.1in;
+}
+
+.label-affiliate {
+  font-size: 22pt;
+  font-weight: 700;
+  line-height: 1.1;
+  margin: 0 0 0.12in;
+  word-break: break-word;
+  max-width: 100%;
+}
+
+.label-qr {
+  width: 2in;
+  height: 2in;
+  margin: 0 0 0.14in;
+}
+
+.label-customer {
+  font-size: 13pt;
+  font-weight: 600;
+  margin: 0 0 0.06in;
+  align-self: flex-start;
+}
+
+/* Blank handwriting rule for the customer name. */
+.label-customer-line {
+  display: block;
+  width: 100%;
+  height: 0.42in;
+  border-bottom: 2px solid #000;
+  margin: 0 0 0.14in;
+}
+
+.label-ref {
+  font-size: 10pt;
+  letter-spacing: 1px;
+  color: #000;
+  margin: auto 0 0;
+}
+
+/* On-screen preview: show the labels as bordered cards so the page is readable
+   before the print dialog opens. Print strips the chrome. */
+@media screen {
+  body { padding: 16px; background: #f1f5f9; }
+  .label-stack {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+  }
+  .label {
+    border: 1px solid #94a3b8;
+    background: #fff;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12);
+  }
+}
 
 @media print {
-  @page { margin: 12mm; }
-  body { padding: 0; }
-  .sheet-header h1 { font-size: 14px; }
+  @page { size: 4in 6in; margin: 0; }
+  body { padding: 0; background: #fff; }
+  .label-stack { display: block; }
+  .label { border: none; box-shadow: none; }
 }

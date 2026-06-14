@@ -30,6 +30,26 @@ exports.mintBags = asyncWrapper(async (req, res) => {
   }
 });
 
+/**
+ * POST /api/v1/bags/print-run — admin + manage_affiliates + CSRF.
+ * Combined mint+issue: labels are ALWAYS tied to an affiliate. Mints a batch
+ * then immediately issues it so the printed bags are claimable. No partial
+ * state on the happy path — mint validates the affiliate/quantity first, then
+ * issue flips the whole batch in one updateMany.
+ */
+exports.printRun = asyncWrapper(async (req, res) => {
+  const { affiliateId, quantity } = req.body;
+  try {
+    const { batchId, bags } = await bagService.mintBatch({
+      affiliateId, quantity, adminId: req.user.id, req
+    });
+    await bagService.issueBatch({ batchId, adminId: req.user.id, req });
+    return sendSuccess(res, { batchId, count: bags.length }, 'Bag print run created', 201);
+  } catch (err) {
+    return mapBagError(res, err);
+  }
+});
+
 /** GET /api/v1/bags/batch/:batchId/labels — admin + manage_affiliates */
 exports.getBatchLabels = asyncWrapper(async (req, res) => {
   const html = await labelSheetService.renderLabelSheet(req.params.batchId);

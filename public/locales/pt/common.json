@@ -934,10 +934,6 @@
         "commission": "Comissão",
         "w9Status": "Status do W9",
         "actions": "Ações",
-        "links": "Links",
-        "showLinks": "Mostrar Links de Marketing",
-        "marketingLinksTitle": "Links de Marketing",
-        "marketingLinksDesc": "Compartilhe esses links com seu afiliado para promover o registro de clientes.",
         "landingPageLink": "Página de Destino do Afiliado",
         "landingPageDesc": "Página de marketing com calculadora de receita e registro de clientes",
         "sendW9": "Enviar W9",
@@ -1436,6 +1432,16 @@
         "on_file": "Arquivado",
         "rejected": "Rejeitado"
       }
+    },
+    "bagLabels": {
+      "button": "Imprimir etiquetas",
+      "modalTitle": "Imprimir etiquetas de sacolas para",
+      "quantityLabel": "Quantas etiquetas?",
+      "printButton": "Imprimir",
+      "cancel": "Cancelar",
+      "success": "Etiquetas de sacolas geradas.",
+      "error": "Não foi possível gerar as etiquetas de sacolas.",
+      "quantityInvalid": "Insira uma quantidade entre 1 e 200."
     }
   },
   "email": {

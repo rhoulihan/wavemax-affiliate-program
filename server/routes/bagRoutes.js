@@ -27,6 +27,17 @@ router.post('/mint',
   bagController.mintBags);
 
 /**
+ * @route   POST /api/v1/bags/print-run
+ * @access  administrator + manage_affiliates (CSRF enforced via csrf-config)
+ * Combined mint+issue for the admin "Print Labels" flow.
+ */
+router.post('/print-run',
+  authenticate,
+  checkAdminPermission('manage_affiliates'),
+  sensitiveOperationLimiter,
+  bagController.printRun);
+
+/**
  * @route   GET /api/v1/bags/batch/:batchId/labels
  * @access  administrator + manage_affiliates
  */

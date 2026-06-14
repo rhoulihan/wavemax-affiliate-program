@@ -1735,7 +1735,7 @@
         renderAffiliatesList(affiliatesData);
 
         // Setup marketing links modal handlers after rendering affiliates
-        setupMarketingLinksModalHandlers();
+        setupPrintLabelsModalHandlers();
       } else {
         console.error('Affiliates API error:', data);
         document.getElementById('affiliatesList').innerHTML = `
@@ -2234,11 +2234,11 @@
                             <td>$${totalCommission.toFixed(2)}</td>
                             <td>${w9StatusDisplay}</td>
                             <td>
-                                <button class="btn btn-sm btn-secondary show-links-btn"
+                                <button class="btn btn-sm btn-secondary print-labels-btn"
                                         data-affiliate-id="${aff.affiliateId}"
                                         data-affiliate-name="${name}"
-                                        title="${t('administrator.dashboard.affiliates.showLinks', 'Show Marketing Links')}">
-                                    ${t('administrator.dashboard.affiliates.links', 'Links')}
+                                        title="${t('admin.bagLabels.button', 'Print Labels')}">
+                                    <i class="fas fa-tags"></i> ${t('admin.bagLabels.button', 'Print Labels')}
                                 </button>
                             </td>
                         </tr>
@@ -2269,121 +2269,109 @@
       });
     }
 
-    // Add event listener for marketing links buttons using event delegation
-    if (!affiliatesContainer.hasAttribute('data-links-handler')) {
-      affiliatesContainer.setAttribute('data-links-handler', 'true');
+    // Add event listener for print-labels buttons using event delegation
+    if (!affiliatesContainer.hasAttribute('data-print-labels-handler')) {
+      affiliatesContainer.setAttribute('data-print-labels-handler', 'true');
       affiliatesContainer.addEventListener('click', (e) => {
-        // Check if the clicked element or its parent has the show-links-btn class
-        const button = e.target.closest('.show-links-btn');
+        const button = e.target.closest('.print-labels-btn');
         if (button) {
           e.preventDefault();
           e.stopPropagation();
 
           const affiliateId = button.getAttribute('data-affiliate-id');
           const affiliateName = button.getAttribute('data-affiliate-name');
-          showMarketingLinksModal(affiliateId, affiliateName);
+          showPrintLabelsModal(affiliateId, affiliateName);
         }
       });
     }
   }
 
-  // Marketing Links Modal functionality
-  function showMarketingLinksModal(affiliateId, affiliateName) {
-    const modal = document.getElementById('marketingLinksModal');
+  // Print Bag Labels modal functionality. Tracks the active affiliate so the
+  // submit handler (wired once in setupPrintLabelsModalHandlers) knows the target.
+  let printLabelsAffiliateId = null;
 
-    // Use the parent site URL for marketing links
-    const baseUrl = 'https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program';
+  function showPrintLabelsModal(affiliateId, affiliateName) {
+    const modal = document.getElementById('printLabelsModal');
+    if (!modal) return;
+    printLabelsAffiliateId = affiliateId;
 
-    // Build the marketing links using the correct route and parameter names
-    const landingPageUrl = `${baseUrl}?route=/affiliate-landing&code=${affiliateId}`;
-
-    // Update modal title with affiliate name
-    const modalTitle = modal.querySelector('.modal-header h3');
-    const t = window.i18n ? window.i18n.t.bind(window.i18n) : (key) => key;
-    if (modalTitle) {
-      modalTitle.setAttribute('data-i18n', 'administrator.dashboard.affiliates.marketingLinksTitle');
-      modalTitle.textContent = `${t('administrator.dashboard.affiliates.marketingLinksTitle', 'Marketing Links')} - ${affiliateName}`;
+    const t = window.i18n ? window.i18n.t.bind(window.i18n) : (key, fallback) => fallback || key;
+    const titleEl = modal.querySelector('.modal-header h3');
+    if (titleEl) {
+      titleEl.textContent =
+        `${t('admin.bagLabels.modalTitle', 'Print bag labels for')} ${affiliateName}`;
     }
 
-    // Populate the modal inputs
-    document.getElementById('landingPageLink').value = landingPageUrl;
+    // Reset the form to its default state.
+    const qtyInput = document.getElementById('printLabelsQuantity');
+    if (qtyInput) qtyInput.value = '10';
+    const submitBtn = document.getElementById('printLabelsSubmitBtn');
+    if (submitBtn) submitBtn.disabled = false;
 
-    // Show the modal
     modal.classList.remove('hidden');
     modal.style.display = 'flex';
   }
 
-  function setupMarketingLinksModalHandlers() {
-    const modal = document.getElementById('marketingLinksModal');
-    if (!modal) {
-      return;
-    }
+  function setupPrintLabelsModalHandlers() {
+    const modal = document.getElementById('printLabelsModal');
+    if (!modal || modal.hasAttribute('data-handlers-initialized')) return;
 
-    // Prevent duplicate setup
-    if (modal.hasAttribute('data-handlers-initialized')) {
-      return;
-    }
+    const closeBtn = document.getElementById('closePrintLabelsModal');
+    const cancelBtn = document.getElementById('cancelPrintLabelsBtn');
+    const submitBtn = document.getElementById('printLabelsSubmitBtn');
+    const qtyInput = document.getElementById('printLabelsQuantity');
+    const t = window.i18n ? window.i18n.t.bind(window.i18n) : (key, fallback) => fallback || key;
 
-    const closeBtn = document.getElementById('closeMarketingLinksModal');
-    const closeModalBtn = document.getElementById('closeMarketingLinksBtn');
-    const copyLandingPageBtn = document.getElementById('copyLandingPageBtn');
-
-    // Close modal handlers
     const closeModal = () => {
       modal.classList.add('hidden');
       modal.style.display = 'none';
+      printLabelsAffiliateId = null;
     };
 
     if (closeBtn) {
-      closeBtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        closeModal();
-      });
+      closeBtn.addEventListener('click', (e) => { e.preventDefault(); closeModal(); });
     }
-
-    if (closeModalBtn) {
-      closeModalBtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        closeModal();
-      });
+    if (cancelBtn) {
+      cancelBtn.addEventListener('click', (e) => { e.preventDefault(); closeModal(); });
     }
+    modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
 
-    // Close when clicking outside the modal
-    modal.addEventListener('click', (e) => {
-      if (e.target === modal) {
-        closeModal();
-      }
-    });
+    if (submitBtn) {
+      submitBtn.addEventListener('click', async (e) => {
+        e.preventDefault();
+        if (submitBtn.disabled) return;
+        if (!printLabelsAffiliateId) return;
 
-    // Copy button handlers
-    if (copyLandingPageBtn) {
-      copyLandingPageBtn.addEventListener('click', async () => {
-        const input = document.getElementById('landingPageLink');
-        const t = window.i18n ? window.i18n.t.bind(window.i18n) : (key) => key;
+        const quantity = parseInt(qtyInput && qtyInput.value, 10);
+        if (!Number.isInteger(quantity) || quantity < 1 || quantity > 200) {
+          showNotification(t('admin.bagLabels.quantityInvalid', 'Enter a quantity between 1 and 200.'), 'error');
+          return;
+        }
 
+        submitBtn.disabled = true;
         try {
-          await navigator.clipboard.writeText(input.value);
-          const originalText = copyLandingPageBtn.textContent;
-          copyLandingPageBtn.textContent = t('common.messages.copied', 'Copied!');
-          setTimeout(() => {
-            copyLandingPageBtn.textContent = originalText;
-          }, 2000);
+          const response = await adminFetch('/api/v1/bags/print-run', {
+            method: 'POST',
+            body: JSON.stringify({ affiliateId: printLabelsAffiliateId, quantity })
+          });
+          const result = response ? await response.json() : null;
+          if (response && response.ok && result && result.batchId) {
+            // The labels page auto-opens the print dialog (print-labels.js).
+            window.open(`${BASE_URL}/api/v1/bags/batch/${result.batchId}/labels`, '_blank');
+            showNotification(t('admin.bagLabels.success', 'Bag labels generated.'), 'success');
+            closeModal();
+          } else {
+            const msg = (result && result.message) || t('admin.bagLabels.error', 'Could not generate bag labels.');
+            showNotification(msg, 'error');
+            submitBtn.disabled = false;
+          }
         } catch (err) {
-          // Fallback for older browsers
-          input.select();
-          document.execCommand('copy');
-          const originalText = copyLandingPageBtn.textContent;
-          copyLandingPageBtn.textContent = t('common.messages.copied', 'Copied!');
-          setTimeout(() => {
-            copyLandingPageBtn.textContent = originalText;
-          }, 2000);
+          showNotification(t('admin.bagLabels.error', 'Could not generate bag labels.'), 'error');
+          submitBtn.disabled = false;
         }
       });
     }
 
-    // Mark modal as initialized
     modal.setAttribute('data-handlers-initialized', 'true');
   }
 

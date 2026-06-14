@@ -125,7 +125,9 @@ describe('Bag endpoints', () => {
       expect(res.headers['content-type']).toMatch(/text\/html/);
       expect(res.text).toContain('data:image/png');
       expect(res.text).toContain('Bag Owner Wash');
-      expect(res.text).not.toMatch(/<script/i);
+      // CSP-clean: the only script is the external auto-print helper (no inline JS)
+      expect(res.text).toContain('src="/assets/js/print-labels.js"');
+      expect(res.text).not.toMatch(/<script(?![^>]*\bsrc=)/i);
 
       const missing = await agent
         .get('/api/v1/bags/batch/BATCH-nope/labels')

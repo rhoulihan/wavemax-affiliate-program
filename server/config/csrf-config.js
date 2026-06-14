@@ -155,9 +155,10 @@ const CSRF_CONFIG = {
     '/api/v1/operators/orders/:orderId/quality-check',
     '/api/v1/operators/shift/status',
 
-    // Bag admin mutations (mint/issue — spec §5)
+    // Bag admin mutations (mint/issue/print-run — spec §5)
     '/api/v1/bags/mint',
     '/api/v1/bags/batch/:batchId/issue',
+    '/api/v1/bags/print-run',
 
     // W-9 surface — critical, ALWAYS CSRF (redesign PR 10, spec §9)
     '/api/v1/affiliates/:affiliateId/w9',

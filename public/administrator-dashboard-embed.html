@@ -556,33 +556,26 @@
         </div>
     </div>
 
-    <!-- Marketing Links Modal -->
-    <div class="modal hidden" id="marketingLinksModal">
+    <!-- Print Bag Labels Modal -->
+    <div class="modal hidden" id="printLabelsModal">
         <div class="modal-content max-width-600">
             <div class="modal-header">
-                <h3 data-i18n="administrator.dashboard.affiliates.marketingLinksTitle">Marketing Links</h3>
-                <button class="modal-close" id="closeMarketingLinksModal">&times;</button>
+                <h3 data-i18n="admin.bagLabels.modalTitle">Print bag labels for</h3>
+                <button class="modal-close" id="closePrintLabelsModal">&times;</button>
             </div>
             <div class="modal-body padding-30">
-                <p class="margin-bottom-20" data-i18n="administrator.dashboard.affiliates.marketingLinksDesc">
-                    Share these links with your affiliate to promote customer registration.
-                </p>
-
                 <div class="form-group margin-bottom-20">
-                    <label class="font-weight-600 margin-bottom-10" data-i18n="administrator.dashboard.affiliates.landingPageLink">
-                        Affiliate Landing Page
+                    <label class="font-weight-600 margin-bottom-10" for="printLabelsQuantity"
+                           data-i18n="admin.bagLabels.quantityLabel">
+                        How many labels?
                     </label>
-                    <div class="input-group">
-                        <input type="text" id="landingPageLink" class="form-control" readonly>
-                        <button class="btn btn-primary" id="copyLandingPageBtn" data-i18n="common.buttons.copy">Copy</button>
-                    </div>
-                    <small class="text-muted" data-i18n="administrator.dashboard.affiliates.landingPageDesc">
-                        Marketing page with revenue calculator and customer registration
-                    </small>
+                    <input type="number" id="printLabelsQuantity" class="form-control"
+                           min="1" max="200" value="10">
                 </div>
 
                 <div class="form-actions justify-content-center margin-top-30">
-                    <button type="button" class="btn btn-secondary" id="closeMarketingLinksBtn" data-i18n="common.buttons.close">Close</button>
+                    <button type="button" class="btn btn-secondary" id="cancelPrintLabelsBtn" data-i18n="admin.bagLabels.cancel">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="printLabelsSubmitBtn" data-i18n="admin.bagLabels.printButton">Print</button>
                 </div>
             </div>
         </div>
