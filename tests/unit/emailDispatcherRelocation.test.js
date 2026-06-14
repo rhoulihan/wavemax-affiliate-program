@@ -29,7 +29,10 @@ describe('email dispatcher after beta removal', () => {
 
   it('still exports the relocated shared senders', () => {
     expect(typeof emailService.sendAdminNotification).toBe('function');
-    expect(typeof emailService.sendMarketingEmail).toBe('function');
+  });
+
+  it('no longer exports the removed marketing sender', () => {
+    expect(emailService.sendMarketingEmail).toBeUndefined();
   });
 
   it('BetaRequest model is deleted', () => {
@@ -69,20 +72,6 @@ describe('email dispatcher after beta removal', () => {
       expect(to).toBe('admin-test@wavemax.promo');
       expect(subject).toBe('T');
       expect(html).toContain('<p>x</p>');
-    });
-
-    it('sendMarketingEmail loads the real template from the relocated path and dispatches', async () => {
-      const result = await emailService.sendMarketingEmail('to@x.com', 'Name');
-
-      expect(result).toEqual({
-        success: true,
-        recipient: 'to@x.com',
-        templateType: 'healthcare-catering-outreach'
-      });
-      expect(sendEmail).toHaveBeenCalledTimes(1);
-      const [to, subject] = sendEmail.mock.calls[0];
-      expect(to).toBe('to@x.com');
-      expect(subject).toBe('Hospital-Quality Laundry Service for Your Business - WaveMAX Laundry');
     });
   });
 });

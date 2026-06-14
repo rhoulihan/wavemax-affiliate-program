@@ -166,14 +166,6 @@ router.post('/reset-rate-limits', checkAdminPermission(['system.manage']), async
   }
 });
 
-// Marketing Email Management
-const marketingController = require('../controllers/marketingController');
-router.get('/marketing/templates', marketingController.getTemplates);
-router.post('/marketing/send', [
-  body('recipientEmail').isEmail().withMessage('Valid email is required'),
-  body('recipientName').notEmpty().withMessage('Recipient name is required')
-], marketingController.sendMarketingEmail);
-
 // Administrator routes with :id parameter (MUST BE LAST)
 router.get('/:id', checkAdminPermission(['administrators.read']), administratorController.getAdministratorById);
 router.patch('/:id', checkAdminPermission(['administrators.update']), administratorController.updateAdministrator);

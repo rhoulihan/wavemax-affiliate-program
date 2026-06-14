@@ -50,8 +50,8 @@ describe('labelSheetService — 4x6 thermal labels', () => {
     expect((html.match(/data:image\/png;base64,TESTQR/g) || [])).toHaveLength(3);
     // affiliate name once per bag (on EVERY label)
     expect((html.match(/Austin Wash Co/g) || [])).toHaveLength(3);
-    // logo embedded as a data-URI img (so it always prints)
-    expect((html.match(/<img class="label-logo"[^>]*src="data:image\/png;base64,/g) || [])).toHaveLength(3);
+    // logo embedded as a data-URI img (thermal SVG, so it always prints)
+    expect((html.match(/<img class="label-logo"[^>]*src="data:image\/svg\+xml;base64,/g) || [])).toHaveLength(3);
     // blank customer-name handwriting line per bag
     expect((html.match(/class="label-customer-line"/g) || [])).toHaveLength(3);
     for (const bag of bags) {

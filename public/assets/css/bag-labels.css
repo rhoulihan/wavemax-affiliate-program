@@ -32,10 +32,13 @@ html, body {
   break-after: auto;
 }
 
+/* Thermal logo (black SVG, 730x250 ~2.9:1): given prominence near the top.
+   3.2in wide => ~1.1in tall, well within the 5.6in usable height once the QR
+   (2in), affiliate name, customer line, and bag ref are stacked below it. */
 .label-logo {
-  width: 1.4in;
+  width: 3.2in;
   height: auto;
-  margin: 0.05in 0 0.1in;
+  margin: 0.08in 0 0.16in;
 }
 
 .label-affiliate {

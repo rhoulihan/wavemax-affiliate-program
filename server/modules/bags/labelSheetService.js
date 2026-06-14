@@ -30,14 +30,15 @@ function escapeHtml(value) {
 
 // Logo is read once and embedded as a data-URI so the printed label never
 // depends on a network fetch (thermal printers/print preview often won't load
-// remote assets). Colored logo grayscales fine on a mono thermal head.
-const LOGO_PATH = path.join(__dirname, '../../../public/assets/images/brand/logo-wavemax.png');
+// remote assets). The thermal logo is a black vector (SVG) so it prints cleanly
+// on white thermal stock — the older PNG had white text that vanished on paper.
+const LOGO_PATH = path.join(__dirname, '../../../public/assets/images/brand/logo-wavemax-thermal.svg');
 let logoDataUri = null;
 function getLogoDataUri() {
   if (logoDataUri === null) {
     try {
       const buf = fs.readFileSync(LOGO_PATH);
-      logoDataUri = `data:image/png;base64,${buf.toString('base64')}`;
+      logoDataUri = `data:image/svg+xml;base64,${buf.toString('base64')}`;
     } catch {
       logoDataUri = ''; // missing asset → omit the logo rather than crash
     }

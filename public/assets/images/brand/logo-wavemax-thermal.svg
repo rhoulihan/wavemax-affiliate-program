@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 730 250" role="img" aria-label="WaveMAX Laundry">
+  <!-- Monochrome (pure black) logo for thermal label printing. The brand
+       logo uses white text, which is invisible on white thermal stock; this
+       black vector version prints crisp at any size on a 203dpi printer. -->
+  <g transform="translate(118,118)">
+    <!-- galaxy disk -->
+    <ellipse rx="104" ry="80" fill="none" stroke="#000" stroke-width="9" transform="rotate(-18)"/>
+    <!-- spiral arms -->
+    <path d="M0,0 C 34,-12 52,16 42,46 C 30,84 -22,88 -52,60"
+          fill="none" stroke="#000" stroke-width="12" stroke-linecap="round"/>
+    <path d="M0,0 C -34,12 -52,-16 -42,-46 C -30,-84 22,-88 52,-60"
+          fill="none" stroke="#000" stroke-width="12" stroke-linecap="round"/>
+    <!-- bright core -->
+    <circle r="10" fill="#000"/>
+    <!-- stars -->
+    <circle cx="-70" cy="44" r="5" fill="#000"/>
+    <circle cx="74" cy="-48" r="5" fill="#000"/>
+    <circle cx="-80" cy="-26" r="3.6" fill="#000"/>
+    <circle cx="60" cy="58" r="3.6" fill="#000"/>
+  </g>
+  <text x="252" y="112" font-family="Arial, Helvetica, sans-serif" font-weight="800" font-size="90" fill="#000">WaveMAX</text>
+  <text x="255" y="186" font-family="Arial, Helvetica, sans-serif" font-weight="700" font-size="52" letter-spacing="17" fill="#000">LAUNDRY</text>
+</svg>
