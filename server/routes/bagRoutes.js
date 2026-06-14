@@ -39,11 +39,13 @@ router.post('/print-run',
 
 /**
  * @route   GET /api/v1/bags/batch/:batchId/labels
- * @access  administrator + manage_affiliates
+ * @access  short-lived labels token (?t=) OR administrator + manage_affiliates.
+ * A browser tab navigation carries no auth header, so the print flow passes a
+ * purpose-scoped token; an admin with a Bearer header still works. The access
+ * decision lives in bagController.bagLabelsAccess (scoped to this route only).
  */
 router.get('/batch/:batchId/labels',
-  authenticate,
-  checkAdminPermission('manage_affiliates'),
+  bagController.bagLabelsAccess,
   bagController.getBatchLabels);
 
 /**

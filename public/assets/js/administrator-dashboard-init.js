@@ -2227,7 +2227,7 @@
                         return `
                         <tr>
                             <td>${aff.affiliateId}</td>
-                            <td>${name}${locationBadge}</td>
+                            <td>${escapeHtml(name)}${locationBadge}</td>
                             <td>${totalCustomers}</td>
                             <td>${totalOrders}</td>
                             <td>$${totalRevenue.toFixed(2)}</td>
@@ -2236,7 +2236,7 @@
                             <td>
                                 <button class="btn btn-sm btn-secondary print-labels-btn"
                                         data-affiliate-id="${aff.affiliateId}"
-                                        data-affiliate-name="${name}"
+                                        data-affiliate-name="${escapeHtml(name)}"
                                         title="${t('admin.bagLabels.button', 'Print Labels')}">
                                     <i class="fas fa-tags"></i> ${t('admin.bagLabels.button', 'Print Labels')}
                                 </button>
@@ -2357,7 +2357,12 @@
           const result = response ? await response.json() : null;
           if (response && response.ok && result && result.batchId) {
             // The labels page auto-opens the print dialog (print-labels.js).
-            window.open(`${BASE_URL}/api/v1/bags/batch/${result.batchId}/labels`, '_blank');
+            // A top-level tab navigation sends no auth header, so we pass the
+            // short-lived, batch-scoped labels token returned by print-run.
+            const tokenParam = result.labelsToken
+              ? `?t=${encodeURIComponent(result.labelsToken)}`
+              : '';
+            window.open(`${BASE_URL}/api/v1/bags/batch/${result.batchId}/labels${tokenParam}`, '_blank');
             showNotification(t('admin.bagLabels.success', 'Bag labels generated.'), 'success');
             closeModal();
           } else {

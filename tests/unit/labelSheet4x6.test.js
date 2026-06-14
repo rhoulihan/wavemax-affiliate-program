@@ -38,6 +38,9 @@ describe('labelSheetService — 4x6 thermal labels', () => {
     const { batchId, bags } = await bagService.mintBatch({
       affiliateId: affiliate.affiliateId, quantity: 3, adminId: affiliate._id
     });
+    // renderLabelSheet only renders claimable bags (issued/active/retired);
+    // print-run always issues before rendering, so mirror that here.
+    await bagService.issueBatch({ batchId, adminId: affiliate._id });
 
     const html = await labelSheetService.renderLabelSheet(batchId);
 
@@ -62,6 +65,7 @@ describe('labelSheetService — 4x6 thermal labels', () => {
     const { batchId, bags } = await bagService.mintBatch({
       affiliateId: affiliate.affiliateId, quantity: 1, adminId: affiliate._id
     });
+    await bagService.issueBatch({ batchId, adminId: affiliate._id });
     await labelSheetService.renderLabelSheet(batchId);
     const base = process.env.BASE_URL || 'https://rundberglaundry.com';
     expect(QRCode.toDataURL).toHaveBeenCalledWith(
@@ -75,6 +79,7 @@ describe('labelSheetService — 4x6 thermal labels', () => {
     const { batchId } = await bagService.mintBatch({
       affiliateId: affiliate.affiliateId, quantity: 1, adminId: affiliate._id
     });
+    await bagService.issueBatch({ batchId, adminId: affiliate._id });
     const html = await labelSheetService.renderLabelSheet(batchId);
     expect(html).toContain('href="/assets/css/bag-labels.css"');
     // external print script (script-src 'self' — no nonce needed), no inline JS/CSS
@@ -99,6 +104,7 @@ describe('labelSheetService — 4x6 thermal labels', () => {
     const { batchId } = await bagService.mintBatch({
       affiliateId: affiliate.affiliateId, quantity: 1, adminId: affiliate._id
     });
+    await bagService.issueBatch({ batchId, adminId: affiliate._id });
     const html = await labelSheetService.renderLabelSheet(batchId);
     expect(html).not.toContain('<script>alert(1)</script>');
     expect(html).toContain('&lt;script&gt;alert(1)&lt;/script&gt;');
@@ -106,5 +112,15 @@ describe('labelSheetService — 4x6 thermal labels', () => {
 
   it('returns null for an unknown batch', async () => {
     expect(await labelSheetService.renderLabelSheet('BATCH-nope')).toBeNull();
+  });
+
+  it('excludes minted (unclaimable) bags — a never-issued batch renders null', async () => {
+    const affiliate = await createAffiliate('Orphan Co');
+    const { batchId } = await bagService.mintBatch({
+      affiliateId: affiliate.affiliateId, quantity: 2, adminId: affiliate._id
+    });
+    // No issueBatch → bags stay 'minted'; their QR tokens resolve to null, so
+    // they must not be printed. With no claimable bags the sheet is null.
+    expect(await labelSheetService.renderLabelSheet(batchId)).toBeNull();
   });
 });

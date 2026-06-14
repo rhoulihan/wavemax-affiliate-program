@@ -1,11 +1,22 @@
 // Bag HTTP layer — thin wrappers over bagService / labelSheetService.
 
+const jwt = require('jsonwebtoken');
 const ControllerHelpers = require('../../utils/controllerHelpers');
 const bagService = require('./bagService');
 const labelSheetService = require('./labelSheetService');
 const Affiliate = require('../../models/Affiliate');
+const { authenticate } = require('../../middleware/auth');
+const { checkAdminPermission } = require('../../middleware/rbac');
 
 const { asyncWrapper, sendSuccess, sendError } = ControllerHelpers;
+
+// Short-lived, purpose-scoped token that lets a browser TAB navigation open the
+// printable labels page. A top-level GET carries no Authorization header (the
+// admin JWT lives in localStorage), so the labels route can't rely on it. We
+// keep the admin JWT out of URLs/logs by minting a separate token scoped to one
+// batch, read-only, 15-minute TTL. See bagLabelsAccess below.
+const LABELS_TOKEN_PURPOSE = 'bag-labels';
+const LABELS_TOKEN_TTL = '15m';
 
 function mapBagError(res, err) {
   if (err.isBagError) return sendError(res, err.message, err.status);
@@ -44,13 +55,45 @@ exports.printRun = asyncWrapper(async (req, res) => {
       affiliateId, quantity, adminId: req.user.id, req
     });
     await bagService.issueBatch({ batchId, adminId: req.user.id, req });
-    return sendSuccess(res, { batchId, count: bags.length }, 'Bag print run created', 201);
+    // Mint a short-lived labels token so the admin UI can open the printable
+    // page via a top-level tab navigation (which carries no auth header).
+    const labelsToken = jwt.sign(
+      { batchId, purpose: LABELS_TOKEN_PURPOSE },
+      process.env.JWT_SECRET,
+      { expiresIn: LABELS_TOKEN_TTL }
+    );
+    return sendSuccess(res, { batchId, count: bags.length, labelsToken }, 'Bag print run created', 201);
   } catch (err) {
     return mapBagError(res, err);
   }
 });
 
-/** GET /api/v1/bags/batch/:batchId/labels — admin + manage_affiliates */
+/**
+ * Access shim for GET /api/v1/bags/batch/:batchId/labels ONLY.
+ * Primary path: a short-lived `?t=` labels token (purpose + batch scoped) lets a
+ * browser tab open the printable page without an auth header. Fallback: a
+ * logged-in admin hitting the URL with a Bearer header still works via the
+ * normal authenticate + checkAdminPermission chain. An invalid/expired `t` with
+ * no valid admin auth falls through to the admin chain and 401/403s as before.
+ * Scoped to this route — does NOT broaden the global authenticate.
+ */
+exports.bagLabelsAccess = (req, res, next) => {
+  const token = req.query.t;
+  if (token) {
+    try {
+      const decoded = jwt.verify(token, process.env.JWT_SECRET, { algorithms: ['HS256'] });
+      if (decoded.purpose === LABELS_TOKEN_PURPOSE && decoded.batchId === req.params.batchId) {
+        return next();
+      }
+    } catch {
+      // fall through to admin auth
+    }
+  }
+  // No (or invalid) labels token → require a logged-in admin with the perm.
+  return authenticate(req, res, () => checkAdminPermission('manage_affiliates')(req, res, next));
+};
+
+/** GET /api/v1/bags/batch/:batchId/labels — labels token OR admin + manage_affiliates */
 exports.getBatchLabels = asyncWrapper(async (req, res) => {
   const html = await labelSheetService.renderLabelSheet(req.params.batchId);
   if (!html) return sendError(res, 'Batch not found', 404);

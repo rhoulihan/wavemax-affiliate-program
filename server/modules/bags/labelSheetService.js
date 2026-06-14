@@ -52,7 +52,14 @@ function getLogoDataUri() {
  * lives in /assets/css/bag-labels.css, never inline.
  */
 async function renderLabelSheet(batchId) {
-  const bags = await Bag.find({ batchId }).sort({ bagId: 1 });
+  // Only render bags whose claim QR actually resolves. A 'minted' bag (issue
+  // failed after mint) would print a label whose token resolves to null —
+  // unclaimable. Exclude it; on the happy path freshly printed bags are
+  // 'issued', so this is a no-op.
+  const bags = await Bag.find({
+    batchId,
+    status: { $in: ['issued', 'active', 'retired'] }
+  }).sort({ bagId: 1 });
   if (bags.length === 0) return null;
 
   const affiliate = await Affiliate.findOne({ affiliateId: bags[0].affiliateId })

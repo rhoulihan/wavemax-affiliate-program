@@ -55,7 +55,9 @@ process.on('uncaughtException', (err) => {
 });
 
 app.use((req, res, next) => {
-  logger.debug(`${req.method} ${req.url}`);
+  // Redact short-lived labels tokens (?t=) so they never land in debug logs.
+  const safeUrl = req.url.replace(/([?&]t=)[^&]+/, '$1<redacted>');
+  logger.debug(`${req.method} ${safeUrl}`);
   next();
 });
 
