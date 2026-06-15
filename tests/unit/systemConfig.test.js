@@ -715,7 +715,7 @@ describe('SystemConfig Model', () => {
           { key: 'delivery_code_max_attempts', value: 5, category: 'system', dataType: 'number', isPublic: false, min: 3, max: 10 },
           { key: 'operator_scan_code_max_attempts', value: 5, category: 'operator', dataType: 'number', isPublic: false, min: 3, max: 10 },
           { key: 'operator_scan_code_length', value: 8, category: 'operator', dataType: 'number', isPublic: false, min: 6, max: 12 },
-          { key: 'customer_delivery_pin_length', value: 6, category: 'customer', dataType: 'number', isPublic: false, min: 4, max: 10 },
+          { key: 'order_reopen_window_minutes', value: 240, category: 'system', dataType: 'number', isPublic: false, min: 0, max: 1440 },
           { key: 'affiliate_delivery_code_length', value: 6, category: 'affiliate', dataType: 'number', isPublic: false, min: 4, max: 10 }
         ];
 
@@ -770,6 +770,8 @@ describe('SystemConfig Model', () => {
 
         // Deleted in PR 3 — V1 bag-purchase artifact (spec §7/§8)
         expect(await SystemConfig.findOne({ key: 'laundry_bag_fee' })).toBeNull();
+        // Removed in PR 3 — customer delivery PIN dropped from the new lifecycle
+        expect(await SystemConfig.findOne({ key: 'customer_delivery_pin_length' })).toBeNull();
         // Never seeded; retired in favor of payment_scan_interval_ms +
         // payment_reminder_* (guards against accidental re-introduction)
         expect(await SystemConfig.findOne({ key: 'payment_check_interval' })).toBeNull();

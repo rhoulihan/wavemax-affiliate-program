@@ -11,6 +11,7 @@ const Bag = require('../../server/modules/bags/Bag');
 const SystemConfig = require('../../server/models/SystemConfig');
 const encryptionUtil = require('../../server/utils/encryption');
 const roleCodes = require('../../server/utils/roleCodes');
+const { getCsrfToken, createAgent } = require('../helpers/csrfHelper');
 
 jest.setTimeout(60000);
 
@@ -150,8 +151,15 @@ describe('Public bag-URL operator-code endpoints', () => {
 
   test('the legacy confirm-delivery route is gone (404)', async () => {
     const { bagToken } = await createWorld({ orderStatus: 'out_for_delivery' });
-    const res = await request(app)
+    // confirm-delivery is not on the CSRF-exempt list (it was deleted), so a
+    // tokenless POST is rejected at the CSRF layer (403) before routing. Send a
+    // valid token so the request reaches the router and proves the route itself
+    // is gone (404), not merely CSRF-blocked.
+    const agent = createAgent(app);
+    const csrfToken = await getCsrfToken(app, agent);
+    const res = await agent
       .post(`/api/v1/bags/${bagToken}/confirm-delivery`)
+      .set('x-csrf-token', csrfToken)
       .send({ operatorCode: 'OPCODE99' });
     expect(res.status).toBe(404);
   });

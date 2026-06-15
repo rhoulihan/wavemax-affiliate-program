@@ -573,7 +573,9 @@ exports.getAffiliateOrders = async (req, res) => {
       }
 
       if (startDate && endDate) {
-        query.pickupDate = { $gte: startDate, $lte: endDate };
+        // Slim order (PR 3): pickupDate is gone — orders are filtered by their
+        // intake/creation time instead.
+        query.createdAt = { $gte: startDate, $lte: endDate };
       }
     }
 
@@ -609,6 +611,8 @@ exports.getAffiliateOrders = async (req, res) => {
     const ordersData = orders.map(order => {
       const customer = customerMap[order.customerId];
 
+      // Slim order (PR 3): state record only — status + scan timestamps +
+      // createdAt. Money/weight/pickup-scheduling fields were removed.
       return {
         orderId: order.orderId,
         customerId: order.customerId,
@@ -617,12 +621,14 @@ exports.getAffiliateOrders = async (req, res) => {
           phone: customer.phone,
           address: `${customer.address}, ${customer.city}, ${customer.state} ${customer.zipCode}`
         } : null,
-        pickupDate: order.pickupDate,
-        pickupTime: order.pickupTime,
-        deliveryDate: order.deliveryDate,
-        deliveryTime: order.deliveryTime,
+        bagId: order.bagId,
         status: order.status,
-        estimatedSize: order.estimatedSize,
+        pickup: order.pickup,
+        processing: order.processing,
+        storePickup: order.storePickup,
+        delivery: order.delivery,
+        completedAt: order.completedAt,
+        cancelledAt: order.cancelledAt,
         createdAt: order.createdAt
       };
     });

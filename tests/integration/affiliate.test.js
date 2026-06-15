@@ -211,21 +211,14 @@ describe('Affiliate API', () => {
   test('should get affiliate\'s orders', async () => {
     const Order = require('../../server/models/Order');
     // Create orders with proper fee structure
+    // Slim order (PR 3): state record only — no weight/money/feeBreakdown.
     const order1 = new Order({
       orderId: 'ORD001',
       customerId: 'CUST001',
       affiliateId: testAffiliate.affiliateId,
       bagId: 'BAG-aff-1',
-      status: 'delivered',
-      actualWeight: 23.5,
-      baseRate: 1.89,
-      feeBreakdown: {
-        numberOfBags: 2,
-        minimumFee: 25,
-        perBagFee: 5,
-        totalFee: 25,
-        minimumApplied: true
-      }
+      status: 'complete',
+      completedAt: new Date()
     });
     await order1.save();
 
@@ -234,15 +227,7 @@ describe('Affiliate API', () => {
       customerId: 'CUST002',
       affiliateId: testAffiliate.affiliateId,
       bagId: 'BAG-aff-2',
-      status: 'in_progress',
-      baseRate: 1.89,
-      feeBreakdown: {
-        numberOfBags: 3,
-        minimumFee: 25,
-        perBagFee: 5,
-        totalFee: 25,
-        minimumApplied: true
-      }
+      status: 'in_progress'
     });
     await order2.save();
 
@@ -256,7 +241,11 @@ describe('Affiliate API', () => {
     expect(res.body).toHaveProperty('orders');
     expect(res.body.orders).toHaveLength(2);
     expect(res.body).toHaveProperty('pagination');
-    expect(res.body).toHaveProperty('totalEarnings', 29.44);
+    // Slim order (PR 3): commission/earnings moved out of Order; the list no
+    // longer computes per-order earnings.
+    expect(res.body).toHaveProperty('totalEarnings', 0);
+    expect(res.body.orders.map(o => o.status).sort())
+      .toEqual(['complete', 'in_progress']);
   });
 
   test('should get affiliate\'s earnings/transactions', async () => {
@@ -327,8 +316,7 @@ describe('Affiliate API', () => {
       customerId: testCustomer.customerId,
       affiliateId: testAffiliate.affiliateId,
       bagId: 'BAG-aff-del-1',
-      status: 'in_progress',
-      feeBreakdown: { numberOfBags: 1, minimumFee: 25, perBagFee: 5, totalFee: 25, minimumApplied: true }
+      status: 'in_progress'
     });
 
 
