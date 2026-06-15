@@ -87,50 +87,6 @@ describe('Email Service - Additional Coverage', () => {
     jest.resetModules();
   });
 
-  describe('Affiliate Commission Email', () => {
-    it('should send affiliate commission email successfully', async () => {
-      const affiliate = {
-        email: 'affiliate@example.com',
-        firstName: 'John',
-        lastName: 'Doe'
-      };
-      const order = {
-        orderId: 'ORD123',
-        actualTotal: 50,
-        commission: 5
-      };
-      const customer = {
-        customerId: 'CUST001',
-        firstName: 'Jane',
-        lastName: 'Smith'
-      };
-
-      await emailService.sendAffiliateCommissionEmail(affiliate, order, customer);
-      
-      expect(mockTransporter.sendMail).toHaveBeenCalledWith(
-        expect.objectContaining({
-          to: 'affiliate@example.com',
-          subject: 'Commission Earned: Order Delivered',
-          html: expect.any(String)
-        })
-      );
-    });
-
-    it('should handle email sending error', async () => {
-      mockTransporter.sendMail.mockRejectedValueOnce(new Error('SMTP error'));
-      
-      const affiliate = { email: 'affiliate@example.com', firstName: 'John' };
-      const order = { orderId: 'ORD123', commission: 5 };
-      const customer = { customerId: 'CUST001', firstName: 'Jane' };
-
-      await emailService.sendAffiliateCommissionEmail(affiliate, order, customer);
-      
-      expect(consoleErrorSpy).toHaveBeenCalledWith(
-        expect.stringContaining('Error sending email'),
-        expect.any(Error)
-      );
-    });
-  });
 
   describe('Customer Password Reset Email', () => {
     it('should send customer password reset email', async () => {
@@ -298,10 +254,9 @@ describe('Email Service - Additional Coverage', () => {
       
       const emailServiceWithError = require('../../server/utils/emailService');
 
-      await emailServiceWithError.sendAffiliateCommissionEmail(
-        { email: 'test@example.com', firstName: 'Test' },
-        { orderId: '123', commission: 10 },
-        { customerId: 'CUST001', firstName: 'Customer' }
+      await emailServiceWithError.sendOrderCancellationEmail(
+        { email: 'test@example.com', firstName: 'Customer', customerId: 'CUST001' },
+        { orderId: '123' }
       );
 
       expect(consoleErrorSpy).toHaveBeenCalledWith(

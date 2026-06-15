@@ -449,7 +449,7 @@ describe('Customer Controller', () => {
 
       expect(Order.countDocuments).toHaveBeenCalledWith({
         customerId: 'CUST123',
-        status: { $in: ['in_progress', 'processed', 'ready_for_pickup', 'picked_up'] }
+        status: { $in: ['pending', 'in_progress', 'out_for_delivery'] }
       });
       expect(Order.deleteMany).toHaveBeenCalledWith({ customerId: 'CUST123' });
       expect(Customer.deleteOne).toHaveBeenCalledWith({ customerId: 'CUST123' });

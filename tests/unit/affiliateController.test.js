@@ -460,26 +460,17 @@ describe('Affiliate Controller', () => {
         {
           orderId: 'ORD001',
           customerId: 'CUST001',
-          deliveredAt: new Date(),
-          actualWeight: 10,
-          actualTotal: 50,
-          affiliateCommission: 5
+          completedAt: new Date()
         },
         {
           orderId: 'ORD002',
           customerId: 'CUST002',
-          deliveredAt: new Date(),
-          actualWeight: 15,
-          actualTotal: 75,
-          affiliateCommission: 7.5
+          completedAt: new Date()
         }
       ];
       const mockCustomers = [
         { customerId: 'CUST001', firstName: 'John', lastName: 'Doe' },
         { customerId: 'CUST002', firstName: 'Jane', lastName: 'Smith' }
-      ];
-      const mockTransactions = [
-        { affiliateId: 'AFF123', amount: 12.5, status: 'pending' }
       ];
 
       req.params.affiliateId = 'AFF123';
@@ -493,8 +484,6 @@ describe('Affiliate Controller', () => {
       });
       Customer.find = createFindMock(mockCustomers);
       Customer.find.mockResolvedValue(mockCustomers);
-      Transaction.find = createFindMock(mockTransactions);
-      Transaction.find.mockResolvedValue(mockTransactions);
 
       const handler = affiliateController.getAffiliateEarnings;
       await handler(req, res, next);
@@ -502,19 +491,17 @@ describe('Affiliate Controller', () => {
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.json).toHaveBeenCalledWith({
         success: true,
-        totalEarnings: 12.5,
-        pendingAmount: 12.5,
+        totalEarnings: 0,
+        pendingAmount: 0,
         orderCount: 2,
         orders: expect.arrayContaining([
           expect.objectContaining({
             orderId: 'ORD001',
-            customerName: 'John Doe',
-            affiliateCommission: 5
+            customerName: 'John Doe'
           }),
           expect.objectContaining({
             orderId: 'ORD002',
-            customerName: 'Jane Smith',
-            affiliateCommission: 7.5
+            customerName: 'Jane Smith'
           })
         ])
       });
@@ -535,11 +522,11 @@ describe('Affiliate Controller', () => {
       await affiliateController.getAffiliateEarnings(req, res, next);
 
       const orderFindCall = Order.find.mock.calls[0][0];
-      expect(orderFindCall.deliveredAt.$gte).toBeDefined();
-      expect(orderFindCall.deliveredAt.$lte).toBeDefined();
+      expect(orderFindCall.completedAt.$gte).toBeDefined();
+      expect(orderFindCall.completedAt.$lte).toBeDefined();
 
       // Check that date range is approximately 7 days
-      const dateDiff = orderFindCall.deliveredAt.$lte - orderFindCall.deliveredAt.$gte;
+      const dateDiff = orderFindCall.completedAt.$lte - orderFindCall.completedAt.$gte;
       const daysDiff = dateDiff / (1000 * 60 * 60 * 24);
       expect(daysDiff).toBeCloseTo(7, 0);
     });
@@ -807,85 +794,32 @@ describe('Affiliate Controller', () => {
   });
 
   describe('getAffiliateDashboardStats', () => {
-    it('should return comprehensive dashboard statistics', async () => {
-      const now = new Date();
-      
-      // Calculate dates to ensure one order is in current week and one is not
-      const firstDayOfWeek = new Date(now);
-      firstDayOfWeek.setDate(now.getDate() - now.getDay());
-      firstDayOfWeek.setHours(0, 0, 0, 0);
-      
-      // First order: within current week
-      const withinThisWeek = new Date();
-      
-      // Second order: ensure it's in current month but NOT in current week
-      const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-      
-      // Create a date that is definitely before the current week but in current month
-      let beforeThisWeek;
-      if (firstDayOfWeek.getTime() > firstDayOfMonth.getTime()) {
-        // Current week started before this month, so use first day of month minus 1 day
-        // to ensure it's before the week
-        beforeThisWeek = new Date(firstDayOfWeek);
-        beforeThisWeek.setDate(beforeThisWeek.getDate() - 3); // 3 days before week start
-        // But if that puts us in previous month, use a date in current month that's after week start
-        if (beforeThisWeek.getMonth() !== now.getMonth()) {
-          // This means we're early in the month and can't have an order before this week
-          // So we'll adjust our expectation instead
-          beforeThisWeek = new Date(firstDayOfMonth);
-          beforeThisWeek.setDate(10); // Middle of the month
-        }
-      } else {
-        // Normal case: week started in current month
-        beforeThisWeek = new Date(firstDayOfWeek);
-        beforeThisWeek.setDate(beforeThisWeek.getDate() - 3); // 3 days before week
-      }
-      
-      const mockDeliveredOrders = [
-        {
-          affiliateId: 'AFF123',
-          affiliateCommission: 10,
-          deliveredAt: withinThisWeek // This week
-        },
-        {
-          affiliateId: 'AFF123',
-          affiliateCommission: 15,
-          deliveredAt: beforeThisWeek // Before current week
-        }
-      ];
-      const mockPendingTransactions = [
-        { amount: 25 }
-      ];
-
+    it('should return count-based dashboard statistics (earnings 0 post Phase 1)', async () => {
       req.params.affiliateId = 'AFF123';
       req.user = { role: 'affiliate', affiliateId: 'AFF123' };
 
       Customer.countDocuments = jest.fn().mockResolvedValue(10);
-      Order.countDocuments = jest.fn().mockResolvedValue(3);
-      Order.find = jest.fn().mockResolvedValue(mockDeliveredOrders);
-      Transaction.find = jest.fn().mockResolvedValue(mockPendingTransactions);
+      // active orders, monthly complete, weekly complete
+      Order.countDocuments = jest.fn()
+        .mockResolvedValueOnce(3)
+        .mockResolvedValueOnce(2)
+        .mockResolvedValueOnce(1);
 
       const handler = affiliateController.getAffiliateDashboardStats;
       await handler(req, res, next);
 
       expect(res.status).toHaveBeenCalledWith(200);
       const response = res.json.mock.calls[0][0];
-      
-      // Calculate expected values based on actual dates
-      const expectedWeeklyOrders = beforeThisWeek >= firstDayOfWeek ? 2 : 1;
-      const expectedWeekEarnings = beforeThisWeek >= firstDayOfWeek ? 25 : 10;
-      const expectedMonthlyOrders = beforeThisWeek.getMonth() === now.getMonth() ? 2 : 1;
-      const expectedMonthEarnings = beforeThisWeek.getMonth() === now.getMonth() ? 25 : 10;
-      
+
       expect(response.stats).toMatchObject({
         customerCount: 10,
         activeOrderCount: 3,
-        totalEarnings: 25,
-        monthEarnings: expectedMonthEarnings,
-        weekEarnings: expectedWeekEarnings,
-        pendingEarnings: 25,
-        monthlyOrders: expectedMonthlyOrders,
-        weeklyOrders: expectedWeeklyOrders
+        totalEarnings: 0,
+        monthEarnings: 0,
+        weekEarnings: 0,
+        pendingEarnings: 0,
+        monthlyOrders: 2,
+        weeklyOrders: 1
       });
       expect(response.stats.nextPayoutDate).toBeDefined();
     });

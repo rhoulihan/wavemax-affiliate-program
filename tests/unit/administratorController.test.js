@@ -711,7 +711,7 @@ describe('Administrator Controller', () => {
       req.query = { startDate: '2025-01-01', endDate: '2025-01-31' };
 
       Order.aggregate.mockResolvedValue([
-        { _id: '2025-01-01', totalOrders: 10, totalRevenue: 500 }
+        { _id: '2025-01-01', totalOrders: 10, completedOrders: 8 }
       ]);
 
       await administratorController.getOrderAnalytics(req, res, next);
@@ -720,7 +720,6 @@ describe('Administrator Controller', () => {
         success: true,
         analytics: expect.objectContaining({
           timeline: expect.any(Array),
-          processingTimeDistribution: expect.any(Array),
           summary: expect.any(Object)
         })
       });
