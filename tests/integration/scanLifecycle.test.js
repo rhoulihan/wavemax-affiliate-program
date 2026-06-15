@@ -183,6 +183,17 @@ describe('Scan resolve/apply lifecycle (operator kiosk JWT)', () => {
     expect(order.status).toBe('pending');
   });
 
+  test('apply without expectedAction -> 400 (drift guard cannot be bypassed)', async () => {
+    const { bagToken, opJwt } = await createWorld();
+    await authed(request(app).post('/api/v1/scan/resolve'), opJwt).send({ bagToken });
+    const a = await authed(request(app).post('/api/v1/scan/apply'), opJwt)
+      .send({ bagToken }); // expectedAction omitted
+    expect(a.status).toBe(400);
+    expect(a.body.errors.code).toBe('expected_action_required');
+    // No order was created despite a valid create-pending state.
+    expect(await Order.countDocuments({ bagToken })).toBe(0);
+  });
+
   test('state-drift: stale expectedAction -> 409 state_changed', async () => {
     const { bagToken, opJwt } = await createWorld();
     // resolve says create-pending; then someone applies, changing state.

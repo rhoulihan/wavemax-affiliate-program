@@ -11,6 +11,18 @@ const Bag = require('../../server/modules/bags/Bag');
 const SystemConfig = require('../../server/models/SystemConfig');
 const encryptionUtil = require('../../server/utils/encryption');
 const roleCodes = require('../../server/utils/roleCodes');
+const crypto = require('crypto');
+
+// Mirror of codeAttemptLockout's key/collection so tests can inspect and
+// manipulate the lockout record deterministically (scope 'scan', no cf header
+// in supertest so the IP component is req.ip).
+const LOCKOUT_COLLECTION = 'ratelimit_bag_codes';
+function lockoutDocFor(bagToken) {
+  const tokenDigest = crypto.createHash('sha256')
+    .update(String(bagToken || '')).digest('hex').slice(0, 16);
+  return mongoose.connection.collection(LOCKOUT_COLLECTION)
+    .findOne({ _id: { $regex: `^scan:${tokenDigest}:` } });
+}
 
 jest.setTimeout(60000);
 
@@ -98,6 +110,75 @@ describe('POST /api/v1/scan/session', () => {
       .post('/api/v1/scan/session')
       .send({ bagToken, code: OP_CODE });
     expect(locked.status).toBe(429);
+  });
+
+  test('correct code after some failed attempts succeeds AND zeroes the failure counter', async () => {
+    const { bagToken } = await createWorld();
+    const maxAttempts = await SystemConfig.getValue('operator_scan_code_max_attempts', 5);
+
+    // A few failures, but stay under the lockout threshold.
+    const failsBeforeSuccess = Math.min(2, maxAttempts - 1);
+    for (let i = 0; i < failsBeforeSuccess; i++) {
+      const bad = await request(app)
+        .post('/api/v1/scan/session')
+        .send({ bagToken, code: 'WRONG9' });
+      expect(bad.status).toBe(401);
+    }
+    const before = await lockoutDocFor(bagToken);
+    expect(before).not.toBeNull();
+    expect(before.hits).toBe(failsBeforeSuccess);
+
+    // Correct code succeeds and must clear the failure counter (clearFailures).
+    const ok = await request(app)
+      .post('/api/v1/scan/session')
+      .send({ bagToken, code: OP_CODE });
+    expect(ok.status).toBe(200);
+
+    // Counter wiped: the record is gone (resetKey deletes it).
+    const cleared = await lockoutDocFor(bagToken);
+    expect(cleared).toBeNull();
+
+    // A subsequent wrong attempt starts the count over at 1, not from the
+    // pre-success total — proving the counter was zeroed.
+    const badAgain = await request(app)
+      .post('/api/v1/scan/session')
+      .send({ bagToken, code: 'WRONG9' });
+    expect(badAgain.status).toBe(401);
+    const restarted = await lockoutDocFor(bagToken);
+    expect(restarted.hits).toBe(1);
+  });
+
+  test('expired lockout window no longer blocks a code attempt', async () => {
+    const { bagToken } = await createWorld();
+    const maxAttempts = await SystemConfig.getValue('operator_scan_code_max_attempts', 5);
+
+    // Drive into a locked-out state.
+    for (let i = 0; i < maxAttempts; i++) {
+      const bad = await request(app)
+        .post('/api/v1/scan/session')
+        .send({ bagToken, code: 'WRONG9' });
+      expect(bad.status).toBe(401);
+    }
+    // Sanity: a correct code is now blocked (429) while the window is live.
+    const lockedNow = await request(app)
+      .post('/api/v1/scan/session')
+      .send({ bagToken, code: OP_CODE });
+    expect(lockedNow.status).toBe(429);
+
+    // Simulate the lockout window passing: push _expiresAt into the past.
+    // isLockedOut treats an expired record as not-locked (the _expiresAt
+    // branch in codeAttemptLockout), independent of the Mongo TTL purge.
+    const doc = await lockoutDocFor(bagToken);
+    expect(doc).not.toBeNull();
+    await mongoose.connection.collection(LOCKOUT_COLLECTION)
+      .updateOne({ _id: doc._id }, { $set: { _expiresAt: new Date(Date.now() - 1000) } });
+
+    // The same correct code is now allowed again (not 429).
+    const allowed = await request(app)
+      .post('/api/v1/scan/session')
+      .send({ bagToken, code: OP_CODE });
+    expect(allowed.status).toBe(200);
+    expect(allowed.body.actorType).toBe('operator');
   });
 
   test('unknown bag token -> generic 404', async () => {

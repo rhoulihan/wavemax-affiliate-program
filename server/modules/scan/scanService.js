@@ -171,6 +171,13 @@ async function resolveScan({ bagToken }) {
  * @returns {{orderId, newStatus, action, sessionTally?}}
  */
 async function applyScan({ bagToken, expectedAction, reopen, paymentConfirmed, actor, req }) {
+  // expectedAction is required: without it the drift guard below is skipped
+  // entirely, so an operator could apply a stale action against a bag whose
+  // state has since changed. Reject up front (400) before touching the order.
+  if (!expectedAction) {
+    throw new ScanError('expected_action_required', 'expectedAction required', 400);
+  }
+
   const bag = await resolveRegisteredBag(bagToken);
   const now = new Date();
   const reopenWindowMs = await getReopenWindowMs();
@@ -178,7 +185,8 @@ async function applyScan({ bagToken, expectedAction, reopen, paymentConfirmed, a
   const decision = resolveScanAction(reference, { now, reopenWindowMs });
 
   // Drift guard: the action the UI confirmed must still be the current one.
-  if (expectedAction && expectedAction !== decision.action) {
+  // (expectedAction is guaranteed present by the check at the top.)
+  if (expectedAction !== decision.action) {
     throw new ScanError('state_changed',
       'Bag state changed since you scanned — please re-scan', 409);
   }
