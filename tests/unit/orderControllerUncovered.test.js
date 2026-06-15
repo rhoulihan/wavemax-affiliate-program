@@ -86,10 +86,10 @@ describe('Order Controller - Uncovered Functions', () => {
     const mockOrders = [
       {
         orderId: 'ORD001',
-        customerId: { customerId: 'CUST001', firstName: 'John', lastName: 'Doe' },
-        affiliateId: { businessName: 'Test Business' },
-        actualTotal: 50,
-        status: 'delivered',
+        customerId: 'CUST001',
+        affiliateId: 'AFF123',
+        bagId: 'BAG-001',
+        status: 'complete',
         createdAt: new Date('2025-01-01')
       }
     ];
@@ -103,7 +103,7 @@ describe('Order Controller - Uncovered Functions', () => {
       });
       
       Customer.find.mockResolvedValue([
-        { customerId: mockOrders[0].customerId.customerId, firstName: 'John', lastName: 'Doe', email: 'john@example.com' }
+        { customerId: mockOrders[0].customerId, firstName: 'John', lastName: 'Doe', email: 'john@example.com' }
       ]);
 
       await exportOrders(req, res);
@@ -143,7 +143,7 @@ describe('Order Controller - Uncovered Functions', () => {
       });
       
       Customer.find.mockResolvedValue([
-        { customerId: mockOrders[0].customerId.customerId, firstName: 'John', lastName: 'Doe', email: 'john@example.com' }
+        { customerId: mockOrders[0].customerId, firstName: 'John', lastName: 'Doe', email: 'john@example.com' }
       ]);
 
       await exportOrders(req, res);
@@ -185,7 +185,7 @@ describe('Order Controller - Uncovered Functions', () => {
       ];
       
       const mockOrders = [
-        { orderId: 'ORD001', customerId: 'CUST001', status: 'delivered', createdAt: new Date() }
+        { orderId: 'ORD001', customerId: 'CUST001', status: 'complete', createdAt: new Date() }
       ];
 
       // First call to find customers by search term
@@ -229,7 +229,7 @@ describe('Order Controller - Uncovered Functions', () => {
       req.user.role = 'admin';
 
       const mockOrders = [
-        { orderId: 'ORD001', customerId: 'CUST001', status: 'delivered', createdAt: new Date() }
+        { orderId: 'ORD001', customerId: 'CUST001', status: 'complete', createdAt: new Date() }
       ];
       
       Order.countDocuments.mockResolvedValue(1);

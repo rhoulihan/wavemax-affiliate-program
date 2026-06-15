@@ -379,12 +379,14 @@ exports.getAffiliateEarnings = async (req, res) => {
       startDate = new Date(0);
     }
 
-    // Find all delivered orders for this affiliate within the date range
+    // Find all completed orders for this affiliate within the date range.
+    // Money/weight/commission moved to Cents (external) in Phase 1; this
+    // endpoint now returns order counts only.
     const orders = await Order.find({
       affiliateId,
-      status: 'delivered',
-      deliveredAt: { $gte: startDate, $lte: endDate }
-    }).sort({ deliveredAt: -1 });
+      status: 'complete',
+      completedAt: { $gte: startDate, $lte: endDate }
+    }).sort({ completedAt: -1 });
 
     // Get customer details for each order
     const customerIds = [...new Set(orders.map(order => order.customerId))];
@@ -396,27 +398,10 @@ exports.getAffiliateEarnings = async (req, res) => {
       customerMap[customer.customerId] = customer;
     });
 
-    // Calculate total earnings
-    let totalEarnings = 0;
-    orders.forEach(order => {
-      totalEarnings += order.affiliateCommission || 0;
-    });
-
-    // Find pending transactions (not yet paid out)
-    const pendingTransactions = await Transaction.find({
-      affiliateId,
-      status: { $in: ['pending', 'processing'] }
-    });
-
-    let pendingAmount = 0;
-    pendingTransactions.forEach(transaction => {
-      pendingAmount += transaction.amount;
-    });
-
     res.status(200).json({
       success: true,
-      totalEarnings,
-      pendingAmount,
+      totalEarnings: 0,
+      pendingAmount: 0,
       orderCount: orders.length,
       orders: orders.map(order => {
         const customer = customerMap[order.customerId];
@@ -424,10 +409,7 @@ exports.getAffiliateEarnings = async (req, res) => {
           orderId: order.orderId,
           customerId: order.customerId,
           customerName: customer ? `${customer.firstName} ${customer.lastName}` : 'Unknown Customer',
-          deliveredAt: order.deliveredAt,
-          actualWeight: order.actualWeight,
-          actualTotal: order.actualTotal,
-          affiliateCommission: order.affiliateCommission
+          completedAt: order.completedAt
         };
       })
     });
@@ -591,7 +573,9 @@ exports.getAffiliateOrders = async (req, res) => {
       }
 
       if (startDate && endDate) {
-        query.pickupDate = { $gte: startDate, $lte: endDate };
+        // Slim order (PR 3): pickupDate is gone — orders are filtered by their
+        // intake/creation time instead.
+        query.createdAt = { $gte: startDate, $lte: endDate };
       }
     }
 
@@ -627,6 +611,8 @@ exports.getAffiliateOrders = async (req, res) => {
     const ordersData = orders.map(order => {
       const customer = customerMap[order.customerId];
 
+      // Slim order (PR 3): state record only — status + scan timestamps +
+      // createdAt. Money/weight/pickup-scheduling fields were removed.
       return {
         orderId: order.orderId,
         customerId: order.customerId,
@@ -635,32 +621,23 @@ exports.getAffiliateOrders = async (req, res) => {
           phone: customer.phone,
           address: `${customer.address}, ${customer.city}, ${customer.state} ${customer.zipCode}`
         } : null,
-        pickupDate: order.pickupDate,
-        pickupTime: order.pickupTime,
-        deliveryDate: order.deliveryDate,
-        deliveryTime: order.deliveryTime,
+        bagId: order.bagId,
         status: order.status,
-        estimatedSize: order.estimatedSize,
-        actualWeight: order.actualWeight,
-        estimatedTotal: order.estimatedTotal,
-        actualTotal: order.actualTotal,
+        pickup: order.pickup,
+        processing: order.processing,
+        storePickup: order.storePickup,
+        delivery: order.delivery,
+        completedAt: order.completedAt,
+        cancelledAt: order.cancelledAt,
         createdAt: order.createdAt
       };
     });
-
-    // Calculate total earnings from delivered orders
-    const totalEarnings = orders.reduce((sum, order) => {
-      if (order.status === 'delivered' && order.affiliateCommission) {
-        return sum + order.affiliateCommission;
-      }
-      return sum;
-    }, 0);
 
     res.status(200).json({
       success: true,
       orders: ordersData,
       totalItems: totalOrders,
-      totalEarnings: parseFloat(totalEarnings.toFixed(2)),
+      totalEarnings: 0,
       pagination: {
         total: totalOrders,
         page,
@@ -757,9 +734,10 @@ exports.getAffiliateTransactions = async (req, res) => {
  * Get affiliate dashboard stats
  */
 /**
- * Year-to-date earnings for an affiliate.
- * Sums affiliateCommission + actualTotal for orders completed since Jan 1
- * of the current year. Used by the dashboard YTD card.
+ * Year-to-date stats for an affiliate.
+ * Counts completed orders since Jan 1 of the current year. Money/commission
+ * moved to Cents (external) in Phase 1, so revenue/earnings report 0.
+ * Used by the dashboard YTD card.
  */
 exports.getAffiliateYtdStats = async (req, res) => {
   try {
@@ -771,26 +749,19 @@ exports.getAffiliateYtdStats = async (req, res) => {
 
     const yearStart = new Date(new Date().getFullYear(), 0, 1);
 
-    // deliveredAt (renames completedAt) is the ground truth for YTD —
-    // commission realizes at 'delivered' (design §4.4/§6.4).
-    const orders = await Order.find({
+    // completedAt is the ground truth for YTD. Money/commission moved to
+    // Cents (external) in Phase 1; this endpoint returns order counts only.
+    const orderCount = await Order.countDocuments({
       affiliateId,
-      status: 'delivered',
-      deliveredAt: { $gte: yearStart }
-    }).select('affiliateCommission actualTotal deliveredAt');
-
-    let totalEarnings = 0;
-    let totalRevenue = 0;
-    for (const order of orders) {
-      totalEarnings += order.affiliateCommission || 0;
-      totalRevenue += order.actualTotal || 0;
-    }
+      status: 'complete',
+      completedAt: { $gte: yearStart }
+    });
 
     res.status(200).json({
       success: true,
-      totalEarnings,
-      totalRevenue,
-      orderCount: orders.length,
+      totalEarnings: 0,
+      totalRevenue: 0,
+      orderCount,
       yearStart,
       asOf: new Date()
     });
@@ -818,59 +789,29 @@ exports.getAffiliateDashboardStats = async (req, res) => {
     // Get customer count
     const customerCount = await Customer.countDocuments({ affiliateId });
 
-    // Get active orders count
+    // Get active orders count (open set in the new status machine)
     const activeOrderCount = await Order.countDocuments({
       affiliateId,
-      status: { $in: ['in_progress', 'processed', 'ready_for_pickup', 'picked_up'] }
+      status: { $in: ['pending', 'in_progress', 'out_for_delivery'] }
     });
 
-    // Get total earnings
-    const deliveredOrders = await Order.find({
-      affiliateId,
-      status: 'delivered'
-    });
-
-    let totalEarnings = 0;
-    deliveredOrders.forEach(order => {
-      totalEarnings += order.affiliateCommission || 0;
-    });
-
-    // Get earnings for this month
+    // Money/commission moved to Cents (external) in Phase 1. Earnings fields
+    // are kept in the response shape but report 0; counts remain accurate.
     const now = new Date();
     const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-
-    const monthOrders = deliveredOrders.filter(order =>
-      order.deliveredAt && order.deliveredAt >= firstDayOfMonth
-    );
-
-    let monthEarnings = 0;
-    monthOrders.forEach(order => {
-      monthEarnings += order.affiliateCommission || 0;
-    });
-
-    // Get earnings for this week
     const firstDayOfWeek = new Date(now);
     firstDayOfWeek.setDate(now.getDate() - now.getDay());
     firstDayOfWeek.setHours(0, 0, 0, 0);
 
-    const weekOrders = deliveredOrders.filter(order =>
-      order.deliveredAt && order.deliveredAt >= firstDayOfWeek
-    );
-
-    let weekEarnings = 0;
-    weekOrders.forEach(order => {
-      weekEarnings += order.affiliateCommission || 0;
-    });
-
-    // Get pending payments
-    const pendingTransactions = await Transaction.find({
+    const monthlyOrders = await Order.countDocuments({
       affiliateId,
-      status: { $in: ['pending', 'processing'] }
+      status: 'complete',
+      completedAt: { $gte: firstDayOfMonth }
     });
-
-    let pendingEarnings = 0;
-    pendingTransactions.forEach(transaction => {
-      pendingEarnings += transaction.amount;
+    const weeklyOrders = await Order.countDocuments({
+      affiliateId,
+      status: 'complete',
+      completedAt: { $gte: firstDayOfWeek }
     });
 
     // Calculate next payout date (typically weekly on Fridays)
@@ -882,12 +823,12 @@ exports.getAffiliateDashboardStats = async (req, res) => {
       stats: {
         customerCount,
         activeOrderCount,
-        totalEarnings,
-        monthEarnings,
-        weekEarnings,
-        pendingEarnings,
-        monthlyOrders: monthOrders.length,
-        weeklyOrders: weekOrders.length,
+        totalEarnings: 0,
+        monthEarnings: 0,
+        weekEarnings: 0,
+        pendingEarnings: 0,
+        monthlyOrders,
+        weeklyOrders,
         nextPayoutDate
       }
     });

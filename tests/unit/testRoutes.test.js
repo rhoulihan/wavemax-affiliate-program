@@ -378,16 +378,13 @@ describe('Test Routes', () => {
   });
 
   describe('POST /api/test/order/advance-stage', () => {
-    it('should record intake weight on the order (weigh action)', async () => {
+    it('should advance order to in_progress (weigh action)', async () => {
       const mockOrder = {
         _id: 'mongoId123',
         orderId: 'ORD-123',
         customerId: 'CUST-123',
         bagToken: 'a'.repeat(32),
-        bags: [],
-        status: 'in_progress',
-        isV2Order: true,
-        baseRate: 1.25,
+        status: 'pending',
         save: jest.fn().mockResolvedValue(true)
       };
 
@@ -398,27 +395,21 @@ describe('Test Routes', () => {
         .post('/api/test/order/advance-stage')
         .send({
           orderId: 'ORD-123',
-          currentStage: 'intake',
+          currentStage: 'pending',
           nextStage: 'in_progress',
-          action: 'weigh',
-          weights: [15, 20],
-          actualWeight: 35
+          action: 'weigh'
         });
 
       expect(response.status).toBe(200);
       expect(mockOrder.status).toBe('in_progress');
-      expect(mockOrder.bags).toHaveLength(1);
-      expect(mockOrder.actualWeight).toBe(35);
+      expect(mockOrder.intake).toMatchObject({ role: 'operator' });
       expect(mockOrder.save).toHaveBeenCalled();
     });
 
-    it('should advance order to processed stage (process action)', async () => {
+    it('should advance order to out_for_delivery (process action)', async () => {
       const mockOrder = {
         _id: 'mongoId123',
         orderId: 'ORD-123',
-        bags: [
-          { bagToken: 'c'.repeat(32), bagNumber: 1, status: 'intake', scannedAt: {} }
-        ],
         status: 'in_progress',
         save: jest.fn().mockResolvedValue(true)
       };
@@ -434,20 +425,16 @@ describe('Test Routes', () => {
         });
 
       expect(response.status).toBe(200);
-      expect(mockOrder.status).toBe('processed');
-      expect(mockOrder.bags[0].status).toBe('processed');
+      expect(mockOrder.status).toBe('out_for_delivery');
+      expect(mockOrder.storePickup).toMatchObject({ role: 'affiliate' });
       expect(mockOrder.save).toHaveBeenCalled();
     });
 
-    it('should advance order to delivered stage (pickup action)', async () => {
+    it('should advance order to complete (pickup action)', async () => {
       const mockOrder = {
         _id: 'mongoId123',
         orderId: 'ORD-123',
-        bags: [
-          { bagToken: 'd'.repeat(32), bagNumber: 1, status: 'processed', scannedAt: {} }
-        ],
-        status: 'processed',
-        isV2Order: true,
+        status: 'out_for_delivery',
         save: jest.fn().mockResolvedValue(true)
       };
 
@@ -462,8 +449,9 @@ describe('Test Routes', () => {
         });
 
       expect(response.status).toBe(200);
-      expect(mockOrder.status).toBe('delivered');
-      expect(mockOrder.bags[0].status).toBe('picked_up');
+      expect(mockOrder.status).toBe('complete');
+      expect(mockOrder.delivery).toMatchObject({ role: 'affiliate' });
+      expect(mockOrder.completedAt).toBeInstanceOf(Date);
       expect(mockOrder.save).toHaveBeenCalled();
     });
 

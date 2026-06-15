@@ -6,7 +6,6 @@ jest.mock('../../server/utils/emailService', () => ({
   sendAffiliateWelcomeEmail: jest.fn(),
   sendAffiliateNewCustomerEmail: jest.fn(),
   sendAffiliateNewOrderEmail: jest.fn(),
-  sendAffiliateCommissionEmail: jest.fn(),
   sendAffiliateOrderCancellationEmail: jest.fn(),
   sendAffiliatePasswordResetEmail: jest.fn(),
   sendCustomerWelcomeEmail: jest.fn(),
@@ -21,7 +20,6 @@ jest.mock('../../server/utils/emailService', () => ({
   sendOperatorShiftReminderEmail: jest.fn(),
   sendOperatorPasswordResetEmail: jest.fn(),
   sendServiceDownAlert: jest.fn(),
-  sendOrderReadyNotification: jest.fn(),
   sendEmail: jest.fn(),
   sendPasswordResetEmail: jest.fn()
 }));
@@ -37,7 +35,6 @@ describe('Email Service Mock', () => {
     emailService.sendAffiliateWelcomeEmail.mockResolvedValue({ MessageId: 'test-message-id' });
     emailService.sendAffiliateNewCustomerEmail.mockResolvedValue({ MessageId: 'test-message-id' });
     emailService.sendAffiliateNewOrderEmail.mockResolvedValue({ MessageId: 'test-message-id' });
-    emailService.sendAffiliateCommissionEmail.mockResolvedValue({ MessageId: 'test-message-id' });
     emailService.sendAffiliateOrderCancellationEmail.mockResolvedValue({ MessageId: 'test-message-id' });
     emailService.sendAffiliatePasswordResetEmail.mockResolvedValue({ MessageId: 'test-message-id' });
     emailService.sendCustomerWelcomeEmail.mockResolvedValue({ MessageId: 'test-message-id' });
@@ -52,7 +49,6 @@ describe('Email Service Mock', () => {
     emailService.sendOperatorShiftReminderEmail.mockResolvedValue({ MessageId: 'test-message-id' });
     emailService.sendOperatorPasswordResetEmail.mockResolvedValue({ MessageId: 'test-message-id' });
     emailService.sendServiceDownAlert.mockResolvedValue({ MessageId: 'test-message-id' });
-    emailService.sendOrderReadyNotification.mockResolvedValue({ MessageId: 'test-message-id' });
     emailService.sendEmail.mockResolvedValue({ MessageId: 'test-message-id' });
     emailService.sendPasswordResetEmail.mockResolvedValue({ MessageId: 'test-message-id' });
   });
@@ -62,7 +58,6 @@ describe('Email Service Mock', () => {
       expect(typeof emailService.sendAffiliateWelcomeEmail).toBe('function');
       expect(typeof emailService.sendAffiliateNewCustomerEmail).toBe('function');
       expect(typeof emailService.sendAffiliateNewOrderEmail).toBe('function');
-      expect(typeof emailService.sendAffiliateCommissionEmail).toBe('function');
       expect(typeof emailService.sendAffiliateOrderCancellationEmail).toBe('function');
       expect(typeof emailService.sendAffiliatePasswordResetEmail).toBe('function');
       expect(typeof emailService.sendCustomerWelcomeEmail).toBe('function');
@@ -77,7 +72,6 @@ describe('Email Service Mock', () => {
       expect(typeof emailService.sendOperatorShiftReminderEmail).toBe('function');
       expect(typeof emailService.sendOperatorPasswordResetEmail).toBe('function');
       expect(typeof emailService.sendServiceDownAlert).toBe('function');
-      expect(typeof emailService.sendOrderReadyNotification).toBe('function');
       expect(typeof emailService.sendEmail).toBe('function');
       expect(typeof emailService.sendPasswordResetEmail).toBe('function');
     });
@@ -90,7 +84,6 @@ describe('Email Service Mock', () => {
       expect(await emailService.sendAffiliateWelcomeEmail({})).toEqual(expectedResponse);
       expect(await emailService.sendAffiliateNewCustomerEmail({}, {})).toEqual(expectedResponse);
       expect(await emailService.sendAffiliateNewOrderEmail({}, {}, {})).toEqual(expectedResponse);
-      expect(await emailService.sendAffiliateCommissionEmail({}, {}, {})).toEqual(expectedResponse);
       expect(await emailService.sendAffiliateOrderCancellationEmail({}, {}, {})).toEqual(expectedResponse);
       expect(await emailService.sendAffiliatePasswordResetEmail({}, '')).toEqual(expectedResponse);
       
@@ -113,8 +106,7 @@ describe('Email Service Mock', () => {
       
       // Service alert functions
       expect(await emailService.sendServiceDownAlert({})).toEqual(expectedResponse);
-      expect(await emailService.sendOrderReadyNotification('', {})).toEqual(expectedResponse);
-      
+
       // Generic functions
       expect(await emailService.sendEmail({})).toEqual(expectedResponse);
       expect(await emailService.sendPasswordResetEmail({}, '')).toEqual(expectedResponse);

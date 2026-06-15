@@ -232,20 +232,18 @@ describe('Administrator Controller - Uncovered Functions', () => {
         groupBy: 'day'
       };
 
+      // Slim order (PR 3): timeline reports status counts only — no
+      // revenue/processing-time, single aggregate call.
       const mockAnalytics = [
         {
-          _id: { day: 1, month: 1, year: 2025 },
+          _id: '2025-01-01',
           totalOrders: 10,
           completedOrders: 8,
-          totalRevenue: 500,
-          averageOrderValue: 50,
-          averageProcessingTime: 120
+          cancelledOrders: 0
         }
       ];
 
-      Order.aggregate
-        .mockResolvedValueOnce(mockAnalytics)  // First call for timeline
-        .mockResolvedValueOnce([]);  // Second call for processingTimeDistribution
+      Order.aggregate.mockResolvedValueOnce(mockAnalytics);  // timeline
 
       await administratorController.getOrderAnalytics(req, res, next);
 
@@ -266,7 +264,6 @@ describe('Administrator Controller - Uncovered Functions', () => {
         success: true,
         analytics: expect.objectContaining({
           timeline: expect.any(Array),
-          processingTimeDistribution: expect.any(Array),
           summary: expect.any(Object)
         })
       });

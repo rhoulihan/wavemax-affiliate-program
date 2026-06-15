@@ -6,9 +6,8 @@ const ControllerHelpers = require('../utils/controllerHelpers');
 const orderQueueService = require('../services/operatorOrderQueueService');
 const shiftStatsService = require('../services/operatorShiftStatsService');
 const supportService = require('../services/operatorSupportService');
-const bagWorkflowService = require('../services/operatorBagWorkflowService');
-const orderIntakeService = require('../modules/orders/orderIntakeService');
-const orderAdvanceService = require('../modules/orders/orderAdvanceService');
+const bagService = require('../modules/bags/bagService');
+const orderTransitionService = require('../modules/orders/orderTransitionService');
 const extractBagToken = require('../modules/bags/extractBagToken');
 
 // Get order queue
@@ -164,149 +163,79 @@ exports.addCustomerNote = async (req, res) => {
   }
 };
 
-// Scan customer card
-exports.scanCustomer = async (req, res) => {
-  try {
-    const result = await bagWorkflowService.scanCustomer({
-      bagToken: req.body.bagToken || req.body.bagId || req.body.customerId, // tolerate old field names one sprint
-      operatorId: req.user.id,
-      req
-    });
-    res.json({ success: true, ...result });
-  } catch (err) {
-    if (err.isBagWorkflowError) {
-      return res.status(err.status).json({ success: false, error: err.message, ...err.details });
-    }
-    logger.error('Error in scanCustomer:', err);
-    res.status(500).json({
-      success: false,
-      error: 'Failed to scan customer card',
-      message: 'An error occurred while processing the scan'
-    });
+// Resolve the bag for a kiosk scan, mapping anti-enumeration null to a generic
+// error. The kiosk operator is authenticated by JWT (req.user.id).
+async function resolveActiveBag(rawToken) {
+  const bagToken = extractBagToken(rawToken);
+  if (!bagToken) return { error: { message: 'A valid bag token is required', status: 400 } };
+  const resolved = await bagService.resolveByToken(bagToken);
+  if (!resolved || !resolved.bag) {
+    return { error: { message: 'Bag not recognized', status: 404, code: 'invalid_bag' } };
   }
-};
+  return { bag: resolved.bag };
+}
 
-// Scan bag for processing (new format: customerId#bagId)
-exports.scanBag = async (req, res) => {
-  try {
-    const result = await bagWorkflowService.scanBag({ qrCode: req.body.qrCode });
-    if (result.legacy) {
-      req.body.customerId = result.customerId || req.body.bagId;
-      return exports.scanCustomer(req, res);
-    }
-    res.json({ success: true, ...result });
-  } catch (err) {
-    if (err.isBagWorkflowError) {
-      return res.status(err.status).json({ success: false, error: err.message, ...err.details });
-    }
-    logger.error('Error scanning bag:', err);
-    res.status(500).json({
-      success: false,
-      error: 'Failed to scan bag',
-      message: 'An error occurred while processing the scan'
-    });
+function sendTransitionError(res, err) {
+  if (err.isTransitionError) {
+    return ControllerHelpers.sendError(res, err.message, err.status, { code: err.code, ...err.details });
   }
-};
+  throw err;
+}
 
-// Receive order with weights
-exports.receiveOrder = async (req, res) => {
-  try {
-    const order = await bagWorkflowService.receiveOrder({
-      orderId: req.params.orderId,
-      bagWeights: req.body.bagWeights,
-      totalWeight: req.body.totalWeight,
-      operatorId: req.user.id,
-      req
-    });
-    res.json({ success: true, message: 'Order received and marked as in progress', order });
-  } catch (err) {
-    if (err.isBagWorkflowError) {
-      return res.status(err.status).json({ success: false, error: err.message, ...err.details });
-    }
-    logger.error('Error receiving order:', err);
-    res.status(500).json({ success: false, error: 'Failed to receive order' });
-  }
-};
+const orderResponse = (order) => order && ({
+  orderId: order.orderId,
+  status: order.status,
+  customerId: order.customerId,
+  affiliateId: order.affiliateId,
+  bagId: order.bagId
+});
 
-// New endpoint for weighing bags with bag tracking
-exports.weighBags = async (req, res) => {
-  try {
-    const { order, reIntake } = await bagWorkflowService.weighBags({
-      bagToken: req.body.bagToken,
-      weight: req.body.weight,
-      addOns: req.body.addOns,
-      freshAddOnsFormPlaced: !!req.body.freshAddOnsFormPlaced,
-      operatorId: req.user.id,
-      req
-    });
-    res.json({ success: true, order, reIntake, message: 'Order created at intake' });
-  } catch (err) {
-    if (err.isBagWorkflowError || err.isIntakeError) {
-      return res.status(err.status).json({ success: false, error: err.message, ...err.details });
-    }
-    logger.error('Error weighing bags:', err);
-    res.status(500).json({ success: false, error: 'Failed to weigh bags' });
-  }
-};
-
-// State-driven kiosk advance (PR 9): in_progress -> processed (gate runs),
-// ready_for_pickup -> picked_up (scan-OUT). Replaces scanProcessed /
-// completePickup. Accepts a raw bag token or the printed claim URL — in the
-// `bagToken` key only (the one-sprint old-field-name tolerance has ended).
+// Kiosk scan — state-driven. The current order state determines the next step
+// (spec §3): no open order -> create pending; pending -> in_progress;
+// in_progress -> out_for_delivery; out_for_delivery -> complete. The store
+// kiosk operator is JWT-authenticated; `role` is 'operator'.
 exports.advance = ControllerHelpers.asyncWrapper(async (req, res) => {
-  const bagToken = extractBagToken(req.body.bagToken);
-  if (!bagToken) return ControllerHelpers.sendError(res, 'A valid bag token is required', 400);
+  const { bag, error } = await resolveActiveBag(req.body.bagToken);
+  if (error) return ControllerHelpers.sendError(res, error.message, error.status, error.code ? { code: error.code } : undefined);
   try {
-    const result = await orderAdvanceService.advance({ bagToken, operatorId: req.user.id, req });
-    ControllerHelpers.sendSuccess(res, { action: result.action, order: result.order },
-      `Order advanced to ${result.action}`);
+    const result = await orderTransitionService.advanceOrder({
+      bag,
+      by: String(req.user.id),
+      role: 'operator',
+      paymentConfirmed: !!req.body.paymentConfirmed,
+      req
+    });
+    return ControllerHelpers.sendSuccess(res, {
+      action: result.action,
+      to: result.to,
+      orderId: result.orderId,
+      order: orderResponse(result.order)
+    }, `Scan applied: ${result.action}`);
   } catch (err) {
-    if (err.isAdvanceError) {
-      return ControllerHelpers.sendError(res, err.message, err.status, { code: err.code });
-    }
-    throw err;
+    return sendTransitionError(res, err);
   }
 });
 
-// Legacy kiosk endpoint — now a thin delegate onto the state-driven advance
-// engine (PR 9). Kept so already-deployed kiosk clients keep working.
+// At the store kiosk, scanning a pending bag = intake (advance to in_progress).
+// The intake endpoint is a state-driven advance — kept so the existing kiosk
+// route keeps working.
+exports.intake = exports.advance;
+
+// Legacy kiosk alias — state-driven advance.
 exports.scanProcessed = exports.advance;
 
-// Kiosk intake — operator JWT + CSRF. One bag = one order (spec §6.4 / §5).
-exports.intake = ControllerHelpers.asyncWrapper(async (req, res) => {
-  const { bagToken, weight, addOns, freshAddOnsFormPlaced } = req.body;
-  if (!bagToken) {
-    return ControllerHelpers.sendError(res, 'bagToken is required', 400);
-  }
+// Field/partner path: scanning a bag with no open order opens a pending order
+// at pickup (PR 5 adds the scan-session auth; here the operator JWT authorizes).
+exports.createPending = ControllerHelpers.asyncWrapper(async (req, res) => {
+  const { bag, error } = await resolveActiveBag(req.body.bagToken);
+  if (error) return ControllerHelpers.sendError(res, error.message, error.status, error.code ? { code: error.code } : undefined);
   try {
-    const { order, reIntake } = await orderIntakeService.createOrderFromBag({
-      bagToken,
-      weight,
-      addOns,
-      freshAddOnsFormPlaced: !!freshAddOnsFormPlaced,
-      operatorId: req.user.id,
-      req
+    const { order } = await orderTransitionService.createPendingOrder({
+      bag, by: String(req.user.id), role: 'operator', req
     });
-    ControllerHelpers.sendSuccess(res, {
-      order: {
-        orderId: order.orderId,
-        status: order.status,
-        customerId: order.customerId,
-        affiliateId: order.affiliateId,
-        actualWeight: order.actualWeight,
-        addOns: order.addOns,
-        addOnTotal: order.addOnTotal,
-        feeBreakdown: order.feeBreakdown,
-        actualTotal: order.actualTotal,
-        affiliateCommission: order.affiliateCommission
-      },
-      reIntake
-    }, 'Order created at intake', 201);
+    return ControllerHelpers.sendSuccess(res, { order: orderResponse(order) }, 'Order created at pickup', 201);
   } catch (err) {
-    if (err.isIntakeError || err.isBagWorkflowError) {
-      return ControllerHelpers.sendError(res, err.message, err.status, { code: err.code, ...err.details });
-    }
-    throw err;
+    return sendTransitionError(res, err);
   }
 });
 

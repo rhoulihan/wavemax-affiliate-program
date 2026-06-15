@@ -1,23 +1,32 @@
+// Kiosk first-scan / intake path — now state-driven advance (spec §3).
+//   no open order      -> create-pending
+//   pending            -> in_progress (intake)
+// /intake is an alias of /advance; operator role required.
+
+jest.mock('../../server/utils/emailService');
+
 const request = require('supertest');
 const app = require('../../server');
-const mongoose = require('mongoose');
 const Operator = require('../../server/models/Operator');
 const Administrator = require('../../server/models/Administrator');
 const Order = require('../../server/models/Order');
 const Customer = require('../../server/models/Customer');
 const Affiliate = require('../../server/models/Affiliate');
 const Bag = require('../../server/modules/bags/Bag');
+const SystemConfig = require('../../server/models/SystemConfig');
 const { getCsrfToken, createAgent } = require('../helpers/csrfHelper');
 const { ensureTestAffiliate, ensureTestCustomer } = require('../helpers/v2TestHelpers');
 const encryptionUtil = require('../../server/utils/encryption');
 
 jest.setTimeout(90000);
 
-describe('POST /api/v1/operators/intake (kiosk)', () => {
+describe('POST /api/v1/operators/intake (kiosk, state-driven advance)', () => {
   let operatorAgent, adminAgent;
   let operatorToken, operatorCsrfToken, adminToken, adminCsrfToken;
   let testAdmin, testOperator, affiliate, customer, bag;
   const TOKEN = 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'; // 32 hex chars
+
+  beforeAll(async () => { await SystemConfig.initializeDefaults(); });
 
   beforeEach(async () => {
     await Promise.all([
@@ -63,42 +72,42 @@ describe('POST /api/v1/operators/intake (kiosk)', () => {
     });
   });
 
-  function intakeBody(overrides = {}) {
-    return {
-      bagToken: TOKEN,
-      weight: 10,
-      addOns: { premiumDetergent: true, fabricSoftener: false, stainRemover: false },
-      freshAddOnsFormPlaced: true,
-      ...overrides
-    };
-  }
-
-  it('creates an in_progress order with non-zero totals (silent-zero guard at the API seam)', async () => {
-    const res = await operatorAgent
+  const intake = (token, body = {}) =>
+    operatorAgent
       .post('/api/v1/operators/intake')
-      .set('Authorization', `Bearer ${operatorToken}`)
+      .set('Authorization', `Bearer ${token}`)
       .set('x-csrf-token', operatorCsrfToken)
-      .send(intakeBody());
+      .send({ bagToken: TOKEN, ...body });
 
-    expect(res.status).toBe(201);
+  it('a bag with no open order -> create-pending', async () => {
+    const res = await intake(operatorToken);
+    expect(res.status).toBe(200);
     expect(res.body.success).toBe(true);
-    expect(res.body.order.status).toBe('in_progress');
-    expect(res.body.order.feeBreakdown.totalFee).toBeGreaterThan(0);
-    expect(res.body.order.affiliateCommission).toBeGreaterThan(0);
-    expect(res.body.order.actualTotal).toBeGreaterThan(0);
+    expect(res.body.action).toBe('create-pending');
+    expect(res.body.order.status).toBe('pending');
 
     const saved = await Order.findOne({ orderId: res.body.order.orderId });
     expect(saved.bagId).toBe(bag.bagId);
     expect(saved.bagToken).toBe(TOKEN);
-    expect(String(saved.intake.weighedBy)).toBe(String(testOperator._id));
-    expect(saved.freshAddOnsFormPlaced).toBe(true);
+    expect(saved.pickup.by).toBe(String(testOperator._id));
+  });
+
+  it('a pending order -> in_progress (intake advance)', async () => {
+    const first = await intake(operatorToken);
+    expect(first.body.order.status).toBe('pending');
+
+    const res = await intake(operatorToken);
+    expect(res.status).toBe(200);
+    expect(res.body.action).toBe('advance');
+    expect(res.body.order.status).toBe('in_progress');
+    expect(await Order.countDocuments({})).toBe(1);
   });
 
   it('rejects without a CSRF token (403)', async () => {
     const res = await operatorAgent
       .post('/api/v1/operators/intake')
       .set('Authorization', `Bearer ${operatorToken}`)
-      .send(intakeBody());
+      .send({ bagToken: TOKEN });
     expect(res.status).toBe(403);
     expect(await Order.countDocuments({})).toBe(0);
   });
@@ -108,7 +117,7 @@ describe('POST /api/v1/operators/intake (kiosk)', () => {
       .post('/api/v1/operators/intake')
       .set('Authorization', `Bearer ${adminToken}`)
       .set('x-csrf-token', adminCsrfToken)
-      .send(intakeBody());
+      .send({ bagToken: TOKEN });
     expect(res.status).toBe(403);
   });
 
@@ -118,60 +127,18 @@ describe('POST /api/v1/operators/intake (kiosk)', () => {
     const res = await agent
       .post('/api/v1/operators/intake')
       .set('x-csrf-token', csrf)
-      .send(intakeBody());
+      .send({ bagToken: TOKEN });
     expect(res.status).toBe(401);
   });
 
-  it('maps service errors: 409 bag_not_active', async () => {
-    bag.status = 'issued';
-    bag.customerId = null;
-    await bag.save();
+  it('an unknown bag token -> 404 invalid_bag', async () => {
     const res = await operatorAgent
       .post('/api/v1/operators/intake')
       .set('Authorization', `Bearer ${operatorToken}`)
       .set('x-csrf-token', operatorCsrfToken)
-      .send(intakeBody());
-    expect(res.status).toBe(409);
-    expect(res.body.success).toBe(false);
-    expect(res.body.errors.code).toBe('bag_not_active');
-  });
-
-  it('maps service errors: 409 order_already_open on a second intake', async () => {
-    await operatorAgent
-      .post('/api/v1/operators/intake')
-      .set('Authorization', `Bearer ${operatorToken}`)
-      .set('x-csrf-token', operatorCsrfToken)
-      .send(intakeBody());
-    const res = await operatorAgent
-      .post('/api/v1/operators/intake')
-      .set('Authorization', `Bearer ${operatorToken}`)
-      .set('x-csrf-token', operatorCsrfToken)
-      .send(intakeBody({ weight: 12 }));
-    expect(res.status).toBe(409);
-    expect(res.body.errors.code).toBe('order_already_open');
-    expect(await Order.countDocuments({})).toBe(1);
-  });
-
-  it('re-intake: picked_up open order is auto-delivered, new order created (201 + reIntake)', async () => {
-    const first = await operatorAgent
-      .post('/api/v1/operators/intake')
-      .set('Authorization', `Bearer ${operatorToken}`)
-      .set('x-csrf-token', operatorCsrfToken)
-      .send(intakeBody());
-    await Order.updateOne({ orderId: first.body.order.orderId }, { $set: { status: 'picked_up' } });
-
-    const res = await operatorAgent
-      .post('/api/v1/operators/intake')
-      .set('Authorization', `Bearer ${operatorToken}`)
-      .set('x-csrf-token', operatorCsrfToken)
-      .send(intakeBody({ weight: 8 }));
-
-    expect(res.status).toBe(201);
-    expect(res.body.reIntake).toBe(true);
-    const prior = await Order.findOne({ orderId: first.body.order.orderId });
-    expect(prior.status).toBe('delivered');
-    expect(prior.proofOfDelivery.method).toBe('reintake');
-    expect(await Order.countDocuments({ status: 'in_progress' })).toBe(1);
+      .send({ bagToken: 'a'.repeat(32) });
+    expect(res.status).toBe(404);
+    expect(res.body.errors.code).toBe('invalid_bag');
   });
 
   it('400 when bagToken is missing', async () => {
@@ -179,7 +146,7 @@ describe('POST /api/v1/operators/intake (kiosk)', () => {
       .post('/api/v1/operators/intake')
       .set('Authorization', `Bearer ${operatorToken}`)
       .set('x-csrf-token', operatorCsrfToken)
-      .send(intakeBody({ bagToken: undefined }));
+      .send({});
     expect(res.status).toBe(400);
   });
 });

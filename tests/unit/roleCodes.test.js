@@ -37,9 +37,9 @@ describe('roleCodes utility', () => {
 
   test('new audit event constants exist', () => {
     const { AuditEvents } = require('../../server/utils/auditLogger');
-    for (const ev of ['OPERATOR_SCAN', 'ORDER_REINTAKE', 'DELIVERY_CONFIRMED',
+    for (const ev of ['OPERATOR_SCAN', 'ORDER_UNDO', 'ORDER_REOPENED', 'DELIVERY_CONFIRMED',
       'DELIVERY_CODE_FAILED', 'OPERATOR_CODE_FAILED', 'DELIVERY_CODE_RESET',
-      'CUSTOMER_PIN_RESET', 'OPERATOR_SCAN_CODE_RESET']) {
+      'OPERATOR_SCAN_CODE_RESET']) {
       expect(AuditEvents[ev]).toBe(ev);
     }
   });

@@ -353,11 +353,10 @@ class Formatters {
 
     const statusMaps = {
       order: {
+        pending: 'Pending',
         in_progress: 'In Progress',
-        processed: 'Processed',
-        ready_for_pickup: 'Ready for Pickup',
-        picked_up: 'Picked Up',
-        delivered: 'Delivered',
+        out_for_delivery: 'Out for Delivery',
+        complete: 'Complete',
         cancelled: 'Cancelled'
       },
       payment: {

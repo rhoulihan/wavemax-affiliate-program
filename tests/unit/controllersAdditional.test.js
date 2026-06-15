@@ -233,11 +233,11 @@ describe('Controllers - Additional Function Coverage', () => {
         req.user = { role: 'admin' };
 
         const mockOrders = [
-          { status: 'delivered', actualTotal: 50, actualWeight: 10 },
-          { status: 'delivered', actualTotal: 100, actualWeight: 15 },
-          { status: 'in_progress', actualWeight: 12 }
+          { status: 'complete' },
+          { status: 'complete' },
+          { status: 'in_progress' }
         ];
-        
+
         Order.find.mockResolvedValue(mockOrders);
 
         await getOrderStatistics(req, res, next);
@@ -249,8 +249,7 @@ describe('Controllers - Additional Function Coverage', () => {
           statistics: expect.objectContaining({
             totalOrders: 3,
             ordersByStatus: expect.any(Object),
-            totalRevenue: expect.any(Number),
-            averageOrderValue: expect.any(Number)
+            completedCount: 2
           })
         });
       });
@@ -260,10 +259,10 @@ describe('Controllers - Additional Function Coverage', () => {
         req.user = { role: 'affiliate', affiliateId: 'AFF123' };
 
         const mockOrders = [
-          { status: 'delivered', actualTotal: 100, actualWeight: 20, affiliateId: 'AFF123' },
-          { status: 'delivered', actualTotal: 200, actualWeight: 30, affiliateId: 'AFF123' }
+          { status: 'complete', affiliateId: 'AFF123' },
+          { status: 'complete', affiliateId: 'AFF123' }
         ];
-        
+
         Order.find.mockResolvedValue(mockOrders);
 
         await getOrderStatistics(req, res, next);
@@ -278,7 +277,7 @@ describe('Controllers - Additional Function Coverage', () => {
           success: true,
           statistics: expect.objectContaining({
             totalOrders: 2,
-            totalRevenue: 300
+            completedCount: 2
           })
         });
       });
@@ -317,44 +316,29 @@ describe('Controllers - Additional Function Coverage', () => {
         });
       });
 
-      it('should handle date range filters', async () => {
+      it('should report counts (earnings are 0 post Phase 1)', async () => {
         req.params = { affiliateId: 'AFF123' };
         req.user = { id: 'affiliate-123', affiliateId: 'AFF123', role: 'affiliate' };
-        req.query = {
-          startDate: '2025-01-01',
-          endDate: '2025-01-31'
-        };
-
-
-        const mockOrders = [
-          { status: 'delivered', actualTotal: 500, affiliateCommission: 50, createdAt: new Date('2025-01-15') },
-          { status: 'delivered', actualTotal: 500, affiliateCommission: 50, createdAt: new Date('2025-01-20') }
-        ];
 
         Order.countDocuments = jest.fn()
           .mockResolvedValueOnce(2) // active orders
-          .mockResolvedValueOnce(10); // total orders
+          .mockResolvedValueOnce(5) // monthly complete
+          .mockResolvedValueOnce(3); // weekly complete
         Customer.countDocuments = jest.fn().mockResolvedValue(10);
-        Order.find = jest.fn().mockResolvedValue(mockOrders);
-        Transaction.find = jest.fn().mockResolvedValue([]);
 
         await getAffiliateDashboardStats(req, res, next);
 
-        expect(Order.find).toHaveBeenCalledWith({
-          affiliateId: 'AFF123',
-          status: 'delivered'
-        });
         expect(res.json).toHaveBeenCalledWith({
           success: true,
           stats: expect.objectContaining({
             customerCount: 10,
             activeOrderCount: 2,
-            totalEarnings: 100,
-            monthEarnings: expect.any(Number),
-            weekEarnings: expect.any(Number),
+            totalEarnings: 0,
+            monthEarnings: 0,
+            weekEarnings: 0,
             pendingEarnings: 0,
-            monthlyOrders: expect.any(Number),
-            weeklyOrders: expect.any(Number),
+            monthlyOrders: 5,
+            weeklyOrders: 3,
             nextPayoutDate: expect.any(Date)
           })
         });

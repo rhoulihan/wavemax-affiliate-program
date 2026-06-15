@@ -1,7 +1,7 @@
-// Operational email dispatchers — service alerts + ready/picked-up notifications.
-// Extracted from utils/emailService.js in Phase 2.
+// Operational email dispatchers — service alerts.
+// Extracted from utils/emailService.js in Phase 2. (The order ready / on-the-way
+// lifecycle emails were removed in Phase 1 PR 3 with the old order lifecycle.)
 
-const { loadTemplate, fillTemplate, formatTimeSlot, formatSize } = require('../template-manager');
 const { sendEmail } = require('../transport');
 /**
  * Send service down alert email
@@ -67,60 +67,6 @@ View monitoring dashboard: https://rundberglaundry.com/monitoring-dashboard.html
 
   // Use the internal sendEmail function
   return sendEmail(mailOptions.to, mailOptions.subject, mailOptions.html);
-};
-
-// Send order ready notification to affiliate (Notification A — the ready gate's
-// "collect from store" email; spec §6.5/§6.6). Language-resolved via
-// template-manager; data.language is the affiliate's languagePreference.
-exports.sendOrderReadyNotification = async (affiliateEmail, data) => {
-  const language = data.language || 'en';
-  const subjects = {
-    en: `Order ${data.orderId} Ready for Pickup`,
-    es: `Pedido ${data.orderId} listo para recoger`,
-    pt: `Pedido ${data.orderId} pronto para retirada`,
-    de: `Bestellung ${data.orderId} abholbereit`
-  };
-  const template = await loadTemplate('order-ready', language);
-  const html = fillTemplate(template, {
-    AFFILIATE_NAME: data.affiliateName,
-    ORDER_ID: data.orderId,
-    CUSTOMER_NAME: data.customerName,
-    TOTAL_WEIGHT: data.totalWeight
-  });
-  return sendEmail(affiliateEmail, subjects[language] || subjects.en, html);
-};
-
-// ---------------------------------------------------------------------------
-// PR 9 — overloaded-bag-URL lifecycle emails
-// Templates use the [PLACEHOLDER] token convention (template-manager
-// fillTemplate). loadTemplate resolves templates/emails/{lang}/<name>.html
-// with the root file as the English fallback.
-// ---------------------------------------------------------------------------
-
-const ON_THE_WAY_SUBJECTS = {
-  en: (orderId) => `Your laundry is on the way — Order ${orderId}`,
-  es: (orderId) => `Tu ropa está en camino — Pedido ${orderId}`,
-  pt: (orderId) => `Sua roupa está a caminho — Pedido ${orderId}`,
-  de: (orderId) => `Ihre Wäsche ist unterwegs — Bestellung ${orderId}`
-};
-
-/**
- * "On the way" — sent at operator scan-OUT (ready_for_pickup -> picked_up).
- * Includes the customer's (freshly rotated) delivery PIN so they can confirm
- * receipt at the door (spec §6.4/§6.6).
- */
-exports.sendOrderOnTheWayEmail = async (customer, order, { deliveryPin, affiliateName } = {}) => {
-  const language = customer.languagePreference || 'en';
-  const template = await loadTemplate('customer-on-the-way', language);
-  const html = fillTemplate(template, {
-    customer_name: `${customer.firstName} ${customer.lastName}`,
-    order_id: order.orderId,
-    affiliate_name: affiliateName || 'Your delivery provider',
-    delivery_pin: deliveryPin || '',
-    total_weight: order.actualWeight != null ? String(order.actualWeight) : ''
-  });
-  const subjectFor = ON_THE_WAY_SUBJECTS[language] || ON_THE_WAY_SUBJECTS.en;
-  return sendEmail(customer.email, subjectFor(order.orderId), html);
 };
 
 module.exports = exports;

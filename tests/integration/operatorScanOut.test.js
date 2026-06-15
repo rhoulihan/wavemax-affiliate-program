@@ -1,20 +1,24 @@
+// Scan 4 — delivery at the partner: out_for_delivery -> complete (spec §3).
+// Replaces the old picked_up scan-out + delivery-PIN concept (removed).
+
 jest.mock('../../server/utils/emailService');
 
+const jwt = require('jsonwebtoken');
 const mongoose = require('mongoose');
-const app = require('../../server'); // ensures models/config registered
+const app = require('../../server');
 const emailService = require('../../server/utils/emailService');
 const Order = require('../../server/models/Order');
 const Customer = require('../../server/models/Customer');
 const Affiliate = require('../../server/models/Affiliate');
 const Operator = require('../../server/models/Operator');
 const Bag = require('../../server/modules/bags/Bag');
+const SystemConfig = require('../../server/models/SystemConfig');
 const encryptionUtil = require('../../server/utils/encryption');
 const roleCodes = require('../../server/utils/roleCodes');
-const orderAdvanceService = require('../../server/modules/orders/orderAdvanceService');
+const { getCsrfToken, createAgent } = require('../helpers/csrfHelper');
 
 jest.setTimeout(60000);
 
-// ---- shared fixture (reused by Tasks 8-11 test files) ----------------------
 async function createWorld({ orderStatus } = {}) {
   const uniq = `${Date.now()}${Math.random().toString(36).slice(2, 6)}`;
   const { salt, hash } = encryptionUtil.hashPassword('FixturePassword417!');
@@ -23,19 +27,15 @@ async function createWorld({ orderStatus } = {}) {
     firstName: 'Fix', lastName: 'Affiliate', email: `fixaff${uniq}@example.com`,
     phone: '5125551111', businessName: 'Fixture Wash Co',
     address: '1 Fixture St', city: 'Austin', state: 'TX', zipCode: '78701',
-    serviceLatitude: 30.27, serviceLongitude: -97.74, // dropped silently if removed
     username: `fixaff${uniq}`, passwordSalt: salt, passwordHash: hash,
-    paymentMethod: 'check',
-    affiliateDeliveryCodeHash: roleCodes.hashCode('VENDOR'),
-    affiliateDeliveryCodeSetAt: new Date()
+    paymentMethod: 'check'
   });
 
   const customer = await Customer.create({
     affiliateId: affiliate.affiliateId,
     firstName: 'Fix', lastName: 'Customer', email: `fixcust${uniq}@example.com`,
     phone: '5125552222', address: '2 Fixture St', city: 'Austin', state: 'TX', zipCode: '78702',
-    username: `fixcust${uniq}`, passwordSalt: salt, passwordHash: hash,
-    deliveryPinHash: roleCodes.hashCode('PINPIN'), deliveryPinSetAt: new Date()
+    username: `fixcust${uniq}`, passwordSalt: salt, passwordHash: hash
   });
 
   const operator = await Operator.create({
@@ -60,91 +60,57 @@ async function createWorld({ orderStatus } = {}) {
       bagId: bag.bagId,
       bagToken: bag.token,
       status: orderStatus,
-      actualWeight: 15,
-      feeBreakdown: { numberOfBags: 1, minimumFee: 25, perBagFee: 5, totalFee: 25, minimumApplied: true },
-      bags: [{
-        bagToken: bag.token, bagNumber: 1, status: 'intake',
-        scannedAt: { intake: new Date() }, scannedBy: { intake: operator._id }
-      }],
-      intake: { weight: 15, weighedAt: new Date(), weighedBy: operator._id }
+      pickup: { at: new Date(), by: affiliate.affiliateId, role: 'affiliate' }
     });
   }
 
   return { affiliate, customer, operator, bag, order, bagToken: token };
 }
-// ---------------------------------------------------------------------------
 
-describe('orderAdvanceService.advance', () => {
+function operatorToken(operator) {
+  return jwt.sign({ id: operator._id.toString(), role: 'operator' },
+    process.env.JWT_SECRET, { expiresIn: '1h' });
+}
+
+describe('Delivery scan: out_for_delivery -> complete', () => {
+  beforeAll(async () => { await SystemConfig.initializeDefaults(); });
   beforeEach(() => jest.clearAllMocks());
 
-  test('in_progress -> processed, stamps intake + bag sub-status, gate promotes to ready_for_pickup', async () => {
-    const { bagToken, operator, order } = await createWorld({
-      orderStatus: 'in_progress'
-    });
-    const result = await orderAdvanceService.advance({ bagToken, operatorId: operator._id });
-    expect(result.action).toBe('ready_for_pickup');
+  test('advancing an out_for_delivery order completes it and sends the delivered email', async () => {
+    const { bagToken, operator, order } = await createWorld({ orderStatus: 'out_for_delivery' });
+    const agent = createAgent(app);
+    const csrfToken = await getCsrfToken(app, agent);
+
+    const res = await agent
+      .post('/api/v1/operators/advance')
+      .set('Authorization', `Bearer ${operatorToken(operator)}`)
+      .set('x-csrf-token', csrfToken)
+      .send({ bagToken });
+    expect(res.status).toBe(200);
+    expect(res.body.action).toBe('advance');
+    expect(res.body.order.status).toBe('complete');
 
     const reloaded = await Order.findOne({ orderId: order.orderId });
-    expect(reloaded.status).toBe('ready_for_pickup');  // payment removed -> unconditional
-    expect(reloaded.readyForPickupAt).toBeInstanceOf(Date);
-    expect(reloaded.intake.processedAt).toBeInstanceOf(Date);
-    expect(reloaded.intake.processedBy.toString()).toBe(operator._id.toString());
-    expect(reloaded.bags[0].status).toBe('processed');
-    expect(reloaded.bags[0].scannedBy.processed.toString()).toBe(operator._id.toString());
+    expect(reloaded.status).toBe('complete');
+    expect(reloaded.completedAt).toBeInstanceOf(Date);
+
+    expect(emailService.sendCustomerDeliveredEmail).toHaveBeenCalledTimes(1);
   });
 
-  test('processed -> ready_for_pickup via defensive gate heal', async () => {
-    const { bagToken, operator, order } = await createWorld({
-      orderStatus: 'processed'
-    });
-    const result = await orderAdvanceService.advance({ bagToken, operatorId: operator._id });
-    expect(result.action).toBe('ready_for_pickup');
+  test('complete stamps delivery.by/role with the operator', async () => {
+    const { bagToken, operator, order } = await createWorld({ orderStatus: 'out_for_delivery' });
+    const agent = createAgent(app);
+    const csrfToken = await getCsrfToken(app, agent);
+
+    await agent
+      .post('/api/v1/operators/advance')
+      .set('Authorization', `Bearer ${operatorToken(operator)}`)
+      .set('x-csrf-token', csrfToken)
+      .send({ bagToken });
 
     const reloaded = await Order.findOne({ orderId: order.orderId });
-    expect(reloaded.status).toBe('ready_for_pickup');
-    expect(reloaded.readyForPickupAt).toBeInstanceOf(Date);
-  });
-
-  test('ready_for_pickup -> picked_up: stamps, rotates PIN, sends on-the-way email with the NEW pin, no commission', async () => {
-    const { bagToken, operator, order, customer } = await createWorld({
-      orderStatus: 'ready_for_pickup'
-    });
-    const before = await Customer.findOne({ customerId: customer.customerId })
-      .select('+deliveryPinHash');
-
-    const result = await orderAdvanceService.advance({ bagToken, operatorId: operator._id });
-    expect(result.action).toBe('picked_up');
-
-    const reloaded = await Order.findOne({ orderId: order.orderId });
-    expect(reloaded.status).toBe('picked_up');
-    expect(reloaded.pickedUpAt).toBeInstanceOf(Date);
-    expect(reloaded.intake.pickedUpBy.toString()).toBe(operator._id.toString());
-    expect(reloaded.bags[0].status).toBe('picked_up');
-    expect(reloaded.commissionRealized).toBeFalsy();   // commission ONLY at delivered
-
-    const after = await Customer.findOne({ customerId: customer.customerId })
-      .select('+deliveryPinHash');
-    expect(after.deliveryPinHash).not.toBe(before.deliveryPinHash); // rotated
-    // Rotation INVALIDATES the previous PIN — the fixture's plaintext no
-    // longer verifies against the stored hash (orchestrator amendment 4).
-    expect(roleCodes.verifyCode('PINPIN', after.deliveryPinHash)).toBe(false);
-
-    expect(emailService.sendOrderOnTheWayEmail).toHaveBeenCalledTimes(1);
-    const [, , opts] = emailService.sendOrderOnTheWayEmail.mock.calls[0];
-    expect(roleCodes.verifyCode(opts.deliveryPin, after.deliveryPinHash)).toBe(true);
-  });
-
-  test('picked_up -> 409 (deliver or re-intake, not advance); unknown bag -> 404; no open order -> 409', async () => {
-    const w1 = await createWorld({ orderStatus: 'picked_up' });
-    await expect(orderAdvanceService.advance({ bagToken: w1.bagToken, operatorId: w1.operator._id }))
-      .rejects.toMatchObject({ code: 'awaiting_delivery_confirmation', status: 409 });
-
-    await expect(orderAdvanceService.advance({
-      bagToken: encryptionUtil.generateToken(16), operatorId: w1.operator._id
-    })).rejects.toMatchObject({ code: 'invalid_bag', status: 404 });
-
-    const w2 = await createWorld({}); // active bag, no order
-    await expect(orderAdvanceService.advance({ bagToken: w2.bagToken, operatorId: w2.operator._id }))
-      .rejects.toMatchObject({ code: 'no_open_order', status: 409 });
+    expect(reloaded.delivery.role).toBe('operator');
+    expect(reloaded.delivery.by).toBe(String(operator._id));
+    expect(reloaded.delivery.at).toBeInstanceOf(Date);
   });
 });

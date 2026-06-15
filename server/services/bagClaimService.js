@@ -3,11 +3,8 @@
 // 'invalid' (minted/retired/unknown — one generic state, no oracle).
 
 const Affiliate = require('../models/Affiliate');
-const Customer = require('../models/Customer');
-const SystemConfig = require('../models/SystemConfig');
 const bagService = require('../modules/bags/bagService');
 const { getOpenOrderContext } = require('../modules/orders/openOrderContext');
-const roleCodes = require('../utils/roleCodes');
 
 class ClaimError extends Error {
   constructor(code, status, message) {
@@ -39,9 +36,8 @@ async function resolveClaimToken(bagToken) {
     return { state: 'claimable', bag, affiliate };
   }
 
-  // outcome === 'claimed' — PR 9: same open-order context the bags resolver
-  // returns (PR 7's helper). order: { status, awaitingDelivery, nextAction },
-  // PII-free; awaitingDelivery true iff picked_up.
+  // outcome === 'claimed' — the same open-order context the bags resolver
+  // returns. order: { status, nextAction }, PII-free.
   const ctx = await getOpenOrderContext(bag.bagId);
   return {
     state: 'claimed',
@@ -61,15 +57,6 @@ async function claimForCustomer(bag, customerId, req = null) {
   if (!claimed) {
     throw new ClaimError('bag_already_claimed', 409, 'This bag has already been claimed');
   }
-
-  // PR 9: every claim provisions the customer's delivery PIN (spec §4.5).
-  const pinLength = await SystemConfig.getValue('customer_delivery_pin_length', 6);
-  const deliveryPin = roleCodes.generateCode(pinLength);
-  await Customer.updateOne(
-    { customerId },
-    { $set: { deliveryPinHash: roleCodes.hashCode(deliveryPin), deliveryPinSetAt: new Date() } }
-  );
-
   return claimed;
 }
 

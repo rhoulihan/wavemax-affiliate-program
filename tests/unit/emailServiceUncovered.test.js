@@ -251,41 +251,6 @@ const { createFindOneMock, createFindMock, createMockDocument, createAggregateMo
     });
   });
 
-  describe('sendOrderReadyNotification', () => {
-    it('should send order ready notification successfully', async () => {
-      const affiliateEmail = 'affiliate@test.com';
-      const data = {
-        affiliateName: 'John\'s Laundry',
-        customerName: 'John Doe',
-        customerId: 'CUST001',
-        orderId: 'ORD123',
-        numberOfBags: 3,
-        totalWeight: 25
-      };
-
-      await emailService.sendOrderReadyNotification(affiliateEmail, data);
-
-      expect(mockTransporter.sendMail).toHaveBeenCalledWith(
-        expect.objectContaining({
-          to: 'affiliate@test.com',
-          subject: expect.stringContaining('Ready for Pickup'),
-          html: expect.stringContaining('ORD123')
-        })
-      );
-    });
-
-    it('should handle missing data fields', async () => {
-      const affiliateEmail = 'affiliate@test.com';
-      const data = {
-        orderId: 'ORD123'
-      };
-
-      await emailService.sendOrderReadyNotification(affiliateEmail, data);
-
-      expect(mockTransporter.sendMail).toHaveBeenCalled();
-    });
-  });
-
   describe('Console Email Provider', () => {
     beforeEach(() => {
       jest.resetModules();

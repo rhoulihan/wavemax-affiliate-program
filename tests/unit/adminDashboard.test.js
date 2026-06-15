@@ -202,8 +202,7 @@ describe('Admin Dashboard Functions', () => {
             today: 15,
             thisWeek: 100,
             thisMonth: 450,
-            statusDistribution: expect.any(Array),
-            averageProcessingTime: 45.5
+            statusDistribution: expect.any(Array)
           }),
           operatorPerformance: expect.any(Array),
           affiliatePerformance: expect.any(Array),
@@ -245,35 +244,21 @@ describe('Admin Dashboard Functions', () => {
           _id: '2024-01-01',
           totalOrders: 20,
           completedOrders: 18,
-          cancelledOrders: 2,
-          totalRevenue: 1500,
-          averageOrderValue: 75,
-          averageProcessingTime: 42,
-          totalWeight: 150
+          cancelledOrders: 2
         }
       ];
-      
-      const mockDistribution = [
-        { _id: 30, count: 10, orders: [] },
-        { _id: 60, count: 5, orders: [] }
-      ];
-      
-      Order.aggregate.mockResolvedValueOnce(mockAnalytics)
-        .mockResolvedValueOnce(mockDistribution);
-      
+
+      Order.aggregate.mockResolvedValue(mockAnalytics);
+
       await administratorController.getOrderAnalytics(mockReq, mockRes);
-      
+
       expect(mockRes.json).toHaveBeenCalledWith({
         success: true,
         analytics: expect.objectContaining({
           timeline: mockAnalytics,
-          processingTimeDistribution: mockDistribution,
           summary: expect.objectContaining({
             totalOrders: 20,
-            completedOrders: 18,
-            totalRevenue: 1500,
-            averageOrderValue: 75,
-            averageProcessingTime: 42
+            completedOrders: 18
           })
         })
       });
@@ -411,15 +396,13 @@ describe('Admin Dashboard Functions', () => {
       };
       
       const mockOrdersReport = [
-        { orderId: 'ORD001', status: 'delivered' }
+        { orderId: 'ORD001', status: 'complete' }
       ];
-      
-      // Mock internal function
+
+      // generateOrdersReport: Order.find(...).populate('affiliateId', ...).lean()
       Order.find.mockReturnValue({
         populate: jest.fn().mockReturnValue({
-          populate: jest.fn().mockReturnValue({
-            lean: jest.fn().mockResolvedValue(mockOrdersReport)
-          })
+          lean: jest.fn().mockResolvedValue(mockOrdersReport)
         })
       });
       
@@ -447,9 +430,7 @@ describe('Admin Dashboard Functions', () => {
       // Mock all model calls for comprehensive report
       Order.find.mockReturnValue({
         populate: jest.fn().mockReturnValue({
-          populate: jest.fn().mockReturnValue({
-            lean: jest.fn().mockResolvedValue([])
-          })
+          lean: jest.fn().mockResolvedValue([])
         })
       });
       
@@ -583,24 +564,18 @@ describe('Admin Dashboard Functions', () => {
           orderId: 'ORD001',
           customerId: 'CUST001',
           affiliateId: { firstName: 'Jane', lastName: 'Smith' },
-          status: 'delivered',
-          orderProcessingStatus: 'completed',
-          assignedOperator: { firstName: 'John', lastName: 'Doe' },
-          processingTimeMinutes: 45,
-          actualWeight: 10,
-          actualTotal: 50,
+          status: 'complete',
+          bagId: 'BAG001',
           createdAt: new Date()
         }
       ];
-      
+
       Order.find.mockReturnValue({
         populate: jest.fn().mockReturnValue({
-          populate: jest.fn().mockReturnValue({
-            lean: jest.fn().mockResolvedValue(mockOrders)
-          })
+          lean: jest.fn().mockResolvedValue(mockOrders)
         })
       });
-      
+
       const generateOrdersReport = async (startDate, endDate) => {
         const orders = await Order.find({
           createdAt: {
@@ -608,7 +583,6 @@ describe('Admin Dashboard Functions', () => {
             $lte: new Date(endDate || Date.now())
           }
         })
-          .populate('assignedOperator', 'firstName lastName operatorId')
           .populate('affiliateId', 'firstName lastName businessName')
           .lean();
 
@@ -618,25 +592,20 @@ describe('Admin Dashboard Functions', () => {
           affiliateName: order.affiliateId ?
             `${order.affiliateId.firstName} ${order.affiliateId.lastName}` : 'N/A',
           status: order.status,
-          processingStatus: order.orderProcessingStatus,
-          operator: order.assignedOperator ?
-            `${order.assignedOperator.firstName} ${order.assignedOperator.lastName}` : 'Unassigned',
-          processingTime: order.processingTimeMinutes || 0,
-          actualWeight: order.actualWeight || 0,
-          actualTotal: order.actualTotal || 0,
+          bagId: order.bagId,
           createdAt: order.createdAt
         }));
       };
-      
+
       const report = await generateOrdersReport('2024-01-01', '2024-01-31');
-      
+
       expect(report).toHaveLength(1);
       expect(report[0]).toMatchObject({
         orderId: 'ORD001',
         customerID: 'CUST001',
         affiliateName: 'Jane Smith',
-        status: 'delivered',
-        operator: 'John Doe'
+        status: 'complete',
+        bagId: 'BAG001'
       });
     });
   });

@@ -209,19 +209,15 @@ describe('Customer Integration Tests', () => {
           customerId: 'CUST123',
           affiliateId: 'AFF123',
           bagId: 'BAG-cust-orders-1',
-          status: 'delivered',
-          actualWeight: 23.5,
-          baseRate: 1.89,
-          feeBreakdown: { numberOfBags: 1, minimumFee: 25, perBagFee: 5, totalFee: 25, minimumApplied: true }
+          status: 'complete',
+          completedAt: new Date()
         },
         {
           orderId: 'ORD002',
           customerId: 'CUST123',
           affiliateId: 'AFF123',
           bagId: 'BAG-cust-orders-2',
-          status: 'in_progress',
-          baseRate: 1.89,
-          feeBreakdown: { numberOfBags: 1, minimumFee: 25, perBagFee: 5, totalFee: 25, minimumApplied: true }
+          status: 'in_progress'
         }
       ];
 
@@ -256,7 +252,7 @@ describe('Customer Integration Tests', () => {
       const response = await agent
         .get('/api/v1/customers/CUST123/orders')
         .set('Authorization', `Bearer ${customerToken}`)
-        .query({ status: 'delivered' });
+        .query({ status: 'complete' });
 
       expect(response.status).toBe(200);
       expect(response.body.orders).toHaveLength(1);
@@ -337,33 +333,23 @@ describe('Customer Integration Tests', () => {
           customerId: 'CUST123',
           affiliateId: 'AFF123',
           bagId: 'BAG-cust-dash-1',
-          status: 'delivered',
-          actualWeight: 23.5,
-          baseRate: 1.89,
-          feeBreakdown: { numberOfBags: 1, minimumFee: 25, perBagFee: 5, totalFee: 25, minimumApplied: true },
-          actualTotal: 50.40,
-          deliveredAt: new Date('2025-05-03')
+          status: 'complete',
+          completedAt: new Date('2025-05-03')
         },
         {
           orderId: 'ORD002',
           customerId: 'CUST123',
           affiliateId: 'AFF123',
           bagId: 'BAG-cust-dash-2',
-          status: 'delivered',
-          actualWeight: 35.0,
-          baseRate: 1.89,
-          feeBreakdown: { numberOfBags: 1, minimumFee: 25, perBagFee: 5, totalFee: 25, minimumApplied: true },
-          actualTotal: 72.15,
-          deliveredAt: new Date('2025-05-12')
+          status: 'complete',
+          completedAt: new Date('2025-05-12')
         },
         {
           orderId: 'ORD003',
           customerId: 'CUST123',
           affiliateId: 'AFF123',
           bagId: 'BAG-cust-dash-3',
-          status: 'in_progress',
-          baseRate: 1.89,
-          feeBreakdown: { numberOfBags: 1, minimumFee: 25, perBagFee: 5, totalFee: 25, minimumApplied: true }
+          status: 'in_progress'
         }
       ];
 
@@ -417,8 +403,7 @@ describe('Customer Integration Tests', () => {
         customerId: 'CUST123',
         affiliateId: 'AFF123',
         bagId: 'BAG-cust-del-1',
-        status: 'in_progress',
-        feeBreakdown: { numberOfBags: 1, minimumFee: 25, perBagFee: 5, totalFee: 25, minimumApplied: true }
+        status: 'in_progress'
       });
 
 

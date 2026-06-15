@@ -81,38 +81,28 @@ async function getPerformanceStats({ operatorId, period = 'week' }) {
   const { startDate, endDate } = dateRangeForPeriod(period);
   const days = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24));
 
+  // Weight/processing-time/quality metrics moved to Cents (external) in
+  // Phase 1. Performance stats now report order counts only.
   const [stats, dailyStats] = await Promise.all([
     Order.aggregate([
-      { $match: { assignedOperator: operator._id, processingStarted: { $gte: startDate, $lte: endDate } } },
+      { $match: { assignedOperator: operator._id, createdAt: { $gte: startDate, $lte: endDate } } },
       { $group: {
         _id: null,
         totalOrders: { $sum: 1 },
-        completedOrders: { $sum: { $cond: [{ $eq: ['$orderProcessingStatus', 'completed'] }, 1, 0] } },
-        totalWeight: { $sum: '$weight' },
-        avgProcessingTime: { $avg: '$processingTimeMinutes' },
-        minProcessingTime: { $min: '$processingTimeMinutes' },
-        maxProcessingTime: { $max: '$processingTimeMinutes' },
-        qualityChecksPassed: { $sum: { $cond: [{ $eq: ['$qualityCheckPassed', true] }, 1, 0] } },
-        qualityChecksFailed: { $sum: { $cond: [{ $eq: ['$qualityCheckPassed', false] }, 1, 0] } }
+        completedOrders: { $sum: { $cond: [{ $eq: ['$status', 'complete'] }, 1, 0] } }
       } }
     ]),
     Order.aggregate([
-      { $match: { assignedOperator: operator._id, processingStarted: { $gte: startDate, $lte: endDate } } },
+      { $match: { assignedOperator: operator._id, createdAt: { $gte: startDate, $lte: endDate } } },
       { $group: {
-        _id: { $dateToString: { format: '%Y-%m-%d', date: '$processingStarted' } },
-        orders: { $sum: 1 },
-        weight: { $sum: '$weight' },
-        avgTime: { $avg: '$processingTimeMinutes' }
+        _id: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } },
+        orders: { $sum: 1 }
       } },
       { $sort: { _id: 1 } }
     ])
   ]);
 
-  const summary = stats[0] || {
-    totalOrders: 0, completedOrders: 0, totalWeight: 0, avgProcessingTime: 0,
-    minProcessingTime: 0, maxProcessingTime: 0, qualityChecksPassed: 0, qualityChecksFailed: 0
-  };
-  const qcTotal = summary.qualityChecksPassed + summary.qualityChecksFailed;
+  const summary = stats[0] || { totalOrders: 0, completedOrders: 0 };
 
   return {
     operator: {
@@ -124,9 +114,7 @@ async function getPerformanceStats({ operatorId, period = 'week' }) {
     summary,
     dailyBreakdown: dailyStats,
     efficiency: {
-      ordersPerDay: summary.totalOrders / days,
-      weightPerDay: summary.totalWeight / days,
-      qualityRate: qcTotal > 0 ? Math.round((summary.qualityChecksPassed / qcTotal) * 100) : 100
+      ordersPerDay: summary.totalOrders / days
     }
   };
 }
@@ -149,7 +137,7 @@ async function getTodayStats({ operatorId }) {
   const [ordersProcessed, todayOrders, ordersReady] = await Promise.all([
     Order.countDocuments(query),
     Order.find(query),
-    Order.countDocuments({ status: 'processed', updatedAt: { $gte: today } })
+    Order.countDocuments({ status: 'out_for_delivery', updatedAt: { $gte: today } })
   ]);
 
   const bagsScanned = todayOrders.reduce((total, order) => total + (order.bagsWeighed || 0), 0);

@@ -212,56 +212,28 @@ describe('Model Tests', () => {
 
       expect(saved._id).toBeDefined();
       expect(saved.orderId).toMatch(/^ORD-[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/);
-      expect(saved.status).toBe('in_progress'); // Default status
-      expect(saved.baseRate).toBe(1.25);
-      expect(saved.intakeAt).toBeDefined();
+      expect(saved.status).toBe('pending'); // Default status (4-state machine)
     });
 
-    it('should calculate actual total and commission when weight is set', async () => {
+    it('stamps the per-scan sub-objects + terminal timestamps', async () => {
       const order = new Order({
         customerId: 'CUST123',
         affiliateId: 'AFF123',
-        bagId: 'BAG-models-2',
-        feeBreakdown: {
-          numberOfBags: 1,
-          minimumFee: 10,
-          perBagFee: 2,
-          totalFee: 10,
-          minimumApplied: true
-        },
-        actualWeight: 30
+        bagId: 'BAG-models-3',
+        pickup: { at: new Date(), by: 'AFF123', role: 'affiliate' }
       });
-
       await order.save();
+      expect(order.status).toBe('pending');
+      expect(order.pickup.by).toBe('AFF123');
 
-      // 30 lbs * $1.25 + $10 fee = $47.50
-      expect(order.actualTotal).toBeCloseTo(47.50, 2);
-      // Commission: 10% of wash cost (30 * $1.25 * 0.1) + fee ($10) = $13.75
-      expect(order.affiliateCommission).toBeCloseTo(13.75, 2);
-    });
-
-    it('should update timestamps for status changes', async () => {
-      const order = new Order({
-        customerId: 'CUST123',
-        affiliateId: 'AFF123',
-        bagId: 'BAG-models-3'
-      });
-
+      order.status = 'complete';
+      order.completedAt = new Date();
       await order.save();
+      expect(order.completedAt).toBeDefined();
 
-      // The pre-save hook stamps lifecycle timestamps set-once on status change
-      order.status = 'processed';
-      await order.save();
-      expect(order.processedAt).toBeDefined();
-
-      order.status = 'picked_up';
-      await order.save();
-      expect(order.pickedUpAt).toBeDefined();
-
-      order.status = 'delivered';
-      await order.save();
-      expect(order.deliveredAt).toBeDefined();
-      expect(order.commissionRealized).toBe(true);
+      // No money/commission fields exist on the slim record.
+      expect(order.actualTotal).toBeUndefined();
+      expect(order.affiliateCommission).toBeUndefined();
     });
   });
 

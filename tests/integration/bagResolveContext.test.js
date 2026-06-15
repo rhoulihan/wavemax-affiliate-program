@@ -13,7 +13,6 @@ const roleCodes = require('../../server/utils/roleCodes');
 
 jest.setTimeout(60000);
 
-// ---- shared fixture (copied from tests/integration/operatorScanOut.test.js) ----
 async function createWorld({ orderStatus } = {}) {
   const uniq = `${Date.now()}${Math.random().toString(36).slice(2, 6)}`;
   const { salt, hash } = encryptionUtil.hashPassword('FixturePassword417!');
@@ -22,19 +21,15 @@ async function createWorld({ orderStatus } = {}) {
     firstName: 'Fix', lastName: 'Affiliate', email: `fixaff${uniq}@example.com`,
     phone: '5125551111', businessName: 'Fixture Wash Co',
     address: '1 Fixture St', city: 'Austin', state: 'TX', zipCode: '78701',
-    serviceLatitude: 30.27, serviceLongitude: -97.74, // dropped silently if removed
     username: `fixaff${uniq}`, passwordSalt: salt, passwordHash: hash,
-    paymentMethod: 'check',
-    affiliateDeliveryCodeHash: roleCodes.hashCode('VENDOR'),
-    affiliateDeliveryCodeSetAt: new Date()
+    paymentMethod: 'check'
   });
 
   const customer = await Customer.create({
     affiliateId: affiliate.affiliateId,
     firstName: 'Fix', lastName: 'Customer', email: `fixcust${uniq}@example.com`,
     phone: '5125552222', address: '2 Fixture St', city: 'Austin', state: 'TX', zipCode: '78702',
-    username: `fixcust${uniq}`, passwordSalt: salt, passwordHash: hash,
-    deliveryPinHash: roleCodes.hashCode('PINPIN'), deliveryPinSetAt: new Date()
+    username: `fixcust${uniq}`, passwordSalt: salt, passwordHash: hash
   });
 
   const operator = await Operator.create({
@@ -59,55 +54,47 @@ async function createWorld({ orderStatus } = {}) {
       bagId: bag.bagId,
       bagToken: bag.token,
       status: orderStatus,
-      actualWeight: 15,
-      feeBreakdown: { numberOfBags: 1, minimumFee: 25, perBagFee: 5, totalFee: 25, minimumApplied: true },
-      bags: [{
-        bagToken: bag.token, bagNumber: 1, status: 'intake',
-        scannedAt: { intake: new Date() }, scannedBy: { intake: operator._id }
-      }],
-      intake: { weight: 15, weighedAt: new Date(), weighedBy: operator._id }
+      pickup: { at: new Date(), by: affiliate.affiliateId, role: 'affiliate' },
+      ...(orderStatus === 'complete' ? { completedAt: new Date() } : {})
     });
   }
 
   return { affiliate, customer, operator, bag, order, bagToken: token };
 }
-// ---------------------------------------------------------------------------
 
-describe('Resolve endpoints expose order context (PR 9)', () => {
+describe('Resolve endpoints expose order context (4-state machine)', () => {
   test.each([
-    ['in_progress', false, 'advance'],
-    ['processed', false, 'advance'],
-    ['ready_for_pickup', false, 'advance'],
-    ['picked_up', true, 'deliver-or-reintake']
-  ])('claimed bag with a %s order -> awaitingDelivery=%s, nextAction=%s', async (status, awaiting, nextAction) => {
+    ['pending', 'intake'],
+    ['in_progress', 'store-pickup'],
+    ['out_for_delivery', 'delivery']
+  ])('claimed bag with a %s order -> nextAction=%s', async (status, nextAction) => {
     const { bagToken } = await createWorld({ orderStatus: status });
 
     const resolve = await request(app).get(`/api/v1/bags/resolve/${bagToken}`);
     expect(resolve.status).toBe(200);
     expect(resolve.body.order.status).toBe(status);
-    expect(resolve.body.order.awaitingDelivery).toBe(awaiting);
     expect(resolve.body.order.nextAction).toBe(nextAction);
+    expect(resolve.body.nextAction).toBe(nextAction);
 
     const claim = await request(app).get(`/api/v1/customers/claim/${bagToken}`);
     expect(claim.status).toBe(200);
     expect(claim.body.state).toBe('claimed');
     expect(claim.body.order.status).toBe(status);
-    expect(claim.body.order.awaitingDelivery).toBe(awaiting);
     expect(claim.body.order.nextAction).toBe(nextAction);
   });
 
-  test('claimed bag with NO open order -> nextAction intake, no order object', async () => {
+  test('claimed bag with NO open order -> nextAction pickup, no order object', async () => {
     const { bagToken } = await createWorld({});
     const resolve = await request(app).get(`/api/v1/bags/resolve/${bagToken}`);
     expect(resolve.status).toBe(200);
-    expect(resolve.body.nextAction).toBe('intake');
+    expect(resolve.body.nextAction).toBe('pickup');
     expect(resolve.body.order).toBeFalsy();
   });
 
-  test('delivered orders are not "open" -> nextAction intake on both resolvers', async () => {
-    const { bagToken } = await createWorld({ orderStatus: 'delivered' });
+  test('completed orders are not "open" -> nextAction pickup on both resolvers', async () => {
+    const { bagToken } = await createWorld({ orderStatus: 'complete' });
     const resolve = await request(app).get(`/api/v1/bags/resolve/${bagToken}`);
-    expect(resolve.body.nextAction).toBe('intake');
+    expect(resolve.body.nextAction).toBe('pickup');
     expect(resolve.body.order).toBeFalsy();
 
     const claim = await request(app).get(`/api/v1/customers/claim/${bagToken}`);
@@ -116,9 +103,7 @@ describe('Resolve endpoints expose order context (PR 9)', () => {
   });
 
   test('no customer PII leaks through either resolver', async () => {
-    const { bagToken, customer } = await createWorld({
-      orderStatus: 'picked_up'
-    });
+    const { bagToken, customer } = await createWorld({ orderStatus: 'in_progress' });
     for (const path of [`/api/v1/bags/resolve/${bagToken}`, `/api/v1/customers/claim/${bagToken}`]) {
       const res = await request(app).get(path);
       const body = JSON.stringify(res.body);
