@@ -259,18 +259,20 @@ describe('Field Filter Utility', () => {
       const mockOrder = {
         orderId: 'ORD123',
         customerId: 'CUST123',
-        status: 'processing',
-        actualWeight: 10,
-        affiliateCommission: 5.00
+        affiliateId: 'AFF123',
+        bagId: 'BAG-1',
+        status: 'in_progress',
+        paymentConfirmedManually: true
       , save: jest.fn().mockResolvedValue(true)};
 
-      // Affiliate should see commission
+      // Both roles see the slim state fields.
       const affiliateView = getFilteredData('order', mockOrder, 'affiliate');
-      expect(affiliateView.affiliateCommission).toBe(5.00);
+      expect(affiliateView.status).toBe('in_progress');
+      expect(affiliateView.bagId).toBe('BAG-1');
 
-      // Customer should not see commission
       const customerView = getFilteredData('order', mockOrder, 'customer');
-      expect(customerView.affiliateCommission).toBeUndefined();
+      expect(customerView.orderId).toBe('ORD123');
+      expect(customerView.status).toBe('in_progress');
     });
   });
 

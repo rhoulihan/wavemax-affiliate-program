@@ -359,11 +359,10 @@ describe('Formatters', () => {
 
   describe('status', () => {
     it('should format order status', () => {
+      expect(Formatters.status('pending', 'order')).toBe('Pending');
       expect(Formatters.status('in_progress', 'order')).toBe('In Progress');
-      expect(Formatters.status('processed', 'order')).toBe('Processed');
-      expect(Formatters.status('ready_for_pickup', 'order')).toBe('Ready for Pickup');
-      expect(Formatters.status('picked_up', 'order')).toBe('Picked Up');
-      expect(Formatters.status('delivered', 'order')).toBe('Delivered');
+      expect(Formatters.status('out_for_delivery', 'order')).toBe('Out for Delivery');
+      expect(Formatters.status('complete', 'order')).toBe('Complete');
       expect(Formatters.status('cancelled', 'order')).toBe('Cancelled');
     });
 
