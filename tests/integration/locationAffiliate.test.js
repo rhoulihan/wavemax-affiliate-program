@@ -1,29 +1,25 @@
-// Location affiliates — WaveMAX-operated collection points with ZERO commission.
+// Location affiliates — WaveMAX-operated collection points.
 //
-// Two seams under test:
-//   1. POST /api/v1/administrators/affiliates — admin hand-creates an affiliate
-//      (no invite), server provisions a one-time temporary password + delivery code.
-//   2. Commission zeroing at the source: an order intaken for a 'location'
-//      affiliate computes affiliateCommission 0 and realizes 0 at delivery,
-//      so the W-9 threshold trigger never fires for it.
+// Seam under test:
+//   POST /api/v1/administrators/affiliates — admin hand-creates an affiliate
+//   (no invite), server provisions a one-time temporary password + delivery
+//   code and applies the affiliateType ('location' vs 'standard') fee defaults.
+//
+// (The old commission-zeroing seam was removed with the commission system in
+// the PR 3 order rewrite — there is no money/commission on the Order anymore.)
 
 jest.mock('../../server/utils/emailService');
 jest.setTimeout(90000);
 
-const mongoose = require('mongoose');
 const app = require('../../server');
 const Administrator = require('../../server/models/Administrator');
 const Affiliate = require('../../server/models/Affiliate');
-const Customer = require('../../server/models/Customer');
-const Operator = require('../../server/models/Operator');
-const Order = require('../../server/models/Order');
-const Bag = require('../../server/modules/bags/Bag');
 const encryptionUtil = require('../../server/utils/encryption');
 const roleCodes = require('../../server/utils/roleCodes');
 const { createTestToken } = require('../helpers/authHelper');
 const { getCsrfToken, createAgent } = require('../helpers/csrfHelper');
 
-describe('Location affiliates (zero-commission collection points)', () => {
+describe('Location affiliates (admin manual-create)', () => {
 
   // ========================================================================
   // 1. Admin manual-create endpoint
@@ -141,116 +137,6 @@ describe('Location affiliates (zero-commission collection points)', () => {
     test('400 on invalid email', async () => {
       const res = await post(createBody({ email: 'not-an-email' }));
       expect(res.status).toBe(400);
-    });
-  });
-
-  // ========================================================================
-  // 2. Commission zeroing through the real intake -> delivered path
-  // ========================================================================
-  describe('commission zeroing for location affiliates', () => {
-    let operatorAgent, operatorToken, operatorCsrfToken;
-
-    async function createWorld({ affiliateType = 'standard' } = {}) {
-      const uniq = `${Date.now()}${Math.random().toString(36).slice(2, 6)}`;
-      const { salt, hash } = encryptionUtil.hashPassword('FixturePassword417!');
-
-      const affiliate = await Affiliate.create({
-        firstName: 'Fix', lastName: 'Affiliate', email: `fixaff${uniq}@example.com`,
-        phone: '5125551111', businessName: 'Fixture Wash Co',
-        address: '1 Fixture St', city: 'Austin', state: 'TX', zipCode: '78701',
-        username: `fixaff${uniq}`, passwordSalt: salt, passwordHash: hash,
-        paymentMethod: 'check',
-        affiliateType,
-        ...(affiliateType === 'location' ? { minimumDeliveryFee: 0, perBagDeliveryFee: 0 } : {}),
-        affiliateDeliveryCodeHash: roleCodes.hashCode('VENDOR'),
-        affiliateDeliveryCodeSetAt: new Date()
-      });
-
-      const customer = await Customer.create({
-        affiliateId: affiliate.affiliateId,
-        firstName: 'Fix', lastName: 'Customer', email: `fixcust${uniq}@example.com`,
-        phone: '5125552222', address: '2 Fixture St', city: 'Austin', state: 'TX', zipCode: '78702',
-        username: `fixcust${uniq}`, passwordSalt: salt, passwordHash: hash
-      });
-
-      const token = encryptionUtil.generateToken(16);
-      const bag = await Bag.create({
-        token, tokenHash: Bag.hashToken(token),
-        affiliateId: affiliate.affiliateId, customerId: customer.customerId,
-        status: 'active', batchId: `BATCH-${uniq}`, claimedAt: new Date()
-      });
-
-      return { affiliate, customer, bag, bagToken: token };
-    }
-
-    async function intakeAndDeliver(bagToken) {
-      const intakeRes = await operatorAgent
-        .post('/api/v1/operators/intake')
-        .set('Authorization', `Bearer ${operatorToken}`)
-        .set('x-csrf-token', operatorCsrfToken)
-        .send({ bagToken, weight: 20 });
-      expect(intakeRes.status).toBe(201);
-
-      // Advance to picked_up so confirm-delivery can close it
-      const order = await Order.findOne({ orderId: intakeRes.body.order.orderId });
-      order.status = 'picked_up';
-      await order.save();
-
-      const confirmRes = await require('supertest')(app)
-        .post(`/api/v1/bags/${bagToken}/confirm-delivery`)
-        .send({ code: 'VENDOR' });
-      expect(confirmRes.status).toBe(200);
-
-      return Order.findOne({ orderId: intakeRes.body.order.orderId });
-    }
-
-    beforeEach(async () => {
-      await Promise.all([
-        Administrator.deleteMany({}), Operator.deleteMany({}), Order.deleteMany({}),
-        Customer.deleteMany({}), Affiliate.deleteMany({}), Bag.deleteMany({})
-      ]);
-
-      const admin = await Administrator.create({
-        firstName: 'Super', lastName: 'User', email: `super${Date.now()}@wavemax.com`,
-        passwordSalt: 'salt', passwordHash: 'hash', permissions: ['all']
-      });
-
-      process.env.OPERATOR_PIN = '1234';
-      process.env.DEFAULT_OPERATOR_ID = 'OPR001';
-      await Operator.create({
-        operatorId: 'OPR001', firstName: 'Test', lastName: 'Operator',
-        email: `operator${Date.now()}@wavemax.com`, username: `testop${Date.now()}`,
-        password: 'OperatorStrongPassword951!',
-        shiftStart: '00:00', shiftEnd: '23:59', createdBy: admin._id
-      });
-
-      operatorAgent = createAgent(app);
-      const operatorLogin = await operatorAgent
-        .post('/api/v1/auth/operator/login')
-        .send({ pinCode: '1234' });
-      operatorToken = operatorLogin.body.token;
-      operatorCsrfToken = await getCsrfToken(app, operatorAgent);
-    });
-
-    test('location affiliate: order computes commission 0, realizes 0', async () => {
-      const { bagToken } = await createWorld({ affiliateType: 'location' });
-
-      const delivered = await intakeAndDeliver(bagToken);
-      expect(delivered.status).toBe('delivered');
-      expect(delivered.commissionRealized).toBe(true);
-      expect(delivered.affiliateCommission).toBe(0);
-      // Customer still owes for the wash itself
-      expect(delivered.actualTotal).toBeGreaterThan(0);
-    });
-
-    test('standard affiliate: commission computes and realizes > 0 (contrast)', async () => {
-      const { bagToken } = await createWorld({ affiliateType: 'standard' });
-
-      const delivered = await intakeAndDeliver(bagToken);
-      expect(delivered.status).toBe('delivered');
-      expect(delivered.commissionRealized).toBe(true);
-      // (20 lbs x baseRate x 10%) + delivery fee — definitely > 0
-      expect(delivered.affiliateCommission).toBeGreaterThan(0);
     });
   });
 });

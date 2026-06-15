@@ -1,114 +1,102 @@
+// Delivery is now a state-driven advance (out_for_delivery -> complete) through
+// the public bag-URL /advance endpoint, authorized by an operator scan code.
+// The old code-specific confirm-delivery route is deleted (PR 3).
+
 jest.mock('../../server/utils/emailService');
 
 const request = require('supertest');
-const jwt = require('jsonwebtoken');
 const mongoose = require('mongoose');
 const app = require('../../server');
+const Order = require('../../server/models/Order');
+const Customer = require('../../server/models/Customer');
 const Affiliate = require('../../server/models/Affiliate');
-const AffiliateInvite = require('../../server/modules/onboarding/AffiliateInvite');
+const Operator = require('../../server/models/Operator');
+const Bag = require('../../server/modules/bags/Bag');
+const SystemConfig = require('../../server/models/SystemConfig');
 const encryptionUtil = require('../../server/utils/encryption');
 const roleCodes = require('../../server/utils/roleCodes');
-const { getCsrfToken, createAgent } = require('../helpers/csrfHelper');
 
 jest.setTimeout(60000);
 
-async function createAffiliate(overrides = {}) {
-  const { salt, hash } = encryptionUtil.hashPassword('TestPassword417!');
-  return Affiliate.create({
-    firstName: 'Del', lastName: 'Iverer',
-    email: `aff${Date.now()}${Math.random().toString(36).slice(2, 6)}@example.com`,
-    phone: '5125551234', businessName: 'Del Iverer LLC',
-    address: '2 Main St', city: 'Austin', state: 'TX', zipCode: '78701',
-    serviceLatitude: 30.27, serviceLongitude: -97.74, // ignored if PR 2 removed them
-    username: `affuser${Date.now()}${Math.random().toString(36).slice(2, 6)}`,
-    passwordSalt: salt, passwordHash: hash, paymentMethod: 'check',
-    ...overrides
+async function createWorld({ orderStatus } = {}) {
+  const uniq = `${Date.now()}${Math.random().toString(36).slice(2, 6)}`;
+  const { salt, hash } = encryptionUtil.hashPassword('FixturePassword417!');
+
+  const affiliate = await Affiliate.create({
+    firstName: 'Del', lastName: 'Iverer', email: `fixaff${uniq}@example.com`,
+    phone: '5125551111', businessName: 'Del Iverer LLC',
+    address: '1 Fixture St', city: 'Austin', state: 'TX', zipCode: '78701',
+    username: `fixaff${uniq}`, passwordSalt: salt, passwordHash: hash,
+    paymentMethod: 'check'
   });
-}
 
-function affiliateToken(affiliate) {
-  return jwt.sign(
-    { id: affiliate._id.toString(), affiliateId: affiliate.affiliateId, role: 'affiliate' },
-    process.env.JWT_SECRET, { expiresIn: '1h' }
-  );
-}
+  const customer = await Customer.create({
+    affiliateId: affiliate.affiliateId,
+    firstName: 'Fix', lastName: 'Customer', email: `fixcust${uniq}@example.com`,
+    phone: '5125552222', address: '2 Fixture St', city: 'Austin', state: 'TX', zipCode: '78702',
+    username: `fixcust${uniq}`, passwordSalt: salt, passwordHash: hash
+  });
 
-describe('Affiliate delivery code', () => {
-  test('invited registration provisions the code and returns it once', async () => {
-    const rawInvite = encryptionUtil.generateToken(32);
-    await AffiliateInvite.create({
-      inviteId: `INV-test-${Date.now()}`,
-      tokenHash: AffiliateInvite.hashToken(rawInvite),
-      email: 'invited.affiliate@example.com',
-      status: 'pending',
-      expiresAt: new Date(Date.now() + 3600 * 1000),
-      createdBy: new mongoose.Types.ObjectId()
+  const operator = await Operator.create({
+    firstName: 'Fix', lastName: 'Operator', email: `fixop${uniq}@example.com`,
+    username: `fixop${uniq}`, password: 'StrongOperatorPass417!',
+    createdBy: new mongoose.Types.ObjectId(),
+    scanCodeHmac: roleCodes.hmacCode('OPCODE99'), scanCodeSetAt: new Date()
+  });
+
+  const token = encryptionUtil.generateToken(16);
+  const bag = await Bag.create({
+    token, tokenHash: Bag.hashToken(token),
+    affiliateId: affiliate.affiliateId, customerId: customer.customerId,
+    status: 'active', batchId: `BATCH-${uniq}`, claimedAt: new Date()
+  });
+
+  let order = null;
+  if (orderStatus) {
+    order = await Order.create({
+      customerId: customer.customerId,
+      affiliateId: affiliate.affiliateId,
+      bagId: bag.bagId,
+      bagToken: bag.token,
+      status: orderStatus,
+      pickup: { at: new Date(), by: affiliate.affiliateId, role: 'affiliate' }
     });
+  }
 
+  return { affiliate, customer, operator, bag, order, bagToken: token };
+}
+
+describe('Delivery completion via public bag-URL advance', () => {
+  beforeAll(async () => { await SystemConfig.initializeDefaults(); });
+
+  test('the legacy confirm-delivery route is gone (404)', async () => {
+    const { bagToken } = await createWorld({ orderStatus: 'out_for_delivery' });
     const res = await request(app)
-      .post('/api/v1/affiliates/register')
-      .send({
-        inviteToken: rawInvite,
-        firstName: 'Invited', lastName: 'Affiliate',
-        email: 'tampered@example.com', // ignored — invite email wins (PR 5)
-        phone: '5125550000', businessName: 'Invited LLC',
-        address: '3 Main St', city: 'Austin', state: 'TX', zipCode: '78701',
-        serviceLatitude: 30.27, serviceLongitude: -97.74,
-        username: `invited${Date.now()}`,
-        password: 'StrongPassword417!',
-        paymentMethod: 'check',
-        languagePreference: 'en'
-      });
-
-    expect(res.status).toBe(201);
-    expect(res.body.deliveryCode).toMatch(/^[ABCDEFGHJKMNPQRSTUVWXYZ23456789]{6}$/);
-
-    const saved = await Affiliate.findOne({ email: 'invited.affiliate@example.com' })
-      .select('+affiliateDeliveryCodeHash');
-    expect(saved).toBeTruthy();
-    expect(roleCodes.verifyCode(res.body.deliveryCode, saved.affiliateDeliveryCodeHash)).toBe(true);
-    expect(saved.affiliateDeliveryCodeSetAt).toBeInstanceOf(Date);
+      .post(`/api/v1/bags/${bagToken}/confirm-delivery`)
+      .send({ code: 'VENDOR' });
+    expect(res.status).toBe(404);
   });
 
-  test('GET /delivery-code returns status for self, 403 for another affiliate', async () => {
-    const affiliate = await createAffiliate({
-      affiliateDeliveryCodeHash: roleCodes.hashCode('CODE99'),
-      affiliateDeliveryCodeSetAt: new Date()
-    });
-    const other = await createAffiliate();
-
-    const ok = await request(app)
-      .get(`/api/v1/affiliates/${affiliate.affiliateId}/delivery-code`)
-      .set('Authorization', `Bearer ${affiliateToken(affiliate)}`);
-    expect(ok.status).toBe(200);
-    expect(ok.body.deliveryCodeSet).toBe(true);
-    expect(JSON.stringify(ok.body)).not.toContain('CODE99');
-
-    const forbidden = await request(app)
-      .get(`/api/v1/affiliates/${affiliate.affiliateId}/delivery-code`)
-      .set('Authorization', `Bearer ${affiliateToken(other)}`);
-    expect(forbidden.status).toBe(403);
-  });
-
-  test('POST /delivery-code/reset regenerates, returns plaintext once, kills the old code', async () => {
-    const affiliate = await createAffiliate({
-      affiliateDeliveryCodeHash: roleCodes.hashCode('OLDCDE'),
-      affiliateDeliveryCodeSetAt: new Date(Date.now() - 1000)
-    });
-    const agent = createAgent(app);
-    const csrfToken = await getCsrfToken(app, agent);
-
-    const res = await agent
-      .post(`/api/v1/affiliates/${affiliate.affiliateId}/delivery-code/reset`)
-      .set('Authorization', `Bearer ${affiliateToken(affiliate)}`)
-      .set('x-csrf-token', csrfToken)
-      .send({});
+  test('scanning an out_for_delivery bag with an operator code completes it', async () => {
+    const { bagToken, order } = await createWorld({ orderStatus: 'out_for_delivery' });
+    const res = await request(app)
+      .post(`/api/v1/bags/${bagToken}/advance`)
+      .send({ operatorCode: 'OPCODE99' });
     expect(res.status).toBe(200);
-    expect(res.body.deliveryCode).toMatch(/^[ABCDEFGHJKMNPQRSTUVWXYZ23456789]{6}$/);
+    expect(res.body.action).toBe('advance');
+    expect(res.body.order.status).toBe('complete');
 
-    const reloaded = await Affiliate.findOne({ affiliateId: affiliate.affiliateId })
-      .select('+affiliateDeliveryCodeHash');
-    expect(roleCodes.verifyCode(res.body.deliveryCode, reloaded.affiliateDeliveryCodeHash)).toBe(true);
-    expect(roleCodes.verifyCode('OLDCDE', reloaded.affiliateDeliveryCodeHash)).toBe(false);
+    const reloaded = await Order.findOne({ orderId: order.orderId });
+    expect(reloaded.status).toBe('complete');
+    expect(reloaded.completedAt).toBeInstanceOf(Date);
+  });
+
+  test('a wrong code cannot complete the order (401, order untouched)', async () => {
+    const { bagToken, order } = await createWorld({ orderStatus: 'out_for_delivery' });
+    const res = await request(app)
+      .post(`/api/v1/bags/${bagToken}/advance`)
+      .send({ operatorCode: 'WRONGC99' });
+    expect(res.status).toBe(401);
+    expect((await Order.findOne({ orderId: order.orderId })).status).toBe('out_for_delivery');
   });
 });

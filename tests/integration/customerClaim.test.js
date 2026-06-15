@@ -54,6 +54,7 @@ describe('Customer claim', () => {
     await Affiliate.deleteMany({});
     await Customer.deleteMany({});
     await Bag.deleteMany({});
+    await require('../../server/models/Order').deleteMany({});
     affiliate = await createAffiliate();
   });
 
@@ -77,6 +78,25 @@ describe('Customer claim', () => {
       // it is absent (falsy) — full shape pinned in bagResolveContext.test.js.
       expect(res.body.order).toBeFalsy();
       expect(JSON.stringify(res.body)).not.toContain('CUST-existing');
+    });
+
+    it("returns 'claimed' with new-vocab order context for a bag with an open order", async () => {
+      const Order = require('../../server/models/Order');
+      const Bag = require('../../server/modules/bags/Bag');
+      const token = await issuedBag(affiliate);
+      await bagService.claim({ token, customerId: 'CUST-open' });
+      const bag = await Bag.findOne({ tokenHash: Bag.hashToken(token) });
+      await Order.create({
+        customerId: 'CUST-open', affiliateId: affiliate.affiliateId,
+        bagId: bag.bagId, bagToken: token, status: 'pending',
+        pickup: { at: new Date(), by: affiliate.affiliateId, role: 'affiliate' }
+      });
+      const res = await request(app).get(`/api/v1/customers/claim/${token}`);
+      expect(res.status).toBe(200);
+      expect(res.body.state).toBe('claimed');
+      expect(res.body.order.status).toBe('pending');
+      expect(res.body.order.nextAction).toBe('intake');
+      expect(JSON.stringify(res.body)).not.toContain('CUST-open');
     });
 
     it("returns 'invalid' for unknown and minted tokens with identical bodies", async () => {

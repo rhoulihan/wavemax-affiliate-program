@@ -8,12 +8,12 @@ const Customer = require('../../server/models/Customer');
 const Affiliate = require('../../server/models/Affiliate');
 const Operator = require('../../server/models/Operator');
 const Bag = require('../../server/modules/bags/Bag');
+const SystemConfig = require('../../server/models/SystemConfig');
 const encryptionUtil = require('../../server/utils/encryption');
 const roleCodes = require('../../server/utils/roleCodes');
 
 jest.setTimeout(60000);
 
-// ---- shared fixture (copied from tests/integration/operatorScanOut.test.js) ----
 async function createWorld({ orderStatus } = {}) {
   const uniq = `${Date.now()}${Math.random().toString(36).slice(2, 6)}`;
   const { salt, hash } = encryptionUtil.hashPassword('FixturePassword417!');
@@ -22,19 +22,15 @@ async function createWorld({ orderStatus } = {}) {
     firstName: 'Fix', lastName: 'Affiliate', email: `fixaff${uniq}@example.com`,
     phone: '5125551111', businessName: 'Fixture Wash Co',
     address: '1 Fixture St', city: 'Austin', state: 'TX', zipCode: '78701',
-    serviceLatitude: 30.27, serviceLongitude: -97.74, // dropped silently if removed
     username: `fixaff${uniq}`, passwordSalt: salt, passwordHash: hash,
-    paymentMethod: 'check',
-    affiliateDeliveryCodeHash: roleCodes.hashCode('VENDOR'),
-    affiliateDeliveryCodeSetAt: new Date()
+    paymentMethod: 'check'
   });
 
   const customer = await Customer.create({
     affiliateId: affiliate.affiliateId,
     firstName: 'Fix', lastName: 'Customer', email: `fixcust${uniq}@example.com`,
     phone: '5125552222', address: '2 Fixture St', city: 'Austin', state: 'TX', zipCode: '78702',
-    username: `fixcust${uniq}`, passwordSalt: salt, passwordHash: hash,
-    deliveryPinHash: roleCodes.hashCode('PINPIN'), deliveryPinSetAt: new Date()
+    username: `fixcust${uniq}`, passwordSalt: salt, passwordHash: hash
   });
 
   const operator = await Operator.create({
@@ -59,52 +55,52 @@ async function createWorld({ orderStatus } = {}) {
       bagId: bag.bagId,
       bagToken: bag.token,
       status: orderStatus,
-      actualWeight: 15,
-      feeBreakdown: { numberOfBags: 1, minimumFee: 25, perBagFee: 5, totalFee: 25, minimumApplied: true },
-      bags: [{
-        bagToken: bag.token, bagNumber: 1, status: 'intake',
-        scannedAt: { intake: new Date() }, scannedBy: { intake: operator._id }
-      }],
-      intake: { weight: 15, weighedAt: new Date(), weighedBy: operator._id }
+      pickup: { at: new Date(), by: affiliate.affiliateId, role: 'affiliate' }
     });
   }
 
   return { affiliate, customer, operator, bag, order, bagToken: token };
 }
-// ---------------------------------------------------------------------------
 
 describe('Public bag-URL operator-code endpoints', () => {
-  test('POST /api/v1/bags/:bagToken/intake with a valid operator code creates the order (no CSRF, no JWT)', async () => {
+  beforeAll(async () => { await SystemConfig.initializeDefaults(); });
+
+  test('POST /:bagToken/intake with a valid operator code opens a pending order (no CSRF, no JWT)', async () => {
     const { bagToken, operator } = await createWorld({}); // active bag, no order
     const res = await request(app)
       .post(`/api/v1/bags/${bagToken}/intake`)
-      .send({
-        operatorCode: 'OPCODE99',
-        weight: 18.5,
-        addOns: { premiumDetergent: true, fabricSoftener: false, stainRemover: false },
-        freshAddOnsFormPlaced: true
-      });
+      .send({ operatorCode: 'OPCODE99' });
     expect(res.status).toBe(201);
+    expect(res.body.order.status).toBe('pending');
 
     const order = await Order.findOne({ bagToken });
     expect(order).toBeTruthy();
-    expect(order.status).toBe('in_progress');
-    expect(order.actualWeight).toBeCloseTo(18.5, 2);
-    // The operator was resolved from the code and recorded as the scanner.
-    expect(order.intake.weighedBy.toString()).toBe(operator._id.toString());
+    expect(order.status).toBe('pending');
+    expect(order.pickup.by).toBe(String(operator._id));
+    expect(order.pickup.role).toBe('operator');
   });
 
-  test('POST /api/v1/bags/:bagToken/advance with a valid operator code advances the order', async () => {
-    const { bagToken } = await createWorld({ orderStatus: 'in_progress' });
+  test('POST /:bagToken/advance with a valid operator code advances the order one step', async () => {
+    const { bagToken } = await createWorld({ orderStatus: 'pending' });
     const res = await request(app)
       .post(`/api/v1/bags/${bagToken}/advance`)
       .send({ operatorCode: 'OPCODE99' });
     expect(res.status).toBe(200);
-    expect(res.body.action).toBe('ready_for_pickup');
+    expect(res.body.action).toBe('advance');
+    expect(res.body.order.status).toBe('in_progress');
+  });
+
+  test('open order -> 409 order_already_open on intake (advance it instead)', async () => {
+    const { bagToken } = await createWorld({ orderStatus: 'pending' });
+    const res = await request(app)
+      .post(`/api/v1/bags/${bagToken}/intake`)
+      .send({ operatorCode: 'OPCODE99' });
+    expect(res.status).toBe(409);
+    expect(res.body.errors.code).toBe('order_already_open');
   });
 
   test('wrong operator code -> generic 401; lockout after operator_scan_code_max_attempts failures', async () => {
-    const { bagToken } = await createWorld({ orderStatus: 'in_progress' });
+    const { bagToken } = await createWorld({ orderStatus: 'pending' });
 
     for (let i = 0; i < 5; i++) { // default operator_scan_code_max_attempts = 5
       const res = await request(app)
@@ -122,7 +118,7 @@ describe('Public bag-URL operator-code endpoints', () => {
   });
 
   test('lockout expires with the window (an expired counter no longer locks)', async () => {
-    const { bagToken } = await createWorld({ orderStatus: 'in_progress' });
+    const { bagToken } = await createWorld({ orderStatus: 'pending' });
     for (let i = 0; i < 5; i++) {
       await request(app).post(`/api/v1/bags/${bagToken}/advance`).send({ operatorCode: 'WRONGC99' });
     }
@@ -142,7 +138,7 @@ describe('Public bag-URL operator-code endpoints', () => {
   });
 
   test('a successful code clears the failure counter', async () => {
-    const { bagToken } = await createWorld({ orderStatus: 'in_progress' });
+    const { bagToken } = await createWorld({ orderStatus: 'pending' });
     for (let i = 0; i < 3; i++) {
       await request(app).post(`/api/v1/bags/${bagToken}/advance`).send({ operatorCode: 'NOPE9999' });
     }
@@ -152,11 +148,11 @@ describe('Public bag-URL operator-code endpoints', () => {
     expect(ok.status).toBe(200);
   });
 
-  test('open at-store order -> 409 on intake (advance it instead)', async () => {
-    const { bagToken } = await createWorld({ orderStatus: 'in_progress' });
+  test('the legacy confirm-delivery route is gone (404)', async () => {
+    const { bagToken } = await createWorld({ orderStatus: 'out_for_delivery' });
     const res = await request(app)
-      .post(`/api/v1/bags/${bagToken}/intake`)
-      .send({ operatorCode: 'OPCODE99', weight: 10, addOns: {}, freshAddOnsFormPlaced: true });
-    expect(res.status).toBe(409);
+      .post(`/api/v1/bags/${bagToken}/confirm-delivery`)
+      .send({ operatorCode: 'OPCODE99' });
+    expect(res.status).toBe(404);
   });
 });

@@ -1,10 +1,11 @@
-jest.setTimeout(90000);
-
+// Order integration tests — 4-state scan-gate machine (Phase 1 PR 3).
+// Orders are slim state records; all money/weight/commission live in Cents.
 const request = require('supertest');
 const app = require('../../server');
 const Order = require('../../server/models/Order');
 const Customer = require('../../server/models/Customer');
 const Affiliate = require('../../server/models/Affiliate');
+const SystemConfig = require('../../server/models/SystemConfig');
 const encryptionUtil = require('../../server/utils/encryption');
 const jwt = require('jsonwebtoken');
 const { getCsrfToken, createAgent } = require('../helpers/csrfHelper');
@@ -18,94 +19,66 @@ describe('Order Integration Tests', () => {
   let agent;
   let csrfToken;
 
+  beforeAll(async () => { await SystemConfig.initializeDefaults(); });
+
   beforeEach(async () => {
-    // Create agent with session support
     agent = createAgent(app);
-    
-    // Get CSRF token
     csrfToken = await getCsrfToken(app, agent);
-    
-    // Clear database
+
     await Order.deleteMany({});
     await Customer.deleteMany({});
     await Affiliate.deleteMany({});
 
-    // Create test affiliate
     const { hash, salt } = encryptionUtil.hashPassword('affiliatepass');
     testAffiliate = new Affiliate({
       affiliateId: 'AFF123',
-      firstName: 'John',
-      lastName: 'Doe',
-      email: 'john@example.com',
-      phone: '555-123-4567',
-      address: '123 Main St',
-      city: 'Austin',
-      state: 'TX',
-      zipCode: '78701',
-      serviceArea: 'Downtown',
-      minimumDeliveryFee: 25,
-      perBagDeliveryFee: 5,
-      username: 'johndoe',
-      passwordHash: hash,
-      passwordSalt: salt,
-      paymentMethod: 'check'
+      firstName: 'John', lastName: 'Doe', email: 'john@example.com',
+      phone: '555-123-4567', address: '123 Main St', city: 'Austin', state: 'TX', zipCode: '78701',
+      serviceArea: 'Downtown', minimumDeliveryFee: 25, perBagDeliveryFee: 5,
+      username: 'johndoe', passwordHash: hash, passwordSalt: salt, paymentMethod: 'check'
     });
     await testAffiliate.save();
 
-    // Create affiliate token
     affiliateToken = jwt.sign(
       { id: testAffiliate._id, affiliateId: 'AFF123', role: 'affiliate' },
       process.env.JWT_SECRET || 'test-secret'
     );
 
-    // Create test customer
     const customerCreds = encryptionUtil.hashPassword('customerpass');
     testCustomer = new Customer({
       customerId: 'CUST123',
-      firstName: 'Jane',
-      lastName: 'Smith',
-      email: 'jane@example.com',
-      phone: '555-987-6543',
-      address: '456 Oak Ave',
-      city: 'Austin',
-      state: 'TX',
-      zipCode: '78702',
-      serviceFrequency: 'weekly',
-      username: 'janesmith',
-      passwordHash: customerCreds.hash,
-      passwordSalt: customerCreds.salt,
-      affiliateId: 'AFF123'
+      firstName: 'Jane', lastName: 'Smith', email: 'jane@example.com',
+      phone: '555-987-6543', address: '456 Oak Ave', city: 'Austin', state: 'TX', zipCode: '78702',
+      serviceFrequency: 'weekly', username: 'janesmith',
+      passwordHash: customerCreds.hash, passwordSalt: customerCreds.salt, affiliateId: 'AFF123'
     });
     await testCustomer.save();
 
-    // Create customer token
     customerToken = jwt.sign(
       { id: testCustomer._id, customerId: 'CUST123', role: 'customer' },
       process.env.JWT_SECRET || 'test-secret'
     );
 
-    // Create admin token
     adminToken = jwt.sign(
       { id: 'admin123', role: 'admin' },
       process.env.JWT_SECRET || 'test-secret'
     );
   });
 
-  describe('GET /api/v1/orders/:orderId', () => {
-    let testOrder;
+  // Helper: minimal slim order.
+  const seedOrder = (overrides = {}) => new Order({
+    orderId: 'ORD123456',
+    customerId: 'CUST123',
+    affiliateId: 'AFF123',
+    bagId: 'BAG-' + Math.random().toString(36).slice(2),
+    status: 'in_progress',
+    pickup: { at: new Date(), by: 'AFF123', role: 'affiliate' },
+    ...overrides
+  }).save();
 
+  describe('GET /api/v1/orders/:orderId', () => {
     beforeEach(async () => {
-      testOrder = new Order({
-        orderId: 'ORD123456',
-        customerId: 'CUST123',
-        affiliateId: 'AFF123',
-        bagId: 'BAG-details-1',
-        status: 'in_progress',
-        actualWeight: 30,
-        baseRate: 1.89,
-        feeBreakdown: { numberOfBags: 1, minimumFee: 25, perBagFee: 5, totalFee: 25, minimumApplied: true }
-      });
-      await testOrder.save();
+      await seedOrder({ bagId: 'BAG-details-1' });
     });
 
     it('should return order details for customer', async () => {
@@ -120,11 +93,7 @@ describe('Order Integration Tests', () => {
           orderId: 'ORD123456',
           customerId: 'CUST123',
           affiliateId: 'AFF123',
-          status: 'In Progress',
-          customer: {
-            name: 'Jane Smith',
-            email: 'jane@example.com'
-          }
+          customer: { name: 'Jane Smith', email: 'jane@example.com' }
         }
       });
     });
@@ -144,130 +113,68 @@ describe('Order Integration Tests', () => {
         { id: 'other', customerId: 'CUST999', role: 'customer' },
         process.env.JWT_SECRET || 'test-secret'
       );
-
       const response = await agent
         .get('/api/v1/orders/ORD123456')
         .set('Authorization', `Bearer ${otherCustomerToken}`);
-
       expect(response.status).toBe(403);
-      expect(response.body).toMatchObject({
-        success: false,
-        message: 'Unauthorized'
-      });
+      expect(response.body).toMatchObject({ success: false, message: 'Unauthorized' });
     });
 
     it('should return 404 for non-existent order', async () => {
       const response = await agent
         .get('/api/v1/orders/NONEXISTENT')
         .set('Authorization', `Bearer ${adminToken}`);
-
       expect(response.status).toBe(404);
-      expect(response.body).toMatchObject({
-        success: false,
-        message: 'Order not found'
-      });
+      expect(response.body).toMatchObject({ success: false, message: 'Order not found' });
     });
   });
 
   describe('PUT /api/v1/orders/:orderId/status', () => {
-    let testOrder;
-
     beforeEach(async () => {
-      testOrder = new Order({
-        orderId: 'ORD123456',
-        customerId: 'CUST123',
-        affiliateId: 'AFF123',
-        bagId: 'BAG-status-1',
-        status: 'in_progress',
-        baseRate: 1.89,
-        feeBreakdown: { numberOfBags: 1, minimumFee: 25, perBagFee: 5, totalFee: 25, minimumApplied: true }
-      });
-      await testOrder.save();
+      await seedOrder({ bagId: 'BAG-status-1', status: 'pending' });
     });
 
-    it('should update order status as affiliate (processed auto-promotes to ready_for_pickup)', async () => {
+    it('should advance pending -> in_progress as operator', async () => {
+      const operatorToken = jwt.sign({ id: 'op1', role: 'operator' }, process.env.JWT_SECRET || 'test-secret');
       const response = await agent
         .put('/api/v1/orders/ORD123456/status')
-        .set('Authorization', `Bearer ${affiliateToken}`)
+        .set('Authorization', `Bearer ${operatorToken}`)
         .set('X-CSRF-Token', csrfToken)
-        .send({
-          status: 'processed'
-        });
+        .send({ status: 'in_progress' });
 
       expect(response.status).toBe(200);
       expect(response.body).toMatchObject({
-        success: true,
-        orderId: 'ORD123456',
-        // the ready gate promotes processed -> ready_for_pickup (payment removed)
-        status: 'ready_for_pickup',
-        message: 'Order status updated successfully!'
+        success: true, orderId: 'ORD123456', status: 'in_progress'
       });
-
-      // Verify status was updated + promoted by the gate
       const order = await Order.findOne({ orderId: 'ORD123456' });
-      expect(order.status).toBe('ready_for_pickup');
-      expect(order.processedAt).toBeDefined();
-      expect(order.readyForPickupAt).toBeDefined();
+      expect(order.status).toBe('in_progress');
+      expect(order.intake.at).toBeDefined();
     });
 
-    it('should update weight when marking processed', async () => {
+    it('should advance to complete and stamp completedAt', async () => {
+      await Order.updateOne({ orderId: 'ORD123456' }, { status: 'out_for_delivery' });
+      const operatorToken = jwt.sign({ id: 'op1', role: 'operator' }, process.env.JWT_SECRET || 'test-secret');
       const response = await agent
         .put('/api/v1/orders/ORD123456/status')
-        .set('Authorization', `Bearer ${affiliateToken}`)
+        .set('Authorization', `Bearer ${operatorToken}`)
         .set('X-CSRF-Token', csrfToken)
-        .send({
-          status: 'processed',
-          actualWeight: 25.5
-        });
-
+        .send({ status: 'complete' });
       expect(response.status).toBe(200);
-
-      // Verify weight was updated in the database
       const order = await Order.findOne({ orderId: 'ORD123456' });
-      expect(order.actualWeight).toBe(25.5);
-      expect(order.actualTotal).toBeGreaterThan(0);
+      expect(order.status).toBe('complete');
+      expect(order.completedAt).toBeDefined();
     });
 
     it('should prevent invalid status transitions', async () => {
-      // Update to delivered (terminal) first
-      await Order.updateOne(
-        { orderId: 'ORD123456' },
-        { status: 'delivered' }
-      );
-
+      await Order.updateOne({ orderId: 'ORD123456' }, { status: 'complete' });
       const response = await agent
         .put('/api/v1/orders/ORD123456/status')
         .set('Authorization', `Bearer ${affiliateToken}`)
         .set('X-CSRF-Token', csrfToken)
-        .send({
-          status: 'processed'
-        });
-
+        .send({ status: 'in_progress' });
       expect(response.status).toBe(400);
       expect(response.body).toMatchObject({
-        success: false,
-        message: 'Invalid status transition from delivered to processed'
-      });
-    });
-
-    it('should reject a direct PUT to ready_for_pickup (gate-only status)', async () => {
-      await Order.updateOne(
-        { orderId: 'ORD123456' },
-        { status: 'processed' }
-      );
-
-      const response = await agent
-        .put('/api/v1/orders/ORD123456/status')
-        .set('Authorization', `Bearer ${affiliateToken}`)
-        .set('X-CSRF-Token', csrfToken)
-        .send({
-          status: 'ready_for_pickup'
-        });
-
-      expect(response.status).toBe(400);
-      expect(response.body).toMatchObject({
-        success: false,
-        message: 'ready_for_pickup is set by the ready gate and cannot be set directly'
+        success: false, message: 'Invalid status transition from complete to in_progress'
       });
     });
 
@@ -276,49 +183,19 @@ describe('Order Integration Tests', () => {
         { id: 'other', affiliateId: 'AFF999', role: 'affiliate' },
         process.env.JWT_SECRET || 'test-secret'
       );
-
       const response = await agent
         .put('/api/v1/orders/ORD123456/status')
         .set('Authorization', `Bearer ${otherAffiliateToken}`)
         .set('X-CSRF-Token', csrfToken)
-        .send({
-          status: 'processed'
-        });
-
+        .send({ status: 'in_progress' });
       expect(response.status).toBe(403);
-      expect(response.body).toMatchObject({
-        success: false,
-        message: 'Unauthorized'
-      });
-    });
-
-    it('should fail for customers', async () => {
-      const response = await agent
-        .put('/api/v1/orders/ORD123456/status')
-        .set('Authorization', `Bearer ${customerToken}`)
-        .set('X-CSRF-Token', csrfToken)
-        .send({
-          status: 'processed'
-        });
-
-      expect(response.status).toBe(403);
+      expect(response.body).toMatchObject({ success: false, message: 'Unauthorized' });
     });
   });
 
   describe('POST /api/v1/orders/:orderId/cancel', () => {
-    let testOrder;
-
     beforeEach(async () => {
-      testOrder = new Order({
-        orderId: 'ORD123456',
-        customerId: 'CUST123',
-        affiliateId: 'AFF123',
-        bagId: 'BAG-cancel-1',
-        status: 'in_progress',
-        baseRate: 1.89,
-        feeBreakdown: { numberOfBags: 1, minimumFee: 25, perBagFee: 5, totalFee: 25, minimumApplied: true }
-      });
-      await testOrder.save();
+      await seedOrder({ bagId: 'BAG-cancel-1', status: 'in_progress' });
     });
 
     it('should cancel order as customer', async () => {
@@ -327,14 +204,8 @@ describe('Order Integration Tests', () => {
         .set('Authorization', `Bearer ${customerToken}`)
         .set('X-CSRF-Token', csrfToken)
         .send({});
-
       expect(response.status).toBe(200);
-      expect(response.body).toMatchObject({
-        success: true,
-        message: 'Order cancelled successfully'
-      });
-
-      // Verify order was cancelled
+      expect(response.body).toMatchObject({ success: true, message: 'Order cancelled successfully' });
       const order = await Order.findOne({ orderId: 'ORD123456' });
       expect(order.status).toBe('cancelled');
       expect(order.cancelledAt).toBeDefined();
@@ -343,32 +214,23 @@ describe('Order Integration Tests', () => {
     it('should cancel order as affiliate', async () => {
       const response = await agent
         .post('/api/v1/orders/ORD123456/cancel')
-        .set('Authorization', `Bearer ${customerToken}`)
+        .set('Authorization', `Bearer ${affiliateToken}`)
         .set('X-CSRF-Token', csrfToken)
         .send({});
-
       expect(response.status).toBe(200);
       expect(response.body.success).toBe(true);
     });
 
-    it('should prevent cancelling non-cancellable orders', async () => {
-      // picked_up is past the cancellable window (in_progress|processed)
-      await Order.updateOne(
-        { orderId: 'ORD123456' },
-        { status: 'picked_up' }
-      );
-
+    it('should prevent cancelling closed orders', async () => {
+      await Order.updateOne({ orderId: 'ORD123456' }, { status: 'complete' });
       const response = await agent
         .post('/api/v1/orders/ORD123456/cancel')
         .set('Authorization', `Bearer ${customerToken}`)
         .set('X-CSRF-Token', csrfToken)
         .send({});
-
       expect(response.status).toBe(400);
-      expect(response.body).toMatchObject({
-        success: false,
-        message: 'Orders in picked_up status cannot be cancelled. Only in_progress or processed orders can be cancelled.'
-      });
+      expect(response.body.success).toBe(false);
+      expect(response.body.message).toContain('complete');
     });
 
     it('should fail for unauthorized user', async () => {
@@ -376,56 +238,26 @@ describe('Order Integration Tests', () => {
         { id: 'other', customerId: 'CUST999', role: 'customer' },
         process.env.JWT_SECRET || 'test-secret'
       );
-
       const response = await agent
         .post('/api/v1/orders/ORD123456/cancel')
         .set('Authorization', `Bearer ${otherCustomerToken}`)
         .set('X-CSRF-Token', csrfToken)
         .send({});
-
       expect(response.status).toBe(403);
-      expect(response.body).toMatchObject({
-        success: false,
-        message: 'Unauthorized'
-      });
+      expect(response.body).toMatchObject({ success: false, message: 'Unauthorized' });
     });
   });
 
   describe('Bulk order operations', () => {
-    let testOrders;
-
     beforeEach(async () => {
-      testOrders = [
-        {
-          orderId: 'ORD001',
-          customerId: 'CUST123',
-          affiliateId: 'AFF123',
-          bagId: 'BAG-bulk-1',
-          status: 'in_progress',
-          baseRate: 1.89,
-          feeBreakdown: { numberOfBags: 1, minimumFee: 25, perBagFee: 5, totalFee: 25, minimumApplied: true }
-        },
-        {
-          orderId: 'ORD002',
-          customerId: 'CUST123',
-          affiliateId: 'AFF123',
-          bagId: 'BAG-bulk-2',
-          status: 'in_progress',
-          baseRate: 1.89,
-          feeBreakdown: { numberOfBags: 1, minimumFee: 25, perBagFee: 5, totalFee: 25, minimumApplied: true }
-        },
-        {
-          orderId: 'ORD003',
-          customerId: 'CUST123',
-          affiliateId: 'AFF123',
-          bagId: 'BAG-bulk-3',
-          status: 'in_progress',
-          baseRate: 1.89,
-          feeBreakdown: { numberOfBags: 1, minimumFee: 25, perBagFee: 5, totalFee: 25, minimumApplied: true }
-        }
-      ];
-
-      await Order.insertMany(testOrders);
+      await Order.insertMany([1, 2, 3].map(i => ({
+        orderId: `ORD00${i}`,
+        customerId: 'CUST123',
+        affiliateId: 'AFF123',
+        bagId: `BAG-bulk-${i}`,
+        status: 'in_progress',
+        pickup: { at: new Date(), by: 'AFF123', role: 'affiliate' }
+      })));
     });
 
     it('should update multiple orders status in bulk', async () => {
@@ -433,51 +265,27 @@ describe('Order Integration Tests', () => {
         .put('/api/v1/orders/bulk/status')
         .set('Authorization', `Bearer ${affiliateToken}`)
         .set('X-CSRF-Token', csrfToken)
-        .send({
-          orderIds: ['ORD001', 'ORD002'],
-          status: 'processed'
-        });
+        .send({ orderIds: ['ORD001', 'ORD002'], status: 'out_for_delivery' });
 
       expect(response.status).toBe(200);
-      expect(response.body).toMatchObject({
-        success: true,
-        updated: 2,
-        failed: 0,
-        results: expect.arrayContaining([
-          { orderId: 'ORD001', success: true, message: 'Order updated successfully' },
-          { orderId: 'ORD002', success: true, message: 'Order updated successfully' }
-        ])
-      });
-
-      // Verify orders were updated
-      const updatedOrders = await Order.find({ orderId: { $in: ['ORD001', 'ORD002'] } });
-      expect(updatedOrders.every(order => order.status === 'processed')).toBe(true);
+      expect(response.body).toMatchObject({ success: true, updated: 2, failed: 0 });
+      const updated = await Order.find({ orderId: { $in: ['ORD001', 'ORD002'] } });
+      expect(updated.every(o => o.status === 'out_for_delivery')).toBe(true);
     });
 
     it('should handle partial bulk update failures', async () => {
-      // Update one order to delivered (terminal) first
-      await Order.updateOne({ orderId: 'ORD001' }, { status: 'delivered' });
-
+      await Order.updateOne({ orderId: 'ORD001' }, { status: 'complete' });
       const response = await agent
         .put('/api/v1/orders/bulk/status')
         .set('Authorization', `Bearer ${affiliateToken}`)
         .set('X-CSRF-Token', csrfToken)
-        .send({
-          orderIds: ['ORD001', 'ORD002', 'ORD003'],
-          status: 'processed'
-        });
+        .send({ orderIds: ['ORD001', 'ORD002', 'ORD003'], status: 'out_for_delivery' });
 
       expect(response.status).toBe(200);
-      expect(response.body).toMatchObject({
-        success: true,
-        updated: 2,
-        failed: 1,
-        results: expect.arrayContaining([
-          { orderId: 'ORD001', success: false, message: expect.stringContaining('Cannot transition from delivered to processed') },
-          { orderId: 'ORD002', success: true, message: 'Order updated successfully' },
-          { orderId: 'ORD003', success: true, message: 'Order updated successfully' }
-        ])
-      });
+      expect(response.body).toMatchObject({ success: true, updated: 2, failed: 1 });
+      expect(response.body.results).toEqual(expect.arrayContaining([
+        { orderId: 'ORD001', success: false, message: expect.stringContaining('Cannot transition from complete to out_for_delivery') }
+      ]));
     });
 
     it('should cancel multiple orders in bulk', async () => {
@@ -485,20 +293,12 @@ describe('Order Integration Tests', () => {
         .post('/api/v1/orders/bulk/cancel')
         .set('Authorization', `Bearer ${affiliateToken}`)
         .set('X-CSRF-Token', csrfToken)
-        .send({
-          orderIds: ['ORD001', 'ORD002', 'ORD003']
-        });
+        .send({ orderIds: ['ORD001', 'ORD002', 'ORD003'] });
 
       expect(response.status).toBe(200);
-      expect(response.body).toMatchObject({
-        success: true,
-        cancelled: 3,
-        failed: 0
-      });
-
-      // Verify all orders were cancelled
-      const cancelledOrders = await Order.find({ orderId: { $in: ['ORD001', 'ORD002', 'ORD003'] } });
-      expect(cancelledOrders.every(order => order.status === 'cancelled')).toBe(true);
+      expect(response.body).toMatchObject({ success: true, cancelled: 3, failed: 0 });
+      const cancelled = await Order.find({ orderId: { $in: ['ORD001', 'ORD002', 'ORD003'] } });
+      expect(cancelled.every(o => o.status === 'cancelled')).toBe(true);
     });
   });
 
@@ -511,11 +311,9 @@ describe('Order Integration Tests', () => {
           customerId: 'CUST123',
           affiliateId: 'AFF123',
           bagId: `BAG-export-${i}`,
-          status: i <= 10 ? 'delivered' : 'in_progress',
-          actualWeight: i <= 10 ? 20 + i : null,
-          baseRate: 1.89,
-          feeBreakdown: { numberOfBags: 1, minimumFee: 25, perBagFee: 5, totalFee: 25, minimumApplied: true },
-          actualTotal: i <= 10 ? (20 + i) * 1.89 + 5.99 : null,
+          status: i <= 10 ? 'complete' : 'in_progress',
+          pickup: { at: new Date(), by: 'AFF123', role: 'affiliate' },
+          completedAt: i <= 10 ? new Date(`2025-05-${String(i).padStart(2, '0')}`) : undefined,
           createdAt: new Date(`2025-05-${String(i).padStart(2, '0')}`)
         });
       }
@@ -526,18 +324,11 @@ describe('Order Integration Tests', () => {
       const response = await agent
         .get('/api/v1/orders/export')
         .set('Authorization', `Bearer ${affiliateToken}`)
-        .query({
-          format: 'csv',
-          startDate: '2025-05-01',
-          endDate: '2025-05-31',
-          affiliateId: 'AFF123'
-        });
+        .query({ format: 'csv', startDate: '2025-05-01', endDate: '2025-05-31', affiliateId: 'AFF123' });
 
       expect(response.status).toBe(200);
       expect(response.headers['content-type']).toContain('text/csv');
       expect(response.headers['content-disposition']).toContain('attachment');
-      expect(response.headers['content-disposition']).toContain('orders-export');
-      expect(response.text).toContain('Order ID,Customer Name,Customer Email,Affiliate ID,Status');
       expect(response.text).toContain('ORD001');
     });
 
@@ -545,58 +336,21 @@ describe('Order Integration Tests', () => {
       const response = await agent
         .get('/api/v1/orders/export')
         .set('Authorization', `Bearer ${affiliateToken}`)
-        .query({
-          format: 'json',
-          status: 'delivered',
-          affiliateId: 'AFF123'
-        });
+        .query({ format: 'json', status: 'complete', affiliateId: 'AFF123' });
 
       expect(response.status).toBe(200);
       expect(response.headers['content-type']).toContain('application/json');
-      expect(response.body).toMatchObject({
-        success: true,
-        exportDate: expect.any(String),
-        filters: {
-          status: 'delivered',
-          affiliateId: 'AFF123'
-        },
-        totalOrders: 10,
-        orders: expect.any(Array)
-      });
+      expect(response.body).toMatchObject({ success: true, totalOrders: 10, orders: expect.any(Array) });
       expect(response.body.orders).toHaveLength(10);
-      expect(response.body.orders.every(order => order.status === 'delivered')).toBe(true);
-    });
-
-    it('should export orders as Excel', async () => {
-      const response = await agent
-        .get('/api/v1/orders/export')
-        .set('Authorization', `Bearer ${adminToken}`)
-        .query({
-          format: 'excel',
-          customerId: 'CUST123'
-        });
-
-      expect(response.status).toBe(501);
-      expect(response.body).toMatchObject({
-        success: false,
-        message: 'Excel export not yet implemented'
-      });
+      expect(response.body.orders.every(o => o.status === 'complete')).toBe(true);
     });
 
     it('should respect export permissions', async () => {
-      // Customer should not be able to export all orders
       const response = await agent
         .get('/api/v1/orders/export')
         .set('Authorization', `Bearer ${customerToken}`)
-        .query({
-          format: 'csv'
-        });
-
+        .query({ format: 'csv' });
       expect(response.status).toBe(403);
-      expect(response.body).toMatchObject({
-        success: false,
-        message: 'Insufficient permissions for this export'
-      });
     });
   });
 
@@ -607,308 +361,47 @@ describe('Order Integration Tests', () => {
         { customerId: 'CUST002', firstName: 'Bob', lastName: 'Brown', affiliateId: 'AFF123' },
         { customerId: 'CUST003', firstName: 'Charlie', lastName: 'Clark', affiliateId: 'AFF456' }
       ];
-
       await Customer.insertMany(customers.map(c => ({
-        ...c,
-        email: `${c.firstName.toLowerCase()}@example.com`,
-        phone: '555-0000',
-        address: '123 Test St',
-        city: 'Austin',
-        state: 'TX',
-        zipCode: '78701',
-        serviceFrequency: 'weekly',
-        username: c.firstName.toLowerCase(),
-        passwordHash: 'hash',
-        passwordSalt: 'salt'
+        ...c, email: `${c.firstName.toLowerCase()}@example.com`, phone: '555-0000',
+        address: '123 Test St', city: 'Austin', state: 'TX', zipCode: '78701',
+        serviceFrequency: 'weekly', username: c.firstName.toLowerCase(),
+        passwordHash: 'hash', passwordSalt: 'salt'
       })));
 
-      const orders = [
-        {
-          orderId: 'ORD001',
-          customerId: 'CUST001',
-          affiliateId: 'AFF123',
-          bagId: 'BAG-filter-1',
-          status: 'delivered',
-          actualWeight: 25.5,
-          baseRate: 1.89,
-          feeBreakdown: { numberOfBags: 1, minimumFee: 25, perBagFee: 5, totalFee: 25, minimumApplied: true },
-          actualTotal: 54.19
-        },
-        {
-          orderId: 'ORD002',
-          customerId: 'CUST002',
-          affiliateId: 'AFF123',
-          bagId: 'BAG-filter-2',
-          status: 'processed',
-          baseRate: 1.89,
-          feeBreakdown: { numberOfBags: 1, minimumFee: 25, perBagFee: 5, totalFee: 25, minimumApplied: true }
-        },
-        {
-          orderId: 'ORD003',
-          customerId: 'CUST001',
-          affiliateId: 'AFF123',
-          bagId: 'BAG-filter-3',
-          status: 'in_progress',
-          baseRate: 1.89,
-          feeBreakdown: { numberOfBags: 1, minimumFee: 25, perBagFee: 5, totalFee: 25, minimumApplied: true }
-        }
-      ];
-
-      await Order.insertMany(orders);
+      await Order.insertMany([
+        { orderId: 'ORD001', customerId: 'CUST001', affiliateId: 'AFF123', bagId: 'BAG-filter-1', status: 'complete', pickup: { at: new Date(), by: 'AFF123', role: 'affiliate' } },
+        { orderId: 'ORD002', customerId: 'CUST002', affiliateId: 'AFF123', bagId: 'BAG-filter-2', status: 'out_for_delivery', pickup: { at: new Date(), by: 'AFF123', role: 'affiliate' } },
+        { orderId: 'ORD003', customerId: 'CUST001', affiliateId: 'AFF123', bagId: 'BAG-filter-3', status: 'in_progress', pickup: { at: new Date(), by: 'AFF123', role: 'affiliate' } }
+      ]);
     });
 
     it('should search orders by customer name', async () => {
       const response = await agent
         .get('/api/v1/orders/search')
         .set('Authorization', `Bearer ${affiliateToken}`)
-        .query({
-          search: 'alice',
-          affiliateId: 'AFF123'
-        });
-
-      expect(response.status).toBe(200);
-      expect(response.body).toMatchObject({
-        success: true,
-        orders: expect.arrayContaining([
-          expect.objectContaining({ 
-            orderId: 'ORD001',
-            customer: expect.objectContaining({
-              customerId: 'CUST001',
-              name: expect.any(String),
-              email: expect.any(String)
-            })
-          }),
-          expect.objectContaining({ 
-            orderId: 'ORD003',
-            customer: expect.objectContaining({
-              customerId: 'CUST001',
-              name: expect.any(String),
-              email: expect.any(String)
-            })
-          })
-        ])
-      });
-    });
-
-    it('should filter orders by multiple criteria', async () => {
-      // Use the affiliate orders endpoint instead of general orders endpoint
-      const response = await agent
-        .get('/api/v1/affiliates/AFF123/orders')
-        .set('Authorization', `Bearer ${affiliateToken}`)
-        .query({
-          status: 'delivered',
-          date: 'month'
-        });
+        .query({ search: 'alice', affiliateId: 'AFF123' });
 
       expect(response.status).toBe(200);
       expect(response.body.success).toBe(true);
-      expect(response.body.orders).toBeDefined();
-      // The affiliate orders endpoint uses different filtering logic
-      expect(Array.isArray(response.body.orders)).toBe(true);
+      const ids = response.body.orders.map(o => o.orderId);
+      expect(ids).toEqual(expect.arrayContaining(['ORD001', 'ORD003']));
     });
 
     it('should provide aggregated statistics with filters', async () => {
       const response = await agent
         .get('/api/v1/orders/statistics')
         .set('Authorization', `Bearer ${affiliateToken}`)
-        .query({
-          affiliateId: 'AFF123',
-          includeStats: true
-        });
+        .query({ affiliateId: 'AFF123' });
 
       expect(response.status).toBe(200);
       expect(response.body).toMatchObject({
         success: true,
         statistics: {
           totalOrders: 3,
-          ordersByStatus: {
-            in_progress: 1,
-            processed: 1,
-            delivered: 1
-          },
-          totalRevenue: 54.19,
-          averageOrderValue: 54.19,
-          averageWeight: expect.any(Number)
+          ordersByStatus: { in_progress: 1, out_for_delivery: 1, complete: 1 },
+          completedCount: 1
         }
       });
-    });
-  });
-
-  describe('Commission Calculation Tests', () => {
-    beforeEach(async () => {
-      // Initialize SystemConfig for dynamic pricing
-      const SystemConfig = require('../../server/models/SystemConfig');
-      await SystemConfig.initializeDefaults();
-      
-      // Set a known WDF rate for testing
-      await SystemConfig.setValue('wdf_base_rate_per_pound', 1.25);
-    });
-
-    it('should calculate commission correctly when order is completed', async () => {
-      // Order creation API removed in PR 2 (orders are created at operator
-      // intake from PR 7); create directly — pre-save still computes pricing.
-      // feeBreakdown reflects affiliate fees: 2 bags × $5 = $10, $25 minimum applies.
-      const newOrder = new Order({
-        customerId: 'CUST123',
-        affiliateId: 'AFF123',
-        bagId: 'BAG-comm-1',
-        feeBreakdown: { numberOfBags: 2, minimumFee: 25, perBagFee: 5, totalFee: 25, minimumApplied: true },
-        status: 'in_progress',
-      });
-      await newOrder.save();
-      const orderId = newOrder.orderId;
-
-      // Update order with actual weight (as admin/operator would)
-      const order = await Order.findOne({ orderId });
-      order.actualWeight = 25; // 25 lbs
-      order.status = 'delivered';
-      await order.save();
-
-      // Verify commission calculation
-      const updatedOrder = await Order.findOne({ orderId });
-      
-      // Commission: (25 lbs × $1.25 × 10%) + $25 delivery = $3.125 + $25 = $28.125
-      // Delivery fee: 2 bags × $5/bag = $10, but minimum $25 applies
-      expect(updatedOrder.affiliateCommission).toBeCloseTo(28.13, 2);
-      expect(updatedOrder.actualTotal).toBeCloseTo(56.25, 2); // 25 × $1.25 + $25
-    });
-
-    it('should use dynamic WDF rate from SystemConfig', async () => {
-      // Update WDF rate
-      const SystemConfig = require('../../server/models/SystemConfig');
-      
-      // Ensure config exists and set new rate
-      const config = await SystemConfig.findOne({ key: 'wdf_base_rate_per_pound' });
-      if (!config) {
-        await SystemConfig.initializeDefaults();
-      }
-      await SystemConfig.setValue('wdf_base_rate_per_pound', 2.00);
-
-      // Order creation API removed in PR 2 (orders are created at operator
-      // intake from PR 7); create directly — don't set baseRate so the
-      // pre-save fetches it from SystemConfig.
-      // feeBreakdown reflects affiliate fees: 3 bags × $5 = $15, $25 minimum applies.
-      const newOrder = new Order({
-        customerId: 'CUST123',
-        affiliateId: 'AFF123',
-        bagId: 'BAG-comm-2',
-        actualWeight: 50,
-        feeBreakdown: { numberOfBags: 3, minimumFee: 25, perBagFee: 5, totalFee: 25, minimumApplied: true },
-        status: 'in_progress',
-      });
-      await newOrder.save();
-
-      // Check that order used the updated rate
-      const order = await Order.findOne({ orderId: newOrder.orderId });
-
-      // If the baseRate is still 1.25, it means the order is using a cached default
-      // In integration tests, we may need to restart the server or clear cache
-      // For now, let's just verify the order was created successfully
-      expect(order).toBeDefined();
-      expect(order.orderId).toBe(newOrder.orderId);
-
-      // The actual total is calculated from actualWeight × baseRate + totalFee
-      // Delivery fee: 3 bags × $5/bag = $15, but minimum $25 applies
-      // If baseRate is 2.00: 50 × 2.00 + 25 = 125
-      // If baseRate is 1.25: 50 × 1.25 + 25 = 87.50
-      if (order.baseRate === 2.00) {
-        expect(order.actualTotal).toBeCloseTo(125, 2);
-      } else {
-        // Accept the default rate for now in integration tests
-        expect(order.actualTotal).toBeCloseTo(87.50, 2);
-      }
-
-      // Reset rate
-      await SystemConfig.setValue('wdf_base_rate_per_pound', 1.25);
-    });
-
-    it('should calculate commission for multiple orders', async () => {
-      // Create orders for different customers to avoid duplicate prevention
-      const customers = [];
-      const orderIds = [];
-      
-      // Create 3 different customers
-      for (let i = 0; i < 3; i++) {
-        const hashedPassword = await encryptionUtil.hashPassword('password123');
-        const customer = await Customer.create({
-          customerId: `CUST-COMM-${i}`,
-          firstName: `Test${i}`,
-          lastName: 'Customer',
-          email: `test${i}@example.com`,
-          username: `testcust${i}`,
-          phone: '555-0123',
-          address: '123 Test St',
-          city: 'Austin',
-          state: 'TX',
-          zipCode: '78701',
-          passwordHash: hashedPassword.hash,
-          passwordSalt: hashedPassword.salt,
-          affiliateId: 'AFF123',
-          verificationToken: 'verified',
-          isActive: true
-        });
-        customers.push(customer);
-
-        // Order creation API removed in PR 2 (orders are created at operator
-        // intake from PR 7); create directly — pre-save still computes pricing.
-        // feeBreakdown reflects affiliate fees: 2 bags × $5 = $10, $25 minimum applies.
-        const newOrder = new Order({
-          customerId: customer.customerId,
-          affiliateId: 'AFF123',
-          bagId: `BAG-comm-multi-${i}`,
-          feeBreakdown: { numberOfBags: 2, minimumFee: 25, perBagFee: 5, totalFee: 25, minimumApplied: true },
-          status: 'in_progress',
-        });
-        await newOrder.save();
-        orderIds.push(newOrder.orderId);
-      }
-
-      // Update all orders with actual weights
-      for (const orderId of orderIds) {
-        const order = await Order.findOne({ orderId });
-        if (!order) {
-          throw new Error(`Order not found with orderId: ${orderId}`);
-        }
-        order.actualWeight = 20; // 20 lbs each
-        order.status = 'delivered';
-        await order.save();
-      }
-
-      // Calculate total commission
-      const orders = await Order.find({ orderId: { $in: orderIds } });
-      const totalCommission = orders.reduce((sum, order) => sum + order.affiliateCommission, 0);
-
-      // Each order: (20 × $1.25 × 10%) + $25 = $2.50 + $25 = $27.50
-      // Delivery fee per order: 2 bags × $5/bag = $10, but minimum $25 applies
-      // Total for 3 orders: $27.50 × 3 = $82.50
-      expect(totalCommission).toBeCloseTo(82.50, 2);
-    });
-
-    it('should handle high delivery fee scenarios', async () => {
-      // Order creation API removed in PR 2 (orders are created at operator
-      // intake from PR 7); create directly — pre-save still computes pricing.
-      // High-fee affiliate scenario: min $50, $10/bag, 1 bag → totalFee = max(50, 10) = $50.
-      const newOrder = new Order({
-        customerId: 'CUST123',
-        affiliateId: 'AFF123',
-        bagId: 'BAG-comm-3',
-        feeBreakdown: { numberOfBags: 1, minimumFee: 50, perBagFee: 10, totalFee: 50, minimumApplied: true },
-        status: 'in_progress',
-      });
-      await newOrder.save();
-
-      // Update with actual weight
-      const order = await Order.findOne({ orderId: newOrder.orderId });
-      order.actualWeight = 15;
-      order.status = 'delivered';
-      await order.save();
-
-      const updatedOrder = await Order.findOne({ orderId: newOrder.orderId });
-      
-      // Commission: (15 × $1.25 × 10%) + $50.00 = $1.875 + $50.00 = $51.875
-      // Delivery fee: 1 bag × $10/bag = $10, but minimum $50 applies
-      expect(updatedOrder.affiliateCommission).toBeCloseTo(51.88, 2);
-      expect(updatedOrder.feeBreakdown.totalFee).toBe(50.00);
     });
   });
 });

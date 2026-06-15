@@ -1,101 +1,172 @@
-// Unit tests for the single shared order-status transition map (design §6.4).
+// Unit tests for the 4-state scan-gate order machine (Phase 1 PR 3, spec §3/§6).
 // Pure logic — no DB needed.
 const {
   TRANSITIONS,
+  OPEN_STATUSES,
+  CLOSED_STATUSES,
   canTransition,
   applyTransition,
+  resolveScanAction,
   TransitionError
 } = require('../../server/modules/orders/orderStateMachine');
 
-describe('orderStateMachine', () => {
+describe('orderStateMachine (4-state)', () => {
   describe('TRANSITIONS', () => {
-    it('defines the canonical map from design §6.4', () => {
+    it('defines the canonical 4-gate map from spec §3', () => {
       expect(TRANSITIONS).toEqual({
-        in_progress: ['processed', 'cancelled'],
-        processed: ['ready_for_pickup', 'cancelled'],
-        ready_for_pickup: ['picked_up'],
-        picked_up: ['delivered'],
-        delivered: [],
+        pending: ['in_progress', 'cancelled'],
+        in_progress: ['out_for_delivery', 'cancelled'],
+        out_for_delivery: ['complete', 'cancelled'],
+        complete: [],
         cancelled: []
       });
+    });
+
+    it('exposes OPEN/CLOSED status partitions', () => {
+      expect(OPEN_STATUSES).toEqual(['pending', 'in_progress', 'out_for_delivery']);
+      expect(CLOSED_STATUSES).toEqual(['complete', 'cancelled']);
     });
   });
 
   describe('canTransition', () => {
     it.each([
-      ['in_progress', 'processed'],
+      ['pending', 'in_progress'],
+      ['pending', 'cancelled'],
+      ['in_progress', 'out_for_delivery'],
       ['in_progress', 'cancelled'],
-      ['processed', 'ready_for_pickup'],
-      ['processed', 'cancelled'],
-      ['ready_for_pickup', 'picked_up'],
-      ['picked_up', 'delivered']
+      ['out_for_delivery', 'complete'],
+      ['out_for_delivery', 'cancelled']
     ])('allows %s -> %s', (from, to) => {
       expect(canTransition(from, to)).toBe(true);
     });
 
     it.each([
-      ['in_progress', 'ready_for_pickup'], // must pass through processed
-      ['in_progress', 'picked_up'],
-      ['in_progress', 'delivered'],
-      ['processed', 'picked_up'],          // must pass through the gate
-      ['processed', 'delivered'],
-      ['ready_for_pickup', 'cancelled'],   // cancel only from in_progress/processed
-      ['picked_up', 'cancelled'],
-      ['delivered', 'cancelled'],
-      ['cancelled', 'in_progress'],
-      ['pending', 'processing'],           // old enum values are dead
-      [undefined, 'processed']
+      ['pending', 'out_for_delivery'],
+      ['pending', 'complete'],
+      ['in_progress', 'complete'],
+      ['complete', 'cancelled'],
+      ['cancelled', 'pending'],
+      ['processed', 'ready_for_pickup'], // old enum is dead
+      [undefined, 'in_progress']
     ])('rejects %s -> %s', (from, to) => {
       expect(canTransition(from, to)).toBe(false);
     });
   });
 
-  describe('applyTransition', () => {
-    it('sets the status and stamps processedAt set-once', () => {
+  describe('applyTransition stamping', () => {
+    const stamp = { by: 'OP-1', role: 'operator' };
+
+    it('in_progress stamps the intake sub-object', () => {
+      const order = { status: 'pending' };
+      applyTransition(order, 'in_progress', stamp);
+      expect(order.status).toBe('in_progress');
+      expect(order.intake.at).toBeInstanceOf(Date);
+      expect(order.intake.by).toBe('OP-1');
+      expect(order.intake.role).toBe('operator');
+    });
+
+    it('out_for_delivery stamps storePickup and the manual-payment flag', () => {
       const order = { status: 'in_progress' };
-      applyTransition(order, 'processed');
-      expect(order.status).toBe('processed');
-      expect(order.processedAt).toBeInstanceOf(Date);
-      const first = order.processedAt;
-      order.status = 'in_progress'; // contrived re-run to prove set-once
-      applyTransition(order, 'processed');
-      expect(order.processedAt).toBe(first);
+      applyTransition(order, 'out_for_delivery', { ...stamp, paymentConfirmed: true });
+      expect(order.status).toBe('out_for_delivery');
+      expect(order.storePickup.at).toBeInstanceOf(Date);
+      expect(order.storePickup.by).toBe('OP-1');
+      expect(order.paymentConfirmedManually).toBe(true);
     });
 
-    it('stamps pickedUpAt on picked_up', () => {
-      const order = { status: 'ready_for_pickup' };
-      applyTransition(order, 'picked_up');
-      expect(order.status).toBe('picked_up');
-      expect(order.pickedUpAt).toBeInstanceOf(Date);
+    it('out_for_delivery without paymentConfirmed leaves the flag falsey', () => {
+      const order = { status: 'in_progress' };
+      applyTransition(order, 'out_for_delivery', stamp);
+      expect(order.paymentConfirmedManually).toBeFalsy();
     });
 
-    it('stamps deliveredAt and realizes commission exactly once on delivered', () => {
-      const order = { status: 'picked_up' };
-      applyTransition(order, 'delivered');
-      expect(order.deliveredAt).toBeInstanceOf(Date);
-      expect(order.commissionRealized).toBe(true);
-      expect(order.commissionRealizedAt).toBeInstanceOf(Date);
+    it('complete stamps delivery + completedAt', () => {
+      const order = { status: 'out_for_delivery' };
+      applyTransition(order, 'complete', { by: 'AFF-9', role: 'affiliate' });
+      expect(order.status).toBe('complete');
+      expect(order.delivery.at).toBeInstanceOf(Date);
+      expect(order.delivery.by).toBe('AFF-9');
+      expect(order.delivery.role).toBe('affiliate');
+      expect(order.completedAt).toBeInstanceOf(Date);
     });
 
-    it('stamps cancelledAt on cancel from processed', () => {
-      const order = { status: 'processed' };
-      applyTransition(order, 'cancelled');
+    it('cancelled stamps cancelledAt', () => {
+      const order = { status: 'pending' };
+      applyTransition(order, 'cancelled', stamp);
       expect(order.status).toBe('cancelled');
       expect(order.cancelledAt).toBeInstanceOf(Date);
     });
 
-    it('does NOT stamp readyForPickupAt (sole writer is the ready gate)', () => {
-      const order = { status: 'processed' };
-      applyTransition(order, 'ready_for_pickup');
-      expect(order.status).toBe('ready_for_pickup');
-      expect(order.readyForPickupAt).toBeUndefined();
+    it('honours an explicit at timestamp', () => {
+      const at = new Date('2026-01-01T00:00:00Z');
+      const order = { status: 'pending' };
+      applyTransition(order, 'in_progress', { ...stamp, at });
+      expect(order.intake.at).toEqual(at);
     });
 
-    it('throws TransitionError on an invalid transition and leaves the order untouched', () => {
-      const order = { status: 'delivered' };
-      expect(() => applyTransition(order, 'cancelled')).toThrow(TransitionError);
-      expect(order.status).toBe('delivered');
+    it('throws TransitionError on an invalid move and leaves the order untouched', () => {
+      const order = { status: 'complete' };
+      expect(() => applyTransition(order, 'cancelled', stamp)).toThrow(TransitionError);
+      expect(order.status).toBe('complete');
       expect(order.cancelledAt).toBeUndefined();
+    });
+
+    it('TransitionError carries code + statusCode', () => {
+      const order = { status: 'pending' };
+      try {
+        applyTransition(order, 'complete', stamp);
+        throw new Error('should have thrown');
+      } catch (err) {
+        expect(err.code).toBe('invalid_transition');
+        expect(err.statusCode).toBe(400);
+      }
+    });
+  });
+
+  describe('resolveScanAction', () => {
+    const reopenWindowMs = 240 * 60 * 1000;
+    const now = new Date('2026-06-15T12:00:00Z');
+
+    it('no order -> create-pending', () => {
+      expect(resolveScanAction(null, { now, reopenWindowMs }))
+        .toEqual({ action: 'create-pending' });
+    });
+
+    it('cancelled order -> create-pending', () => {
+      expect(resolveScanAction({ status: 'cancelled' }, { now, reopenWindowMs }))
+        .toEqual({ action: 'create-pending' });
+    });
+
+    it('pending -> advance to in_progress', () => {
+      expect(resolveScanAction({ status: 'pending' }, { now, reopenWindowMs }))
+        .toEqual({ action: 'advance', to: 'in_progress' });
+    });
+
+    it('in_progress -> advance to out_for_delivery', () => {
+      expect(resolveScanAction({ status: 'in_progress' }, { now, reopenWindowMs }))
+        .toEqual({ action: 'advance', to: 'out_for_delivery' });
+    });
+
+    it('out_for_delivery -> advance to complete', () => {
+      expect(resolveScanAction({ status: 'out_for_delivery' }, { now, reopenWindowMs }))
+        .toEqual({ action: 'advance', to: 'complete' });
+    });
+
+    it('complete within the reopen window -> delivery-rescan-prompt', () => {
+      const completedAt = new Date(now.getTime() - 60 * 60 * 1000); // 1h ago
+      const res = resolveScanAction(
+        { status: 'complete', completedAt, orderId: 'ORD-1' },
+        { now, reopenWindowMs }
+      );
+      expect(res).toEqual({ action: 'delivery-rescan-prompt', orderId: 'ORD-1' });
+    });
+
+    it('complete beyond the reopen window -> create-pending', () => {
+      const completedAt = new Date(now.getTime() - 5 * 60 * 60 * 1000); // 5h ago
+      expect(resolveScanAction(
+        { status: 'complete', completedAt, orderId: 'ORD-1' },
+        { now, reopenWindowMs }
+      )).toEqual({ action: 'create-pending' });
     });
   });
 });
