@@ -85,8 +85,7 @@ describe('POST /api/v1/operators/intake (kiosk)', () => {
     expect(res.body.order.status).toBe('in_progress');
     expect(res.body.order.feeBreakdown.totalFee).toBeGreaterThan(0);
     expect(res.body.order.affiliateCommission).toBeGreaterThan(0);
-    expect(res.body.order.paymentAmount).toBeGreaterThan(0);
-    expect(res.body.order.paymentStatus).toBe('awaiting');
+    expect(res.body.order.actualTotal).toBeGreaterThan(0);
 
     const saved = await Order.findOne({ orderId: res.body.order.orderId });
     expect(saved.bagId).toBe(bag.bagId);

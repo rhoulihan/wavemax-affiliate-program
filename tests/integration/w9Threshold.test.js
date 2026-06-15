@@ -37,7 +37,6 @@ async function realizedOrder(affiliate, totalFee) {
     bags: [{ bagToken: token, bagNumber: 1 }],
     actualWeight: 10,
     status: 'delivered',
-    paymentStatus: 'verified',
     commissionRealized: true,
     commissionRealizedAt: new Date(),
     feeBreakdown: { minimumFee: 10, perBagFee: 2, totalFee, minimumApplied: false }
@@ -138,7 +137,6 @@ describe('threshold trigger fires through the admin delivered override', () => {
       bags: [{ bagToken: token, bagNumber: 1 }],
       actualWeight: 10,
       status: 'picked_up',
-      paymentStatus: 'verified',
       commissionRealized: false,
       feeBreakdown: { minimumFee: 10, perBagFee: 2, totalFee: 700, minimumApplied: false }
     });

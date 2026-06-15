@@ -15,7 +15,7 @@ const { getCsrfToken, createAgent } = require('../helpers/csrfHelper');
 jest.setTimeout(60000);
 
 // ---- shared fixture (copied from tests/integration/operatorScanOut.test.js) ----
-async function createWorld({ orderStatus, paymentStatus = 'pending' } = {}) {
+async function createWorld({ orderStatus } = {}) {
   const uniq = `${Date.now()}${Math.random().toString(36).slice(2, 6)}`;
   const { salt, hash } = encryptionUtil.hashPassword('FixturePassword417!');
 
@@ -60,7 +60,6 @@ async function createWorld({ orderStatus, paymentStatus = 'pending' } = {}) {
       bagId: bag.bagId,
       bagToken: bag.token,
       status: orderStatus,
-      paymentStatus,
       actualWeight: 15,
       feeBreakdown: { numberOfBags: 1, minimumFee: 25, perBagFee: 5, totalFee: 25, minimumApplied: true },
       bags: [{
@@ -90,7 +89,7 @@ describe('admin manual_confirm override (spec §6.6 / §11)', () => {
   });
 
   test('admin PUT picked_up -> delivered stamps proofOfDelivery manual_confirm + realizes commission', async () => {
-    const { order } = await createWorld({ orderStatus: 'picked_up', paymentStatus: 'verified' });
+    const { order } = await createWorld({ orderStatus: 'picked_up' });
 
     const res = await agent
       .put(`/api/v1/orders/${order.orderId}/status`)
@@ -114,7 +113,7 @@ describe('admin manual_confirm override (spec §6.6 / §11)', () => {
     // service set affiliate_code in the same request), the stamp must not
     // clobber it. Simulate by pre-setting proofOfDelivery on a picked_up
     // order before the admin PUT.
-    const { order } = await createWorld({ orderStatus: 'picked_up', paymentStatus: 'verified' });
+    const { order } = await createWorld({ orderStatus: 'picked_up' });
     order.proofOfDelivery = {
       method: 'affiliate_code', confirmedByRole: 'affiliate',
       confirmedById: order.affiliateId, confirmedAt: new Date()

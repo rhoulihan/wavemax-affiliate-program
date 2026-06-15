@@ -15,7 +15,7 @@ const roleCodes = require('../../server/utils/roleCodes');
 jest.setTimeout(60000);
 
 // ---- shared fixture (copied from tests/integration/operatorScanOut.test.js) ----
-async function createWorld({ orderStatus, paymentStatus = 'pending' } = {}) {
+async function createWorld({ orderStatus } = {}) {
   const uniq = `${Date.now()}${Math.random().toString(36).slice(2, 6)}`;
   const { salt, hash } = encryptionUtil.hashPassword('FixturePassword417!');
 
@@ -60,7 +60,6 @@ async function createWorld({ orderStatus, paymentStatus = 'pending' } = {}) {
       bagId: bag.bagId,
       bagToken: bag.token,
       status: orderStatus,
-      paymentStatus,
       actualWeight: 15,
       feeBreakdown: { numberOfBags: 1, minimumFee: 25, perBagFee: 5, totalFee: 25, minimumApplied: true },
       bags: [{
@@ -83,7 +82,7 @@ describe('POST /api/v1/bags/:bagToken/confirm-delivery', () => {
 
   test('vendor (affiliate) code on a picked_up order -> delivered, commission realized, both emails', async () => {
     const { bagToken, order, affiliate } = await createWorld({
-      orderStatus: 'picked_up', paymentStatus: 'verified'
+      orderStatus: 'picked_up'
     });
     const res = await confirm(bagToken, { code: 'VENDOR' });
     expect(res.status).toBe(200);
@@ -105,7 +104,7 @@ describe('POST /api/v1/bags/:bagToken/confirm-delivery', () => {
 
   test('customer PIN -> delivered with confirmedByRole customer; optional geo persists [lng,lat]', async () => {
     const { bagToken, order, customer } = await createWorld({
-      orderStatus: 'picked_up', paymentStatus: 'verified'
+      orderStatus: 'picked_up'
     });
     const res = await confirm(bagToken, { code: 'PINPIN', geo: { lat: 30.2672, lng: -97.7431 } });
     expect(res.status).toBe(200);
@@ -120,7 +119,7 @@ describe('POST /api/v1/bags/:bagToken/confirm-delivery', () => {
   });
 
   test('operator code -> 401 with errors.code operator_code (re-intake hint, not a delivery)', async () => {
-    const { bagToken } = await createWorld({ orderStatus: 'picked_up', paymentStatus: 'verified' });
+    const { bagToken } = await createWorld({ orderStatus: 'picked_up' });
     const res = await confirm(bagToken, { code: 'OPCODE99' });
     expect(res.status).toBe(401);
     expect(res.body.errors.code).toBe('operator_code');
@@ -130,7 +129,7 @@ describe('POST /api/v1/bags/:bagToken/confirm-delivery', () => {
   });
 
   test("ANOTHER affiliate's valid code -> generic 401 (verified against this order's parties only)", async () => {
-    const { bagToken } = await createWorld({ orderStatus: 'picked_up', paymentStatus: 'verified' });
+    const { bagToken } = await createWorld({ orderStatus: 'picked_up' });
     const otherWorld = await createWorld({});
     await Affiliate.updateOne(
       { affiliateId: otherWorld.affiliate.affiliateId },
@@ -142,14 +141,14 @@ describe('POST /api/v1/bags/:bagToken/confirm-delivery', () => {
   });
 
   test('non-picked_up order -> 409 not_picked_up', async () => {
-    const { bagToken } = await createWorld({ orderStatus: 'processed', paymentStatus: 'verified' });
+    const { bagToken } = await createWorld({ orderStatus: 'processed' });
     const res = await confirm(bagToken, { code: 'VENDOR' });
     expect(res.status).toBe(409);
     expect(res.body.errors.code).toBe('not_picked_up');
   });
 
   test('double-confirm -> 409; commission realized exactly once', async () => {
-    const { bagToken, order } = await createWorld({ orderStatus: 'picked_up', paymentStatus: 'verified' });
+    const { bagToken, order } = await createWorld({ orderStatus: 'picked_up' });
     const first = await confirm(bagToken, { code: 'VENDOR' });
     expect(first.status).toBe(200);
     const stamped = (await Order.findOne({ orderId: order.orderId })).commissionRealizedAt;
@@ -163,7 +162,7 @@ describe('POST /api/v1/bags/:bagToken/confirm-delivery', () => {
   });
 
   test('wrong code -> 401 and lockout after delivery_code_max_attempts; success still blocked while locked', async () => {
-    const { bagToken } = await createWorld({ orderStatus: 'picked_up', paymentStatus: 'verified' });
+    const { bagToken } = await createWorld({ orderStatus: 'picked_up' });
     for (let i = 0; i < 5; i++) { // default delivery_code_max_attempts = 5
       const res = await confirm(bagToken, { code: 'NOPE99' });
       expect(res.status).toBe(401);
@@ -173,7 +172,7 @@ describe('POST /api/v1/bags/:bagToken/confirm-delivery', () => {
   });
 
   test('delivery still succeeds when the customer email throws', async () => {
-    const { bagToken } = await createWorld({ orderStatus: 'picked_up', paymentStatus: 'verified' });
+    const { bagToken } = await createWorld({ orderStatus: 'picked_up' });
     emailService.sendCustomerDeliveredEmail.mockRejectedValueOnce(new Error('SMTP down'));
     const res = await confirm(bagToken, { code: 'VENDOR' });
     expect(res.status).toBe(200);

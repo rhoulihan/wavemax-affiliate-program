@@ -235,51 +235,6 @@ describe('Order Controller - Additional Coverage', () => {
     });
   });
 
-  describe('updatePaymentStatus', () => {
-    beforeEach(() => {
-      req.user = { role: 'admin' }; // Need admin or affiliate role
-    });
-
-    it('should handle order not found', async () => {
-      const next = jest.fn();
-      req.params.orderId = 'ORD999';
-      req.body.paymentStatus = 'completed';
-
-      Order.findOne = createFindOneMock(null);
-
-      const handler = orderController.updatePaymentStatus;
-      await handler(req, res, next);
-
-      expect(res.status).toHaveBeenCalledWith(404);
-      expect(res.json).toHaveBeenCalledWith({
-        success: false,
-        message: 'Order not found'
-      });
-    });
-
-    it('should prevent payment updates on non-delivered orders', async () => {
-      req.params.orderId = 'ORD001';
-      req.body.paymentStatus = 'verified';
-
-      const mockOrder = {
-        orderId: 'ORD001',
-        status: 'in_progress', // Not delivered
-        save: jest.fn().mockResolvedValue(true)
-      };
-
-      Order.findOne = createFindOneMock(mockOrder);
-
-      const handler = extractHandler(orderController.updatePaymentStatus);
-      await handler(req, res, next);
-
-      expect(res.status).toHaveBeenCalledWith(400);
-      expect(res.json).toHaveBeenCalledWith({
-        success: false,
-        message: 'Cannot update payment status for non-delivered orders'
-      });
-    });
-  });
-
   describe('bulkUpdateOrderStatus', () => {
     it('should handle invalid order IDs format', async () => {
       const next = jest.fn();

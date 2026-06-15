@@ -29,16 +29,6 @@ router.get('/search', authenticate, orderController.searchOrders);
 router.get('/statistics', authenticate, orderController.getOrderStatistics);
 
 /**
- * @route   GET /api/v1/orders/held
- * @desc    Held-at-store orders (processed + unpaid) — spec §5
- * @access  admin / administrator / operator (all), affiliate (own)
- */
-router.get('/held',
-  authenticate,
-  checkRole(['admin', 'administrator', 'operator', 'affiliate']),
-  orderController.getHeldOrders);
-
-/**
  * @route   PUT /api/orders/bulk/status
  * @desc    Bulk update order status
  * @access  Private (affiliate or admin)
@@ -83,44 +73,5 @@ router.put('/:orderId/status', authenticate, orderController.updateOrderStatus);
  * @access  Private (involved customer, affiliate, or admin)
  */
 router.post('/:orderId/cancel', authenticate, orderController.cancelOrder);
-
-/**
- * @route   PUT /api/orders/:orderId/payment-status
- * @desc    Update payment status
- * @access  Private (affiliate or admin)
- */
-router.put('/:orderId/payment-status', authenticate, [
-  body('paymentStatus').isIn(['pending', 'awaiting', 'confirming', 'verified', 'failed']).withMessage('Invalid payment status')
-], orderController.updatePaymentStatus);
-
-/**
- * @route   POST /api/orders/confirm-payment
- * @desc    Customer confirms they have already paid
- * @access  Public (with order validation)
- */
-router.post('/confirm-payment', [
-  body('orderId').notEmpty().withMessage('Order ID is required'),
-  body('paymentMethod').optional().isIn(['venmo', 'paypal', 'cashapp']).withMessage('Invalid payment method')
-], orderController.confirmPayment);
-
-/**
- * @route   PUT /api/orders/:orderId/verify-payment
- * @desc    Manually verify payment (admin only)
- * @access  Private (admin only)
- */
-router.put('/:orderId/verify-payment', authenticate, checkRole(['admin', 'administrator']), [
-  body('transactionId').optional(),
-  body('notes').optional()
-], orderController.verifyPaymentManually);
-
-/**
- * @route   POST /api/v1/orders/:orderId/resend-payment-request
- * @desc    Re-send the stored-link payment request; reset reminder clock — spec §5
- * @access  admin / administrator (CSRF default-enforced)
- */
-router.post('/:orderId/resend-payment-request',
-  authenticate,
-  checkRole(['admin', 'administrator']),
-  orderController.resendPaymentRequest);
 
 module.exports = router;

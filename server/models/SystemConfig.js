@@ -282,43 +282,6 @@ systemConfigSchema.statics.initializeDefaults = async function() {
       validation: { min: 0, max: 10000 }
     },
 
-    // Payment cadence (redesign spec §8) — IMAP detection decoupled from reminders
-    {
-      key: 'payment_scan_interval_ms',
-      value: 120000,
-      defaultValue: 120000,
-      description: 'IMAP payment-detection scan cadence in milliseconds',
-      category: 'payment',
-      dataType: 'number',
-      validation: { min: 60000, max: 600000 }
-    },
-    {
-      key: 'payment_reminder_interval_minutes',
-      value: 60,
-      defaultValue: 60,
-      description: 'Minutes between payment reminder emails',
-      category: 'payment',
-      dataType: 'number',
-      validation: { min: 15, max: 240 }
-    },
-    {
-      key: 'payment_reminder_max_attempts',
-      value: 8,
-      defaultValue: 8,
-      description: 'Maximum payment reminders before the come-to-store hold notice',
-      category: 'payment',
-      dataType: 'number',
-      validation: { min: 1, max: 24 }
-    },
-    {
-      key: 'payment_hold_notice_enabled',
-      value: true,
-      defaultValue: true,
-      description: 'Master switch for the "come to the store" hold notice',
-      category: 'payment',
-      dataType: 'boolean'
-    },
-
     // Affiliate onboarding (redesign spec §8)
     {
       key: 'invite_token_ttl_hours',

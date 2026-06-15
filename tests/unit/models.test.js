@@ -214,7 +214,6 @@ describe('Model Tests', () => {
       expect(saved.orderId).toMatch(/^ORD-[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/);
       expect(saved.status).toBe('in_progress'); // Default status
       expect(saved.baseRate).toBe(1.25);
-      expect(saved.paymentStatus).toBe('pending');
       expect(saved.intakeAt).toBeDefined();
     });
 

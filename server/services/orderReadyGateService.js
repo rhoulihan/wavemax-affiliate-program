@@ -1,13 +1,16 @@
-// THE canonical "ready for pickup" gate (design §6.5; settled decision §13 #3).
+// THE canonical "ready for pickup" gate.
 //
-//   ready_for_pickup  IFF  status === 'processed'  AND  paymentStatus === 'verified'
+//   ready_for_pickup  IFF  status === 'processed'
+//
+// Payment was removed in Phase 1 (all money lives in Cents, external), so the
+// processed -> ready_for_pickup promotion is now UNCONDITIONAL. This is an
+// INTERIM implementation — PR 3 replaces this service entirely with the
+// rewritten lifecycle.
 //
 // This service is the SOLE writer of Order.readyForPickupAt (never the model
 // pre-save, never a direct PUT) and the only path into 'ready_for_pickup'.
 // This service is required directly by callers (no delegate on the state
-// machine — that would create a static require cycle). Callers (this PR): orderController.updateOrderStatus (processed transition)
-// and orderController.verifyPaymentManually. PR 7 adds the kiosk processed scan;
-// PR 8 adds the IMAP scanner / verification-job verify path.
+// machine — that would create a static require cycle).
 
 const Customer = require('../models/Customer');
 const Affiliate = require('../models/Affiliate');
@@ -17,17 +20,17 @@ const { applyTransition } = require('../modules/orders/orderStateMachine');
 
 /**
  * Apply the ready gate to an order. Idempotent.
- * - processed + verified  -> ready_for_pickup, stamp readyForPickupAt,
- *                            heldAtStore=false, save, notify affiliate
- *                            (reuses the existing sendOrderReadyNotification
- *                            dispatcher — Notification A, design §6.6).
- * - processed + !verified -> heldAtStore=true, save (physically held).
- * - anything else         -> no-op.
+ * - processed     -> ready_for_pickup, stamp readyForPickupAt, save, notify
+ *                    affiliate (reuses the existing sendOrderReadyNotification
+ *                    dispatcher — Notification A, design §6.6).
+ * - anything else -> no-op.
+ *
+ * Promotion is unconditional now that payment has been removed (Phase 1).
  *
  * @param {Object} order - mongoose Order document
  * @param {Object} [ctx]
  * @param {string} [ctx.trigger] - caller tag for logs ('status_put',
- *   'manual_verify', 'scanner_verify', 'processed_scan', ...)
+ *   'processed_scan', ...)
  * @returns {Promise<{promoted: boolean, held: boolean}>}
  */
 async function applyReadyGate(order, { trigger } = {}) {
@@ -35,21 +38,8 @@ async function applyReadyGate(order, { trigger } = {}) {
     return { promoted: false, held: false };
   }
 
-  if (order.paymentStatus !== 'verified') {
-    if (!order.heldAtStore) {
-      order.heldAtStore = true;
-      await order.save();
-    }
-    logger.info('Ready gate: processed but unpaid — held at store', {
-      orderId: order.orderId,
-      trigger
-    });
-    return { promoted: false, held: true };
-  }
-
   applyTransition(order, 'ready_for_pickup');
   if (!order.readyForPickupAt) order.readyForPickupAt = new Date(); // SOLE writer
-  order.heldAtStore = false;
   await order.save();
 
   logger.info('Ready gate: promoted to ready_for_pickup', {

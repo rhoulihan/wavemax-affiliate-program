@@ -298,9 +298,7 @@ exports.intake = ControllerHelpers.asyncWrapper(async (req, res) => {
         addOnTotal: order.addOnTotal,
         feeBreakdown: order.feeBreakdown,
         actualTotal: order.actualTotal,
-        paymentAmount: order.paymentAmount,
-        affiliateCommission: order.affiliateCommission,
-        paymentStatus: order.paymentStatus
+        affiliateCommission: order.affiliateCommission
       },
       reIntake
     }, 'Order created at intake', 201);

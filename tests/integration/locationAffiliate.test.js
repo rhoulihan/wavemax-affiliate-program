@@ -193,10 +193,9 @@ describe('Location affiliates (zero-commission collection points)', () => {
         .send({ bagToken, weight: 20 });
       expect(intakeRes.status).toBe(201);
 
-      // Advance to picked_up + paid so confirm-delivery can close it
+      // Advance to picked_up so confirm-delivery can close it
       const order = await Order.findOne({ orderId: intakeRes.body.order.orderId });
       order.status = 'picked_up';
-      order.paymentStatus = 'verified';
       await order.save();
 
       const confirmRes = await require('supertest')(app)
@@ -250,8 +249,8 @@ describe('Location affiliates (zero-commission collection points)', () => {
       expect(delivered.status).toBe('delivered');
       expect(delivered.commissionRealized).toBe(true);
       expect(delivered.affiliateCommission).toBe(0);
-      // Customer still pays for the wash itself
-      expect(delivered.paymentAmount).toBeGreaterThan(0);
+      // Customer still owes for the wash itself
+      expect(delivered.actualTotal).toBeGreaterThan(0);
 
       const reloadedAffiliate = await Affiliate.findOne({ affiliateId: affiliate.affiliateId });
       expect(reloadedAffiliate.w9Status).toBe('not_required');

@@ -3,8 +3,8 @@
 // createOrderFromBag: resolve the durable bag, guard open orders (Task 3/4
 // add the guards + re-intake), set EVERY pricing input before the first
 // save (the Order pre-save READS feeBreakdown.totalFee, it does not
-// compute the delivery fee), save, generate payment links exactly once,
-// email the payment request, audit.
+// compute the delivery fee), save, audit. Payment is handled externally in
+// Cents — orders carry no payment state and no payment notice is sent.
 
 const Order = require('../../models/Order');
 const Customer = require('../../models/Customer');
@@ -13,7 +13,6 @@ const bagService = require('../bags/bagService');
 const { applyTransition } = require('./orderStateMachine');
 const { applyW9ThresholdCheck } = require('../onboarding/w9ThresholdService');
 const { calculateDeliveryFee } = require('../../services/orderPricingService');
-const paymentLinkService = require('../../services/paymentLinkService');
 const emailService = require('../../utils/emailService');
 const { logAuditEvent, AuditEvents } = require('../../utils/auditLogger');
 const logger = require('../../utils/logger');
@@ -201,7 +200,7 @@ async function createOrderFromBag({ bagToken, weight, addOns, freshAddOnsFormPla
     }]
   });
 
-  // 5. Save — pre-save computes actualTotal / paymentAmount / affiliateCommission.
+  // 5. Save — pre-save computes actualTotal / affiliateCommission.
   // The partial unique index on open Order.bagId backstops the read-then-write
   // open-order guard above: when two kiosks race the same bag, exactly one
   // save wins and the loser's E11000 maps to the same clean 409.
@@ -225,39 +224,17 @@ async function createOrderFromBag({ bagToken, weight, addOns, freshAddOnsFormPla
     await customer.save();
   }
 
-  // 6. Payment links/QR generated exactly ONCE (spec §6.4 step 6).
-  const customerName = `${customer.firstName} ${customer.lastName}`;
-  const { links, qrCodes } = await paymentLinkService.generatePaymentLinks(
-    order.orderId, order.paymentAmount, customerName
-  );
-  order.paymentLinks = links;
-  order.paymentQRCodes = qrCodes;
-  order.paymentStatus = 'awaiting';
-  order.paymentRequestedAt = new Date();
-  await order.save();
-
-  // 7. Payment request email (best-effort) + audit.
-  try {
-    await emailService.sendV2PaymentRequest({
-      customer, order,
-      paymentAmount: order.paymentAmount,
-      paymentLinks: links,
-      qrCodes
-    });
-  } catch (emailError) {
-    logger.error(`Failed to send payment request for order ${order.orderId}:`, emailError);
-  }
-
+  // Payment is handled externally in Cents — no payment notice is sent at intake.
   await logAuditEvent(AuditEvents.ORDER_STATUS_CHANGED, {
     operatorId,
     orderId: order.orderId,
     bagId: bag.bagId,
     action: 'order_created_at_intake',
     weight: parsedWeight,
-    paymentAmount: order.paymentAmount
+    actualTotal: order.actualTotal
   }, req);
 
-  logger.info(`Order ${order.orderId} created at intake for bag ${bag.bagId} (${parsedWeight} lbs, $${order.paymentAmount})`);
+  logger.info(`Order ${order.orderId} created at intake for bag ${bag.bagId} (${parsedWeight} lbs, $${order.actualTotal})`);
   return { order, reIntake };
 }
 

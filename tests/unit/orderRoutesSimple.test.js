@@ -53,10 +53,6 @@ describe('Order Routes - Simple', () => {
     app.post('/api/orders/:orderId/cancel', mockAuth, (req, res) => {
       res.json({ cancelled: true });
     });
-
-    app.put('/api/orders/:orderId/payment-status', mockAuth, (req, res) => {
-      res.json({ updated: true });
-    });
   });
 
   describe('POST /api/orders', () => {
@@ -167,14 +163,4 @@ describe('Order Routes - Simple', () => {
     });
   });
 
-  describe('PUT /api/orders/:orderId/payment-status', () => {
-    it('should update payment status', async () => {
-      const response = await request(app)
-        .put('/api/orders/ORD-123/payment-status')
-        .send({ paymentStatus: 'paid' });
-
-      expect(response.status).toBe(200);
-      expect(response.body).toEqual({ updated: true });
-    });
-  });
 });

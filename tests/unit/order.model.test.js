@@ -99,11 +99,8 @@ describe('Order model (redesigned)', () => {
       }).save()).rejects.toThrow(/is not a valid enum value/);
     });
 
-    it('defaults the new payment-hold fields', async () => {
+    it('defaults commissionRealized to false', async () => {
       const order = await buildOrder().save();
-      expect(order.paymentEscalated).toBe(false);
-      expect(order.heldAtStore).toBe(false);
-      expect(order.holdNoticeSentAt).toBeUndefined();
       expect(order.commissionRealized).toBe(false);
     });
   });
@@ -115,7 +112,6 @@ describe('Order model (redesigned)', () => {
       expect(order.baseRate).toBe(1.25);
       // wdf 20*1.25=25.00; fee 10.00; no add-ons
       expect(order.actualTotal).toBeCloseTo(35.00, 2);
-      expect(order.paymentAmount).toBeCloseTo(35.00, 2);
       // commission = wdf*0.1 + fee = 2.50 + 10.00
       expect(order.affiliateCommission).toBeCloseTo(12.50, 2);
     });
@@ -140,10 +136,9 @@ describe('Order model (redesigned)', () => {
       expect(order.affiliateCommission).toBeCloseTo(12.50, 2);
     });
 
-    it('applies carry-in wdfCreditApplied to actualTotal but not paymentAmount-free commission', async () => {
+    it('applies carry-in wdfCreditApplied to actualTotal but not to commission', async () => {
       const order = await buildOrder({ actualWeight: 20, wdfCreditApplied: 5 }).save();
       expect(order.actualTotal).toBeCloseTo(30.00, 2);      // 35 - 5 credit
-      expect(order.paymentAmount).toBeCloseTo(35.00, 2);    // gross, credit-free
       expect(order.affiliateCommission).toBeCloseTo(12.50, 2);
     });
 
@@ -221,13 +216,6 @@ describe('Order model (redesigned)', () => {
       order.status = 'cancelled';
       await order.save();
       expect(order.cancelledAt).toBeInstanceOf(Date);
-    });
-
-    it('stamps paymentVerifiedAt when paymentStatus flips to verified', async () => {
-      const order = await buildOrder({ paymentStatus: 'awaiting' }).save();
-      order.paymentStatus = 'verified';
-      await order.save();
-      expect(order.paymentVerifiedAt).toBeInstanceOf(Date);
     });
   });
 });

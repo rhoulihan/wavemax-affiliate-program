@@ -4,8 +4,9 @@
 // orders are created at store intake (one durable bag = one order), priced from
 // actualWeight only (no customer estimate exists), and move through
 // in_progress -> processed -> ready_for_pickup -> picked_up -> delivered.
-// ready_for_pickup is gated on payment (orderReadyGateService.applyReadyGate is
-// the SOLE writer of readyForPickupAt — never this pre-save, never a direct PUT).
+// Payment lives entirely in Cents (external) — orders carry no payment state.
+// readyForPickupAt has a single writer — orderReadyGateService.applyReadyGate
+// (never this pre-save, never a direct PUT).
 
 const mongoose = require('mongoose');
 const { v4: uuidv4 } = require('uuid');
@@ -120,43 +121,6 @@ const orderSchema = new mongoose.Schema({
   wdfAmount: Number,
   mdfAmount: Number,
 
-  // Post-weigh payment state (enum unchanged — escalation is the boolean below, §4.4)
-  paymentStatus: {
-    type: String,
-    enum: ['pending', 'awaiting', 'confirming', 'verified', 'failed'],
-    default: 'pending'
-  },
-  paymentMethod: {
-    type: String,
-    enum: ['venmo', 'paypal', 'cashapp', 'multiple', 'pending', 'credit_card'],
-    default: 'pending'
-  },
-  paymentAmount: { type: Number, default: 0 },
-  paymentRequestedAt: Date,
-  paymentConfirmedAt: Date,                                          // customer clicked "already paid"
-  paymentVerifiedAt: Date,
-  paymentTransactionId: String,
-  paymentLinks: { venmo: String, paypal: String, cashapp: String },
-  paymentQRCodes: { venmo: String, paypal: String, cashapp: String },
-  paymentCheckAttempts: { type: Number, default: 0 },                // IMAP detection counter (PR 8 decouples cadence)
-  lastPaymentCheck: Date,
-  paymentNotes: String,
-  paymentReminderCount: { type: Number, default: 0 },                // reminder counter (PR 8: hourly, cap 8)
-  paymentLastReminderAt: Date,
-  paymentReminders: [{
-    sentAt: { type: Date, required: true },
-    reminderNumber: { type: Number, required: true },
-    sentBy: { type: mongoose.Schema.Types.ObjectId, ref: 'Administrator' },
-    method: { type: String, enum: ['email', 'sms'], default: 'email' }
-  }],
-  lastReminderSentAt: Date,
-  reminderCount: { type: Number, default: 0 },
-
-  // Payment-hold escalation (design §4.4 — escalated is NOT a paymentStatus value)
-  paymentEscalated: { type: Boolean, default: false },               // set true after the 8th reminder (PR 8)
-  holdNoticeSentAt: { type: Date },                                  // "come to store" notice sent once (PR 8)
-  heldAtStore: { type: Boolean, default: false },                    // processed but unpaid -> physically held
-
   // Proof of delivery (design §4.4)
   proofOfDelivery: {
     method: { type: String, enum: ['customer_pin', 'affiliate_code', 'reintake', 'manual_confirm'] },
@@ -233,8 +197,6 @@ orderSchema.pre('save', async function(next) {
     const subtotal = wdfTotal + totalFee + (this.addOnTotal || 0);
     // Apply carry-in WDF credit (subtract if positive credit, add if negative/debit)
     this.actualTotal = parseFloat((subtotal - (this.wdfCreditApplied || 0)).toFixed(2));
-    // Payment amount is the gross total without credits (credits apply to the customer, not the invoice)
-    this.paymentAmount = parseFloat((wdfTotal + totalFee + (this.addOnTotal || 0)).toFixed(2));
     // Affiliate commission = (WDF x 10%) + delivery fee. Add-ons and credits are NOT included.
     // Location affiliates (WaveMAX-operated collection points) earn nothing.
     this.affiliateCommission = this.zeroCommission
@@ -242,11 +204,6 @@ orderSchema.pre('save', async function(next) {
       : parseFloat(((wdfTotal * 0.1) + totalFee).toFixed(2));
     // No estimate-vs-actual variance exists in the at-intake flow.
     this.wdfCreditGenerated = 0;
-  }
-
-  // Stamp paymentVerifiedAt when payment becomes verified
-  if (this.isModified('paymentStatus') && this.paymentStatus === 'verified' && !this.paymentVerifiedAt) {
-    this.paymentVerifiedAt = new Date();
   }
 
   // Lifecycle timestamps, set-once. 'ready_for_pickup' is deliberately absent:

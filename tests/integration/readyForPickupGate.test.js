@@ -22,7 +22,7 @@ const {
   createTestOrder
 } = require('../helpers/v2TestHelpers');
 
-describe('ready_for_pickup gate (PUT /api/v1/orders/:orderId/status + verify-payment)', () => {
+describe('ready_for_pickup gate (PUT /api/v1/orders/:orderId/status)', () => {
   let adminToken;
   let affiliate;
   let customer;
@@ -34,8 +34,8 @@ describe('ready_for_pickup gate (PUT /api/v1/orders/:orderId/status + verify-pay
     await Order.deleteMany({});
     // House pattern (see tests/integration/order.test.js): /orders/:orderId/status
     // and /:orderId/cancel are CRITICAL_ENDPOINTS in csrf-config — CSRF is
-    // ALWAYS enforced (even under NODE_ENV=test), and verify-payment hits the
-    // default-enforce branch. Every mutation below needs agent + x-csrf-token.
+    // ALWAYS enforced (even under NODE_ENV=test). Every mutation below needs
+    // agent + x-csrf-token.
     agent = createAgent(app);
     csrfToken = await getCsrfToken(app, agent);
     affiliate = await ensureTestAffiliate({});
@@ -54,39 +54,8 @@ describe('ready_for_pickup gate (PUT /api/v1/orders/:orderId/status + verify-pay
     });
   }
 
-  it('Path A (processed-then-paid): PUT processed holds an unpaid order, manual verify promotes it', async () => {
-    const order = await makeOrder({ status: 'in_progress', paymentStatus: 'awaiting' });
-
-    const putRes = await agent
-      .put(`/api/v1/orders/${order.orderId}/status`)
-      .set('Authorization', `Bearer ${adminToken}`)
-      .set('x-csrf-token', csrfToken)
-      .send({ status: 'processed' });
-    expect(putRes.status).toBe(200);
-
-    let persisted = await Order.findById(order._id);
-    expect(persisted.status).toBe('processed');
-    expect(persisted.heldAtStore).toBe(true);
-    expect(persisted.readyForPickupAt).toBeUndefined();
-    expect(emailService.sendOrderReadyNotification).not.toHaveBeenCalled();
-
-    const verifyRes = await agent
-      .put(`/api/v1/orders/${order._id}/verify-payment`)
-      .set('Authorization', `Bearer ${adminToken}`)
-      .set('x-csrf-token', csrfToken)
-      .send({ notes: 'venmo screenshot checked' });
-    expect(verifyRes.status).toBe(200);
-
-    persisted = await Order.findById(order._id);
-    expect(persisted.status).toBe('ready_for_pickup');
-    expect(persisted.paymentStatus).toBe('verified');
-    expect(persisted.readyForPickupAt).toBeInstanceOf(Date);
-    expect(persisted.heldAtStore).toBe(false);
-    expect(emailService.sendOrderReadyNotification).toHaveBeenCalledTimes(1);
-  });
-
-  it('Path B (paid-then-processed): PUT processed on a verified order promotes immediately', async () => {
-    const order = await makeOrder({ status: 'in_progress', paymentStatus: 'verified' });
+  it('PUT processed promotes to ready_for_pickup unconditionally (payment removed)', async () => {
+    const order = await makeOrder({ status: 'in_progress' });
 
     const res = await agent
       .put(`/api/v1/orders/${order.orderId}/status`)
@@ -102,7 +71,7 @@ describe('ready_for_pickup gate (PUT /api/v1/orders/:orderId/status + verify-pay
   });
 
   it('rejects a direct PUT to ready_for_pickup (gate is the only writer)', async () => {
-    const order = await makeOrder({ status: 'processed', paymentStatus: 'verified' });
+    const order = await makeOrder({ status: 'processed' });
     const res = await agent
       .put(`/api/v1/orders/${order.orderId}/status`)
       .set('Authorization', `Bearer ${adminToken}`)
