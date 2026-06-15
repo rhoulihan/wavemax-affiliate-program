@@ -56,6 +56,25 @@ describe('explorerGuard', () => {
       httpOnly: true, sameSite: 'lax', path: '/design-explorer'
     });
   });
+  it('marks the explorer_k cookie Secure in production', () => {
+    const OLD_ENV = process.env.NODE_ENV;
+    process.env.NODE_ENV = 'production';
+    try {
+      const req = mkReq({ query: { k: 'secret123' } }); const res = mkRes(); const next = jest.fn();
+      explorerGuard(req, res, next);
+      expect(res.cookies.explorer_k.opts).toMatchObject({
+        httpOnly: true, sameSite: 'lax', path: '/design-explorer', secure: true
+      });
+    } finally {
+      process.env.NODE_ENV = OLD_ENV;
+    }
+  });
+  it('does not throw and 404s when ?k is a non-string (array) value', () => {
+    const req = mkReq({ query: { k: ['secret123', 'x'] } }); const res = mkRes(); const next = jest.fn();
+    expect(() => explorerGuard(req, res, next)).not.toThrow();
+    expect(next).not.toHaveBeenCalled();
+    expect(res.status).toHaveBeenCalledWith(404);
+  });
   it('accepts a request authenticated only by the explorer_k cookie (no ?k)', () => {
     const req = mkReq({ query: {}, cookies: { explorer_k: 'secret123' } }); const res = mkRes(); const next = jest.fn();
     explorerGuard(req, res, next);

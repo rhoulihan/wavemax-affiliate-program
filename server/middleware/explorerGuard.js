@@ -37,6 +37,19 @@ const EXPLORER_CSP = [
   "object-src 'none'"
 ].join('; ');
 
+const crypto = require('crypto');
+
+// Constant-time compare for the token so a wrong ?k/cookie cannot be told apart
+// from a right one by response timing. Non-strings (e.g. ?k supplied as an array)
+// and length mismatches return false without throwing.
+function safeEqual(a, b) {
+  if (typeof a !== 'string' || typeof b !== 'string') return false;
+  const ab = Buffer.from(a);
+  const bb = Buffer.from(b);
+  if (ab.length !== bb.length) return false;
+  return crypto.timingSafeEqual(ab, bb);
+}
+
 function explorerGuard(req, res, next) {
   // NB: req.path is NOT percent-decoded by Express, but express.static decodes before
   // resolving files. Decode here so encoded variants (e.g. /%64esign-explorer/...) are
@@ -49,8 +62,8 @@ function explorerGuard(req, res, next) {
   if (!inExplorer) return next();
 
   const token = process.env.EXPLORER_TOKEN;
-  const queryOk = Boolean(token) && req.query.k === token;
-  const cookieOk = Boolean(token) && req.cookies && req.cookies.explorer_k === token;
+  const queryOk = Boolean(token) && safeEqual(req.query.k, token);
+  const cookieOk = Boolean(token) && req.cookies && safeEqual(req.cookies.explorer_k, token);
 
   if (!queryOk && !cookieOk) {
     res.set('Cache-Control', 'no-store');
@@ -61,6 +74,7 @@ function explorerGuard(req, res, next) {
   if (queryOk) {
     res.cookie('explorer_k', token, {
       httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
       path: '/design-explorer'
     });
