@@ -141,13 +141,12 @@ async function claim({ token, customerId, req = null }) {
 }
 
 /**
- * Operator intake resolution (consumed by PR 7's orderIntakeService).
- * Resolves an ACTIVE bag by token, atomically increments the lifetime
- * intake counters, and returns the denormalized link ids.
- *
- * NOTE for PR 7: the open-order check lives in createOrderFromBag, and MUST
- * count only status NOT IN ['delivered','cancelled'] as open — a cancelled
- * order never blocks re-intake (the bag itself stays 'active' on cancel).
+ * Bag lifetime-counter bump primitive. Resolves an ACTIVE bag by token,
+ * atomically increments the lifetime intake counters (orderCount /
+ * lastIntakeAt), and returns the denormalized link ids. The open-order guard
+ * itself lives in orderTransitionService (one open order per bag — open =
+ * pending | in_progress | out_for_delivery; a cancelled/complete order never
+ * blocks a new cycle since the bag stays 'active').
  */
 async function linkToOrderAtIntake({ token, operatorId }) {
   if (!token || typeof token !== 'string') {
