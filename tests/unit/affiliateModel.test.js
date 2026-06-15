@@ -67,15 +67,10 @@ describe('Affiliate Model Methods', () => {
         isActive: true
       }));
 
-      // Active and unlocked — can receive payouts
+      // Active — can receive payouts
       expect(affiliate.canReceivePayments()).toBe(true);
 
-      // Locked — cannot receive payouts
-      affiliate.paymentProcessingLocked = true;
-      expect(affiliate.canReceivePayments()).toBe(false);
-
-      // Unlocked but inactive — cannot receive payouts
-      affiliate.paymentProcessingLocked = false;
+      // Inactive — cannot receive payouts
       affiliate.isActive = false;
       expect(affiliate.canReceivePayments()).toBe(false);
     });

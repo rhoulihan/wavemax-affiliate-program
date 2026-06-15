@@ -262,7 +262,7 @@
 
   // Clear loading states from all containers
   function clearLoadingStates() {
-    const loadingContainers = ['dashboardStats', 'recentActivity', 'operatorsList', 'kpiOverview', 'orderAnalytics', 'affiliatesList', 'invitesList', 'w9PendingList', 'systemConfigForm'];
+    const loadingContainers = ['dashboardStats', 'recentActivity', 'operatorsList', 'kpiOverview', 'orderAnalytics', 'affiliatesList', 'invitesList', 'systemConfigForm'];
     loadingContainers.forEach(id => {
       const element = document.getElementById(id);
       if (element && element.querySelector('.loading')) {
@@ -295,9 +295,6 @@
       break;
     case 'invites':
       await loadInvites();
-      break;
-    case 'quickbooks':
-      await loadQuickBooksTab();
       break;
     case 'config':
       await loadSystemConfig();
@@ -1752,194 +1749,6 @@
         </p>
       `;
     }
-
-    // W-9 review surface lives in the same tab — load it regardless of the
-    // analytics call outcome.
-    setupW9ReviewHandlers();
-    await loadW9Pending();
-  }
-
-  // ========================================
-  // W-9 Review (admin/pending list + verify / reject / audited download)
-  // ========================================
-
-  async function loadW9Pending() {
-    const container = document.getElementById('w9PendingList');
-    if (!container) return;
-    try {
-      const response = await adminFetch('/api/v1/w9/admin/pending');
-      const data = await response.json();
-      if (response.ok && data.success) {
-        renderW9PendingList(data.affiliates || []);
-      } else {
-        container.innerHTML = `<p class="p-20 text-center text-danger">${escapeHtml(data.message || t('admin.w9.loadError', 'Failed to load pending W-9 reviews'))}</p>`;
-      }
-    } catch (error) {
-      console.error('Error loading pending W-9 reviews:', error);
-      container.innerHTML = `<p class="p-20 text-center text-danger">${t('admin.w9.loadError', 'Failed to load pending W-9 reviews')}</p>`;
-    }
-  }
-
-  function renderW9PendingList(affiliates) {
-    const container = document.getElementById('w9PendingList');
-    if (!container) return;
-
-    if (!affiliates || affiliates.length === 0) {
-      container.innerHTML = `<p class="p-20 text-center text-muted">${t('admin.w9.empty', 'No W-9 submissions pending')}</p>`;
-      return;
-    }
-
-    const tableHtml = `
-      <table>
-        <thead>
-          <tr>
-            <th>${t('admin.w9.affiliate', 'Affiliate')}</th>
-            <th>${t('admin.invites.email', 'Email')}</th>
-            <th>${t('admin.w9.submitted', 'Submitted')}</th>
-            <th>${t('admin.w9.filename', 'Document')}</th>
-            <th>${t('admin.w9.actions', 'Actions')}</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${affiliates.map(aff => {
-            const name = `${aff.firstName || ''} ${aff.lastName || ''}`.trim() || aff.affiliateId;
-            const submitted = aff.w9SubmittedAt ? new Date(aff.w9SubmittedAt).toLocaleString() : '-';
-            const filename = (aff.w9Document && aff.w9Document.filename) || 'w9';
-            return `
-              <tr>
-                <td>
-                  <div>${escapeHtml(name)}</div>
-                  ${aff.businessName ? `<div class="text-sm text-muted">${escapeHtml(aff.businessName)}</div>` : ''}
-                  <div class="text-sm text-light">${escapeHtml(aff.affiliateId)}</div>
-                </td>
-                <td>${escapeHtml(aff.email)}</td>
-                <td>${escapeHtml(submitted)}</td>
-                <td>${escapeHtml(filename)}</td>
-                <td>
-                  <button class="btn btn-sm btn-secondary w9-download-btn" data-affiliate-id="${escapeHtml(aff.affiliateId)}" data-filename="${escapeHtml(filename)}">${t('admin.w9.download', 'Download')}</button>
-                  <button class="btn btn-sm btn-primary w9-verify-btn" data-affiliate-id="${escapeHtml(aff.affiliateId)}" data-name="${escapeHtml(name)}">${t('admin.w9.verify', 'Verify')}</button>
-                  <button class="btn btn-sm btn-secondary w9-reject-btn" data-affiliate-id="${escapeHtml(aff.affiliateId)}" data-name="${escapeHtml(name)}">${t('admin.w9.reject', 'Reject')}</button>
-                </td>
-              </tr>
-            `;
-          }).join('')}
-        </tbody>
-      </table>
-    `;
-    container.innerHTML = tableHtml;
-  }
-
-  function setupW9ReviewHandlers() {
-    const refreshBtn = document.getElementById('refreshW9PendingBtn');
-    if (refreshBtn && !refreshBtn.hasAttribute('data-initialized')) {
-      refreshBtn.setAttribute('data-initialized', 'true');
-      refreshBtn.addEventListener('click', loadW9Pending);
-    }
-
-    const container = document.getElementById('w9PendingList');
-    if (container && !container.hasAttribute('data-initialized')) {
-      container.setAttribute('data-initialized', 'true');
-      container.addEventListener('click', async (e) => {
-        const button = e.target.closest('button');
-        if (!button || button.disabled) return;
-        const affiliateId = button.getAttribute('data-affiliate-id');
-        if (!affiliateId) return;
-
-        if (button.classList.contains('w9-download-btn')) {
-          await downloadW9Document(affiliateId, button.getAttribute('data-filename') || 'w9', button);
-        } else if (button.classList.contains('w9-verify-btn')) {
-          await verifyW9(affiliateId, button.getAttribute('data-name') || affiliateId, button);
-        } else if (button.classList.contains('w9-reject-btn')) {
-          await rejectW9(affiliateId, button.getAttribute('data-name') || affiliateId, button);
-        }
-      });
-    }
-  }
-
-  // Token-authenticated fetch -> blob -> object-URL download (the endpoint is
-  // a JWT-protected attachment; a plain <a href> would arrive unauthenticated).
-  async function downloadW9Document(affiliateId, filename, button) {
-    try {
-      button.disabled = true;
-      const response = await adminFetch(`/api/v1/w9/admin/${encodeURIComponent(affiliateId)}/document`);
-      if (!response || !response.ok) {
-        let message = t('admin.w9.downloadError', 'Unable to download the W-9 document');
-        try {
-          const err = await response.json();
-          if (err && err.message) message = err.message;
-        } catch (e) { /* non-JSON body */ }
-        showNotification(message, 'error');
-        return;
-      }
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      a.remove();
-    } catch (error) {
-      console.error('Error downloading W-9 document:', error);
-      showNotification(t('admin.w9.downloadError', 'Unable to download the W-9 document'), 'error');
-    } finally {
-      button.disabled = false;
-    }
-  }
-
-  async function verifyW9(affiliateId, name, button) {
-    const confirmMessage = `${t('admin.w9.verifyConfirm', 'Mark this W-9 as verified for')} ${name}?`;
-    if (!confirm(confirmMessage)) return;
-    try {
-      button.disabled = true;
-      const response = await adminFetch(`/api/v1/w9/admin/${encodeURIComponent(affiliateId)}/verify`, {
-        method: 'POST',
-        body: JSON.stringify({})
-      });
-      const data = await response.json();
-      if (response.ok && data.success) {
-        showNotification(t('admin.w9.verifySuccess', 'W-9 verified'), 'success');
-        await loadW9Pending();
-        await loadAffiliates();
-      } else {
-        showNotification(data.message || t('admin.w9.actionError', 'W-9 action failed'), 'error');
-      }
-    } catch (error) {
-      console.error('Error verifying W-9:', error);
-      showNotification(t('admin.w9.actionError', 'W-9 action failed'), 'error');
-    } finally {
-      button.disabled = false;
-    }
-  }
-
-  async function rejectW9(affiliateId, name, button) {
-    const reason = prompt(`${t('admin.w9.rejectReasonPrompt', 'Rejection reason (required) for')} ${name}:`);
-    if (reason === null) return; // cancelled
-    if (!reason.trim()) {
-      showNotification(t('admin.w9.rejectReasonRequired', 'A rejection reason is required'), 'error');
-      return;
-    }
-    try {
-      button.disabled = true;
-      const response = await adminFetch(`/api/v1/w9/admin/${encodeURIComponent(affiliateId)}/reject`, {
-        method: 'POST',
-        body: JSON.stringify({ reason: reason.trim() })
-      });
-      const data = await response.json();
-      if (response.ok && data.success) {
-        showNotification(t('admin.w9.rejectSuccess', 'W-9 rejected'), 'success');
-        await loadW9Pending();
-        await loadAffiliates();
-      } else {
-        showNotification(data.message || t('admin.w9.actionError', 'W-9 action failed'), 'error');
-      }
-    } catch (error) {
-      console.error('Error rejecting W-9:', error);
-      showNotification(t('admin.w9.actionError', 'W-9 action failed'), 'error');
-    } finally {
-      button.disabled = false;
-    }
   }
 
   // ========================================
@@ -2192,7 +2001,6 @@
                         <th>${t('administrator.dashboard.affiliates.orders')}</th>
                         <th>${t('administrator.dashboard.affiliates.revenue')}</th>
                         <th>${t('administrator.dashboard.affiliates.commission')}</th>
-                        <th>${t('administrator.dashboard.affiliates.w9Status')}</th>
                         <th>${t('administrator.dashboard.affiliates.actions')}</th>
                     </tr>
                 </thead>
@@ -2205,19 +2013,6 @@
                         const totalOrders = metrics.totalOrders || 0;
                         const totalRevenue = metrics.totalRevenue || 0;
                         const totalCommission = metrics.totalCommission || 0;
-                        const w9Status = aff.w9Status || 'not_required';
-
-                        // Determine W9 status display (enum: not_required / required /
-                        // pending_review / on_file / rejected — server/models/Affiliate.js)
-                        const w9Badges = {
-                            not_required: { cls: 'inactive', label: t('admin.w9.statusBadge.not_required', 'Not Required') },
-                            required: { cls: 'pending', label: t('admin.w9.statusBadge.required', 'Required') },
-                            pending_review: { cls: 'pending', label: t('admin.w9.statusBadge.pending_review', 'Pending Review') },
-                            on_file: { cls: 'active', label: t('admin.w9.statusBadge.on_file', 'On File') },
-                            rejected: { cls: 'inactive', label: t('admin.w9.statusBadge.rejected', 'Rejected') }
-                        };
-                        const w9Badge = w9Badges[w9Status] || { cls: 'inactive', label: w9Status };
-                        const w9StatusDisplay = `<span class="status-badge ${w9Badge.cls}">${escapeHtml(w9Badge.label)}</span>`;
 
                         // Zero-commission WaveMAX-operated collection points
                         const locationBadge = aff.affiliateType === 'location'
@@ -2232,7 +2027,6 @@
                             <td>${totalOrders}</td>
                             <td>$${totalRevenue.toFixed(2)}</td>
                             <td>$${totalCommission.toFixed(2)}</td>
-                            <td>${w9StatusDisplay}</td>
                             <td>
                                 <button class="btn btn-sm btn-secondary print-labels-btn"
                                         data-affiliate-id="${aff.affiliateId}"
@@ -2247,27 +2041,8 @@
             </table>
         `;
     document.getElementById('affiliatesList').innerHTML = tableHtml;
-    
-    // Add event listeners for Send W9 buttons using event delegation
-    // Only add once to prevent duplicate handlers
+
     const affiliatesContainer = document.getElementById('affiliatesList');
-    if (!affiliatesContainer.hasAttribute('data-w9-handler')) {
-      affiliatesContainer.setAttribute('data-w9-handler', 'true');
-      affiliatesContainer.addEventListener('click', async (e) => {
-        if (e.target.classList.contains('send-w9-btn')) {
-          e.preventDefault();
-          e.stopPropagation();
-
-          // Prevent double-clicks
-          if (e.target.disabled) return;
-
-          const affiliateId = e.target.getAttribute('data-affiliate-id');
-          const email = e.target.getAttribute('data-email');
-          const name = e.target.getAttribute('data-name');
-          await handleSendW9Click(affiliateId, email, name, e.target);
-        }
-      });
-    }
 
     // Add event listener for print-labels buttons using event delegation
     if (!affiliatesContainer.hasAttribute('data-print-labels-handler')) {
@@ -2379,355 +2154,6 @@
 
     modal.setAttribute('data-handlers-initialized', 'true');
   }
-
-
-  // QuickBooks Export functionality
-  let exportHistory = [];
-  let searchTimeout = null;
-  let affiliateSearchResults = [];
-
-  // Load QuickBooks tab
-  async function loadQuickBooksTab() {
-    await loadExportHistory();
-    setupQuickBooksEventHandlers();
-  }
-
-  // Load export history
-  async function loadExportHistory() {
-    try {
-      const response = await adminFetch('/api/v1/quickbooks/history?limit=20');
-      const data = await response.json();
-
-      if (response.ok) {
-        exportHistory = data.exports || [];
-        renderExportHistory();
-      } else {
-        document.getElementById('exportHistoryList').innerHTML = `
-                    <p class="p-20 text-center text-muted">${t('administrator.dashboard.errors.exportHistoryLoadFailed', 'Failed to load export history')}</p>
-                `;
-      }
-    } catch (error) {
-      console.error('Error loading export history:', error);
-      document.getElementById('exportHistoryList').innerHTML = `
-                <p class="p-20 text-center text-muted">${t('administrator.dashboard.errors.exportHistoryLoadFailed', 'Error loading export history')}</p>
-            `;
-    }
-  }
-
-  // Render export history
-  function renderExportHistory() {
-    if (exportHistory.length === 0) {
-      document.getElementById('exportHistoryList').innerHTML = `
-                <p class="p-20 text-center text-muted">${t('administrator.dashboard.quickbooks.noExports', 'No exports found')}</p>
-            `;
-      return;
-    }
-
-    const historyHtml = `
-            <table>
-                <thead>
-                    <tr>
-                        <th>${t('administrator.dashboard.quickbooks.exportId', 'Export ID')}</th>
-                        <th>${t('administrator.dashboard.quickbooks.type', 'Type')}</th>
-                        <th>${t('administrator.dashboard.quickbooks.date', 'Date')}</th>
-                        <th>${t('administrator.dashboard.quickbooks.exportedBy', 'Exported By')}</th>
-                        <th>${t('administrator.dashboard.quickbooks.details', 'Details')}</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${exportHistory.map(exp => {
-    const typeLabels = {
-      'vendor': t('administrator.dashboard.quickbooks.vendorExport', 'Vendor Export'),
-      'payment_summary': t('administrator.dashboard.quickbooks.paymentSummary', 'Payment Summary'),
-      'commission_detail': t('administrator.dashboard.quickbooks.commissionDetail', 'Commission Detail')
-    };
-
-    let details = '';
-    if (exp.type === 'vendor') {
-      details = `${exp.affiliateIds.length} vendors`;
-    } else if (exp.type === 'payment_summary') {
-      const start = new Date(exp.periodStart).toLocaleDateString();
-      const end = new Date(exp.periodEnd).toLocaleDateString();
-      details = `${start} - ${end}`;
-    } else if (exp.type === 'commission_detail') {
-      details = `Affiliate: ${exp.affiliateIds[0]}`;
-    }
-
-    return `
-                            <tr>
-                                <td>${exp.exportId}</td>
-                                <td>${typeLabels[exp.type] || exp.type}</td>
-                                <td>${new Date(exp.createdAt).toLocaleString()}</td>
-                                <td>${exp.exportedBy?.firstName || ''} ${exp.exportedBy?.lastName || ''}</td>
-                                <td>${details}</td>
-                            </tr>
-                        `;
-  }).join('')}
-                </tbody>
-            </table>
-        `;
-
-    document.getElementById('exportHistoryList').innerHTML = historyHtml;
-  }
-
-  // Setup QuickBooks event handlers
-  function setupQuickBooksEventHandlers() {
-    // Export vendors button
-    const exportVendorsBtn = document.getElementById('exportVendorsBtn');
-    if (exportVendorsBtn && !exportVendorsBtn.hasAttribute('data-initialized')) {
-      exportVendorsBtn.setAttribute('data-initialized', 'true');
-      exportVendorsBtn.addEventListener('click', exportVendors);
-    }
-
-    // Payment summary button
-    const openPaymentSummaryBtn = document.getElementById('openPaymentSummaryBtn');
-    if (openPaymentSummaryBtn && !openPaymentSummaryBtn.hasAttribute('data-initialized')) {
-      openPaymentSummaryBtn.setAttribute('data-initialized', 'true');
-      openPaymentSummaryBtn.addEventListener('click', () => {
-        const paymentModal = document.getElementById('paymentSummaryModal');
-        if (paymentModal) {
-          paymentModal.classList.remove('hidden');
-          paymentModal.style.display = 'flex';
-        }
-      });
-    }
-
-    // Commission detail button
-    const openCommissionDetailBtn = document.getElementById('openCommissionDetailBtn');
-    if (openCommissionDetailBtn && !openCommissionDetailBtn.hasAttribute('data-initialized')) {
-      openCommissionDetailBtn.setAttribute('data-initialized', 'true');
-      openCommissionDetailBtn.addEventListener('click', () => {
-        const commissionModal = document.getElementById('commissionDetailModal');
-        if (commissionModal) {
-          commissionModal.classList.remove('hidden');
-          commissionModal.style.display = 'flex';
-        }
-      });
-    }
-
-    // Refresh export history button
-    const refreshExportHistoryBtn = document.getElementById('refreshExportHistoryBtn');
-    if (refreshExportHistoryBtn && !refreshExportHistoryBtn.hasAttribute('data-initialized')) {
-      refreshExportHistoryBtn.setAttribute('data-initialized', 'true');
-      refreshExportHistoryBtn.addEventListener('click', loadExportHistory);
-    }
-
-    // Payment summary form
-    const paymentSummaryForm = document.getElementById('paymentSummaryForm');
-    if (paymentSummaryForm && !paymentSummaryForm.hasAttribute('data-initialized')) {
-      paymentSummaryForm.setAttribute('data-initialized', 'true');
-      paymentSummaryForm.addEventListener('submit', handlePaymentSummaryExport);
-    }
-
-    // Commission detail form
-    const commissionDetailForm = document.getElementById('commissionDetailForm');
-    if (commissionDetailForm && !commissionDetailForm.hasAttribute('data-initialized')) {
-      commissionDetailForm.setAttribute('data-initialized', 'true');
-      commissionDetailForm.addEventListener('submit', handleCommissionDetailExport);
-    }
-
-    // Affiliate search
-    const detailAffiliateSearch = document.getElementById('detailAffiliateSearch');
-    if (detailAffiliateSearch && !detailAffiliateSearch.hasAttribute('data-initialized')) {
-      detailAffiliateSearch.setAttribute('data-initialized', 'true');
-      detailAffiliateSearch.addEventListener('input', handleAffiliateSearch);
-    }
-  }
-
-  // Export vendors
-  async function exportVendors() {
-    try {
-      const response = await adminFetch('/api/v1/quickbooks/vendors?format=csv');
-
-      if (response.ok) {
-        // Download CSV file
-        const blob = await response.blob();
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `wavemax-vendors-${new Date().toISOString().split('T')[0]}.csv`;
-        document.body.appendChild(a);
-        a.click();
-        window.URL.revokeObjectURL(url);
-        document.body.removeChild(a);
-
-        // Reload export history
-        await loadExportHistory();
-      } else {
-        const error = await response.json();
-        alert(error.message || t('administrator.dashboard.quickbooks.exportFailed', 'Export failed'));
-      }
-    } catch (error) {
-      console.error('Error exporting vendors:', error);
-      alert(t('administrator.dashboard.errors.networkError', 'Network error. Please try again.'));
-    }
-  }
-
-  // Handle payment summary export
-  async function handlePaymentSummaryExport(e) {
-    e.preventDefault();
-
-    const startDate = document.getElementById('summaryStartDate').value;
-    const endDate = document.getElementById('summaryEndDate').value;
-    const format = document.getElementById('summaryFormat').value;
-
-    try {
-      const response = await adminFetch(`/api/v1/quickbooks/payment-summary?startDate=${startDate}&endDate=${endDate}&format=${format}`);
-
-      if (response.ok) {
-        if (format === 'csv') {
-          // Download CSV file
-          const blob = await response.blob();
-          const url = window.URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = `wavemax-payments-${startDate}-to-${endDate}.csv`;
-          document.body.appendChild(a);
-          a.click();
-          window.URL.revokeObjectURL(url);
-          document.body.removeChild(a);
-        } else {
-          // Show JSON response
-          const data = await response.json();
-          alert(t('administrator.dashboard.quickbooks.exportSuccess', 'Export successful! Check export history for details.'));
-        }
-
-        closePaymentSummaryModal();
-        await loadExportHistory();
-      } else {
-        const error = await response.json();
-        alert(error.message || t('administrator.dashboard.quickbooks.exportFailed', 'Export failed'));
-      }
-    } catch (error) {
-      console.error('Error exporting payment summary:', error);
-      alert(t('administrator.dashboard.errors.networkError', 'Network error. Please try again.'));
-    }
-  }
-
-  // Handle commission detail export
-  async function handleCommissionDetailExport(e) {
-    e.preventDefault();
-
-    const affiliateId = document.getElementById('detailAffiliateId').value;
-    const startDate = document.getElementById('detailStartDate').value;
-    const endDate = document.getElementById('detailEndDate').value;
-    const format = document.getElementById('detailFormat').value;
-
-    if (!affiliateId) {
-      alert(t('administrator.dashboard.quickbooks.selectAffiliateError', 'Please select an affiliate'));
-      return;
-    }
-
-    try {
-      const response = await adminFetch(`/api/v1/quickbooks/commission-detail?affiliateId=${affiliateId}&startDate=${startDate}&endDate=${endDate}&format=${format}`);
-
-      if (response.ok) {
-        if (format === 'csv') {
-          // Download CSV file
-          const blob = await response.blob();
-          const url = window.URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = `wavemax-commission-${affiliateId}-${startDate}-to-${endDate}.csv`;
-          document.body.appendChild(a);
-          a.click();
-          window.URL.revokeObjectURL(url);
-          document.body.removeChild(a);
-        } else {
-          // Show JSON response
-          const data = await response.json();
-          alert(t('administrator.dashboard.quickbooks.exportSuccess', 'Export successful! Check export history for details.'));
-        }
-
-        closeCommissionDetailModal();
-        await loadExportHistory();
-      } else {
-        const error = await response.json();
-        alert(error.message || t('administrator.dashboard.quickbooks.exportFailed', 'Export failed'));
-      }
-    } catch (error) {
-      console.error('Error exporting commission detail:', error);
-      alert(t('administrator.dashboard.errors.networkError', 'Network error. Please try again.'));
-    }
-  }
-
-  // Handle affiliate search
-  async function handleAffiliateSearch(e) {
-    const searchTerm = e.target.value.trim();
-
-    if (searchTerm.length < 2) {
-      document.getElementById('affiliateSearchResults').style.display = 'none';
-      return;
-    }
-
-    // Clear previous timeout
-    if (searchTimeout) clearTimeout(searchTimeout);
-
-    // Debounce search
-    searchTimeout = setTimeout(async () => {
-      try {
-        const response = await adminFetch(`/api/v1/affiliates?search=${encodeURIComponent(searchTerm)}&status=active&limit=10`);
-        const data = await response.json();
-
-        if (response.ok && data.affiliates) {
-          affiliateSearchResults = data.affiliates;
-          renderAffiliateSearchResults();
-        }
-      } catch (error) {
-        console.error('Error searching affiliates:', error);
-      }
-    }, 300);
-  }
-
-  // Render affiliate search results
-  function renderAffiliateSearchResults() {
-    const resultsDiv = document.getElementById('affiliateSearchResults');
-
-    if (affiliateSearchResults.length === 0) {
-      resultsDiv.innerHTML = `<div class="p-10 text-muted">${t('administrator.dashboard.quickbooks.noAffiliatesFound', 'No affiliates found')}</div>`;
-    } else {
-      resultsDiv.innerHTML = affiliateSearchResults.map(affiliate => `
-                <div class="p-10 clickable border-bottom" 
-                     data-affiliate-id="${affiliate.affiliateId}" data-affiliate-name="${affiliate.firstName} ${affiliate.lastName}" class="select-affiliate-link affiliate-search-item">
-                    <strong>${affiliate.firstName} ${affiliate.lastName}</strong><br>
-                    <small>${affiliate.email} | ID: ${affiliate.affiliateId}</small>
-                </div>
-            `).join('');
-    }
-
-    resultsDiv.style.display = 'block';
-  }
-
-  // Select affiliate
-  window.selectAffiliate = function(affiliateId, affiliateName) {
-    document.getElementById('detailAffiliateId').value = affiliateId;
-    document.getElementById('selectedAffiliateName').textContent = affiliateName;
-    document.getElementById('selectedAffiliate').style.display = 'block';
-    document.getElementById('affiliateSearchResults').style.display = 'none';
-    document.getElementById('detailAffiliateSearch').value = '';
-  };
-
-  // Modal close functions
-  window.closePaymentSummaryModal = function() {
-    const paymentModal = document.getElementById('paymentSummaryModal');
-    if (paymentModal) {
-      paymentModal.style.display = 'none';
-      paymentModal.classList.add('hidden');
-    }
-    document.getElementById('paymentSummaryForm').reset();
-  };
-
-  window.closeCommissionDetailModal = function() {
-    const commissionModal = document.getElementById('commissionDetailModal');
-    if (commissionModal) {
-      commissionModal.style.display = 'none';
-      commissionModal.classList.add('hidden');
-    }
-    document.getElementById('commissionDetailForm').reset();
-    document.getElementById('detailAffiliateId').value = '';
-    document.getElementById('selectedAffiliate').style.display = 'none';
-    document.getElementById('affiliateSearchResults').style.display = 'none';
-  };
 
 
   // Load system config
@@ -2854,7 +2280,7 @@
       'Database': ['MONGODB_URI'],
       'Security & Authentication': ['JWT_SECRET', 'SESSION_SECRET', 'ENCRYPTION_KEY'],
       'Email': ['EMAIL_PROVIDER', 'EMAIL_FROM', 'EMAIL_HOST', 'EMAIL_PORT', 'EMAIL_USER', 'EMAIL_PASS', 'EMAIL_SECURE'],
-      'DocuSign': ['DOCUSIGN_INTEGRATION_KEY', 'DOCUSIGN_USER_ID', 'DOCUSIGN_ACCOUNT_ID', 'DOCUSIGN_BASE_URL', 'DOCUSIGN_OAUTH_BASE_URL', 'DOCUSIGN_CLIENT_SECRET', 'DOCUSIGN_REDIRECT_URI', 'DOCUSIGN_PRIVATE_KEY', 'DOCUSIGN_WEBHOOK_SECRET', 'DOCUSIGN_W9_TEMPLATE_ID'],
+      'DocuSign': ['DOCUSIGN_INTEGRATION_KEY', 'DOCUSIGN_USER_ID', 'DOCUSIGN_ACCOUNT_ID', 'DOCUSIGN_BASE_URL', 'DOCUSIGN_OAUTH_BASE_URL', 'DOCUSIGN_CLIENT_SECRET', 'DOCUSIGN_REDIRECT_URI', 'DOCUSIGN_PRIVATE_KEY', 'DOCUSIGN_WEBHOOK_SECRET'],
       'AWS (Optional)': ['AWS_S3_BUCKET', 'AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY', 'AWS_REGION'],
       'Stripe (Deprecated)': ['STRIPE_PUBLISHABLE_KEY', 'STRIPE_SECRET_KEY'],
       'Features': ['SHOW_DOCS', 'ENABLE_DELETE_DATA_FEATURE', 'CSRF_PHASE', 'RELAX_RATE_LIMITING'],
@@ -3055,112 +2481,8 @@
     }
 
     configHtml += '</form>';
-    
-    // Add DocuSign Authorization section
-    configHtml += `
-      <div class="docusign-auth-section mt-40 p-20 border rounded bg-light">
-        <h3 class="m-0 mb-15">${t('administrator.dashboard.config.docusignTitle', 'DocuSign Integration')}</h3>
-        <p class="mb-15">${t('administrator.dashboard.config.docusignDesc', 'Authorize DocuSign to enable W9 form sending to affiliates.')}</p>
-        <div id="docusignAuthStatus" class="mb-15">
-          <span class="spinner d-inline-block mr-10"></span>
-          ${t('administrator.dashboard.config.checkingAuth', 'Checking authorization status...')}
-        </div>
-        <button id="authorizeDocuSignBtn" class="btn btn-primary d-none">
-          ${t('administrator.dashboard.config.authorizeDocuSign', 'Authorize DocuSign')}
-        </button>
-      </div>
-    `;
-    
-    document.getElementById('systemConfig').innerHTML = configHtml;
-    
-    // Check DocuSign authorization status
-    checkDocuSignAuth();
-  }
 
-  // Check DocuSign authorization status
-  async function checkDocuSignAuth() {
-    try {
-      const response = await adminFetch('/api/v1/w9/check-auth');
-      const data = await response.json();
-      
-      const statusDiv = document.getElementById('docusignAuthStatus');
-      const authBtn = document.getElementById('authorizeDocuSignBtn');
-      
-      if (data.authorized) {
-        statusDiv.innerHTML = `
-          <span class="text-success">✓</span> 
-          ${t('administrator.dashboard.config.docusignAuthorized', 'DocuSign is authorized and ready to use.')}
-        `;
-        authBtn.style.display = 'none';
-      } else {
-        statusDiv.innerHTML = `
-          <span class="text-danger">✗</span> 
-          ${t('administrator.dashboard.config.docusignNotAuthorized', 'DocuSign is not authorized. Click the button below to authorize.')}
-        `;
-        authBtn.style.display = 'inline-block';
-        
-        // Store authorization URL and state
-        authBtn.dataset.authUrl = data.authorizationUrl;
-        authBtn.dataset.authState = data.state;
-        
-        // Add click handler
-        authBtn.onclick = () => authorizeDocuSign(data.authorizationUrl, data.state);
-      }
-    } catch (error) {
-      console.error('Error checking DocuSign auth:', error);
-      const statusDiv = document.getElementById('docusignAuthStatus');
-      statusDiv.innerHTML = `
-        <span class="text-danger">✗</span> 
-        ${t('administrator.dashboard.config.docusignCheckError', 'Error checking authorization status.')}
-      `;
-    }
-  }
-  
-  // Authorize DocuSign
-  function authorizeDocuSign(authUrl, state) {
-    // Open DocuSign authorization in a new window
-    const authWindow = window.open(authUrl, 'DocuSignAuth', 'width=600,height=700');
-    
-    // Store state for verification
-    localStorage.setItem('docusign-auth-state', state);
-    
-    // Poll for completion
-    const pollInterval = setInterval(async () => {
-      // Check if window is closed
-      if (authWindow.closed) {
-        clearInterval(pollInterval);
-        
-        // Check if authorization was successful
-        const storedAuth = localStorage.getItem('docusign-auth-success');
-        if (storedAuth) {
-          const authData = JSON.parse(storedAuth);
-          if (authData.state === state) {
-            // Authorization successful
-            localStorage.removeItem('docusign-auth-success');
-            localStorage.removeItem('docusign-auth-state');
-            
-            // Recheck authorization status
-            await checkDocuSignAuth();
-            
-            alert(t('administrator.dashboard.config.docusignAuthSuccess', 'DocuSign authorization successful!'));
-          }
-        }
-      }
-      
-      // Also check authorization status periodically
-      try {
-        const response = await adminFetch('/api/v1/w9/authorization-status');
-        const data = await response.json();
-        if (data.authorized) {
-          clearInterval(pollInterval);
-          if (!authWindow.closed) authWindow.close();
-          await checkDocuSignAuth();
-          alert(t('administrator.dashboard.config.docusignAuthSuccess', 'DocuSign authorization successful!'));
-        }
-      } catch (error) {
-        // Ignore errors during polling
-      }
-    }, 2000);
+    document.getElementById('systemConfig').innerHTML = configHtml;
   }
 
   // Modal handling
@@ -3330,60 +2652,6 @@
     }
   });
 
-  // Handle Send W9 button click
-  async function handleSendW9Click(affiliateId, email, name, button) {
-    try {
-      const confirmMessage = t('administrator.dashboard.affiliates.confirmSendW9', 
-        `Send W9 form to ${name} at ${email}?`);
-      
-      if (!confirm(confirmMessage)) {
-        return;
-      }
-      
-      // Show loading state
-      button.disabled = true;
-      button.textContent = t('administrator.dashboard.affiliates.sending', 'Sending...');
-      
-      const response = await adminFetch('/api/v1/w9/send-docusign', {
-        method: 'POST',
-        body: JSON.stringify({ affiliateId })
-      });
-      
-      const data = await response.json();
-      
-      if (response.ok && data.success) {
-        alert(t('administrator.dashboard.affiliates.w9Sent', 'W9 form sent successfully!'));
-        // Reload the affiliates table to update status
-        await loadAffiliates();
-      } else {
-        // Show more specific error message based on response
-        let errorMessage = data.message || t('administrator.dashboard.affiliates.w9SendFailed', 'Failed to send W9 form');
-        
-        // Add specific guidance for common errors
-        if (response.status === 401 || data.error === 'Authorization required') {
-          errorMessage = t('administrator.dashboard.affiliates.docusignAuthRequired', 
-            'DocuSign authorization required. Please authorize DocuSign integration in system settings.');
-        } else if (data.error === 'Template configuration error') {
-          errorMessage = t('administrator.dashboard.affiliates.docusignTemplateError', 
-            'DocuSign W9 template not configured. Please check template ID in system settings.');
-        }
-        
-        alert(errorMessage);
-        // Re-enable button
-        button.disabled = false;
-        button.textContent = t('administrator.dashboard.affiliates.sendW9', 'Send W9');
-      }
-    } catch (error) {
-      console.error('Error sending W9:', error);
-      alert(t('administrator.dashboard.affiliates.w9SendError', 'Error sending W9 form. Please try again.'));
-      // Re-enable button
-      if (button) {
-        button.disabled = false;
-        button.textContent = t('administrator.dashboard.affiliates.sendW9', 'Send W9');
-      }
-    }
-  }
-
   // Global functions for inline handlers
   window.editOperator = async (operatorId) => {
     try {
@@ -3475,13 +2743,6 @@
       printCustomerCard(customerId);
     }
     
-    // Select affiliate link
-    if (e.target.closest('.select-affiliate-link')) {
-      const link = e.target.closest('.select-affiliate-link');
-      const affiliateId = link.getAttribute('data-affiliate-id');
-      const affiliateName = link.getAttribute('data-affiliate-name');
-      selectAffiliate(affiliateId, affiliateName);
-    }
   });
   
   // Hover effect for affiliate search items is now handled in CSS file
@@ -3541,22 +2802,6 @@
   });
   
   // Modal functions (moved from inline event handlers)
-  window.closePaymentSummaryModal = function() {
-    const modal = document.getElementById('paymentSummaryModal');
-    if (modal) {
-      modal.style.display = 'none';
-      modal.classList.add('hidden');
-    }
-  };
-
-  window.closeCommissionDetailModal = function() {
-    const modal = document.getElementById('commissionDetailModal');
-    if (modal) {
-      modal.style.display = 'none';
-      modal.classList.add('hidden');
-    }
-  };
-
   window.closeLogoutModal = function() {
     const modal = document.getElementById('logoutModal');
     if (modal) {
@@ -3572,28 +2817,6 @@
   // NOTE: must use onDomReady — the SPA router injects this script after
   // DOMContentLoaded has already fired, so a bare listener never runs.
   onDomReady(function() {
-    // Payment Summary Modal
-    const closePaymentSummaryBtn = document.getElementById('closePaymentSummaryModal');
-    if (closePaymentSummaryBtn) {
-      closePaymentSummaryBtn.addEventListener('click', window.closePaymentSummaryModal);
-    }
-    
-    const cancelPaymentSummaryBtn = document.getElementById('cancelPaymentSummaryModal');
-    if (cancelPaymentSummaryBtn) {
-      cancelPaymentSummaryBtn.addEventListener('click', window.closePaymentSummaryModal);
-    }
-
-    // Commission Detail Modal
-    const closeCommissionDetailBtn = document.getElementById('closeCommissionDetailModal');
-    if (closeCommissionDetailBtn) {
-      closeCommissionDetailBtn.addEventListener('click', window.closeCommissionDetailModal);
-    }
-    
-    const cancelCommissionDetailBtn = document.getElementById('cancelCommissionDetailModal');
-    if (cancelCommissionDetailBtn) {
-      cancelCommissionDetailBtn.addEventListener('click', window.closeCommissionDetailModal);
-    }
-
     // Logout Modal
     const closeLogoutBtn = document.getElementById('closeLogoutModal');
     if (closeLogoutBtn) {
@@ -3611,7 +2834,7 @@
     }
 
     // Click outside modal to close
-    const modals = ['paymentSummaryModal', 'commissionDetailModal', 'logoutModal'];
+    const modals = ['logoutModal'];
     modals.forEach(modalId => {
       const modal = document.getElementById(modalId);
       if (modal) {

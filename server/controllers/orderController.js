@@ -14,7 +14,6 @@ const Formatters = require('../utils/formatters');
 const logger = require('../utils/logger');
 const { canTransition } = require('../modules/orders/orderStateMachine');
 const { applyReadyGate } = require('../services/orderReadyGateService');
-const { applyW9ThresholdCheck } = require('../modules/onboarding/w9ThresholdService');
 
 // ============================================================================
 // Order Controllers
@@ -175,12 +174,6 @@ exports.updateOrderStatus = async (req, res) => {
     }
 
     await order.save();
-
-    // Commission realizes at delivered (Order pre-save set-once stamp) —
-    // best-effort W-9 threshold re-check (spec §6.2/§8); the service never throws.
-    if (status === 'delivered') {
-      await applyW9ThresholdCheck(order.affiliateId, { req });
-    }
 
     // The processed transition runs the canonical ready gate, which now
     // promotes processed -> ready_for_pickup unconditionally (payment removed).

@@ -262,25 +262,6 @@ systemConfigSchema.statics.initializeDefaults = async function() {
       validation: { min: 0.00, max: 50.00 },
       isPublic: true
     },
-    {
-      key: 'w9_earnings_threshold',
-      value: 600.00,
-      defaultValue: 600.00,
-      description: 'YTD earnings (USD) at which an affiliate must have a W-9 on file before further commission payouts',
-      category: 'payment',
-      dataType: 'number',
-      validation: { min: 0.00, max: 10000.00 },
-      isPublic: false
-    },
-    {
-      key: 'w9_threshold_usd',
-      value: 600,
-      defaultValue: 600,
-      description: 'YTD earnings (USD) that trigger the W-9 payment lock (canonical name; w9_earnings_threshold is the legacy alias)',
-      category: 'payment',
-      dataType: 'number',
-      validation: { min: 0, max: 10000 }
-    },
 
     // Affiliate onboarding (redesign spec §8)
     {
@@ -291,15 +272,6 @@ systemConfigSchema.statics.initializeDefaults = async function() {
       category: 'affiliate',
       dataType: 'number',
       validation: { min: 1, max: 336 }
-    },
-    {
-      key: 'w9_max_upload_mb',
-      value: 10,
-      defaultValue: 10,
-      description: 'Maximum W-9 upload size in megabytes',
-      category: 'affiliate',
-      dataType: 'number',
-      validation: { min: 1, max: 25 }
     },
 
     // Durable bags (redesign spec §8)

@@ -29,7 +29,6 @@
             <button class="nav-tab" data-tab="customers" data-i18n="administrator.dashboard.tabs.customers">Customers</button>
             <button class="nav-tab" data-tab="affiliates" data-i18n="administrator.dashboard.tabs.affiliates">Affiliates</button>
             <button class="nav-tab" data-tab="invites" data-i18n="administrator.dashboard.tabs.invites">Invites</button>
-            <button class="nav-tab" data-tab="quickbooks" data-i18n="administrator.dashboard.tabs.quickbooks">QuickBooks</button>
             <button class="nav-tab" data-tab="config" data-i18n="administrator.dashboard.tabs.config">Config</button>
         </nav>
 
@@ -237,19 +236,6 @@
                     </div>
                 </div>
             </div>
-
-            <!-- W-9 Review (pending submissions) -->
-            <div class="card margin-top-20">
-                <div class="card-header">
-                    <h2 class="card-title" data-i18n="admin.w9.title">W-9 review</h2>
-                    <button class="btn btn-secondary" id="refreshW9PendingBtn" data-i18n="common.buttons.refresh">Refresh</button>
-                </div>
-                <div id="w9PendingList">
-                    <div class="loading">
-                        <div class="spinner"></div>
-                    </div>
-                </div>
-            </div>
         </div>
 
         <!-- Invites Tab -->
@@ -381,56 +367,6 @@
 
 
 
-        <!-- QuickBooks Export Tab -->
-        <div class="tab-content" id="quickbooks-tab">
-            <div class="card">
-                <div class="card-header">
-                    <h2 class="card-title" data-i18n="administrator.dashboard.quickbooks.title">QuickBooks Export</h2>
-                </div>
-                
-                <!-- Export Options -->
-                <div class="padding-20">
-                    <div class="dashboard-grid">
-                        <!-- Vendor Export Card -->
-                        <div class="stat-card">
-                            <h3 data-i18n="administrator.dashboard.quickbooks.vendorExport">Vendor Export</h3>
-                            <p class="color-666 margin-bottom-15" data-i18n="administrator.dashboard.quickbooks.vendorExportDesc">Export all affiliates with verified W-9s as QuickBooks vendors</p>
-                            <button class="btn btn-primary" id="exportVendorsBtn" data-i18n="administrator.dashboard.quickbooks.exportVendors">Export Vendors</button>
-                        </div>
-                        
-                        <!-- Payment Summary Card -->
-                        <div class="stat-card">
-                            <h3 data-i18n="administrator.dashboard.quickbooks.paymentSummary">Payment Summary</h3>
-                            <p class="color-666 margin-bottom-15" data-i18n="administrator.dashboard.quickbooks.paymentSummaryDesc">Export commission payments for a date range</p>
-                            <button class="btn btn-primary" id="openPaymentSummaryBtn" data-i18n="administrator.dashboard.quickbooks.selectDateRange">Select Date Range</button>
-                        </div>
-                        
-                        <!-- Commission Detail Card -->
-                        <div class="stat-card">
-                            <h3 data-i18n="administrator.dashboard.quickbooks.commissionDetail">Commission Detail</h3>
-                            <p class="color-666 margin-bottom-15" data-i18n="administrator.dashboard.quickbooks.commissionDetailDesc">Export detailed commission report for a specific affiliate</p>
-                            <button class="btn btn-primary" id="openCommissionDetailBtn" data-i18n="administrator.dashboard.quickbooks.selectAffiliate">Select Affiliate</button>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Export History -->
-                <div class="card margin-top-20">
-                    <div class="card-header">
-                        <h3 class="margin-0 font-size-18" data-i18n="administrator.dashboard.quickbooks.exportHistory">Export History</h3>
-                        <button class="btn btn-secondary btn-sm" id="refreshExportHistoryBtn" data-i18n="common.buttons.refresh">Refresh</button>
-                    </div>
-                    <div id="exportHistoryList">
-                        <div class="loading">
-                            <div class="spinner"></div>
-                            <p data-i18n="administrator.dashboard.loading.exportHistory">Loading export history...</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-
         <!-- System Config Tab -->
         <div class="tab-content" id="config-tab">
             <!-- Sub-tabs for Config -->
@@ -467,88 +403,6 @@
                         </div>
                     </div>
                 </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Payment Summary Export Modal -->
-    <div id="paymentSummaryModal" class="modal hidden">
-        <div class="modal-content max-width-500">
-            <div class="modal-header">
-                <h3 data-i18n="administrator.dashboard.quickbooks.paymentSummaryTitle">Export Payment Summary</h3>
-                <button class="modal-close" id="closePaymentSummaryModal">&times;</button>
-            </div>
-            <div class="modal-body">
-                <form id="paymentSummaryForm">
-                    <div class="form-group">
-                        <label for="summaryStartDate" data-i18n="administrator.dashboard.quickbooks.startDate">Start Date</label>
-                        <input type="date" id="summaryStartDate" class="form-control" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="summaryEndDate" data-i18n="administrator.dashboard.quickbooks.endDate">End Date</label>
-                        <input type="date" id="summaryEndDate" class="form-control" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="summaryFormat" data-i18n="administrator.dashboard.quickbooks.exportFormat">Export Format</label>
-                        <select id="summaryFormat" class="form-control">
-                            <option value="csv">CSV (QuickBooks Import)</option>
-                            <option value="json">JSON (API Response)</option>
-                        </select>
-                    </div>
-                    
-                    <div class="form-actions flex-center gap-10 justify-content-flex-end margin-top-20">
-                        <button type="button" class="btn btn-secondary" id="cancelPaymentSummaryModal" data-i18n="common.buttons.cancel">Cancel</button>
-                        <button type="submit" class="btn btn-primary" data-i18n="administrator.dashboard.quickbooks.export">Export</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <!-- Commission Detail Export Modal -->
-    <div id="commissionDetailModal" class="modal hidden">
-        <div class="modal-content max-width-600">
-            <div class="modal-header">
-                <h3 data-i18n="administrator.dashboard.quickbooks.commissionDetailTitle">Export Commission Detail</h3>
-                <button class="modal-close" id="closeCommissionDetailModal">&times;</button>
-            </div>
-            <div class="modal-body">
-                <form id="commissionDetailForm">
-                    <div class="form-group">
-                        <label for="detailAffiliateSearch" data-i18n="administrator.dashboard.quickbooks.searchAffiliate">Search Affiliate</label>
-                        <input type="text" id="detailAffiliateSearch" class="form-control" placeholder="Type to search..." data-i18n-placeholder="administrator.dashboard.quickbooks.searchAffiliatePlaceholder">
-                        <div id="affiliateSearchResults" class="affiliate-search-results"></div>
-                        <input type="hidden" id="detailAffiliateId" required>
-                        <div id="selectedAffiliate" class="selected-affiliate">
-                            <strong data-i18n="administrator.dashboard.quickbooks.selected">Selected:</strong> <span id="selectedAffiliateName"></span>
-                        </div>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="detailStartDate" data-i18n="administrator.dashboard.quickbooks.startDate">Start Date</label>
-                        <input type="date" id="detailStartDate" class="form-control" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="detailEndDate" data-i18n="administrator.dashboard.quickbooks.endDate">End Date</label>
-                        <input type="date" id="detailEndDate" class="form-control" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="detailFormat" data-i18n="administrator.dashboard.quickbooks.exportFormat">Export Format</label>
-                        <select id="detailFormat" class="form-control">
-                            <option value="csv">CSV (Detailed Report)</option>
-                            <option value="json">JSON (API Response)</option>
-                        </select>
-                    </div>
-                    
-                    <div class="form-actions flex-center gap-10 justify-content-flex-end margin-top-20">
-                        <button type="button" class="btn btn-secondary" id="cancelCommissionDetailModal" data-i18n="common.buttons.cancel">Cancel</button>
-                        <button type="submit" class="btn btn-primary" data-i18n="administrator.dashboard.quickbooks.export">Export</button>
-                    </div>
-                </form>
             </div>
         </div>
     </div>

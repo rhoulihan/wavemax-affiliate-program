@@ -47,8 +47,6 @@ const REQUIRED_KEYS = [
   'admin.bags.inventory.status.active', 'admin.bags.inventory.status.retired',
   'affiliate.bags.inventory.title', 'affiliate.bags.inventory.empty',
   'affiliateRegister.invite.invalidOrExpired', 'affiliateRegister.invite.emailLocked',
-  'affiliateRegister.w9.uploadLabel', 'affiliateRegister.w9.fileTypeHint',
-  'affiliateRegister.w9.tooLarge', 'affiliateRegister.w9.wrongType', 'affiliateRegister.w9.optionalNote',
   'operator.intake.weightLabel', 'operator.intake.addOns.premiumDetergent',
   'operator.intake.addOns.fabricSoftener', 'operator.intake.addOns.stainRemover',
   'operator.intake.freshFormAck', 'operator.intake.created',
@@ -65,9 +63,9 @@ const REQUIRED_KEYS = [
   'order.status.picked_up', 'order.status.delivered', 'order.status.cancelled'
 ];
 
-// Namespaces whose leaf names are owned by earlier PRs (5 = invites, 10 = W-9
-// admin UI) — at least one key must exist under each prefix in en.
-const REQUIRED_PREFIXES = ['admin.invites', 'admin.w9'];
+// Namespaces whose leaf names are owned by earlier PRs (5 = invites) — at
+// least one key must exist under each prefix in en.
+const REQUIRED_PREFIXES = ['admin.invites'];
 
 // Spec §10 email templates that must resolve in all four languages via
 // template-manager.loadTemplate(name, lang). Names are loadTemplate names (no
@@ -76,7 +74,6 @@ const REQUIRED_PREFIXES = ['admin.invites', 'admin.w9'];
 // templates for one email.
 const REQUIRED_EMAIL_TEMPLATES = [
   'affiliate-invite',
-  'affiliate-w9-status',
   'customer-order-delivered',
   'order-ready',
   'customer-on-the-way'

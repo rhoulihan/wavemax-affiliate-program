@@ -18,7 +18,6 @@ const Customer = require('../../server/models/Customer');
 const Operator = require('../../server/models/Operator');
 const Order = require('../../server/models/Order');
 const Bag = require('../../server/modules/bags/Bag');
-const SystemConfig = require('../../server/models/SystemConfig');
 const encryptionUtil = require('../../server/utils/encryption');
 const roleCodes = require('../../server/utils/roleCodes');
 const { createTestToken } = require('../helpers/authHelper');
@@ -92,7 +91,6 @@ describe('Location affiliates (zero-commission collection points)', () => {
       expect(persisted).toBeTruthy();
       expect(persisted.affiliateType).toBe('location');
       expect(persisted.isActive).toBe(true);
-      expect(persisted.w9Status).toBe('not_required');
       // Location affiliates charge no delivery fees by default
       expect(persisted.minimumDeliveryFee).toBe(0);
       expect(persisted.perBagDeliveryFee).toBe(0);
@@ -212,10 +210,6 @@ describe('Location affiliates (zero-commission collection points)', () => {
         Customer.deleteMany({}), Affiliate.deleteMany({}), Bag.deleteMany({})
       ]);
 
-      // Tiny threshold so ANY realized commission > 0 triggers the W-9 flow —
-      // this is what makes "stays not_required" a meaningful assertion.
-      await SystemConfig.updateOne({ key: 'w9_threshold_usd' }, { $set: { value: 1 } });
-
       const admin = await Administrator.create({
         firstName: 'Super', lastName: 'User', email: `super${Date.now()}@wavemax.com`,
         passwordSalt: 'salt', passwordHash: 'hash', permissions: ['all']
@@ -238,12 +232,8 @@ describe('Location affiliates (zero-commission collection points)', () => {
       operatorCsrfToken = await getCsrfToken(app, operatorAgent);
     });
 
-    afterEach(async () => {
-      await SystemConfig.initializeDefaults(); // restore the threshold row
-    });
-
-    test('location affiliate: order computes commission 0, realizes 0, w9Status stays not_required', async () => {
-      const { affiliate, bagToken } = await createWorld({ affiliateType: 'location' });
+    test('location affiliate: order computes commission 0, realizes 0', async () => {
+      const { bagToken } = await createWorld({ affiliateType: 'location' });
 
       const delivered = await intakeAndDeliver(bagToken);
       expect(delivered.status).toBe('delivered');
@@ -251,23 +241,16 @@ describe('Location affiliates (zero-commission collection points)', () => {
       expect(delivered.affiliateCommission).toBe(0);
       // Customer still owes for the wash itself
       expect(delivered.actualTotal).toBeGreaterThan(0);
-
-      const reloadedAffiliate = await Affiliate.findOne({ affiliateId: affiliate.affiliateId });
-      expect(reloadedAffiliate.w9Status).toBe('not_required');
-      expect(reloadedAffiliate.paymentProcessingLocked).toBe(false);
     });
 
-    test('standard affiliate: commission unchanged and the W-9 trigger still fires (contrast)', async () => {
-      const { affiliate, bagToken } = await createWorld({ affiliateType: 'standard' });
+    test('standard affiliate: commission computes and realizes > 0 (contrast)', async () => {
+      const { bagToken } = await createWorld({ affiliateType: 'standard' });
 
       const delivered = await intakeAndDeliver(bagToken);
       expect(delivered.status).toBe('delivered');
       expect(delivered.commissionRealized).toBe(true);
       // (20 lbs x baseRate x 10%) + delivery fee — definitely > 0
       expect(delivered.affiliateCommission).toBeGreaterThan(0);
-
-      const reloadedAffiliate = await Affiliate.findOne({ affiliateId: affiliate.affiliateId });
-      expect(reloadedAffiliate.w9Status).toBe('required'); // threshold of $1 crossed
     });
   });
 });

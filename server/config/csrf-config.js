@@ -158,12 +158,7 @@ const CSRF_CONFIG = {
     // Bag admin mutations (mint/issue/print-run — spec §5)
     '/api/v1/bags/mint',
     '/api/v1/bags/batch/:batchId/issue',
-    '/api/v1/bags/print-run',
-
-    // W-9 surface — critical, ALWAYS CSRF (redesign PR 10, spec §9)
-    '/api/v1/affiliates/:affiliateId/w9',
-    '/api/v1/w9/admin/:affiliateId/verify',
-    '/api/v1/w9/admin/:affiliateId/reject'
+    '/api/v1/bags/print-run'
   ],
 
   // HIGH priority endpoints (Phase 2)

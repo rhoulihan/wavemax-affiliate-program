@@ -60,8 +60,3 @@ body {
 .delete-data-section {
     display: none;
 }
-
-/* W9 notification modal - ensure proper display when shown */
-#w9NotificationModal.show {
-    display: flex;
-}
