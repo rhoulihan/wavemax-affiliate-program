@@ -569,42 +569,6 @@ input:focus, select:focus {
     padding: 20px;
 }
 
-/* W-9 specific styles */
-.w9-row {
-    display: flex;
-    align-items: center;
-    padding: 15px 20px;
-    border-bottom: 1px solid #e9ecef;
-    transition: background-color 0.2s;
-}
-
-.w9-row:hover {
-    background-color: #f8f9fa;
-}
-
-.w9-info {
-    flex: 1;
-}
-
-.w9-affiliate-name {
-    font-weight: 600;
-    margin-bottom: 5px;
-}
-
-.w9-affiliate-details {
-    font-size: 0.875rem;
-    color: #666;
-}
-
-.w9-status {
-    margin: 0 20px;
-}
-
-.w9-actions {
-    display: flex;
-    gap: 10px;
-}
-
 .status-badge {
     padding: 4px 12px;
     border-radius: 20px;

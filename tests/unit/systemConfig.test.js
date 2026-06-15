@@ -707,8 +707,6 @@ describe('SystemConfig Model', () => {
 
         const expected = [
           { key: 'invite_token_ttl_hours', value: 72, category: 'affiliate', dataType: 'number', isPublic: false, min: 1, max: 336 },
-          { key: 'w9_max_upload_mb', value: 10, category: 'affiliate', dataType: 'number', isPublic: false, min: 1, max: 25 },
-          { key: 'w9_threshold_usd', value: 600, category: 'payment', dataType: 'number', isPublic: false, min: 0, max: 10000 },
           { key: 'bag_mint_max_batch', value: 200, category: 'operations', dataType: 'number', isPublic: false, min: 1, max: 500 },
           { key: 'bag_token_bytes', value: 16, category: 'operations', dataType: 'number', isPublic: false, min: 12, max: 32 },
           { key: 'bag_label_columns', value: 3, category: 'operations', dataType: 'number', isPublic: false, min: 1, max: 6 },
@@ -758,17 +756,13 @@ describe('SystemConfig Model', () => {
         expect(updated.value).toBe(24);
       });
 
-      it('should keep w9_earnings_threshold seeded as the legacy alias of w9_threshold_usd', async () => {
+      it('should not seed retired W-9 keys (Phase 1 removed the W-9 subsystem)', async () => {
         await SystemConfig.initializeDefaults();
 
-        const legacy = await SystemConfig.findOne({ key: 'w9_earnings_threshold' });
-        const canonical = await SystemConfig.findOne({ key: 'w9_threshold_usd' });
-
-        expect(legacy).not.toBeNull();
-        expect(legacy.value).toBeCloseTo(600, 2);
-        expect(legacy.category).toBe('payment');
-        expect(canonical).not.toBeNull();
-        expect(canonical.value).toBeCloseTo(600, 2);
+        // Removed in Phase 1 PR 2 — W-9 tax subsystem deleted (no commissions yet)
+        expect(await SystemConfig.findOne({ key: 'w9_earnings_threshold' })).toBeNull();
+        expect(await SystemConfig.findOne({ key: 'w9_threshold_usd' })).toBeNull();
+        expect(await SystemConfig.findOne({ key: 'w9_max_upload_mb' })).toBeNull();
       });
 
       it('should not seed retired keys (laundry_bag_fee, payment_check_*)', async () => {

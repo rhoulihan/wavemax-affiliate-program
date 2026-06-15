@@ -83,15 +83,6 @@ exports.authenticate = async (req, res, next) => {
       ...(decoded.requirePasswordChange && { requirePasswordChange: decoded.requirePasswordChange })
     };
 
-    // Debug logging for W9 endpoint
-    if (req.path.includes('/w9/')) {
-      logger.info('Auth middleware - W9 endpoint accessed:', {
-        path: req.path,
-        userId: req.user.id,
-        role: req.user.role,
-        affiliateId: req.user.affiliateId
-      });
-    }
 
     // Check if password change is required
     if (decoded.requirePasswordChange &&

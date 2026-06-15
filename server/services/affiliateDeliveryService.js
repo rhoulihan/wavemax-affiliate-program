@@ -19,7 +19,6 @@ const SystemConfig = require('../models/SystemConfig');
 const { applyTransition } = require('../modules/orders/orderStateMachine');
 const { OPEN_STATUSES } = require('../modules/orders/orderAdvanceService');
 const codeAttemptLockout = require('./codeAttemptLockout');
-const { applyW9ThresholdCheck } = require('../modules/onboarding/w9ThresholdService');
 const roleCodes = require('../utils/roleCodes');
 const emailService = require('../utils/emailService');
 const { logAuditEvent, AuditEvents } = require('../utils/auditLogger');
@@ -125,8 +124,6 @@ async function confirmDelivery({ bagToken, code, geo, req }) {
     if (affiliate && affiliate.email) {
       await emailService.sendAffiliateCommissionEmail(affiliate, order, customer);
     }
-    // Commission just realized — best-effort W-9 threshold re-check (spec §6.2/§8).
-    await applyW9ThresholdCheck(order.affiliateId, { req });
   } catch (emailError) {
     logger.error(`Delivery emails failed for order ${order.orderId} (non-blocking):`, emailError);
   }

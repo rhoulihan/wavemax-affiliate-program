@@ -252,9 +252,7 @@ describe('Order Controller', () => {
       Order.findOne.mockResolvedValue(mockOrder);
       Customer.findOne.mockResolvedValue(mockCustomer);
       // The controller calls Affiliate.findOne(...) directly (for the commission
-      // email) AND applyW9ThresholdCheck (delivered only) calls it with .select().
-      // Return a thenable that also exposes .select so both call sites resolve to
-      // mockAffiliate and the non-blocking W-9 service doesn't log a mock-gap error.
+      // email). Return a thenable that also exposes .select for safety.
       Affiliate.findOne.mockReturnValue({
         select: jest.fn().mockResolvedValue(mockAffiliate),
         then: (resolve) => resolve(mockAffiliate)

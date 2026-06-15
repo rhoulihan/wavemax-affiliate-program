@@ -17,8 +17,6 @@ const logger = require('../utils/logger');
 const inviteService = require('../modules/onboarding/inviteService');
 const { InviteError } = inviteService;
 const { logAuditEvent, AuditEvents } = require('../utils/auditLogger');
-const secureFileStore = require('../services/secureFileStore');
-const path = require('path');
 const SystemConfig = require('../models/SystemConfig');
 const roleCodes = require('../utils/roleCodes');
 
@@ -144,32 +142,6 @@ exports.registerAffiliate = async (req, res) => {
     newAffiliate.affiliateDeliveryCodeHash = roleCodes.hashCode(deliveryCode);
     newAffiliate.affiliateDeliveryCodeSetAt = new Date();
 
-    // Optional W-9 uploaded with the invited registration (multipart field 'w9').
-    // Stored encrypted BEFORE save so a storage failure aborts registration
-    // cleanly (no affiliate row pointing at a missing file). Spec §6.2.
-    if (req.file && req.file.buffer) {
-      const { storageKey, sha256 } = await secureFileStore.storeEncrypted(req.file.buffer, {
-        affiliateId: newAffiliate.affiliateId,
-        contentType: req.file.mimetype,
-        filename: req.file.originalname
-      });
-      const w9Now = new Date();
-      newAffiliate.w9Document = {
-        storageKey,
-        filename: path.basename(String(req.file.originalname || 'w9'))
-          .replace(/[^a-zA-Z0-9._-]/g, '_').slice(0, 120),
-        contentType: req.file.mimetype,
-        sizeBytes: req.file.size,
-        sha256,
-        submittedAt: w9Now
-      };
-      newAffiliate.w9Status = 'pending_review';
-      newAffiliate.w9SubmittedAt = w9Now;
-      logAuditEvent(AuditEvents.W9_UPLOADED, {
-        affiliateId: newAffiliate.affiliateId, storageKey, context: 'invited_registration'
-      }, req);
-    }
-
     await newAffiliate.save();
 
     // Atomic single-use consume. A null result means another registration
@@ -177,18 +149,6 @@ exports.registerAffiliate = async (req, res) => {
     const consumed = await inviteService.consumeInvite(inviteToken, newAffiliate.affiliateId);
     if (!consumed) {
       await Affiliate.deleteOne({ _id: newAffiliate._id });
-      // Best-effort: don't leave an orphaned encrypted W-9 behind when the
-      // registration is rolled back (spec §6.2 "no orphan files").
-      if (newAffiliate.w9Document && newAffiliate.w9Document.storageKey) {
-        try {
-          await secureFileStore.deleteFile(newAffiliate.w9Document.storageKey);
-        } catch (cleanupError) {
-          logger.warn('Rolled-back registration W-9 cleanup failed', {
-            storageKey: newAffiliate.w9Document.storageKey,
-            error: cleanupError.message
-          });
-        }
-      }
       return res.status(409).json({
         success: false,
         message: 'This invitation has already been used.',

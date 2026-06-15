@@ -30,12 +30,6 @@ const SERVICES = [
     critical: false,
   },
   {
-    name: 'QuickBooks API',
-    type: 'https',
-    url: 'https://sandbox-quickbooks.api.intuit.com',
-    critical: false,
-  },
-  {
     name: 'DNS Resolution',
     type: 'dns',
     hostname: 'google.com',

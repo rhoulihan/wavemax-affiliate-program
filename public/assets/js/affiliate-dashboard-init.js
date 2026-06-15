@@ -61,9 +61,6 @@ function initializeAffiliateDashboard() {
   // PR 9: delivery code card
   initDeliveryCodeCard(affiliateId);
 
-  // Fetch admin support email for W9 notifications
-  fetchAdminSupportEmail();
-
   // Check URL parameters for specific customer filtering
   // Try both window.location.search and the global urlParams if available
   const urlParams = new URLSearchParams(window.location.search);
@@ -559,9 +556,6 @@ async function loadAffiliateData(affiliateId) {
           }
         }, 500);
       }
-
-      // Check W9 status and show notification if needed
-      checkW9NotificationRequired(data);
     }
   } catch (error) {
     console.error('Error loading affiliate data:', error);
@@ -1211,151 +1205,6 @@ function updateFeeCalculatorPreview() {
       }
     }
   });
-}
-
-// W9-related functions removed - W9 management now handled through admin dashboard
-
-// W9 Notification Functions
-async function checkW9NotificationRequired(affiliateData) {
-  try {
-    // Check if W9 status needs attention
-    const w9Status = affiliateData.w9Information?.status || 'not_submitted';
-    
-    // Only show modal for statuses that need action
-    if (w9Status === 'verified') {
-      return; // No notification needed
-    }
-
-    // Check year-to-date revenue for $600 threshold
-    const ytdRevenue = await getYearToDateRevenue(affiliateData.affiliateId);
-    
-    // Only show notification if revenue exceeds $600 or status needs attention
-    if (ytdRevenue < 600 && w9Status === 'not_submitted') {
-      return; // No notification needed yet
-    }
-
-    // Show appropriate modal based on status
-    showW9NotificationModal(w9Status, affiliateData, ytdRevenue);
-  } catch (error) {
-    console.error('Error checking W9 notification requirements:', error);
-  }
-}
-
-async function getYearToDateRevenue(affiliateId) {
-  try {
-    const baseUrl = window.EMBED_CONFIG?.baseUrl || window.location.origin;
-    const currentYear = new Date().getFullYear();
-    
-    const token = localStorage.getItem('affiliateToken');
-    
-    try {
-      // Fetch year-to-date stats
-      const data = await ApiClient.get(`/api/v1/affiliates/${affiliateId}/stats/ytd`, {
-        showError: false,
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-      return data.totalRevenue || data.totalEarnings || 0;
-    } catch (error) {
-      // Fallback to dashboard stats if YTD endpoint doesn't exist
-      try {
-        const data = await ApiClient.get(`/api/v1/affiliates/${affiliateId}/dashboard`, {
-          showError: false,
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        });
-        return data.totalEarnings || 0;
-      } catch (dashboardError) {
-        return 0;
-      }
-    }
-  } catch (error) {
-    console.error('Error fetching year-to-date revenue:', error);
-    return 0;
-  }
-}
-
-function showW9NotificationModal(status, affiliateData, ytdRevenue) {
-  const modal = document.getElementById('w9NotificationModal');
-  const title = document.getElementById('w9ModalTitle');
-  const content = document.getElementById('w9ModalContent');
-  const closeBtn = document.getElementById('w9ModalCloseBtn');
-  
-  if (!modal || !title || !content) return;
-
-  // Set content based on status
-  switch (status) {
-    case 'not_submitted':
-      title.textContent = 'W-9 Form Required';
-      content.innerHTML = `
-        <p class="mb-3">Your year-to-date revenue of <strong>$${ytdRevenue.toFixed(2)}</strong> exceeds the IRS threshold of $600.</p>
-        <p class="mb-3">You will receive a W-9 form via DocuSign to the email address: <strong>${affiliateData.email}</strong></p>
-        <p class="text-sm text-gray-600">Please complete the form promptly. Additional payments cannot be processed until your W-9 is completed and reviewed.</p>
-      `;
-      break;
-      
-    case 'pending_review':
-      title.textContent = 'W-9 Form Pending Review';
-      content.innerHTML = `
-        <p class="mb-3">A W-9 form has been sent to you via DocuSign at: <strong>${affiliateData.email}</strong></p>
-        <p class="mb-3">Please check your email (including spam folder) and complete the form if you haven't already.</p>
-        <p class="text-sm text-gray-600">Payments will resume once your W-9 has been completed and reviewed by our team.</p>
-      `;
-      break;
-      
-    case 'rejected':
-      // Get admin email for support
-      const adminEmail = localStorage.getItem('adminSupportEmail') || 'support@wavemaxlaundry.com';
-      title.textContent = 'W-9 Processing Issue';
-      content.innerHTML = `
-        <p class="mb-3">There was a problem processing your W-9 form.</p>
-        <p class="mb-3">Please contact WaveMAX support for assistance:</p>
-        <p class="text-center"><a href="mailto:${adminEmail}" class="text-blue-600 hover:underline font-semibold">${adminEmail}</a></p>
-      `;
-      break;
-      
-    case 'expired':
-      title.textContent = 'W-9 Form Expired';
-      content.innerHTML = `
-        <p class="mb-3">Your W-9 form has expired and needs to be renewed.</p>
-        <p class="mb-3">You will receive a new W-9 form via DocuSign to: <strong>${affiliateData.email}</strong></p>
-        <p class="text-sm text-gray-600">Please complete the form promptly to continue receiving payments.</p>
-      `;
-      break;
-  }
-
-  // Show modal
-  modal.classList.remove('hidden');
-
-  // Close button handler - only way to dismiss modal
-  closeBtn.onclick = function() {
-    modal.classList.add('hidden');
-  };
-}
-
-// Fetch admin support email on page load
-async function fetchAdminSupportEmail() {
-  try {
-    const baseUrl = window.EMBED_CONFIG?.baseUrl || window.location.origin;
-    // Try to get the primary administrator's email
-    const data = await ApiClient.get('/api/v1/administrators', {
-      showError: false,
-      headers: {
-        'Authorization': `Bearer ${localStorage.getItem('affiliateToken')}`
-      }
-    });
-    
-    // Get the first administrator's email (usually the primary admin)
-    if (data.administrators && data.administrators.length > 0) {
-      const adminEmail = data.administrators[0].email;
-      localStorage.setItem('adminSupportEmail', adminEmail);
-    }
-  } catch (error) {
-    // Affiliates can't list administrators (403) — expected. Fall back silently.
-    localStorage.setItem('adminSupportEmail', 'support@wavemaxlaundry.com');
-  }
 }
 
 // ---- PR 9: vendor delivery code card ---------------------------------------

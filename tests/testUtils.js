@@ -45,7 +45,6 @@ async function createTestAffiliate(data = {}) {
     referralCode: data.referralCode || `TEST${Date.now()}`,
     commissionRate: data.commissionRate || 10,
     isActive: data.isActive !== undefined ? data.isActive : true,
-    w9OnFile: data.w9OnFile || false,
     ...data
   };
 

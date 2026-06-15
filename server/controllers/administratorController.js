@@ -19,7 +19,6 @@ const mongoose = require('mongoose');
 const encryptionUtil = require('../utils/encryption');
 const logger = require('../utils/logger');
 
-const affiliatePaymentLockService = require('../services/affiliatePaymentLockService');
 const systemConfigService = require('../services/systemConfigService');
 const systemHealthService = require('../services/systemHealthService');
 const adminDashboardService = require('../services/adminDashboardService');
@@ -453,7 +452,26 @@ exports.exportReport = async (req, res) => {
  */
 exports.getAffiliatesList = async (req, res) => {
   try {
-    const affiliates = await affiliatePaymentLockService.listAffiliates(req.query);
+    const { search, status, limit = 100 } = req.query;
+    const query = {};
+    if (search) {
+      const escapedSearch = escapeRegex(search);
+      query.$or = [
+        { businessName: { $regex: escapedSearch, $options: 'i' } },
+        { firstName: { $regex: escapedSearch, $options: 'i' } },
+        { lastName: { $regex: escapedSearch, $options: 'i' } },
+        { email: { $regex: escapedSearch, $options: 'i' } },
+        { affiliateId: { $regex: escapedSearch, $options: 'i' } }
+      ];
+    }
+    if (status === 'active') query.isActive = true;
+    else if (status === 'inactive') query.isActive = false;
+
+    const affiliates = await Affiliate.find(query)
+      .select('affiliateId firstName lastName businessName email isActive serviceArea')
+      .limit(parseInt(limit, 10))
+      .sort('businessName');
+
     res.json({ success: true, affiliates });
   } catch (error) {
     logger.error('Error fetching affiliates list:', error);
@@ -462,47 +480,6 @@ exports.getAffiliatesList = async (req, res) => {
       message: 'Failed to fetch affiliates list',
       error: error.message
     });
-  }
-};
-
-/**
- * Lock commission payouts for an affiliate.
- */
-exports.lockAffiliatePayments = async (req, res) => {
-  try {
-    const affiliate = await affiliatePaymentLockService.lockPayments({
-      affiliateId: req.params.affiliateId,
-      reason: (req.body || {}).reason,
-      notes: (req.body || {}).notes
-    });
-    res.json({ success: true, message: 'Commission payouts locked for affiliate', affiliate });
-  } catch (err) {
-    if (err.isPaymentLockError) {
-      return res.status(err.status).json({ success: false, message: err.message });
-    }
-    logger.error('Error locking affiliate payments:', err);
-    res.status(500).json({ success: false, message: 'Failed to lock affiliate payments', error: err.message });
-  }
-};
-
-/**
- * Unlock commission payouts for an affiliate (typically after a W-9 is on file).
- */
-exports.unlockAffiliatePayments = async (req, res) => {
-  try {
-    const affiliate = await affiliatePaymentLockService.unlockPayments({
-      affiliateId: req.params.affiliateId,
-      notes: (req.body || {}).notes,
-      w9Received: (req.body || {}).w9Received,
-      adminId: req.user._id || req.user.id
-    });
-    res.json({ success: true, message: 'Commission payouts unlocked for affiliate', affiliate });
-  } catch (err) {
-    if (err.isPaymentLockError) {
-      return res.status(err.status).json({ success: false, message: err.message });
-    }
-    logger.error('Error unlocking affiliate payments:', err);
-    res.status(500).json({ success: false, message: 'Failed to unlock affiliate payments', error: err.message });
   }
 };
 

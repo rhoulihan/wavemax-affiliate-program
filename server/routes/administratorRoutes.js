@@ -56,14 +56,6 @@ router.post('/affiliates',
   ],
   manualAffiliateController.createAffiliateManually);
 
-// Commission payment lock/unlock (W-9 compliance)
-router.post('/affiliates/:affiliateId/lock-payments',
-  checkAdminPermission(['manage_affiliates']),
-  administratorController.lockAffiliatePayments);
-router.post('/affiliates/:affiliateId/unlock-payments',
-  checkAdminPermission(['manage_affiliates']),
-  administratorController.unlockAffiliatePayments);
-
 // Affiliate invites (invite-only onboarding) — spec §5 / §6.2.
 // CSRF is enforced globally on POST by conditionalCsrf.
 router.post('/affiliate-invites',

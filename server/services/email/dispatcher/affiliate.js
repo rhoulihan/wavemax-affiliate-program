@@ -40,16 +40,7 @@ exports.sendAffiliateWelcomeEmail = async (affiliate) => {
         DELIVERY_FEES_LABEL: 'OF DELIVERY FEES',
         STARTUP_COST_LABEL: 'STARTUP COST',
         DASHBOARD_MESSAGE: 'Login to your dashboard to manage your affiliate account, track orders, and view your earnings.',
-        DASHBOARD_BUTTON: 'Go to Dashboard',
-        W9_NOTICE_TITLE: '⚠️ IMPORTANT: W-9 Form Information',
-        W9_NOTICE_SUBTITLE: 'Tax Documentation Process',
-        W9_NOTICE_MESSAGE: 'To comply with IRS regulations:',
-        W9_STEP_1: 'Once your annual earnings cross $600, commission payouts are placed on hold',
-        W9_STEP_2: 'Submit a completed W-9 form to our admin team by email or secure upload',
-        W9_STEP_3: 'An administrator will verify your W-9 and re-enable commission payouts',
-        W9_STEP_4: 'Responding promptly keeps your commissions flowing without interruption',
-        W9_IRS_NOTE: 'Note: Commission payouts pause automatically at the $600 annual earnings threshold until your W-9 is on file.',
-        W9_SUPPORT_MESSAGE: 'For questions about the W-9 process, contact support@rundberglaundry.com'
+        DASHBOARD_BUTTON: 'Go to Dashboard'
       },
       es: {
         EMAIL_TITLE: 'Bienvenido al Programa de Afiliados de WaveMAX Laundry',
@@ -72,16 +63,7 @@ exports.sendAffiliateWelcomeEmail = async (affiliate) => {
         DELIVERY_FEES_LABEL: 'DE TARIFAS DE ENTREGA',
         STARTUP_COST_LABEL: 'COSTO INICIAL',
         DASHBOARD_MESSAGE: 'Inicie sesión en su panel para administrar su cuenta de afiliado, rastrear pedidos y ver sus ganancias.',
-        DASHBOARD_BUTTON: 'Ir al Panel',
-        W9_NOTICE_TITLE: '⚠️ IMPORTANTE: Información del Formulario W-9',
-        W9_NOTICE_SUBTITLE: 'Proceso de Documentación Fiscal',
-        W9_NOTICE_MESSAGE: 'Para cumplir con las regulaciones del IRS:',
-        W9_STEP_1: 'Cuando sus ganancias anuales superen los $600, los pagos de comisiones se pausarán',
-        W9_STEP_2: 'Envíe un formulario W-9 completo a nuestro equipo de administración por correo electrónico o carga segura',
-        W9_STEP_3: 'Un administrador verificará su W-9 y reactivará los pagos de comisiones',
-        W9_STEP_4: 'Responder rápidamente mantiene sus comisiones fluyendo sin interrupciones',
-        W9_IRS_NOTE: 'Nota: Los pagos de comisiones se pausan automáticamente al alcanzar el umbral de ganancias anuales de $600 hasta que su W-9 esté archivado.',
-        W9_SUPPORT_MESSAGE: 'Para preguntas sobre el proceso W-9, contacte a support@rundberglaundry.com'
+        DASHBOARD_BUTTON: 'Ir al Panel'
       },
       pt: {
         EMAIL_TITLE: 'Bem-vindo ao Programa de Afiliados WaveMAX Laundry',
@@ -104,16 +86,7 @@ exports.sendAffiliateWelcomeEmail = async (affiliate) => {
         DELIVERY_FEES_LABEL: 'DAS TAXAS DE ENTREGA',
         STARTUP_COST_LABEL: 'CUSTO INICIAL',
         DASHBOARD_MESSAGE: 'Faça login em seu painel para gerenciar sua conta de afiliado, rastrear pedidos e visualizar seus ganhos.',
-        DASHBOARD_BUTTON: 'Ir para o Painel',
-        W9_NOTICE_TITLE: '⚠️ IMPORTANTE: Informações do Formulário W-9',
-        W9_NOTICE_SUBTITLE: 'Processo de Documentação Fiscal',
-        W9_NOTICE_MESSAGE: 'Para cumprir com os regulamentos do IRS:',
-        W9_STEP_1: 'Quando seus ganhos anuais ultrapassarem $600, os pagamentos de comissão são pausados',
-        W9_STEP_2: 'Envie um formulário W-9 completo à nossa equipe de administração por e-mail ou upload seguro',
-        W9_STEP_3: 'Um administrador verificará seu W-9 e reativará os pagamentos de comissão',
-        W9_STEP_4: 'Responder rapidamente mantém suas comissões fluindo sem interrupções',
-        W9_IRS_NOTE: 'Nota: Os pagamentos de comissão são pausados automaticamente ao atingir o limite de ganhos anuais de $600 até que seu W-9 esteja arquivado.',
-        W9_SUPPORT_MESSAGE: 'Para perguntas sobre o processo W-9, entre em contato com support@rundberglaundry.com'
+        DASHBOARD_BUTTON: 'Ir para o Painel'
       },
       de: {
         EMAIL_TITLE: 'Willkommen beim WaveMAX Laundry Affiliate-Programm',
@@ -136,16 +109,7 @@ exports.sendAffiliateWelcomeEmail = async (affiliate) => {
         DELIVERY_FEES_LABEL: 'DER LIEFERGEBÜHREN',
         STARTUP_COST_LABEL: 'STARTKOSTEN',
         DASHBOARD_MESSAGE: 'Melden Sie sich in Ihrem Dashboard an, um Ihr Affiliate-Konto zu verwalten, Bestellungen zu verfolgen und Ihre Einnahmen anzuzeigen.',
-        DASHBOARD_BUTTON: 'Zum Dashboard',
-        W9_NOTICE_TITLE: '⚠️ WICHTIG: W-9 Formular Informationen',
-        W9_NOTICE_SUBTITLE: 'Steuerdokumentationsprozess',
-        W9_NOTICE_MESSAGE: 'Um die IRS-Vorschriften einzuhalten:',
-        W9_STEP_1: 'Sobald Ihre jährlichen Einnahmen $600 überschreiten, werden Provisionszahlungen pausiert',
-        W9_STEP_2: 'Senden Sie ein ausgefülltes W-9-Formular per E-Mail oder sicherem Upload an unser Administrationsteam',
-        W9_STEP_3: 'Ein Administrator prüft Ihr W-9 und aktiviert die Provisionszahlungen wieder',
-        W9_STEP_4: 'Eine prompte Antwort hält Ihre Provisionen ohne Unterbrechung in Bewegung',
-        W9_IRS_NOTE: 'Hinweis: Provisionszahlungen werden automatisch pausiert, sobald die jährliche Einnahmenschwelle von $600 erreicht wird, bis Ihr W-9 vorliegt.',
-        W9_SUPPORT_MESSAGE: 'Bei Fragen zum W-9-Prozess wenden Sie sich an support@rundberglaundry.com'
+        DASHBOARD_BUTTON: 'Zum Dashboard'
       }
     };
 

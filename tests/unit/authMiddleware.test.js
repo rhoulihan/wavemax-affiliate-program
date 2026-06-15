@@ -457,35 +457,6 @@ describe('Auth Middleware', () => {
       });
     });
 
-    it('should handle W9 endpoint logging', async () => {
-      const consoleSpy = jest.spyOn(logger, 'info').mockImplementation();
-      
-      req.headers.authorization = 'Bearer validtoken';
-      req.path = '/api/affiliates/w9/download';
-      
-      const decodedToken = {
-        id: 'user123',
-        role: 'affiliate',
-        affiliateId: 'AFF123'
-      };
-      jwt.verify.mockReturnValue(decodedToken);
-      TokenBlacklist.isBlacklisted.mockResolvedValue(false);
-
-      await authenticate(req, res, next);
-
-      expect(consoleSpy).toHaveBeenCalledWith(
-        'Auth middleware - W9 endpoint accessed:',
-        expect.objectContaining({
-          path: '/api/affiliates/w9/download',
-          userId: 'user123',
-          role: 'affiliate',
-          affiliateId: 'AFF123'
-        })
-      );
-      expect(next).toHaveBeenCalled();
-      
-      consoleSpy.mockRestore();
-    });
   });
 
   describe('authorize - array syntax', () => {
