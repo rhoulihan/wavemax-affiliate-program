@@ -172,14 +172,18 @@ describe('Order Controller', () => {
 
       await orderController.updateOrderStatus(req, res);
 
-      expect(mockOrder.status).toBe('processed');
+      // PR 1 interim: marking an order 'processed' runs orderReadyGateService
+      // .applyReadyGate, which now promotes processed -> ready_for_pickup
+      // unconditionally (payment gate removed). So the persisted status is
+      // ready_for_pickup. (PR 3 rewrites the lifecycle.)
+      expect(mockOrder.status).toBe('ready_for_pickup');
       expect(mockOrder.save).toHaveBeenCalled();
       expect(emailService.sendOrderStatusUpdateEmail).toHaveBeenCalled();
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.json).toHaveBeenCalledWith(
         expectSuccessResponse({
           orderId: 'ORD123',
-          status: 'processed',
+          status: 'ready_for_pickup',
           actualWeight: undefined,
           actualTotal: undefined,
           affiliateCommission: undefined
@@ -205,7 +209,8 @@ describe('Order Controller', () => {
 
       await orderController.updateOrderStatus(req, res);
 
-      expect(mockOrder.status).toBe('processed');
+      // PR 1 interim: 'processed' auto-advances via the ready gate (see above).
+      expect(mockOrder.status).toBe('ready_for_pickup');
       expect(mockOrder.actualWeight).toBe(25.5);
       expect(mockOrder.save).toHaveBeenCalled();
     });
@@ -246,7 +251,14 @@ describe('Order Controller', () => {
 
       Order.findOne.mockResolvedValue(mockOrder);
       Customer.findOne.mockResolvedValue(mockCustomer);
-      Affiliate.findOne.mockResolvedValue(mockAffiliate);
+      // The controller calls Affiliate.findOne(...) directly (for the commission
+      // email) AND applyW9ThresholdCheck (delivered only) calls it with .select().
+      // Return a thenable that also exposes .select so both call sites resolve to
+      // mockAffiliate and the non-blocking W-9 service doesn't log a mock-gap error.
+      Affiliate.findOne.mockReturnValue({
+        select: jest.fn().mockResolvedValue(mockAffiliate),
+        then: (resolve) => resolve(mockAffiliate)
+      });
       emailService.sendOrderStatusUpdateEmail.mockResolvedValue();
       emailService.sendAffiliateCommissionEmail.mockResolvedValue();
 

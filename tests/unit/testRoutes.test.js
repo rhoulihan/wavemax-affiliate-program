@@ -70,7 +70,7 @@ describe('Test Routes', () => {
     it('should return existing test customer', async () => {
       const mockCustomer = {
         _id: 'customerId',
-        email: 'spam-me@wavemax.promo',
+        email: 'spam-me@rundberglaundry.com',
         firstName: 'Test',
         lastName: 'Customer',
         save: jest.fn().mockResolvedValue(true)
@@ -85,11 +85,11 @@ describe('Test Routes', () => {
       expect(response.status).toBe(200);
       expect(response.body).toEqual({
         _id: 'customerId',
-        email: 'spam-me@wavemax.promo',
+        email: 'spam-me@rundberglaundry.com',
         firstName: 'Test',
         lastName: 'Customer'
       });
-      expect(Customer.findOne).toHaveBeenCalledWith({ email: 'spam-me@wavemax.promo' });
+      expect(Customer.findOne).toHaveBeenCalledWith({ email: 'spam-me@rundberglaundry.com' });
     });
 
     it('should return 404 when test customer not found', async () => {
@@ -271,7 +271,7 @@ describe('Test Routes', () => {
         .send({});
       
       expect(response.status).toBe(200);
-      expect(Customer.findOne).toHaveBeenCalledWith({ email: 'spam-me@wavemax.promo' });
+      expect(Customer.findOne).toHaveBeenCalledWith({ email: 'spam-me@rundberglaundry.com' });
       expect(mockOrder.save).toHaveBeenCalled();
     });
 
@@ -532,7 +532,7 @@ describe('Test Routes', () => {
       expect(response.body).toEqual({ message: 'Test data cleaned up successfully' });
       expect(Order.deleteMany).toHaveBeenCalledWith({ isTestOrder: true });
       expect(Customer.deleteMany).toHaveBeenCalledWith({
-        email: { $in: ['spam-me@wavemax.promo', 'test.customer@wavemax.test', 'test.affiliate@wavemax.test'] }
+        email: { $in: ['spam-me@rundberglaundry.com', 'test.customer@wavemax.test', 'test.affiliate@wavemax.test'] }
       });
     });
 

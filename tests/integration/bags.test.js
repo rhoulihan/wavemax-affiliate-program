@@ -118,6 +118,10 @@ describe('Bag endpoints', () => {
       const { batchId } = await bagService.mintBatch({
         affiliateId: affiliate.affiliateId, quantity: 2, adminId: admin._id
       });
+      // renderLabelSheet only renders bags whose claim QR resolves
+      // (status in issued/active/retired); a minted-only batch yields null -> 404.
+      // Issue the batch so the labels actually render.
+      await bagService.issueBatch({ batchId, adminId: admin._id });
       const res = await agent
         .get(`/api/v1/bags/batch/${batchId}/labels`)
         .set('Authorization', `Bearer ${adminToken}`);
@@ -126,7 +130,7 @@ describe('Bag endpoints', () => {
       expect(res.text).toContain('data:image/png');
       expect(res.text).toContain('Bag Owner Wash');
       // CSP-clean: the only script is the external auto-print helper (no inline JS)
-      expect(res.text).toContain('src="/assets/js/print-labels.js"');
+      expect(res.text).toContain('src="/assets/js/print-labels.js');
       expect(res.text).not.toMatch(/<script(?![^>]*\bsrc=)/i);
 
       const missing = await agent
