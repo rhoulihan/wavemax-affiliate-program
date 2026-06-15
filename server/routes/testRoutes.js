@@ -5,7 +5,6 @@ const Customer = require('../models/Customer');
 const Order = require('../models/Order');
 const { generateQRCode } = require('../utils/qrCodeGenerator');
 const encryptionUtil = require('../utils/encryption');
-const QRCode = require('qrcode');
 const logger = require('../utils/logger');
 
 // Middleware to ensure test routes are only available in development
@@ -17,46 +16,6 @@ const testOnlyMiddleware = (req, res, next) => {
 };
 
 router.use(testOnlyMiddleware);
-
-// Helper function to generate payment URLs and QR codes
-async function generatePaymentURLs(order, paymentAmount) {
-  const amount = paymentAmount ? paymentAmount.toFixed(2) : order.paymentAmount.toFixed(2);
-  const orderNote = `WaveMAX Order ${order.orderId}`;
-
-  // Generate payment URLs for each service
-  const links = {
-    venmo: `https://venmo.com/wavemaxatx?txn=pay&amount=${amount}&note=${encodeURIComponent(orderNote)}`,
-    paypal: `https://www.paypal.me/WaveMAXLaundry/${amount}?locale.x=en_US&country.x=US`,
-    cashapp: `https://cash.app/$WaveMAXLaundry/${amount}?note=${encodeURIComponent(orderNote)}`
-  };
-
-  // Use the same URL for QR codes as the button
-  const qrUrls = {
-    venmo: links.venmo,
-    paypal: links.paypal,
-    cashapp: links.cashapp
-  };
-
-  const qrCodes = {};
-  for (const [service, url] of Object.entries(qrUrls)) {
-    try {
-      // Generate QR code as base64 string
-      qrCodes[service] = await QRCode.toDataURL(url, {
-        width: 300,
-        margin: 1,
-        color: {
-          dark: '#000000',
-          light: '#FFFFFF'
-        }
-      });
-    } catch (error) {
-      logger.error(`Failed to generate QR code for ${service}:`, error);
-      qrCodes[service] = null;
-    }
-  }
-
-  return { links, qrCodes };
-}
 
 // Get or create test customer
 router.get('/customer', async (req, res) => {
@@ -228,7 +187,6 @@ router.post('/order', async (req, res) => {
             bagToken: require('crypto').randomBytes(16).toString('hex'),
             isTestOrder: true, // Mark as test order for cleanup
             baseRate: 1.25, // rate per pound
-            paymentStatus: 'pending',
             // Delivery fee breakdown
             feeBreakdown: {
                 numberOfBags: 1,
@@ -273,35 +231,6 @@ router.get('/order/:orderId', async (req, res) => {
     } catch (error) {
         logger.error('Error fetching test order:', error);
         res.status(500).json({ error: 'Failed to fetch test order' });
-    }
-});
-
-// Send test payment email
-router.post('/send-payment-email', async (req, res) => {
-    try {
-        const { to, subject, html, orderId } = req.body;
-        
-        if (!to || !subject || !html) {
-            return res.status(400).json({ error: 'Missing required fields: to, subject, html' });
-        }
-        
-        // Import email service
-        const emailService = require('../utils/emailService');
-        
-        // Send the email
-        await emailService.sendEmail(to, subject, html);
-        
-        // Log the test email for debugging
-        logger.info(`Test payment email sent to ${to} for order ${orderId}`);
-        
-        res.json({ 
-            success: true, 
-            message: 'Test payment email sent successfully',
-            orderId 
-        });
-    } catch (error) {
-        logger.error('Error sending test payment email:', error);
-        res.status(500).json({ error: 'Failed to send test payment email: ' + error.message });
     }
 });
 
@@ -360,43 +289,7 @@ router.post('/order/advance-stage', async (req, res) => {
 
                 order.status = 'in_progress';
                 order.receivedAt = new Date();
-
-                // Save order first to calculate paymentAmount
                 await order.save();
-
-                // Post-weigh payment flow: send payment request email after weighing
-                {
-                    const Customer = require('../models/Customer');
-                    const customer = await Customer.findOne({ customerId: order.customerId });
-
-                    if (customer) {
-                        const QRCode = require('qrcode');
-                        const paymentAmount = order.paymentAmount || order.actualTotal ||
-                                            (order.actualWeight * (order.baseRate || 1.25) + (order.addOnTotal || 0));
-
-                        // Generate payment URLs and QR codes
-                        const paymentURLs = await generatePaymentURLs(order, paymentAmount);
-
-                        // Save payment data to order
-                        order.paymentAmount = paymentAmount;
-                        order.paymentLinks = paymentURLs.links;
-                        order.paymentQRCodes = paymentURLs.qrCodes;
-                        order.paymentRequestSentAt = new Date();
-                        await order.save();
-
-                        // Send payment request email
-                        const emailService = require('../utils/emailService');
-                        await emailService.sendV2PaymentRequest({
-                            customer,
-                            order,
-                            paymentAmount: paymentAmount,
-                            paymentLinks: paymentURLs.links,
-                            qrCodes: paymentURLs.qrCodes
-                        });
-
-                        logger.info(`V2 Payment request sent for test order ${order.orderId}, amount: $${paymentAmount}`);
-                    }
-                }
                 break;
 
             case 'process':
@@ -422,10 +315,6 @@ router.post('/order/advance-stage', async (req, res) => {
                     });
                 }
                 order.status = 'delivered';
-
-                // Mark payment as completed for testing
-                order.paymentStatus = 'verified';
-                order.paymentMethod = 'credit_card';
                 break;
 
             default:

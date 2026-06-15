@@ -16,8 +16,7 @@ describe('Order Routes - Isolated V2', () => {
       bulkCancelOrders: jest.fn((req, res) => res.json({ cancelled: 2 })),
       getOrderDetails: jest.fn((req, res) => res.json({ orderId: req.params.orderId })),
       updateOrderStatus: jest.fn((req, res) => res.json({ updated: true })),
-      cancelOrder: jest.fn((req, res) => res.json({ cancelled: true })),
-      updatePaymentStatus: jest.fn((req, res) => res.json({ updated: true }))
+      cancelOrder: jest.fn((req, res) => res.json({ cancelled: true }))
     };
 
     // Simple auth middleware
@@ -42,7 +41,6 @@ describe('Order Routes - Isolated V2', () => {
     router.get('/:orderId', authenticate, mockController.getOrderDetails);
     router.put('/:orderId/status', authenticate, mockController.updateOrderStatus);
     router.post('/:orderId/cancel', authenticate, mockController.cancelOrder);
-    router.put('/:orderId/payment-status', authenticate, mockController.updatePaymentStatus);
 
     app.use('/api/orders', router);
   });
@@ -145,16 +143,6 @@ describe('Order Routes - Isolated V2', () => {
 
     expect(response.body).toEqual({ cancelled: true });
     expect(mockController.cancelOrder).toHaveBeenCalledTimes(1);
-  });
-
-  test('PUT /api/orders/:orderId/payment-status - should update payment', async () => {
-    const response = await request(app)
-      .put('/api/orders/ORD-123/payment-status')
-      .send({ paymentStatus: 'paid' })
-      .expect(200);
-
-    expect(response.body).toEqual({ updated: true });
-    expect(mockController.updatePaymentStatus).toHaveBeenCalledTimes(1);
   });
 
   test('Error handling - should return 404 for unknown routes', async () => {

@@ -214,8 +214,7 @@ exports.getCustomerOrders = [
         customerId: 'customerId',
         status: 'status',
         startDate: 'createdAt',
-        endDate: 'createdAt',
-        paymentStatus: 'paymentStatus'
+        endDate: 'createdAt'
       }
     );
 
@@ -242,8 +241,6 @@ exports.getCustomerOrders = [
       formattedTotal: Formatters.currency(order.actualTotal),
       numberOfBags: order.numberOfBags,
       bagsSummary: Formatters.plural(order.numberOfBags, 'bag'),
-      paymentStatus: order.paymentStatus,
-      formattedPaymentStatus: Formatters.status(order.paymentStatus, 'payment'),
       createdAt: order.createdAt,
       timeAgo: Formatters.relativeTime(order.createdAt)
     }));
@@ -344,8 +341,7 @@ exports.getCustomerDashboardStats = [
         orderId: activeOrder.orderId,
         status: Formatters.status(activeOrder.status, 'order'),
         pickupDate: Formatters.date(activeOrder.pickupDate),
-        timeUntilPickup: Formatters.relativeTime(activeOrder.pickupDate),
-        paymentStatus: Formatters.status(activeOrder.paymentStatus, 'payment')
+        timeUntilPickup: Formatters.relativeTime(activeOrder.pickupDate)
       } : null
     };
 

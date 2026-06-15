@@ -14,7 +14,7 @@ const roleCodes = require('../../server/utils/roleCodes');
 jest.setTimeout(60000);
 
 // ---- shared fixture (copied from tests/integration/operatorScanOut.test.js) ----
-async function createWorld({ orderStatus, paymentStatus = 'pending' } = {}) {
+async function createWorld({ orderStatus } = {}) {
   const uniq = `${Date.now()}${Math.random().toString(36).slice(2, 6)}`;
   const { salt, hash } = encryptionUtil.hashPassword('FixturePassword417!');
 
@@ -59,7 +59,6 @@ async function createWorld({ orderStatus, paymentStatus = 'pending' } = {}) {
       bagId: bag.bagId,
       bagToken: bag.token,
       status: orderStatus,
-      paymentStatus,
       actualWeight: 15,
       feeBreakdown: { numberOfBags: 1, minimumFee: 25, perBagFee: 5, totalFee: 25, minimumApplied: true },
       bags: [{
@@ -96,12 +95,12 @@ describe('Public bag-URL operator-code endpoints', () => {
   });
 
   test('POST /api/v1/bags/:bagToken/advance with a valid operator code advances the order', async () => {
-    const { bagToken } = await createWorld({ orderStatus: 'in_progress', paymentStatus: 'awaiting' });
+    const { bagToken } = await createWorld({ orderStatus: 'in_progress' });
     const res = await request(app)
       .post(`/api/v1/bags/${bagToken}/advance`)
       .send({ operatorCode: 'OPCODE99' });
     expect(res.status).toBe(200);
-    expect(res.body.action).toBe('processed');
+    expect(res.body.action).toBe('ready_for_pickup');
   });
 
   test('wrong operator code -> generic 401; lockout after operator_scan_code_max_attempts failures', async () => {
@@ -123,7 +122,7 @@ describe('Public bag-URL operator-code endpoints', () => {
   });
 
   test('lockout expires with the window (an expired counter no longer locks)', async () => {
-    const { bagToken } = await createWorld({ orderStatus: 'in_progress', paymentStatus: 'awaiting' });
+    const { bagToken } = await createWorld({ orderStatus: 'in_progress' });
     for (let i = 0; i < 5; i++) {
       await request(app).post(`/api/v1/bags/${bagToken}/advance`).send({ operatorCode: 'WRONGC99' });
     }
@@ -143,7 +142,7 @@ describe('Public bag-URL operator-code endpoints', () => {
   });
 
   test('a successful code clears the failure counter', async () => {
-    const { bagToken } = await createWorld({ orderStatus: 'in_progress', paymentStatus: 'awaiting' });
+    const { bagToken } = await createWorld({ orderStatus: 'in_progress' });
     for (let i = 0; i < 3; i++) {
       await request(app).post(`/api/v1/bags/${bagToken}/advance`).send({ operatorCode: 'NOPE9999' });
     }

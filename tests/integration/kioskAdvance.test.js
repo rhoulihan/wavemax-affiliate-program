@@ -15,7 +15,7 @@ const { getCsrfToken, createAgent } = require('../helpers/csrfHelper');
 jest.setTimeout(60000);
 
 // ---- shared fixture (from tests/integration/operatorScanOut.test.js) -------
-async function createWorld({ orderStatus, paymentStatus = 'pending' } = {}) {
+async function createWorld({ orderStatus } = {}) {
   const uniq = `${Date.now()}${Math.random().toString(36).slice(2, 6)}`;
   const { salt, hash } = encryptionUtil.hashPassword('FixturePassword417!');
 
@@ -60,7 +60,6 @@ async function createWorld({ orderStatus, paymentStatus = 'pending' } = {}) {
       bagId: bag.bagId,
       bagToken: bag.token,
       status: orderStatus,
-      paymentStatus,
       actualWeight: 15,
       feeBreakdown: { numberOfBags: 1, minimumFee: 25, perBagFee: 5, totalFee: 25, minimumApplied: true },
       bags: [{
@@ -81,9 +80,9 @@ function operatorToken(operator) {
 }
 
 describe('Kiosk advance endpoint', () => {
-  test('POST /api/v1/operators/advance (JWT + CSRF) advances in_progress -> processed', async () => {
+  test('POST /api/v1/operators/advance (JWT + CSRF) advances in_progress -> ready_for_pickup', async () => {
     const { bagToken, operator } = await createWorld({
-      orderStatus: 'in_progress', paymentStatus: 'awaiting'
+      orderStatus: 'in_progress'
     });
     const agent = createAgent(app);
     const csrfToken = await getCsrfToken(app, agent);
@@ -94,12 +93,12 @@ describe('Kiosk advance endpoint', () => {
       .set('x-csrf-token', csrfToken)
       .send({ bagToken });
     expect(res.status).toBe(200);
-    expect(res.body.action).toBe('processed');
+    expect(res.body.action).toBe('ready_for_pickup');
   });
 
   test('legacy /scan-processed delegates to advance (accepts the printed claim URL in bagToken)', async () => {
     const { bagToken, operator } = await createWorld({
-      orderStatus: 'in_progress', paymentStatus: 'awaiting'
+      orderStatus: 'in_progress'
     });
     const agent = createAgent(app);
     const csrfToken = await getCsrfToken(app, agent);
@@ -112,12 +111,12 @@ describe('Kiosk advance endpoint', () => {
       .set('x-csrf-token', csrfToken)
       .send({ bagToken: `https://wavemax.promo/embed-app-v2.html?route=/claim&bag=${bagToken}` });
     expect(res.status).toBe(200);
-    expect(res.body.action).toBe('processed');
+    expect(res.body.action).toBe('ready_for_pickup');
   });
 
   test('legacy qrCode payload key is no longer accepted (400)', async () => {
     const { bagToken, operator } = await createWorld({
-      orderStatus: 'in_progress', paymentStatus: 'awaiting'
+      orderStatus: 'in_progress'
     });
     const agent = createAgent(app);
     const csrfToken = await getCsrfToken(app, agent);
@@ -130,9 +129,9 @@ describe('Kiosk advance endpoint', () => {
     expect(res.status).toBe(400);
   });
 
-  test('advance on held (processed+unpaid) order returns 409 awaiting_payment', async () => {
+  test('advance on a processed order heals it to ready_for_pickup', async () => {
     const { bagToken, operator } = await createWorld({
-      orderStatus: 'processed', paymentStatus: 'awaiting'
+      orderStatus: 'processed'
     });
     const agent = createAgent(app);
     const csrfToken = await getCsrfToken(app, agent);
@@ -142,8 +141,8 @@ describe('Kiosk advance endpoint', () => {
       .set('Authorization', `Bearer ${operatorToken(operator)}`)
       .set('x-csrf-token', csrfToken)
       .send({ bagToken });
-    expect(res.status).toBe(409);
-    expect(res.body.errors.code).toBe('awaiting_payment');
+    expect(res.status).toBe(200);
+    expect(res.body.order.status).toBe('ready_for_pickup');
   });
 
   test('advance requires the operator role', async () => {

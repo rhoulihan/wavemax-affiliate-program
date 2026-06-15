@@ -70,7 +70,7 @@ describe('Test Routes', () => {
     it('should return existing test customer', async () => {
       const mockCustomer = {
         _id: 'customerId',
-        email: 'spam-me@wavemax.promo',
+        email: 'spam-me@rundberglaundry.com',
         firstName: 'Test',
         lastName: 'Customer',
         save: jest.fn().mockResolvedValue(true)
@@ -85,11 +85,11 @@ describe('Test Routes', () => {
       expect(response.status).toBe(200);
       expect(response.body).toEqual({
         _id: 'customerId',
-        email: 'spam-me@wavemax.promo',
+        email: 'spam-me@rundberglaundry.com',
         firstName: 'Test',
         lastName: 'Customer'
       });
-      expect(Customer.findOne).toHaveBeenCalledWith({ email: 'spam-me@wavemax.promo' });
+      expect(Customer.findOne).toHaveBeenCalledWith({ email: 'spam-me@rundberglaundry.com' });
     });
 
     it('should return 404 when test customer not found', async () => {
@@ -271,7 +271,7 @@ describe('Test Routes', () => {
         .send({});
       
       expect(response.status).toBe(200);
-      expect(Customer.findOne).toHaveBeenCalledWith({ email: 'spam-me@wavemax.promo' });
+      expect(Customer.findOne).toHaveBeenCalledWith({ email: 'spam-me@rundberglaundry.com' });
       expect(mockOrder.save).toHaveBeenCalled();
     });
 
@@ -377,74 +377,7 @@ describe('Test Routes', () => {
     });
   });
 
-  describe('POST /api/test/send-payment-email', () => {
-    let emailService;
-
-    beforeEach(() => {
-      // Mock emailService
-      emailService = require('../../server/utils/emailService');
-      emailService.sendEmail = jest.fn().mockResolvedValue(true);
-    });
-
-    it('should send payment email successfully', async () => {
-      const emailData = {
-        to: 'test@example.com',
-        subject: 'Payment Request',
-        html: '<p>Please pay $50.00</p>',
-        orderId: 'ORD-123'
-      };
-
-      const response = await request(app)
-        .post('/api/test/send-payment-email')
-        .send(emailData);
-
-      expect(response.status).toBe(200);
-      expect(response.body).toEqual({
-        success: true,
-        message: 'Test payment email sent successfully',
-        orderId: 'ORD-123'
-      });
-      expect(emailService.sendEmail).toHaveBeenCalledWith(
-        'test@example.com',
-        'Payment Request',
-        '<p>Please pay $50.00</p>'
-      );
-    });
-
-    it('should return 400 when missing required fields', async () => {
-      const response = await request(app)
-        .post('/api/test/send-payment-email')
-        .send({ to: 'test@example.com' }); // Missing subject and html
-
-      expect(response.status).toBe(400);
-      expect(response.body).toEqual({ error: 'Missing required fields: to, subject, html' });
-    });
-
-    it('should handle email sending errors', async () => {
-      emailService.sendEmail.mockRejectedValue(new Error('SMTP error'));
-
-      const response = await request(app)
-        .post('/api/test/send-payment-email')
-        .send({
-          to: 'test@example.com',
-          subject: 'Test',
-          html: '<p>Test</p>'
-        });
-
-      expect(response.status).toBe(500);
-      expect(response.body.error).toContain('Failed to send test payment email');
-    });
-  });
-
   describe('POST /api/test/order/advance-stage', () => {
-    let emailService;
-
-    beforeEach(() => {
-      // Mock emailService
-      emailService = require('../../server/utils/emailService');
-      emailService.sendV2PaymentRequest = jest.fn().mockResolvedValue(true);
-    });
-
     it('should record intake weight on the order (weigh action)', async () => {
       const mockOrder = {
         _id: 'mongoId123',
@@ -477,57 +410,6 @@ describe('Test Routes', () => {
       expect(mockOrder.bags).toHaveLength(1);
       expect(mockOrder.actualWeight).toBe(35);
       expect(mockOrder.save).toHaveBeenCalled();
-    });
-
-    it('should send V2 payment request email after weighing', async () => {
-      const mockCustomer = {
-        _id: 'customerId123',
-        customerId: 'CUST-123',
-        email: 'test@example.com',
-        firstName: 'Test',
-        lastName: 'Customer'
-      };
-
-      const mockOrder = {
-        _id: 'mongoId123',
-        orderId: 'ORD-123',
-        customerId: 'CUST-123',
-        bagToken: 'b'.repeat(32),
-        bags: [],
-        status: 'in_progress',
-        isV2Order: true,
-        baseRate: 1.25,
-        actualWeight: 0,
-        feeBreakdown: { totalFee: 10 },
-        addOns: { fabricSoftener: true },
-        save: jest.fn().mockResolvedValue(true)
-      };
-
-      // Mock the save function to set the computed payment amount
-      mockOrder.save.mockImplementation(async function() {
-        this.paymentAmount = 45.50;
-        return true;
-      }.bind(mockOrder));
-
-      Order.findOne = createFindOneMock(mockOrder);
-      Order.findOne.mockResolvedValue(mockOrder);
-      Customer.findOne = createFindOneMock(mockCustomer);
-      Customer.findOne.mockResolvedValue(mockCustomer);
-
-      const response = await request(app)
-        .post('/api/test/order/advance-stage')
-        .send({
-          orderId: 'ORD-123',
-          action: 'weigh',
-          weights: [15, 20],
-          actualWeight: 35
-        });
-
-      expect(response.status).toBe(200);
-      expect(mockOrder.status).toBe('in_progress');
-      expect(emailService.sendV2PaymentRequest).toHaveBeenCalled();
-      expect(mockOrder.paymentLinks).toBeDefined();
-      expect(mockOrder.paymentQRCodes).toBeDefined();
     });
 
     it('should advance order to processed stage (process action)', async () => {
@@ -581,7 +463,6 @@ describe('Test Routes', () => {
 
       expect(response.status).toBe(200);
       expect(mockOrder.status).toBe('delivered');
-      expect(mockOrder.paymentStatus).toBe('verified');
       expect(mockOrder.bags[0].status).toBe('picked_up');
       expect(mockOrder.save).toHaveBeenCalled();
     });
@@ -651,7 +532,7 @@ describe('Test Routes', () => {
       expect(response.body).toEqual({ message: 'Test data cleaned up successfully' });
       expect(Order.deleteMany).toHaveBeenCalledWith({ isTestOrder: true });
       expect(Customer.deleteMany).toHaveBeenCalledWith({
-        email: { $in: ['spam-me@wavemax.promo', 'test.customer@wavemax.test', 'test.affiliate@wavemax.test'] }
+        email: { $in: ['spam-me@rundberglaundry.com', 'test.customer@wavemax.test', 'test.affiliate@wavemax.test'] }
       });
     });
 

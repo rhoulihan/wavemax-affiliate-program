@@ -15,7 +15,7 @@ const orderAdvanceService = require('../../server/modules/orders/orderAdvanceSer
 jest.setTimeout(60000);
 
 // ---- shared fixture (reused by Tasks 8-11 test files) ----------------------
-async function createWorld({ orderStatus, paymentStatus = 'pending' } = {}) {
+async function createWorld({ orderStatus } = {}) {
   const uniq = `${Date.now()}${Math.random().toString(36).slice(2, 6)}`;
   const { salt, hash } = encryptionUtil.hashPassword('FixturePassword417!');
 
@@ -60,7 +60,6 @@ async function createWorld({ orderStatus, paymentStatus = 'pending' } = {}) {
       bagId: bag.bagId,
       bagToken: bag.token,
       status: orderStatus,
-      paymentStatus,
       actualWeight: 15,
       feeBreakdown: { numberOfBags: 1, minimumFee: 25, perBagFee: 5, totalFee: 25, minimumApplied: true },
       bags: [{
@@ -78,25 +77,25 @@ async function createWorld({ orderStatus, paymentStatus = 'pending' } = {}) {
 describe('orderAdvanceService.advance', () => {
   beforeEach(() => jest.clearAllMocks());
 
-  test('in_progress -> processed, stamps intake + bag sub-status, runs the ready gate (held when unpaid)', async () => {
+  test('in_progress -> processed, stamps intake + bag sub-status, gate promotes to ready_for_pickup', async () => {
     const { bagToken, operator, order } = await createWorld({
-      orderStatus: 'in_progress', paymentStatus: 'awaiting'
+      orderStatus: 'in_progress'
     });
     const result = await orderAdvanceService.advance({ bagToken, operatorId: operator._id });
-    expect(result.action).toBe('processed');
+    expect(result.action).toBe('ready_for_pickup');
 
     const reloaded = await Order.findOne({ orderId: order.orderId });
-    expect(reloaded.status).toBe('processed');         // unpaid -> gate holds
-    expect(reloaded.heldAtStore).toBe(true);
+    expect(reloaded.status).toBe('ready_for_pickup');  // payment removed -> unconditional
+    expect(reloaded.readyForPickupAt).toBeInstanceOf(Date);
     expect(reloaded.intake.processedAt).toBeInstanceOf(Date);
     expect(reloaded.intake.processedBy.toString()).toBe(operator._id.toString());
     expect(reloaded.bags[0].status).toBe('processed');
     expect(reloaded.bags[0].scannedBy.processed.toString()).toBe(operator._id.toString());
   });
 
-  test('in_progress + already-verified payment promotes straight to ready_for_pickup (Path B)', async () => {
+  test('processed -> ready_for_pickup via defensive gate heal', async () => {
     const { bagToken, operator, order } = await createWorld({
-      orderStatus: 'in_progress', paymentStatus: 'verified'
+      orderStatus: 'processed'
     });
     const result = await orderAdvanceService.advance({ bagToken, operatorId: operator._id });
     expect(result.action).toBe('ready_for_pickup');
@@ -104,21 +103,11 @@ describe('orderAdvanceService.advance', () => {
     const reloaded = await Order.findOne({ orderId: order.orderId });
     expect(reloaded.status).toBe('ready_for_pickup');
     expect(reloaded.readyForPickupAt).toBeInstanceOf(Date);
-    expect(reloaded.heldAtStore).toBe(false);
-  });
-
-  test('processed + unpaid -> 409 awaiting_payment (held; no workflow email)', async () => {
-    const { bagToken, operator } = await createWorld({
-      orderStatus: 'processed', paymentStatus: 'awaiting'
-    });
-    await expect(orderAdvanceService.advance({ bagToken, operatorId: operator._id }))
-      .rejects.toMatchObject({ code: 'awaiting_payment', status: 409 });
-    expect(emailService.sendOrderOnTheWayEmail).not.toHaveBeenCalled();
   });
 
   test('ready_for_pickup -> picked_up: stamps, rotates PIN, sends on-the-way email with the NEW pin, no commission', async () => {
     const { bagToken, operator, order, customer } = await createWorld({
-      orderStatus: 'ready_for_pickup', paymentStatus: 'verified'
+      orderStatus: 'ready_for_pickup'
     });
     const before = await Customer.findOne({ customerId: customer.customerId })
       .select('+deliveryPinHash');
@@ -146,7 +135,7 @@ describe('orderAdvanceService.advance', () => {
   });
 
   test('picked_up -> 409 (deliver or re-intake, not advance); unknown bag -> 404; no open order -> 409', async () => {
-    const w1 = await createWorld({ orderStatus: 'picked_up', paymentStatus: 'verified' });
+    const w1 = await createWorld({ orderStatus: 'picked_up' });
     await expect(orderAdvanceService.advance({ bagToken: w1.bagToken, operatorId: w1.operator._id }))
       .rejects.toMatchObject({ code: 'awaiting_delivery_confirmation', status: 409 });
 

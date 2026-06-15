@@ -92,8 +92,7 @@ describe('Field Filter WDF Credit Support', () => {
       actualTotal: 41.25,
       wdfCreditApplied: 5.00,
       wdfCreditGenerated: 0,
-      washInstructions: 'Cold wash only',
-      paymentStatus: 'verified'
+      washInstructions: 'Cold wash only'
     , save: jest.fn().mockResolvedValue(true)};
 
     it('should include WDF fields for customer viewing own order', () => {

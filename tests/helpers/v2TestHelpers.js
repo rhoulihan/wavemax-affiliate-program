@@ -1,11 +1,10 @@
-// V2 Payment Flow Test Helpers
-// Provides reusable test data setup functions with deterministic IDs
+// Order/affiliate/customer test data helpers with deterministic IDs.
+// (Payment-scenario helpers were removed with the V2 payment subsystem.)
 
 const mongoose = require('mongoose');
 const Customer = require('../../server/models/Customer');
 const Order = require('../../server/models/Order');
 const Affiliate = require('../../server/models/Affiliate');
-const SystemConfig = require('../../server/models/SystemConfig');
 const crypto = require('crypto');
 
 // Deterministic test IDs for consistent data
@@ -124,18 +123,7 @@ async function createTestOrder(options = {}) {
       numberOfBags: 1, minimumFee: 10, perBagFee: 2, totalFee: 10, minimumApplied: true
     },
     status: options.status || 'in_progress',
-    
-    // V2 Payment fields
-    paymentStatus: options.paymentStatus || 'pending',
-    paymentAmount: options.paymentAmount || null,
-    paymentMethod: options.paymentMethod || null,
-    paymentRequestedAt: options.paymentRequestedAt || null,
-    paymentVerifiedAt: options.paymentVerifiedAt || null,
-    paymentLinks: options.paymentLinks || null,
-    paymentCheckAttempts: options.paymentCheckAttempts || 0,
-    paymentReminderCount: options.paymentReminderCount || 0,
-    paymentLastReminderAt: options.paymentLastReminderAt || null,
-    
+
     // Actual weight and processing
     actualWeight: options.actualWeight || null,
     actualTotal: options.actualTotal || null,
@@ -164,70 +152,6 @@ async function createTestOrder(options = {}) {
 }
 
 /**
- * Create a complete V2 payment scenario
- * Returns customer and order ready for payment processing
- */
-async function setupV2PaymentScenario(options = {}) {
-  // Initialize SystemConfig
-  await SystemConfig.deleteMany({});
-  await SystemConfig.initializeDefaults();
-  
-  // Set to V2 payment mode
-  await SystemConfig.findOneAndUpdate(
-    { key: 'payment_version' },
-    { value: 'v2' },
-    { upsert: true }
-  );
-  
-  const affiliate = await ensureTestAffiliate(options.affiliate || {});
-  const customer = await ensureTestCustomer({
-    ...options.customer,
-    affiliateId: affiliate.affiliateId
-  });
-  
-  // Create order in processing state with weight
-  const order = await createTestOrder({
-    ...options.order,
-    customerId: customer.customerId,
-    affiliateId: affiliate.affiliateId,
-    status: 'in_progress',
-    actualWeight: 10,
-    actualTotal: 12.50,
-    paymentStatus: 'awaiting',
-    paymentAmount: 12.50,
-    paymentRequestedAt: new Date(),
-    paymentLinks: {
-      venmo: 'venmo://paycharge?txn=pay&recipients=wavemax&amount=12.50',
-      paypal: 'https://paypal.me/wavemax/12.50',
-      cashapp: 'https://cash.app/$wavemax/12.50'
-    },
-    bags: [
-      { bagToken: 'f0e1d2c3b4a5968778695a4b3c2d1e0f', weight: 10, status: 'intake', bagNumber: 1 }
-    ],
-    bagToken: 'f0e1d2c3b4a5968778695a4b3c2d1e0f',
-    skipValidation: true
-  });
-  
-  return { affiliate, customer, order };
-}
-
-/**
- * Create order ready for payment verification
- */
-async function setupOrderForPaymentVerification(options = {}) {
-  const { affiliate, customer, order } = await setupV2PaymentScenario(options);
-  
-  // Update order to have payment verified
-  order.paymentStatus = 'verified';
-  order.paymentVerifiedAt = new Date();
-  order.paymentTransactionId = options.transactionId || 'TEST-TXN-001';
-  order.paymentMethod = options.paymentMethod || 'venmo';
-  await order.save({ validateBeforeSave: false });
-  
-  return { affiliate, customer, order };
-}
-
-/**
  * Clean up test data
  */
 async function cleanupV2TestData() {
@@ -247,44 +171,10 @@ async function cleanupV2TestData() {
   });
 }
 
-/**
- * Create multiple test scenarios for different test cases
- */
-async function createMultipleTestScenarios() {
-  const scenarios = [];
-  
-  // Scenario 1: Order awaiting payment
-  scenarios.push(await setupV2PaymentScenario({
-    customer: { customerId: TEST_IDS.customer },
-    order: { _id: TEST_IDS.order }
-  }));
-  
-  // Scenario 2: Order with payment verified
-  scenarios.push(await setupOrderForPaymentVerification({
-    customer: { customerId: TEST_IDS.customer2 },
-    order: { _id: TEST_IDS.order2 }
-  }));
-  
-  // Scenario 3: Order ready for pickup
-  const scenario3 = await setupOrderForPaymentVerification({
-    customer: { customerId: TEST_IDS.customer3 },
-    order: { _id: TEST_IDS.order3 }
-  });
-  scenario3.order.status = 'processed';
-  scenario3.order.bagsProcessed = 2;
-  await scenario3.order.save({ validateBeforeSave: false });
-  scenarios.push(scenario3);
-  
-  return scenarios;
-}
-
 module.exports = {
   TEST_IDS,
   ensureTestAffiliate,
   ensureTestCustomer,
   createTestOrder,
-  setupV2PaymentScenario,
-  setupOrderForPaymentVerification,
-  cleanupV2TestData,
-  createMultipleTestScenarios
+  cleanupV2TestData
 };

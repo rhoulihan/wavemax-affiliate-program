@@ -1,9 +1,8 @@
 // orderIntakeService — order birth at store intake (spec §6.4).
 // MANDATORY: the silent-zero regression guard (non-zero totalFee /
-// affiliateCommission / paymentAmount after intake).
+// affiliateCommission / actualTotal after intake).
 
 jest.mock('../../server/utils/emailService', () => ({
-  sendV2PaymentRequest: jest.fn().mockResolvedValue(true),
   sendCustomerDeliveredEmail: jest.fn().mockResolvedValue(true),
   sendAffiliateCommissionEmail: jest.fn().mockResolvedValue(true),
   sendOrderReadyNotification: jest.fn().mockResolvedValue(true)
@@ -11,7 +10,6 @@ jest.mock('../../server/utils/emailService', () => ({
 
 const mongoose = require('mongoose');
 const emailService = require('../../server/utils/emailService');
-const paymentLinkService = require('../../server/services/paymentLinkService');
 const Order = require('../../server/models/Order');
 const Customer = require('../../server/models/Customer');
 const Affiliate = require('../../server/models/Affiliate');
@@ -20,7 +18,7 @@ const { createOrderFromBag } = require('../../server/modules/orders/orderIntakeS
 const { ensureTestAffiliate, ensureTestCustomer } = require('../helpers/v2TestHelpers');
 
 describe('orderIntakeService.createOrderFromBag', () => {
-  let affiliate, customer, bag, operatorId, linkSpy;
+  let affiliate, customer, bag, operatorId;
   const TOKEN = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'; // 32 hex chars
 
   beforeEach(async () => {
@@ -42,12 +40,6 @@ describe('orderIntakeService.createOrderFromBag', () => {
       status: 'active',
       batchId: 'BATCH-test'
     });
-
-    linkSpy = jest.spyOn(paymentLinkService, 'generatePaymentLinks');
-  });
-
-  afterEach(() => {
-    linkSpy.mockRestore();
   });
 
   it('creates exactly one in_progress order with ids derived from the bag', async () => {
@@ -80,7 +72,7 @@ describe('orderIntakeService.createOrderFromBag', () => {
     expect(await Order.countDocuments({ bagId: bag.bagId })).toBe(1);
   });
 
-  it('SILENT-ZERO GUARD: saved order has non-zero totalFee, affiliateCommission, paymentAmount', async () => {
+  it('SILENT-ZERO GUARD: saved order has non-zero totalFee, affiliateCommission, actualTotal', async () => {
     await createOrderFromBag({
       bagToken: TOKEN, weight: 10,
       addOns: { premiumDetergent: true }, freshAddOnsFormPlaced: true, operatorId
@@ -93,28 +85,17 @@ describe('orderIntakeService.createOrderFromBag', () => {
     expect(saved.feeBreakdown.totalFee).toBeCloseTo(10.0, 2);
     expect(saved.feeBreakdown.minimumApplied).toBe(true);
     expect(saved.addOnTotal).toBeCloseTo(1.0, 2);
+    expect(saved.actualTotal).toBeGreaterThan(0);
     expect(saved.actualTotal).toBeCloseTo(23.5, 2);
-    expect(saved.paymentAmount).toBeGreaterThan(0);
-    expect(saved.paymentAmount).toBeCloseTo(23.5, 2);
     expect(saved.affiliateCommission).toBeGreaterThan(0);
     expect(saved.affiliateCommission).toBeCloseTo(11.25, 2);
   });
 
-  it('generates payment links exactly ONCE, flips paymentStatus to awaiting, emails the request', async () => {
-    const { order } = await createOrderFromBag({
+  it('does not send a payment notice at intake (payment is external)', async () => {
+    await createOrderFromBag({
       bagToken: TOKEN, weight: 10, addOns: {}, freshAddOnsFormPlaced: true, operatorId
     });
-
-    expect(linkSpy).toHaveBeenCalledTimes(1);
-    expect(linkSpy).toHaveBeenCalledWith(order.orderId, expect.any(Number), expect.any(String));
-    expect(order.paymentStatus).toBe('awaiting');
-    expect(order.paymentRequestedAt).toBeInstanceOf(Date);
-    expect(order.paymentLinks.venmo).toBeTruthy();
-    expect(order.paymentQRCodes.venmo).toMatch(/^data:image\/png/);
-    expect(emailService.sendV2PaymentRequest).toHaveBeenCalledTimes(1);
-    const callArg = emailService.sendV2PaymentRequest.mock.calls[0][0];
-    expect(callArg.customer.customerId).toBe(customer.customerId);
-    expect(callArg.paymentAmount).toBeCloseTo(order.paymentAmount, 2);
+    expect(emailService.sendV2PaymentRequest).toBeUndefined();
   });
 
   it('applies carry-in WDF credit at intake and resets the customer balance', async () => {
@@ -127,9 +108,8 @@ describe('orderIntakeService.createOrderFromBag', () => {
 
     const saved = await Order.findOne({ bagId: bag.bagId });
     expect(saved.wdfCreditApplied).toBeCloseTo(5, 2);
-    // actualTotal nets the credit (12.50 + 10 − 5 = 17.50); paymentAmount stays gross (22.50)
+    // actualTotal nets the credit (12.50 + 10 − 5 = 17.50)
     expect(saved.actualTotal).toBeCloseTo(17.5, 2);
-    expect(saved.paymentAmount).toBeCloseTo(22.5, 2);
 
     const freshCustomer = await Customer.findOne({ customerId: customer.customerId });
     expect(freshCustomer.wdfCredit).toBe(0);

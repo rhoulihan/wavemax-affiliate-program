@@ -77,9 +77,6 @@ const REQUIRED_PREFIXES = ['admin.invites', 'admin.w9'];
 const REQUIRED_EMAIL_TEMPLATES = [
   'affiliate-invite',
   'affiliate-w9-status',
-  'v2/payment-request',
-  'v2/payment-reminder',
-  'v2/come-to-store',
   'customer-order-delivered',
   'order-ready',
   'customer-on-the-way'

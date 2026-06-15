@@ -14,7 +14,7 @@ const roleCodes = require('../../server/utils/roleCodes');
 jest.setTimeout(60000);
 
 // ---- shared fixture (copied from tests/integration/operatorScanOut.test.js) ----
-async function createWorld({ orderStatus, paymentStatus = 'pending' } = {}) {
+async function createWorld({ orderStatus } = {}) {
   const uniq = `${Date.now()}${Math.random().toString(36).slice(2, 6)}`;
   const { salt, hash } = encryptionUtil.hashPassword('FixturePassword417!');
 
@@ -59,7 +59,6 @@ async function createWorld({ orderStatus, paymentStatus = 'pending' } = {}) {
       bagId: bag.bagId,
       bagToken: bag.token,
       status: orderStatus,
-      paymentStatus,
       actualWeight: 15,
       feeBreakdown: { numberOfBags: 1, minimumFee: 25, perBagFee: 5, totalFee: 25, minimumApplied: true },
       bags: [{
@@ -81,7 +80,7 @@ describe('Resolve endpoints expose order context (PR 9)', () => {
     ['ready_for_pickup', false, 'advance'],
     ['picked_up', true, 'deliver-or-reintake']
   ])('claimed bag with a %s order -> awaitingDelivery=%s, nextAction=%s', async (status, awaiting, nextAction) => {
-    const { bagToken } = await createWorld({ orderStatus: status, paymentStatus: 'verified' });
+    const { bagToken } = await createWorld({ orderStatus: status });
 
     const resolve = await request(app).get(`/api/v1/bags/resolve/${bagToken}`);
     expect(resolve.status).toBe(200);
@@ -106,7 +105,7 @@ describe('Resolve endpoints expose order context (PR 9)', () => {
   });
 
   test('delivered orders are not "open" -> nextAction intake on both resolvers', async () => {
-    const { bagToken } = await createWorld({ orderStatus: 'delivered', paymentStatus: 'verified' });
+    const { bagToken } = await createWorld({ orderStatus: 'delivered' });
     const resolve = await request(app).get(`/api/v1/bags/resolve/${bagToken}`);
     expect(resolve.body.nextAction).toBe('intake');
     expect(resolve.body.order).toBeFalsy();
@@ -118,7 +117,7 @@ describe('Resolve endpoints expose order context (PR 9)', () => {
 
   test('no customer PII leaks through either resolver', async () => {
     const { bagToken, customer } = await createWorld({
-      orderStatus: 'picked_up', paymentStatus: 'verified'
+      orderStatus: 'picked_up'
     });
     for (const path of [`/api/v1/bags/resolve/${bagToken}`, `/api/v1/customers/claim/${bagToken}`]) {
       const res = await request(app).get(path);

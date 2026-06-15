@@ -61,13 +61,13 @@ describe('check-i18n-parity', () => {
   describe('checkEmailTemplates', () => {
     it('passes when lang copies exist with identical placeholder sets (en may use the flat default)', () => {
       const emails = path.join(tmp, 'emails');
-      fs.mkdirSync(path.join(emails, 'v2'), { recursive: true });
-      fs.writeFileSync(path.join(emails, 'v2', 'payment-request.html'), '<p>[NAME] [AMOUNT]</p>');
+      fs.mkdirSync(emails, { recursive: true });
+      fs.writeFileSync(path.join(emails, 'customer-order-delivered.html'), '<p>[NAME] [AMOUNT]</p>');
       for (const l of ['es', 'pt', 'de']) {
-        fs.mkdirSync(path.join(emails, l, 'v2'), { recursive: true });
-        fs.writeFileSync(path.join(emails, l, 'v2', 'payment-request.html'), '<p>[AMOUNT] y [NAME]</p>');
+        fs.mkdirSync(path.join(emails, l), { recursive: true });
+        fs.writeFileSync(path.join(emails, l, 'customer-order-delivered.html'), '<p>[AMOUNT] y [NAME]</p>');
       }
-      expect(checkEmailTemplates({ emailRoot: emails, required: ['v2/payment-request'] })).toEqual([]);
+      expect(checkEmailTemplates({ emailRoot: emails, required: ['customer-order-delivered'] })).toEqual([]);
     });
 
     it('flags a missing language copy and placeholder drift', () => {
@@ -98,7 +98,7 @@ describe('check-i18n-parity', () => {
       expect(REQUIRED_KEYS).toContain('operator.intake.error.bagNotActive');
       expect(REQUIRED_KEYS).toContain('order.status.ready_for_pickup');
       expect(REQUIRED_EMAIL_TEMPLATES).toContain('affiliate-invite');
-      expect(REQUIRED_EMAIL_TEMPLATES).toContain('v2/come-to-store');
+      expect(REQUIRED_EMAIL_TEMPLATES).toContain('customer-order-delivered');
     });
   });
 });

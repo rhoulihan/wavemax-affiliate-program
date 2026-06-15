@@ -706,10 +706,6 @@ describe('SystemConfig Model', () => {
         await SystemConfig.initializeDefaults();
 
         const expected = [
-          { key: 'payment_scan_interval_ms', value: 120000, category: 'payment', dataType: 'number', isPublic: false, min: 60000, max: 600000 },
-          { key: 'payment_reminder_interval_minutes', value: 60, category: 'payment', dataType: 'number', isPublic: false, min: 15, max: 240 },
-          { key: 'payment_reminder_max_attempts', value: 8, category: 'payment', dataType: 'number', isPublic: false, min: 1, max: 24 },
-          { key: 'payment_hold_notice_enabled', value: true, category: 'payment', dataType: 'boolean', isPublic: false },
           { key: 'invite_token_ttl_hours', value: 72, category: 'affiliate', dataType: 'number', isPublic: false, min: 1, max: 336 },
           { key: 'w9_max_upload_mb', value: 10, category: 'affiliate', dataType: 'number', isPublic: false, min: 1, max: 25 },
           { key: 'w9_threshold_usd', value: 600, category: 'payment', dataType: 'number', isPublic: false, min: 0, max: 10000 },
@@ -753,10 +749,10 @@ describe('SystemConfig Model', () => {
       it('should enforce spec §8 ranges on the new keys via setValue', async () => {
         await SystemConfig.initializeDefaults();
 
-        await expect(SystemConfig.setValue('payment_reminder_max_attempts', 25))
-          .rejects.toThrow('Value must be at most 24');
-        await expect(SystemConfig.setValue('payment_scan_interval_ms', 59999))
-          .rejects.toThrow('Value must be at least 60000');
+        await expect(SystemConfig.setValue('invite_token_ttl_hours', 0))
+          .rejects.toThrow('Value must be at least 1');
+        await expect(SystemConfig.setValue('invite_token_ttl_hours', 337))
+          .rejects.toThrow('Value must be at most 336');
 
         const updated = await SystemConfig.setValue('invite_token_ttl_hours', 24);
         expect(updated.value).toBe(24);

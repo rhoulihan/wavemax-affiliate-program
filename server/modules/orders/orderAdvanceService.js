@@ -1,8 +1,8 @@
 // State-driven one-step order advance — the "scan it again" engine (spec §6.4).
 //
-//   in_progress      -> processed   (stamp scan-2; then run the ready gate)
-//   processed        -> 409 awaiting_payment when unpaid (held); the gate is
-//                       re-run defensively first (idempotent heal)
+//   in_progress      -> processed   (stamp scan-2; the ready gate then
+//                       promotes straight to ready_for_pickup — payment removed)
+//   processed        -> ready_for_pickup (defensive gate heal — idempotent)
 //   ready_for_pickup -> picked_up   (operator scan-OUT: stamp scan-3, rotate +
 //                       email the customer delivery PIN; NO commission here)
 //   picked_up        -> 409 (deliver or re-intake — not this service)
@@ -61,7 +61,7 @@ async function advance({ bagToken, operatorId, req }) {
       order.bags[0].scannedBy.processed = operatorId;
     }
     await order.save();
-    // Gate: promotes to ready_for_pickup iff paid; else marks heldAtStore.
+    // Gate: promotes to ready_for_pickup unconditionally (payment removed).
     await orderReadyGateService.applyReadyGate(order, { trigger: 'processed' });
     logAuditEvent(AuditEvents.OPERATOR_SCAN, {
       action: 'advance_processed', orderId: order.orderId, bagId: bag.bagId, operatorId
@@ -70,12 +70,8 @@ async function advance({ bagToken, operatorId, req }) {
   }
 
   if (order.status === 'processed') {
-    // Defensive idempotent heal — if payment verified since the last scan,
-    // the gate promotes; otherwise the order is held and the scan is a no-op.
+    // Defensive idempotent heal — the gate promotes processed -> ready_for_pickup.
     await orderReadyGateService.applyReadyGate(order, { trigger: 'advance_rescan' });
-    if (order.status !== 'ready_for_pickup') {
-      throw new AdvanceError('awaiting_payment', 'Order is processed but unpaid — held at store', 409);
-    }
     logAuditEvent(AuditEvents.OPERATOR_SCAN, {
       action: 'advance_gate_heal', orderId: order.orderId, bagId: bag.bagId, operatorId
     }, req);
@@ -83,10 +79,6 @@ async function advance({ bagToken, operatorId, req }) {
   }
 
   if (order.status === 'ready_for_pickup') {
-    if (order.paymentStatus !== 'verified') {
-      // Defensive — the gate is the only path here and it requires verified.
-      throw new AdvanceError('awaiting_payment', 'Payment not verified', 409);
-    }
     applyTransition(order, 'picked_up');
     order.intake.pickedUpAt = now;
     order.intake.pickedUpBy = operatorId;

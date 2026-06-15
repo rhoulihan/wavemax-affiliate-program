@@ -1159,17 +1159,6 @@
       "viewDetails": "View Details"
     }
   },
-  "payment": {
-    "holdNotice": {
-      "subject": "Action needed: pick up your laundry in store",
-      "heading": "Please pick up your laundry in store",
-      "body": "We haven't been able to confirm payment for your order, so your clean laundry is being held safely at the store. Reminders have stopped. Come by, pay, and collect your bag whenever suits you.",
-      "amountDue": "Amount due",
-      "orderNumber": "Order number",
-      "storeContact": "Store address",
-      "cta": "Pay & pick up in store"
-    }
-  },
   "emails": {
     "greeting": "Hello {{name}},",
     "footer": "Thank you for choosing WaveMAX Laundry Services.",
@@ -1289,10 +1278,6 @@
     "checkingServiceArea": "Checking if your address is within our service area",
     "schedulingPickup": "Scheduling your pickup...",
     "confirmingPickup": "Please wait while we confirm your pickup time",
-    "preparingPayment": "Preparing Payment",
-    "openingPaymentWindow": "Opening Payment Window",
-    "completePaymentPopup": "Please complete your payment in the popup window...",
-    "processingPayment": "Processing Payment",
     "loadingDashboard": "Loading your dashboard...",
     "fetchingInfo": "Please wait while we fetch your information"
   },

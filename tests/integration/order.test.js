@@ -185,7 +185,7 @@ describe('Order Integration Tests', () => {
       await testOrder.save();
     });
 
-    it('should update order status as affiliate', async () => {
+    it('should update order status as affiliate (processed auto-promotes to ready_for_pickup)', async () => {
       const response = await agent
         .put('/api/v1/orders/ORD123456/status')
         .set('Authorization', `Bearer ${affiliateToken}`)
@@ -198,14 +198,16 @@ describe('Order Integration Tests', () => {
       expect(response.body).toMatchObject({
         success: true,
         orderId: 'ORD123456',
-        status: 'processed',
+        // the ready gate promotes processed -> ready_for_pickup (payment removed)
+        status: 'ready_for_pickup',
         message: 'Order status updated successfully!'
       });
 
-      // Verify status was updated
+      // Verify status was updated + promoted by the gate
       const order = await Order.findOne({ orderId: 'ORD123456' });
-      expect(order.status).toBe('processed');
+      expect(order.status).toBe('ready_for_pickup');
       expect(order.processedAt).toBeDefined();
+      expect(order.readyForPickupAt).toBeDefined();
     });
 
     it('should update weight when marking processed', async () => {
@@ -265,7 +267,7 @@ describe('Order Integration Tests', () => {
       expect(response.status).toBe(400);
       expect(response.body).toMatchObject({
         success: false,
-        message: 'ready_for_pickup is set by the payment gate and cannot be set directly'
+        message: 'ready_for_pickup is set by the ready gate and cannot be set directly'
       });
     });
 
@@ -598,105 +600,6 @@ describe('Order Integration Tests', () => {
     });
   });
 
-  describe('Payment status updates', () => {
-    let testOrder;
-
-    beforeEach(async () => {
-      testOrder = new Order({
-        orderId: 'ORD123456',
-        customerId: 'CUST123',
-        affiliateId: 'AFF123',
-        bagId: 'BAG-payment-1',
-        status: 'delivered',
-        actualWeight: 25.5,
-        baseRate: 1.89,
-        feeBreakdown: { numberOfBags: 1, minimumFee: 25, perBagFee: 5, totalFee: 25, minimumApplied: true },
-        deliveredAt: new Date('2025-05-27'),
-        paymentStatus: 'pending'
-      });
-      await testOrder.save();
-    });
-
-    it('should update payment status', async () => {
-      const response = await agent
-        .put('/api/v1/orders/ORD123456/payment-status')
-        .set('Authorization', `Bearer ${affiliateToken}`)
-        .set('X-CSRF-Token', csrfToken)
-        .send({
-          paymentStatus: 'verified',
-          paymentMethod: 'venmo',
-          paymentTransactionId: 'ch_1234567890'
-        });
-
-      expect(response.status).toBe(200);
-      expect(response.body).toMatchObject({
-        success: true,
-        message: 'Payment status updated successfully',
-        order: {
-          orderId: 'ORD123456',
-          paymentStatus: 'verified',
-          paymentMethod: 'venmo',
-          paymentTransactionId: 'ch_1234567890',
-          paymentVerifiedAt: expect.any(String)
-        }
-      });
-
-      // Verify payment was recorded
-      const order = await Order.findOne({ orderId: 'ORD123456' });
-      expect(order.paymentStatus).toBe('verified');
-      expect(order.paymentVerifiedAt).toBeDefined();
-    });
-
-    it('should handle payment failure', async () => {
-      const response = await agent
-        .put('/api/v1/orders/ORD123456/payment-status')
-        .set('Authorization', `Bearer ${affiliateToken}`)
-        .set('X-CSRF-Token', csrfToken)
-        .send({
-          paymentStatus: 'failed',
-          paymentNotes: 'Insufficient funds'
-        });
-
-      expect(response.status).toBe(200);
-      expect(response.body.order.paymentStatus).toBe('failed');
-      expect(response.body.order.paymentNotes).toBe('Insufficient funds');
-    });
-
-    it('should prevent payment status update on non-delivered orders', async () => {
-      await Order.updateOne({ orderId: 'ORD123456' }, { status: 'in_progress' });
-
-      const response = await agent
-        .put('/api/v1/orders/ORD123456/payment-status')
-        .set('Authorization', `Bearer ${affiliateToken}`)
-        .set('X-CSRF-Token', csrfToken)
-        .send({
-          paymentStatus: 'verified'
-        });
-
-      expect(response.status).toBe(400);
-      expect(response.body).toMatchObject({
-        success: false,
-        message: 'Cannot update payment status for non-delivered orders'
-      });
-    });
-
-    it('should reject payment statuses outside the schema enum', async () => {
-      const response = await agent
-        .put('/api/v1/orders/ORD123456/payment-status')
-        .set('Authorization', `Bearer ${affiliateToken}`)
-        .set('X-CSRF-Token', csrfToken)
-        .send({
-          paymentStatus: 'refunded'
-        });
-
-      expect(response.status).toBe(400);
-      expect(response.body).toMatchObject({
-        success: false,
-        message: 'Invalid payment status'
-      });
-    });
-  });
-
   describe('Order filtering and search', () => {
     beforeEach(async () => {
       const customers = [
@@ -851,7 +754,6 @@ describe('Order Integration Tests', () => {
         bagId: 'BAG-comm-1',
         feeBreakdown: { numberOfBags: 2, minimumFee: 25, perBagFee: 5, totalFee: 25, minimumApplied: true },
         status: 'in_progress',
-        paymentStatus: 'pending'
       });
       await newOrder.save();
       const orderId = newOrder.orderId;
@@ -893,7 +795,6 @@ describe('Order Integration Tests', () => {
         actualWeight: 50,
         feeBreakdown: { numberOfBags: 3, minimumFee: 25, perBagFee: 5, totalFee: 25, minimumApplied: true },
         status: 'in_progress',
-        paymentStatus: 'pending'
       });
       await newOrder.save();
 
@@ -957,7 +858,6 @@ describe('Order Integration Tests', () => {
           bagId: `BAG-comm-multi-${i}`,
           feeBreakdown: { numberOfBags: 2, minimumFee: 25, perBagFee: 5, totalFee: 25, minimumApplied: true },
           status: 'in_progress',
-          paymentStatus: 'pending'
         });
         await newOrder.save();
         orderIds.push(newOrder.orderId);
@@ -994,7 +894,6 @@ describe('Order Integration Tests', () => {
         bagId: 'BAG-comm-3',
         feeBreakdown: { numberOfBags: 1, minimumFee: 50, perBagFee: 10, totalFee: 50, minimumApplied: true },
         status: 'in_progress',
-        paymentStatus: 'pending'
       });
       await newOrder.save();
 

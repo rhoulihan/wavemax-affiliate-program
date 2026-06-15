@@ -15,7 +15,7 @@ const roleCodes = require('../../server/utils/roleCodes');
 jest.setTimeout(60000);
 
 // ---- shared fixture (copied from tests/integration/operatorScanOut.test.js) ----
-async function createWorld({ orderStatus, paymentStatus = 'pending' } = {}) {
+async function createWorld({ orderStatus } = {}) {
   const uniq = `${Date.now()}${Math.random().toString(36).slice(2, 6)}`;
   const { salt, hash } = encryptionUtil.hashPassword('FixturePassword417!');
 
@@ -60,7 +60,6 @@ async function createWorld({ orderStatus, paymentStatus = 'pending' } = {}) {
       bagId: bag.bagId,
       bagToken: bag.token,
       status: orderStatus,
-      paymentStatus,
       actualWeight: 15,
       feeBreakdown: { numberOfBags: 1, minimumFee: 25, perBagFee: 5, totalFee: 25, minimumApplied: true },
       bags: [{
@@ -80,7 +79,7 @@ describe('Re-intake of a picked_up bag (operator code on the bag URL)', () => {
 
   test('auto-delivers the prior order (method reintake, commission once) and opens a new in_progress order', async () => {
     const { bagToken, bag, order: prior } = await createWorld({
-      orderStatus: 'picked_up', paymentStatus: 'verified'
+      orderStatus: 'picked_up'
     });
 
     const res = await request(app)
@@ -112,7 +111,7 @@ describe('Re-intake of a picked_up bag (operator code on the bag URL)', () => {
 
   test('double re-intake scan cannot double-close or double-realize commission', async () => {
     const { bagToken, order: prior } = await createWorld({
-      orderStatus: 'picked_up', paymentStatus: 'verified'
+      orderStatus: 'picked_up'
     });
     const body = { operatorCode: 'OPCODE99', weight: 12, addOns: {}, freshAddOnsFormPlaced: true };
 
@@ -131,7 +130,7 @@ describe('Re-intake of a picked_up bag (operator code on the bag URL)', () => {
 
   test('customer/vendor code on the intake endpoint cannot trigger re-intake (401)', async () => {
     const { bagToken, order: prior } = await createWorld({
-      orderStatus: 'picked_up', paymentStatus: 'verified'
+      orderStatus: 'picked_up'
     });
     const res = await request(app)
       .post(`/api/v1/bags/${bagToken}/intake`)

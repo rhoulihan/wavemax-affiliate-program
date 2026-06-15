@@ -36,14 +36,13 @@ describe('orderReadyGateService.applyReadyGate', () => {
     });
   }
 
-  it('promotes processed + verified to ready_for_pickup, stamps readyForPickupAt, clears heldAtStore, notifies the affiliate', async () => {
-    const order = await gateOrder({ status: 'processed', paymentStatus: 'verified', heldAtStore: true });
+  it('promotes a processed order to ready_for_pickup unconditionally, stamps readyForPickupAt, notifies the affiliate', async () => {
+    const order = await gateOrder({ status: 'processed' });
     const result = await applyReadyGate(order, { trigger: 'unit_test' });
 
     expect(result).toEqual({ promoted: true, held: false });
     expect(order.status).toBe('ready_for_pickup');
     expect(order.readyForPickupAt).toBeInstanceOf(Date);
-    expect(order.heldAtStore).toBe(false);
 
     const persisted = await Order.findById(order._id);
     expect(persisted.status).toBe('ready_for_pickup');
@@ -56,22 +55,8 @@ describe('orderReadyGateService.applyReadyGate', () => {
     expect(data.numberOfBags).toBe(1);
   });
 
-  it('holds a processed + unpaid order at the store (no promote, no email)', async () => {
-    const order = await gateOrder({ status: 'processed', paymentStatus: 'awaiting' });
-    const result = await applyReadyGate(order, { trigger: 'unit_test' });
-
-    expect(result).toEqual({ promoted: false, held: true });
-    expect(order.status).toBe('processed');
-    expect(order.heldAtStore).toBe(true);
-    expect(order.readyForPickupAt).toBeUndefined();
-    expect(emailService.sendOrderReadyNotification).not.toHaveBeenCalled();
-
-    const persisted = await Order.findById(order._id);
-    expect(persisted.heldAtStore).toBe(true);
-  });
-
   it('is a no-op for non-processed orders', async () => {
-    const order = await gateOrder({ status: 'in_progress', paymentStatus: 'verified' });
+    const order = await gateOrder({ status: 'in_progress' });
     const result = await applyReadyGate(order, { trigger: 'unit_test' });
     expect(result).toEqual({ promoted: false, held: false });
     expect(order.status).toBe('in_progress');
@@ -79,7 +64,7 @@ describe('orderReadyGateService.applyReadyGate', () => {
   });
 
   it('is idempotent — second call on a ready order is a no-op and does not re-notify', async () => {
-    const order = await gateOrder({ status: 'processed', paymentStatus: 'verified' });
+    const order = await gateOrder({ status: 'processed' });
     await applyReadyGate(order, { trigger: 'first' });
     const firstStamp = order.readyForPickupAt;
 
@@ -91,7 +76,7 @@ describe('orderReadyGateService.applyReadyGate', () => {
 
   it('still promotes when the notification email throws (best-effort)', async () => {
     emailService.sendOrderReadyNotification.mockRejectedValueOnce(new Error('smtp down'));
-    const order = await gateOrder({ status: 'processed', paymentStatus: 'verified' });
+    const order = await gateOrder({ status: 'processed' });
     const result = await applyReadyGate(order, { trigger: 'unit_test' });
     expect(result.promoted).toBe(true);
     expect((await Order.findById(order._id)).status).toBe('ready_for_pickup');

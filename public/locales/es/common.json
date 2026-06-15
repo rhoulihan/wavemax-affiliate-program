@@ -1159,17 +1159,6 @@
       "viewDetails": "Ver Detalles"
     }
   },
-  "payment": {
-    "holdNotice": {
-      "subject": "Acción necesaria: recoja su ropa en la tienda",
-      "heading": "Por favor recoja su ropa en la tienda",
-      "body": "No hemos podido confirmar el pago de su pedido, por lo que su ropa limpia se guarda de forma segura en la tienda. Los recordatorios se han detenido. Pase por la tienda, pague y recoja su bolsa cuando le convenga.",
-      "amountDue": "Importe a pagar",
-      "orderNumber": "Número de pedido",
-      "storeContact": "Dirección de la tienda",
-      "cta": "Pagar y recoger en la tienda"
-    }
-  },
   "emails": {
     "greeting": "Hola {{name}},",
     "footer": "Gracias por elegir WaveMAX Laundry Services.",
@@ -1289,10 +1278,6 @@
     "checkingServiceArea": "Comprobando si tu dirección está dentro de nuestra zona de servicio",
     "schedulingPickup": "Programando tu recogida...",
     "confirmingPickup": "Espera mientras confirmamos la hora de tu recogida",
-    "preparingPayment": "Preparando el pago",
-    "openingPaymentWindow": "Abriendo la ventana de pago",
-    "completePaymentPopup": "Completa tu pago en la ventana emergente...",
-    "processingPayment": "Procesando el pago",
     "loadingDashboard": "Cargando tu panel...",
     "fetchingInfo": "Espera mientras obtenemos tu información"
   },

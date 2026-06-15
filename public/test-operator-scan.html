@@ -48,11 +48,6 @@
                     <i class="fas fa-print"></i> Print All Bag Cards
                 </button>
             </div>
-            <div class="col-md-3">
-                <button class="btn btn-warning w-100 mb-2" id="testVenmoPaymentBtn" disabled>
-                    <i class="fas fa-dollar-sign"></i> Test Venmo Payment
-                </button>
-            </div>
         </div>
         <div class="row mb-4">
             <div class="col-md-12">
@@ -114,64 +109,6 @@
             <a href="/embed-app-v2.html?route=/operator-scan" class="btn btn-secondary" target="_blank">
                 Open Operator Scan Page
             </a>
-        </div>
-    </div>
-
-    <!-- Venmo Payment Test Modal -->
-    <div class="modal fade" id="venmoPaymentModal" tabindex="-1" aria-labelledby="venmoPaymentModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="venmoPaymentModalLabel">Test Venmo Payment Confirmation</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="alert alert-info">
-                        <strong>Order Details:</strong><br>
-                        Order ID: <span id="modalOrderId"></span><br>
-                        Expected Amount: $<span id="modalExpectedAmount"></span><br>
-                        Status: <span id="modalOrderStatus"></span>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label for="paymentAmount" class="form-label">Payment Amount ($)</label>
-                        <input type="number" class="form-control" id="paymentAmount" step="0.01" min="0.01">
-                        <small class="form-text text-muted">Adjust to test underpayment or overpayment scenarios</small>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label for="senderName" class="form-label">Sender Name</label>
-                        <input type="text" class="form-control" id="senderName" value="John Smith">
-                    </div>
-                    
-                    <div class="mb-3 form-check">
-                        <input type="checkbox" class="form-check-input" id="sendMultiplePayments">
-                        <label class="form-check-label" for="sendMultiplePayments">
-                            Send multiple payments (test duplicate detection)
-                        </label>
-                    </div>
-                    
-                    <div id="paymentProgress" class="d-none">
-                        <div class="alert alert-warning">
-                            <strong>Monitoring Order...</strong>
-                            <div class="spinner-border spinner-border-sm ms-2" role="status">
-                                <span class="visually-hidden">Loading...</span>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div id="paymentResults" class="d-none">
-                        <div class="alert alert-success">
-                            <strong>Payment Detection Results:</strong>
-                            <div id="paymentResultDetails"></div>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary" id="sendVenmoEmail">Send Test Payment Email</button>
-                </div>
-            </div>
         </div>
     </div>
 

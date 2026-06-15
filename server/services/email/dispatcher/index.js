@@ -12,7 +12,6 @@ const customer = require('./customer');
 const admin = require('./admin');
 const operator = require('./operator');
 const ops = require('./ops');
-const payment = require('./payment');
 const onboarding = require('./onboarding');
 
 const { sendEmail } = require('../transport');
@@ -24,7 +23,6 @@ module.exports = {
   ...admin,
   ...operator,
   ...ops,
-  ...payment,
   ...onboarding,
   // Low-level helpers kept for backward compatibility with existing callers.
   sendEmail,
