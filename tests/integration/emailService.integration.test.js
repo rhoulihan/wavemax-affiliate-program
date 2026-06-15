@@ -96,7 +96,6 @@ describe('Email Service Integration', () => {
       expect(typeof emailService.sendAffiliateWelcomeEmail).toBe('function');
       expect(typeof emailService.sendAffiliateNewCustomerEmail).toBe('function');
       expect(typeof emailService.sendAffiliateNewOrderEmail).toBe('function');
-      expect(typeof emailService.sendAffiliateCommissionEmail).toBe('function');
       expect(typeof emailService.sendAffiliateOrderCancellationEmail).toBe('function');
       
       // Customer emails

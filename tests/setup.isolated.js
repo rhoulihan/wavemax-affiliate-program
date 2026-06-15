@@ -17,7 +17,6 @@ jest.mock('../server/utils/emailService', () => ({
   sendAffiliateWelcomeEmail: jest.fn().mockResolvedValue({ MessageId: 'test-message-id' }),
   sendAffiliateNewCustomerEmail: jest.fn().mockResolvedValue({ MessageId: 'test-message-id' }),
   sendAffiliateNewOrderEmail: jest.fn().mockResolvedValue({ MessageId: 'test-message-id' }),
-  sendAffiliateCommissionEmail: jest.fn().mockResolvedValue({ MessageId: 'test-message-id' }),
   sendAffiliateOrderCancellationEmail: jest.fn().mockResolvedValue({ MessageId: 'test-message-id' }),
   sendCustomerWelcomeEmail: jest.fn().mockResolvedValue({ MessageId: 'test-message-id' }),
   sendCustomerOrderConfirmationEmail: jest.fn().mockResolvedValue({ MessageId: 'test-message-id' }),
