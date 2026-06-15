@@ -75,7 +75,6 @@ const CSRF_CONFIG = {
     // phone's native camera opens the page with no session/cookie).
     '/api/v1/bags/:bagToken/intake',
     '/api/v1/bags/:bagToken/advance',
-    '/api/v1/bags/:bagToken/confirm-delivery',
 
     // Test endpoints (development only)
     '/api/v1/test/customer',
