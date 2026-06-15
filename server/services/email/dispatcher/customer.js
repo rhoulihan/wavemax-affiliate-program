@@ -462,20 +462,16 @@ exports.sendOrderStatusUpdateEmail = async (customer, order, status) => {
         FOOTER_RIGHTS: 'All rights reserved.',
         FOOTER_AUTOMATED_MESSAGE: 'This is an automated message. Please do not reply to this email.',
         STATUS_MESSAGES: {
-          pending: 'Your order has been created and is awaiting acceptance',
-          scheduled: 'Your order has been accepted by the affiliate',
-          processing: 'Your laundry has been received and is being processed',
-          processed: 'Your laundry is ready for pickup by the affiliate',
-          complete: 'Your laundry has been delivered',
-          ready: 'Your laundry is ready and will be delivered soon'
+          pending: 'Your order has been created',
+          in_progress: 'Your laundry has been received and is being processed',
+          out_for_delivery: 'Your laundry is on its way back to you',
+          complete: 'Your laundry has been delivered'
         },
         STATUS_TITLES: {
-          pending: 'Order Pending',
-          scheduled: 'Order Scheduled',
-          processing: 'Laundry Processing',
-          processed: 'Ready for Pickup',
-          complete: 'Order Complete',
-          ready: 'Ready for Delivery'
+          pending: 'Order Created',
+          in_progress: 'Laundry Processing',
+          out_for_delivery: 'Out for Delivery',
+          complete: 'Order Complete'
         }
       },
       es: {
@@ -492,17 +488,15 @@ exports.sendOrderStatusUpdateEmail = async (customer, order, status) => {
         FOOTER_RIGHTS: 'Todos los derechos reservados.',
         FOOTER_AUTOMATED_MESSAGE: 'Este es un mensaje automatizado. Por favor no responda a este correo.',
         STATUS_MESSAGES: {
-          pending: 'Su pedido ha sido creado y está esperando aceptación',
-          scheduled: 'Su pedido ha sido aceptado por el afiliado',
-          processing: 'Su ropa ha sido recibida y está siendo procesada',
-          processed: 'Su ropa está lista para ser recogida por el afiliado',
+          pending: 'Su pedido ha sido creado',
+          in_progress: 'Su ropa ha sido recibida y está siendo procesada',
+          out_for_delivery: 'Su ropa está en camino de regreso a usted',
           complete: 'Su ropa ha sido entregada'
         },
         STATUS_TITLES: {
-          pending: 'Pedido Pendiente',
-          scheduled: 'Pedido Programado',
-          processing: 'Procesando Ropa',
-          processed: 'Lista para Recoger',
+          pending: 'Pedido Creado',
+          in_progress: 'Procesando Ropa',
+          out_for_delivery: 'En Camino',
           complete: 'Pedido Completo'
         }
       },
@@ -520,17 +514,15 @@ exports.sendOrderStatusUpdateEmail = async (customer, order, status) => {
         FOOTER_RIGHTS: 'Todos os direitos reservados.',
         FOOTER_AUTOMATED_MESSAGE: 'Esta é uma mensagem automatizada. Por favor, não responda a este e-mail.',
         STATUS_MESSAGES: {
-          pending: 'Seu pedido foi criado e está aguardando aceitação',
-          scheduled: 'Seu pedido foi aceito pelo afiliado',
-          processing: 'Sua roupa foi recebida e está sendo processada',
-          processed: 'Sua roupa está pronta para ser recolhida pelo afiliado',
+          pending: 'Seu pedido foi criado',
+          in_progress: 'Sua roupa foi recebida e está sendo processada',
+          out_for_delivery: 'Sua roupa está a caminho de volta para você',
           complete: 'Sua roupa foi entregue'
         },
         STATUS_TITLES: {
-          pending: 'Pedido Pendente',
-          scheduled: 'Pedido Agendado',
-          processing: 'Processando Roupa',
-          processed: 'Pronta para Recolher',
+          pending: 'Pedido Criado',
+          in_progress: 'Processando Roupa',
+          out_for_delivery: 'A Caminho',
           complete: 'Pedido Completo'
         }
       },
@@ -548,17 +540,15 @@ exports.sendOrderStatusUpdateEmail = async (customer, order, status) => {
         FOOTER_RIGHTS: 'Alle Rechte vorbehalten.',
         FOOTER_AUTOMATED_MESSAGE: 'Dies ist eine automatisierte Nachricht. Bitte antworten Sie nicht auf diese E-Mail.',
         STATUS_MESSAGES: {
-          pending: 'Ihre Bestellung wurde erstellt und wartet auf Annahme',
-          scheduled: 'Ihre Bestellung wurde vom Partner angenommen',
-          processing: 'Ihre Wäsche wurde empfangen und wird bearbeitet',
-          processed: 'Ihre Wäsche ist bereit zur Abholung durch den Partner',
+          pending: 'Ihre Bestellung wurde erstellt',
+          in_progress: 'Ihre Wäsche wurde empfangen und wird bearbeitet',
+          out_for_delivery: 'Ihre Wäsche ist auf dem Rückweg zu Ihnen',
           complete: 'Ihre Wäsche wurde geliefert'
         },
         STATUS_TITLES: {
-          pending: 'Bestellung ausstehend',
-          scheduled: 'Bestellung geplant',
-          processing: 'Wäsche in Bearbeitung',
-          processed: 'Bereit zur Abholung',
+          pending: 'Bestellung erstellt',
+          in_progress: 'Wäsche in Bearbeitung',
+          out_for_delivery: 'Unterwegs',
           complete: 'Bestellung abgeschlossen'
         }
       }
@@ -571,9 +561,9 @@ exports.sendOrderStatusUpdateEmail = async (customer, order, status) => {
     const data = {
       first_name: customer.firstName,
       order_id: order.orderId,
-      status_message: statusMessages[status],
-      weight_info: order.actualWeight ? `<div class="detail-row"><span class="detail-label">${language === 'es' ? 'Peso' : language === 'pt' ? 'Peso' : language === 'de' ? 'Gewicht' : 'Weight'}:</span> ${order.actualWeight} lbs</div>` : '',
-      total_info: order.actualTotal ? `<div class="detail-row"><span class="detail-label">${language === 'es' ? 'Total Final' : language === 'pt' ? 'Total Final' : language === 'de' ? 'Endgültiger Betrag' : 'Final Total'}:</span> $${order.actualTotal.toFixed(2)}</div>` : '',
+      status_message: statusMessages[status] || '',
+      weight_info: '',
+      total_info: '',
       dashboard_url: 'https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?login=customer',
       current_year: new Date().getFullYear(),
       ...emailTranslations
@@ -803,7 +793,9 @@ exports.sendCustomerDeliveredEmail = async (customer, order, { affiliateName } =
     };
     const t = translations[language] || translations.en;
 
-    const deliveredAt = order.deliveredAt ? new Date(order.deliveredAt) : new Date();
+    const deliveredAt = order.completedAt
+      ? new Date(order.completedAt)
+      : (order.delivery && order.delivery.at ? new Date(order.delivery.at) : new Date());
     const html = fillTemplate(template, {
       ...t,
       ORDER_ID: order.orderId,

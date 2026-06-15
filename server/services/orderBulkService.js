@@ -28,8 +28,8 @@ async function bulkUpdateStatus({ orderIds, status, user }) {
     throw new BulkError('Order IDs must be provided as an array');
   }
 
-  // ready_for_pickup is gate-only; in_progress is birth-only (shared TRANSITIONS).
-  const validStatuses = ['processed', 'picked_up', 'delivered', 'cancelled'];
+  // pending is birth-only; the rest are the open/closed transitions.
+  const validStatuses = ['in_progress', 'out_for_delivery', 'complete', 'cancelled'];
   if (!validStatuses.includes(status)) {
     throw new BulkError('Invalid status');
   }

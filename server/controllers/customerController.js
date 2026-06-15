@@ -16,9 +16,6 @@ const bagClaimService = require('../services/bagClaimService');
 const ControllerHelpers = require('../utils/controllerHelpers');
 const AuthorizationHelpers = require('../middleware/authorizationHelpers');
 const Formatters = require('../utils/formatters');
-const SystemConfig = require('../models/SystemConfig');
-const roleCodes = require('../utils/roleCodes');
-const { logAuditEvent, AuditEvents } = require('../utils/auditLogger');
 
 // ============================================================================
 // Customer Controllers - Refactored with Utilities
@@ -234,11 +231,6 @@ exports.getCustomerOrders = [
       formattedStatus: Formatters.status(order.status, 'order'),
       pickupDate: order.pickupDate,
       formattedDate: Formatters.date(order.pickupDate, 'medium'),
-      estimatedWeight: order.estimatedWeight,
-      actualWeight: order.actualWeight,
-      formattedWeight: Formatters.weight(order.actualWeight),
-      actualTotal: order.actualTotal,
-      formattedTotal: Formatters.currency(order.actualTotal),
       numberOfBags: order.numberOfBags,
       bagsSummary: Formatters.plural(order.numberOfBags, 'bag'),
       createdAt: order.createdAt,
@@ -275,11 +267,9 @@ exports.getCustomerDashboardStats = [
           $group: {
             _id: null,
             totalOrders: { $sum: 1 },
-            totalSpent: { $sum: '$actualTotal' },
-            totalWeight: { $sum: '$actualWeight' },
             completedOrders: {
               $sum: {
-                $cond: [{ $eq: ['$status', 'delivered'] }, 1, 0]
+                $cond: [{ $eq: ['$status', 'complete'] }, 1, 0]
               }
             }
           }
@@ -287,12 +277,12 @@ exports.getCustomerDashboardStats = [
       ]),
       Order.findOne({
         customerId,
-        status: { $in: ['in_progress', 'processed', 'ready_for_pickup', 'picked_up'] }
+        status: { $in: ['pending', 'in_progress', 'out_for_delivery'] }
       }).sort('-createdAt'),
-      // Count active orders (not delivered or cancelled)
+      // Count active orders (not complete or cancelled)
       Order.countDocuments({
         customerId,
-        status: { $in: ['in_progress', 'processed', 'ready_for_pickup', 'picked_up'] }
+        status: { $in: ['pending', 'in_progress', 'out_for_delivery'] }
       })
     ]);
 
@@ -308,33 +298,18 @@ exports.getCustomerDashboardStats = [
         email: customer.email,
         phone: Formatters.phone(customer.phone),
         address: Formatters.address(customer),
-        wdfCredits: customer.wdfCredit || 0,
-        formattedCredits: Formatters.currency(customer.wdfCredit || 0),
         memberSince: Formatters.date(customer.createdAt, 'medium'),
         memberDuration: Formatters.relativeTime(customer.createdAt)
       },
       statistics: {
         totalOrders: stats[0]?.totalOrders || 0,
         completedOrders: stats[0]?.completedOrders || 0,
-        activeOrders: activeOrdersCount || 0,
-        totalSpent: stats[0]?.totalSpent || 0,
-        formattedSpent: Formatters.currency(stats[0]?.totalSpent || 0),
-        totalWeight: stats[0]?.totalWeight || 0,
-        formattedWeight: Formatters.weight(stats[0]?.totalWeight || 0),
-        averageOrderValue: stats[0]?.totalOrders > 0
-          ? (stats[0].totalSpent / stats[0].totalOrders)
-          : 0,
-        formattedAverageValue: Formatters.currency(
-          stats[0]?.totalOrders > 0
-            ? (stats[0].totalSpent / stats[0].totalOrders)
-            : 0
-        )
+        activeOrders: activeOrdersCount || 0
       },
       recentOrders: recentOrders.map(order => ({
         orderId: Formatters.orderId(order.orderId, true),
         date: Formatters.date(order.pickupDate),
         status: Formatters.status(order.status, 'order'),
-        total: Formatters.currency(order.actualTotal),
         bags: order.numberOfBags
       })),
       activeOrder: activeOrder ? {
@@ -419,7 +394,7 @@ exports.deleteCustomerData = [
     // Check for active orders
     const activeOrders = await Order.countDocuments({
       customerId,
-      status: { $in: ['in_progress', 'processed', 'ready_for_pickup', 'picked_up'] }
+      status: { $in: ['pending', 'in_progress', 'out_for_delivery'] }
     });
 
     if (activeOrders > 0) {
@@ -578,8 +553,6 @@ exports.getCustomersForAdmin = [
       formattedAddress: Formatters.address(customer, 'short'),
       affiliateId: customer.affiliateId,
       affiliateName: affiliateMap[customer.affiliateId] || 'N/A',
-      wdfCredits: customer.wdfCredits || 0,
-      formattedWdfCredits: Formatters.currency(customer.wdfCredits || 0),
       registrationDate: Formatters.date(customer.createdAt),
       createdAt: customer.createdAt,
       lastActive: customer.lastLogin ? Formatters.relativeTime(customer.lastLogin) : 'Never',
@@ -593,47 +566,5 @@ exports.getCustomersForAdmin = [
     return ControllerHelpers.sendPaginated(res, formattedCustomers, pagination, 'customers');
   })
 ];
-
-/**
- * GET /api/v1/customers/:customerId/delivery-pin — PIN status (self only).
- * Plaintext is never returned here; it is shown once, only on reset (§5).
- */
-exports.getDeliveryPinStatus = ControllerHelpers.asyncWrapper(async (req, res) => {
-  const { customerId } = req.params;
-  if (req.user.role === 'customer' && req.user.customerId !== customerId) {
-    return ControllerHelpers.sendError(res, 'Unauthorized', 403);
-  }
-  const customer = await Customer.findOne({ customerId }).select('+deliveryPinHash');
-  if (!customer) return ControllerHelpers.sendError(res, 'Customer not found', 404);
-  ControllerHelpers.sendSuccess(res, {
-    deliveryPinSet: !!customer.deliveryPinHash,
-    deliveryPinSetAt: customer.deliveryPinSetAt || null
-  }, 'Delivery PIN status');
-});
-
-/**
- * POST /api/v1/customers/:customerId/delivery-pin/reset — regenerate (self, CSRF).
- * Returns the new plaintext PIN exactly once.
- */
-exports.resetDeliveryPin = ControllerHelpers.asyncWrapper(async (req, res) => {
-  const { customerId } = req.params;
-  if (req.user.role === 'customer' && req.user.customerId !== customerId) {
-    return ControllerHelpers.sendError(res, 'Unauthorized', 403);
-  }
-  const customer = await Customer.findOne({ customerId });
-  if (!customer) return ControllerHelpers.sendError(res, 'Customer not found', 404);
-
-  const pinLength = await SystemConfig.getValue('customer_delivery_pin_length', 6);
-  const deliveryPin = roleCodes.generateCode(pinLength);
-  customer.deliveryPinHash = roleCodes.hashCode(deliveryPin);
-  customer.deliveryPinSetAt = new Date();
-  await customer.save();
-
-  logAuditEvent(AuditEvents.CUSTOMER_PIN_RESET, { customerId, userId: req.user.id }, req);
-  ControllerHelpers.sendSuccess(res, {
-    deliveryPin,
-    deliveryPinSetAt: customer.deliveryPinSetAt
-  }, 'Delivery PIN reset');
-});
 
 module.exports = exports;

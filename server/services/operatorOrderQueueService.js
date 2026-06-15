@@ -41,9 +41,7 @@ function formatOrder(order) {
       name: Formatters.fullName(order.customer.firstName, order.customer.lastName),
       phone: Formatters.phone(order.customer.phone)
     } : null,
-    scheduledPickup: order.scheduledPickup ? Formatters.datetime(order.scheduledPickup) : base.scheduledPickup,
-    estimatedWeight: Formatters.weight(order.estimatedWeight),
-    actualWeight: Formatters.weight(order.actualWeight)
+    scheduledPickup: order.scheduledPickup ? Formatters.datetime(order.scheduledPickup) : base.scheduledPickup
   };
 }
 

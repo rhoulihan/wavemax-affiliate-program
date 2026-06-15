@@ -1,14 +1,14 @@
-// Public bag-URL actions (spec §5/§6.4/§6.6) — the phone/ad-hoc path.
-// No JWT: every mutation is authorized by a role code. Operator codes are
-// resolved globally by HMAC (identify-and-verify); delivery codes are
-// verified by affiliateDeliveryService against the order's own parties.
+// Public bag-URL actions (spec §3/§5/§6) — the phone/ad-hoc field path.
+// No JWT: every mutation is authorized by a role code (operator scan code).
+// PR 5 replaces this with the proper authenticate-once scan-session token; for
+// now the operator code authorizes each call and the order moves through the
+// state-driven transition service.
 
 const Operator = require('../models/Operator');
 const SystemConfig = require('../models/SystemConfig');
 const ControllerHelpers = require('../utils/controllerHelpers');
-const orderIntakeService = require('../modules/orders/orderIntakeService');
-const orderAdvanceService = require('../modules/orders/orderAdvanceService');
-const affiliateDeliveryService = require('../services/affiliateDeliveryService');
+const bagService = require('../modules/bags/bagService');
+const orderTransitionService = require('../modules/orders/orderTransitionService');
 const codeAttemptLockout = require('../services/codeAttemptLockout');
 const roleCodes = require('../utils/roleCodes');
 const { logAuditEvent, AuditEvents } = require('../utils/auditLogger');
@@ -23,9 +23,8 @@ class BagActionError extends Error {
 }
 
 function sendTypedError(res, err) {
-  // Our own typed errors + the typed errors thrown by the intake/advance/
-  // delivery services (all carry .code + .status). Generic messages only —
-  // no token echo, no role oracle.
+  // Our own typed errors + the transition service's typed errors (all carry
+  // .code + .status). Generic messages only — no token echo, no role oracle.
   const status = err.status || err.statusCode;
   if (status && status < 500) {
     return ControllerHelpers.sendError(res, err.message, status, { code: err.code || 'error' });
@@ -51,70 +50,55 @@ async function resolveOperatorByCode({ operatorCode, bagToken, req }) {
   return operator;
 }
 
+async function resolveActiveBag(bagToken) {
+  const resolved = await bagService.resolveByToken(bagToken);
+  if (!resolved || !resolved.bag) {
+    throw new BagActionError('invalid_bag', 'Bag not recognized', 404);
+  }
+  return resolved.bag;
+}
+
 /**
- * POST /api/v1/bags/:bagToken/intake  { operatorCode, weight, addOns, freshAddOnsFormPlaced }
+ * POST /api/v1/bags/:bagToken/intake  { operatorCode }
+ * Field pickup: open a pending order for a registered bag.
  */
 exports.intakeWithCode = ControllerHelpers.asyncWrapper(async (req, res) => {
   try {
     const operator = await resolveOperatorByCode({
       operatorCode: req.body.operatorCode, bagToken: req.params.bagToken, req
     });
-    const result = await orderIntakeService.createOrderFromBag({
-      bagToken: req.params.bagToken,
-      weight: req.body.weight,
-      addOns: req.body.addOns,
-      freshAddOnsFormPlaced: req.body.freshAddOnsFormPlaced,
-      operatorId: operator._id,
-      req
+    const bag = await resolveActiveBag(req.params.bagToken);
+    const { order } = await orderTransitionService.createPendingOrder({
+      bag, by: String(operator._id), role: 'operator', req
     });
-    logAuditEvent(AuditEvents.OPERATOR_SCAN, {
-      action: 'bag_url_intake', operatorId: operator.operatorId,
-      orderId: result.order ? result.order.orderId : result.orderId
-    }, req);
-    return ControllerHelpers.sendSuccess(res, result, 'Order created', 201);
+    return ControllerHelpers.sendSuccess(res, {
+      order: { orderId: order.orderId, status: order.status }
+    }, 'Order created', 201);
   } catch (err) {
     return sendTypedError(res, err);
   }
 });
 
 /**
- * POST /api/v1/bags/:bagToken/advance  { operatorCode }
+ * POST /api/v1/bags/:bagToken/advance  { operatorCode, paymentConfirmed? }
+ * State-driven advance (intake / store-pickup / delivery), one step per scan.
  */
 exports.advanceWithCode = ControllerHelpers.asyncWrapper(async (req, res) => {
   try {
     const operator = await resolveOperatorByCode({
       operatorCode: req.body.operatorCode, bagToken: req.params.bagToken, req
     });
-    const result = await orderAdvanceService.advance({
-      bagToken: req.params.bagToken, operatorId: operator._id, req
-    });
-    return ControllerHelpers.sendSuccess(res,
-      { action: result.action, order: result.order }, `Order advanced to ${result.action}`);
-  } catch (err) {
-    return sendTypedError(res, err);
-  }
-});
-
-/**
- * POST /api/v1/bags/:bagToken/confirm-delivery  { code, geo? }   (Task 9)
- */
-exports.confirmDelivery = ControllerHelpers.asyncWrapper(async (req, res) => {
-  try {
-    const result = await affiliateDeliveryService.confirmDelivery({
-      bagToken: req.params.bagToken,
-      code: req.body.code,
-      geo: req.body.geo,
-      req
+    const bag = await resolveActiveBag(req.params.bagToken);
+    const result = await orderTransitionService.advanceOrder({
+      bag, by: String(operator._id), role: 'operator',
+      paymentConfirmed: !!req.body.paymentConfirmed, req
     });
     return ControllerHelpers.sendSuccess(res, {
-      orderId: result.order.orderId,
-      status: result.order.status,
-      proofOfDelivery: {
-        method: result.order.proofOfDelivery.method,
-        confirmedByRole: result.order.proofOfDelivery.confirmedByRole,
-        confirmedAt: result.order.proofOfDelivery.confirmedAt
-      }
-    }, 'Delivery confirmed');
+      action: result.action,
+      to: result.to,
+      orderId: result.orderId || (result.order && result.order.orderId),
+      order: result.order ? { orderId: result.order.orderId, status: result.order.status } : undefined
+    }, `Scan applied: ${result.action}`);
   } catch (err) {
     return sendTypedError(res, err);
   }

@@ -26,12 +26,7 @@ const customerSchema = new mongoose.Schema({
   username: { type: String, required: true, unique: true },
   passwordSalt: { type: String, required: true },
   passwordHash: { type: String, required: true },
-  // Payment is handled by Paygistix after bags are weighed (post-weigh workflow).
-  // No payment information is stored in our database.
-  // WDF Credit tracking
-  wdfCredit: { type: Number, default: 0 }, // Positive = credit, Negative = debit
-  wdfCreditUpdatedAt: Date, // When the credit was last updated
-  wdfCreditFromOrderId: String, // Reference to the order that generated this credit
+  // Payment is handled externally in Cents. No payment information is stored.
   isActive: { type: Boolean, default: true },
   registrationDate: { type: Date, default: Date.now },
   lastLogin: Date,
@@ -41,13 +36,6 @@ const customerSchema = new mongoose.Schema({
   // prod-lockdown-2026-05-20.
   loginAttempts: { type: Number, default: 0 },
   lockUntil: Date,
-  // Delivery PIN — short code the customer enters at the door to confirm
-  // receipt (spec §4.5/§6.6). Verified only against THIS order's customer.
-  // Stored as "pbkdf2hash:salt" via utils/roleCodes.hashCode; rotated at each
-  // operator scan-out so the plaintext can ride in the "on the way" email
-  // while only a hash exists at rest. NOT a login credential.
-  deliveryPinHash: { type: String, select: false },
-  deliveryPinSetAt: Date,
   // Language preference for communications
   languagePreference: {
     type: String,

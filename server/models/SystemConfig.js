@@ -350,13 +350,13 @@ systemConfigSchema.statics.initializeDefaults = async function() {
       validation: { min: 6, max: 12 }
     },
     {
-      key: 'customer_delivery_pin_length',
-      value: 6,
-      defaultValue: 6,
-      description: 'Customer delivery-PIN length',
-      category: 'customer',
+      key: 'order_reopen_window_minutes',
+      value: 240,
+      defaultValue: 240,
+      description: 'Window after completion in which re-scanning a bag prompts to reopen vs. starting a fresh order',
+      category: 'system',
       dataType: 'number',
-      validation: { min: 4, max: 10 }
+      validation: { min: 0, max: 1440 }
     },
     {
       key: 'affiliate_delivery_code_length',

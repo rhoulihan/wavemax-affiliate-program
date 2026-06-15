@@ -20,6 +20,7 @@ const bagActionLimiter = createCustomLimiter({
 
 router.post('/:bagToken/intake', bagActionLimiter, bagActionController.intakeWithCode);
 router.post('/:bagToken/advance', bagActionLimiter, bagActionController.advanceWithCode);
-router.post('/:bagToken/confirm-delivery', bagActionLimiter, bagActionController.confirmDelivery);
+// confirm-delivery removed (PR 3): delivery is now a state-driven advance
+// (out_for_delivery -> complete) through /advance.
 
 module.exports = router;

@@ -58,8 +58,7 @@ async function collectExportData({ format = 'csv', filters, user }) {
 function formatCsv({ orders, customerMap }) {
   const headers = [
     'Order ID', 'Customer Name', 'Customer Email', 'Affiliate ID', 'Status',
-    'Estimated Weight', 'Actual Weight', 'Estimated Total', 'Actual Total',
-    'Commission', 'Pickup Date', 'Delivery Date', 'Created At'
+    'Bag ID', 'Created At'
   ].join(',');
 
   const rows = orders.map(order => {
@@ -70,13 +69,7 @@ function formatCsv({ orders, customerMap }) {
       customer ? customer.email : '',
       order.affiliateId,
       order.status,
-      order.estimatedWeight || '',
-      order.actualWeight || '',
-      order.estimatedTotal || '',
-      order.actualTotal || '',
-      order.affiliateCommission || '',
-      order.pickupDate ? new Date(order.pickupDate).toISOString() : '',
-      order.deliveryDate ? new Date(order.deliveryDate).toISOString() : '',
+      order.bagId || '',
       new Date(order.createdAt).toISOString()
     ].join(',');
   });
@@ -100,13 +93,7 @@ function formatJson({ orders, customerMap, filters }) {
         customer: customer ? { name: `${customer.firstName} ${customer.lastName}`, email: customer.email } : null,
         affiliateId: order.affiliateId,
         status: order.status,
-        estimatedWeight: order.estimatedWeight,
-        actualWeight: order.actualWeight,
-        estimatedTotal: order.estimatedTotal,
-        actualTotal: order.actualTotal,
-        commission: order.affiliateCommission,
-        pickupDate: order.pickupDate,
-        deliveryDate: order.deliveryDate,
+        bagId: order.bagId,
         createdAt: order.createdAt
       };
     })

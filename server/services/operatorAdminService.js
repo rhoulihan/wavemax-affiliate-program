@@ -152,16 +152,15 @@ async function getOperatorById({ operatorId }) {
     .populate('createdBy', 'firstName lastName');
   if (!operator) throw new OperatorAdminError('not_found', 'Operator not found', 404);
 
+  // Processing-time/quality metrics moved to Cents (external) in Phase 1.
+  // Operator statistics now report order counts only.
   const stats = await Order.aggregate([
     { $match: { assignedOperator: operator._id } },
     {
       $group: {
         _id: null,
         totalOrders: { $sum: 1 },
-        completedOrders: { $sum: { $cond: [{ $eq: ['$orderProcessingStatus', 'completed'] }, 1, 0] } },
-        averageProcessingTime: { $avg: '$processingTimeMinutes' },
-        qualityChecksPassed: { $sum: { $cond: [{ $eq: ['$qualityCheckPassed', true] }, 1, 0] } },
-        qualityChecksTotal: { $sum: { $cond: [{ $ne: ['$qualityCheckPassed', null] }, 1, 0] } }
+        completedOrders: { $sum: { $cond: [{ $eq: ['$status', 'complete'] }, 1, 0] } }
       }
     }
   ]);
@@ -170,10 +169,7 @@ async function getOperatorById({ operatorId }) {
     operator: fieldFilter(operator.toObject(), 'administrator'),
     statistics: stats[0] || {
       totalOrders: 0,
-      completedOrders: 0,
-      averageProcessingTime: 0,
-      qualityChecksPassed: 0,
-      qualityChecksTotal: 0
+      completedOrders: 0
     }
   };
 }
@@ -228,15 +224,14 @@ async function deactivateOperator({ id, adminId, req }) {
   );
   if (!operator) throw new OperatorAdminError('not_found', 'Operator not found', 404);
 
-  // Release any orders held by the deactivated operator back to the pending queue.
+  // Release any in-progress orders held by the deactivated operator.
   await Order.updateMany(
     {
       assignedOperator: operator._id,
-      orderProcessingStatus: { $in: ['assigned', 'washing', 'drying', 'folding'] }
+      status: { $in: ['pending', 'in_progress', 'out_for_delivery'] }
     },
     {
-      $unset: { assignedOperator: 1 },
-      $set: { orderProcessingStatus: 'pending' }
+      $unset: { assignedOperator: 1 }
     }
   );
 
@@ -330,7 +325,7 @@ async function deleteOperator({ id, adminId }) {
 
   const activeOrdersCount = await Order.countDocuments({
     assignedOperator: operator._id,
-    orderProcessingStatus: { $nin: ['completed', 'delivered', 'cancelled'] }
+    status: { $in: ['pending', 'in_progress', 'out_for_delivery'] }
   });
 
   if (activeOrdersCount > 0 || operator.currentOrderCount > 0) {

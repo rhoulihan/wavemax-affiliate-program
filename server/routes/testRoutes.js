@@ -166,41 +166,15 @@ router.post('/order', async (req, res) => {
             });
         }
 
-        // Get affiliate for fee calculation
-        const Affiliate = require('../models/Affiliate');
-        // affiliateId is a string in UUID format, not ObjectId
-        const affiliate = customer.affiliateId ? await Affiliate.findOne({ 
-            affiliateId: customer.affiliateId
-        }) : null;
-        
-        // Calculate delivery fee (one bag = one order)
-        const minimumFee = affiliate?.minimumDeliveryFee || 1;
-        const perBagFee = affiliate?.perBagDeliveryFee || 1;
-        const totalFee = Math.max(minimumFee, perBagFee);
-
-        // Create new test order in the redesigned shape (born at intake)
+        // Create new test order in the slimmed state-record shape.
+        // Money/weight/commission moved to Cents (external) in Phase 1.
         const orderData = {
             // orderId will be auto-generated as ORD-[UUID]
             customerId: customer.customerId,
             affiliateId: customer.affiliateId,
             bagId: `BAG-${require('uuid').v4()}`,
             bagToken: require('crypto').randomBytes(16).toString('hex'),
-            isTestOrder: true, // Mark as test order for cleanup
-            baseRate: 1.25, // rate per pound
-            // Delivery fee breakdown
-            feeBreakdown: {
-                numberOfBags: 1,
-                minimumFee: minimumFee,
-                perBagFee: perBagFee,
-                totalFee: totalFee,
-                minimumApplied: totalFee === minimumFee
-            },
-            // Add fabric softener add-on for testing
-            addOns: {
-                premiumDetergent: false,
-                fabricSoftener: true,  // Enable fabric softener for testing
-                stainRemover: false
-            }
+            isTestOrder: true // Mark as test order for cleanup
         };
 
         const order = new Order(orderData);
@@ -237,7 +211,7 @@ router.get('/order/:orderId', async (req, res) => {
 // Advance order stage for testing
 router.post('/order/advance-stage', async (req, res) => {
     try {
-        const { orderId, currentStage, nextStage, action, weights, actualWeight, processedBags, pickedUpBags } = req.body;
+        const { orderId, currentStage, nextStage, action } = req.body;
 
         // Find the order
         const order = await Order.findOne({
@@ -253,68 +227,24 @@ router.post('/order/advance-stage', async (req, res) => {
 
         logger.info(`Advancing order ${orderId} from ${currentStage} to ${nextStage}`);
 
-        // Handle stage transitions
+        // Walk the slimmed status machine:
+        // pending -> in_progress -> out_for_delivery -> complete.
+        // Money/weight/commission live externally in Cents (Phase 1).
         switch (action) {
             case 'weigh':
-                // Simulate drop-off and weighing
-                if (!order.bags || order.bags.length === 0) {
-                    // Initialize the single bag (one bag = one order)
-                    order.bags = [{
-                        bagNumber: 1,
-                        bagToken: order.bagToken,
-                        weight: weights ? weights[0] : 30, // Use provided weight or default to 30 lbs
-                        status: 'intake',
-                        scannedAt: {
-                            intake: new Date()
-                        },
-                        scannedBy: {}  // Initialize empty for test mode
-                    }];
-                }
-
-                // Set actual weight and calculate total
-                order.actualWeight = actualWeight || 30;
-
-                // Calculate post-weigh pricing
-                {
-                    const basePrice = order.actualWeight * (order.baseRate || 1.25);
-
-                    // Add delivery fee
-                    const deliveryFee = order.feeBreakdown?.totalFee || 0;
-
-                    // Add fabric softener add-on ($2.00)
-                    const fabricSoftenerFee = order.addOns?.fabricSoftener ? 2.00 : 0;
-
-                    order.actualTotal = basePrice + deliveryFee + fabricSoftenerFee;
-                }
-
                 order.status = 'in_progress';
-                order.receivedAt = new Date();
-                await order.save();
+                order.intake = { at: new Date(), by: null, role: 'operator' };
                 break;
 
             case 'process':
-                // Simulate marking bags as processed (washed/dried)
-                if (order.bags && order.bags.length > 0) {
-                    order.bags.forEach(bag => {
-                        bag.status = 'processed';
-                        if (!bag.scannedAt) bag.scannedAt = {};
-                        bag.scannedAt.processed = new Date();
-                    });
-                }
-                order.status = 'processed';
-                order.processedAt = new Date();
+                order.status = 'out_for_delivery';
+                order.storePickup = { at: new Date(), by: null, role: 'affiliate' };
                 break;
 
             case 'pickup':
-                // Simulate customer pickup
-                if (order.bags && order.bags.length > 0) {
-                    order.bags.forEach(bag => {
-                        bag.status = 'picked_up';
-                        if (!bag.scannedAt) bag.scannedAt = {};
-                        bag.scannedAt.picked_up = new Date();
-                    });
-                }
-                order.status = 'delivered';
+                order.status = 'complete';
+                order.delivery = { at: new Date(), by: null, role: 'affiliate' };
+                order.completedAt = new Date();
                 break;
 
             default:

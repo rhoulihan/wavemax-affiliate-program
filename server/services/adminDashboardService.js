@@ -42,26 +42,7 @@ async function getDashboard() {
         today: [{ $match: { createdAt: { $gte: today } } }, { $count: 'count' }],
         thisWeek: [{ $match: { createdAt: { $gte: thisWeekStart } } }, { $count: 'count' }],
         thisMonth: [{ $match: { createdAt: { $gte: thisMonthStart } } }, { $count: 'count' }],
-        statusDistribution: [{ $group: { _id: '$status', count: { $sum: 1 } } }],
-        processingStatusDistribution: [
-          { $group: { _id: '$orderProcessingStatus', count: { $sum: 1 } } }
-        ],
-        averageProcessingTime: [
-          { $match: {
-            status: 'delivered',
-            intakeAt: { $exists: true },
-            deliveredAt: { $exists: true }
-          } },
-          { $project: {
-            processingTime: {
-              $divide: [
-                { $subtract: ['$deliveredAt', '$intakeAt'] },
-                1000 * 60
-              ]
-            }
-          } },
-          { $group: { _id: null, avg: { $avg: '$processingTime' } } }
-        ]
+        statusDistribution: [{ $group: { _id: '$status', count: { $sum: 1 } } }]
       }
     }
   ]);
@@ -104,21 +85,17 @@ async function getDashboard() {
         businessName: 1,
         customerCount: { $size: '$customers' },
         orderCount: { $size: '$orders' },
-        monthlyRevenue: {
-          $reduce: {
-            input: {
-              $filter: {
-                input: '$orders',
-                cond: { $gte: ['$$this.createdAt', thisMonthStart] }
-              }
-            },
-            initialValue: 0,
-            in: { $add: ['$$value', { $ifNull: ['$$this.actualTotal', 0] }] }
+        monthlyOrders: {
+          $size: {
+            $filter: {
+              input: '$orders',
+              cond: { $gte: ['$$this.createdAt', thisMonthStart] }
+            }
           }
         }
       }
     },
-    { $sort: { monthlyRevenue: -1 } },
+    { $sort: { monthlyOrders: -1 } },
     { $limit: 10 }
   ]);
 
@@ -128,13 +105,13 @@ async function getDashboard() {
     activeAffiliates: await Affiliate.countDocuments({ isActive: true }),
     totalCustomers: await Customer.countDocuments(),
     ordersInProgress: await Order.countDocuments({
-      status: { $in: ['in_progress', 'processed', 'ready_for_pickup', 'picked_up'] }
+      status: { $in: ['pending', 'in_progress', 'out_for_delivery'] }
     }),
-    completedOrders: await Order.countDocuments({ status: 'delivered' }),
-    // Orders stuck in processing for > 24h — surfaces queue backups.
+    completedOrders: await Order.countDocuments({ status: 'complete' }),
+    // Orders stuck in progress for > 24h — surfaces queue backups.
     processingDelays: await Order.countDocuments({
       status: 'in_progress',
-      intakeAt: { $lte: new Date(Date.now() - 24 * 60 * 60 * 1000) }
+      createdAt: { $lte: new Date(Date.now() - 24 * 60 * 60 * 1000) }
     })
   };
 
@@ -164,9 +141,7 @@ async function getDashboard() {
       today: orderStats[0].today[0]?.count || 0,
       thisWeek: orderStats[0].thisWeek[0]?.count || 0,
       thisMonth: orderStats[0].thisMonth[0]?.count || 0,
-      statusDistribution: orderStats[0].statusDistribution,
-      processingStatusDistribution: orderStats[0].processingStatusDistribution,
-      averageProcessingTime: orderStats[0].averageProcessingTime[0]?.avg || 0
+      statusDistribution: orderStats[0].statusDistribution
     },
     operatorPerformance,
     affiliatePerformance,
@@ -179,73 +154,26 @@ async function getOrderAnalytics({ startDate, endDate, groupBy = 'day' }) {
   const { start, end } = resolveDateRange({ startDate, endDate });
   const format = GROUP_BY_FORMAT[groupBy] || GROUP_BY_FORMAT.day;
 
+  // Money/weight/processing-time moved to Cents (external) in Phase 1.
+  // The timeline now reports order counts by status only.
   const timeline = await Order.aggregate([
     { $match: { createdAt: { $gte: start, $lte: end } } },
-    {
-      $addFields: {
-        completionTimeMinutes: {
-          $cond: [
-            {
-              $and: [
-                { $eq: ['$status', 'delivered'] },
-                { $ne: ['$processingStarted', null] },
-                { $ne: ['$processingCompleted', null] }
-              ]
-            },
-            { $divide: [{ $subtract: ['$processingCompleted', '$processingStarted'] }, 60000] },
-            null
-          ]
-        }
-      }
-    },
     {
       $group: {
         _id: { $dateToString: { format, date: '$createdAt' } },
         totalOrders: { $sum: 1 },
-        completedOrders: { $sum: { $cond: [{ $eq: ['$status', 'delivered'] }, 1, 0] } },
-        cancelledOrders: { $sum: { $cond: [{ $eq: ['$status', 'cancelled'] }, 1, 0] } },
-        totalRevenue: { $sum: '$actualTotal' },
-        averageOrderValue: { $avg: '$actualTotal' },
-        averageProcessingTime: {
-          $avg: { $cond: [{ $eq: ['$status', 'delivered'] }, '$completionTimeMinutes', null] }
-        },
-        totalWeight: { $sum: '$actualWeight' }
+        completedOrders: { $sum: { $cond: [{ $eq: ['$status', 'complete'] }, 1, 0] } },
+        cancelledOrders: { $sum: { $cond: [{ $eq: ['$status', 'cancelled'] }, 1, 0] } }
       }
     },
     { $sort: { _id: 1 } }
   ]);
 
-  const processingTimeDistribution = await Order.aggregate([
-    {
-      $match: {
-        processingTimeMinutes: { $exists: true },
-        createdAt: { $gte: start, $lte: end }
-      }
-    },
-    {
-      $bucket: {
-        groupBy: '$processingTimeMinutes',
-        boundaries: [0, 30, 60, 90, 120, 180, 240, 300],
-        default: 'Other',
-        output: { count: { $sum: 1 }, orders: { $push: '$orderId' } }
-      }
-    }
-  ]);
-
-  const nonZeroProcessing = timeline.filter(item => item.averageProcessingTime > 0);
   return {
     timeline,
-    processingTimeDistribution,
     summary: {
       totalOrders: timeline.reduce((sum, item) => sum + item.totalOrders, 0),
-      completedOrders: timeline.reduce((sum, item) => sum + item.completedOrders, 0),
-      totalRevenue: timeline.reduce((sum, item) => sum + (item.totalRevenue || 0), 0),
-      averageOrderValue: timeline.length
-        ? timeline.reduce((sum, item) => sum + (item.averageOrderValue || 0), 0) / timeline.length
-        : 0,
-      averageProcessingTime: nonZeroProcessing.length
-        ? nonZeroProcessing.reduce((sum, item) => sum + (item.averageProcessingTime || 0), 0) / nonZeroProcessing.length
-        : 0
+      completedOrders: timeline.reduce((sum, item) => sum + item.completedOrders, 0)
     }
   };
 }
@@ -287,20 +215,10 @@ async function getOperatorAnalytics({ startDate, endDate }) {
             $size: {
               $filter: {
                 input: '$periodOrders',
-                cond: { $eq: ['$$this.orderProcessingStatus', 'completed'] }
+                cond: { $eq: ['$$this.status', 'complete'] }
               }
             }
-          },
-          averageProcessingTime: { $avg: '$periodOrders.processingTimeMinutes' },
-          qualityChecksPassed: {
-            $size: {
-              $filter: {
-                input: '$periodOrders',
-                cond: { $eq: ['$$this.qualityCheckPassed', true] }
-              }
-            }
-          },
-          totalProcessingTime: { $sum: '$periodOrders.processingTimeMinutes' }
+          }
         }
       }
     },
@@ -311,13 +229,6 @@ async function getOperatorAnalytics({ startDate, endDate }) {
             { $eq: ['$metrics.totalOrders', 0] },
             0,
             { $divide: ['$metrics.completedOrders', '$metrics.totalOrders'] }
-          ]
-        },
-        'metrics.qualityPassRate': {
-          $cond: [
-            { $eq: ['$metrics.completedOrders', 0] },
-            0,
-            { $divide: ['$metrics.qualityChecksPassed', '$metrics.completedOrders'] }
           ]
         }
       }
@@ -337,9 +248,7 @@ async function getOperatorAnalytics({ startDate, endDate }) {
     {
       $group: {
         _id: '$operator.workStation',
-        totalOrders: { $sum: 1 },
-        averageProcessingTime: { $avg: '$processingTimeMinutes' },
-        totalProcessingTime: { $sum: '$processingTimeMinutes' }
+        totalOrders: { $sum: 1 }
       }
     }
   ]);
@@ -394,14 +303,11 @@ async function getAffiliateAnalytics({ startDate, endDate }) {
               $filter: { input: '$customers', cond: { $eq: ['$$this.isActive', true] } }
             }
           },
-          totalOrders: { $size: '$periodOrders' },
-          totalRevenue: { $sum: '$periodOrders.actualTotal' },
-          totalCommission: { $sum: '$periodOrders.affiliateCommission' },
-          averageOrderValue: { $avg: '$periodOrders.actualTotal' }
+          totalOrders: { $size: '$periodOrders' }
         }
       }
     },
-    { $sort: { 'metrics.totalRevenue': -1 } }
+    { $sort: { 'metrics.totalOrders': -1 } }
   ]);
 
   return { affiliates };
@@ -410,7 +316,6 @@ async function getAffiliateAnalytics({ startDate, endDate }) {
 async function generateOrdersReport({ startDate, endDate }) {
   const { start, end } = resolveDateRange({ startDate, endDate });
   const orders = await Order.find({ createdAt: { $gte: start, $lte: end } })
-    .populate('assignedOperator', 'firstName lastName operatorId')
     .populate('affiliateId', 'firstName lastName businessName')
     .lean();
 
@@ -421,13 +326,7 @@ async function generateOrdersReport({ startDate, endDate }) {
       ? `${order.affiliateId.firstName} ${order.affiliateId.lastName}`
       : 'N/A',
     status: order.status,
-    processingStatus: order.orderProcessingStatus,
-    operator: order.assignedOperator
-      ? `${order.assignedOperator.firstName} ${order.assignedOperator.lastName}`
-      : 'Unassigned',
-    processingTime: order.processingTimeMinutes || 0,
-    actualWeight: order.actualWeight || 0,
-    actualTotal: order.actualTotal || 0,
+    bagId: order.bagId,
     createdAt: order.createdAt
   }));
 }
@@ -444,9 +343,7 @@ async function generateOperatorsReport({ startDate, endDate }) {
         $group: {
           _id: null,
           totalOrders: { $sum: 1 },
-          completedOrders: { $sum: { $cond: [{ $eq: ['$orderProcessingStatus', 'completed'] }, 1, 0] } },
-          averageProcessingTime: { $avg: '$processingTimeMinutes' },
-          totalProcessingTime: { $sum: '$processingTimeMinutes' }
+          completedOrders: { $sum: { $cond: [{ $eq: ['$status', 'complete'] }, 1, 0] } }
         }
       }
     ]);
@@ -458,8 +355,6 @@ async function generateOperatorsReport({ startDate, endDate }) {
       isActive: operator.isActive,
       totalOrders: orderStats[0]?.totalOrders || 0,
       completedOrders: orderStats[0]?.completedOrders || 0,
-      averageProcessingTime: orderStats[0]?.averageProcessingTime || 0,
-      totalProcessingTime: orderStats[0]?.totalProcessingTime || 0,
       qualityScore: operator.qualityScore
     });
   }
@@ -477,9 +372,7 @@ async function generateAffiliatesReport({ startDate, endDate }) {
       {
         $group: {
           _id: null,
-          totalOrders: { $sum: 1 },
-          totalRevenue: { $sum: '$actualTotal' },
-          totalCommission: { $sum: '$affiliateCommission' }
+          totalOrders: { $sum: 1 }
         }
       }
     ]);
@@ -492,8 +385,6 @@ async function generateAffiliatesReport({ startDate, endDate }) {
       businessName: affiliate.businessName,
       customerCount,
       totalOrders: stats[0]?.totalOrders || 0,
-      totalRevenue: stats[0]?.totalRevenue || 0,
-      totalCommission: stats[0]?.totalCommission || 0,
       isActive: affiliate.isActive
     });
   }
@@ -513,7 +404,6 @@ async function generateComprehensiveReport({ startDate, endDate }) {
     affiliates,
     summary: {
       totalOrders: orders.length,
-      totalRevenue: orders.reduce((sum, order) => sum + order.actualTotal, 0),
       activeOperators: operators.filter(op => op.isActive).length,
       activeAffiliates: affiliates.filter(aff => aff.isActive).length
     }

@@ -1,16 +1,23 @@
-// Order Model for WaveMAX Laundry Affiliate Program
+// Order Model — slim state record (Phase 1 PR 3, spec §6).
 //
-// Redesigned per docs/superpowers/specs/2026-06-08-invite-bag-workflow-redesign-design.md §4.4:
-// orders are created at store intake (one durable bag = one order), priced from
-// actualWeight only (no customer estimate exists), and move through
-// in_progress -> processed -> ready_for_pickup -> picked_up -> delivered.
-// Payment lives entirely in Cents (external) — orders carry no payment state.
-// readyForPickupAt has a single writer — orderReadyGateService.applyReadyGate
-// (never this pre-save, never a direct PUT).
+// The order is a thin bag-tracking state record: bag linkage, a 4-state
+// status, and a {at, by, role} stamp per scan gate. ALL money, weight,
+// pricing, payment, and commission live externally in Cents — this model
+// holds none of it (those fields + the pricing/lifecycle pre-save hooks were
+// removed; recoverable on the phase2-reference tag).
+//
+// `by` is a String, not an ObjectId: partners scan (affiliateId) and operators
+// scan (Operator _id) — `role` ('affiliate' | 'operator') disambiguates.
 
 const mongoose = require('mongoose');
 const { v4: uuidv4 } = require('uuid');
-const SystemConfig = require('./SystemConfig');
+
+// Per-scan stamp: who scanned, in what role, when.
+const scanEventSchema = new mongoose.Schema({
+  at: { type: Date },
+  by: { type: String },                 // affiliateId OR Operator _id (as string)
+  role: { type: String, enum: ['affiliate', 'operator'] }
+}, { _id: false });
 
 const orderSchema = new mongoose.Schema({
   orderId: {
@@ -21,220 +28,51 @@ const orderSchema = new mongoose.Schema({
   customerId: { type: String, required: true, ref: 'Customer' },
   affiliateId: { type: String, required: true, ref: 'Affiliate' },
 
-  // Durable bag reference (one bag = one order) — design §4.1 "one identifier per role":
+  // Durable bag references (one bag = one order) — design §6.
   bagId: { type: String, required: true, ref: 'Bag', index: true },  // == Bag.bagId (BAG-uuid); the JOIN key
   bagToken: { type: String, index: true },                           // == Bag.token (32 hex); denormalized SCAN key
 
-  // Order status
+  // 4-state scan-gate machine (spec §3). pending is the birth state.
   status: {
     type: String,
-    enum: ['in_progress', 'processed', 'ready_for_pickup', 'picked_up', 'delivered', 'cancelled'],
-    default: 'in_progress'
+    enum: ['pending', 'in_progress', 'out_for_delivery', 'complete', 'cancelled'],
+    default: 'pending'
   },
 
-  // Laundry details
-  actualWeight: Number,
-  washInstructions: String,
+  // Per-scan stamps (one per gate):
+  pickup: scanEventSchema,        // scan 1 — partner pickup -> pending (creation)
+  intake: scanEventSchema,        // scan 2 — store intake   -> in_progress
+  storePickup: scanEventSchema,   // scan 3 — store pickup    -> out_for_delivery
+  delivery: scanEventSchema,      // scan 4 — partner delivery-> complete
 
-  // Per-order intake snapshot (resets every order; lives here, NOT on the durable Bag)
-  intake: {
-    weight: { type: Number, default: 0 },
-    weighedAt: Date,
-    weighedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'Operator' },
-    processedAt: Date,
-    processedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'Operator' },
-    pickedUpAt: Date,                                                // operator scans bag OUT of store
-    pickedUpBy: { type: mongoose.Schema.Types.ObjectId, ref: 'Operator' },
-    deliveredAt: Date,                                               // affiliate scans at customer door
-    deliveredBy: { type: String, ref: 'Affiliate' },                 // affiliateId string
-    addOnFormPlaced: { type: Boolean, default: false },              // operator ack: fresh form in pocket
-    addOnFormPlacedAt: Date
-  },
+  // Manual payment confirmation at store-pickup — a flag only (no payment data;
+  // money lives in Cents). Set when the operator checks the payment box.
+  paymentConfirmedManually: { type: Boolean, default: false },
 
-  // One-element bags[] kept as an array so the 3-stage scanner can iterate.
-  // The reference field is bagToken — NEVER bagId — and carries Bag.token (32 hex).
-  bags: [{
-    bagToken: { type: String, required: true, index: true },
-    bagNumber: { type: Number, required: true },                     // always 1 (one bag = one order)
-    status: {
-      type: String,
-      enum: ['intake', 'processed', 'picked_up', 'delivered'],
-      default: 'intake'
-    },
-    weight: { type: Number, default: 0 },
-    scannedAt: { intake: Date, processed: Date, picked_up: Date, delivered: Date },
-    scannedBy: {
-      intake: { type: mongoose.Schema.Types.ObjectId, ref: 'Operator' },
-      processed: { type: mongoose.Schema.Types.ObjectId, ref: 'Operator' },
-      picked_up: { type: mongoose.Schema.Types.ObjectId, ref: 'Operator' },
-      delivered: { type: String, ref: 'Affiliate' }                  // affiliate door-scan
-    }
-  }],
+  // Terminal timestamps. completedAt is the 4h delivery-rescan reference.
+  completedAt: Date,
+  cancelledAt: Date,
 
-  // Add-on services — entered by the operator at intake from the paper form
-  addOns: {
-    premiumDetergent: { type: Boolean, default: false },
-    fabricSoftener: { type: Boolean, default: false },
-    stainRemover: { type: Boolean, default: false }
-  },
-  addOnTotal: { type: Number, default: 0 },
-  addOnsEnteredBy: { type: mongoose.Schema.Types.ObjectId, ref: 'Operator' },
-  addOnsEnteredAt: Date,
-  freshAddOnsFormPlaced: { type: Boolean, default: false },          // operator ack: fresh form in pocket
-  freshAddOnsFormAckBy: { type: mongoose.Schema.Types.ObjectId, ref: 'Operator' },
-  freshAddOnsFormAckAt: Date,
-
-  // Pricing
-  baseRate: { type: Number },                                        // per-pound WDF rate from SystemConfig
-  feeBreakdown: {
-    numberOfBags: Number,
-    minimumFee: Number,
-    perBagFee: Number,
-    totalFee: Number,                                                // the actual fee charged
-    minimumApplied: Boolean
-  },
-  actualTotal: Number,
-  wdfCreditApplied: { type: Number, default: 0 },                    // carry-in credit applied at intake
-  wdfCreditGenerated: { type: Number, default: 0 },                  // always 0 — no estimate variance exists
-  affiliateCommission: { type: Number, default: 0 },
-
-  // Snapshot of Affiliate.affiliateType === 'location' at order creation
-  // (orderIntakeService sets it where the affiliate is already in hand).
-  // When true the pre-save computes affiliateCommission to 0 — WDF share AND
-  // delivery-fee share — on every recompute, so weight edits can't resurrect
-  // a commission for a WaveMAX-operated collection point.
-  zeroCommission: { type: Boolean, default: false },
-
-  // Commission realization (realized at 'delivered', not 'picked_up')
-  commissionRealized: { type: Boolean, default: false },
-  commissionRealizedAt: Date,
-
-  // Operator processing fields
-  assignedOperator: { type: mongoose.Schema.Types.ObjectId, ref: 'Operator' },
-  operatorNotes: String,
-  qualityCheckPassed: { type: Boolean, default: null },
-  qualityCheckBy: { type: mongoose.Schema.Types.ObjectId, ref: 'Operator' },
-  qualityCheckNotes: String,
-  processingTimeMinutes: Number,
-
-  // WDF / delivery fee breakdown extras
-  wdfAmount: Number,
-  mdfAmount: Number,
-
-  // Proof of delivery (design §4.4)
-  proofOfDelivery: {
-    method: { type: String, enum: ['customer_pin', 'affiliate_code', 'reintake', 'manual_confirm'] },
-    confirmedByRole: { type: String, enum: ['customer', 'affiliate', 'operator', 'admin'] },
-    confirmedById: { type: String },                                 // customerId / affiliateId / operatorId
-    confirmedAt: Date,
-    geo: { type: { type: String, enum: ['Point'] }, coordinates: { type: [Number] } }, // [lng, lat], optional
-    photoKey: String,                                                // FUTURE hook — not built now
-    note: { type: String, maxlength: 500 }
-  },
-
-  // Test order flag for cleanup
-  isTestOrder: { type: Boolean, default: false },
-
-  // Lifecycle timestamps
-  createdAt: { type: Date, default: Date.now },
-  intakeAt: Date,                                                    // == createdAt for the new flow; explicit for clarity
-  processedAt: Date,
-  readyForPickupAt: Date,  // SOLE writer = orderReadyGateService.applyReadyGate — never this pre-save, never a direct PUT
-  pickedUpAt: Date,                                                  // operator scan-OUT
-  deliveredAt: Date,                                                 // renames completedAt
-  cancelledAt: Date
+  // Test order flag for cleanup.
+  isTestOrder: { type: Boolean, default: false }
 }, { timestamps: true });
 
-// Two-kiosk re-intake race backstop (PR 9): at most ONE open order per bag.
-// The intake guard is read-then-write; this partial unique index makes the
-// invariant a database guarantee — the race loser's E11000 is mapped to a
-// 409 order_already_open by orderIntakeService. Named explicitly so it never
-// collides with the plain field-level bagId index (which still serves the
-// $nin / closed-status lookups a partial index cannot).
+// At most ONE open order per bag (open = pending | in_progress | out_for_delivery).
+// Backstops the read-then-write open-order guard in the transition service: two
+// concurrent pickup scans race, exactly one save wins, the loser's E11000 maps
+// to a clean order_already_open. Named so it never collides with the plain
+// field-level bagId index (which serves closed-status lookups a partial cannot).
 orderSchema.index(
   { bagId: 1 },
   {
     unique: true,
     name: 'bagId_open_unique',
     partialFilterExpression: {
-      status: { $in: ['in_progress', 'processed', 'ready_for_pickup', 'picked_up'] }
+      status: { $in: ['pending', 'in_progress', 'out_for_delivery'] }
     }
   }
 );
 
-// Pricing + lifecycle pre-save engine (design §4.4 rewrite).
-// Pricing inputs (feeBreakdown, addOns, actualWeight, wdfCreditApplied) must be
-// set BEFORE the first .save() — this hook READS feeBreakdown.totalFee, it does
-// not compute the delivery fee (intake owns that via orderPricingService, PR 7).
-orderSchema.pre('save', async function(next) {
-  // Fetch current WDF rate from system config if not explicitly set
-  if (this.isNew && !this.baseRate) {
-    try {
-      this.baseRate = await SystemConfig.getValue('wdf_base_rate_per_pound', 1.25);
-    } catch (error) {
-      // If SystemConfig is not available, use default
-      this.baseRate = 1.25;
-    }
-  }
-
-  if (this.isNew && !this.intakeAt) {
-    this.intakeAt = this.createdAt || new Date();
-  }
-
-  // Add-on total — based on actualWeight ONLY (no estimate exists in the at-intake flow)
-  if (this.isNew || this.isModified('addOns') || this.isModified('actualWeight')) {
-    const weight = this.actualWeight || 0;
-    const selectedAddOns = Object.values(this.addOns || {}).filter(selected => selected === true).length;
-    this.addOnTotal = parseFloat((selectedAddOns * weight * 0.10).toFixed(2));
-  }
-
-  // Actual total / payment amount / commission — actualWeight only; fee READ from feeBreakdown
-  if (this.actualWeight &&
-      (this.isNew || this.isModified('actualWeight') || this.isModified('addOns') ||
-       this.isModified('feeBreakdown') || this.isModified('wdfCreditApplied') || this.isModified('baseRate'))) {
-    const totalFee = this.feeBreakdown?.totalFee || 0;
-    const wdfTotal = this.actualWeight * this.baseRate;
-    const subtotal = wdfTotal + totalFee + (this.addOnTotal || 0);
-    // Apply carry-in WDF credit (subtract if positive credit, add if negative/debit)
-    this.actualTotal = parseFloat((subtotal - (this.wdfCreditApplied || 0)).toFixed(2));
-    // Affiliate commission = (WDF x 10%) + delivery fee. Add-ons and credits are NOT included.
-    // Location affiliates (WaveMAX-operated collection points) earn nothing.
-    this.affiliateCommission = this.zeroCommission
-      ? 0
-      : parseFloat(((wdfTotal * 0.1) + totalFee).toFixed(2));
-    // No estimate-vs-actual variance exists in the at-intake flow.
-    this.wdfCreditGenerated = 0;
-  }
-
-  // Lifecycle timestamps, set-once. 'ready_for_pickup' is deliberately absent:
-  // readyForPickupAt has a single writer — orderReadyGateService.applyReadyGate
-  // (design §4.4 / settled §13 #3).
-  if (this.isModified('status')) {
-    const now = new Date();
-    switch (this.status) {
-    case 'processed':
-      if (!this.processedAt) this.processedAt = now;
-      break;
-    case 'picked_up':
-      if (!this.pickedUpAt) this.pickedUpAt = now;
-      break;
-    case 'delivered':
-      if (!this.deliveredAt) this.deliveredAt = now;
-      if (!this.commissionRealized) {
-        this.commissionRealized = true;
-        this.commissionRealizedAt = now;
-      }
-      break;
-    case 'cancelled':
-      if (!this.cancelledAt) this.cancelledAt = now;
-      break;
-    }
-  }
-
-  next();
-});
-
-// Create model
 const Order = mongoose.model('Order', orderSchema);
 
 module.exports = Order;
