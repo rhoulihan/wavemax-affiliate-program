@@ -897,7 +897,7 @@ apiV1Router.use('/affiliates', affiliateRoutes);
 apiV1Router.use('/affiliate-invites', require('./server/routes/affiliateInviteRoutes'));  // Public invite validate (invite-only onboarding)
 apiV1Router.use('/customers', customerRoutes);
 apiV1Router.use('/bags', require('./server/routes/bagRoutes'));  // Durable bags: mint/issue/labels/resolve/inventory
-apiV1Router.use('/bags', require('./server/routes/bagActionRoutes'));  // PR 9 — public code-gated bag actions
+apiV1Router.use('/scan', require('./server/routes/scanRoutes'));  // PR 4 — scan-session engine (auth-once, state-driven resolve/apply/undo)
 apiV1Router.use('/orders', orderRoutes);
 apiV1Router.use('/administrators', administratorRoutes);
 apiV1Router.use('/operators', operatorRoutes);

@@ -44,7 +44,14 @@
       "confirm": "Yes — start a new order"
     },
     "scan": {
-      "operatorCodeLabel": "Operator code"
+      "operatorCodeLabel": "Operator code",
+      "confirm": {
+        "createPending": "Start a new order for this bag?",
+        "advanceToInProgress": "Check this bag in at the store?",
+        "advanceToOutForDelivery": "Hand this bag back for delivery? (confirm payment)",
+        "advanceToComplete": "Mark this bag delivered?",
+        "deliveryRescan": "This bag was just delivered. Start a new order?"
+      }
     },
     "status": {
       "in_progress": "Your laundry is being processed",
