@@ -51,7 +51,28 @@
         "advanceToOutForDelivery": "Devolver esta sacola para entrega? (confirmar pagamento)",
         "advanceToComplete": "Marcar esta sacola como entregue?",
         "deliveryRescan": "Esta sacola acabou de ser entregue. Iniciar um novo pedido?"
-      }
+      },
+      "staffTitle": "Leitura da equipe",
+      "staffIntro": "Digite o seu código para ler esta sacola.",
+      "codePlaceholder": "Seu código",
+      "startSession": "Começar a ler",
+      "badCode": "Esse código não confere. Tente novamente.",
+      "lockedOut": "Tentativas em excesso. Tente novamente mais tarde.",
+      "paymentConfirmed": "Pagamento confirmado",
+      "yes": "Sim",
+      "no": "Não",
+      "applied": "Pronto — leia a próxima sacola.",
+      "scanNext": "Leia a próxima sacola.",
+      "confirmGeneric": "Aplicar esta leitura?",
+      "stateChanged": "O estado da sacola mudou — leia novamente.",
+      "undo": "Desfazer última leitura",
+      "undone": "Última leitura desfeita.",
+      "nothingToUndo": "Nada para desfazer.",
+      "sessionActiveUntil": "Sessão ativa até",
+      "sessionExpired": "Sua sessão expirou. Digite o seu código novamente.",
+      "endSession": "Encerrar sessão",
+      "notRegistered": "Sacola não registrada.",
+      "networkError": "Erro de rede — tente novamente."
     },
     "status": {
       "in_progress": "Sua roupa está sendo processada",
@@ -690,6 +711,29 @@
         "orderAlreadyOpen": "Já existe um pedido aberto para esta sacola",
         "bagNotFound": "Sacola não reconhecida"
       }
+    },
+    "scan": {
+      "heading": "Ler uma sacola",
+      "subheading": "Cada leitura move a sacola para a próxima etapa automaticamente.",
+      "tallyLabel": "Pedidos nesta sessão",
+      "legend": {
+        "intake": "Sacola nova → registre a entrada na loja.",
+        "outForDelivery": "Sacola registrada → devolva para entrega (confirmar pagamento).",
+        "complete": "Sacola em entrega → marque como entregue."
+      },
+      "paymentConfirmed": "Pagamento confirmado",
+      "yes": "Sim",
+      "no": "Não",
+      "undo": "Desfazer última leitura",
+      "applied": "Pronto",
+      "undone": "Última leitura desfeita",
+      "nothingToUndo": "Nada para desfazer",
+      "stateChanged": "O estado da sacola mudou — leia novamente",
+      "notRegistered": "Sacola não registrada",
+      "networkError": "Erro de rede — tente novamente.",
+      "confirmGeneric": "Aplicar esta leitura?",
+      "successTitle": "Sucesso",
+      "errorTitle": "Erro"
     }
   },
   "administrator": {

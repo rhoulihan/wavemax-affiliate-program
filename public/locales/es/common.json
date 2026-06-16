@@ -51,7 +51,28 @@
         "advanceToOutForDelivery": "¿Devolver esta bolsa para entrega? (confirmar pago)",
         "advanceToComplete": "¿Marcar esta bolsa como entregada?",
         "deliveryRescan": "Esta bolsa acaba de entregarse. ¿Iniciar un nuevo pedido?"
-      }
+      },
+      "staffTitle": "Escaneo del personal",
+      "staffIntro": "Ingrese su código para escanear esta bolsa.",
+      "codePlaceholder": "Su código",
+      "startSession": "Comenzar a escanear",
+      "badCode": "Ese código no coincide. Inténtelo de nuevo.",
+      "lockedOut": "Demasiados intentos. Inténtelo de nuevo más tarde.",
+      "paymentConfirmed": "Pago confirmado",
+      "yes": "Sí",
+      "no": "No",
+      "applied": "Listo — escanee la siguiente bolsa.",
+      "scanNext": "Escanee la siguiente bolsa.",
+      "confirmGeneric": "¿Aplicar este escaneo?",
+      "stateChanged": "El estado de la bolsa cambió — vuelva a escanear.",
+      "undo": "Deshacer último escaneo",
+      "undone": "Último escaneo deshecho.",
+      "nothingToUndo": "Nada que deshacer.",
+      "sessionActiveUntil": "Sesión activa hasta",
+      "sessionExpired": "Su sesión expiró. Ingrese su código de nuevo.",
+      "endSession": "Finalizar sesión",
+      "notRegistered": "Bolsa no registrada.",
+      "networkError": "Error de red — inténtelo de nuevo."
     },
     "status": {
       "in_progress": "Tu ropa se está procesando",
@@ -690,6 +711,29 @@
         "orderAlreadyOpen": "Ya existe un pedido abierto para esta bolsa",
         "bagNotFound": "Bolsa no reconocida"
       }
+    },
+    "scan": {
+      "heading": "Escanear una bolsa",
+      "subheading": "Cada escaneo mueve la bolsa a su siguiente paso automáticamente.",
+      "tallyLabel": "Pedidos en esta sesión",
+      "legend": {
+        "intake": "Bolsa nueva → regístrela en la tienda.",
+        "outForDelivery": "Bolsa registrada → devuélvala para entrega (confirmar pago).",
+        "complete": "Bolsa en entrega → márquela como entregada."
+      },
+      "paymentConfirmed": "Pago confirmado",
+      "yes": "Sí",
+      "no": "No",
+      "undo": "Deshacer último escaneo",
+      "applied": "Listo",
+      "undone": "Último escaneo deshecho",
+      "nothingToUndo": "Nada que deshacer",
+      "stateChanged": "El estado de la bolsa cambió — vuelva a escanear",
+      "notRegistered": "Bolsa no registrada",
+      "networkError": "Error de red — inténtelo de nuevo.",
+      "confirmGeneric": "¿Aplicar este escaneo?",
+      "successTitle": "Éxito",
+      "errorTitle": "Error"
     }
   },
   "administrator": {
