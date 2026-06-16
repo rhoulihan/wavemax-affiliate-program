@@ -134,9 +134,10 @@ describe('Location quarantine middleware', () => {
         expect(response.headers.location || '').not.toMatch(/wavemaxlaundry\.com/);
       });
 
-      it('allows /customer-login-embed.html', async () => {
-        // (was customer-register-embed.html, retired in PR 11 — claim-only registration)
-        const response = await request(app).get('/customer-login-embed.html').redirects(0);
+      it('allows /claim-embed.html', async () => {
+        // The customer surface is now bag-claim registration only
+        // (customer login/dashboard retired in Phase 1 PR 6).
+        const response = await request(app).get('/claim-embed.html').redirects(0);
         expect(response.headers.location || '').not.toMatch(/wavemaxlaundry\.com/);
       });
 

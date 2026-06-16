@@ -3,7 +3,6 @@
 const RefreshToken = require('../models/RefreshToken');
 const TokenBlacklist = require('../models/TokenBlacklist');
 const Affiliate = require('../models/Affiliate');
-const Customer = require('../models/Customer');
 const Administrator = require('../models/Administrator');
 const Operator = require('../models/Operator');
 const encryptionUtil = require('../utils/encryption');
@@ -486,115 +485,8 @@ exports.operatorLogin = async (req, res) => {
   }
 };
 
-/**
- * Customer login controller
- */
-exports.customerLogin = async (req, res) => {
-  try {
-    const { username, emailOrUsername, password } = req.body;
-
-    // Support both the old 'username' field and new 'emailOrUsername' field
-    const loginIdentifier = emailOrUsername || username;
-
-    if (!loginIdentifier) {
-      return res.status(400).json({
-        success: false,
-        message: 'Username or email is required'
-      });
-    }
-
-    // Find customer by username or email (case-insensitive)
-    const customer = await Customer.findOne({
-      $or: [
-        { username: { $regex: new RegExp('^' + escapeRegex(loginIdentifier) + '$', 'i') } },
-        { email: loginIdentifier.toLowerCase() }
-      ]
-    });
-
-    if (!customer) {
-      return res.status(401).json({
-        success: false,
-        message: 'Invalid username/email or password'
-      });
-    }
-
-    // H-5: account-level lockout. Check BEFORE password verification.
-    // prod-lockdown-2026-05-20.
-    if (customer.isLocked) {
-      logLoginAttempt(false, 'customer', loginIdentifier, req, 'Account locked');
-      return res.status(403).json({
-        success: false,
-        message: 'Account is locked due to multiple failed login attempts. Please try again later.'
-      });
-    }
-
-    // Verify password
-    const isPasswordValid = encryptionUtil.verifyPassword(
-      password,
-      customer.passwordSalt,
-      customer.passwordHash
-    );
-
-    if (!isPasswordValid) {
-      await customer.incLoginAttempts();
-      logLoginAttempt(false, 'customer', loginIdentifier, req, 'Invalid password');
-      return res.status(401).json({
-        success: false,
-        message: 'Invalid username/email or password'
-      });
-    }
-
-    // Reset failed-attempt counter on success (also sets lastLogin)
-    await customer.resetLoginAttempts();
-
-    // Find affiliate
-    const affiliate = await Affiliate.findOne({ affiliateId: customer.affiliateId });
-    logger.info('Customer affiliateId:', customer.affiliateId);
-    logger.info('Found affiliate:', affiliate ? affiliate.affiliateId : 'null');
-    logger.info('Affiliate fees:', affiliate ? `min: ${affiliate.minimumDeliveryFee}, per-bag: ${affiliate.perBagDeliveryFee}` : 'null');
-
-    // Generate token
-    const token = generateToken({
-      id: customer._id,
-      customerId: customer.customerId,
-      affiliateId: customer.affiliateId,
-      role: 'customer'
-    });
-
-    const responseData = {
-      success: true,
-      token,
-      customer: {
-        customerId: customer.customerId,
-        firstName: customer.firstName,
-        lastName: customer.lastName,
-        email: customer.email,
-        phone: customer.phone,
-        address: customer.address,
-        city: customer.city,
-        state: customer.state,
-        zipCode: customer.zipCode,
-        affiliateId: customer.affiliateId,
-        numberOfBags: customer.numberOfBags || 1,
-        affiliate: affiliate ? {
-          affiliateId: affiliate.affiliateId,
-          name: `${affiliate.firstName} ${affiliate.lastName}`,
-          minimumDeliveryFee: affiliate.minimumDeliveryFee,
-          perBagDeliveryFee: affiliate.perBagDeliveryFee
-        } : null
-      }
-    };
-
-    logger.info('Sending customer login response:', JSON.stringify(responseData.customer, null, 2));
-    res.status(200).json(responseData);
-  } catch (error) {
-    logger.error('Customer login error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'An error occurred during login'
-    });
-  }
-};
+// Phase 1: customer login removed — the customer surface is bag-claim
+// registration only (no customer portal). Preserved on `phase2-reference`.
 
 /**
  * Request password reset

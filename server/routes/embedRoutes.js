@@ -24,9 +24,6 @@ router.get('/affiliate-login-embed.html', serveHTMLWithNonce('affiliate-login-em
 // Affiliate Register
 router.get('/affiliate-register-embed.html', serveHTMLWithNonce('affiliate-register-embed.html'));
 
-// Customer Login
-router.get('/customer-login-embed.html', serveHTMLWithNonce('customer-login-embed.html'));
-
 // Forgot Password
 router.get('/forgot-password-embed.html', serveHTMLWithNonce('forgot-password-embed.html'));
 
@@ -44,12 +41,6 @@ router.get('/embed-landing.html', serveHTMLWithNonce('embed-landing.html'));
 
 // Affiliate Dashboard
 router.get('/affiliate-dashboard-embed.html', serveHTMLWithNonce('affiliate-dashboard-embed.html'));
-
-// Order Confirmation
-router.get('/order-confirmation-embed.html', serveHTMLWithNonce('order-confirmation-embed.html'));
-
-// Customer Dashboard
-router.get('/customer-dashboard-embed.html', serveHTMLWithNonce('customer-dashboard-embed.html'));
 
 // Affiliate Success
 router.get('/affiliate-success-embed.html', serveHTMLWithNonce('affiliate-success-embed.html'));

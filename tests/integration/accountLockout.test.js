@@ -1,4 +1,5 @@
-// Per-account login lockout for Affiliate + Customer.
+// Per-account login lockout for Affiliate. (Customer login was removed in
+// Phase 1 — the customer surface is registration-only.)
 //
 // Mirrors the existing Administrator lockout pattern (5 failed attempts in
 // the window → 2h lock; success resets the counter). Closes finding H-5
@@ -104,64 +105,6 @@ describe('Per-account login lockout (H-5)', () => {
       const final = await Affiliate.findOne({ username });
       expect(final.loginAttempts).toBe(0);
       expect(final.lockUntil).toBeFalsy();
-    });
-  });
-
-  describe('Customer', () => {
-    const username = 'lockout-test-cust';
-    const goodPassword = getStrongPassword('customer-lockout', 1);
-
-    async function createCustomer() {
-      const { hash, salt } = encryptionUtil.hashPassword(goodPassword);
-      await Customer.create({
-        customerId: 'CUST-LOCKOUT-1',
-        affiliateId: 'AFF-LOCKOUT-1',
-        firstName: 'Lock', lastName: 'Cust',
-        email: 'lockout-cust@example.com',
-        phone: '512-555-0002',
-        username,
-        passwordSalt: salt,
-        passwordHash: hash,
-        address: '1 Test', city: 'Austin',
-        state: 'TX', zipCode: '78753',
-        serviceFrequency: 'weekly',
-        languagePreference: 'en',
-        isActive: true
-      });
-    }
-
-    async function attemptLogin(password) {
-      return agent.post('/api/v1/auth/customer/login')
-        .set('x-csrf-token', csrfToken)
-        .send({ username, password });
-    }
-
-    it('locks the customer account after 5 failed attempts', async () => {
-      await createCustomer();
-
-      for (let i = 1; i <= 5; i++) {
-        const r = await attemptLogin('wrong');
-        expect(r.status).toBe(401);
-      }
-
-      const r = await attemptLogin(goodPassword);
-      expect(r.status).toBe(403);
-      expect(r.body.message).toMatch(/locked/i);
-
-      const fresh = await Customer.findOne({ username });
-      expect(fresh.lockUntil).toBeInstanceOf(Date);
-      expect(fresh.loginAttempts).toBeGreaterThanOrEqual(5);
-    });
-
-    it('does not lock when correct password is given before the threshold', async () => {
-      await createCustomer();
-      for (let i = 1; i <= 4; i++) await attemptLogin('wrong');
-      const good = await attemptLogin(goodPassword);
-      expect(good.status).toBe(200);
-
-      const fresh = await Customer.findOne({ username });
-      expect(fresh.lockUntil).toBeFalsy();
-      expect(fresh.loginAttempts).toBe(0);
     });
   });
 });

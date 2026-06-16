@@ -14,7 +14,7 @@ function isAnyUserAuthenticated() {
     }
     
     // Check all possible user types
-    const userTypes = ['administrator', 'affiliate', 'customer', 'operator'];
+    const userTypes = ['administrator', 'affiliate', 'operator'];
     return userTypes.some(type => window.SessionManager.isAuthenticated(type));
 }
 
@@ -32,7 +32,7 @@ function getAuthenticatedUserType() {
         return null;
     }
     
-    const userTypes = ['administrator', 'affiliate', 'customer', 'operator'];
+    const userTypes = ['administrator', 'affiliate', 'operator'];
     return userTypes.find(type => window.SessionManager.isAuthenticated(type)) || null;
 }
 
@@ -49,14 +49,11 @@ const EMBED_PAGES = {
     '/affiliate-login': '/affiliate-login-embed.html',
     '/affiliate-register': '/affiliate-register-embed.html',
     '/affiliate-dashboard': '/affiliate-dashboard-embed.html',
-    '/customer-login': '/customer-login-embed.html',
     '/claim': '/claim-embed.html',
     '/forgot-password': '/forgot-password-embed.html',
     '/reset-password': '/reset-password-embed.html',
     '/administrator-login': '/administrator-login-embed.html',
     '/administrator-dashboard': '/administrator-dashboard-embed.html',
-    '/order-confirmation': '/order-confirmation-embed.html',
-    '/customer-dashboard': '/customer-dashboard-embed.html',
     '/affiliate-success': '/affiliate-success-embed.html',
     '/affiliate-landing': '/affiliate-landing-embed.html',
     // Website pages (content-only for iframe embedding)
@@ -85,9 +82,8 @@ function getRouteFromUrl() {
     // Handle legacy login parameter for backward compatibility with emails
     if (!route && params.get('login')) {
         const loginType = params.get('login');
-        if (loginType === 'customer') {
-            route = '/customer-login';
-        } else if (loginType === 'affiliate') {
+        // Customer login removed (Phase 1: registration-only customer surface).
+        if (loginType === 'affiliate') {
             route = '/affiliate-login';
         } else if (loginType === 'administrator') {
             route = '/administrator-login';
@@ -483,7 +479,6 @@ async function loadPage(route) {
         // Don't persist certain pages that require specific parameters or are entry points
         const excludedRoutes = [
             '/affiliate-landing',  // Requires specific affiliate code
-            '/customer-login',     // Entry point that may have affiliate ID
             '/claim',              // Requires a ?bag= token parameter
             '/affiliate-login',    // Entry point
             '/affiliate-register', // Entry point
@@ -582,14 +577,11 @@ function initializePageScripts(route) {
         '/affiliate-login': ['/assets/js/i18n.js', '/assets/js/language-switcher.js', '/assets/js/modal-utils.js', '/assets/js/csrf-utils.js', '/assets/js/swirl-spinner.js', '/assets/js/api-client.js', '/assets/js/affiliate-login.js'],
         '/affiliate-register': ['/assets/js/embed-config.js', '/assets/js/i18n.js', '/assets/js/language-switcher.js', '/assets/js/modal-utils.js', '/assets/js/errorHandler.js', '/assets/js/csrf-utils.js', '/assets/js/swirl-spinner.js', '/assets/js/api-client.js', '/assets/js/address-validation-component.js', '/assets/js/form-validation.js', '/assets/js/pricing-preview-component.js', 'https://cdnjs.cloudflare.com/ajax/libs/awesomplete/1.1.5/awesomplete.min.js', '/assets/js/service-area-autocomplete.js', '/assets/js/affiliate-register-init.js', '/assets/js/affiliate-register-page-init.js', '/assets/js/affiliate-register-invite.js'],
         '/affiliate-dashboard': ['/assets/js/i18n.js', '/assets/js/language-switcher.js', '/assets/js/address-validation-component.js', '/assets/js/pricing-preview-component.js', 'https://cdnjs.cloudflare.com/ajax/libs/awesomplete/1.1.5/awesomplete.min.js', '/assets/js/service-area-autocomplete.js', '/assets/js/csrf-utils.js', '/assets/js/api-client.js', '/assets/js/affiliate-dashboard-init.js', '/assets/js/affiliate-dashboard-embed.js', '/assets/js/affiliate-dashboard-i18n.js'],
-        '/customer-login': ['/assets/js/embed-config.js', '/assets/js/i18n.js', '/assets/js/language-switcher.js', '/assets/js/modal-utils.js', '/assets/js/csrf-utils.js', '/assets/js/swirl-spinner.js', '/assets/js/api-client.js', '/assets/js/customer-login-init.js?v=20260613'],
         '/claim': ['/assets/js/i18n.js', '/assets/js/language-switcher.js', '/assets/js/scan-session.js', '/assets/js/claim.js'],
         '/forgot-password': ['/assets/js/embed-config.js', '/assets/js/i18n.js', '/assets/js/language-switcher.js', '/assets/js/modal-utils.js', '/assets/js/csrf-utils.js', '/assets/js/swirl-spinner.js', '/assets/js/api-client.js', '/assets/js/forgot-password-init.js?v=20260613'],
         '/reset-password': ['/assets/js/embed-config.js', '/assets/js/i18n.js', '/assets/js/language-switcher.js', '/assets/js/modal-utils.js', '/assets/js/csrf-utils.js', '/assets/js/swirl-spinner.js', '/assets/js/api-client.js', '/assets/js/reset-password-init.js?v=20260613'],
         '/administrator-login': ['/assets/js/i18n.js', '/assets/js/language-switcher.js', '/assets/js/csrf-utils.js', '/assets/js/api-client.js', '/assets/js/administrator-login-init.js'],
         '/administrator-dashboard': ['https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js', '/assets/js/i18n.js', '/assets/js/language-switcher.js', '/assets/js/modal-utils.js', '/assets/js/errorHandler.js', '/assets/js/csrf-utils.js', '/assets/js/api-client.js', '/assets/js/password-validator-component.js', '/assets/js/qrcode.min.js', 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js', '/assets/js/label-print-utils.js', '/assets/js/administrator-dashboard-init.js?v=20260613', '/assets/js/admin-operator-fix.js', '/assets/js/administrator-dashboard-i18n.js'],
-        '/order-confirmation': ['/assets/js/i18n.js', '/assets/js/language-switcher.js', '/assets/js/order-confirmation-init.js'],
-        '/customer-dashboard': ['/assets/js/i18n.js', '/assets/js/language-switcher.js', '/assets/js/modal-utils.js', '/assets/js/csrf-utils.js', '/assets/js/swirl-spinner.js', '/assets/js/api-client.js', '/assets/js/address-validation-component.js', 'https://cdnjs.cloudflare.com/ajax/libs/awesomplete/1.1.5/awesomplete.min.js', '/assets/js/service-area-autocomplete.js', '/assets/js/customer-dashboard.js?v=20250108-5'],
         '/affiliate-success': ['/assets/js/i18n.js', '/assets/js/language-switcher.js', '/assets/js/modal-utils.js', '/assets/js/affiliate-success-init.js'],
         '/affiliate-landing': ['/assets/js/i18n.js', '/assets/js/language-switcher.js', '/assets/js/api-client.js', '/assets/js/affiliate-landing-init.js'],
         // Site pages

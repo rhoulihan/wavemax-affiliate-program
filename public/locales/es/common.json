@@ -9,25 +9,16 @@
     },
     "deliverHelp": "Para entregar o consultar una bolsa, escanea el código QR de la bolsa con la cámara de tu teléfono."
   },
-  "customerDashboard": {
-    "deliveryPin": {
-      "title": "PIN de entrega",
-      "current": "Tu PIN de entrega está configurado",
-      "reset": "Restablecer PIN de entrega",
-      "shownOnceNote": "Tu nuevo PIN se muestra solo una vez. También se incluye en cada correo \"en camino\":"
-    }
-  },
   "claim": {
     "title": "Reclama tu bolsa de lavandería",
     "subtitle": "Te estás registrando con",
     "resolving": "Verificando tu bolsa...",
     "cta": "Crear mi cuenta",
     "alreadyClaimedTitle": "Esta bolsa ya está reclamada",
-    "alreadyClaimedBody": "Esta bolsa está vinculada a una cuenta existente. Inicia sesión para ver el estado de tu pedido.",
-    "alreadyClaimedCta": "Iniciar sesión",
+    "alreadyClaimedBody": "Esta bolsa ya está vinculada a una cuenta. Si esto parece incorrecto, comuníquese con su proveedor de servicios de lavandería.",
     "invalidTitle": "Bolsa no reconocida",
     "invalidBody": "No pudimos reconocer esta bolsa. Comunícate con tu proveedor de servicio de lavandería.",
-    "raceLost": "Alguien acaba de reclamar esta bolsa. Si fuiste tú en otro dispositivo, inicia sesión.",
+    "raceLost": "Alguien acaba de reclamar esta bolsa. Si fue usted desde otro dispositivo, ya está todo listo.",
     "deliver": {
       "title": "Confirmar entrega",
       "codeLabel": "Código de entrega o PIN",
@@ -79,9 +70,10 @@
       "processed": "Tu ropa está lavada y esperando en la tienda",
       "ready_for_pickup": "Tu ropa está lista — tu repartidor la recogerá pronto",
       "picked_up": "Tu ropa está en camino",
-      "delivered": "Tu ropa fue entregada",
-      "loginCta": "Inicia sesión para ver tu pedido"
-    }
+      "delivered": "Tu ropa fue entregada"
+    },
+    "registeredTitle": "¡Todo listo!",
+    "registeredBody": "Su bolsa ya está vinculada a su cuenta. Su proveedor de lavandería se encargará a partir de aquí; esté atento a su correo electrónico para recibir actualizaciones."
   },
   "bag": {
     "label": {
@@ -643,28 +635,6 @@
       "inventory": {
         "title": "Mis bolsas",
         "empty": "Aún no hay bolsas"
-      }
-    }
-  },
-  "customer": {
-    "login": {
-      "title": "Acceso de Cliente",
-      "subtitle": "Inicia sesión para gestionar tu servicio de lavandería",
-      "emailOrUsername": "Nombre de Usuario o Correo Electrónico",
-      "noAccount": "¿No tienes una cuenta?"
-    },
-    "dashboard": {
-      "title": "Panel de Cliente",
-      "welcome": "¡Bienvenido de vuelta, {{name}}!",
-      "activeOrder": "Pedido Activo",
-      "activeOrders": "Pedidos Activos",
-      "orderHistory": "Historial de Pedidos",
-      "accountSettings": "Configuración de Cuenta",
-      "metrics": {
-        "totalOrders": "Total de Pedidos",
-        "totalSpent": "Total Gastado",
-        "averageOrder": "Pedido Promedio",
-        "lastOrder": "Último Pedido"
       }
     }
   },

@@ -99,14 +99,12 @@ const CSRF_CONFIG = {
   // Authentication endpoints - will add rate limiting instead of CSRF
   AUTH_ENDPOINTS: [
     '/api/auth/affiliate/login',
-    '/api/auth/customer/login',
     '/api/auth/administrator/login',
     '/api/auth/operator/login',
     '/api/auth/forgot-password',
     '/api/auth/reset-password',
     '/api/auth/refresh-token',
     '/api/v1/auth/affiliate/login',
-    '/api/v1/auth/customer/login',
     '/api/v1/auth/administrator/login',
     '/api/v1/auth/operator/login',
     '/api/v1/auth/forgot-password',
@@ -115,7 +113,6 @@ const CSRF_CONFIG = {
     // Password change endpoints (part of auth flow)
     '/api/v1/administrators/change-password',
     '/api/v1/affiliates/change-password',
-    '/api/v1/customers/change-password',
     '/api/v1/operators/change-password'
   ],
 
@@ -139,12 +136,8 @@ const CSRF_CONFIG = {
     '/api/v1/orders/:orderId/payment-status',
     '/api/v1/orders/bulk/status',
 
-    // Password changes
-    '/api/v1/customers/:customerId/password',
-
     // Data deletion
     '/api/v1/affiliates/:affiliateId/delete-all-data',
-    '/api/v1/customers/:customerId/delete-all-data',
 
     // Admin operations
     '/api/v1/administrators/affiliates',
@@ -168,22 +161,17 @@ const CSRF_CONFIG = {
   // HIGH priority endpoints (Phase 2)
   HIGH_PRIORITY_ENDPOINTS: [
     // Profile updates
-    '/api/v1/customers/:customerId',
-    '/api/v1/customers/:customerId/profile',
-    '/api/v1/customers/:customerId/payment',
     '/api/v1/affiliates/:affiliateId'
   ],
 
   // READ-ONLY endpoints that can remain without CSRF
   READ_ONLY_ENDPOINTS: [
     // Dashboard data (GET only)
-    '/api/v1/customers/:customerId/dashboard',
     '/api/v1/affiliates/:affiliateId/dashboard',
     '/api/v1/operators/dashboard',
     '/api/v1/administrators/dashboard',
 
     // List/search endpoints (GET only)
-    '/api/v1/customers/:customerId/orders',
     '/api/v1/affiliates/:affiliateId/customers',
     '/api/v1/affiliates/:affiliateId/orders',
     '/api/v1/orders/search',

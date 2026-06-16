@@ -14,7 +14,7 @@
 
   var bagToken = new URLSearchParams(window.location.search).get('bag');
 
-  var SECTIONS = ['resolving', 'claimable', 'claimed', 'invalid'];
+  var SECTIONS = ['resolving', 'claimable', 'registered', 'claimed', 'invalid'];
   var PANELS = ['claim-scan-code-panel', 'claim-scan-confirm-panel'];
 
   function show(state) {
@@ -275,15 +275,15 @@
       .then(function (res) { return res.json().then(function (body) { return { status: res.status, body: body }; }); })
       .then(function (result) {
         if (result.status === 201) {
-          localStorage.setItem('customerToken', result.body.token);
-          localStorage.setItem('currentCustomer', JSON.stringify(result.body.customerData));
-          window.location.href = '/embed-app-v2.html?route=/customer-dashboard';
+          // Phase 1: registration-only — no customer portal to land in.
+          // Show a simple success state right here on the claim page.
+          show('registered');
           return;
         }
         submit.disabled = false;
         if (result.status === 409) {
           var raceMsg = t('claim.raceLost',
-            'Someone just claimed this bag. If that was you on another device, please log in.');
+            'Someone just claimed this bag. If that was you on another device, you\'re all set.');
           showFormError(raceMsg);
           return;
         }
@@ -302,8 +302,6 @@
   function init() {
     document.getElementById('claimRegistrationForm')
       .addEventListener('submit', submitRegistration);
-    var login = document.getElementById('claim-login-link');
-    if (login) login.href = '/embed-app-v2.html?route=/customer-login';
 
     // Staff scan-session controls (CSP: addEventListener only, no inline handlers).
     var codeBtn = document.getElementById('scan-code-submit');

@@ -37,30 +37,8 @@ router.post('/affiliate/login',
   authController.affiliateLogin
 );
 
-/**
- * @route   POST /api/auth/customer/login
- * @desc    Login customer
- * @access  Public
- */
-router.post('/customer/login',
-  authLimiter,
-  [
-    // Support both username and emailOrUsername fields
-    body('emailOrUsername').optional().trim(),
-    body('username').optional().trim(),
-    body('password').notEmpty().withMessage('Password is required'),
-    // Custom validation to ensure at least one identifier is provided
-    body().custom((value, { req }) => {
-      const { username, emailOrUsername } = req.body;
-      if (!username && !emailOrUsername) {
-        throw new Error('Username or email is required');
-      }
-      return true;
-    })
-  ],
-  validate,
-  authController.customerLogin
-);
+// Phase 1: customer login removed — the customer surface is bag-claim
+// registration only (no customer portal). Preserved on `phase2-reference`.
 
 /**
  * @route   POST /api/auth/administrator/login
