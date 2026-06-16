@@ -49,7 +49,8 @@ describe('/claim page wiring', () => {
     const langs = ['en', 'es', 'pt', 'de'];
     const required = [
       'title', 'subtitle', 'resolving', 'cta',
-      'alreadyClaimedTitle', 'alreadyClaimedBody', 'alreadyClaimedCta',
+      'registeredTitle', 'registeredBody',
+      'alreadyClaimedTitle', 'alreadyClaimedBody',
       'invalidTitle', 'invalidBody', 'raceLost'
     ];
     for (const lang of langs) {

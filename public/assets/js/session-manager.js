@@ -14,12 +14,6 @@
         data: 'affiliateData',
         lastActivity: 'affiliateLastActivity'
       },
-      customer: {
-        token: 'customerToken',
-        refreshToken: 'customerRefreshToken',
-        data: 'customerData',
-        lastActivity: 'customerLastActivity'
-      },
       administrator: {
         token: 'adminToken',
         refreshToken: 'adminRefreshToken',
@@ -38,7 +32,6 @@
     // Protected routes that require authentication
     PROTECTED_ROUTES: {
       affiliate: ['/affiliate-dashboard'],
-      customer: ['/customer-dashboard', '/order-confirmation'],
       administrator: ['/administrator-dashboard'],
       operator: ['/operator-scan']
     },
@@ -46,7 +39,6 @@
     // Login routes
     LOGIN_ROUTES: {
       affiliate: '/affiliate-login',
-      customer: '/customer-login',
       administrator: '/administrator-login',
       operator: '/operator-login'
     },

@@ -9,25 +9,16 @@
     },
     "deliverHelp": "To deliver or check a bag, scan the bag's QR code with your phone camera."
   },
-  "customerDashboard": {
-    "deliveryPin": {
-      "title": "Delivery PIN",
-      "current": "Your delivery PIN is set",
-      "reset": "Reset delivery PIN",
-      "shownOnceNote": "Your new PIN is shown only once. It is also included in each \"on the way\" email:"
-    }
-  },
   "claim": {
     "title": "Claim your laundry bag",
     "subtitle": "You're signing up with",
     "resolving": "Checking your bag...",
     "cta": "Create my account",
     "alreadyClaimedTitle": "This bag is already claimed",
-    "alreadyClaimedBody": "This bag is linked to an existing account. Log in to see your order status.",
-    "alreadyClaimedCta": "Log in",
+    "alreadyClaimedBody": "This bag is already linked to an account. If this looks wrong, please contact your laundry service provider.",
     "invalidTitle": "Bag not recognized",
     "invalidBody": "We couldn't recognize this bag. Please contact your laundry service provider.",
-    "raceLost": "Someone just claimed this bag. If that was you on another device, please log in.",
+    "raceLost": "Someone just claimed this bag. If that was you on another device, you're all set.",
     "deliver": {
       "title": "Confirm delivery",
       "codeLabel": "Delivery code or PIN",
@@ -79,9 +70,10 @@
       "processed": "Your laundry is washed and waiting at the store",
       "ready_for_pickup": "Your laundry is ready — your delivery provider will collect it soon",
       "picked_up": "Your laundry is on the way",
-      "delivered": "Your laundry was delivered",
-      "loginCta": "Log in to see your order"
-    }
+      "delivered": "Your laundry was delivered"
+    },
+    "registeredTitle": "You're all set!",
+    "registeredBody": "Your bag is now linked to your account. Your laundry provider will take it from here — watch your email for updates."
   },
   "bag": {
     "label": {
@@ -643,28 +635,6 @@
       "inventory": {
         "title": "My bags",
         "empty": "No bags yet"
-      }
-    }
-  },
-  "customer": {
-    "login": {
-      "title": "Customer Login",
-      "subtitle": "Sign in to manage your laundry service",
-      "emailOrUsername": "Username or Email Address",
-      "noAccount": "Don't have an account?"
-    },
-    "dashboard": {
-      "title": "Customer Dashboard",
-      "welcome": "Welcome back, {{name}}!",
-      "activeOrder": "Active Order",
-      "activeOrders": "Active Orders",
-      "orderHistory": "Order History",
-      "accountSettings": "Account Settings",
-      "metrics": {
-        "totalOrders": "Total Orders",
-        "totalSpent": "Total Spent",
-        "averageOrder": "Average Order",
-        "lastOrder": "Last Order"
       }
     }
   },

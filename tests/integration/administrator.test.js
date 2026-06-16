@@ -211,32 +211,23 @@ describe('Administrator Integration Tests', () => {
         affiliateId: 'AFF-TEST001'
       });
 
-      const customerLogin = await agent
-        .post('/api/v1/auth/customer/login')
-        .set('x-csrf-token', csrfToken)
-        .send({
-          username: 'testcustomer',
-          password: 'CustomerPass123!'
-        });
+      // Customer login was removed in Phase 1 (registration-only customer
+      // surface), so we mint a non-admin (customer) JWT directly to prove the
+      // admin route rejects a valid-but-unprivileged token with 403.
+      const jwt = require('jsonwebtoken');
+      const customerToken = jwt.sign(
+        { id: customer._id, customerId: customer.customerId, role: 'customer' },
+        process.env.JWT_SECRET,
+        { expiresIn: '1h' }
+      );
 
-      // If login failed, skip token check
-      if (customerLogin.status !== 200) {
-        console.log('Customer login failed:', customerLogin.body);
-        // Try to access without token to get 401
-        const response = await agent
-          .get('/api/v1/administrators')
-          .set('x-csrf-token', csrfToken);
-        
-        expect(response.status).toBe(401);
-      } else {
-        const response = await agent
-          .get('/api/v1/administrators')
-          .set('Authorization', `Bearer ${customerLogin.body.token}`)
-          .set('x-csrf-token', csrfToken);
+      const response = await agent
+        .get('/api/v1/administrators')
+        .set('Authorization', `Bearer ${customerToken}`)
+        .set('x-csrf-token', csrfToken);
 
-        expect(response.status).toBe(403);
-        expect(response.body.message).toContain('Access denied');
-      }
+      expect(response.status).toBe(403);
+      expect(response.body.message).toContain('Access denied');
     });
   });
 

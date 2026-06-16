@@ -31,7 +31,8 @@ const DEFAULT_DISPATCHER_DIR = path.join(ROOT, 'server', 'services', 'email');
 // --- Spec §10 client-UI inventory (exact keys; en is the source of truth) ---
 const REQUIRED_KEYS = [
   'claim.title', 'claim.subtitle', 'claim.cta',
-  'claim.alreadyClaimedTitle', 'claim.alreadyClaimedBody', 'claim.alreadyClaimedCta',
+  'claim.registeredTitle', 'claim.registeredBody',
+  'claim.alreadyClaimedTitle', 'claim.alreadyClaimedBody',
   'claim.invalidTitle', 'claim.invalidBody', 'claim.raceLost', 'claim.resolving',
   'claim.deliver.title', 'claim.deliver.codeLabel', 'claim.deliver.codePlaceholder',
   'claim.deliver.geoOptIn', 'claim.deliver.rememberCode', 'claim.deliver.confirm',
@@ -55,7 +56,7 @@ const REQUIRED_KEYS = [
   'operator.scan.networkError', 'operator.scan.confirmGeneric',
   'operator.scan.successTitle', 'operator.scan.errorTitle',
   'claim.status.in_progress', 'claim.status.processed', 'claim.status.ready_for_pickup',
-  'claim.status.picked_up', 'claim.status.delivered', 'claim.status.loginCta',
+  'claim.status.picked_up', 'claim.status.delivered',
   'bag.label.affiliateHeading', 'bag.label.bagRef', 'bag.label.printInstructions',
   'admin.bags.mint.title', 'admin.bags.mint.affiliate', 'admin.bags.mint.quantity',
   'admin.bags.mint.submit', 'admin.bags.mint.success', 'admin.bags.issue.confirm',
@@ -71,8 +72,6 @@ const REQUIRED_KEYS = [
   'affiliateDashboard.deliveryCode.title', 'affiliateDashboard.deliveryCode.current',
   'affiliateDashboard.deliveryCode.reset', 'affiliateDashboard.deliveryCode.resetConfirm',
   'affiliateDashboard.deliveryCode.shownOnceNote', 'affiliateDashboard.deliverHelp',
-  'customerDashboard.deliveryPin.title', 'customerDashboard.deliveryPin.current',
-  'customerDashboard.deliveryPin.reset', 'customerDashboard.deliveryPin.shownOnceNote',
   'admin.operators.scanCode.reset', 'admin.operators.scanCode.shownOnceNote',
   'email.onTheWay.deliveryPinNote',
   'order.status.in_progress', 'order.status.processed', 'order.status.ready_for_pickup',

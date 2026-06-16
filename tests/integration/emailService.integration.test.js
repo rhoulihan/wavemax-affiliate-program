@@ -100,7 +100,6 @@ describe('Email Service Integration', () => {
       
       // Customer emails
       expect(typeof emailService.sendCustomerWelcomeEmail).toBe('function');
-      expect(typeof emailService.sendCustomerOrderConfirmationEmail).toBe('function');
       expect(typeof emailService.sendOrderStatusUpdateEmail).toBe('function');
       expect(typeof emailService.sendOrderCancellationEmail).toBe('function');
       

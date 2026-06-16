@@ -64,18 +64,13 @@ describe('CSRF Configuration', () => {
       expect(CSRF_CONFIG.CRITICAL_ENDPOINTS).toContain('/api/v1/orders');
       expect(CSRF_CONFIG.CRITICAL_ENDPOINTS).toContain('/api/v1/orders/:orderId/cancel');
 
-      // Password changes must be protected
-      expect(CSRF_CONFIG.CRITICAL_ENDPOINTS).toContain('/api/v1/customers/:customerId/password');
-
       // Data deletion must be protected
       expect(CSRF_CONFIG.CRITICAL_ENDPOINTS).toContain('/api/v1/affiliates/:affiliateId/delete-all-data');
-      expect(CSRF_CONFIG.CRITICAL_ENDPOINTS).toContain('/api/v1/customers/:customerId/delete-all-data');
     });
 
     it('should exclude authentication endpoints from CSRF', () => {
       // Login endpoints should use rate limiting instead
       expect(CSRF_CONFIG.AUTH_ENDPOINTS).toContain('/api/auth/affiliate/login');
-      expect(CSRF_CONFIG.AUTH_ENDPOINTS).toContain('/api/auth/customer/login');
       expect(CSRF_CONFIG.AUTH_ENDPOINTS).toContain('/api/auth/administrator/login');
       expect(CSRF_CONFIG.AUTH_ENDPOINTS).toContain('/api/auth/operator/login');
     });
@@ -149,7 +144,7 @@ describe('CSRF Configuration', () => {
     describe('Authentication endpoints', () => {
       it('should not enforce CSRF for login endpoints', () => {
         req.method = 'POST';
-        req.path = '/api/auth/customer/login';
+        req.path = '/api/auth/affiliate/login';
         expect(shouldEnforceCsrf(req)).toBe(false);
       });
 
@@ -199,15 +194,9 @@ describe('CSRF Configuration', () => {
         expect(shouldEnforceCsrf(req)).toBe(true);
       });
 
-      it('should enforce CSRF for password changes', () => {
-        req.method = 'PUT';
-        req.path = '/api/v1/customers/123/password';
-        expect(shouldEnforceCsrf(req)).toBe(true);
-      });
-
       it('should enforce CSRF for data deletion', () => {
         req.method = 'DELETE';
-        req.path = '/api/v1/customers/123/delete-all-data';
+        req.path = '/api/v1/affiliates/123/delete-all-data';
         expect(shouldEnforceCsrf(req)).toBe(true);
       });
 
@@ -234,28 +223,14 @@ describe('CSRF Configuration', () => {
       it('should not enforce CSRF for high priority endpoints when CSRF_PHASE < 2', () => {
         process.env.CSRF_PHASE = '1';
         req.method = 'PUT';
-        req.path = '/api/v1/customers/123/profile';
+        req.path = '/api/v1/affiliates/123';
         expect(shouldEnforceCsrf(req)).toBe(false);
       });
 
       it('should enforce CSRF for high priority endpoints when CSRF_PHASE >= 2', () => {
         process.env.CSRF_PHASE = '2';
         req.method = 'PUT';
-        req.path = '/api/v1/customers/123/profile';
-        expect(shouldEnforceCsrf(req)).toBe(true);
-      });
-
-      it('should handle bag management endpoints based on phase', () => {
-        process.env.CSRF_PHASE = '3';
-        req.method = 'POST';
-        req.path = '/api/v1/customers/123/bags/456/report-lost';
-        expect(shouldEnforceCsrf(req)).toBe(true);
-      });
-
-      it('should handle payment updates based on phase', () => {
-        process.env.CSRF_PHASE = '2';
-        req.method = 'PUT';
-        req.path = '/api/v1/customers/123/payment';
+        req.path = '/api/v1/affiliates/123';
         expect(shouldEnforceCsrf(req)).toBe(true);
       });
     });
@@ -263,7 +238,7 @@ describe('CSRF Configuration', () => {
     describe('Read-only endpoints', () => {
       it('should not enforce CSRF for dashboard endpoints', () => {
         req.method = 'POST'; // Even for POST, read-only endpoints should not enforce
-        req.path = '/api/v1/customers/123/dashboard';
+        req.path = '/api/v1/affiliates/123/dashboard';
         expect(shouldEnforceCsrf(req)).toBe(false);
       });
 
@@ -332,14 +307,14 @@ describe('CSRF Configuration', () => {
       it('should handle missing CSRF_PHASE environment variable', () => {
         delete process.env.CSRF_PHASE;
         req.method = 'PUT';
-        req.path = '/api/v1/customers/123/profile';
+        req.path = '/api/v1/affiliates/123';
         expect(shouldEnforceCsrf(req)).toBe(false);
       });
 
       it('should handle non-numeric CSRF_PHASE', () => {
         process.env.CSRF_PHASE = 'invalid';
         req.method = 'PUT';
-        req.path = '/api/v1/customers/123/profile';
+        req.path = '/api/v1/affiliates/123';
         expect(shouldEnforceCsrf(req)).toBe(false);
       });
 

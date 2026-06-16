@@ -9,25 +9,16 @@
     },
     "deliverHelp": "Um eine Tasche zuzustellen oder zu prüfen, scannen Sie den QR-Code der Tasche mit Ihrer Handykamera."
   },
-  "customerDashboard": {
-    "deliveryPin": {
-      "title": "Liefer-PIN",
-      "current": "Ihre Liefer-PIN ist eingerichtet",
-      "reset": "Liefer-PIN zurücksetzen",
-      "shownOnceNote": "Ihre neue PIN wird nur einmal angezeigt. Sie ist außerdem in jeder \"unterwegs\"-E-Mail enthalten:"
-    }
-  },
   "claim": {
     "title": "Wäschebeutel registrieren",
     "subtitle": "Sie registrieren sich bei",
     "resolving": "Beutel wird überprüft...",
     "cta": "Konto erstellen",
     "alreadyClaimedTitle": "Dieser Beutel ist bereits registriert",
-    "alreadyClaimedBody": "Dieser Beutel ist mit einem bestehenden Konto verknüpft. Melden Sie sich an, um Ihren Bestellstatus zu sehen.",
-    "alreadyClaimedCta": "Anmelden",
+    "alreadyClaimedBody": "Dieser Beutel ist bereits mit einem Konto verknüpft. Falls dies falsch erscheint, wenden Sie sich bitte an Ihren Wäscheservice-Anbieter.",
     "invalidTitle": "Beutel nicht erkannt",
     "invalidBody": "Wir konnten diesen Beutel nicht erkennen. Bitte wenden Sie sich an Ihren Wäscheservice-Anbieter.",
-    "raceLost": "Jemand hat diesen Beutel gerade registriert. Falls Sie das auf einem anderen Gerät waren, melden Sie sich bitte an.",
+    "raceLost": "Jemand hat diesen Beutel gerade beansprucht. Falls Sie das auf einem anderen Gerät waren, ist alles erledigt.",
     "deliver": {
       "title": "Zustellung bestätigen",
       "codeLabel": "Liefercode oder PIN",
@@ -79,9 +70,10 @@
       "processed": "Ihre Wäsche ist gewaschen und wartet im Geschäft",
       "ready_for_pickup": "Ihre Wäsche ist fertig — Ihr Lieferpartner holt sie bald ab",
       "picked_up": "Ihre Wäsche ist unterwegs",
-      "delivered": "Ihre Wäsche wurde zugestellt",
-      "loginCta": "Melden Sie sich an, um Ihre Bestellung zu sehen"
-    }
+      "delivered": "Ihre Wäsche wurde zugestellt"
+    },
+    "registeredTitle": "Alles erledigt!",
+    "registeredBody": "Ihr Beutel ist jetzt mit Ihrem Konto verknüpft. Ihr Wäscheanbieter übernimmt ab hier — achten Sie auf Ihre E-Mails für Updates."
   },
   "bag": {
     "label": {
@@ -643,28 +635,6 @@
       "inventory": {
         "title": "Meine Beutel",
         "empty": "Noch keine Beutel"
-      }
-    }
-  },
-  "customer": {
-    "login": {
-      "title": "Kunden-Login",
-      "subtitle": "Melden Sie sich an, um Ihren Wäscheservice zu verwalten",
-      "emailOrUsername": "Benutzername oder E-Mail-Adresse",
-      "noAccount": "Haben Sie noch kein Konto?"
-    },
-    "dashboard": {
-      "title": "Kunden-Dashboard",
-      "welcome": "Willkommen zurück, {{name}}!",
-      "activeOrder": "Aktive Bestellung",
-      "activeOrders": "Aktive Bestellungen",
-      "orderHistory": "Bestellverlauf",
-      "accountSettings": "Kontoeinstellungen",
-      "metrics": {
-        "totalOrders": "Bestellungen gesamt",
-        "totalSpent": "Ausgaben gesamt",
-        "averageOrder": "Durchschnittliche Bestellung",
-        "lastOrder": "Letzte Bestellung"
       }
     }
   },

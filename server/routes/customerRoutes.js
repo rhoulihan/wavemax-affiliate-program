@@ -1,14 +1,19 @@
 // Customer Routes for WaveMAX Laundry Affiliate Program
+//
+// Phase 1: the customer surface is bag-claim registration only — there is no
+// customer login, dashboard, profile, or order portal. The only authenticated
+// reader is the administrator customer list. (Portal preserved on the
+// `phase2-reference` tag.)
 
 const express = require('express');
 const router = express.Router();
 const customerController = require('../controllers/customerController');
-const { authenticate, authorize } = require('../middleware/auth');
+const { authenticate } = require('../middleware/auth');
 const { checkRole } = require('../middleware/rbac');
 const { body } = require('express-validator');
 const { customPasswordValidator } = require('../utils/passwordValidator');
 const { registrationLimiter, createCustomLimiter } = require('../middleware/rateLimiting');
-const { profileAddressValidation, handleValidationErrors } = require('../middleware/locationValidation');
+const { handleValidationErrors } = require('../middleware/locationValidation');
 
 // Tight limiter on top of the global apiLimiter for the public claim
 // resolver (anti-enumeration, spec §9 — mirrors bagRoutes' bag-resolve).
@@ -67,81 +72,6 @@ router.post('/claim/:bagToken/register', registrationLimiter, [
   body('username').notEmpty().withMessage('Username is required'),
   body('password').custom((value, { req }) => customPasswordValidator()(value, { req }))
 ], handleValidationErrors, customerController.claimRegister);
-
-
-/**
- * @route   GET /api/customers/:customerId/profile
- * @desc    Get customer profile (public for success page, authenticated for full profile)
- * @access  Public (limited) / Private (full)
- */
-router.get('/:customerId/profile', (req, res, next) => {
-  // Try to authenticate if token is provided, but don't require it
-  if (req.headers.authorization || req.headers['x-auth-token']) {
-    authenticate(req, res, (err) => {
-      if (err) {
-        // Authentication failed, continue without user
-        req.user = null;
-      }
-      next();
-    });
-  } else {
-    next();
-  }
-}, customerController.getCustomerProfile);
-
-/**
- * @route   GET /api/customers/:customerId
- * @desc    Get customer profile
- * @access  Private (self, affiliated affiliate, or admin)
- */
-router.get('/:customerId', authenticate, customerController.getCustomerProfile);
-
-/**
- * @route   PUT /api/customers/:customerId/profile
- * @desc    Update customer profile
- * @access  Private (self, affiliated affiliate, or admin)
- */
-router.put('/:customerId/profile', 
-  authenticate, 
-  profileAddressValidation,
-  handleValidationErrors,
-  customerController.updateCustomerProfile
-);
-
-/**
- * @route   GET /api/customers/:customerId/orders
- * @desc    Get customer orders
- * @access  Private (self, affiliated affiliate, or admin)
- */
-router.get('/:customerId/orders', authenticate, customerController.getCustomerOrders);
-
-/**
- * @route   GET /api/customers/:customerId/dashboard
- * @desc    Get customer dashboard stats
- * @access  Private (self, affiliated affiliate, or admin)
- */
-router.get('/:customerId/dashboard', authenticate, customerController.getCustomerDashboardStats);
-
-/**
- * @route   PUT /api/customers/:customerId/password
- * @desc    Update customer password
- * @access  Private (self or admin)
- */
-router.put('/:customerId/password', authenticate, [
-  body('currentPassword').notEmpty().withMessage('Current password is required'),
-  body('newPassword').custom(customPasswordValidator())
-], customerController.updateCustomerPassword);
-
-
-// Payment information is now handled entirely by Paygistix
-// No payment update endpoint needed
-
-/**
- * @route   DELETE /api/customers/:customerId/delete-all-data
- * @desc    Delete all data for a customer (development/test only)
- * @access  Private (self only, development/test environments)
- */
-router.delete('/:customerId/delete-all-data', authenticate, authorize(['customer']), customerController.deleteCustomerData);
 
 /**
  * @route   GET /api/customers/admin/list
