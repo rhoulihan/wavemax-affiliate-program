@@ -73,69 +73,16 @@ describe('Operator Controller', () => {
     jest.clearAllMocks();
   });
 
-  describe('getOrderQueue', () => {
-    it('should return available orders for operator workstation', async () => {
-      const mockOperator = {
-        _id: 'op123',
-        workStation: 'WS001'
-      };
+  // getOrderQueue / claimOrder / updateOrderStatus (operatorOrderQueueService)
+  // were removed in PR 8 — they queried orderProcessingStatus / assignedOperator
+  // / customer, fields that never existed on the slim Order. The live kiosk-scan
+  // flow is covered by tests/integration/kioskAdvance.test.js + operatorScanOut.
+  //
+  // confirmPickup / completePickup / markOrderReady / markBagProcessed were
+  // deleted in PR 9 (legacy pickup paths; markOrderReady was a payment-gate
+  // bypass).
 
-      const mockOrders = [
-        { 
-          _id: '1', 
-          orderNumber: 'ORD001', 
-          scheduledPickup: new Date(),
-          toObject: jest.fn().mockReturnValue({ 
-            _id: '1', 
-            orderNumber: 'ORD001', 
-            scheduledPickup: new Date() 
-          }),
-          customer: {
-            firstName: 'John',
-            lastName: 'Doe',
-            phone: '555-1234',
-            toObject: jest.fn().mockReturnValue({
-              firstName: 'John',
-              lastName: 'Doe',
-              phone: '555-1234'
-            })
-          }
-        }
-      ];
-
-      Operator.findById = jest.fn().mockResolvedValue(mockOperator);
-      Order.find = createFindMock([]);
-      Order.find.mockReturnValue({
-        populate: jest.fn().mockReturnThis(),
-        sort: jest.fn().mockReturnThis(),
-        skip: jest.fn().mockReturnThis(),
-        limit: jest.fn().mockResolvedValue(mockOrders)
-      });
-      Order.countDocuments.mockResolvedValue(1);
-
-      const handler = operatorController.getOrderQueue;
-      await handler(req, res, next);
-
-      expect(Order.find).toHaveBeenCalledWith({
-        orderProcessingStatus: 'pending'
-      });
-      expect(res.json).toHaveBeenCalledWith({
-        success: true,
-        message: 'Order queue retrieved successfully',
-        orders: expect.any(Array),
-        pagination: {
-          total: 1,
-          page: 1,
-          pages: 1
-        }
-      });
-    });
-
-    // confirmPickup / completePickup / markOrderReady / markBagProcessed were
-    // deleted in PR 9 (legacy pickup paths; markOrderReady was a payment-gate
-    // bypass). Coverage for the replacement lives in
-    // tests/integration/kioskAdvance.test.js + operatorScanOut.test.js.
-
+  describe('getTodayStats', () => {
     it('should handle error in getTodayStats', async () => {
       Order.countDocuments.mockRejectedValue(new Error('Database error'));
 

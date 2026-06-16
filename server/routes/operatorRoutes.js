@@ -53,9 +53,9 @@ router.patch('/:id/stats', checkRole(['administrator']), checkAdminPermission(['
 router.use(checkRole(['operator']));
 
 // Order Management
-router.get('/orders/queue', operatorController.getOrderQueue);
-router.post('/orders/:orderId/claim', operatorController.claimOrder);
-router.put('/orders/:orderId/status', operatorController.updateOrderStatus);
+// Removed in PR 8: /orders/queue, /orders/:orderId/claim, /orders/:orderId/status
+// (operatorOrderQueueService) — queried orderProcessingStatus / assignedOperator,
+// fields that never existed on the slim Order. The kiosk-scan flow replaces them.
 router.post('/orders/:orderId/quality-check', operatorController.performQualityCheck);
 router.get('/orders/mine', operatorController.getMyOrders);
 
