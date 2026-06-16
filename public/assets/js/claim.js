@@ -313,8 +313,42 @@
 
   // ---- Firebase phone --------------------------------------------------------
 
+  // The Firebase compat SDK (~170 KB) is only needed for the phone-verification
+  // step, which is a later interaction — it MUST stay off the initial critical
+  // path so it doesn't delay revealing the registration form (the LCP element).
+  // So we lazy-load the two vendored SDK files on demand, only when the server
+  // says phone verification is enabled. CSP-safe: self-hosted /assets/js/vendor/
+  // files injected with the page nonce, loaded sequentially (app before auth).
+  var firebaseSdkPromise = null;
+  function loadFirebaseSdk() {
+    if (firebaseSdkPromise) return firebaseSdkPromise;
+    var nonce = window.CSP_NONCE ||
+      (document.querySelector('meta[name="csp-nonce"]') || {}).content || '';
+    function inject(src) {
+      return new Promise(function (resolve, reject) {
+        var s = document.createElement('script');
+        s.src = src;
+        if (nonce) s.nonce = nonce;
+        s.onload = resolve;
+        s.onerror = reject;
+        document.head.appendChild(s);
+      });
+    }
+    firebaseSdkPromise = inject('/assets/js/vendor/firebase-app-compat.js')
+      .then(function () { return inject('/assets/js/vendor/firebase-auth-compat.js'); });
+    return firebaseSdkPromise;
+  }
+
   function initFirebasePhone(config) {
-    phoneEnabled = !!(config && config.enabled && window.firebase);
+    if (!(config && config.enabled)) { phoneEnabled = false; return; }
+    // Defer SDK download until we know phone verification is on, then init.
+    loadFirebaseSdk()
+      .then(function () { setupFirebasePhone(config); updateSubmitState(); })
+      .catch(function () { phoneEnabled = false; });
+  }
+
+  function setupFirebasePhone(config) {
+    phoneEnabled = !!window.firebase;
     if (!phoneEnabled) return;
     try {
       if (!window.firebase.apps || !window.firebase.apps.length) {

@@ -105,8 +105,7 @@ describe('Email Service Integration', () => {
       
       // Password reset emails (no generic sendPasswordResetEmail function)
       expect(typeof emailService.sendAffiliatePasswordResetEmail).toBe('function');
-      expect(typeof emailService.sendCustomerPasswordResetEmail).toBe('function');
-      
+
       // Administrator emails
       expect(typeof emailService.sendAdministratorWelcomeEmail).toBe('function');
       expect(typeof emailService.sendAdministratorPasswordResetEmail).toBe('function');

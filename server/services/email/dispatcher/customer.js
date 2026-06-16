@@ -510,33 +510,6 @@ exports.sendOrderCancellationEmail = async (customer, order) => {
 };
 
 /**
- * Send password reset email to customer
- */
-exports.sendCustomerPasswordResetEmail = async (customer, resetUrl) => {
-  try {
-    const template = await loadTemplate('customer-password-reset');
-
-    const data = {
-      first_name: customer.firstName,
-      customer_id: customer.customerId,
-      reset_url: resetUrl,
-      expire_time: '1 hour',
-      current_year: new Date().getFullYear()
-    };
-
-    const html = fillTemplate(template, data);
-
-    await sendEmail(
-      customer.email,
-      'Password Reset Request - WaveMAX Customer Portal',
-      html
-    );
-  } catch (error) {
-    logger.error('Error sending customer password reset email:', error);
-  }
-};
-
-/**
  * Notification B (spec §6.6) — customer "your laundry was delivered".
  * Sent at order `delivered`: affiliate door confirm, customer PIN
  * confirm, or the re-intake auto-deliver (method 'reintake').
