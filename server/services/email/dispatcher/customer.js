@@ -66,7 +66,7 @@ exports.sendCustomerWelcomeEmail = async (customer, affiliate, bagInfo = {}) => 
         SERVICE_PROVIDER_LABEL: 'Your Service Provider',
         BAG_INFO_TITLE: isV2Registration ? 'How Our Service Works' : (isFreeRegistration ? 'Your FREE Laundry Bag' : 'Your Laundry Bags'),
         BAG_INFO_MESSAGE: isV2Registration ?
-          'Schedule your laundry pickup online. After we pick up and weigh your laundry, you\'ll receive an invoice. Pay conveniently via credit card, Venmo, PayPal, or CashApp.' :
+          'After we pick up and weigh your laundry, you\'ll receive an invoice. Pay conveniently via credit card, Venmo, PayPal, or CashApp.' :
           (isFreeRegistration ?
             'Great news! Your first laundry bag is FREE! It will be delivered to you by your service provider.' :
             'Your laundry bags are ready! Your service provider will bring them when you place your first order.'),
@@ -89,17 +89,11 @@ exports.sendCustomerWelcomeEmail = async (customer, affiliate, bagInfo = {}) => 
         STEP_3_DESC: 'Your laundry is professionally washed, dried, and folded at our facility.',
         STEP_4_TITLE: 'Delivery to Your Door',
         STEP_4_DESC: 'Your clean, fresh laundry is delivered back to you, usually within 24-48 hours.',
-        READY_TO_SCHEDULE_TITLE: 'Ready to Schedule Your First Pickup?',
-        READY_TO_SCHEDULE_MESSAGE: 'Click the button below to access your dashboard and schedule your first pickup.',
-        SCHEDULE_BUTTON: 'Schedule Pickup',
-        CREDIT_REMINDER: 'Remember: Your bags will be delivered with your first pickup!',
         QUESTIONS_TITLE: 'Questions?',
         QUESTIONS_MESSAGE: 'Your service provider is here to help! Feel free to reach out:',
         NAME_LABEL: 'Name',
         PHONE_LABEL: 'Phone',
         EMAIL_LABEL: 'Email',
-        DASHBOARD_MESSAGE: 'Access your customer dashboard anytime to manage orders and track deliveries.',
-        DASHBOARD_BUTTON: 'Go to Dashboard',
         FOOTER_SUPPORT: 'If you have any questions, please contact our support team.',
         FOOTER_RIGHTS: 'All rights reserved.',
         FOOTER_ADDRESS: '123 Main Street, Austin, TX 78701'
@@ -114,7 +108,7 @@ exports.sendCustomerWelcomeEmail = async (customer, affiliate, bagInfo = {}) => 
         SERVICE_PROVIDER_LABEL: 'Su Proveedor de Servicio',
         BAG_INFO_TITLE: isV2Registration ? 'Cómo Funciona Nuestro Servicio' : (isFreeRegistration ? 'Su Bolsa de Lavandería GRATIS' : 'Sus Bolsas de Lavandería'),
         BAG_INFO_MESSAGE: isV2Registration ?
-          'Programe la recogida de su ropa en línea. Después de recoger y pesar su ropa, recibirá una factura. Pague cómodamente con tarjeta de crédito, Venmo, PayPal o CashApp.' :
+          'Después de recoger y pesar su ropa, recibirá una factura. Pague cómodamente con tarjeta de crédito, Venmo, PayPal o CashApp.' :
           (isFreeRegistration ?
             '¡Excelentes noticias! ¡Su primera bolsa de lavandería es GRATIS! Será entregada por su proveedor de servicio.' :
             '¡Sus bolsas de lavandería están listas! Su proveedor de servicio las traerá cuando haga su primer pedido.'),
@@ -137,17 +131,11 @@ exports.sendCustomerWelcomeEmail = async (customer, affiliate, bagInfo = {}) => 
         STEP_3_DESC: 'Su ropa es lavada, secada y doblada profesionalmente en nuestras instalaciones.',
         STEP_4_TITLE: 'Entrega a Su Puerta',
         STEP_4_DESC: 'Su ropa limpia y fresca es entregada, generalmente dentro de 24-48 horas.',
-        READY_TO_SCHEDULE_TITLE: '¿Listo para Programar Su Primera Recogida?',
-        READY_TO_SCHEDULE_MESSAGE: 'Haga clic en el botón a continuación para acceder a su panel y programar su primera recogida.',
-        SCHEDULE_BUTTON: 'Programar Recogida',
-        CREDIT_REMINDER: '¡Recuerde: Sus bolsas serán entregadas con su primera recogida!',
         QUESTIONS_TITLE: '¿Preguntas?',
         QUESTIONS_MESSAGE: '¡Su proveedor de servicio está aquí para ayudar! No dude en contactar:',
         NAME_LABEL: 'Nombre',
         PHONE_LABEL: 'Teléfono',
         EMAIL_LABEL: 'Correo',
-        DASHBOARD_MESSAGE: 'Acceda a su panel de cliente en cualquier momento para gestionar pedidos y rastrear entregas.',
-        DASHBOARD_BUTTON: 'Ir al Panel',
         FOOTER_SUPPORT: 'Si tiene alguna pregunta, contacte a nuestro equipo de soporte.',
         FOOTER_RIGHTS: 'Todos los derechos reservados.',
         FOOTER_ADDRESS: '123 Main Street, Austin, TX 78701'
@@ -162,7 +150,7 @@ exports.sendCustomerWelcomeEmail = async (customer, affiliate, bagInfo = {}) => 
         SERVICE_PROVIDER_LABEL: 'Seu Provedor de Serviço',
         BAG_INFO_TITLE: isV2Registration ? 'Como Funciona Nosso Serviço' : (isFreeRegistration ? 'Sua Sacola de Lavanderia GRÁTIS' : 'Suas Sacolas de Lavanderia'),
         BAG_INFO_MESSAGE: isV2Registration ?
-          'Agende a coleta de suas roupas online. Depois de coletarmos e pesarmos suas roupas, você receberá uma fatura. Pague convenientemente via cartão de crédito, Venmo, PayPal ou CashApp.' :
+          'Depois de coletarmos e pesarmos suas roupas, você receberá uma fatura. Pague convenientemente via cartão de crédito, Venmo, PayPal ou CashApp.' :
           (isFreeRegistration ?
             'Ótimas notícias! Sua primeira sacola de lavanderia é GRÁTIS! Ela será entregue pelo seu provedor de serviço.' :
             'Suas sacolas de lavanderia estão prontas! Seu provedor de serviço as trará quando você fizer seu primeiro pedido.'),
@@ -185,17 +173,11 @@ exports.sendCustomerWelcomeEmail = async (customer, affiliate, bagInfo = {}) => 
         STEP_3_DESC: 'Sua roupa é lavada, seca e dobrada profissionalmente em nossas instalações.',
         STEP_4_TITLE: 'Entrega em Sua Porta',
         STEP_4_DESC: 'Sua roupa limpa e fresca é entregue, geralmente dentro de 24-48 horas.',
-        READY_TO_SCHEDULE_TITLE: 'Pronto para Agendar Sua Primeira Coleta?',
-        READY_TO_SCHEDULE_MESSAGE: 'Clique no botão abaixo para acessar seu painel e agendar sua primeira coleta.',
-        SCHEDULE_BUTTON: 'Agendar Coleta',
-        CREDIT_REMINDER: 'Lembre-se: Suas sacolas serão entregues com sua primeira coleta!',
         QUESTIONS_TITLE: 'Dúvidas?',
         QUESTIONS_MESSAGE: 'Seu provedor de serviço está aqui para ajudar! Sinta-se à vontade para entrar em contato:',
         NAME_LABEL: 'Nome',
         PHONE_LABEL: 'Telefone',
         EMAIL_LABEL: 'E-mail',
-        DASHBOARD_MESSAGE: 'Acesse seu painel de cliente a qualquer momento para gerenciar pedidos e rastrear entregas.',
-        DASHBOARD_BUTTON: 'Ir para o Painel',
         FOOTER_SUPPORT: 'Se você tiver alguma dúvida, entre em contato com nossa equipe de suporte.',
         FOOTER_RIGHTS: 'Todos os direitos reservados.',
         FOOTER_ADDRESS: '123 Main Street, Austin, TX 78701'
@@ -210,7 +192,7 @@ exports.sendCustomerWelcomeEmail = async (customer, affiliate, bagInfo = {}) => 
         SERVICE_PROVIDER_LABEL: 'Ihr Dienstleister',
         BAG_INFO_TITLE: isV2Registration ? 'So Funktioniert Unser Service' : (isFreeRegistration ? 'Ihr KOSTENLOSER Wäschesack' : 'Ihre Wäschesäcke'),
         BAG_INFO_MESSAGE: isV2Registration ?
-          'Planen Sie Ihre Wäscheabholung online. Nachdem wir Ihre Wäsche abgeholt und gewogen haben, erhalten Sie eine Rechnung. Bezahlen Sie bequem per Kreditkarte, Venmo, PayPal oder CashApp.' :
+          'Nachdem wir Ihre Wäsche abgeholt und gewogen haben, erhalten Sie eine Rechnung. Bezahlen Sie bequem per Kreditkarte, Venmo, PayPal oder CashApp.' :
           (isFreeRegistration ?
             'Großartige Neuigkeiten! Ihr erster Wäschesack ist KOSTENLOS! Er wird von Ihrem Dienstleister geliefert.' :
             'Ihre Wäschesäcke sind bereit! Ihr Dienstleister wird sie bei Ihrer ersten Bestellung mitbringen.'),
@@ -233,17 +215,11 @@ exports.sendCustomerWelcomeEmail = async (customer, affiliate, bagInfo = {}) => 
         STEP_3_DESC: 'Ihre Wäsche wird professionell in unserer Einrichtung gewaschen, getrocknet und gefaltet.',
         STEP_4_TITLE: 'Lieferung an Ihre Tür',
         STEP_4_DESC: 'Ihre saubere, frische Wäsche wird geliefert, normalerweise innerhalb von 24-48 Stunden.',
-        READY_TO_SCHEDULE_TITLE: 'Bereit, Ihre erste Abholung zu planen?',
-        READY_TO_SCHEDULE_MESSAGE: 'Klicken Sie auf den Button unten, um auf Ihr Dashboard zuzugreifen und Ihre erste Abholung zu planen.',
-        SCHEDULE_BUTTON: 'Abholung planen',
-        CREDIT_REMINDER: 'Denken Sie daran: Ihre Säcke werden mit Ihrer ersten Abholung geliefert!',
         QUESTIONS_TITLE: 'Fragen?',
         QUESTIONS_MESSAGE: 'Ihr Dienstleister ist hier, um zu helfen! Zögern Sie nicht, Kontakt aufzunehmen:',
         NAME_LABEL: 'Name',
         PHONE_LABEL: 'Telefon',
         EMAIL_LABEL: 'E-Mail',
-        DASHBOARD_MESSAGE: 'Greifen Sie jederzeit auf Ihr Kunden-Dashboard zu, um Bestellungen zu verwalten und Lieferungen zu verfolgen.',
-        DASHBOARD_BUTTON: 'Zum Dashboard',
         FOOTER_SUPPORT: 'Bei Fragen wenden Sie sich bitte an unser Support-Team.',
         FOOTER_RIGHTS: 'Alle Rechte vorbehalten.',
         FOOTER_ADDRESS: '123 Main Street, Austin, TX 78701'
@@ -262,8 +238,6 @@ exports.sendCustomerWelcomeEmail = async (customer, affiliate, bagInfo = {}) => 
       number_of_bags: numberOfBags,
       bag_fee: bagFee.toFixed(2),
       total_credit: totalCredit.toFixed(2),
-      login_url: 'https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?login=customer',
-      schedule_url: 'https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?login=customer',
       current_year: new Date().getFullYear(),
       ...emailTranslations
     };
@@ -311,7 +285,6 @@ exports.sendOrderStatusUpdateEmail = async (customer, order, status) => {
         STATUS_UPDATE_TITLE: 'Status Update',
         ORDER_ID_LABEL: 'Order ID',
         STATUS_LABEL: 'Status',
-        VIEW_ORDER_BUTTON: 'View Order Details',
         THANK_YOU_MESSAGE: 'Thank you for choosing WaveMAX Laundry!',
         CLOSING_MESSAGE: 'Best regards,<br>The WaveMAX Laundry Team',
         FOOTER_RIGHTS: 'All rights reserved.',
@@ -337,7 +310,6 @@ exports.sendOrderStatusUpdateEmail = async (customer, order, status) => {
         STATUS_UPDATE_TITLE: 'Actualización de Estado',
         ORDER_ID_LABEL: 'ID del Pedido',
         STATUS_LABEL: 'Estado',
-        VIEW_ORDER_BUTTON: 'Ver Detalles del Pedido',
         THANK_YOU_MESSAGE: '¡Gracias por elegir WaveMAX Laundry!',
         CLOSING_MESSAGE: 'Saludos cordiales,<br>El Equipo de WaveMAX Laundry',
         FOOTER_RIGHTS: 'Todos los derechos reservados.',
@@ -363,7 +335,6 @@ exports.sendOrderStatusUpdateEmail = async (customer, order, status) => {
         STATUS_UPDATE_TITLE: 'Atualização de Status',
         ORDER_ID_LABEL: 'ID do Pedido',
         STATUS_LABEL: 'Status',
-        VIEW_ORDER_BUTTON: 'Ver Detalhes do Pedido',
         THANK_YOU_MESSAGE: 'Obrigado por escolher WaveMAX Laundry!',
         CLOSING_MESSAGE: 'Atenciosamente,<br>A Equipe WaveMAX Laundry',
         FOOTER_RIGHTS: 'Todos os direitos reservados.',
@@ -389,7 +360,6 @@ exports.sendOrderStatusUpdateEmail = async (customer, order, status) => {
         STATUS_UPDATE_TITLE: 'Status-Update',
         ORDER_ID_LABEL: 'Bestell-ID',
         STATUS_LABEL: 'Status',
-        VIEW_ORDER_BUTTON: 'Bestelldetails anzeigen',
         THANK_YOU_MESSAGE: 'Vielen Dank, dass Sie sich für WaveMAX Laundry entschieden haben!',
         CLOSING_MESSAGE: 'Mit freundlichen Grüßen,<br>Das WaveMAX Laundry Team',
         FOOTER_RIGHTS: 'Alle Rechte vorbehalten.',
@@ -419,7 +389,6 @@ exports.sendOrderStatusUpdateEmail = async (customer, order, status) => {
       status_message: statusMessages[status] || '',
       weight_info: '',
       total_info: '',
-      dashboard_url: 'https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?login=customer',
       current_year: new Date().getFullYear(),
       ...emailTranslations
     };
