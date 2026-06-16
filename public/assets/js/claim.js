@@ -1,13 +1,21 @@
-// /claim — bag claim page (spec §6.3).
-// State machine: resolving | claimable | claimed | invalid.
-// PR 9 adds 'deliver' and 'reintake' branches to renderState's switch —
-// do not dispatch state anywhere else.
+// /claim — overloaded bag URL (Phase 1 PR 5).
+//
+// Two audiences hit the same URL:
+//   1. A CUSTOMER scanning an unregistered ('claimable') bag → registration form.
+//   2. STAFF (partner/operator) scanning a registered ('claimed') bag → a
+//      scan-session panel: enter a code once → batch-scan transitions.
+//
+// Batch-across-QR persistence: each bag QR opens a fresh full-page /claim load.
+// Only sessionStorage survives those loads, so on every 'claimed' load we check
+// ScanSession.getSession(); a live session SKIPS the code panel and goes straight
+// to resolve → confirm. (Registration OTP / Firebase phone gates arrive in PR 8.)
 (function () {
   'use strict';
 
   var bagToken = new URLSearchParams(window.location.search).get('bag');
 
   var SECTIONS = ['resolving', 'claimable', 'claimed', 'invalid'];
+  var PANELS = ['claim-scan-code-panel', 'claim-scan-confirm-panel'];
 
   function show(state) {
     SECTIONS.forEach(function (name) {
@@ -16,20 +24,34 @@
     });
   }
 
+  function showPanel(id) {
+    show('__none__');
+    PANELS.forEach(function (p) {
+      var el = document.getElementById(p);
+      if (el) el.hidden = (p !== id);
+    });
+  }
+
+  // i18n.t returns the key when a translation is missing → fall back to English.
+  function t(key, fallback) {
+    var v = (window.i18n && typeof window.i18n.t === 'function') ? window.i18n.t(key) : key;
+    return (v && v !== key) ? v : (fallback || key);
+  }
+
   function renderState(state, data) {
     switch (state) {
     case 'claimable': {
       var affiliate = (data && data.affiliate) || {};
       var name = affiliate.businessName ||
           ((affiliate.firstName || '') + ' ' + (affiliate.lastName || '')).trim() || 'WaveMAX';
-        // textContent — never innerHTML (XSS)
+      // textContent — never innerHTML (XSS)
       document.getElementById('claim-affiliate-name').textContent = name;
       show('claimable');
       break;
     }
     case 'claimed':
-      // PR 9: dispatch on the resolve order context (deliver / status panels).
-      dispatchClaimedState(data);
+      // Registered bag → staff scan-session overload.
+      enterStaffScan();
       break;
     case 'invalid':
     default:
@@ -38,134 +60,177 @@
     }
   }
 
-  // ---- PR 9: deliver / status / re-intake branches ---------------------------
+  // ---- staff scan-session flow -----------------------------------------------
 
-  function t9(key, fallback) {
-    if (window.i18n && typeof window.i18n.translate === 'function') {
-      const v = window.i18n.translate(key);
-      if (v && v !== key) return v;
-    }
-    return fallback;
-  }
+  var pending = null; // last resolveData awaiting confirm
 
-  function showPanel(id) {
-    // The PR 6 base sections and the PR 9 panels are mutually exclusive.
-    show('__none__');
-    ['claim-deliver-panel', 'claim-reintake-panel', 'claim-status-panel'].forEach(function (p) {
-      var el = document.getElementById(p);
-      if (el) el.hidden = (p !== id);
-    });
-  }
-
-  // Called from renderState's `state === 'claimed'` branch:
-  function dispatchClaimedState(data) {
-    if (data && data.order && data.order.awaitingDelivery) {
-      showPanel('claim-deliver-panel');
-      const remembered = localStorage.getItem('wavemax_role_code');
-      if (remembered) {
-        document.getElementById('deliver-code').value = remembered;
-        document.getElementById('deliver-remember-code').checked = true;
-      }
-    } else if (data && data.order) {
-      showStatusPanel(data.order.status);
+  function enterStaffScan() {
+    // Batch-across-QR: a live session skips the code panel.
+    if (window.ScanSession && window.ScanSession.getSession() && !window.ScanSession.isExpired()) {
+      window.ScanSession.init({ mode: 'session' });
+      showSessionActive();
+      resolveAndConfirm();
     } else {
-      showStatusPanel(null); // claimed, nothing open — status/login affordance
+      if (window.ScanSession) window.ScanSession.clearSession();
+      showPanel('claim-scan-code-panel');
     }
   }
 
-  function showStatusPanel(status) {
-    showPanel('claim-status-panel');
-    const heading = document.getElementById('claim-status-heading');
-    heading.textContent = status
-      ? t9('claim.status.' + status, status.replace(/_/g, ' '))
-      : t9('claim.alreadyClaimedTitle', 'This bag is registered'); // PR 6 key
+  function showSessionActive() {
+    var note = document.getElementById('scan-session-active');
+    if (!note) return;
+    var s = window.ScanSession.getSession();
+    if (s && s.expiresAt) {
+      var time = new Date(s.expiresAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      note.textContent = t('claim.scan.sessionActiveUntil', 'Session active until') + ' ' + time;
+      note.hidden = false;
+    }
   }
 
-  function getGeoOptIn() {
-    return new Promise(function (resolve) {
-      if (!document.getElementById('deliver-geo-optin').checked) return resolve(undefined);
-      if (!navigator.geolocation) return resolve(undefined);
-      navigator.geolocation.getCurrentPosition(
-        function (pos) { resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude }); },
-        function () { resolve(undefined); },
-        { timeout: 5000, maximumAge: 60000 }
-      );
-    });
-  }
-
-  async function submitDeliveryCode() {
-    const codeInput = document.getElementById('deliver-code');
-    const errorEl = document.getElementById('deliver-error');
-    const successEl = document.getElementById('deliver-success');
+  function startSession() {
+    var codeInput = document.getElementById('scan-code');
+    var errorEl = document.getElementById('scan-code-error');
     errorEl.hidden = true;
-    const code = codeInput.value.trim();
+    var code = codeInput.value.trim();
     if (!code) return;
-
-    const geo = await getGeoOptIn();
-    const res = await fetch('/api/v1/bags/' + encodeURIComponent(bagToken) + '/confirm-delivery', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(geo ? { code: code, geo: geo } : { code: code })
-    });
-    const data = await res.json().catch(function () { return {}; });
-
-    if (res.ok) {
-      if (document.getElementById('deliver-remember-code').checked) {
-        localStorage.setItem('wavemax_role_code', code); // explicit opt-in (§6.6)
-      } else {
-        localStorage.removeItem('wavemax_role_code');
-      }
-      successEl.hidden = false;
-      document.getElementById('deliver-submit').disabled = true;
-      return;
-    }
-    if (res.status === 401 && data.errors && data.errors.code === 'operator_code') {
-      // Operator code on a picked_up bag = back at the store -> explicit
-      // confirm before closing the order (§6.6 re-intake prompt).
-      window.__pendingOperatorCode = code;
-      showPanel('claim-reintake-panel');
-      return;
-    }
-    errorEl.textContent = res.status === 429
-      ? t9('claim.deliver.lockedOut', 'Too many attempts. Please try again later.')
-      : t9('claim.deliver.badCode', "That code didn't match. Please try again.");
-    errorEl.hidden = false;
-  }
-
-  async function submitReintake() {
-    const errorEl = document.getElementById('reintake-error');
-    errorEl.hidden = true;
-    const weight = parseFloat(document.getElementById('reintake-weight').value);
-    if (!Number.isFinite(weight) || weight <= 0) {
-      errorEl.textContent = t9('operator.intake.weightLabel', 'Weight (lbs)');
-      errorEl.hidden = false;
-      return;
-    }
-    const res = await fetch('/api/v1/bags/' + encodeURIComponent(bagToken) + '/intake', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        operatorCode: window.__pendingOperatorCode,
-        weight: weight,
-        addOns: {
-          premiumDetergent: document.getElementById('reintake-addon-detergent').checked,
-          fabricSoftener: document.getElementById('reintake-addon-softener').checked,
-          stainRemover: document.getElementById('reintake-addon-stain').checked
-        },
-        freshAddOnsFormPlaced: document.getElementById('reintake-fresh-form').checked
+    window.ScanSession.init({ mode: 'session' });
+    window.ScanSession.mint(bagToken, code)
+      .then(function () {
+        showSessionActive();
+        resolveAndConfirm();
       })
-    });
-    if (res.ok) {
-      showStatusPanel('in_progress'); // new order opened
+      .catch(function (err) {
+        errorEl.textContent = err.status === 429
+          ? t('claim.scan.lockedOut', 'Too many attempts. Please try again later.')
+          : t('claim.scan.badCode', "That code didn't match. Please try again.");
+        errorEl.hidden = false;
+      });
+  }
+
+  function resolveAndConfirm() {
+    showPanel('claim-scan-confirm-panel');
+    showSessionActive();
+    document.getElementById('scan-confirm-result').hidden = true;
+    document.getElementById('scan-confirm-error').hidden = true;
+    window.ScanSession.resolve(bagToken)
+      .then(renderConfirm)
+      .catch(handleScanError);
+  }
+
+  function renderConfirm(resolveData) {
+    pending = resolveData;
+    var promptKey = resolveData.promptKey ? 'claim.' + resolveData.promptKey : null;
+    document.getElementById('scan-confirm-prompt').textContent = promptKey
+      ? t(promptKey, t('claim.scan.confirmGeneric', 'Apply this scan?'))
+      : t('claim.scan.confirmGeneric', 'Apply this scan?');
+
+    var c = resolveData.customer;
+    document.getElementById('scan-confirm-customer').textContent = c
+      ? ((c.firstName || '') + ' ' + (c.lastName || '')).trim()
+      : '';
+
+    var needsPayment = resolveData.proposedAction === 'advance' &&
+      resolveData.to === 'out_for_delivery';
+    var paymentRow = document.getElementById('scan-payment-row');
+    paymentRow.hidden = !needsPayment;
+    document.getElementById('scan-payment-confirmed').checked = false;
+  }
+
+  function onConfirmYes() {
+    if (!pending) return;
+    var resolveData = pending;
+    var opts = {};
+    if (resolveData.proposedAction === 'advance' && resolveData.to === 'out_for_delivery') {
+      opts.paymentConfirmed = document.getElementById('scan-payment-confirmed').checked;
+    }
+    if (resolveData.proposedAction === 'delivery-rescan-prompt') {
+      opts.reopen = true;
+    }
+    applyAction(resolveData.proposedAction, opts);
+  }
+
+  function onConfirmNo() {
+    if (pending && pending.proposedAction === 'delivery-rescan-prompt') {
+      applyAction('delivery-rescan-prompt', { reopen: false });
       return;
     }
-    errorEl.textContent = res.status === 429
-      ? t9('claim.deliver.lockedOut', 'Too many attempts. Please try again later.')
-      : t9('claim.deliver.badCode', "That code didn't match. Please try again.");
+    // Other actions: just dismiss this bag.
+    pending = null;
+    document.getElementById('scan-confirm-prompt').textContent =
+      t('claim.scan.scanNext', 'Scan the next bag.');
+    document.getElementById('scan-confirm-customer').textContent = '';
+    document.getElementById('scan-payment-row').hidden = true;
+  }
+
+  function applyAction(expectedAction, opts) {
+    var resultEl = document.getElementById('scan-confirm-result');
+    var errorEl = document.getElementById('scan-confirm-error');
+    resultEl.hidden = true;
+    errorEl.hidden = true;
+    window.ScanSession.apply(bagToken, expectedAction, opts)
+      .then(function (result) {
+        pending = null;
+        if (result.action !== 'no-op') {
+          document.getElementById('scan-undo').hidden = false;
+        }
+        resultEl.textContent = t('claim.scan.applied', 'Done — scan the next bag.');
+        resultEl.hidden = false;
+        document.getElementById('scan-confirm-prompt').textContent =
+          t('claim.scan.scanNext', 'Scan the next bag.');
+        document.getElementById('scan-confirm-customer').textContent = '';
+        document.getElementById('scan-payment-row').hidden = true;
+      })
+      .catch(function (err) {
+        if (err.status === 409 && err.code === 'state_changed') {
+          errorEl.textContent = t('claim.scan.stateChanged', 'Bag state changed — please re-scan');
+          errorEl.hidden = false;
+          resolveAndConfirm();
+          return;
+        }
+        handleScanError(err);
+      });
+  }
+
+  function onUndo() {
+    window.ScanSession.undo(bagToken)
+      .then(function (result) {
+        var resultEl = document.getElementById('scan-confirm-result');
+        if (result.undone) {
+          resultEl.textContent = t('claim.scan.undone', 'Last scan undone.');
+        } else {
+          resultEl.textContent = t('claim.scan.nothingToUndo', 'Nothing to undo.');
+        }
+        resultEl.hidden = false;
+        document.getElementById('scan-undo').hidden = true;
+      })
+      .catch(handleScanError);
+  }
+
+  function endSession() {
+    if (window.ScanSession) window.ScanSession.clearSession();
+    showPanel('claim-scan-code-panel');
+    var codeInput = document.getElementById('scan-code');
+    if (codeInput) codeInput.value = '';
+  }
+
+  function handleScanError(err) {
+    var errorEl = document.getElementById('scan-confirm-error');
+    if (err.status === 401) {
+      // session expired/invalidated — fall back to the code panel.
+      if (window.ScanSession) window.ScanSession.clearSession();
+      var codeError = document.getElementById('scan-code-error');
+      codeError.textContent = t('claim.scan.sessionExpired', 'Your session expired. Please enter your code again.');
+      codeError.hidden = false;
+      showPanel('claim-scan-code-panel');
+      return;
+    }
+    errorEl.textContent = (err.status === 404 || err.code === 'bag_not_registered')
+      ? t('claim.scan.notRegistered', 'Bag not registered')
+      : (err.message || t('claim.scan.networkError', 'Network error — please try again.'));
     errorEl.hidden = false;
   }
 
-  // ---- end PR 9 ---------------------------------------------------------------
+  // ---- customer registration branch (unchanged) -----------------------------
 
   function showFormError(message) {
     var el = document.getElementById('claim-form-error');
@@ -217,8 +282,8 @@
         }
         submit.disabled = false;
         if (result.status === 409) {
-          var raceMsg = (window.i18n && window.i18n.translate('claim.raceLost')) ||
-            'Someone just claimed this bag. If that was you on another device, please log in.';
+          var raceMsg = t('claim.raceLost',
+            'Someone just claimed this bag. If that was you on another device, please log in.');
           showFormError(raceMsg);
           return;
         }
@@ -239,11 +304,19 @@
       .addEventListener('submit', submitRegistration);
     var login = document.getElementById('claim-login-link');
     if (login) login.href = '/embed-app-v2.html?route=/customer-login';
-    // PR 9 panels (CSP: addEventListener only, no inline handlers)
-    var deliverBtn = document.getElementById('deliver-submit');
-    if (deliverBtn) deliverBtn.addEventListener('click', submitDeliveryCode);
-    var reintakeBtn = document.getElementById('reintake-confirm');
-    if (reintakeBtn) reintakeBtn.addEventListener('click', submitReintake);
+
+    // Staff scan-session controls (CSP: addEventListener only, no inline handlers).
+    var codeBtn = document.getElementById('scan-code-submit');
+    if (codeBtn) codeBtn.addEventListener('click', startSession);
+    var yesBtn = document.getElementById('scan-confirm-yes');
+    if (yesBtn) yesBtn.addEventListener('click', onConfirmYes);
+    var noBtn = document.getElementById('scan-confirm-no');
+    if (noBtn) noBtn.addEventListener('click', onConfirmNo);
+    var undoBtn = document.getElementById('scan-undo');
+    if (undoBtn) undoBtn.addEventListener('click', onUndo);
+    var endBtn = document.getElementById('scan-end-session');
+    if (endBtn) endBtn.addEventListener('click', endSession);
+
     resolveBag();
   }
 
