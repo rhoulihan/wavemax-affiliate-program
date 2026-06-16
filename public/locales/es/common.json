@@ -685,7 +685,9 @@
       "networkError": "Error de red — inténtelo de nuevo.",
       "confirmGeneric": "¿Aplicar este escaneo?",
       "successTitle": "Éxito",
-      "errorTitle": "Error"
+      "errorTitle": "Error",
+      "noChange": "Sin cambios — el pedido queda como entregado",
+      "infoTitle": "Sin cambios"
     }
   },
   "administrator": {

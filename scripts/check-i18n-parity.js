@@ -51,6 +51,7 @@ const REQUIRED_KEYS = [
   'operator.scan.stateChanged', 'operator.scan.notRegistered',
   'operator.scan.networkError', 'operator.scan.confirmGeneric',
   'operator.scan.successTitle', 'operator.scan.errorTitle',
+  'operator.scan.infoTitle', 'operator.scan.noChange',
   'claim.status.in_progress', 'claim.status.processed',
   'bag.label.affiliateHeading', 'bag.label.bagRef', 'bag.label.printInstructions',
   'admin.bags.mint.title', 'admin.bags.mint.affiliate', 'admin.bags.mint.quantity',

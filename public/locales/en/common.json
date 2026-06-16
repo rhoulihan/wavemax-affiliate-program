@@ -685,7 +685,9 @@
       "networkError": "Network error — please try again.",
       "confirmGeneric": "Apply this scan?",
       "successTitle": "Success",
-      "errorTitle": "Error"
+      "errorTitle": "Error",
+      "noChange": "No change — order left as delivered",
+      "infoTitle": "No change"
     }
   },
   "administrator": {

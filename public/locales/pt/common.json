@@ -685,7 +685,9 @@
       "networkError": "Erro de rede — tente novamente.",
       "confirmGeneric": "Aplicar esta leitura?",
       "successTitle": "Sucesso",
-      "errorTitle": "Erro"
+      "errorTitle": "Erro",
+      "noChange": "Sem alterações — o pedido permanece como entregue",
+      "infoTitle": "Sem alterações"
     }
   },
   "administrator": {

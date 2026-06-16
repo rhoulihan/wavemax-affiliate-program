@@ -685,7 +685,9 @@
       "networkError": "Netzwerkfehler — bitte versuchen Sie es erneut.",
       "confirmGeneric": "Diesen Scan anwenden?",
       "successTitle": "Erfolg",
-      "errorTitle": "Fehler"
+      "errorTitle": "Fehler",
+      "noChange": "Keine Änderung — Bestellung bleibt als zugestellt",
+      "infoTitle": "Keine Änderung"
     }
   },
   "administrator": {

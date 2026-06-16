@@ -21,7 +21,8 @@ const KEYS = [
   'operator.scan.applied', 'operator.scan.undone', 'operator.scan.nothingToUndo',
   'operator.scan.stateChanged', 'operator.scan.notRegistered',
   'operator.scan.networkError', 'operator.scan.confirmGeneric',
-  'operator.scan.successTitle', 'operator.scan.errorTitle'
+  'operator.scan.successTitle', 'operator.scan.errorTitle',
+  'operator.scan.infoTitle', 'operator.scan.noChange'
 ];
 
 function dig(obj, dotted) {
