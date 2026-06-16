@@ -63,40 +63,36 @@
                 <a id="claim-login-link" href="/embed-app-v2.html?route=/customer-login" class="claim-submit inline-block" data-i18n="claim.alreadyClaimedCta">Log in</a>
             </section>
 
-            <!-- PR 9: deliver / re-intake / status branches of the overloaded bag URL -->
-            <section id="claim-deliver-panel" class="claim-panel" hidden>
-                <h1 data-i18n="claim.deliver.title">Confirm delivery</h1>
-                <label for="deliver-code" data-i18n="claim.deliver.codeLabel">Delivery code or PIN</label>
-                <input id="deliver-code" type="text" autocomplete="one-time-code" autocapitalize="characters"
-                       maxlength="12" data-i18n-placeholder="claim.deliver.codePlaceholder">
-                <label class="claim-checkbox">
-                    <input id="deliver-geo-optin" type="checkbox">
-                    <span data-i18n="claim.deliver.geoOptIn">Attach my location to this confirmation</span>
-                </label>
-                <label class="claim-checkbox">
-                    <input id="deliver-remember-code" type="checkbox">
-                    <span data-i18n="claim.deliver.rememberCode">Remember my code on this device</span>
-                </label>
-                <button id="deliver-submit" type="button" class="btn btn-primary" data-i18n="claim.deliver.confirm">Confirm delivery</button>
-                <p id="deliver-error" class="claim-error" hidden></p>
-                <p id="deliver-success" class="claim-success" hidden data-i18n="claim.deliver.success">Delivery confirmed — thank you!</p>
+            <!-- PR 5: staff scan-session overload of the registered-bag URL.
+                 A partner/operator enters their code ONCE to mint a scan session,
+                 then batch-scans bag QRs (each a fresh page load; sessionStorage
+                 carries the session) confirming one state-driven transition each. -->
+            <section id="claim-scan-code-panel" class="claim-panel" hidden>
+                <h1 data-i18n="claim.scan.staffTitle">Staff scan</h1>
+                <p data-i18n="claim.scan.staffIntro">Enter your code to scan this bag.</p>
+                <label for="scan-code" data-i18n="claim.scan.operatorCodeLabel">Operator code</label>
+                <input id="scan-code" type="text" autocomplete="one-time-code" autocapitalize="characters"
+                       maxlength="12" data-i18n-placeholder="claim.scan.codePlaceholder">
+                <button id="scan-code-submit" type="button" class="btn btn-primary" data-i18n="claim.scan.startSession">Start scanning</button>
+                <p id="scan-code-error" class="claim-error" hidden></p>
             </section>
 
-            <section id="claim-reintake-panel" class="claim-panel" hidden>
-                <h1 data-i18n="claim.reintake.prompt">Mark delivered &amp; start a new order?</h1>
-                <label for="reintake-weight" data-i18n="operator.intake.weightLabel">Weight (lbs)</label>
-                <input id="reintake-weight" type="number" min="1" step="0.1" inputmode="decimal">
-                <label class="claim-checkbox"><input id="reintake-addon-detergent" type="checkbox"><span data-i18n="operator.intake.addOns.premiumDetergent">Premium detergent</span></label>
-                <label class="claim-checkbox"><input id="reintake-addon-softener" type="checkbox"><span data-i18n="operator.intake.addOns.fabricSoftener">Fabric softener</span></label>
-                <label class="claim-checkbox"><input id="reintake-addon-stain" type="checkbox"><span data-i18n="operator.intake.addOns.stainRemover">Stain remover</span></label>
-                <label class="claim-checkbox"><input id="reintake-fresh-form" type="checkbox"><span data-i18n="operator.intake.freshFormAck">Fresh add-ons form placed in pocket</span></label>
-                <button id="reintake-confirm" type="button" class="btn btn-primary" data-i18n="claim.reintake.confirm">Yes — start a new order</button>
-                <p id="reintake-error" class="claim-error" hidden></p>
-            </section>
-
-            <section id="claim-status-panel" class="claim-panel" hidden>
-                <h1 id="claim-status-heading"></h1>
-                <a id="claim-status-login" href="/embed-app-v2.html?route=/customer-login" data-i18n="claim.status.loginCta">Log in to see your order</a>
+            <section id="claim-scan-confirm-panel" class="claim-panel" hidden>
+                <p id="scan-session-active" class="claim-session-note" hidden></p>
+                <h1 id="scan-confirm-prompt"></h1>
+                <p id="scan-confirm-customer"></p>
+                <label class="claim-checkbox" id="scan-payment-row" hidden>
+                    <input id="scan-payment-confirmed" type="checkbox">
+                    <span data-i18n="claim.scan.paymentConfirmed">Payment confirmed</span>
+                </label>
+                <div class="scan-confirm-actions">
+                    <button id="scan-confirm-no" type="button" class="btn btn-secondary" data-i18n="claim.scan.no">No</button>
+                    <button id="scan-confirm-yes" type="button" class="btn btn-primary" data-i18n="claim.scan.yes">Yes</button>
+                </div>
+                <p id="scan-confirm-result" class="claim-success" hidden></p>
+                <p id="scan-confirm-error" class="claim-error" hidden></p>
+                <button id="scan-undo" type="button" class="btn btn-secondary" hidden data-i18n="claim.scan.undo">Undo last scan</button>
+                <button id="scan-end-session" type="button" class="btn btn-secondary" data-i18n="claim.scan.endSession">End session</button>
             </section>
 
             <!-- STATE: invalid -->

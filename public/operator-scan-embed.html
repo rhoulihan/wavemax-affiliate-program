@@ -22,74 +22,67 @@
 <body>
     <div class="main-container">
         <div class="top-spacer"></div>
-        
-        <!-- Action Bar (removed - print labels moved to admin dashboard) -->
-        
-        <!-- Stats Summary -->
+
+        <!-- Session tally: orders advanced/created this scan session -->
         <div class="stats-summary">
             <div class="stat-card">
-                <div class="stat-value" id="ordersToday">0</div>
-                <div class="stat-label">Orders Today</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-value" id="bagsScanned">0</div>
-                <div class="stat-label">Bags Scanned</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-value" id="ordersReady">0</div>
-                <div class="stat-label">Ready for Pickup</div>
+                <div class="stat-value" id="sessionTally">0</div>
+                <div class="stat-label" data-i18n="operator.scan.tallyLabel">Orders this session</div>
             </div>
         </div>
 
         <!-- Scan Prompt -->
         <div class="scan-prompt">
             <div class="scan-icon">🧺</div>
-            <h2>Scan to Process Order</h2>
-            <p>Use scanner at each stage of the process</p>
-            
-            <!-- Hidden input for scanner -->
+            <h2 data-i18n="operator.scan.heading">Scan a bag</h2>
+            <p data-i18n="operator.scan.subheading">Each scan moves the bag to its next step automatically.</p>
+
+            <!-- Hidden input for scanner (keyboard-wedge) -->
             <input type="text" id="scanInput" autocomplete="off" inputmode="none">
-            
+
+            <!-- State-driven explanation (replaces the old fixed 3-stage legend) -->
             <div class="scan-types">
                 <div class="scan-type">
-                    <div class="scan-type-icon">1️⃣</div>
-                    <div class="scan-type-text">
-                        <strong>Receive:</strong><br>
-                        Scan to weigh bags
+                    <div class="scan-type-text" data-i18n="operator.scan.legend.intake">
+                        New bag → check it in at the store.
                     </div>
                 </div>
                 <div class="scan-type">
-                    <div class="scan-type-icon">2️⃣</div>
-                    <div class="scan-type-text">
-                        <strong>Notify:</strong><br>
-                        Scan when WDF is done
+                    <div class="scan-type-text" data-i18n="operator.scan.legend.outForDelivery">
+                        Checked-in bag → hand back for delivery (confirm payment).
                     </div>
                 </div>
                 <div class="scan-type">
-                    <div class="scan-type-icon">3️⃣</div>
-                    <div class="scan-type-text">
-                        <strong>Pickup:</strong><br>
-                        Scan as bags leave
+                    <div class="scan-type-text" data-i18n="operator.scan.legend.complete">
+                        Out-for-delivery bag → mark delivered.
                     </div>
                 </div>
+            </div>
+
+            <button type="button" id="undoBtn" class="btn btn-secondary" hidden
+                    data-i18n="operator.scan.undo">Undo last scan</button>
+        </div>
+    </div>
+
+    <!-- Scan confirm dialog (one dialog for every state-driven transition) -->
+    <div class="confirmation-modal" id="scanConfirmModal" hidden>
+        <div class="confirmation-content">
+            <h4 id="scanConfirmPrompt"></h4>
+            <p id="scanConfirmCustomer"></p>
+            <label class="scan-confirm-payment" id="scanPaymentRow" hidden>
+                <input type="checkbox" id="scanPaymentConfirmed">
+                <span data-i18n="operator.scan.paymentConfirmed">Payment confirmed</span>
+            </label>
+            <div class="action-buttons">
+                <button type="button" class="btn btn-secondary" id="scanConfirmNo"
+                        data-i18n="operator.scan.no">No</button>
+                <button type="button" class="btn btn-primary" id="scanConfirmYes"
+                        data-i18n="operator.scan.yes">Yes</button>
             </div>
         </div>
     </div>
 
-    <!-- Order Details Modal -->
-    <div class="modal" id="orderModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 id="modalTitle">Order Details</h3>
-                <button class="close-btn" id="modalCloseBtn">&times;</button>
-            </div>
-            <div class="modal-body" id="modalBody">
-                <!-- Content will be dynamically inserted -->
-            </div>
-        </div>
-    </div>
-
-    <!-- Confirmation Modal -->
+    <!-- Transient toast (success / error) -->
     <div class="confirmation-modal" id="confirmationModal">
         <div class="confirmation-content">
             <div class="confirmation-icon" id="confirmIcon">✓</div>
@@ -100,24 +93,15 @@
         </div>
     </div>
 
-    <!-- i18n Scripts -->
+    <!-- Scripts -->
     <script src="/assets/js/i18n.js"></script>
     <script src="/assets/js/language-switcher.js"></script>
     <script src="/assets/js/modal-utils.js"></script>
     <script src="/assets/js/errorHandler.js"></script>
     <script src="/assets/js/csrf-utils.js"></script>
-    <!-- Print utilities -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-    <script src="/assets/js/label-print-utils.js"></script>
-    <script src="/assets/js/thermal-print-utils.js"></script>
+    <script src="/assets/js/api-client.js"></script>
     <script src="/assets/js/bag-token-parser.js"></script>
+    <script src="/assets/js/scan-session.js"></script>
     <script src="/assets/js/operator-scan-init.js"></script>
-
-  <!-- Hibu Dynamic Phone Insertion — swaps the WaveMAX Austin number for a
-       source-indexed tracking number. Loader is blocked by ad-blockers
-       gracefully; the init script no-ops when the loader is absent. -->
-  <script src="/assets/vendor/ybDynamicPhoneInsertion.js?v=20260520"></script>
-  <script src="/assets/js/austin-hibu-phone-swap.js?v=20260523b"></script>
 </body>
 </html>

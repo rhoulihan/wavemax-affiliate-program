@@ -51,7 +51,28 @@
         "advanceToOutForDelivery": "Hand this bag back for delivery? (confirm payment)",
         "advanceToComplete": "Mark this bag delivered?",
         "deliveryRescan": "This bag was just delivered. Start a new order?"
-      }
+      },
+      "staffTitle": "Staff scan",
+      "staffIntro": "Enter your code to scan this bag.",
+      "codePlaceholder": "Your code",
+      "startSession": "Start scanning",
+      "badCode": "That code didn't match. Please try again.",
+      "lockedOut": "Too many attempts. Please try again later.",
+      "paymentConfirmed": "Payment confirmed",
+      "yes": "Yes",
+      "no": "No",
+      "applied": "Done — scan the next bag.",
+      "scanNext": "Scan the next bag.",
+      "confirmGeneric": "Apply this scan?",
+      "stateChanged": "Bag state changed — please re-scan.",
+      "undo": "Undo last scan",
+      "undone": "Last scan undone.",
+      "nothingToUndo": "Nothing to undo.",
+      "sessionActiveUntil": "Session active until",
+      "sessionExpired": "Your session expired. Please enter your code again.",
+      "endSession": "End session",
+      "notRegistered": "Bag not registered.",
+      "networkError": "Network error — please try again."
     },
     "status": {
       "in_progress": "Your laundry is being processed",
@@ -690,6 +711,29 @@
         "orderAlreadyOpen": "An order is already open for this bag",
         "bagNotFound": "Bag not recognized"
       }
+    },
+    "scan": {
+      "heading": "Scan a bag",
+      "subheading": "Each scan moves the bag to its next step automatically.",
+      "tallyLabel": "Orders this session",
+      "legend": {
+        "intake": "New bag → check it in at the store.",
+        "outForDelivery": "Checked-in bag → hand back for delivery (confirm payment).",
+        "complete": "Out-for-delivery bag → mark delivered."
+      },
+      "paymentConfirmed": "Payment confirmed",
+      "yes": "Yes",
+      "no": "No",
+      "undo": "Undo last scan",
+      "applied": "Done",
+      "undone": "Last scan undone",
+      "nothingToUndo": "Nothing to undo",
+      "stateChanged": "Bag state changed — please re-scan",
+      "notRegistered": "Bag not registered",
+      "networkError": "Network error — please try again.",
+      "confirmGeneric": "Apply this scan?",
+      "successTitle": "Success",
+      "errorTitle": "Error"
     }
   },
   "administrator": {

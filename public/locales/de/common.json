@@ -51,7 +51,28 @@
         "advanceToOutForDelivery": "Diesen Beutel zur Lieferung zurückgeben? (Zahlung bestätigen)",
         "advanceToComplete": "Diesen Beutel als geliefert markieren?",
         "deliveryRescan": "Dieser Beutel wurde gerade geliefert. Einen neuen Auftrag starten?"
-      }
+      },
+      "staffTitle": "Mitarbeiter-Scan",
+      "staffIntro": "Geben Sie Ihren Code ein, um diesen Beutel zu scannen.",
+      "codePlaceholder": "Ihr Code",
+      "startSession": "Scannen beginnen",
+      "badCode": "Dieser Code stimmt nicht. Bitte versuchen Sie es erneut.",
+      "lockedOut": "Zu viele Versuche. Bitte versuchen Sie es später erneut.",
+      "paymentConfirmed": "Zahlung bestätigt",
+      "yes": "Ja",
+      "no": "Nein",
+      "applied": "Fertig — scannen Sie den nächsten Beutel.",
+      "scanNext": "Scannen Sie den nächsten Beutel.",
+      "confirmGeneric": "Diesen Scan anwenden?",
+      "stateChanged": "Der Beutelstatus hat sich geändert — bitte erneut scannen.",
+      "undo": "Letzten Scan rückgängig machen",
+      "undone": "Letzter Scan rückgängig gemacht.",
+      "nothingToUndo": "Nichts rückgängig zu machen.",
+      "sessionActiveUntil": "Sitzung aktiv bis",
+      "sessionExpired": "Ihre Sitzung ist abgelaufen. Bitte geben Sie Ihren Code erneut ein.",
+      "endSession": "Sitzung beenden",
+      "notRegistered": "Beutel nicht registriert.",
+      "networkError": "Netzwerkfehler — bitte versuchen Sie es erneut."
     },
     "status": {
       "in_progress": "Ihre Wäsche wird bearbeitet",
@@ -690,6 +711,29 @@
         "orderAlreadyOpen": "Für diesen Beutel ist bereits ein Auftrag offen",
         "bagNotFound": "Beutel nicht erkannt"
       }
+    },
+    "scan": {
+      "heading": "Einen Beutel scannen",
+      "subheading": "Jeder Scan bringt den Beutel automatisch zum nächsten Schritt.",
+      "tallyLabel": "Aufträge in dieser Sitzung",
+      "legend": {
+        "intake": "Neuer Beutel → im Geschäft einchecken.",
+        "outForDelivery": "Eingecheckter Beutel → zur Lieferung zurückgeben (Zahlung bestätigen).",
+        "complete": "Beutel in Lieferung → als geliefert markieren."
+      },
+      "paymentConfirmed": "Zahlung bestätigt",
+      "yes": "Ja",
+      "no": "Nein",
+      "undo": "Letzten Scan rückgängig machen",
+      "applied": "Fertig",
+      "undone": "Letzter Scan rückgängig gemacht",
+      "nothingToUndo": "Nichts rückgängig zu machen",
+      "stateChanged": "Der Beutelstatus hat sich geändert — bitte erneut scannen",
+      "notRegistered": "Beutel nicht registriert",
+      "networkError": "Netzwerkfehler — bitte versuchen Sie es erneut.",
+      "confirmGeneric": "Diesen Scan anwenden?",
+      "successTitle": "Erfolg",
+      "errorTitle": "Fehler"
     }
   },
   "administrator": {
