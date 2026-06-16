@@ -187,6 +187,9 @@ secure/
 *.pem
 *.key
 *.p12
+# Firebase Admin service-account credentials (PR 7)
+*firebase-adminsdk*.json
+firebase-service-account*.json
 
 # Runtime state
 temp/

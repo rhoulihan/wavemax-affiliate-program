@@ -55,7 +55,32 @@
       "processed": "Sua roupa está lavada e aguardando na loja"
     },
     "registeredTitle": "Tudo pronto!",
-    "registeredBody": "Sua sacola agora está vinculada à sua conta. Seu prestador de serviços de lavanderia cuidará do resto — fique de olho no seu e-mail para atualizações."
+    "registeredBody": "Sua sacola agora está vinculada à sua conta. Seu prestador de serviços de lavanderia cuidará do resto — fique de olho no seu e-mail para atualizações.",
+    "verify": {
+      "emailHeading": "Verifique seu e-mail",
+      "emailIntro": "Enviamos um código de 6 dígitos para seu e-mail. Digite-o abaixo para continuar.",
+      "sendCode": "Enviar código",
+      "codeSent": "Código enviado. Verifique seu e-mail.",
+      "codeLabel": "Código de verificação",
+      "verify": "Verificar",
+      "verified": "Verificado",
+      "invalidCode": "Esse código está incorreto ou expirou. Tente novamente.",
+      "lockedOut": "Muitas tentativas. Tente novamente mais tarde.",
+      "resend": "Reenviar código",
+      "phoneHeading": "Verifique seu telefone",
+      "phoneIntro": "Enviaremos um código por mensagem de texto para o número acima.",
+      "sendSms": "Enviar código por SMS",
+      "smsSent": "Mensagem enviada. Digite o código abaixo.",
+      "smsCodeLabel": "Código SMS",
+      "verifyPhone": "Verificar telefone",
+      "invalidSms": "Esse código SMS está incorreto. Tente novamente.",
+      "recaptchaError": "A verificação falhou. Recarregue e tente novamente.",
+      "phoneRequired": "Verifique seu número de telefone para continuar.",
+      "phoneMismatch": "O número verificado não corresponde ao telefone que você digitou.",
+      "emailRequired": "Verifique seu e-mail para continuar.",
+      "enterPhoneFirst": "Digite seu número de telefone primeiro.",
+      "enterEmailFirst": "Digite seu e-mail primeiro."
+    }
   },
   "bag": {
     "label": {

@@ -356,7 +356,13 @@ app.use((req, res, next) => {
       // Cloudflare Turnstile (franchise self-serve preview modal on crhsent.com):
       // loads its api.js + challenge widget from this origin. Lazy-loaded by the
       // modal, so it only costs weight when a franchisee opens the preview form.
-      'https://challenges.cloudflare.com'
+      'https://challenges.cloudflare.com',
+      // Firebase Phone Auth (PR 7) — the reCAPTCHA Enterprise widget + Firebase
+      // helpers load at runtime from Google origins even though the Firebase SDK
+      // itself is self-hosted (vendored). Registration page only.
+      'https://www.gstatic.com',
+      'https://www.google.com',
+      'https://apis.google.com'
     ],
     'style-src': [
       "'self'",
@@ -366,15 +372,21 @@ app.use((req, res, next) => {
       'https://stackpath.bootstrapcdn.com'
     ],
     'img-src': ["'self'", 'data:', 'https://wavemax.promo', 'https://www.wavemax.promo', 'https://atxwashateria.com', 'https://atxwashdryfold.com', 'https://runberglaundry.com', 'https://rundberglaundry.com', 'https://*.tile.openstreetmap.org', 'https://tile.openstreetmap.org', 'https://cdnjs.cloudflare.com', 'https://flagcdn.com', 'https://secure.walibu.com', 'https://upload.wikimedia.org', 'https://*.googleusercontent.com', 'https://maps.googleapis.com', 'https://maps.gstatic.com', 'https://*.googleapis.com', 'https://*.gstatic.com', 'https://www.facebook.com'],
-    'connect-src': ["'self'", 'https://wavemax.promo', 'https://atxwashateria.com', 'https://atxwashdryfold.com', 'https://runberglaundry.com', 'https://rundberglaundry.com', 'https://cdn.jsdelivr.net', 'https://cdnjs.cloudflare.com', 'https://stackpath.bootstrapcdn.com', 'https://router.project-osrm.org', 'https://graphhopper.com', 'https://api.openrouteservice.org', 'https://valhalla1.openstreetmap.de', 'https://nominatim.openstreetmap.org', 'https://www.local-marketing-reports.com', 'https://places.googleapis.com', 'https://maps.googleapis.com', 'https://maps.gstatic.com', 'https://connect.facebook.net', 'https://www.facebook.com'],
+    'connect-src': ["'self'", 'https://wavemax.promo', 'https://atxwashateria.com', 'https://atxwashdryfold.com', 'https://runberglaundry.com', 'https://rundberglaundry.com', 'https://cdn.jsdelivr.net', 'https://cdnjs.cloudflare.com', 'https://stackpath.bootstrapcdn.com', 'https://router.project-osrm.org', 'https://graphhopper.com', 'https://api.openrouteservice.org', 'https://valhalla1.openstreetmap.de', 'https://nominatim.openstreetmap.org', 'https://www.local-marketing-reports.com', 'https://places.googleapis.com', 'https://maps.googleapis.com', 'https://maps.gstatic.com', 'https://connect.facebook.net', 'https://www.facebook.com',
+      // Firebase Phone Auth (PR 7) — Identity Toolkit + secure-token endpoints.
+      'https://identitytoolkit.googleapis.com', 'https://securetoken.googleapis.com', 'https://www.googleapis.com'],
     'font-src': ["'self'", 'https://cdnjs.cloudflare.com', 'https://cdn.jsdelivr.net', 'https://fonts.gstatic.com'],
     'object-src': ["'none'"],
     'media-src': ["'self'"],
     'frame-src': isClickjackingDemo
       ? ["'self'", 'https://www.google.com', 'https://maps.google.com', 'https://my.matterport.com', 'https://challenges.cloudflare.com',
+         // Firebase Phone Auth (PR 7) — the auth helper iframe.
+         'https://wavemax-bag-registration.firebaseapp.com',
          // Educational clickjacking demo only — see isClickjackingDemo comment above.
          'https://www.wavemaxlaundry.com', 'https://wavemaxlaundry.com', 'https://rundberglaundry.com']
-      : ["'self'", 'https://www.google.com', 'https://maps.google.com', 'https://my.matterport.com', 'https://challenges.cloudflare.com'],
+      : ["'self'", 'https://www.google.com', 'https://maps.google.com', 'https://my.matterport.com', 'https://challenges.cloudflare.com',
+         // Firebase Phone Auth (PR 7) — the auth helper iframe.
+         'https://wavemax-bag-registration.firebaseapp.com'],
     'form-action': ["'self'"],
     'frame-ancestors': ["'self'", 'https://www.wavemaxlaundry.com', 'https://wavemaxlaundry.com'],
     'base-uri': ["'self'"],
