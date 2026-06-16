@@ -627,4 +627,73 @@ exports.sendCustomerDeliveredEmail = async (customer, order, { affiliateName } =
   }
 };
 
+/**
+ * Send the 6-digit email-verification OTP at bag-claim registration (PR 7).
+ * Best-effort: logs and returns false on failure, never throws.
+ * @param {{email:string, code:string, languagePreference?:string}} opts
+ */
+exports.sendCustomerEmailOtp = async ({ email, code, languagePreference } = {}) => {
+  try {
+    if (!email || !code) {
+      logger.error('sendCustomerEmailOtp: missing email or code');
+      return false;
+    }
+    const language = languagePreference || 'en';
+    const template = await loadTemplate('customer-email-otp', language);
+
+    const translations = {
+      en: {
+        EMAIL_TITLE: 'Your WaveMAX verification code',
+        EMAIL_HEADER: 'Verify your email',
+        GREETING: 'Hello,',
+        INTRO: 'Enter this code to verify your email and finish claiming your laundry bag:',
+        EXPIRY_NOTE: 'This code expires in 10 minutes. If you didn\'t request it, you can ignore this email.',
+        FOOTER_RIGHTS: 'All rights reserved.',
+        FOOTER_AUTOMATED_MESSAGE: 'This is an automated message. Please do not reply to this email.'
+      },
+      es: {
+        EMAIL_TITLE: 'Su código de verificación de WaveMAX',
+        EMAIL_HEADER: 'Verifique su correo electrónico',
+        GREETING: 'Hola,',
+        INTRO: 'Ingrese este código para verificar su correo electrónico y terminar de reclamar su bolsa de ropa:',
+        EXPIRY_NOTE: 'Este código caduca en 10 minutos. Si no lo solicitó, puede ignorar este correo.',
+        FOOTER_RIGHTS: 'Todos los derechos reservados.',
+        FOOTER_AUTOMATED_MESSAGE: 'Este es un mensaje automatizado. Por favor no responda a este correo.'
+      },
+      pt: {
+        EMAIL_TITLE: 'Seu código de verificação WaveMAX',
+        EMAIL_HEADER: 'Verifique seu e-mail',
+        GREETING: 'Olá,',
+        INTRO: 'Digite este código para verificar seu e-mail e concluir o registro da sua sacola de roupa:',
+        EXPIRY_NOTE: 'Este código expira em 10 minutos. Se você não o solicitou, pode ignorar este e-mail.',
+        FOOTER_RIGHTS: 'Todos os direitos reservados.',
+        FOOTER_AUTOMATED_MESSAGE: 'Esta é uma mensagem automática. Por favor, não responda a este e-mail.'
+      },
+      de: {
+        EMAIL_TITLE: 'Ihr WaveMAX-Bestätigungscode',
+        EMAIL_HEADER: 'Bestätigen Sie Ihre E-Mail',
+        GREETING: 'Hallo,',
+        INTRO: 'Geben Sie diesen Code ein, um Ihre E-Mail zu bestätigen und die Registrierung Ihres Wäschebeutels abzuschließen:',
+        EXPIRY_NOTE: 'Dieser Code läuft in 10 Minuten ab. Wenn Sie ihn nicht angefordert haben, können Sie diese E-Mail ignorieren.',
+        FOOTER_RIGHTS: 'Alle Rechte vorbehalten.',
+        FOOTER_AUTOMATED_MESSAGE: 'Dies ist eine automatische Nachricht. Bitte antworten Sie nicht auf diese E-Mail.'
+      }
+    };
+    const t = translations[language] || translations.en;
+
+    const html = fillTemplate(template, {
+      ...t,
+      OTP_CODE: code,
+      CURRENT_YEAR: String(new Date().getFullYear())
+    });
+
+    await sendEmail(email, t.EMAIL_TITLE, html);
+    logger.info('Customer email OTP sent', { email });
+    return true;
+  } catch (error) {
+    logger.error('Error sending customer email OTP:', error);
+    return false;
+  }
+};
+
 module.exports = exports;

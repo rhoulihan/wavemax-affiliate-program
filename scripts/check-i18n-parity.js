@@ -43,6 +43,15 @@ const REQUIRED_KEYS = [
   'claim.scan.nothingToUndo', 'claim.scan.sessionActiveUntil',
   'claim.scan.sessionExpired', 'claim.scan.endSession', 'claim.scan.notRegistered',
   'claim.scan.networkError',
+  // PR 7 — bag-claim email + phone verification UI
+  'claim.verify.emailHeading', 'claim.verify.emailIntro', 'claim.verify.sendCode',
+  'claim.verify.codeSent', 'claim.verify.codeLabel', 'claim.verify.verify',
+  'claim.verify.verified', 'claim.verify.invalidCode', 'claim.verify.lockedOut',
+  'claim.verify.resend', 'claim.verify.phoneHeading', 'claim.verify.phoneIntro',
+  'claim.verify.sendSms', 'claim.verify.smsSent', 'claim.verify.smsCodeLabel',
+  'claim.verify.verifyPhone', 'claim.verify.invalidSms', 'claim.verify.recaptchaError',
+  'claim.verify.phoneRequired', 'claim.verify.phoneMismatch', 'claim.verify.emailRequired',
+  'claim.verify.enterPhoneFirst', 'claim.verify.enterEmailFirst',
   'operator.scan.heading', 'operator.scan.subheading', 'operator.scan.tallyLabel',
   'operator.scan.legend.intake', 'operator.scan.legend.outForDelivery',
   'operator.scan.legend.complete', 'operator.scan.paymentConfirmed',
@@ -87,7 +96,8 @@ const REQUIRED_EMAIL_TEMPLATES = [
   'affiliate-invite',
   'customer-order-delivered',
   'order-ready',
-  'customer-on-the-way'
+  'customer-on-the-way',
+  'customer-email-otp'
 ];
 
 function flattenKeys(obj, prefix = '', out = []) {

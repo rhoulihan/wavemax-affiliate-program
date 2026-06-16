@@ -55,7 +55,32 @@
       "processed": "Ihre Wäsche ist gewaschen und wartet im Geschäft"
     },
     "registeredTitle": "Alles erledigt!",
-    "registeredBody": "Ihr Beutel ist jetzt mit Ihrem Konto verknüpft. Ihr Wäscheanbieter übernimmt ab hier — achten Sie auf Ihre E-Mails für Updates."
+    "registeredBody": "Ihr Beutel ist jetzt mit Ihrem Konto verknüpft. Ihr Wäscheanbieter übernimmt ab hier — achten Sie auf Ihre E-Mails für Updates.",
+    "verify": {
+      "emailHeading": "Bestätigen Sie Ihre E-Mail",
+      "emailIntro": "Wir haben einen 6-stelligen Code an Ihre E-Mail gesendet. Geben Sie ihn unten ein, um fortzufahren.",
+      "sendCode": "Code senden",
+      "codeSent": "Code gesendet. Bitte prüfen Sie Ihre E-Mail.",
+      "codeLabel": "Bestätigungscode",
+      "verify": "Bestätigen",
+      "verified": "Bestätigt",
+      "invalidCode": "Dieser Code ist falsch oder abgelaufen. Bitte versuchen Sie es erneut.",
+      "lockedOut": "Zu viele Versuche. Bitte versuchen Sie es später erneut.",
+      "resend": "Code erneut senden",
+      "phoneHeading": "Bestätigen Sie Ihre Telefonnummer",
+      "phoneIntro": "Wir senden einen Code per SMS an die oben angegebene Nummer.",
+      "sendSms": "SMS-Code senden",
+      "smsSent": "SMS gesendet. Geben Sie den Code unten ein.",
+      "smsCodeLabel": "SMS-Code",
+      "verifyPhone": "Telefon bestätigen",
+      "invalidSms": "Dieser SMS-Code ist falsch. Bitte versuchen Sie es erneut.",
+      "recaptchaError": "Die Überprüfung ist fehlgeschlagen. Bitte laden Sie die Seite neu und versuchen Sie es erneut.",
+      "phoneRequired": "Bitte bestätigen Sie Ihre Telefonnummer, um fortzufahren.",
+      "phoneMismatch": "Die bestätigte Nummer stimmt nicht mit der eingegebenen Telefonnummer überein.",
+      "emailRequired": "Bitte bestätigen Sie Ihre E-Mail, um fortzufahren.",
+      "enterPhoneFirst": "Geben Sie zuerst Ihre Telefonnummer ein.",
+      "enterEmailFirst": "Geben Sie zuerst Ihre E-Mail ein."
+    }
   },
   "bag": {
     "label": {

@@ -228,6 +228,30 @@ class Formatters {
   }
 
   /**
+   * Normalize a phone number to E.164 (+<country><number>), defaulting to US
+   * (+1) for 10-digit input. Used to compare an entered phone against the
+   * Firebase-verified phone (which is always E.164). Returns '' for empty
+   * input and the cleaned best-effort form otherwise.
+   * @param {string} phone
+   * @param {string} defaultCountry - ISO-ish hint; only 'us' is special-cased
+   * @returns {string}
+   */
+  static e164(phone, defaultCountry = 'us') {
+    if (!phone) return '';
+    const raw = String(phone).trim();
+    // Keep a leading + if present; strip everything else non-digit.
+    const hasPlus = raw.startsWith('+');
+    const digits = raw.replace(/\D/g, '');
+    if (!digits) return '';
+    if (hasPlus) return `+${digits}`;
+    if (defaultCountry === 'us') {
+      if (digits.length === 10) return `+1${digits}`;
+      if (digits.length === 11 && digits[0] === '1') return `+${digits}`;
+    }
+    return `+${digits}`;
+  }
+
+  /**
    * Format name (capitalize properly)
    * @param {string} name - Name to format
    * @param {boolean} lastFirst - Format as "Last, First"

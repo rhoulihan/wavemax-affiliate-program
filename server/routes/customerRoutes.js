@@ -11,7 +11,6 @@ const customerController = require('../controllers/customerController');
 const { authenticate } = require('../middleware/auth');
 const { checkRole } = require('../middleware/rbac');
 const { body } = require('express-validator');
-const { customPasswordValidator } = require('../utils/passwordValidator');
 const { registrationLimiter, createCustomLimiter } = require('../middleware/rateLimiting');
 const { handleValidationErrors } = require('../middleware/locationValidation');
 
@@ -56,8 +55,29 @@ router.get('/check-rate-limit', (req, res, next) => {
 router.get('/claim/:bagToken', claimResolveLimiter, customerController.resolveClaim);
 
 /**
+ * @route   POST /api/v1/customers/claim/:bagToken/email-otp/request
+ * @desc    Send a 6-digit email-verification OTP for this bag + email
+ * @access  Public (registrationLimiter; CSRF-exempt registration class)
+ */
+router.post('/claim/:bagToken/email-otp/request', registrationLimiter, [
+  body('email').isEmail().withMessage('Valid email is required')
+], handleValidationErrors, customerController.requestEmailOtp);
+
+/**
+ * @route   POST /api/v1/customers/claim/:bagToken/email-otp/verify
+ * @desc    Verify the email OTP; mints a one-time emailVerificationToken
+ * @access  Public (lockout-gated; CSRF-exempt registration class)
+ */
+router.post('/claim/:bagToken/email-otp/verify', registrationLimiter, [
+  body('email').isEmail().withMessage('Valid email is required'),
+  body('code').notEmpty().withMessage('Code is required')
+], handleValidationErrors, customerController.verifyEmailOtp);
+
+/**
  * @route   POST /api/v1/customers/claim/:bagToken/register
- * @desc    Register a new customer against an issued bag (affiliate derived from the bag)
+ * @desc    Register a new customer against an issued bag (affiliate derived from the bag).
+ *          PR 7: requires a verified emailVerificationToken (always) and a Firebase
+ *          phoneIdToken when phone verification is enabled. No username/password.
  * @access  Public (registrationLimiter; CSRF-exempt registration class)
  */
 router.post('/claim/:bagToken/register', registrationLimiter, [
@@ -69,8 +89,7 @@ router.post('/claim/:bagToken/register', registrationLimiter, [
   body('city').notEmpty().withMessage('City is required'),
   body('state').notEmpty().withMessage('State is required'),
   body('zipCode').notEmpty().withMessage('ZIP code is required'),
-  body('username').notEmpty().withMessage('Username is required'),
-  body('password').custom((value, { req }) => customPasswordValidator()(value, { req }))
+  body('emailVerificationToken').notEmpty().withMessage('Email verification is required')
 ], handleValidationErrors, customerController.claimRegister);
 
 /**

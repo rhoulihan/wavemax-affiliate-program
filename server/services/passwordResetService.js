@@ -11,24 +11,23 @@
 
 const crypto = require('crypto');
 const Affiliate = require('../models/Affiliate');
-const Customer = require('../models/Customer');
 const Administrator = require('../models/Administrator');
 const Operator = require('../models/Operator');
 const encryptionUtil = require('../utils/encryption');
 const emailService = require('../utils/emailService');
 
-const USER_TYPES = ['affiliate', 'customer', 'administrator', 'operator'];
+// PR 7: customers are registration-only (no password/login), so there's no
+// customer password to reset — the 'customer' user type is gone from this flow.
+const USER_TYPES = ['affiliate', 'administrator', 'operator'];
 
 const MODEL_BY_USER_TYPE = {
   affiliate: Affiliate,
-  customer: Customer,
   administrator: Administrator,
   operator: Operator
 };
 
 const RESET_EMAIL_SENDERS = {
   affiliate: 'sendAffiliatePasswordResetEmail',
-  customer: 'sendCustomerPasswordResetEmail',
   administrator: 'sendAdministratorPasswordResetEmail',
   operator: 'sendOperatorPasswordResetEmail'
 };

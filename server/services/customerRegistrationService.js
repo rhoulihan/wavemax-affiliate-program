@@ -5,25 +5,33 @@
 // never from client input. Order of operations for the claim race: save the
 // customer, then claim; on race loss, compensating delete (no Mongo
 // transaction — standalone-mongod portable, spec §13 #4).
+//
+// PR 7 — verification gate (spec §5): the email is ALWAYS re-verified
+// server-side via a one-time emailVerificationToken minted by the email OTP
+// flow. When PHONE_VERIFICATION_ENABLED is on, the Firebase phone ID token is
+// re-verified and the returned E.164 must match the entered phone; off → phone
+// is collected but not verified. Phase 1 has no customer login, so no username
+// or password is stored.
 
 const { v4: uuidv4 } = require('uuid');
 
 const Customer = require('../models/Customer');
 const bagClaimService = require('./bagClaimService');
-const encryptionUtil = require('../utils/encryption');
 const emailService = require('../utils/emailService');
+const emailOtpService = require('./emailOtpService');
+const firebasePhoneService = require('./firebasePhoneService');
 const Formatters = require('../utils/formatters');
 const logger = require('../utils/logger');
 
 /**
  * Error type used to communicate expected failures (duplicate email, bag not
- * claimable, etc.) back to the HTTP layer. The controller maps these to JSON
- * error responses; unexpected failures bubble up normally.
+ * claimable, unverified contact, etc.) back to the HTTP layer. The controller
+ * maps these to JSON error responses; unexpected failures bubble up normally.
  */
 class RegistrationError extends Error {
   constructor(code, message, extras = {}) {
     super(message);
-    this.code = code;        // 'bag_not_claimable' | 'bag_already_claimed' | 'duplicate_email_and_username' | 'duplicate_email' | 'duplicate_username'
+    this.code = code;        // 'bag_not_claimable' | 'bag_already_claimed' | 'duplicate_email' | 'email_not_verified' | 'phone_not_verified' | 'phone_mismatch'
     this.status = extras.status || 400;
     this.extras = extras;
     this.isRegistrationError = true;
@@ -48,8 +56,8 @@ async function registerCustomer(payload) {
     zipCode,
     specialInstructions,
     affiliateSpecialInstructions,
-    username,
-    password,
+    emailVerificationToken,
+    phoneIdToken,
     languagePreference
   } = payload;
 
@@ -62,30 +70,40 @@ async function registerCustomer(payload) {
   }
   const { bag, affiliate } = resolved;
 
-  const [existingEmail, existingUsername] = await Promise.all([
-    Customer.findOne({ email }),
-    Customer.findOne({ username })
-  ]);
-
-  if (existingEmail && existingUsername) {
-    throw new RegistrationError(
-      'duplicate_email_and_username',
-      'Both email and username are already in use',
-      { errors: { email: 'Email already registered', username: 'Username already taken' } }
-    );
-  }
+  const existingEmail = await Customer.findOne({ email: String(email || '').toLowerCase() });
   if (existingEmail) {
     throw new RegistrationError('duplicate_email', 'Email already registered', { field: 'email' });
   }
-  if (existingUsername) {
-    throw new RegistrationError('duplicate_username', 'Username already taken', { field: 'username' });
-  }
 
-  // PR7: registration verification reworks credential handling. The customer
-  // still gets a username + hashed password here, but Phase 1 has no customer
-  // portal / login, so nothing consumes them yet — kept (not removed) to avoid
-  // churn that PR 7 would redo.
-  const { salt: passwordSalt, hash: passwordHash } = encryptionUtil.hashPassword(password);
+  // --- Email verification (always required) --------------------------------
+  // Re-verify the one-time token server-side; the client cannot self-assert.
+  const emailVerified = await emailOtpService.consumeVerification({
+    bagToken, email, verificationToken: emailVerificationToken
+  });
+  if (!emailVerified) {
+    throw new RegistrationError('email_not_verified', 'Email not verified', { field: 'email' });
+  }
+  const emailVerifiedAt = new Date();
+
+  // --- Phone verification (gated by the feature flag) ----------------------
+  let phoneVerifiedAt = null;
+  if (firebasePhoneService.isEnabled()) {
+    if (!phoneIdToken) {
+      throw new RegistrationError('phone_not_verified', 'Phone not verified', { field: 'phone' });
+    }
+    let verifiedPhone;
+    try {
+      verifiedPhone = await firebasePhoneService.verifyPhoneToken(phoneIdToken);
+    } catch (err) {
+      logger.warn('Phone token verification failed', { error: err.message });
+      throw new RegistrationError('phone_not_verified', 'Phone not verified', { field: 'phone' });
+    }
+    // The Firebase-verified E.164 must match the entered phone.
+    if (Formatters.e164(phone, 'us') !== Formatters.e164(verifiedPhone, 'us')) {
+      throw new RegistrationError('phone_mismatch', 'Phone number does not match the verified number', { field: 'phone' });
+    }
+    phoneVerifiedAt = new Date();
+  }
 
   const newCustomer = new Customer({
     customerId: `CUST-${uuidv4()}`,
@@ -100,9 +118,8 @@ async function registerCustomer(payload) {
     zipCode,
     specialInstructions,
     affiliateSpecialInstructions,
-    username,
-    passwordSalt,
-    passwordHash,
+    emailVerifiedAt,
+    phoneVerifiedAt,
     languagePreference: languagePreference || 'en'
   });
 
@@ -120,9 +137,12 @@ async function registerCustomer(payload) {
     throw err;
   }
 
-  // No customer-role JWT is minted: Phase 1 has no route that authorizes the
-  // customer role and the claim page is registration-only, so the token had no
-  // consumer. (PR 7 owns whatever post-registration session model is needed.)
+  // The single-use email OTP record is no longer needed.
+  try {
+    await emailOtpService.clearVerification({ bagToken, email });
+  } catch (err) {
+    logger.warn('Failed to clear email verification record', { error: err.message });
+  }
 
   // Emails are best-effort — never fail registration on SMTP hiccup.
   await sendWelcomeEmails(newCustomer, affiliate);

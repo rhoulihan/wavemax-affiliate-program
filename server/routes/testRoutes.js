@@ -42,11 +42,7 @@ router.post('/customer', async (req, res) => {
         let customer = await Customer.findOne({ email: testEmail });
 
         if (customer) {
-            // Update existing customer's password and username to ensure consistency
-            const { salt, hash } = encryptionUtil.hashPassword('TestPass!');
-            customer.passwordSalt = salt;
-            customer.passwordHash = hash;
-            customer.username = 'testuser';  // Ensure username is set
+            // PR 7: customers are registration-only (no username/password).
             await customer.save();
             return res.json(customer);
         }
@@ -98,31 +94,18 @@ router.post('/customer', async (req, res) => {
             await testAffiliate.save();
         }
 
-        // Check if username 'testuser' is already taken by another customer
-        const existingCustomer = await Customer.findOne({ username: 'testuser', email: { $ne: testEmail } });
-        if (existingCustomer) {
-            // Delete the existing customer if it's not our test email
-            await Customer.deleteOne({ username: 'testuser', email: { $ne: testEmail } });
-        }
-
-        // Hash password for customer
-        const { salt, hash } = encryptionUtil.hashPassword('TestPass!');
-
-        // Create new test customer
+        // Create new test customer (PR 7: registration-only, no credentials)
         customer = new Customer({
             firstName: req.body.firstName || 'Test',
             lastName: req.body.lastName || 'Customer',
             email: testEmail,
-            username: 'testuser',  // Fixed username for testing
             phone: req.body.phone || '512-555-0100',
             address: req.body.address?.street || '123 Test Street',
             city: req.body.address?.city || 'Austin',
             state: req.body.address?.state || 'TX',
             zipCode: req.body.address?.zipCode || '78701',
             isActive: true,
-            affiliateId: testAffiliate.affiliateId || testAffiliate._id,
-            passwordSalt: salt,
-            passwordHash: hash
+            affiliateId: testAffiliate.affiliateId || testAffiliate._id
         });
 
         await customer.save();

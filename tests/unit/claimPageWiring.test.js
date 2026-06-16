@@ -23,6 +23,17 @@ describe('/claim page wiring', () => {
       .toBeLessThan(m[1].indexOf('/assets/js/claim.js'));
   });
 
+  it('vendors the Firebase compat SDK (CSP-self) before claim.js for /claim (PR 7)', () => {
+    const m = routerSrc.match(/'\/claim':\s*\[([^\]]+)\]/);
+    expect(m[1]).toContain('/assets/js/vendor/firebase-app-compat.js');
+    expect(m[1]).toContain('/assets/js/vendor/firebase-auth-compat.js');
+    expect(m[1].indexOf('/assets/js/vendor/firebase-auth-compat.js'))
+      .toBeLessThan(m[1].indexOf('/assets/js/claim.js'));
+    // the vendored files actually exist on disk
+    expect(fs.existsSync(path.join(ROOT, 'public/assets/js/vendor/firebase-app-compat.js'))).toBe(true);
+    expect(fs.existsSync(path.join(ROOT, 'public/assets/js/vendor/firebase-auth-compat.js'))).toBe(true);
+  });
+
   it('loads scan-session.js for /operator-scan', () => {
     const m = routerSrc.match(/'\/operator-scan':\s*\[([^\]]+)\]/);
     expect(m).not.toBeNull();

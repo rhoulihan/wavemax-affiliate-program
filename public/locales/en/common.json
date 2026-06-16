@@ -55,7 +55,32 @@
       "processed": "Your laundry is washed and waiting at the store"
     },
     "registeredTitle": "You're all set!",
-    "registeredBody": "Your bag is now linked to your account. Your laundry provider will take it from here — watch your email for updates."
+    "registeredBody": "Your bag is now linked to your account. Your laundry provider will take it from here — watch your email for updates.",
+    "verify": {
+      "emailHeading": "Verify your email",
+      "emailIntro": "We sent a 6-digit code to your email. Enter it below to continue.",
+      "sendCode": "Send code",
+      "codeSent": "Code sent. Check your email.",
+      "codeLabel": "Verification code",
+      "verify": "Verify",
+      "verified": "Verified",
+      "invalidCode": "That code is incorrect or expired. Please try again.",
+      "lockedOut": "Too many attempts. Please try again later.",
+      "resend": "Resend code",
+      "phoneHeading": "Verify your phone",
+      "phoneIntro": "We will text a code to the phone number above.",
+      "sendSms": "Send SMS code",
+      "smsSent": "Text sent. Enter the code below.",
+      "smsCodeLabel": "SMS code",
+      "verifyPhone": "Verify phone",
+      "invalidSms": "That SMS code is incorrect. Please try again.",
+      "recaptchaError": "Verification check failed. Please reload and try again.",
+      "phoneRequired": "Please verify your phone number to continue.",
+      "phoneMismatch": "The verified number does not match the phone you entered.",
+      "emailRequired": "Please verify your email to continue.",
+      "enterPhoneFirst": "Enter your phone number first.",
+      "enterEmailFirst": "Enter your email first."
+    }
   },
   "bag": {
     "label": {
