@@ -44,7 +44,14 @@
       "confirm": "Ja — neuen Auftrag starten"
     },
     "scan": {
-      "operatorCodeLabel": "Bediener-Code"
+      "operatorCodeLabel": "Bediener-Code",
+      "confirm": {
+        "createPending": "Einen neuen Auftrag für diesen Beutel starten?",
+        "advanceToInProgress": "Diesen Beutel im Geschäft einchecken?",
+        "advanceToOutForDelivery": "Diesen Beutel zur Lieferung zurückgeben? (Zahlung bestätigen)",
+        "advanceToComplete": "Diesen Beutel als geliefert markieren?",
+        "deliveryRescan": "Dieser Beutel wurde gerade geliefert. Einen neuen Auftrag starten?"
+      }
     },
     "status": {
       "in_progress": "Ihre Wäsche wird bearbeitet",

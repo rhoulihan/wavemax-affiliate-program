@@ -359,6 +359,15 @@ systemConfigSchema.statics.initializeDefaults = async function() {
       validation: { min: 0, max: 1440 }
     },
     {
+      key: 'scan_session_ttl_minutes',
+      value: 15,
+      defaultValue: 15,
+      description: 'Lifetime of a field scan-session token (authenticate once, batch-scan until it expires)',
+      category: 'operator',
+      dataType: 'number',
+      validation: { min: 1, max: 120 }
+    },
+    {
       key: 'affiliate_delivery_code_length',
       value: 6,
       defaultValue: 6,

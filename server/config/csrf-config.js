@@ -70,11 +70,16 @@ const CSRF_CONFIG = {
     // from the design-explorer pages; abuse is bounded by conciergeLimiter.
     '/api/concierge',
 
-    // Overloaded bag-URL actions (PR 9) — public, gated by role codes +
-    // tight rate limit + per-bag/IP attempt lockout instead of CSRF (the
-    // phone's native camera opens the page with no session/cookie).
-    '/api/v1/bags/:bagToken/intake',
-    '/api/v1/bags/:bagToken/advance',
+    // Scan-session engine (PR 4) — public/credential-light: /session is gated
+    // by a one-time role code + lockout; resolve/apply/undo are gated by
+    // scanAuth (operator JWT or scan-session token). None carries an ambient
+    // cookie credential, so CSRF gains an attacker nothing — same rationale as
+    // the retired bag-URL flow (the phone's camera opens the page with no
+    // session/cookie).
+    '/api/v1/scan/session',
+    '/api/v1/scan/resolve',
+    '/api/v1/scan/apply',
+    '/api/v1/scan/undo',
 
     // Test endpoints (development only)
     '/api/v1/test/customer',

@@ -44,7 +44,14 @@
       "confirm": "Sim — iniciar um novo pedido"
     },
     "scan": {
-      "operatorCodeLabel": "Código do operador"
+      "operatorCodeLabel": "Código do operador",
+      "confirm": {
+        "createPending": "Iniciar um novo pedido para esta sacola?",
+        "advanceToInProgress": "Registrar a entrada desta sacola na loja?",
+        "advanceToOutForDelivery": "Devolver esta sacola para entrega? (confirmar pagamento)",
+        "advanceToComplete": "Marcar esta sacola como entregue?",
+        "deliveryRescan": "Esta sacola acabou de ser entregue. Iniciar um novo pedido?"
+      }
     },
     "status": {
       "in_progress": "Sua roupa está sendo processada",
