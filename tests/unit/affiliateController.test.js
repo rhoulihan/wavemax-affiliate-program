@@ -683,7 +683,7 @@ describe('Affiliate Controller', () => {
       expect(Order.find).toHaveBeenCalledWith(expect.objectContaining({
         affiliateId: 'AFF123',
         status: 'pending',
-        pickupDate: expect.any(Object)
+        createdAt: expect.any(Object)
       }));
 
       expect(res.status).toHaveBeenCalledWith(200);
@@ -715,16 +715,16 @@ describe('Affiliate Controller', () => {
       await affiliateController.getAffiliateOrders(req, res, next);
 
       const findCall = Order.find.mock.calls[0][0];
-      expect(findCall.pickupDate).toBeDefined();
-      expect(findCall.pickupDate.$gte).toBeDefined();
-      expect(findCall.pickupDate.$lte).toBeDefined();
+      expect(findCall.createdAt).toBeDefined();
+      expect(findCall.createdAt.$gte).toBeDefined();
+      expect(findCall.createdAt.$lte).toBeDefined();
 
       // Check that the date is tomorrow
       const today = new Date();
       const tomorrow = new Date(today);
       tomorrow.setDate(tomorrow.getDate() + 1);
 
-      const filterDate = new Date(findCall.pickupDate.$gte);
+      const filterDate = new Date(findCall.createdAt.$gte);
       expect(filterDate.getDate()).toBe(tomorrow.getDate());
     });
   });
