@@ -357,79 +357,8 @@ describe('AuthorizationHelpers', () => {
     });
   });
 
-  describe('checkCustomerAccess middleware', () => {
-    beforeEach(() => {
-      // Mock Customer.findOne
-      require('../../server/models/Customer').findOne = jest.fn();
-    });
-
-    it('should allow customer to access own data', async () => {
-      req.user = { role: 'customer', customerId: 'CUST123' };
-      req.params.customerId = 'CUST123';
-
-      await AuthorizationHelpers.checkCustomerAccess(req, res, next);
-
-      expect(next).toHaveBeenCalled();
-      expect(res.status).not.toHaveBeenCalled();
-    });
-
-    it('should allow admin to access any customer', async () => {
-      req.user = { role: 'admin' };
-      req.params.customerId = 'CUST999';
-
-      await AuthorizationHelpers.checkCustomerAccess(req, res, next);
-
-      expect(next).toHaveBeenCalled();
-      expect(res.status).not.toHaveBeenCalled();
-    });
-
-    it('should allow administrator to access any customer', async () => {
-      req.user = { role: 'administrator' };
-      req.params.customerId = 'CUST999';
-
-      await AuthorizationHelpers.checkCustomerAccess(req, res, next);
-
-      expect(next).toHaveBeenCalled();
-      expect(res.status).not.toHaveBeenCalled();
-    });
-
-    it('should deny customer access to other customers', async () => {
-      req.user = { role: 'customer', customerId: 'CUST123' };
-      req.params.customerId = 'CUST456';
-
-      await AuthorizationHelpers.checkCustomerAccess(req, res, next);
-
-      expect(next).not.toHaveBeenCalled();
-      expect(res.status).toHaveBeenCalledWith(403);
-      expect(res.json).toHaveBeenCalledWith({
-        success: false,
-        message: 'Unauthorized access to customer data'
-      });
-    });
-
-    it('should use customerId from body if not in params', async () => {
-      req.user = { role: 'customer', customerId: 'CUST123' };
-      req.body.customerId = 'CUST123';
-
-      await AuthorizationHelpers.checkCustomerAccess(req, res, next);
-
-      expect(next).toHaveBeenCalled();
-      expect(res.status).not.toHaveBeenCalled();
-    });
-
-    it('should return 400 when no customer ID provided', async () => {
-      req.user = { role: 'customer', customerId: 'CUST123' };
-
-      await AuthorizationHelpers.checkCustomerAccess(req, res, next);
-
-      expect(next).not.toHaveBeenCalled();
-      expect(res.status).toHaveBeenCalledWith(400);
-      expect(res.json).toHaveBeenCalledWith({
-        success: false,
-        message: 'Customer ID required'
-      });
-    });
-  });
+  // checkCustomerAccess middleware removed in PR 8 — zero callers after the
+  // customer-portal removal (canAccessCustomer, the pure helper, is retained).
 
   describe('hasPermission', () => {
     it('should return true for admin user', () => {
