@@ -19,21 +19,6 @@
     "invalidTitle": "Bolsa no reconocida",
     "invalidBody": "No pudimos reconocer esta bolsa. Comunícate con tu proveedor de servicio de lavandería.",
     "raceLost": "Alguien acaba de reclamar esta bolsa. Si fue usted desde otro dispositivo, ya está todo listo.",
-    "deliver": {
-      "title": "Confirmar entrega",
-      "codeLabel": "Código de entrega o PIN",
-      "codePlaceholder": "Introduce tu código",
-      "geoOptIn": "Adjuntar mi ubicación a esta confirmación",
-      "rememberCode": "Recordar mi código en este dispositivo",
-      "confirm": "Confirmar entrega",
-      "success": "Entrega confirmada — ¡gracias!",
-      "badCode": "El código no coincide. Inténtalo de nuevo.",
-      "lockedOut": "Demasiados intentos. Inténtalo más tarde."
-    },
-    "reintake": {
-      "prompt": "¿Marcar como entregado y comenzar un nuevo pedido?",
-      "confirm": "Sí — comenzar un nuevo pedido"
-    },
     "scan": {
       "operatorCodeLabel": "Código de operador",
       "confirm": {
@@ -67,10 +52,7 @@
     },
     "status": {
       "in_progress": "Tu ropa se está procesando",
-      "processed": "Tu ropa está lavada y esperando en la tienda",
-      "ready_for_pickup": "Tu ropa está lista — tu repartidor la recogerá pronto",
-      "picked_up": "Tu ropa está en camino",
-      "delivered": "Tu ropa fue entregada"
+      "processed": "Tu ropa está lavada y esperando en la tienda"
     },
     "registeredTitle": "¡Todo listo!",
     "registeredBody": "Su bolsa ya está vinculada a su cuenta. Su proveedor de lavandería se encargará a partir de aquí; esté atento a su correo electrónico para recibir actualizaciones."

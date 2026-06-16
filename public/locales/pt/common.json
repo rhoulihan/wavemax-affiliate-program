@@ -19,21 +19,6 @@
     "invalidTitle": "Sacola não reconhecida",
     "invalidBody": "Não foi possível reconhecer esta sacola. Entre em contato com seu provedor de serviço de lavanderia.",
     "raceLost": "Alguém acabou de reivindicar esta sacola. Se foi você em outro dispositivo, está tudo pronto.",
-    "deliver": {
-      "title": "Confirmar entrega",
-      "codeLabel": "Código de entrega ou PIN",
-      "codePlaceholder": "Digite seu código",
-      "geoOptIn": "Anexar minha localização a esta confirmação",
-      "rememberCode": "Lembrar meu código neste dispositivo",
-      "confirm": "Confirmar entrega",
-      "success": "Entrega confirmada — obrigado!",
-      "badCode": "O código não confere. Tente novamente.",
-      "lockedOut": "Muitas tentativas. Tente novamente mais tarde."
-    },
-    "reintake": {
-      "prompt": "Marcar como entregue e iniciar um novo pedido?",
-      "confirm": "Sim — iniciar um novo pedido"
-    },
     "scan": {
       "operatorCodeLabel": "Código do operador",
       "confirm": {
@@ -67,10 +52,7 @@
     },
     "status": {
       "in_progress": "Sua roupa está sendo processada",
-      "processed": "Sua roupa está lavada e aguardando na loja",
-      "ready_for_pickup": "Sua roupa está pronta — seu entregador irá retirá-la em breve",
-      "picked_up": "Sua roupa está a caminho",
-      "delivered": "Sua roupa foi entregue"
+      "processed": "Sua roupa está lavada e aguardando na loja"
     },
     "registeredTitle": "Tudo pronto!",
     "registeredBody": "Sua sacola agora está vinculada à sua conta. Seu prestador de serviços de lavanderia cuidará do resto — fique de olho no seu e-mail para atualizações."
