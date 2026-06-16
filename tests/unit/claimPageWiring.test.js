@@ -23,12 +23,21 @@ describe('/claim page wiring', () => {
       .toBeLessThan(m[1].indexOf('/assets/js/claim.js'));
   });
 
-  it('vendors the Firebase compat SDK (CSP-self) before claim.js for /claim (PR 7)', () => {
+  it('lazy-loads the Firebase compat SDK from claim.js, keeping it off the render path (PR 8 perf)', () => {
+    // The ~170 KB Firebase compat SDK must NOT be eagerly injected via pageScripts —
+    // that delayed revealing the registration form (the LCP element). It is loaded on
+    // demand by claim.js only when phone verification is enabled.
     const m = routerSrc.match(/'\/claim':\s*\[([^\]]+)\]/);
-    expect(m[1]).toContain('/assets/js/vendor/firebase-app-compat.js');
-    expect(m[1]).toContain('/assets/js/vendor/firebase-auth-compat.js');
-    expect(m[1].indexOf('/assets/js/vendor/firebase-auth-compat.js'))
-      .toBeLessThan(m[1].indexOf('/assets/js/claim.js'));
+    expect(m[1]).not.toContain('/assets/js/vendor/firebase-app-compat.js');
+    expect(m[1]).not.toContain('/assets/js/vendor/firebase-auth-compat.js');
+
+    // claim.js injects both vendored files (CSP-self) on demand, app before auth.
+    const claimSrc = fs.readFileSync(path.join(ROOT, 'public/assets/js/claim.js'), 'utf8');
+    expect(claimSrc).toContain('/assets/js/vendor/firebase-app-compat.js');
+    expect(claimSrc).toContain('/assets/js/vendor/firebase-auth-compat.js');
+    expect(claimSrc.indexOf('/assets/js/vendor/firebase-app-compat.js'))
+      .toBeLessThan(claimSrc.indexOf('/assets/js/vendor/firebase-auth-compat.js'));
+
     // the vendored files actually exist on disk
     expect(fs.existsSync(path.join(ROOT, 'public/assets/js/vendor/firebase-app-compat.js'))).toBe(true);
     expect(fs.existsSync(path.join(ROOT, 'public/assets/js/vendor/firebase-auth-compat.js'))).toBe(true);
