@@ -1,6 +1,9 @@
 # Phase 1 — Bag Registration + Scan-Gate Order State (Design Spec)
 
-> Status: **DRAFT for review** (2026-06-15). Supersedes the payment/processing scope of the
+> Status: **BUILT — all 8 PRs merged to main (2026-06-16).** Registration page Lighthouse:
+> desktop 99/100/100/100, mobile 91/100/100/100. Firebase project wavemax-bag-registration
+> live (PHONE_VERIFICATION_ENABLED). Not yet deployed to prod — see the deploy notes in the
+> phase1-rebuild memory. Supersedes the payment/processing scope of the
 > 2026-06-08 invite/bag redesign for Phase 1. Phase 2 work (payment, W-9, commissions,
 > Paygistix) is preserved on the git tag `phase2-reference` and returns later.
 
