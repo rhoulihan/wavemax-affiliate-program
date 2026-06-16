@@ -1,0 +1,215 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - button "Skip to content" [ref=e3] [cursor=pointer]:
+      - generic [ref=e5]: Skip to content
+    - button "Accessibility Feedback" [ref=e6] [cursor=pointer]:
+      - generic [ref=e8]: Accessibility Feedback
+    - generic [ref=e9]:
+      - link "Back to Bing search" [ref=e10] [cursor=pointer]:
+        - /url: /?FORM=Z9FD1
+        - heading "Back to Bing search" [level=1] [ref=e11]
+      - search [ref=e12]:
+        - button "Search" [ref=e15] [cursor=pointer]
+        - searchbox "Enter your search here - Search suggestions will show as you type" [ref=e16]: WaveMAX Laundry 825 E Rundberg Ln Austin TX reviews
+        - button "Search using an image" [ref=e19] [cursor=pointer]
+        - status [ref=e21]
+    - complementary "Account Rewards and Preferences" [ref=e22]:
+      - button "Microsoft Rewards" [ref=e23] [cursor=pointer]:
+        - generic [ref=e25]:
+          - generic [ref=e26]: Rewards
+          - img [ref=e28]
+      - link "Sign in" [ref=e40] [cursor=pointer]:
+        - /url: javascript:void(0)
+        - generic "Sign in" [ref=e41]
+    - navigation "Search Filter" [ref=e42]:
+      - list [ref=e43]:
+        - listitem [ref=e44]:
+          - link "All" [ref=e45] [cursor=pointer]:
+            - /url: /?scope=web&FORM=HDRSC1
+        - listitem [ref=e46]:
+          - link "Images" [ref=e47] [cursor=pointer]:
+            - /url: https://www.bing.com/ck/a?!&&p=ad71fa561f1f9a2c69745bdd6d1314ac1aa3ff71483ef34e3fcf57d8abb39005JmltdHM9MTc4MDAxMjgwMA&ptn=3&ver=2&hsh=4&fclid=3accd799-0a06-6702-0071-c0f10bc66625&u=a1L2ltYWdlcy9zZWFyY2g_cT1XYXZlTUFYK0xhdW5kcnkrODI1K0UrUnVuZGJlcmcrTG4rQXVzdGluK1RYK3Jldmlld3MmRk9STT1IRFJTQzI&ntb=1
+        - listitem [ref=e48]:
+          - link "Videos" [ref=e49] [cursor=pointer]:
+            - /url: https://www.bing.com/ck/a?!&&p=5ac331858342b1f6b8c902ddab3fdc9a8038ce03941f5cce7d210a676d34c026JmltdHM9MTc4MDAxMjgwMA&ptn=3&ver=2&hsh=4&fclid=3accd799-0a06-6702-0071-c0f10bc66625&u=a1L3ZpZGVvcy9zZWFyY2g_cT1XYXZlTUFYK0xhdW5kcnkrODI1K0UrUnVuZGJlcmcrTG4rQXVzdGluK1RYK3Jldmlld3MmRk9STT1IRFJTQzM&ntb=1
+        - listitem [ref=e50]:
+          - link "Maps" [ref=e51] [cursor=pointer]:
+            - /url: https://www.bing.com/ck/a?!&&p=daf0bbefb1e6432844812110b04c1428ef84259d5a1693ca13b8cdc23272985dJmltdHM9MTc4MDAxMjgwMA&ptn=3&ver=2&hsh=4&fclid=3accd799-0a06-6702-0071-c0f10bc66625&u=a1L21hcHM_cT1XYXZlTUFYK0xhdW5kcnkrODI1K0UrUnVuZGJlcmcrTG4rQXVzdGluK1RYK3Jldmlld3MmRk9STT1IRFJTQzQ&ntb=1
+        - listitem [ref=e52]:
+          - link "News" [ref=e53] [cursor=pointer]:
+            - /url: https://www.bing.com/ck/a?!&&p=a4887875b53ae3803c30cf81f3917d3a69907a8f4762fb8740986d9aea68929bJmltdHM9MTc4MDAxMjgwMA&ptn=3&ver=2&hsh=4&fclid=3accd799-0a06-6702-0071-c0f10bc66625&u=a1L25ld3Mvc2VhcmNoP3E9V2F2ZU1BWCtMYXVuZHJ5KzgyNStFK1J1bmRiZXJnK0xuK0F1c3RpbitUWCtyZXZpZXdzJkZPUk09SERSU0M2&ntb=1
+        - listitem [ref=e54]:
+          - link "Shopping" [ref=e55] [cursor=pointer]:
+            - /url: https://www.bing.com/ck/a?!&&p=e2ed69d338bbb6f430f1f9ec48e1e214e9badca3d01d0fce98a6146dbbcdc539JmltdHM9MTc4MDAxMjgwMA&ptn=3&ver=2&hsh=4&fclid=3accd799-0a06-6702-0071-c0f10bc66625&u=a1L3Nob3AvdG9waWNzP3E9V2F2ZU1BWCtMYXVuZHJ5KzgyNStFK1J1bmRiZXJnK0xuK0F1c3RpbitUWCtyZXZpZXdzJkZPUk09U0hPUFRC&ntb=1
+        - listitem [ref=e56]:
+          - button "More" [ref=e57] [cursor=pointer]:
+            - img [ref=e59]
+            - text: More
+  - generic [ref=e61]:
+    - main "Search Results" [ref=e62]:
+      - generic [ref=e64]: About 2,630 results
+      - list [ref=e65]:
+        - listitem [ref=e66]:
+          - link "malwaretips.com" [ref=e68] [cursor=pointer]:
+            - /url: https://www.bing.com/ck/a?!&&p=73367f3ee83431357b7e64d55bf90ca726cc55bc0ce952c5031c69535fa765e2JmltdHM9MTc4MDAxMjgwMA&ptn=3&ver=2&hsh=4&fclid=3accd799-0a06-6702-0071-c0f10bc66625&u=a1aHR0cHM6Ly9tYWx3YXJldGlwcy5jb20vYmxvZ3Mvd2F2ZW1heC10di1hbnRlbm5hLw&ntb=1
+            - img "Global web icon" [ref=e72]
+            - generic [ref=e73]:
+              - generic [ref=e74]: malwaretips.com
+              - generic [ref=e77]: https://malwaretips.com › blogs › wavemax-tv-antenna
+          - 'heading "WaveMax TV Antenna: Scam Or Legitimate? The Hard Facts" [level=2] [ref=e78]':
+            - 'link "WaveMax TV Antenna: Scam Or Legitimate? The Hard Facts" [ref=e79] [cursor=pointer]':
+              - /url: https://www.bing.com/ck/a?!&&p=73367f3ee83431357b7e64d55bf90ca726cc55bc0ce952c5031c69535fa765e2JmltdHM9MTc4MDAxMjgwMA&ptn=3&ver=2&hsh=4&fclid=3accd799-0a06-6702-0071-c0f10bc66625&u=a1aHR0cHM6Ly9tYWx3YXJldGlwcy5jb20vYmxvZ3Mvd2F2ZW1heC10di1hbnRlbm5hLw&ntb=1
+              - strong [ref=e80]: WaveMax
+              - text: "TV Antenna: Scam Or Legitimate? The Hard Facts"
+          - paragraph [ref=e82]: Apr 19, 2024 · Have you seen ads online or on social media promoting an TV antenna called the WaveMax that supposedly lets you access over 100 channels for free? While it sounds too good to …
+        - listitem [ref=e83]:
+          - link "thebuyersreviews.com" [ref=e85] [cursor=pointer]:
+            - /url: https://www.bing.com/ck/a?!&&p=98bcbc01cf6a71481de62debe1014b2d4d1d3f5edbae179c72c58b0138daed3bJmltdHM9MTc4MDAxMjgwMA&ptn=3&ver=2&hsh=4&fclid=3accd799-0a06-6702-0071-c0f10bc66625&u=a1aHR0cHM6Ly93d3cudGhlYnV5ZXJzcmV2aWV3cy5jb20vd2F2ZW1heC1yZXZpZXdzLw&ntb=1
+            - img "Global web icon" [ref=e89]
+            - generic [ref=e90]:
+              - generic [ref=e91]: thebuyersreviews.com
+              - generic [ref=e94]: https://www.thebuyersreviews.com › wavemax-reviews
+          - 'heading "WaveMax Reviews 2026: Don''t Get Scammed - Read This First!" [level=2] [ref=e95]':
+            - 'link "WaveMax Reviews 2026: Don''t Get Scammed - Read This First!" [ref=e96] [cursor=pointer]':
+              - /url: https://www.bing.com/ck/a?!&&p=98bcbc01cf6a71481de62debe1014b2d4d1d3f5edbae179c72c58b0138daed3bJmltdHM9MTc4MDAxMjgwMA&ptn=3&ver=2&hsh=4&fclid=3accd799-0a06-6702-0071-c0f10bc66625&u=a1aHR0cHM6Ly93d3cudGhlYnV5ZXJzcmV2aWV3cy5jb20vd2F2ZW1heC1yZXZpZXdzLw&ntb=1
+              - strong [ref=e97]: WaveMax
+              - text: "Reviews 2026: Don't Get Scammed - Read This First!"
+          - paragraph [ref=e99]: Oct 15, 2025 · What is WaveMax? WaveMax is marketed as an indoor HDTV antenna designed to receive over-the-air television broadcasts without monthly subscription fees. The product claims to …
+        - listitem [ref=e100]:
+          - link "wavemaxlaundry.com" [ref=e102] [cursor=pointer]:
+            - /url: https://www.bing.com/ck/a?!&&p=bbf26512a513c5b862c783f9ffacb296951d96d2181e4a3e24f31f1d2c4d0410JmltdHM9MTc4MDAxMjgwMA&ptn=3&ver=2&hsh=4&fclid=3accd799-0a06-6702-0071-c0f10bc66625&u=a1aHR0cHM6Ly93YXZlbWF4bGF1bmRyeS5jb20vc2FuLWFudG9uaW8tdHgv&ntb=1
+            - img "Global web icon" [ref=e106]
+            - generic [ref=e107]:
+              - generic [ref=e108]: wavemaxlaundry.com
+              - generic [ref=e111]: https://wavemaxlaundry.com › san-antonio-tx
+          - heading "San Antonio, TX Laundromat | Wash-Dry-Fold | WaveMAX" [level=2] [ref=e112]:
+            - link "San Antonio, TX Laundromat | Wash-Dry-Fold | WaveMAX" [ref=e113] [cursor=pointer]:
+              - /url: https://www.bing.com/ck/a?!&&p=bbf26512a513c5b862c783f9ffacb296951d96d2181e4a3e24f31f1d2c4d0410JmltdHM9MTc4MDAxMjgwMA&ptn=3&ver=2&hsh=4&fclid=3accd799-0a06-6702-0071-c0f10bc66625&u=a1aHR0cHM6Ly93YXZlbWF4bGF1bmRyeS5jb20vc2FuLWFudG9uaW8tdHgv&ntb=1
+              - text: San Antonio, TX Laundromat | Wash-Dry-Fold |
+              - strong [ref=e114]: WaveMAX
+          - paragraph [ref=e116]: WaveMAX is San Antonio's top-rated laundromat — rated 4.8★ on Google. Full load done in under 45 minutes. Touchless card payment — no quarters needed. Fully attended, air-conditioned, monitored …
+        - listitem [ref=e117]:
+          - link "infoquu.com" [ref=e119] [cursor=pointer]:
+            - /url: https://www.bing.com/ck/a?!&&p=d5066edec63740ab4458e8347125d09b361bba809e7fd49a256e095a07bb47d9JmltdHM9MTc4MDAxMjgwMA&ptn=3&ver=2&hsh=4&fclid=3accd799-0a06-6702-0071-c0f10bc66625&u=a1aHR0cHM6Ly93d3cuaW5mb3F1dS5jb20vaS1ib3VnaHQtd2F2ZW1heC10di1hbnRlbm5hLWhlcmUtaXMtbXktaG9uZXN0LXJldmlldy8&ntb=1
+            - img "Global web icon" [ref=e123]
+            - generic [ref=e124]:
+              - generic [ref=e125]: infoquu.com
+              - generic [ref=e128]: https://www.infoquu.com › i-bought-wavemax-tv-antenna-here-is-my...
+          - 'heading "I Bought WaveMax TV Antenna: Here Is My Honest Review" [level=2] [ref=e129]':
+            - 'link "I Bought WaveMax TV Antenna: Here Is My Honest Review" [ref=e130] [cursor=pointer]':
+              - /url: https://www.bing.com/ck/a?!&&p=d5066edec63740ab4458e8347125d09b361bba809e7fd49a256e095a07bb47d9JmltdHM9MTc4MDAxMjgwMA&ptn=3&ver=2&hsh=4&fclid=3accd799-0a06-6702-0071-c0f10bc66625&u=a1aHR0cHM6Ly93d3cuaW5mb3F1dS5jb20vaS1ib3VnaHQtd2F2ZW1heC10di1hbnRlbm5hLWhlcmUtaXMtbXktaG9uZXN0LXJldmlldy8&ntb=1
+              - text: I Bought
+              - strong [ref=e131]: WaveMax
+              - text: "TV Antenna: Here Is My Honest Review"
+          - paragraph [ref=e133]: The WaveMax TV Antenna claims to offer advanced features such as access to over 100 channels, including local news, sports, and entertainment. It also boasts of a compact and lightweight design …
+        - listitem [ref=e134]:
+          - link "en-wavemax.com" [ref=e136] [cursor=pointer]:
+            - /url: https://www.bing.com/ck/a?!&&p=9e76c39c1127059b427e51eaef13975c70348b2415b143bbeb257ffec9383b12JmltdHM9MTc4MDAxMjgwMA&ptn=3&ver=2&hsh=4&fclid=3accd799-0a06-6702-0071-c0f10bc66625&u=a1aHR0cHM6Ly93d3cuZW4td2F2ZW1heC5jb20v&ntb=1
+            - img "Global web icon" [ref=e140]
+            - generic [ref=e141]:
+              - generic [ref=e142]: en-wavemax.com
+              - generic [ref=e145]: https://www.en-wavemax.com
+          - heading "Wavemax® | Official Site USA" [level=2] [ref=e146]:
+            - link "Wavemax® | Official Site USA" [ref=e147] [cursor=pointer]:
+              - /url: https://www.bing.com/ck/a?!&&p=9e76c39c1127059b427e51eaef13975c70348b2415b143bbeb257ffec9383b12JmltdHM9MTc4MDAxMjgwMA&ptn=3&ver=2&hsh=4&fclid=3accd799-0a06-6702-0071-c0f10bc66625&u=a1aHR0cHM6Ly93d3cuZW4td2F2ZW1heC5jb20v&ntb=1
+              - strong [ref=e148]: Wavemax
+              - text: ® | Official Site USA
+          - paragraph [ref=e150]: Wavemax is a high-performance indoor antenna that lets you enjoy free television channels without the hassle of costly cable or satellite subscriptions. With access to over 100 channels, you can watch …
+        - listitem [ref=e151]:
+          - link "bbb.org" [ref=e153] [cursor=pointer]:
+            - /url: https://www.bing.com/ck/a?!&&p=a5f1d13dc82a336c1a0b9f4759766f03c7bc6cc67d1744e5f220ec3c7aebc126JmltdHM9MTc4MDAxMjgwMA&ptn=3&ver=2&hsh=4&fclid=3accd799-0a06-6702-0071-c0f10bc66625&u=a1aHR0cHM6Ly93d3cuYmJiLm9yZy91cy9jYS9yYW5jaG8tY3VjYW1vbmdhL3Byb2ZpbGUvYW50ZW5uYS93YXZlbWF4LTExMjYtODUwMTExMjMxL2NvbXBsYWludHM&ntb=1
+            - img "Global web icon" [ref=e157]
+            - generic [ref=e158]:
+              - generic [ref=e159]: bbb.org
+              - generic [ref=e162]: https://www.bbb.org › us › ca › rancho-cucamonga › profile › ...
+          - heading "Wavemax | BBB Complaints | Better Business Bureau" [level=2] [ref=e163]:
+            - link "Wavemax | BBB Complaints | Better Business Bureau" [ref=e164] [cursor=pointer]:
+              - /url: https://www.bing.com/ck/a?!&&p=a5f1d13dc82a336c1a0b9f4759766f03c7bc6cc67d1744e5f220ec3c7aebc126JmltdHM9MTc4MDAxMjgwMA&ptn=3&ver=2&hsh=4&fclid=3accd799-0a06-6702-0071-c0f10bc66625&u=a1aHR0cHM6Ly93d3cuYmJiLm9yZy91cy9jYS9yYW5jaG8tY3VjYW1vbmdhL3Byb2ZpbGUvYW50ZW5uYS93YXZlbWF4LTExMjYtODUwMTExMjMxL2NvbXBsYWludHM&ntb=1
+              - strong [ref=e165]: Wavemax
+              - text: "| BBB Complaints | Better Business Bureau"
+          - paragraph [ref=e167]: Apr 3, 2026 · View complaints of Wavemax filed with BBB. BBB helps resolve disputes with the services or products a business provides.
+        - listitem [ref=e168]:
+          - link "us-wavemax.com" [ref=e170] [cursor=pointer]:
+            - /url: https://www.bing.com/ck/a?!&&p=4218bbf2e75ca40527db8e2fb00d5ea82dd9c293a3cce084412fe7f1955a15ddJmltdHM9MTc4MDAxMjgwMA&ptn=3&ver=2&hsh=4&fclid=3accd799-0a06-6702-0071-c0f10bc66625&u=a1aHR0cHM6Ly93d3cudXMtd2F2ZW1heC5jb20v&ntb=1
+            - img "Global web icon" [ref=e174]
+            - generic [ref=e175]:
+              - generic [ref=e176]: us-wavemax.com
+              - generic [ref=e179]: https://www.us-wavemax.com
+          - heading "Wavemax Antenna® | Official Site | Best Free HDTV Antenna" [level=2] [ref=e180]:
+            - link "Wavemax Antenna® | Official Site | Best Free HDTV Antenna" [ref=e181] [cursor=pointer]:
+              - /url: https://www.bing.com/ck/a?!&&p=4218bbf2e75ca40527db8e2fb00d5ea82dd9c293a3cce084412fe7f1955a15ddJmltdHM9MTc4MDAxMjgwMA&ptn=3&ver=2&hsh=4&fclid=3accd799-0a06-6702-0071-c0f10bc66625&u=a1aHR0cHM6Ly93d3cudXMtd2F2ZW1heC5jb20v&ntb=1
+              - strong [ref=e182]: Wavemax
+              - text: Antenna® | Official Site | Best Free HDTV Antenna
+          - paragraph [ref=e184]: Wavemax TV Antenna is a powerful indoor antenna that allows you to watch television channels for free. It eliminates the need for costly cable or satellite subscriptions, giving you access to over 100 …
+        - listitem [ref=e185]:
+          - link "amazon.com" [ref=e187] [cursor=pointer]:
+            - /url: https://www.bing.com/ck/a?!&&p=38a1ea73a6c84a56d89852552da29603a5583daed0f79c57506bdb69287c2a3dJmltdHM9MTc4MDAxMjgwMA&ptn=3&ver=2&hsh=4&fclid=3accd799-0a06-6702-0071-c0f10bc66625&u=a1aHR0cHM6Ly93d3cuYW1hem9uLmNvbS9BbnRlbm5hLURpZ2l0YWwtQm9vc3Rlci1EaXNwbGF5LVN1cHBvcnRzL2RwL0IwRjlGM0gxWlI&ntb=1
+            - img "Global web icon" [ref=e191]
+            - generic [ref=e192]:
+              - generic [ref=e193]: amazon.com
+              - generic [ref=e196]: https://www.amazon.com › Antenna-Digital-Booster-Display-Supports › dp › ...
+          - heading "Wave Max TV Antenna 2025, Wave Max Antenna, Indoor Antenna for …" [level=2] [ref=e197]:
+            - link "Wave Max TV Antenna 2025, Wave Max Antenna, Indoor Antenna for …" [ref=e198] [cursor=pointer]:
+              - /url: https://www.bing.com/ck/a?!&&p=38a1ea73a6c84a56d89852552da29603a5583daed0f79c57506bdb69287c2a3dJmltdHM9MTc4MDAxMjgwMA&ptn=3&ver=2&hsh=4&fclid=3accd799-0a06-6702-0071-c0f10bc66625&u=a1aHR0cHM6Ly93d3cuYW1hem9uLmNvbS9BbnRlbm5hLURpZ2l0YWwtQm9vc3Rlci1EaXNwbGF5LVN1cHBvcnRzL2RwL0IwRjlGM0gxWlI&ntb=1
+              - strong [ref=e199]: Wave Max
+              - text: TV Antenna 2025,
+              - strong [ref=e200]: Wave Max
+              - text: Antenna, Indoor Antenna for …
+          - paragraph [ref=e202]: 【Crystal-Clear 4K & Full HD Broadcasting】 Unlock a world of entertainment without monthly fees! Wave Max Antenna brings you free access to top local channels in stunning 4K and 1080p quality. …
+        - listitem [ref=e203]:
+          - link "youtube.com" [ref=e205] [cursor=pointer]:
+            - /url: https://www.bing.com/ck/a?!&&p=b76c6d8c5425214208242bad26fe3de20fe293df525696843ab9b9a32c535a72JmltdHM9MTc4MDAxMjgwMA&ptn=3&ver=2&hsh=4&fclid=3accd799-0a06-6702-0071-c0f10bc66625&u=a1aHR0cHM6Ly9tLnlvdXR1YmUuY29tL3dhdGNoP3Y9Q2RTUnZtSnBaRms&ntb=1
+            - img "Global web icon" [ref=e209]
+            - generic [ref=e210]:
+              - generic [ref=e211]: youtube.com
+              - generic [ref=e214]: https://m.youtube.com › watch
+          - 'heading "WaveMax TV Antenna: Is It Legit? - YouTube" [level=2] [ref=e215]':
+            - 'link "WaveMax TV Antenna: Is It Legit? - YouTube" [ref=e216] [cursor=pointer]':
+              - /url: https://www.bing.com/ck/a?!&&p=b76c6d8c5425214208242bad26fe3de20fe293df525696843ab9b9a32c535a72JmltdHM9MTc4MDAxMjgwMA&ptn=3&ver=2&hsh=4&fclid=3accd799-0a06-6702-0071-c0f10bc66625&u=a1aHR0cHM6Ly9tLnlvdXR1YmUuY29tL3dhdGNoP3Y9Q2RTUnZtSnBaRms&ntb=1
+              - strong [ref=e217]: WaveMax
+              - text: "TV Antenna: Is It Legit? -"
+              - strong [ref=e218]: YouTube
+          - paragraph [ref=e220]: Mar 22, 2024 · Automatic Dependent Surveillance-Broadcast greatly enhances public safety. Broadcast is incredibly efficient at sending data. I strongly believe wireless broadcast and multicast technologies …
+        - listitem [ref=e221]:
+          - link "yelp.com" [ref=e223] [cursor=pointer]:
+            - /url: https://www.bing.com/ck/a?!&&p=3cea22bc2b4888ad3bc9d6917a092048f30712fd398ec92a09543e9bccb29114JmltdHM9MTc4MDAxMjgwMA&ptn=3&ver=2&hsh=4&fclid=3accd799-0a06-6702-0071-c0f10bc66625&u=a1aHR0cHM6Ly93d3cueWVscC5jb20vYml6L3dhdmVtYXgtc2FuLWFudG9uaW8tMj9tc29ja2lkPTNhY2NkNzk5MGEwNjY3MDIwMDcxYzBmMTBiYzY2NjI1&ntb=1
+            - img "Global web icon" [ref=e227]
+            - generic [ref=e228]:
+              - generic [ref=e229]: yelp.com
+              - generic [ref=e232]: https://www.yelp.com › biz
+          - heading "WAVEMAX - Updated May 2026 - 11 Photos - 7519 Marbach Rd, San …" [level=2] [ref=e233]:
+            - link "WAVEMAX - Updated May 2026 - 11 Photos - 7519 Marbach Rd, San …" [ref=e234] [cursor=pointer]:
+              - /url: https://www.bing.com/ck/a?!&&p=3cea22bc2b4888ad3bc9d6917a092048f30712fd398ec92a09543e9bccb29114JmltdHM9MTc4MDAxMjgwMA&ptn=3&ver=2&hsh=4&fclid=3accd799-0a06-6702-0071-c0f10bc66625&u=a1aHR0cHM6Ly93d3cueWVscC5jb20vYml6L3dhdmVtYXgtc2FuLWFudG9uaW8tMj9tc29ja2lkPTNhY2NkNzk5MGEwNjY3MDIwMDcxYzBmMTBiYzY2NjI1&ntb=1
+              - strong [ref=e235]: WAVEMAX
+              - text: "- Updated May 2026 - 11 Photos - 7519 Marbach Rd, San …"
+          - paragraph [ref=e237]: Dec 1, 2022 · Do you recommend this business? Yelp users haven’t asked any questions yet about WaveMax.
+        - listitem [ref=e238]:
+          - navigation "More results for WaveMAX Laundry 825 E Rundberg Ln Austin TX reviews":
+            - list:
+              - listitem [ref=e239]:
+                - generic "Page 1" [ref=e240]: "1"
+              - listitem [ref=e241]:
+                - link "Page 2" [ref=e242] [cursor=pointer]:
+                  - /url: /search?q=WaveMAX+Laundry+825+E+Rundberg+Ln+Austin+TX+reviews&rdr=1&rdrig=0484258BAE874F43B64FC632BF5953C9&FPIG=FD7BDE2F2148415FBABE85FDD1FD9A24&first=11&FORM=PERE
+                  - text: "2"
+              - listitem [ref=e243]:
+                - link "Page 3" [ref=e244] [cursor=pointer]:
+                  - /url: /search?q=WaveMAX+Laundry+825+E+Rundberg+Ln+Austin+TX+reviews&rdr=1&rdrig=0484258BAE874F43B64FC632BF5953C9&FPIG=FD7BDE2F2148415FBABE85FDD1FD9A24&first=21&FORM=PERE1
+                  - text: "3"
+              - listitem [ref=e245]:
+                - link "Next page" [ref=e246] [cursor=pointer]:
+                  - /url: /search?q=WaveMAX+Laundry+825+E+Rundberg+Ln+Austin+TX+reviews&rdr=1&rdrig=0484258BAE874F43B64FC632BF5953C9&FPIG=FD7BDE2F2148415FBABE85FDD1FD9A24&first=11&FORM=PORE
+    - complementary "Additional Results" [ref=e247]:
+      - list
+    - complementary "Explore More" [ref=e248]:
+      - list
+  - contentinfo [ref=e249]:
+    - generic [ref=e250]:
+      - list:
+        - listitem [ref=e251]:
+          - link "Privacy" [ref=e252] [cursor=pointer]:
+            - /url: https://www.bing.com/ck/a?!&&p=1889961cea8b10fb2a9c8eb0cf2e2f9dacf6a1aa7eb98cb61edd81764024c76bJmltdHM9MTc4MDAxMjgwMA&ptn=3&ver=2&hsh=4&fclid=3accd799-0a06-6702-0071-c0f10bc66625&u=a1aHR0cDovL2dvLm1pY3Jvc29mdC5jb20vZndsaW5rLz9MaW5rSWQ9NTIxODM5&ntb=1
+        - listitem [ref=e253]:
+          - link "Terms" [ref=e254] [cursor=pointer]:
+            - /url: https://www.bing.com/ck/a?!&&p=bcc31be392c7ae1f350c6baac238094ea355ea8dfefc8a897b3867186f87fbd8JmltdHM9MTc4MDAxMjgwMA&ptn=3&ver=2&hsh=4&fclid=3accd799-0a06-6702-0071-c0f10bc66625&u=a1aHR0cDovL2dvLm1pY3Jvc29mdC5jb20vZndsaW5rLz9MaW5rSUQ9MjQ2MzM4&ntb=1
+  - dialog "Quick Search"

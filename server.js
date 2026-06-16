@@ -907,6 +907,7 @@ apiV1Router.use('/location', require('./server/routes/locationRoutes'));  // Per
 apiV1Router.use('/contact', require('./server/routes/contactRoutes'));  // Per-location contact-form submissions
 apiV1Router.use('/', require('./server/routes/corporateInquiryRoutes'));  // /corporate-contact + /franchise-lead
 apiV1Router.use('/', require('./server/routes/mapsConfigRoute'));  // /maps-config — Maps API key for corporate pages
+apiV1Router.use('/', require('./server/routes/firebaseConfigRoute'));  // /firebase-config — Firebase web config + phone-verify flag (PR 7)
 // Test routes (development only)
 if (process.env.NODE_ENV !== 'production' || process.env.ENABLE_TEST_ROUTES === 'true') {
   const testRoutes = require('./server/routes/testRoutes');
