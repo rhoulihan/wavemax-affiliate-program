@@ -10,7 +10,7 @@
          render-blocking) -->
     <link rel="stylesheet" href="/assets/css/language-switcher.css">
     <link href="/assets/css/theme.css" rel="stylesheet">
-    <link href="/assets/css/claim.css?v=20260611" rel="stylesheet">
+    <link href="/assets/css/claim.css?v=20260616" rel="stylesheet">
 </head>
 <body class="bg-white font-sans">
     <div id="language-switcher-container" class="language-switcher-container"></div>
@@ -38,17 +38,44 @@
                             <input type="text" id="firstName" name="firstName" required class="claim-input" data-i18n-placeholder="common.labels.firstName" placeholder="First Name">
                             <input type="text" id="lastName" name="lastName" required class="claim-input" data-i18n-placeholder="common.labels.lastName" placeholder="Last Name">
                         </div>
-                        <input type="email" id="email" name="email" required class="claim-input" data-i18n-placeholder="common.labels.email" placeholder="Email">
-                        <input type="tel" id="phone" name="phone" required class="claim-input" data-i18n-placeholder="common.labels.phoneNumber" placeholder="Phone Number">
+                        <!-- Email + email-OTP verification (PR 7) -->
+                        <div class="claim-verify-row">
+                            <input type="email" id="email" name="email" required class="claim-input" data-i18n-placeholder="common.labels.email" placeholder="Email">
+                            <button type="button" id="emailSendCode" class="claim-verify-btn" data-i18n="claim.verify.sendCode">Send code</button>
+                        </div>
+                        <div id="email-otp-block" hidden>
+                            <p id="email-otp-status" class="claim-verify-note" data-i18n="claim.verify.codeSent">Code sent. Check your email.</p>
+                            <div class="claim-verify-row">
+                                <input type="text" id="emailCode" inputmode="numeric" autocomplete="one-time-code" maxlength="6" class="claim-input" data-i18n-placeholder="claim.verify.codeLabel" placeholder="Verification code">
+                                <button type="button" id="emailVerifyBtn" class="claim-verify-btn" data-i18n="claim.verify.verify">Verify</button>
+                            </div>
+                            <button type="button" id="emailResend" class="claim-link-btn" data-i18n="claim.verify.resend">Resend code</button>
+                            <p id="email-verify-error" class="claim-error" hidden></p>
+                        </div>
+                        <p id="email-verified-badge" class="claim-success" hidden data-i18n="claim.verify.verified">Verified</p>
+
+                        <!-- Phone + Firebase phone verification (PR 7; the SMS controls show only when enabled) -->
+                        <div class="claim-verify-row">
+                            <input type="tel" id="phone" name="phone" required class="claim-input" data-i18n-placeholder="common.labels.phoneNumber" placeholder="Phone Number">
+                            <button type="button" id="phoneSendSms" class="claim-verify-btn" hidden data-i18n="claim.verify.sendSms">Send SMS code</button>
+                        </div>
+                        <div id="phone-otp-block" hidden>
+                            <p id="phone-otp-status" class="claim-verify-note" data-i18n="claim.verify.smsSent">Text sent. Enter the code below.</p>
+                            <div class="claim-verify-row">
+                                <input type="text" id="phoneCode" inputmode="numeric" autocomplete="one-time-code" maxlength="6" class="claim-input" data-i18n-placeholder="claim.verify.smsCodeLabel" placeholder="SMS code">
+                                <button type="button" id="phoneVerifyBtn" class="claim-verify-btn" data-i18n="claim.verify.verifyPhone">Verify phone</button>
+                            </div>
+                            <p id="phone-verify-error" class="claim-error" hidden></p>
+                        </div>
+                        <p id="phone-verified-badge" class="claim-success" hidden data-i18n="claim.verify.verified">Verified</p>
+                        <!-- reCAPTCHA (invisible) mounts here for Firebase phone auth -->
+                        <div id="recaptcha-container"></div>
+
                         <input type="text" id="address" name="address" required class="claim-input" data-i18n-placeholder="common.labels.address" placeholder="Address">
                         <div class="grid grid-cols-3 gap-3">
                             <input type="text" id="city" name="city" required class="claim-input" data-i18n-placeholder="common.labels.city" placeholder="City">
                             <input type="text" id="state" name="state" required maxlength="2" class="claim-input" data-i18n-placeholder="common.labels.state" placeholder="State">
                             <input type="text" id="zipCode" name="zipCode" required class="claim-input" data-i18n-placeholder="common.labels.zipCode" placeholder="Zip Code">
-                        </div>
-                        <div id="claim-credentials">
-                            <input type="text" id="username" name="username" required autocomplete="username" class="claim-input" data-i18n-placeholder="common.labels.username" placeholder="Username">
-                            <input type="password" id="password" name="password" required autocomplete="new-password" class="claim-input" data-i18n-placeholder="common.labels.password" placeholder="Password">
                         </div>
                         <p id="claim-form-error" class="claim-error" hidden></p>
                         <button type="submit" id="claimSubmit" class="claim-submit" data-i18n="claim.cta">Create my account</button>

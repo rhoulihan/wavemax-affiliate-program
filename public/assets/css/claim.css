@@ -119,3 +119,39 @@
   font-weight: 600;
   margin: 12px 0 0;
 }
+
+/* PR 7 — email + phone verification controls */
+.claim-verify-row {
+  display: flex;
+  gap: 8px;
+  align-items: stretch;
+}
+.claim-verify-row .claim-input { flex: 1 1 auto; }
+.claim-verify-btn {
+  flex: 0 0 auto;
+  background: #2563eb;
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  padding: 0 14px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.claim-verify-btn:hover { background: #1d4ed8; }
+.claim-verify-btn[disabled] { opacity: 0.6; cursor: not-allowed; }
+.claim-verify-note {
+  color: #475569;
+  font-size: 14px;
+  margin: 4px 0 8px;
+}
+.claim-link-btn {
+  background: none;
+  border: none;
+  color: #2563eb;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+}
