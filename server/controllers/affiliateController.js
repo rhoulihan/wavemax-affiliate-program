@@ -16,6 +16,7 @@ const Formatters = require('../utils/formatters');
 const logger = require('../utils/logger');
 const inviteService = require('../modules/onboarding/inviteService');
 const { InviteError } = inviteService;
+const { OPEN_STATUSES } = require('../modules/orders/orderStateMachine');
 const { logAuditEvent, AuditEvents } = require('../utils/auditLogger');
 const SystemConfig = require('../models/SystemConfig');
 const roleCodes = require('../utils/roleCodes');
@@ -792,7 +793,7 @@ exports.getAffiliateDashboardStats = async (req, res) => {
     // Get active orders count (open set in the new status machine)
     const activeOrderCount = await Order.countDocuments({
       affiliateId,
-      status: { $in: ['pending', 'in_progress', 'out_for_delivery'] }
+      status: { $in: OPEN_STATUSES }
     });
 
     // Money/commission moved to Cents (external) in Phase 1. Earnings fields

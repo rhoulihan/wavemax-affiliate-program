@@ -13,6 +13,7 @@
 const crypto = require('crypto');
 const Operator = require('../models/Operator');
 const Order = require('../models/Order');
+const { OPEN_STATUSES } = require('../modules/orders/orderStateMachine');
 const { fieldFilter } = require('../utils/fieldFilter');
 const fieldFilterModule = require('../utils/fieldFilter');
 const emailService = require('../utils/emailService');
@@ -228,7 +229,7 @@ async function deactivateOperator({ id, adminId, req }) {
   await Order.updateMany(
     {
       assignedOperator: operator._id,
-      status: { $in: ['pending', 'in_progress', 'out_for_delivery'] }
+      status: { $in: OPEN_STATUSES }
     },
     {
       $unset: { assignedOperator: 1 }
@@ -325,7 +326,7 @@ async function deleteOperator({ id, adminId }) {
 
   const activeOrdersCount = await Order.countDocuments({
     assignedOperator: operator._id,
-    status: { $in: ['pending', 'in_progress', 'out_for_delivery'] }
+    status: { $in: OPEN_STATUSES }
   });
 
   if (activeOrdersCount > 0 || operator.currentOrderCount > 0) {

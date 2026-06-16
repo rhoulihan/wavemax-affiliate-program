@@ -11,6 +11,7 @@
 
 const mongoose = require('mongoose');
 const { v4: uuidv4 } = require('uuid');
+const { OPEN_STATUSES } = require('../modules/orders/orderStateMachine');
 
 // Per-scan stamp: who scanned, in what role, when.
 const scanEventSchema = new mongoose.Schema({
@@ -68,7 +69,7 @@ orderSchema.index(
     unique: true,
     name: 'bagId_open_unique',
     partialFilterExpression: {
-      status: { $in: ['pending', 'in_progress', 'out_for_delivery'] }
+      status: { $in: OPEN_STATUSES }
     }
   }
 );
