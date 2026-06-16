@@ -298,26 +298,16 @@ describe('Email Service - Additional Coverage', () => {
       const consoleEmailService = require('../../server/utils/emailService');
       
       try {
-        await consoleEmailService.sendCustomerOrderConfirmationEmail(
-          { 
-            email: 'customer@example.com', 
-            firstName: 'John', 
-            languagePreference: 'en' 
+        await consoleEmailService.sendOrderStatusUpdateEmail(
+          {
+            email: 'customer@example.com',
+            firstName: 'John',
+            languagePreference: 'en'
           },
-          { 
-            orderId: 'ORD123', 
-            actualTotal: 50, 
-            estimatedTotal: 50,
-            pickupDate: new Date(),
-            pickupTime: 'morning'
+          {
+            orderId: 'ORD123'
           },
-          { 
-            businessName: 'Test Business',
-            firstName: 'Test',
-            lastName: 'Affiliate',
-            phone: '555-1234',
-            email: 'affiliate@example.com'
-          }
+          'in_progress'
         );
       } catch (error) {
         console.error('Email sending failed:', error.message);

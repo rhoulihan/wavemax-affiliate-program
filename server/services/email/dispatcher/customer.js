@@ -294,151 +294,6 @@ exports.sendCustomerWelcomeEmail = async (customer, affiliate, bagInfo = {}) => 
 };
 
 /**
- * Send order confirmation email to customer
- */
-exports.sendCustomerOrderConfirmationEmail = async (customer, order, affiliate) => {
-  try {
-    const language = customer.languagePreference || 'en';
-    const template = await loadTemplate('customer-order-confirmation', language);
-
-    // Get translations for the email content
-    const translations = {
-      en: {
-        EMAIL_TITLE: 'Your Laundry Pickup Confirmation',
-        EMAIL_HEADER: 'Your Laundry Pickup is Confirmed!',
-        GREETING: `Hello ${customer.firstName},`,
-        CONFIRMATION_MESSAGE: 'Thank you for scheduling your laundry pickup with WaveMAX Laundry. Your order has been confirmed and your affiliate partner has been notified.',
-        ORDER_SUMMARY_TITLE: 'Order Summary',
-        ORDER_ID_LABEL: 'Order ID',
-        PICKUP_DATE_LABEL: 'Pickup Date',
-        PICKUP_TIME_LABEL: 'Pickup Time',
-        DELIVERY_DATE_LABEL: 'Delivery Date',
-        DELIVERY_TIME_LABEL: 'Delivery Time',
-        ESTIMATED_TOTAL_LABEL: 'Estimated Total',
-        AFFILIATE_INFO_TITLE: 'Your Affiliate Partner',
-        NAME_LABEL: 'Name',
-        PHONE_LABEL: 'Phone',
-        EMAIL_LABEL: 'Email',
-        VIEW_ORDER_BUTTON: 'Login to View Your Order',
-        WHAT_HAPPENS_NEXT_TITLE: 'What happens next?',
-        WHAT_HAPPENS_NEXT_LIST: '<ul><li>Your affiliate partner will arrive during your selected pickup window</li><li>Please have your laundry ready in bags</li><li>You\'ll receive updates as your order progresses</li><li>Final pricing will be based on the actual weight of your laundry</li></ul>',
-        CHANGE_ORDER_MESSAGE: 'If you need to make any changes to your order, please contact your affiliate partner directly.',
-        CLOSING_MESSAGE: 'Best regards,<br>The WaveMAX Laundry Team',
-        FOOTER_RIGHTS: 'All rights reserved.',
-        FOOTER_AUTOMATED_MESSAGE: 'This is an automated message. Please do not reply to this email.'
-      },
-      es: {
-        EMAIL_TITLE: 'Confirmación de Recogida de Lavandería',
-        EMAIL_HEADER: '¡Su Recogida de Lavandería está Confirmada!',
-        GREETING: `Hola ${customer.firstName},`,
-        CONFIRMATION_MESSAGE: 'Gracias por programar su recogida de lavandería con WaveMAX Laundry. Su pedido ha sido confirmado y su socio afiliado ha sido notificado.',
-        ORDER_SUMMARY_TITLE: 'Resumen del Pedido',
-        ORDER_ID_LABEL: 'ID del Pedido',
-        PICKUP_DATE_LABEL: 'Fecha de Recogida',
-        PICKUP_TIME_LABEL: 'Hora de Recogida',
-        DELIVERY_DATE_LABEL: 'Fecha de Entrega',
-        DELIVERY_TIME_LABEL: 'Hora de Entrega',
-        ESTIMATED_TOTAL_LABEL: 'Total Estimado',
-        AFFILIATE_INFO_TITLE: 'Su Socio Afiliado',
-        NAME_LABEL: 'Nombre',
-        PHONE_LABEL: 'Teléfono',
-        EMAIL_LABEL: 'Correo Electrónico',
-        VIEW_ORDER_BUTTON: 'Iniciar Sesión para Ver Su Pedido',
-        WHAT_HAPPENS_NEXT_TITLE: '¿Qué sucede a continuación?',
-        WHAT_HAPPENS_NEXT_LIST: '<ul><li>Su socio afiliado llegará durante su ventana de recogida seleccionada</li><li>Por favor tenga su ropa lista en bolsas</li><li>Recibirá actualizaciones mientras su pedido progresa</li><li>El precio final se basará en el peso real de su ropa</li></ul>',
-        CHANGE_ORDER_MESSAGE: 'Si necesita hacer cambios a su pedido, contacte directamente a su socio afiliado.',
-        CLOSING_MESSAGE: 'Saludos cordiales,<br>El Equipo de WaveMAX Laundry',
-        FOOTER_RIGHTS: 'Todos los derechos reservados.',
-        FOOTER_AUTOMATED_MESSAGE: 'Este es un mensaje automatizado. Por favor no responda a este correo.'
-      },
-      pt: {
-        EMAIL_TITLE: 'Confirmação de Coleta de Lavanderia',
-        EMAIL_HEADER: 'Sua Coleta de Lavanderia está Confirmada!',
-        GREETING: `Olá ${customer.firstName},`,
-        CONFIRMATION_MESSAGE: 'Obrigado por agendar sua coleta de lavanderia com WaveMAX Laundry. Seu pedido foi confirmado e seu parceiro afiliado foi notificado.',
-        ORDER_SUMMARY_TITLE: 'Resumo do Pedido',
-        ORDER_ID_LABEL: 'ID do Pedido',
-        PICKUP_DATE_LABEL: 'Data de Coleta',
-        PICKUP_TIME_LABEL: 'Hora de Coleta',
-        DELIVERY_DATE_LABEL: 'Data de Entrega',
-        DELIVERY_TIME_LABEL: 'Hora de Entrega',
-        ESTIMATED_TOTAL_LABEL: 'Total Estimado',
-        AFFILIATE_INFO_TITLE: 'Seu Parceiro Afiliado',
-        NAME_LABEL: 'Nome',
-        PHONE_LABEL: 'Telefone',
-        EMAIL_LABEL: 'E-mail',
-        VIEW_ORDER_BUTTON: 'Faça Login para Ver Seu Pedido',
-        WHAT_HAPPENS_NEXT_TITLE: 'O que acontece a seguir?',
-        WHAT_HAPPENS_NEXT_LIST: '<ul><li>Seu parceiro afiliado chegará durante sua janela de coleta selecionada</li><li>Por favor, tenha sua roupa pronta em sacolas</li><li>Você receberá atualizações conforme seu pedido progride</li><li>O preço final será baseado no peso real de sua roupa</li></ul>',
-        CHANGE_ORDER_MESSAGE: 'Se precisar fazer alterações em seu pedido, entre em contato diretamente com seu parceiro afiliado.',
-        CLOSING_MESSAGE: 'Atenciosamente,<br>A Equipe WaveMAX Laundry',
-        FOOTER_RIGHTS: 'Todos os direitos reservados.',
-        FOOTER_AUTOMATED_MESSAGE: 'Esta é uma mensagem automatizada. Por favor, não responda a este e-mail.'
-      },
-      de: {
-        EMAIL_TITLE: 'Ihre Wäscheabholung Bestätigung',
-        EMAIL_HEADER: 'Ihre Wäscheabholung ist bestätigt!',
-        GREETING: `Hallo ${customer.firstName},`,
-        CONFIRMATION_MESSAGE: 'Vielen Dank für die Terminbuchung Ihrer Wäscheabholung bei WaveMAX Laundry. Ihre Bestellung wurde bestätigt und Ihr Affiliate-Partner wurde benachrichtigt.',
-        ORDER_SUMMARY_TITLE: 'Bestellübersicht',
-        ORDER_ID_LABEL: 'Bestell-ID',
-        PICKUP_DATE_LABEL: 'Abholdatum',
-        PICKUP_TIME_LABEL: 'Abholzeit',
-        DELIVERY_DATE_LABEL: 'Lieferdatum',
-        DELIVERY_TIME_LABEL: 'Lieferzeit',
-        ESTIMATED_TOTAL_LABEL: 'Geschätzter Gesamtbetrag',
-        AFFILIATE_INFO_TITLE: 'Ihr Affiliate-Partner',
-        NAME_LABEL: 'Name',
-        PHONE_LABEL: 'Telefon',
-        EMAIL_LABEL: 'E-Mail',
-        VIEW_ORDER_BUTTON: 'Anmelden um Ihre Bestellung anzusehen',
-        WHAT_HAPPENS_NEXT_TITLE: 'Was passiert als nächstes?',
-        WHAT_HAPPENS_NEXT_LIST: '<ul><li>Ihr Affiliate-Partner kommt während Ihres gewählten Abholzeitfensters</li><li>Bitte haben Sie Ihre Wäsche in Säcken bereit</li><li>Sie erhalten Updates während Ihre Bestellung bearbeitet wird</li><li>Die endgültige Preisgestaltung basiert auf dem tatsächlichen Gewicht Ihrer Wäsche</li></ul>',
-        CHANGE_ORDER_MESSAGE: 'Wenn Sie Änderungen an Ihrer Bestellung vornehmen müssen, kontaktieren Sie bitte direkt Ihren Affiliate-Partner.',
-        CLOSING_MESSAGE: 'Mit freundlichen Grüßen,<br>Das WaveMAX Laundry Team',
-        FOOTER_RIGHTS: 'Alle Rechte vorbehalten.',
-        FOOTER_AUTOMATED_MESSAGE: 'Dies ist eine automatisierte Nachricht. Bitte antworten Sie nicht auf diese E-Mail.'
-      }
-    };
-
-    const emailTranslations = translations[language] || translations.en;
-
-    const data = {
-      first_name: customer.firstName,
-      order_id: order.orderId,
-      pickup_date: new Date(order.pickupDate).toLocaleDateString(),
-      pickup_time: formatTimeSlot(order.pickupTime),
-      estimated_total: `$${order.estimatedTotal.toFixed(2)}`,
-      affiliate_name: `${affiliate.firstName} ${affiliate.lastName}`,
-      affiliate_phone: affiliate.phone,
-      affiliate_email: affiliate.email,
-      login_url: 'https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?login=customer',
-      current_year: new Date().getFullYear(),
-      ...emailTranslations
-    };
-
-    const html = fillTemplate(template, data);
-
-    // Translate subject based on language
-    const subjects = {
-      en: 'Your Laundry Pickup Confirmation',
-      es: 'Confirmación de Recogida de Lavandería',
-      pt: 'Confirmação de Coleta de Lavanderia',
-      de: 'Ihre Wäscheabholung Bestätigung'
-    };
-    const subject = subjects[language] || subjects.en;
-
-    await sendEmail(
-      customer.email,
-      subject,
-      html
-    );
-  } catch (error) {
-    logger.error('Error sending order confirmation email:', error);
-  }
-};
-
-/**
  * Send order status update email to customer
  */
 exports.sendOrderStatusUpdateEmail = async (customer, order, status) => {
@@ -607,9 +462,7 @@ exports.sendOrderCancellationEmail = async (customer, order) => {
         CANCELLATION_MESSAGE: 'Your laundry pickup order has been cancelled.',
         CANCELLATION_DETAILS_TITLE: 'Cancellation Details',
         ORDER_ID_LABEL: 'Order ID',
-        ORIGINAL_PICKUP_DATE_LABEL: 'Original Pickup Date',
         CANCELLED_AT_LABEL: 'Cancelled At',
-        VIEW_DASHBOARD_LINK: 'View Your Dashboard',
         APOLOGY_MESSAGE: 'We\'re sorry for any inconvenience. If you have any questions, please contact your affiliate partner.',
         CLOSING_MESSAGE: 'Best regards,<br>The WaveMAX Laundry Team',
         FOOTER_RIGHTS: 'All rights reserved.',
@@ -622,9 +475,7 @@ exports.sendOrderCancellationEmail = async (customer, order) => {
         CANCELLATION_MESSAGE: 'Su pedido de recogida de lavandería ha sido cancelado.',
         CANCELLATION_DETAILS_TITLE: 'Detalles de Cancelación',
         ORDER_ID_LABEL: 'ID del Pedido',
-        ORIGINAL_PICKUP_DATE_LABEL: 'Fecha Original de Recogida',
         CANCELLED_AT_LABEL: 'Cancelado a las',
-        VIEW_DASHBOARD_LINK: 'Ver Su Panel',
         APOLOGY_MESSAGE: 'Lamentamos cualquier inconveniente. Si tiene preguntas, contacte a su socio afiliado.',
         CLOSING_MESSAGE: 'Saludos cordiales,<br>El Equipo de WaveMAX Laundry',
         FOOTER_RIGHTS: 'Todos los derechos reservados.',
@@ -637,9 +488,7 @@ exports.sendOrderCancellationEmail = async (customer, order) => {
         CANCELLATION_MESSAGE: 'Seu pedido de coleta de lavanderia foi cancelado.',
         CANCELLATION_DETAILS_TITLE: 'Detalhes do Cancelamento',
         ORDER_ID_LABEL: 'ID do Pedido',
-        ORIGINAL_PICKUP_DATE_LABEL: 'Data Original de Coleta',
         CANCELLED_AT_LABEL: 'Cancelado às',
-        VIEW_DASHBOARD_LINK: 'Ver Seu Painel',
         APOLOGY_MESSAGE: 'Pedimos desculpas por qualquer inconveniente. Se tiver dúvidas, entre em contato com seu parceiro afiliado.',
         CLOSING_MESSAGE: 'Atenciosamente,<br>A Equipe WaveMAX Laundry',
         FOOTER_RIGHTS: 'Todos os direitos reservados.',
@@ -652,9 +501,7 @@ exports.sendOrderCancellationEmail = async (customer, order) => {
         CANCELLATION_MESSAGE: 'Ihre Wäscheabholung wurde storniert.',
         CANCELLATION_DETAILS_TITLE: 'Stornierungsdetails',
         ORDER_ID_LABEL: 'Bestell-ID',
-        ORIGINAL_PICKUP_DATE_LABEL: 'Ursprüngliches Abholdatum',
         CANCELLED_AT_LABEL: 'Storniert um',
-        VIEW_DASHBOARD_LINK: 'Ihr Dashboard anzeigen',
         APOLOGY_MESSAGE: 'Wir entschuldigen uns für etwaige Unannehmlichkeiten. Bei Fragen kontaktieren Sie bitte Ihren Affiliate-Partner.',
         CLOSING_MESSAGE: 'Mit freundlichen Grüßen,<br>Das WaveMAX Laundry Team',
         FOOTER_RIGHTS: 'Alle Rechte vorbehalten.',
@@ -667,9 +514,7 @@ exports.sendOrderCancellationEmail = async (customer, order) => {
     const data = {
       first_name: customer.firstName,
       order_id: order.orderId,
-      pickup_date: new Date(order.pickupDate).toLocaleDateString(),
       cancellation_time: new Date().toLocaleTimeString(),
-      dashboard_url: 'https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?login=customer',
       current_year: new Date().getFullYear(),
       ...emailTranslations
     };
