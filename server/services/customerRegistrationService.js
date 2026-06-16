@@ -6,7 +6,6 @@
 // customer, then claim; on race loss, compensating delete (no Mongo
 // transaction — standalone-mongod portable, spec §13 #4).
 
-const jwt = require('jsonwebtoken');
 const { v4: uuidv4 } = require('uuid');
 
 const Customer = require('../models/Customer');
@@ -33,7 +32,7 @@ class RegistrationError extends Error {
 
 /**
  * Register a new customer against a scanned bag token.
- * Returns `{ customer, affiliate, bag, token }` on success, or throws a
+ * Returns `{ customer, affiliate, bag }` on success, or throws a
  * RegistrationError on expected failure cases.
  */
 async function registerCustomer(payload) {
@@ -82,6 +81,10 @@ async function registerCustomer(payload) {
     throw new RegistrationError('duplicate_username', 'Username already taken', { field: 'username' });
   }
 
+  // PR7: registration verification reworks credential handling. The customer
+  // still gets a username + hashed password here, but Phase 1 has no customer
+  // portal / login, so nothing consumes them yet — kept (not removed) to avoid
+  // churn that PR 7 would redo.
   const { salt: passwordSalt, hash: passwordHash } = encryptionUtil.hashPassword(password);
 
   const newCustomer = new Customer({
@@ -117,16 +120,14 @@ async function registerCustomer(payload) {
     throw err;
   }
 
-  const token = jwt.sign(
-    { id: newCustomer._id, customerId: newCustomer.customerId, role: 'customer' },
-    process.env.JWT_SECRET,
-    { expiresIn: '24h' }
-  );
+  // No customer-role JWT is minted: Phase 1 has no route that authorizes the
+  // customer role and the claim page is registration-only, so the token had no
+  // consumer. (PR 7 owns whatever post-registration session model is needed.)
 
   // Emails are best-effort — never fail registration on SMTP hiccup.
   await sendWelcomeEmails(newCustomer, affiliate);
 
-  return { customer: newCustomer, affiliate, bag: claimedBag, token };
+  return { customer: newCustomer, affiliate, bag: claimedBag };
 }
 
 async function sendWelcomeEmails(customer, affiliate) {

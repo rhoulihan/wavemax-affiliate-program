@@ -60,7 +60,7 @@ exports.claimRegister = ControllerHelpers.asyncWrapper(async (req, res) => {
   }
 
   try {
-    const { customer, affiliate, bag, token } = await customerRegistrationService.registerCustomer({
+    const { customer, affiliate, bag } = await customerRegistrationService.registerCustomer({
       ...req.body,
       bagToken: req.params.bagToken
     });
@@ -69,7 +69,6 @@ exports.claimRegister = ControllerHelpers.asyncWrapper(async (req, res) => {
       res,
       {
         customerId: customer.customerId,
-        token,
         bag: { bagId: bag.bagId },
         customerData: {
           firstName: customer.firstName,

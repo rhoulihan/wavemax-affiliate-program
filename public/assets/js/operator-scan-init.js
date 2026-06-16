@@ -43,9 +43,13 @@
 
   // --- toast ----------------------------------------------------------------
   function showToast(message, icon, type) {
-    toastTitle.textContent = type === 'error'
-      ? t('operator.scan.errorTitle', 'Error')
-      : t('operator.scan.successTitle', 'Success');
+    if (type === 'error') {
+      toastTitle.textContent = t('operator.scan.errorTitle', 'Error');
+    } else if (type === 'info') {
+      toastTitle.textContent = t('operator.scan.infoTitle', 'No change');
+    } else {
+      toastTitle.textContent = t('operator.scan.successTitle', 'Success');
+    }
     toastMessage.textContent = message;
     toastIcon.textContent = icon || '✓';
     toast.className = 'confirmation-modal ' + (type || 'success');
@@ -132,12 +136,16 @@
     try {
       var result = await window.ScanSession.apply(bagToken, expectedAction, opts);
       lastBagToken = bagToken;
-      if (result.action !== 'no-op') {
+      if (result.action === 'no-op') {
+        // e.g. delivery-rescan-prompt answered "No" — the order was deliberately
+        // left as-is. Acknowledge with a neutral toast, not a success one.
+        showToast(t('operator.scan.noChange', 'No change — order left as delivered'), 'ℹ️', 'info');
+      } else {
         tally += 1;
         sessionTally.textContent = String(tally);
         undoBtn.hidden = false;
+        showToast(t('operator.scan.applied', 'Done'), '✅', 'success');
       }
-      showToast(t('operator.scan.applied', 'Done'), '✅', 'success');
     } catch (err) {
       if (err.status === 409 && err.code === 'state_changed') {
         showError(t('operator.scan.stateChanged', 'Bag state changed — please re-scan'));

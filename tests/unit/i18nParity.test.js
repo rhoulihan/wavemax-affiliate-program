@@ -94,7 +94,7 @@ describe('check-i18n-parity', () => {
   describe('spec §10 manifest', () => {
     it('carries the load-bearing inventory entries', () => {
       expect(REQUIRED_KEYS).toContain('claim.title');
-      expect(REQUIRED_KEYS).toContain('claim.deliver.badCode');
+      expect(REQUIRED_KEYS).toContain('claim.scan.badCode');
       expect(REQUIRED_KEYS).toContain('operator.intake.error.bagNotActive');
       expect(REQUIRED_KEYS).toContain('order.status.ready_for_pickup');
       expect(REQUIRED_EMAIL_TEMPLATES).toContain('affiliate-invite');

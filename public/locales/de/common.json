@@ -19,21 +19,6 @@
     "invalidTitle": "Beutel nicht erkannt",
     "invalidBody": "Wir konnten diesen Beutel nicht erkennen. Bitte wenden Sie sich an Ihren Wäscheservice-Anbieter.",
     "raceLost": "Jemand hat diesen Beutel gerade beansprucht. Falls Sie das auf einem anderen Gerät waren, ist alles erledigt.",
-    "deliver": {
-      "title": "Zustellung bestätigen",
-      "codeLabel": "Liefercode oder PIN",
-      "codePlaceholder": "Code eingeben",
-      "geoOptIn": "Meinen Standort an diese Bestätigung anhängen",
-      "rememberCode": "Code auf diesem Gerät merken",
-      "confirm": "Zustellung bestätigen",
-      "success": "Zustellung bestätigt — vielen Dank!",
-      "badCode": "Der Code stimmt nicht. Bitte erneut versuchen.",
-      "lockedOut": "Zu viele Versuche. Bitte später erneut versuchen."
-    },
-    "reintake": {
-      "prompt": "Als zugestellt markieren und neuen Auftrag starten?",
-      "confirm": "Ja — neuen Auftrag starten"
-    },
     "scan": {
       "operatorCodeLabel": "Bediener-Code",
       "confirm": {
@@ -67,10 +52,7 @@
     },
     "status": {
       "in_progress": "Ihre Wäsche wird bearbeitet",
-      "processed": "Ihre Wäsche ist gewaschen und wartet im Geschäft",
-      "ready_for_pickup": "Ihre Wäsche ist fertig — Ihr Lieferpartner holt sie bald ab",
-      "picked_up": "Ihre Wäsche ist unterwegs",
-      "delivered": "Ihre Wäsche wurde zugestellt"
+      "processed": "Ihre Wäsche ist gewaschen und wartet im Geschäft"
     },
     "registeredTitle": "Alles erledigt!",
     "registeredBody": "Ihr Beutel ist jetzt mit Ihrem Konto verknüpft. Ihr Wäscheanbieter übernimmt ab hier — achten Sie auf Ihre E-Mails für Updates."
@@ -703,7 +685,9 @@
       "networkError": "Netzwerkfehler — bitte versuchen Sie es erneut.",
       "confirmGeneric": "Diesen Scan anwenden?",
       "successTitle": "Erfolg",
-      "errorTitle": "Fehler"
+      "errorTitle": "Fehler",
+      "noChange": "Keine Änderung — Bestellung bleibt als zugestellt",
+      "infoTitle": "Keine Änderung"
     }
   },
   "administrator": {

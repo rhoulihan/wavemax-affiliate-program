@@ -12,6 +12,7 @@ const Operator = require('../models/Operator');
 const Order = require('../models/Order');
 const Affiliate = require('../models/Affiliate');
 const Customer = require('../models/Customer');
+const { OPEN_STATUSES } = require('../modules/orders/orderStateMachine');
 const { logAuditEvent, AuditEvents } = require('../utils/auditLogger');
 
 const GROUP_BY_FORMAT = {
@@ -105,7 +106,7 @@ async function getDashboard() {
     activeAffiliates: await Affiliate.countDocuments({ isActive: true }),
     totalCustomers: await Customer.countDocuments(),
     ordersInProgress: await Order.countDocuments({
-      status: { $in: ['pending', 'in_progress', 'out_for_delivery'] }
+      status: { $in: OPEN_STATUSES }
     }),
     completedOrders: await Order.countDocuments({ status: 'complete' }),
     // Orders stuck in progress for > 24h — surfaces queue backups.

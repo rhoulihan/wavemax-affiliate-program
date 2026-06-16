@@ -210,11 +210,13 @@ describe('Email Service Integration', () => {
     it('should verify essential email templates exist', async () => {
       const actualFs = jest.requireActual('fs').promises;
       const templateDir = path.join(__dirname, '../../server/templates/emails');
+      // customer-order-confirmation.html was removed in PR 8 (orphan — no live
+      // dispatcher). The old 'order-confirmation.html' entry pointed at a file
+      // that never existed and was only console.logged, never asserted.
       const essentialTemplates = [
         'affiliate-welcome.html',
         'customer-welcome.html',
-        'password-reset.html',
-        'order-confirmation.html'
+        'password-reset.html'
       ];
 
       for (const template of essentialTemplates) {
@@ -222,10 +224,8 @@ describe('Email Service Integration', () => {
         const exists = await actualFs.access(templatePath)
           .then(() => true)
           .catch(() => false);
-        
-        if (!exists) {
-          console.log(`Missing template: ${template}`);
-        }
+
+        expect(exists).toBe(true);
       }
     });
   });

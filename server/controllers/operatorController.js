@@ -3,58 +3,11 @@ const logger = require('../utils/logger');
 // Utility modules for consistent error handling and responses
 const ControllerHelpers = require('../utils/controllerHelpers');
 
-const orderQueueService = require('../services/operatorOrderQueueService');
 const shiftStatsService = require('../services/operatorShiftStatsService');
 const supportService = require('../services/operatorSupportService');
 const bagService = require('../modules/bags/bagService');
 const orderTransitionService = require('../modules/orders/orderTransitionService');
 const extractBagToken = require('../modules/bags/extractBagToken');
-
-// Get order queue
-exports.getOrderQueue = ControllerHelpers.asyncWrapper(async (req, res) => {
-  const { status = 'pending', priority, dateFrom, dateTo } = req.query;
-  const pagination = ControllerHelpers.parsePagination(req.query, { limit: 20 });
-
-  const result = await orderQueueService.getOrderQueue({
-    status, priority, dateFrom, dateTo, pagination
-  });
-
-  ControllerHelpers.sendSuccess(res, result, 'Order queue retrieved successfully');
-});
-
-// Claim an order
-exports.claimOrder = ControllerHelpers.asyncWrapper(async (req, res) => {
-  try {
-    const order = await orderQueueService.claimOrder({
-      orderId: req.params.orderId,
-      operatorId: req.user.id,
-      req
-    });
-    ControllerHelpers.sendSuccess(res, { order }, 'Order claimed successfully');
-  } catch (err) {
-    if (err.isQueueError) return ControllerHelpers.sendError(res, err.message, err.status);
-    throw err;
-  }
-});
-
-// Update order status
-exports.updateOrderStatus = async (req, res) => {
-  try {
-    const order = await orderQueueService.updateOrderStatus({
-      orderId: req.params.orderId,
-      operatorId: req.user.id,
-      status: req.body.status,
-      notes: req.body.notes,
-      workstation: req.body.workstation,
-      req
-    });
-    res.json({ message: 'Order status updated', order });
-  } catch (err) {
-    if (err.isQueueError) return res.status(err.status).json({ error: err.message });
-    logger.error('Error updating order status:', err);
-    res.status(500).json({ error: 'Failed to update order status' });
-  }
-};
 
 // Perform quality check
 exports.performQualityCheck = async (req, res) => {

@@ -4,7 +4,6 @@
  * to reduce code duplication across controllers
  */
 
-const Customer = require('../models/Customer');
 const Affiliate = require('../models/Affiliate');
 const Order = require('../models/Order');
 const logger = require('../utils/logger');
@@ -101,74 +100,6 @@ class AuthorizationHelpers {
 
       next();
     };
-  }
-
-  /**
-   * Middleware to check customer access
-   * Expects customerId in params or body
-   */
-  static async checkCustomerAccess(req, res, next) {
-    try {
-      const customerId = req.params.customerId || req.body.customerId || req.params.id;
-      
-      if (!customerId) {
-        return res.status(400).json({
-          success: false,
-          message: 'Customer ID required'
-        });
-      }
-
-      // Admin and administrators have full access
-      if (req.user.role === 'admin' || req.user.role === 'administrator') {
-        return next();
-      }
-
-      // Customers can only access their own data
-      if (req.user.role === 'customer') {
-        if (req.user.customerId !== customerId) {
-          return res.status(403).json({
-            success: false,
-            message: 'Unauthorized access to customer data'
-          });
-        }
-        return next();
-      }
-
-      // Affiliates and operators need to verify customer belongs to them
-      if (req.user.role === 'affiliate' || req.user.role === 'operator') {
-        const customer = await Customer.findOne({ customerId }).select('affiliateId');
-        
-        if (!customer) {
-          return res.status(404).json({
-            success: false,
-            message: 'Customer not found'
-          });
-        }
-
-        if (customer.affiliateId !== req.user.affiliateId) {
-          return res.status(403).json({
-            success: false,
-            message: 'Unauthorized access to customer data'
-          });
-        }
-
-        req.customer = customer; // Attach for use in controller
-        return next();
-      }
-
-      // Default deny
-      return res.status(403).json({
-        success: false,
-        message: 'Unauthorized'
-      });
-
-    } catch (error) {
-      logger.error('Customer access check error:', error);
-      return res.status(500).json({
-        success: false,
-        message: 'Authorization check failed'
-      });
-    }
   }
 
   /**

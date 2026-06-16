@@ -19,21 +19,6 @@
     "invalidTitle": "Bag not recognized",
     "invalidBody": "We couldn't recognize this bag. Please contact your laundry service provider.",
     "raceLost": "Someone just claimed this bag. If that was you on another device, you're all set.",
-    "deliver": {
-      "title": "Confirm delivery",
-      "codeLabel": "Delivery code or PIN",
-      "codePlaceholder": "Enter your code",
-      "geoOptIn": "Attach my location to this confirmation",
-      "rememberCode": "Remember my code on this device",
-      "confirm": "Confirm delivery",
-      "success": "Delivery confirmed — thank you!",
-      "badCode": "That code didn't match. Please try again.",
-      "lockedOut": "Too many attempts. Please try again later."
-    },
-    "reintake": {
-      "prompt": "Mark delivered & start a new order?",
-      "confirm": "Yes — start a new order"
-    },
     "scan": {
       "operatorCodeLabel": "Operator code",
       "confirm": {
@@ -67,10 +52,7 @@
     },
     "status": {
       "in_progress": "Your laundry is being processed",
-      "processed": "Your laundry is washed and waiting at the store",
-      "ready_for_pickup": "Your laundry is ready — your delivery provider will collect it soon",
-      "picked_up": "Your laundry is on the way",
-      "delivered": "Your laundry was delivered"
+      "processed": "Your laundry is washed and waiting at the store"
     },
     "registeredTitle": "You're all set!",
     "registeredBody": "Your bag is now linked to your account. Your laundry provider will take it from here — watch your email for updates."
@@ -703,7 +685,9 @@
       "networkError": "Network error — please try again.",
       "confirmGeneric": "Apply this scan?",
       "successTitle": "Success",
-      "errorTitle": "Error"
+      "errorTitle": "Error",
+      "noChange": "No change — order left as delivered",
+      "infoTitle": "No change"
     }
   },
   "administrator": {
