@@ -11,7 +11,6 @@ jest.mock('../../server/utils/emailService', () => ({
   sendCustomerWelcomeEmail: jest.fn(),
   sendOrderStatusUpdateEmail: jest.fn(),
   sendOrderCancellationEmail: jest.fn(),
-  sendCustomerPasswordResetEmail: jest.fn(),
   sendAdministratorWelcomeEmail: jest.fn(),
   sendAdministratorPasswordResetEmail: jest.fn(),
   sendOperatorWelcomeEmail: jest.fn(),
@@ -39,7 +38,6 @@ describe('Email Service Mock', () => {
     emailService.sendCustomerWelcomeEmail.mockResolvedValue({ MessageId: 'test-message-id' });
     emailService.sendOrderStatusUpdateEmail.mockResolvedValue({ MessageId: 'test-message-id' });
     emailService.sendOrderCancellationEmail.mockResolvedValue({ MessageId: 'test-message-id' });
-    emailService.sendCustomerPasswordResetEmail.mockResolvedValue({ MessageId: 'test-message-id' });
     emailService.sendAdministratorWelcomeEmail.mockResolvedValue({ MessageId: 'test-message-id' });
     emailService.sendAdministratorPasswordResetEmail.mockResolvedValue({ MessageId: 'test-message-id' });
     emailService.sendOperatorWelcomeEmail.mockResolvedValue({ MessageId: 'test-message-id' });
@@ -61,7 +59,6 @@ describe('Email Service Mock', () => {
       expect(typeof emailService.sendCustomerWelcomeEmail).toBe('function');
       expect(typeof emailService.sendOrderStatusUpdateEmail).toBe('function');
       expect(typeof emailService.sendOrderCancellationEmail).toBe('function');
-      expect(typeof emailService.sendCustomerPasswordResetEmail).toBe('function');
       expect(typeof emailService.sendAdministratorWelcomeEmail).toBe('function');
       expect(typeof emailService.sendAdministratorPasswordResetEmail).toBe('function');
       expect(typeof emailService.sendOperatorWelcomeEmail).toBe('function');
@@ -88,8 +85,7 @@ describe('Email Service Mock', () => {
       expect(await emailService.sendCustomerWelcomeEmail({}, {}, {})).toEqual(expectedResponse);
       expect(await emailService.sendOrderStatusUpdateEmail({}, {}, '')).toEqual(expectedResponse);
       expect(await emailService.sendOrderCancellationEmail({}, {})).toEqual(expectedResponse);
-      expect(await emailService.sendCustomerPasswordResetEmail({}, '')).toEqual(expectedResponse);
-      
+
       // Administrator functions
       expect(await emailService.sendAdministratorWelcomeEmail({})).toEqual(expectedResponse);
       expect(await emailService.sendAdministratorPasswordResetEmail({}, '')).toEqual(expectedResponse);

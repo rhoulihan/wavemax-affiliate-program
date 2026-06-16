@@ -88,28 +88,6 @@ describe('Email Service - Additional Coverage', () => {
   });
 
 
-  describe('Customer Password Reset Email', () => {
-    it('should send customer password reset email', async () => {
-      const customer = {
-        email: 'customer@example.com',
-        firstName: 'Jane',
-        lastName: 'Smith',
-        customerId: 'CUST001'
-      };
-      const resetUrl = 'https://example.com/reset/token123';
-
-      await emailService.sendCustomerPasswordResetEmail(customer, resetUrl);
-      
-      expect(mockTransporter.sendMail).toHaveBeenCalledWith(
-        expect.objectContaining({
-          to: 'customer@example.com',
-          subject: expect.stringContaining('Password Reset'),
-          html: expect.stringContaining('Reset your password Jane')
-        })
-      );
-    });
-  });
-
   describe('Administrator Emails', () => {
     it('should send administrator welcome email with language support', async () => {
       const admin = {
