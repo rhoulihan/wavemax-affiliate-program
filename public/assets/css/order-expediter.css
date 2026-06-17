@@ -1,4 +1,18 @@
 /* Order Expediter — always-on in-store display. Large, high-contrast, no CDN. */
+
+/* Brand header — define locally (not relying on theme.css) so the white-wordmark
+   logo always sits on its blue band, full-width and centered. */
+.embed-brand-header {
+  background-color: #1e3a8a;
+  padding: 18px 20px;
+  text-align: center;
+}
+.embed-brand-logo {
+  max-width: 200px;
+  height: auto;
+  display: inline-block;
+}
+
 .exp-body {
   margin: 0;
   background: #f1f5f9;
