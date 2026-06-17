@@ -23,6 +23,31 @@ describe('/claim page wiring', () => {
       .toBeLessThan(m[1].indexOf('/assets/js/claim.js'));
   });
 
+  it('loads modal-utils.js + swirl-spinner.js (code modal + spinner) before claim.js', () => {
+    const m = routerSrc.match(/'\/claim':\s*\[([^\]]+)\]/);
+    expect(m[1]).toContain('/assets/js/modal-utils.js');
+    expect(m[1]).toContain('/assets/js/swirl-spinner.js');
+    expect(m[1].indexOf('/assets/js/modal-utils.js'))
+      .toBeLessThan(m[1].indexOf('/assets/js/claim.js'));
+    expect(m[1].indexOf('/assets/js/swirl-spinner.js'))
+      .toBeLessThan(m[1].indexOf('/assets/js/claim.js'));
+  });
+
+  it('claim-embed.html has the brand logo header and the shared code-entry modal', () => {
+    const html = fs.readFileSync(path.join(ROOT, 'public/claim-embed.html'), 'utf8');
+    expect(html).toContain('/assets/images/brand/logo-wavemax.png');
+    expect(html).toContain('id="claimCodeModal"');
+    expect(html).toContain('id="claimCodeInput"');
+    expect(html).toContain('id="claimCodeVerify"');
+    expect(html).toContain('id="claimCodeResend"');
+    // inline OTP field blocks were replaced by the modal
+    expect(html).not.toContain('id="email-otp-block"');
+    expect(html).not.toContain('id="phone-otp-block"');
+    // loads the modal + spinner stylesheets
+    expect(html).toContain('/assets/css/modal-utils.css');
+    expect(html).toContain('/assets/css/swirl-spinner.css');
+  });
+
   it('lazy-loads the Firebase compat SDK from claim.js, keeping it off the render path (PR 8 perf)', () => {
     // The ~170 KB Firebase compat SDK must NOT be eagerly injected via pageScripts —
     // that delayed revealing the registration form (the LCP element). It is loaded on

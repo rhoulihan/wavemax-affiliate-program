@@ -73,6 +73,8 @@
       "smsSent": "Text sent. Enter the code below.",
       "smsCodeLabel": "SMS code",
       "verifyPhone": "Verify phone",
+      "modalTitleEmail": "Enter your email code",
+      "modalTitlePhone": "Enter your SMS code",
       "invalidSms": "That SMS code is incorrect. Please try again.",
       "recaptchaError": "Verification check failed. Please reload and try again.",
       "phoneRequired": "Please verify your phone number to continue.",

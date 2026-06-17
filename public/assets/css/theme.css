@@ -1,5 +1,19 @@
 /* WaveMAX Theme CSS - Global Styles */
 
+/* Shared brand header — a centered WaveMAX logo band for every form/page.
+   Use: <div class="embed-brand-header"><img class="embed-brand-logo"
+   src="/assets/images/brand/logo-wavemax.png" alt="WaveMAX Laundry"></div> */
+.embed-brand-header {
+  background-color: #1e3a8a;
+  padding: 18px 20px;
+  text-align: center;
+}
+.embed-brand-logo {
+  max-width: 180px;
+  height: auto;
+  display: inline-block;
+}
+
 :root {
   /* Brand Colors */
   --wavemax-primary: #1e3a8a;

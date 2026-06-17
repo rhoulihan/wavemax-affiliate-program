@@ -1,16 +1,30 @@
 <!DOCTYPE html>
 <html lang="es">
-<head><meta charset="utf-8"></head>
-<body style="margin:0;padding:0;background:#f4f4f4;">
-  <div style="font-family: Arial, sans-serif; max-width:600px; margin:0 auto; background:#ffffff;">
-    <div style="background-color:#1e3a8a;color:#ffffff;padding:20px;text-align:center;">
-      <h2 style="margin:0;">Pedido listo — Recoger en la tienda</h2>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pedido listo — Recoger en la tienda</title>
+  <style>
+    body { font-family: Arial, sans-serif; line-height: 1.6; color: #333333; margin: 0; padding: 0; background: #f4f4f4; }
+    .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+    .header { background-color: #1e3a8a; color: #ffffff !important; padding: 20px; text-align: center; }
+    .logo { max-width: 180px; margin-bottom: 12px; }
+    .content { padding: 20px; background-color: #ffffff; }
+    .footer { background-color: #f5f5f5; padding: 20px; text-align: center; font-size: 12px; color: #6b7280; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <img src="[BASE_URL]/assets/images/brand/logo-wavemax.png" alt="WaveMAX Laundry" class="logo">
+      <h1>Pedido listo — Recoger en la tienda</h1>
     </div>
-    <div style="padding:20px;color:#333333;line-height:1.6;">
-      <p>Hola [AFFILIATE_NAME]:</p><p>El pedido <strong>[ORDER_ID]</strong> de [CUSTOMER_NAME] ([TOTAL_WEIGHT] lbs) está procesado y pagado. Recógelo en la tienda y entrégaselo a tu cliente.</p>
+    <div class="content">
+      <p>Hola [AFFILIATE_NAME]:</p>
+      <p>El pedido <strong>[ORDER_ID]</strong> de [CUSTOMER_NAME] ([TOTAL_WEIGHT] lbs) está procesado y pagado. Recógelo en la tienda y entrégaselo a tu cliente.</p>
     </div>
-    <div style="background-color:#f5f5f5;padding:10px;text-align:center;font-size:12px;color:#666666;">
-      &copy; 2025 CRHS Enterprises, LLC. All rights reserved.
+    <div class="footer">
+      <p>&copy; 2025 CRHS Enterprises, LLC. All rights reserved.</p>
     </div>
   </div>
 </body>

@@ -19,10 +19,14 @@
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
         .header {
-            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            background-color: #1e3a8a;
             color: #ffffff !important;
-            padding: 40px 30px;
+            padding: 20px;
             text-align: center;
+        }
+        .logo {
+            max-width: 180px;
+            margin-bottom: 12px;
         }
         .header h1 {
             margin: 0;
@@ -130,17 +134,18 @@
             color: #856404;
         }
         .footer {
-            background-color: #f8f9fa;
-            padding: 30px;
+            background-color: #f5f5f5;
+            padding: 20px;
             text-align: center;
-            color: #666;
-            font-size: 14px;
+            font-size: 12px;
+            color: #6b7280;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
+            <img src="[BASE_URL]/assets/images/brand/logo-wavemax.png" alt="WaveMAX Laundry" class="logo">
             <div class="clock-icon">⏰</div>
             <h1>{{i18n "emails.shiftReminder.title"}}</h1>
         </div>

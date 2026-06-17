@@ -269,27 +269,80 @@
       .catch(function () { renderState('invalid'); });
   }
 
+  // ---- spinner + confirmation-code modal -------------------------------------
+
+  // Show a swirl spinner on a button during a server round-trip; returns a
+  // handle with hide(). Falls back to a plain disable if the lib isn't loaded.
+  function spin(btn) {
+    if (btn && window.SwirlSpinnerUtils && typeof window.SwirlSpinnerUtils.showOnButton === 'function') {
+      try { return window.SwirlSpinnerUtils.showOnButton(btn); } catch (e) { /* fall through */ }
+    }
+    if (btn) btn.disabled = true;
+    return { hide: function () { if (btn) btn.disabled = false; } };
+  }
+
+  function setText(id, text) {
+    var el = document.getElementById(id);
+    if (el && typeof text === 'string') el.textContent = text;
+  }
+
+  // One modal serves both the email OTP and the SMS OTP; mode routes verify/resend.
+  var codeModalMode = 'email'; // 'email' | 'phone'
+
+  function openCodeModal(mode, statusText) {
+    codeModalMode = mode;
+    setText('claimCodeTitle', mode === 'phone'
+      ? t('claim.verify.modalTitlePhone', 'Enter your SMS code')
+      : t('claim.verify.modalTitleEmail', 'Enter your email code'));
+    setText('claimCodeStatus', statusText || '');
+    var input = document.getElementById('claimCodeInput');
+    if (input) input.value = '';
+    hideById('claimCodeError');
+    if (window.ModalSystem && typeof window.ModalSystem.showModal === 'function') {
+      window.ModalSystem.showModal('claimCodeModal');
+    } else {
+      var m = document.getElementById('claimCodeModal');
+      if (m) m.classList.add('active');
+    }
+    if (input) input.focus();
+  }
+
+  function closeCodeModal() {
+    if (window.ModalSystem && typeof window.ModalSystem.closeActiveModal === 'function') {
+      window.ModalSystem.closeActiveModal();
+    } else {
+      var m = document.getElementById('claimCodeModal');
+      if (m) m.classList.remove('active');
+    }
+  }
+
+  function onCodeVerify() { if (codeModalMode === 'phone') verifyPhoneSms(); else verifyEmailOtp(); }
+  function onCodeResend() { if (codeModalMode === 'phone') sendPhoneSms(true); else requestEmailOtp(true); }
+
   // ---- email OTP -------------------------------------------------------------
 
-  function requestEmailOtp() {
+  function requestEmailOtp(isResend) {
     var email = document.getElementById('email').value.trim();
     hideById('email-verify-error');
+    hideById('claimCodeError');
     if (!email) { showById('email-verify-error', t('claim.verify.enterEmailFirst', 'Enter your email first.')); return; }
+    var s = spin(document.getElementById(isResend ? 'claimCodeResend' : 'emailSendCode'));
     fetch('/api/v1/customers/claim/' + encodeURIComponent(bagToken) + '/email-otp/request', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email: email, languagePreference: localStorage.getItem('selectedLanguage') || 'en' })
     }).then(function () {
-      showById('email-otp-block');
-      showById('email-otp-status', t('claim.verify.codeSent', 'Code sent. Check your email.'));
+      openCodeModal('email', t('claim.verify.codeSent', 'Code sent. Check your email.'));
     }).catch(function () {
-      showById('email-verify-error', t('claim.verify.recaptchaError', 'Verification check failed. Please reload and try again.'));
-    });
+      var target = isResend ? 'claimCodeError' : 'email-verify-error';
+      showById(target, t('claim.verify.recaptchaError', 'Verification check failed. Please reload and try again.'));
+    }).then(function () { s.hide(); });
   }
 
   function verifyEmailOtp() {
     var email = document.getElementById('email').value.trim();
-    var code = document.getElementById('emailCode').value.trim();
-    hideById('email-verify-error');
+    var code = document.getElementById('claimCodeInput').value.trim();
+    hideById('claimCodeError');
+    var s = spin(document.getElementById('claimCodeVerify'));
     fetch('/api/v1/customers/claim/' + encodeURIComponent(bagToken) + '/email-otp/verify', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email: email, code: code })
@@ -298,17 +351,17 @@
     }).then(function (r) {
       if (r.status === 200 && r.body.emailVerificationToken) {
         emailVerificationToken = r.body.emailVerificationToken;
-        hideById('email-otp-block');
+        closeCodeModal();
         showById('email-verified-badge');
         updateSubmitState();
         return;
       }
-      showById('email-verify-error', r.status === 429
+      showById('claimCodeError', r.status === 429
         ? t('claim.verify.lockedOut', 'Too many attempts. Please try again later.')
         : t('claim.verify.invalidCode', 'That code is incorrect or expired. Please try again.'));
     }).catch(function () {
-      showById('email-verify-error', t('claim.verify.invalidCode', 'That code is incorrect or expired. Please try again.'));
-    });
+      showById('claimCodeError', t('claim.verify.invalidCode', 'That code is incorrect or expired. Please try again.'));
+    }).then(function () { s.hide(); });
   }
 
   // ---- Firebase phone --------------------------------------------------------
@@ -366,16 +419,17 @@
     }
   }
 
-  function sendPhoneSms() {
+  function sendPhoneSms(isResend) {
     var phone = document.getElementById('phone').value.trim();
     hideById('phone-verify-error');
+    hideById('claimCodeError');
     if (!phone) { showById('phone-verify-error', t('claim.verify.enterPhoneFirst', 'Enter your phone number first.')); return; }
     var e164 = phone.charAt(0) === '+' ? phone.replace(/[^\d+]/g, '') : '+1' + phone.replace(/\D/g, '');
+    var s = spin(document.getElementById(isResend ? 'claimCodeResend' : 'phoneSendSms'));
     window.firebase.auth().signInWithPhoneNumber(e164, recaptchaVerifier)
       .then(function (confirmation) {
         firebaseConfirmation = confirmation;
-        showById('phone-otp-block');
-        showById('phone-otp-status', t('claim.verify.smsSent', 'Text sent. Enter the code below.'));
+        openCodeModal('phone', t('claim.verify.smsSent', 'Text sent. Enter the code below.'));
       })
       .catch(function (err) {
         // Surface the actual Firebase error (code + message) so config issues
@@ -384,26 +438,30 @@
         // rather than hidden behind a generic message.
         if (window.console && console.error) console.error('signInWithPhoneNumber failed:', err);
         var detail = (err && (err.code || err.message)) ? ' [' + (err.code || '') + ' ' + (err.message || '') + ']' : '';
-        showById('phone-verify-error',
+        var target = isResend ? 'claimCodeError' : 'phone-verify-error';
+        showById(target,
           t('claim.verify.recaptchaError', 'Verification check failed. Please reload and try again.') + detail);
-      });
+      })
+      .then(function () { s.hide(); });
   }
 
   function verifyPhoneSms() {
-    var code = document.getElementById('phoneCode').value.trim();
-    hideById('phone-verify-error');
-    if (!firebaseConfirmation) { showById('phone-verify-error', t('claim.verify.invalidSms', 'That SMS code is incorrect. Please try again.')); return; }
+    var code = document.getElementById('claimCodeInput').value.trim();
+    hideById('claimCodeError');
+    if (!firebaseConfirmation) { showById('claimCodeError', t('claim.verify.invalidSms', 'That SMS code is incorrect. Please try again.')); return; }
+    var s = spin(document.getElementById('claimCodeVerify'));
     firebaseConfirmation.confirm(code)
       .then(function (result) { return result.user.getIdToken(); })
       .then(function (token) {
         phoneIdToken = token;
-        hideById('phone-otp-block');
+        closeCodeModal();
         showById('phone-verified-badge');
         updateSubmitState();
       })
       .catch(function () {
-        showById('phone-verify-error', t('claim.verify.invalidSms', 'That SMS code is incorrect. Please try again.'));
-      });
+        showById('claimCodeError', t('claim.verify.invalidSms', 'That SMS code is incorrect. Please try again.'));
+      })
+      .then(function () { s.hide(); });
   }
 
   // ---- gating + submit -------------------------------------------------------
@@ -433,7 +491,7 @@
       showFormError(t('claim.verify.phoneRequired', 'Please verify your phone number to continue.'));
       return;
     }
-    submit.disabled = true;
+    var s = spin(submit);
 
     var payload = {
       firstName: fields.firstName.value.trim(),
@@ -462,7 +520,6 @@
           show('registered');
           return;
         }
-        submit.disabled = false;
         if (result.status === 409) {
           var raceMsg = t('claim.raceLost',
             'Someone just claimed this bag. If that was you on another device, you\'re all set.');
@@ -476,26 +533,31 @@
         showFormError(msg);
       })
       .catch(function () {
-        submit.disabled = false;
         showFormError('Network error — please try again.');
-      });
+      })
+      .then(function () { s.hide(); });
   }
 
   function init() {
     document.getElementById('claimRegistrationForm')
       .addEventListener('submit', submitRegistration);
 
-    // PR 7 verification controls (CSP: addEventListener only).
+    // PR 7 verification controls (CSP: addEventListener only). Wrap the send
+    // handlers so the click Event isn't passed as the isResend flag.
     var sendCode = document.getElementById('emailSendCode');
-    if (sendCode) sendCode.addEventListener('click', requestEmailOtp);
-    var emailVerifyBtn = document.getElementById('emailVerifyBtn');
-    if (emailVerifyBtn) emailVerifyBtn.addEventListener('click', verifyEmailOtp);
-    var emailResend = document.getElementById('emailResend');
-    if (emailResend) emailResend.addEventListener('click', requestEmailOtp);
+    if (sendCode) sendCode.addEventListener('click', function () { requestEmailOtp(false); });
     var phoneSendSms = document.getElementById('phoneSendSms');
-    if (phoneSendSms) phoneSendSms.addEventListener('click', sendPhoneSms);
-    var phoneVerifyBtn = document.getElementById('phoneVerifyBtn');
-    if (phoneVerifyBtn) phoneVerifyBtn.addEventListener('click', verifyPhoneSms);
+    if (phoneSendSms) phoneSendSms.addEventListener('click', function () { sendPhoneSms(false); });
+
+    // Shared confirmation-code modal (email + SMS).
+    var codeVerify = document.getElementById('claimCodeVerify');
+    if (codeVerify) codeVerify.addEventListener('click', onCodeVerify);
+    var codeResend = document.getElementById('claimCodeResend');
+    if (codeResend) codeResend.addEventListener('click', onCodeResend);
+    var codeInput = document.getElementById('claimCodeInput');
+    if (codeInput) codeInput.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') { e.preventDefault(); onCodeVerify(); }
+    });
 
     // Staff scan-session controls (CSP: addEventListener only, no inline handlers).
     var codeBtn = document.getElementById('scan-code-submit');

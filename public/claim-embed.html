@@ -10,13 +10,20 @@
          render-blocking) -->
     <link rel="stylesheet" href="/assets/css/language-switcher.css">
     <link href="/assets/css/theme.css" rel="stylesheet">
-    <link href="/assets/css/claim.css?v=20260616" rel="stylesheet">
+    <link href="/assets/css/modal-utils.css" rel="stylesheet">
+    <link href="/assets/css/swirl-spinner.css" rel="stylesheet">
+    <link href="/assets/css/claim.css?v=20260617" rel="stylesheet">
 </head>
 <body class="bg-white font-sans">
     <div id="language-switcher-container" class="language-switcher-container"></div>
 
     <div class="embed-container">
         <div class="max-w-md mx-auto bg-white rounded-lg shadow-md overflow-hidden">
+
+            <!-- Brand header (shown on every state) -->
+            <div class="claim-logo-header">
+                <img class="claim-logo" src="/assets/images/brand/logo-wavemax.png" alt="WaveMAX Laundry">
+            </div>
 
             <!-- STATE: resolving -->
             <section id="claim-state-resolving" class="p-6 text-center">
@@ -25,9 +32,9 @@
 
             <!-- STATE: claimable (registration form) -->
             <section id="claim-state-claimable" hidden>
-                <div class="wavemax-blue text-white p-6">
+                <div class="claim-title-block">
                     <h1 class="text-2xl font-bold" data-i18n="claim.title">Claim your laundry bag</h1>
-                    <p class="mt-2">
+                    <p class="mt-2 text-gray-600">
                         <span data-i18n="claim.subtitle">You're signing up with</span>
                         <strong id="claim-affiliate-name"></strong>
                     </p>
@@ -38,20 +45,13 @@
                             <input type="text" id="firstName" name="firstName" required class="claim-input" data-i18n-placeholder="common.labels.firstName" placeholder="First Name">
                             <input type="text" id="lastName" name="lastName" required class="claim-input" data-i18n-placeholder="common.labels.lastName" placeholder="Last Name">
                         </div>
-                        <!-- Email + email-OTP verification (PR 7) -->
+                        <!-- Email + email-OTP verification (PR 7). The 6-digit code is
+                             entered in the shared #claimCodeModal, not inline. -->
                         <div class="claim-verify-row">
                             <input type="email" id="email" name="email" required class="claim-input" data-i18n-placeholder="common.labels.email" placeholder="Email">
                             <button type="button" id="emailSendCode" class="claim-verify-btn" data-i18n="claim.verify.sendCode">Send code</button>
                         </div>
-                        <div id="email-otp-block" hidden>
-                            <p id="email-otp-status" class="claim-verify-note" data-i18n="claim.verify.codeSent">Code sent. Check your email.</p>
-                            <div class="claim-verify-row">
-                                <input type="text" id="emailCode" inputmode="numeric" autocomplete="one-time-code" maxlength="6" class="claim-input" data-i18n-placeholder="claim.verify.codeLabel" placeholder="Verification code">
-                                <button type="button" id="emailVerifyBtn" class="claim-verify-btn" data-i18n="claim.verify.verify">Verify</button>
-                            </div>
-                            <button type="button" id="emailResend" class="claim-link-btn" data-i18n="claim.verify.resend">Resend code</button>
-                            <p id="email-verify-error" class="claim-error" hidden></p>
-                        </div>
+                        <p id="email-verify-error" class="claim-error" hidden></p>
                         <p id="email-verified-badge" class="claim-success" hidden data-i18n="claim.verify.verified">Verified</p>
 
                         <!-- Phone + Firebase phone verification (PR 7; the SMS controls show only when enabled) -->
@@ -59,14 +59,7 @@
                             <input type="tel" id="phone" name="phone" required class="claim-input" data-i18n-placeholder="common.labels.phoneNumber" placeholder="Phone Number">
                             <button type="button" id="phoneSendSms" class="claim-verify-btn" hidden data-i18n="claim.verify.sendSms">Send SMS code</button>
                         </div>
-                        <div id="phone-otp-block" hidden>
-                            <p id="phone-otp-status" class="claim-verify-note" data-i18n="claim.verify.smsSent">Text sent. Enter the code below.</p>
-                            <div class="claim-verify-row">
-                                <input type="text" id="phoneCode" inputmode="numeric" autocomplete="one-time-code" maxlength="6" class="claim-input" data-i18n-placeholder="claim.verify.smsCodeLabel" placeholder="SMS code">
-                                <button type="button" id="phoneVerifyBtn" class="claim-verify-btn" data-i18n="claim.verify.verifyPhone">Verify phone</button>
-                            </div>
-                            <p id="phone-verify-error" class="claim-error" hidden></p>
-                        </div>
+                        <p id="phone-verify-error" class="claim-error" hidden></p>
                         <p id="phone-verified-badge" class="claim-success" hidden data-i18n="claim.verify.verified">Verified</p>
                         <!-- reCAPTCHA (invisible) mounts here for Firebase phone auth -->
                         <div id="recaptcha-container"></div>
@@ -133,6 +126,27 @@
                 <p class="text-gray-600" data-i18n="claim.invalidBody">We couldn't recognize this bag. Please contact your laundry service provider.</p>
             </section>
 
+        </div>
+    </div>
+
+    <!-- Shared confirmation-code modal (email OTP + SMS OTP). Static markup so
+         claim.js can drive it CSP-cleanly (no innerHTML); reuses modal-utils
+         styling and its data-modal-close / backdrop / ESC wiring. -->
+    <div class="modal" id="claimCodeModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="claimCodeTitle" data-i18n="claim.verify.modalTitleEmail">Enter your code</h3>
+                <button class="modal-close" type="button" data-modal-close aria-label="Close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p id="claimCodeStatus" class="claim-verify-note"></p>
+                <input type="text" id="claimCodeInput" inputmode="numeric" autocomplete="one-time-code" maxlength="6" class="claim-input" data-i18n-placeholder="claim.verify.codeLabel" placeholder="Verification code">
+                <p id="claimCodeError" class="claim-error" hidden></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" id="claimCodeResend" class="btn btn-secondary" data-i18n="claim.verify.resend">Resend code</button>
+                <button type="button" id="claimCodeVerify" class="btn btn-primary" data-i18n="claim.verify.verify">Verify</button>
+            </div>
         </div>
     </div>
 </body>

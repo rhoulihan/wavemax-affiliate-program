@@ -73,6 +73,8 @@
       "smsSent": "Mensagem enviada. Digite o código abaixo.",
       "smsCodeLabel": "Código SMS",
       "verifyPhone": "Verificar telefone",
+      "modalTitleEmail": "Digite o código do seu e-mail",
+      "modalTitlePhone": "Digite seu código SMS",
       "invalidSms": "Esse código SMS está incorreto. Tente novamente.",
       "recaptchaError": "A verificação falhou. Recarregue e tente novamente.",
       "phoneRequired": "Verifique seu número de telefone para continuar.",
