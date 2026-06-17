@@ -34,7 +34,7 @@ a{color:var(--blue2);text-decoration:none}
 .stats .s .l{font-size:13px;color:#bcd3ff}
 
 /* sections */
-section{padding:64px 0}
+section{padding:64px 0;scroll-margin-top:74px}
 .sec-h{font-size:30px;font-weight:800;color:var(--blue);letter-spacing:-.4px}
 .sec-sub{font-size:16px;color:var(--muted);margin-top:10px;max-width:70ch}
 .eyebrow{font-size:13px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--blue2)}
