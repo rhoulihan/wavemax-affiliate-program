@@ -115,5 +115,17 @@ describe('Security Headers (regression — prod-lockdown-2026-05-20)', () => {
       expect(connectSrc).toContain('https://www.facebook.com');
       expect(imgSrc).toContain('https://www.facebook.com');
     });
+
+    // Firebase Phone Auth's reCAPTCHA v2 fallback fetches from www.google.com
+    // /recaptcha/... — without these in connect-src/frame-src the verification
+    // XHRs are CSP-blocked and signInWithPhoneNumber hangs (no error surfaces).
+    it('CSP connect-src + frame-src allow reCAPTCHA (www.google.com)', async () => {
+      const r = await probe();
+      const csp = r.headers['content-security-policy'];
+      const connectSrc = csp.split(';').find((d) => d.trim().startsWith('connect-src'));
+      const frameSrc = csp.split(';').find((d) => d.trim().startsWith('frame-src'));
+      expect(connectSrc).toContain('https://www.google.com');
+      expect(frameSrc).toContain('https://www.google.com');
+    });
   });
 });

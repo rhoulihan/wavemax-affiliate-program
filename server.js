@@ -373,8 +373,12 @@ app.use((req, res, next) => {
     ],
     'img-src': ["'self'", 'data:', 'https://wavemax.promo', 'https://www.wavemax.promo', 'https://atxwashateria.com', 'https://atxwashdryfold.com', 'https://runberglaundry.com', 'https://rundberglaundry.com', 'https://*.tile.openstreetmap.org', 'https://tile.openstreetmap.org', 'https://cdnjs.cloudflare.com', 'https://flagcdn.com', 'https://secure.walibu.com', 'https://upload.wikimedia.org', 'https://*.googleusercontent.com', 'https://maps.googleapis.com', 'https://maps.gstatic.com', 'https://*.googleapis.com', 'https://*.gstatic.com', 'https://www.facebook.com'],
     'connect-src': ["'self'", 'https://wavemax.promo', 'https://atxwashateria.com', 'https://atxwashdryfold.com', 'https://runberglaundry.com', 'https://rundberglaundry.com', 'https://cdn.jsdelivr.net', 'https://cdnjs.cloudflare.com', 'https://stackpath.bootstrapcdn.com', 'https://router.project-osrm.org', 'https://graphhopper.com', 'https://api.openrouteservice.org', 'https://valhalla1.openstreetmap.de', 'https://nominatim.openstreetmap.org', 'https://www.local-marketing-reports.com', 'https://places.googleapis.com', 'https://maps.googleapis.com', 'https://maps.gstatic.com', 'https://connect.facebook.net', 'https://www.facebook.com',
-      // Firebase Phone Auth (PR 7) — Identity Toolkit + secure-token endpoints.
-      'https://identitytoolkit.googleapis.com', 'https://securetoken.googleapis.com', 'https://www.googleapis.com'],
+      // Firebase Phone Auth (PR 7) — Identity Toolkit + secure-token endpoints,
+      // plus the reCAPTCHA origins the v2 fallback fetches from (www.google.com
+      // /recaptcha/... and gstatic). Without www.google.com here the reCAPTCHA
+      // verification XHRs are CSP-blocked and signInWithPhoneNumber hangs.
+      'https://identitytoolkit.googleapis.com', 'https://securetoken.googleapis.com', 'https://www.googleapis.com',
+      'https://www.google.com', 'https://www.gstatic.com', 'https://www.recaptcha.net'],
     'font-src': ["'self'", 'https://cdnjs.cloudflare.com', 'https://cdn.jsdelivr.net', 'https://fonts.gstatic.com'],
     'object-src': ["'none'"],
     'media-src': ["'self'"],
@@ -385,6 +389,8 @@ app.use((req, res, next) => {
          // Educational clickjacking demo only — see isClickjackingDemo comment above.
          'https://www.wavemaxlaundry.com', 'https://wavemaxlaundry.com', 'https://rundberglaundry.com']
       : ["'self'", 'https://www.google.com', 'https://maps.google.com', 'https://my.matterport.com', 'https://challenges.cloudflare.com',
+         // reCAPTCHA v2 challenge iframe (fallback when Enterprise can't init).
+         'https://www.recaptcha.net',
          // Firebase Phone Auth (PR 7) — the auth helper iframe.
          'https://wavemax-bag-registration.firebaseapp.com'],
     'form-action': ["'self'"],
