@@ -3,6 +3,23 @@
   'use strict';
 
   console.log('label-print-utils.js loading...');
+
+  // WaveMAX Austin store address — printed on every bag label, below the
+  // customer name, so a bag's destination/return point is always on the label.
+  var STORE_ADDRESS_LINES = ['825 E Rundberg Ln, Suite F1', 'Austin, TX 78753'];
+
+  // Render the store address (centered, small) starting at yTop; returns the y
+  // position just below the block so callers can continue laying out content.
+  function drawStoreAddress(pdf, pageWidth, yTop) {
+    pdf.setFontSize(9);
+    pdf.setFont('helvetica', 'normal');
+    var y = yTop;
+    STORE_ADDRESS_LINES.forEach(function (line) {
+      pdf.text(line, pageWidth / 2, y, { align: 'center' });
+      y += 0.16;
+    });
+    return y;
+  }
   
   // Export to window for global access
   window.LabelPrintUtils = {
@@ -53,10 +70,13 @@
         pdf.setFontSize(16);
         pdf.setFont('helvetica', 'normal');
         pdf.text(label.customerName, pageWidth / 2, margin + 0.7, { align: 'center' });
-        
-        // Add phone and email if available
+
+        // Store address below the customer name
+        drawStoreAddress(pdf, pageWidth, margin + 0.95);
+
+        // Add phone and email if available (below the address block)
         pdf.setFontSize(11);
-        let yPos = margin + 1.1;
+        let yPos = margin + 1.4;
         
         if (label.phone) {
           pdf.text(label.phone, pageWidth / 2, yPos, { align: 'center' });
@@ -188,7 +208,10 @@
         pdf.setFont('helvetica', 'normal');
         const customerName = `${customer.firstName} ${customer.lastName}`;
         pdf.text(customerName, pageWidth / 2, margin + 1, { align: 'center' });
-        
+
+        // Store address below the customer name
+        drawStoreAddress(pdf, pageWidth, margin + 1.25);
+
         // Generate QR code using the same method as admin dashboard
         let qrImageUrl;
         try {
@@ -216,10 +239,10 @@
           qrImageUrl = canvas.toDataURL('image/png');
         }
         
-        // Add QR code to PDF (centered)
+        // Add QR code to PDF (centered; nudged down to clear the address block)
         const qrSizeInInches = 2.5;
         const qrX = (pageWidth - qrSizeInInches) / 2;
-        pdf.addImage(qrImageUrl, 'PNG', qrX, 1.75, qrSizeInInches, qrSizeInInches);
+        pdf.addImage(qrImageUrl, 'PNG', qrX, 1.95, qrSizeInInches, qrSizeInInches);
         
         // Add customer ID
         pdf.setFontSize(14);

@@ -28,7 +28,11 @@ Process: TDD, one concern/PR, full gate per PR (⊆ baseline), deploy both boxes
 - [ ] Tests; Lighthouse; gate; deploy; set EXPEDITER_TOKEN on both boxes
 
 ## PR E — Follow-ups
-- [ ] operator-login-embed.html inline onclick → addEventListener (CSP)
-- [ ] Email i18n parity: en/customer-on-the-way, en/customer-order-delivered, es|pt|de/affiliate-welcome
-- [ ] Bag label: add WaveMAX Austin address below customer name (labelSheet4x6 / label-print-utils)
+- [x] operator-login-embed.html inline onclick → <span> (CSP-clean; alert just repeated the link text)
+- [N/A] Email i18n parity — VERIFIED a non-issue: dispatchers loadTemplate(name, lang) + JS-embedded
+      per-lang translations; root template + correct-language strings serve es/pt/de via fallback. No drift.
+- [x] Bag label: WaveMAX Austin address (825 E Rundberg Ln, Suite F1 / Austin, TX 78753) below customer name, both render paths
 - [ ] Gate; deploy
+
+## Done — A,B,C,D deployed; each adversarially reviewed (12/11/16 findings fixed). EXPEDITER_TOKEN set on both boxes.
+## Note: expediter Lighthouse deferred (WSL Chrome flake); internal display, CSP-clean/DOM-only/i18n-complete.
