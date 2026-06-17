@@ -2019,20 +2019,38 @@
                             ? ` <span class="status-badge inactive">${escapeHtml(t('admin.locationAffiliate.badge', 'Location'))}</span>`
                             : '';
 
+                        // Service capability + notification state badges.
+                        const serviceType = aff.serviceType || 'pickup_location';
+                        const serviceBadge = serviceType === 'full_service'
+                            ? ` <span class="status-badge active">${escapeHtml(t('admin.affiliateSettings.fullService', 'Full service'))}</span>`
+                            : ` <span class="status-badge">${escapeHtml(t('admin.affiliateSettings.pickupLocation', 'Pickup location'))}</span>`;
+                        const notifyOn = aff.orderNotificationsEnabled === true;
+                        const notifyBadge = notifyOn
+                            ? ` <span class="status-badge active" title="${escapeHtml(t('admin.affiliateSettings.notificationsOn', 'Order notifications on'))}"><i class="fas fa-bell"></i></span>`
+                            : ` <span class="status-badge inactive" title="${escapeHtml(t('admin.affiliateSettings.notificationsOff', 'Order notifications off'))}"><i class="fas fa-bell-slash"></i></span>`;
+
                         return `
                         <tr>
                             <td>${aff.affiliateId}</td>
-                            <td>${escapeHtml(name)}${locationBadge}</td>
+                            <td>${escapeHtml(name)}${locationBadge}${serviceBadge}${notifyBadge}</td>
                             <td>${totalCustomers}</td>
                             <td>${totalOrders}</td>
                             <td>$${totalRevenue.toFixed(2)}</td>
                             <td>$${totalCommission.toFixed(2)}</td>
                             <td>
+                                <button class="btn btn-sm btn-secondary affiliate-settings-btn"
+                                        data-affiliate-id="${aff.affiliateId}"
+                                        data-affiliate-name="${escapeHtml(name)}"
+                                        data-service-type="${escapeHtml(serviceType)}"
+                                        data-notifications="${notifyOn ? '1' : '0'}"
+                                        title="${escapeHtml(t('admin.affiliateSettings.button', 'Settings'))}">
+                                    <i class="fas fa-cog"></i> ${escapeHtml(t('admin.affiliateSettings.button', 'Settings'))}
+                                </button>
                                 <button class="btn btn-sm btn-secondary print-labels-btn"
                                         data-affiliate-id="${aff.affiliateId}"
                                         data-affiliate-name="${escapeHtml(name)}"
-                                        title="${t('admin.bagLabels.button', 'Print Labels')}">
-                                    <i class="fas fa-tags"></i> ${t('admin.bagLabels.button', 'Print Labels')}
+                                        title="${escapeHtml(t('admin.bagLabels.button', 'Print Labels'))}">
+                                    <i class="fas fa-tags"></i> ${escapeHtml(t('admin.bagLabels.button', 'Print Labels'))}
                                 </button>
                             </td>
                         </tr>
@@ -2044,22 +2062,95 @@
 
     const affiliatesContainer = document.getElementById('affiliatesList');
 
-    // Add event listener for print-labels buttons using event delegation
+    // Add event listener for print-labels + settings buttons via delegation
     if (!affiliatesContainer.hasAttribute('data-print-labels-handler')) {
       affiliatesContainer.setAttribute('data-print-labels-handler', 'true');
       affiliatesContainer.addEventListener('click', (e) => {
-        const button = e.target.closest('.print-labels-btn');
-        if (button) {
+        const printBtn = e.target.closest('.print-labels-btn');
+        if (printBtn) {
           e.preventDefault();
           e.stopPropagation();
-
-          const affiliateId = button.getAttribute('data-affiliate-id');
-          const affiliateName = button.getAttribute('data-affiliate-name');
-          showPrintLabelsModal(affiliateId, affiliateName);
+          showPrintLabelsModal(printBtn.getAttribute('data-affiliate-id'),
+            printBtn.getAttribute('data-affiliate-name'));
+          return;
+        }
+        const settingsBtn = e.target.closest('.affiliate-settings-btn');
+        if (settingsBtn) {
+          e.preventDefault();
+          e.stopPropagation();
+          showAffiliateSettingsModal({
+            affiliateId: settingsBtn.getAttribute('data-affiliate-id'),
+            name: settingsBtn.getAttribute('data-affiliate-name'),
+            serviceType: settingsBtn.getAttribute('data-service-type'),
+            notifications: settingsBtn.getAttribute('data-notifications') === '1'
+          });
         }
       });
     }
   }
+
+  // ── Per-affiliate settings modal (serviceType + order notifications) ──────
+  let affiliateSettingsId = null;
+
+  function showAffiliateSettingsModal({ affiliateId, name, serviceType, notifications }) {
+    const modal = document.getElementById('affiliateSettingsModal');
+    if (!modal) return;
+    affiliateSettingsId = affiliateId;
+    const nameEl = document.getElementById('affiliateSettingsName');
+    if (nameEl) nameEl.textContent = name || affiliateId;
+    const typeSel = document.getElementById('affiliateSettingsServiceType');
+    if (typeSel) typeSel.value = serviceType === 'full_service' ? 'full_service' : 'pickup_location';
+    const notifyChk = document.getElementById('affiliateSettingsNotifications');
+    if (notifyChk) notifyChk.checked = !!notifications;
+    modal.classList.remove('hidden');
+    modal.style.display = 'flex';
+  }
+
+  function closeAffiliateSettingsModal() {
+    const modal = document.getElementById('affiliateSettingsModal');
+    if (modal) { modal.style.display = 'none'; modal.classList.add('hidden'); }
+    affiliateSettingsId = null;
+  }
+
+  async function saveAffiliateSettings() {
+    if (!affiliateSettingsId) return;
+    const t = window.i18n ? window.i18n.t.bind(window.i18n) : (k, f) => f || k;
+    const serviceType = document.getElementById('affiliateSettingsServiceType').value;
+    const orderNotificationsEnabled = document.getElementById('affiliateSettingsNotifications').checked;
+    const saveBtn = document.getElementById('saveAffiliateSettings');
+    try {
+      if (saveBtn) saveBtn.disabled = true;
+      const response = await adminFetch(`/api/v1/administrators/affiliates/${affiliateSettingsId}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ serviceType, orderNotificationsEnabled })
+      });
+      const data = await response.json();
+      if (response.ok && data.success) {
+        showNotification(t('admin.affiliateSettings.saved', 'Affiliate settings saved'), 'success');
+        closeAffiliateSettingsModal();
+        await loadAffiliates();
+      } else {
+        showNotification(data.message || t('admin.affiliateSettings.saveError', 'Failed to save settings'), 'error');
+      }
+    } catch (err) {
+      console.error('Error saving affiliate settings:', err);
+      showNotification(t('admin.affiliateSettings.saveError', 'Failed to save settings'), 'error');
+    } finally {
+      if (saveBtn) saveBtn.disabled = false;
+    }
+  }
+
+  // Wire the settings modal's static controls once.
+  (function wireAffiliateSettingsModal() {
+    const save = document.getElementById('saveAffiliateSettings');
+    if (save) save.addEventListener('click', saveAffiliateSettings);
+    const cancel = document.getElementById('cancelAffiliateSettings');
+    if (cancel) cancel.addEventListener('click', closeAffiliateSettingsModal);
+    const close = document.getElementById('closeAffiliateSettingsModal');
+    if (close) close.addEventListener('click', closeAffiliateSettingsModal);
+    const modal = document.getElementById('affiliateSettingsModal');
+    if (modal) modal.addEventListener('click', (e) => { if (e.target === modal) closeAffiliateSettingsModal(); });
+  })();
 
   // Print Bag Labels modal functionality. Tracks the active affiliate so the
   // submit handler (wired once in setupPrintLabelsModalHandlers) knows the target.

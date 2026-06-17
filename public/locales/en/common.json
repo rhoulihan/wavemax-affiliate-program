@@ -1324,6 +1324,18 @@
       "deliveryCode": "Delivery code",
       "badge": "Location"
     },
+    "affiliateSettings": {
+      "button": "Settings",
+      "modalTitle": "Affiliate settings",
+      "serviceTypeLabel": "Service type",
+      "pickupLocation": "Pickup location",
+      "fullService": "Full service",
+      "notificationsLabel": "Send order notifications to this affiliate",
+      "notificationsOn": "Order notifications on",
+      "notificationsOff": "Order notifications off",
+      "saved": "Affiliate settings saved",
+      "saveError": "Failed to save settings"
+    },
     "bagLabels": {
       "button": "Print Labels",
       "modalTitle": "Print bag labels for",

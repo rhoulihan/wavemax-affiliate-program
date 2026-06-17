@@ -1324,6 +1324,18 @@
       "deliveryCode": "Liefercode",
       "badge": "Standort"
     },
+    "affiliateSettings": {
+      "button": "Einstellungen",
+      "modalTitle": "Partner-Einstellungen",
+      "serviceTypeLabel": "Servicetyp",
+      "pickupLocation": "Abholstelle",
+      "fullService": "Full-Service",
+      "notificationsLabel": "Bestellbenachrichtigungen an diesen Partner senden",
+      "notificationsOn": "Bestellbenachrichtigungen aktiviert",
+      "notificationsOff": "Bestellbenachrichtigungen deaktiviert",
+      "saved": "Partner-Einstellungen gespeichert",
+      "saveError": "Einstellungen konnten nicht gespeichert werden"
+    },
     "bagLabels": {
       "button": "Etiketten drucken",
       "modalTitle": "Beutel-Etiketten drucken für",

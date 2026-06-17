@@ -67,6 +67,8 @@ exports.createAffiliateManually = ControllerHelpers.asyncWrapper(async (req, res
     firstName, lastName, email, phone, businessName,
     address, city, state, zipCode, username, languagePreference,
     affiliateType = 'location',
+    serviceType,
+    orderNotificationsEnabled,
     minimumDeliveryFee, perBagDeliveryFee
   } = req.body;
 
@@ -96,6 +98,11 @@ exports.createAffiliateManually = ControllerHelpers.asyncWrapper(async (req, res
   const isLocation = affiliateType === 'location';
   const affiliate = new Affiliate({
     affiliateType,
+    // serviceType (pickup_location|full_service) is independent of commission
+    // type; the model's pre-validate hook defaults notifications by serviceType
+    // when orderNotificationsEnabled isn't explicitly provided.
+    ...(serviceType !== undefined ? { serviceType } : {}),
+    ...(orderNotificationsEnabled !== undefined ? { orderNotificationsEnabled } : {}),
     firstName, lastName,
     email: normalizedEmail,
     phone, businessName,
@@ -144,4 +151,78 @@ exports.createAffiliateManually = ControllerHelpers.asyncWrapper(async (req, res
     deliveryCode,      // shown exactly once
     message: 'Affiliate created successfully'
   });
+});
+
+/**
+ * PATCH /api/v1/administrators/affiliates/:affiliateId
+ *
+ * Admin edits an affiliate's operational settings. Whitelisted fields only:
+ * serviceType, orderNotificationsEnabled, isActive, minimumDeliveryFee,
+ * perBagDeliveryFee. Never touches credentials, identity, or the delivery code.
+ * Responds 200 with the updated subset; 404 if the affiliate doesn't exist.
+ */
+exports.updateAffiliateSettings = ControllerHelpers.asyncWrapper(async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ success: false, errors: errors.array() });
+  }
+
+  const affiliate = await Affiliate.findOne({ affiliateId: req.params.affiliateId });
+  if (!affiliate) {
+    return ControllerHelpers.sendError(res, 'Affiliate not found', 404, [{ code: 'not_found' }]);
+  }
+
+  const changed = {};
+  const serviceTypeProvided = req.body.serviceType !== undefined;
+  const notificationsProvided = req.body.orderNotificationsEnabled !== undefined;
+
+  if (serviceTypeProvided) {
+    affiliate.serviceType = req.body.serviceType;
+    changed.serviceType = req.body.serviceType;
+  }
+  if (notificationsProvided) {
+    // Explicit value always wins.
+    affiliate.orderNotificationsEnabled = !!req.body.orderNotificationsEnabled;
+    changed.orderNotificationsEnabled = affiliate.orderNotificationsEnabled;
+  } else if (serviceTypeProvided) {
+    // serviceType changed without an explicit notifications value → re-apply the
+    // serviceType default (full_service → on, pickup_location → off) so the two
+    // never drift out of sync on a type change.
+    affiliate.orderNotificationsEnabled = (affiliate.serviceType === 'full_service');
+    changed.orderNotificationsEnabled = affiliate.orderNotificationsEnabled;
+  }
+  if (req.body.isActive !== undefined) {
+    affiliate.isActive = !!req.body.isActive;
+    changed.isActive = affiliate.isActive;
+  }
+  if (req.body.minimumDeliveryFee !== undefined) {
+    affiliate.minimumDeliveryFee = parseFloat(req.body.minimumDeliveryFee);
+    changed.minimumDeliveryFee = affiliate.minimumDeliveryFee;
+  }
+  if (req.body.perBagDeliveryFee !== undefined) {
+    affiliate.perBagDeliveryFee = parseFloat(req.body.perBagDeliveryFee);
+    changed.perBagDeliveryFee = affiliate.perBagDeliveryFee;
+  }
+
+  await affiliate.save();
+
+  logAuditEvent(AuditEvents.AFFILIATE_UPDATED, {
+    adminId: req.user.id,
+    affiliateId: affiliate.affiliateId,
+    changed
+  }, req);
+  logger.info('Affiliate settings updated by administrator', {
+    affiliateId: affiliate.affiliateId, changed: Object.keys(changed)
+  });
+
+  return ControllerHelpers.sendSuccess(res, {
+    affiliate: {
+      affiliateId: affiliate.affiliateId,
+      serviceType: affiliate.serviceType,
+      orderNotificationsEnabled: affiliate.orderNotificationsEnabled,
+      isActive: affiliate.isActive,
+      minimumDeliveryFee: affiliate.minimumDeliveryFee,
+      perBagDeliveryFee: affiliate.perBagDeliveryFee
+    }
+  }, 'Affiliate updated');
 });

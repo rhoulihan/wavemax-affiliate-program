@@ -1324,6 +1324,18 @@
       "deliveryCode": "Código de entrega",
       "badge": "Ubicación"
     },
+    "affiliateSettings": {
+      "button": "Configuración",
+      "modalTitle": "Configuración del afiliado",
+      "serviceTypeLabel": "Tipo de servicio",
+      "pickupLocation": "Punto de recogida",
+      "fullService": "Servicio completo",
+      "notificationsLabel": "Enviar notificaciones de pedidos a este afiliado",
+      "notificationsOn": "Notificaciones de pedidos activadas",
+      "notificationsOff": "Notificaciones de pedidos desactivadas",
+      "saved": "Configuración del afiliado guardada",
+      "saveError": "No se pudo guardar la configuración"
+    },
     "bagLabels": {
       "button": "Imprimir etiquetas",
       "modalTitle": "Imprimir etiquetas de bolsas para",

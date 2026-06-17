@@ -468,7 +468,8 @@ exports.getAffiliatesList = async (req, res) => {
     else if (status === 'inactive') query.isActive = false;
 
     const affiliates = await Affiliate.find(query)
-      .select('affiliateId firstName lastName businessName email isActive serviceArea')
+      .select('affiliateId firstName lastName businessName email isActive serviceArea ' +
+              'affiliateType serviceType orderNotificationsEnabled minimumDeliveryFee perBagDeliveryFee')
       .limit(parseInt(limit, 10))
       .sort('businessName');
 

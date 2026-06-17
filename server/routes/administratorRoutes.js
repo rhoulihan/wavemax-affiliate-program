@@ -51,10 +51,26 @@ router.post('/affiliates',
     body('username').notEmpty().trim().isLength({ min: 3, max: 50 }).withMessage('Username is required'),
     body('languagePreference').optional().isIn(['en', 'es', 'pt', 'de']),
     body('affiliateType').optional().isIn(['standard', 'location']),
+    body('serviceType').optional().isIn(['pickup_location', 'full_service']),
+    body('orderNotificationsEnabled').optional().isBoolean(),
     body('minimumDeliveryFee').optional().isFloat({ min: 0, max: 100 }),
     body('perBagDeliveryFee').optional().isFloat({ min: 0, max: 50 })
   ],
   manualAffiliateController.createAffiliateManually);
+
+// Per-affiliate settings edit (serviceType / order notifications / active /
+// fees). Defined before the administrator '/:id' routes below so the more
+// specific '/affiliates/:affiliateId' path wins. CSRF: CRITICAL_ENDPOINTS.
+router.patch('/affiliates/:affiliateId',
+  checkAdminPermission(['manage_affiliates']),
+  [
+    body('serviceType').optional().isIn(['pickup_location', 'full_service']),
+    body('orderNotificationsEnabled').optional().isBoolean(),
+    body('isActive').optional().isBoolean(),
+    body('minimumDeliveryFee').optional().isFloat({ min: 0, max: 100 }),
+    body('perBagDeliveryFee').optional().isFloat({ min: 0, max: 50 })
+  ],
+  manualAffiliateController.updateAffiliateSettings);
 
 // Affiliate invites (invite-only onboarding) — spec §5 / §6.2.
 // CSRF is enforced globally on POST by conditionalCsrf.

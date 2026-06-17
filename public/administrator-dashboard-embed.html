@@ -432,6 +432,37 @@
         </div>
     </div>
 
+    <!-- Per-affiliate settings modal (serviceType + order notifications) -->
+    <div class="modal hidden" id="affiliateSettingsModal">
+        <div class="modal-content max-width-400">
+            <div class="modal-header">
+                <h3 data-i18n="admin.affiliateSettings.modalTitle">Affiliate settings</h3>
+                <button class="modal-close" id="closeAffiliateSettingsModal">&times;</button>
+            </div>
+            <div class="modal-body padding-30">
+                <p class="font-weight-600 margin-bottom-20" id="affiliateSettingsName"></p>
+                <div class="form-group margin-bottom-20">
+                    <label class="font-weight-600 margin-bottom-10" for="affiliateSettingsServiceType"
+                           data-i18n="admin.affiliateSettings.serviceTypeLabel">Service type</label>
+                    <select id="affiliateSettingsServiceType" class="form-control">
+                        <option value="pickup_location" data-i18n="admin.affiliateSettings.pickupLocation">Pickup location</option>
+                        <option value="full_service" data-i18n="admin.affiliateSettings.fullService">Full service</option>
+                    </select>
+                </div>
+                <div class="form-group margin-bottom-20">
+                    <label class="font-weight-600">
+                        <input type="checkbox" id="affiliateSettingsNotifications">
+                        <span data-i18n="admin.affiliateSettings.notificationsLabel">Send order notifications to this affiliate</span>
+                    </label>
+                </div>
+                <div class="form-actions justify-content-center margin-top-30">
+                    <button type="button" class="btn btn-secondary" id="cancelAffiliateSettings" data-i18n="common.buttons.cancel">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="saveAffiliateSettings" data-i18n="common.buttons.save">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Logout Confirmation Modal -->
     <div class="modal hidden" id="logoutModal">
         <div class="modal-content max-width-400">
@@ -531,7 +562,7 @@
     <!-- Label Printing Utils - Must load after QRCode and jsPDF -->
     <script src="/assets/js/label-print-utils.js" nonce="{{nonce}}"></script>
     
-    <script src="/assets/js/administrator-dashboard-init.js?v=20260613" nonce="{{nonce}}"></script>
+    <script src="/assets/js/administrator-dashboard-init.js?v=20260617" nonce="{{nonce}}"></script>
     <script src="/assets/js/administrator-dashboard-i18n.js" nonce="{{nonce}}"></script>
 
   <!-- Hibu Dynamic Phone Insertion — swaps the WaveMAX Austin number for a

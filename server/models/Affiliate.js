@@ -21,6 +21,20 @@ const affiliateSchema = new mongoose.Schema({
     enum: ['standard', 'location'],
     default: 'standard'
   },
+  // Service capability (independent of the commission affiliateType above):
+  // 'pickup_location'  = a drop-off point only.
+  // 'full_service'     = pickup + delivery partner.
+  // Full-service partners default to order-notifications ON (see pre-validate
+  // hook); pickup locations default OFF. Admin can override per affiliate.
+  serviceType: {
+    type: String,
+    enum: ['pickup_location', 'full_service'],
+    default: 'pickup_location'
+  },
+  // Per-affiliate order-email opt-in. Default OFF; full_service defaults ON
+  // (set in the pre-validate hook when not explicitly provided). When on, the
+  // affiliate is emailed when a customer starts an order and when it's ready.
+  orderNotificationsEnabled: { type: Boolean },
   firstName: { type: String, required: true },
   lastName: { type: String, required: true },
   email: { type: String, required: true, unique: true },
@@ -112,6 +126,12 @@ affiliateSchema.pre('validate', function(next) {
     this.passwordSalt = salt;
     this.passwordHash = hash;
     this.password = undefined; // Remove plain text password
+  }
+
+  // Default order-notifications by service type when not explicitly set:
+  // full_service → ON, pickup_location → OFF. An explicit true/false wins.
+  if (this.orderNotificationsEnabled === undefined || this.orderNotificationsEnabled === null) {
+    this.orderNotificationsEnabled = (this.serviceType === 'full_service');
   }
 
   next();

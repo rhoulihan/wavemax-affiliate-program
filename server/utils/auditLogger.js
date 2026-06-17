@@ -106,6 +106,8 @@ const AuditEvents = {
 
   // Admin-created affiliates (no invite — e.g. zero-commission location accounts)
   AFFILIATE_CREATED_MANUALLY: 'AFFILIATE_CREATED_MANUALLY',
+  // Admin edits an affiliate's settings (serviceType / notifications / active)
+  AFFILIATE_UPDATED: 'AFFILIATE_UPDATED',
 
   // Affiliate invites (invite-only onboarding, spec §9)
   INVITE_MINTED: 'INVITE_MINTED',

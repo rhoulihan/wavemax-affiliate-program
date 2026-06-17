@@ -75,4 +75,49 @@ describe('Affiliate Model Methods', () => {
       expect(affiliate.canReceivePayments()).toBe(false);
     });
   });
+
+  describe('serviceType + order notifications', () => {
+    const base = {
+      firstName: 'Pat', lastName: 'Lee', phone: '555-0000',
+      address: '1 A St', city: 'Austin', state: 'TX', zipCode: '78701',
+      password: 'StrongPassword123!', paymentMethod: 'check'
+    };
+
+    it('defaults serviceType to pickup_location and notifications OFF', async () => {
+      const a = await new Affiliate(createAffiliateData({
+        ...base, email: 'pl@example.com', username: 'pl1'
+      })).save();
+      expect(a.serviceType).toBe('pickup_location');
+      expect(a.orderNotificationsEnabled).toBe(false);
+    });
+
+    it('full_service defaults notifications ON', async () => {
+      const a = await new Affiliate(createAffiliateData({
+        ...base, email: 'fs@example.com', username: 'fs1', serviceType: 'full_service'
+      })).save();
+      expect(a.serviceType).toBe('full_service');
+      expect(a.orderNotificationsEnabled).toBe(true);
+    });
+
+    it('explicit notifications setting wins over the serviceType default', async () => {
+      const a = await new Affiliate(createAffiliateData({
+        ...base, email: 'fs2@example.com', username: 'fs2',
+        serviceType: 'full_service', orderNotificationsEnabled: false
+      })).save();
+      expect(a.orderNotificationsEnabled).toBe(false);
+
+      const b = await new Affiliate(createAffiliateData({
+        ...base, email: 'pl2@example.com', username: 'pl2',
+        serviceType: 'pickup_location', orderNotificationsEnabled: true
+      })).save();
+      expect(b.orderNotificationsEnabled).toBe(true);
+    });
+
+    it('rejects an invalid serviceType', async () => {
+      const a = new Affiliate(createAffiliateData({
+        ...base, email: 'bad@example.com', username: 'bad1', serviceType: 'nope'
+      }));
+      await expect(a.save()).rejects.toThrow();
+    });
+  });
 });
