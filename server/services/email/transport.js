@@ -38,9 +38,13 @@ function createTransport() {
     }
   };
 
-  // When connecting by IP, still tell TLS which hostname to validate against
+  // When connecting by IP, TLS verification has no hostname to validate the
+  // cert against, so set the servername explicitly to match the mail server's
+  // certificate. The Ultahost mail box presents a cert for mail.crhsent.com
+  // (SAN: crhsent.com, mail.crhsent.com, www.crhsent.com) — override via
+  // EMAIL_TLS_SERVERNAME if the mail host's cert ever changes.
   if (process.env.EMAIL_HOST && /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(process.env.EMAIL_HOST)) {
-    transportConfig.tls.servername = 'mail.rundberglaundry.com';
+    transportConfig.tls.servername = process.env.EMAIL_TLS_SERVERNAME || 'mail.crhsent.com';
   }
 
   return nodemailer.createTransport(transportConfig);

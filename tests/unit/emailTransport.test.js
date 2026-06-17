@@ -3,7 +3,7 @@ jest.mock('nodemailer', () => ({ createTransport: jest.fn() }));
 jest.mock('../../server/utils/logger', () => ({ info: jest.fn(), error: jest.fn(), warn: jest.fn(), debug: jest.fn() }));
 
 const nodemailer = require('nodemailer');
-const { sendEmail } = require('../../server/services/email/transport');
+const { sendEmail, createTransport } = require('../../server/services/email/transport');
 
 describe('email transport — From override', () => {
   let sendMail;
@@ -24,5 +24,40 @@ describe('email transport — From override', () => {
   it('falls back to the default From when no override is given', async () => {
     await sendEmail('to@example.com', 'Subj', '<p>hi</p>');
     expect(sendMail.mock.calls[0][0].from).toContain('no-reply@wavemax.promo');
+  });
+});
+
+describe('email transport — TLS servername when connecting by IP', () => {
+  const savedHost = process.env.EMAIL_HOST;
+  const savedServername = process.env.EMAIL_TLS_SERVERNAME;
+  beforeEach(() => {
+    jest.clearAllMocks();
+    nodemailer.createTransport.mockReturnValue({ sendMail: jest.fn() });
+    process.env.EMAIL_PROVIDER = 'smtp';
+  });
+  afterEach(() => {
+    if (savedHost === undefined) delete process.env.EMAIL_HOST; else process.env.EMAIL_HOST = savedHost;
+    if (savedServername === undefined) delete process.env.EMAIL_TLS_SERVERNAME; else process.env.EMAIL_TLS_SERVERNAME = savedServername;
+  });
+
+  it('uses the cert-matching default servername (mail.crhsent.com) when EMAIL_HOST is an IP', () => {
+    process.env.EMAIL_HOST = '158.62.198.7';
+    delete process.env.EMAIL_TLS_SERVERNAME;
+    createTransport();
+    expect(nodemailer.createTransport.mock.calls[0][0].tls.servername).toBe('mail.crhsent.com');
+  });
+
+  it('honors EMAIL_TLS_SERVERNAME override when EMAIL_HOST is an IP', () => {
+    process.env.EMAIL_HOST = '158.62.198.7';
+    process.env.EMAIL_TLS_SERVERNAME = 'mail.example.net';
+    createTransport();
+    expect(nodemailer.createTransport.mock.calls[0][0].tls.servername).toBe('mail.example.net');
+  });
+
+  it('does not set a servername when EMAIL_HOST is a hostname', () => {
+    process.env.EMAIL_HOST = 'mail.crhsent.com';
+    delete process.env.EMAIL_TLS_SERVERNAME;
+    createTransport();
+    expect(nodemailer.createTransport.mock.calls[0][0].tls.servername).toBeUndefined();
   });
 });
