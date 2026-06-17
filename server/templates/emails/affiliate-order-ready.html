@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>[EMAIL_TITLE]</title>
+  <style>
+    body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; background-color: #f5f5f5; }
+    .container { max-width: 600px; margin: 0 auto; background-color: #ffffff; }
+    .header { background-color: #1e3a8a; color: #ffffff !important; padding: 20px; text-align: center; }
+    .logo { max-width: 180px; margin-bottom: 12px; }
+    .content { padding: 24px; background-color: #ffffff; }
+    .order-box { background-color: #f1f5f9; color: #1e3a8a; padding: 18px; border-radius: 8px; margin: 24px 0; }
+    .detail-row { margin: 8px 0; }
+    .detail-label { font-weight: bold; }
+    .footer { background-color: #f5f5f5; padding: 20px; text-align: center; font-size: 12px; color: #6b7280; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <img src="[BASE_URL]/assets/images/brand/logo-wavemax.png" alt="WaveMAX Laundry" class="logo">
+      <h1>[EMAIL_HEADER]</h1>
+    </div>
+    <div class="content">
+      <p>[GREETING]</p>
+      <p>[READY_MESSAGE]</p>
+      <div class="order-box">
+        <div class="detail-row"><span class="detail-label">[ORDER_ID_LABEL]:</span> [ORDER_ID]</div>
+        <div class="detail-row"><span class="detail-label">[CUSTOMER_LABEL]:</span> [CUSTOMER_NAME]</div>
+      </div>
+      <p>[CLOSING_MESSAGE]</p>
+    </div>
+    <div class="footer">
+      <p>&copy; [CURRENT_YEAR] CRHS Enterprises, LLC. [FOOTER_RIGHTS]</p>
+      <p>[FOOTER_AUTOMATED_MESSAGE]</p>
+    </div>
+  </div>
+</body>
+</html>

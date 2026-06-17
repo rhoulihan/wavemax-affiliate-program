@@ -1,37 +1,34 @@
-# UI polish pass — logo headers, spinner, code modal (2026-06-17)
+# Workflow expansion (2026-06-17) — plan: ~/.claude/plans/parsed-spinning-unicorn.md
 
-Scope (Rick): every form + every email gets a clean WaveMAX logo header.
-The **claim registration form** additionally gets a swirl spinner on every server
-round-trip (send email OTP / send SMS / verify / submit) and a **modal dialog** for
-the email + phone confirmation codes (replacing the inline fields).
-Workflow changes to follow after this.
+Locked: omit WDF pounds; customer scan = start-only; new serviceType field; expediter = read-only token.
+Process: TDD, one concern/PR, full gate per PR (⊆ baseline), deploy both boxes per PR.
 
-## A. Claim registration form (me — centerpiece) — DONE
-- [x] Logo header on claim-embed.html (replace text-only blue bar)
-- [x] Static code-entry modal (#claimCodeModal) reusing modal-utils styling/wiring
-- [x] Load swirl-spinner.js + modal-utils.js (+ CSS) on /claim
-- [x] claim.js: spinner on send-email-otp / send-sms / verify / submit; open code modal on send; verify in modal; close + show verified badge
-- [x] Remove inline #email-otp-block / #phone-otp-block fields
-- [x] i18n claim.verify.modalTitleEmail/Phone ×4
-- [x] claimPageWiring.test.js updated — 190 pass
+## PR A — Affiliate serviceType + per-affiliate notifications (model + admin) ✅ committed
+- [x] Affiliate.js: serviceType + orderNotificationsEnabled (full_service→on default, explicit wins)
+- [x] PATCH /administrators/affiliates/:id (manage_affiliates) → updateAffiliateSettings
+- [x] Admin dashboard: per-affiliate Settings modal + badges; i18n ×4
+- [x] Adversarial review (12 findings) → XSS-escape titles, serviceType re-default, cache-bust; tests 14/14
+- [ ] full gate (A+B) + deploy
 
-## B. Emails — logo header (subagents)
-- [x] Lang-subfolder templates (en/es/pt/de) — subagent done (14 files)
-- [~] ROOT-level templates (the live fallback set: password resets, order status/cancel,
-      new-customer/order, admin/operator welcomes, pin reset, etc.) — subagent running
-- NOTE drift: en/ missing customer-on-the-way + customer-order-delivered; es/pt/de missing affiliate-welcome (pre-existing)
+## PR B — Order transition notifications ✅ committed
+- [x] Customer email on every state change; affiliate email on customer-create + ready (gated)
+- [x] Adapt sendAffiliateNewOrderEmail (slim); new affiliate-order-ready template; Order role enum +customer
+- [x] orderTransitionService tests 17/17
+- [ ] full gate (A+B) + deploy
 
-## C. Other forms — logo header (subagent running)
-- [~] admin login, affiliate login, affiliate register, forgot/reset password,
-      operator login, operator-login-store, operator scan, contact
-      (shared .embed-brand-header class added to theme.css)
+## PR C — Customer-initiated start (phone/email), START ONLY
+- [ ] mintSession customer branch (phone/email match); scanAuth forward 'customer'; Order role enum +customer
+- [ ] Start-only enforcement (customer actor → only create-pending else 403)
+- [ ] claim UI: "or enter phone/email" path in scan-code panel
+- [ ] Tests; gate; deploy
 
-## Gate
-- [ ] Full-suite gate clean (⊆ environmental baseline)
-- [ ] Lighthouse on /claim (mobile+desktop) holds the bar
-- [ ] Deploy both boxes; then Rick's workflow changes
+## PR D — Order Expediter (read-only token)
+- [ ] EXPEDITER_TOKEN guard; expediterService aggregations (active by affiliate, counters, daily completed summary — NO pounds)
+- [ ] GET /api/v1/expediter/summary; /order-expediter page (EMBED_PAGES + pageScripts + rebuild min)
+- [ ] Tests; Lighthouse; gate; deploy; set EXPEDITER_TOKEN on both boxes
 
----
-## Background (not blocking)
-- [ ] Remove diagnostic `X-Origin-Box` header before declaring OCI migration fully done
-- [ ] Mail flip to OCI — gated on Oracle SRs (PTR #4-0002859947/#4-0002859970, port-25 #CAM-266605)
+## PR E — Follow-ups
+- [ ] operator-login-embed.html inline onclick → addEventListener (CSP)
+- [ ] Email i18n parity: en/customer-on-the-way, en/customer-order-delivered, es|pt|de/affiliate-welcome
+- [ ] Bag label: add WaveMAX Austin address below customer name (labelSheet4x6 / label-print-utils)
+- [ ] Gate; deploy

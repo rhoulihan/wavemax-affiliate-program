@@ -4,7 +4,9 @@
 jest.mock('../../server/utils/emailService', () => ({
   sendCustomerDeliveredEmail: jest.fn().mockResolvedValue(true),
   sendOrderStatusUpdateEmail: jest.fn().mockResolvedValue(true),
-  sendOrderCancellationEmail: jest.fn().mockResolvedValue(true)
+  sendOrderCancellationEmail: jest.fn().mockResolvedValue(true),
+  sendAffiliateNewOrderEmail: jest.fn().mockResolvedValue(true),
+  sendAffiliateOrderReadyEmail: jest.fn().mockResolvedValue(true)
 }));
 
 const mongoose = require('mongoose');
@@ -148,6 +150,58 @@ describe('orderTransitionService', () => {
       const { order: cancelled } = await svc.cancelOrder({ order, ...opRole });
       expect(cancelled.status).toBe('cancelled');
       expect(cancelled.cancelledAt).toBeInstanceOf(Date);
+    });
+  });
+
+  describe('transition notifications (PR B)', () => {
+    const email = require('../../server/utils/emailService');
+    const custRole = () => ({ by: customer.customerId, role: 'customer' });
+
+    it('customer gets a status email on create / in_progress / out_for_delivery; cancel sends cancellation', async () => {
+      await svc.createPendingOrder({ bag: await freshBag(), ...affRole() });
+      expect(email.sendOrderStatusUpdateEmail).toHaveBeenCalledWith(
+        expect.objectContaining({ customerId: customer.customerId }), expect.anything(), 'pending');
+
+      const { order: ip } = await svc.advanceOrder({ bag: await freshBag(), ...opRole });
+      expect(email.sendOrderStatusUpdateEmail).toHaveBeenCalledWith(expect.anything(), expect.anything(), 'in_progress');
+
+      await svc.advanceOrder({ bag: await freshBag(), ...opRole }); // -> out_for_delivery
+      expect(email.sendOrderStatusUpdateEmail).toHaveBeenCalledWith(expect.anything(), expect.anything(), 'out_for_delivery');
+
+      await svc.cancelOrder({ order: await Order.findOne({ orderId: ip.orderId }), ...opRole });
+      expect(email.sendOrderCancellationEmail).toHaveBeenCalledTimes(1);
+    });
+
+    it('affiliate (opted-in) gets new-order email ONLY when the order is customer-initiated', async () => {
+      affiliate.orderNotificationsEnabled = true; await affiliate.save();
+
+      // operator-initiated → no affiliate new-order email
+      await svc.createPendingOrder({ bag: await freshBag(), ...opRole });
+      expect(email.sendAffiliateNewOrderEmail).not.toHaveBeenCalled();
+      await Order.deleteMany({});
+
+      // customer-initiated → affiliate new-order email fires
+      await svc.createPendingOrder({ bag: await freshBag(), ...custRole() });
+      expect(email.sendAffiliateNewOrderEmail).toHaveBeenCalledTimes(1);
+    });
+
+    it('affiliate (opted-in) gets a ready-for-pickup email at out_for_delivery', async () => {
+      affiliate.orderNotificationsEnabled = true; await affiliate.save();
+      await svc.createPendingOrder({ bag: await freshBag(), ...affRole() });
+      await svc.advanceOrder({ bag: await freshBag(), ...opRole }); // in_progress
+      await svc.advanceOrder({ bag: await freshBag(), ...opRole }); // out_for_delivery
+      expect(email.sendAffiliateOrderReadyEmail).toHaveBeenCalledTimes(1);
+    });
+
+    it('affiliate (opted-OUT, the default) gets NO affiliate emails', async () => {
+      expect(affiliate.orderNotificationsEnabled).toBe(false);
+      await svc.createPendingOrder({ bag: await freshBag(), ...custRole() });
+      await svc.advanceOrder({ bag: await freshBag(), ...opRole }); // in_progress
+      await svc.advanceOrder({ bag: await freshBag(), ...opRole }); // out_for_delivery
+      expect(email.sendAffiliateNewOrderEmail).not.toHaveBeenCalled();
+      expect(email.sendAffiliateOrderReadyEmail).not.toHaveBeenCalled();
+      // ...but the customer still got status emails
+      expect(email.sendOrderStatusUpdateEmail).toHaveBeenCalled();
     });
   });
 

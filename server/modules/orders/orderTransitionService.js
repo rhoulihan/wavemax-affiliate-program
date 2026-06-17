@@ -87,6 +87,7 @@ async function createPendingOrder({ bag, by, role, req }) {
     orderId: order.orderId, bagId: bag.bagId, by, role, action: 'pickup'
   }, req);
   logger.info('Order created at pickup', { orderId: order.orderId, bagId: bag.bagId });
+  await notifyTransition(order, { event: 'created' });
   return { order };
 }
 
@@ -142,26 +143,62 @@ async function advanceOrder({ bag, by, role, paymentConfirmed, req }) {
     action: 'advance', to: order.status
   }, req);
 
-  if (order.status === 'complete') {
-    await sendCompleteNotice(order);
-  }
+  // Notify on the new state (in_progress / out_for_delivery / complete).
+  await notifyTransition(order, { event: order.status });
 
   return { order, action: 'advance', to: order.status };
 }
 
-/** Best-effort "your order is complete" notice (no commission framing). */
-async function sendCompleteNotice(order) {
+/**
+ * Best-effort per-transition notifications. NEVER throws into the scan flow.
+ *
+ * Customer is emailed on EVERY state change. The affiliate is emailed only when
+ * a customer starts an order (pickup.role === 'customer') and when the order is
+ * ready for pickup — and only if the affiliate has order notifications enabled
+ * (default off; full_service defaults on — see Affiliate model). Both sends run
+ * in parallel and failures are swallowed (logged), so a flaky SMTP never blocks
+ * or fails a scan.
+ *
+ * @param {Order} order
+ * @param {{event: 'created'|'in_progress'|'out_for_delivery'|'complete'|'cancelled'}} opts
+ */
+async function notifyTransition(order, { event }) {
   try {
-    const customer = await Customer.findOne({ customerId: order.customerId });
-    const affiliate = await Affiliate.findOne({ affiliateId: order.affiliateId });
+    const [customer, affiliate] = await Promise.all([
+      Customer.findOne({ customerId: order.customerId }),
+      Affiliate.findOne({ affiliateId: order.affiliateId })
+    ]);
     const affiliateName = affiliate
       ? (affiliate.businessName || `${affiliate.firstName} ${affiliate.lastName}`)
       : null;
+
+    const sends = [];
+
+    // Customer — every state change.
     if (customer && customer.email) {
-      await emailService.sendCustomerDeliveredEmail(customer, order, { affiliateName });
+      if (event === 'created') {
+        sends.push(emailService.sendOrderStatusUpdateEmail(customer, order, 'pending'));
+      } else if (event === 'in_progress' || event === 'out_for_delivery') {
+        sends.push(emailService.sendOrderStatusUpdateEmail(customer, order, event));
+      } else if (event === 'complete') {
+        sends.push(emailService.sendCustomerDeliveredEmail(customer, order, { affiliateName }));
+      } else if (event === 'cancelled') {
+        sends.push(emailService.sendOrderCancellationEmail(customer, order));
+      }
     }
-  } catch (emailError) {
-    logger.error(`Complete notice failed for order ${order.orderId} (non-blocking):`, emailError);
+
+    // Affiliate — gated on opt-in; only on customer-started creation + ready.
+    if (affiliate && affiliate.orderNotificationsEnabled && affiliate.email) {
+      if (event === 'created' && order.pickup && order.pickup.role === 'customer') {
+        sends.push(emailService.sendAffiliateNewOrderEmail(affiliate, customer, order));
+      } else if (event === 'out_for_delivery') {
+        sends.push(emailService.sendAffiliateOrderReadyEmail(affiliate, order, customer));
+      }
+    }
+
+    await Promise.allSettled(sends);
+  } catch (err) {
+    logger.error(`Order notification failed for ${order.orderId} event=${event} (non-blocking):`, err);
   }
 }
 
@@ -179,6 +216,7 @@ async function cancelOrder({ order, by, role, req }) {
   await logAuditEvent(AuditEvents.ORDER_CANCELLED, {
     orderId: order.orderId, bagId: order.bagId, by, role
   }, req);
+  await notifyTransition(order, { event: 'cancelled' });
   return { order };
 }
 

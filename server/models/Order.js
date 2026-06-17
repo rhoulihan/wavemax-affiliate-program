@@ -15,8 +15,8 @@ const { v4: uuidv4 } = require('uuid');
 // Per-scan stamp: who scanned, in what role, when.
 const scanEventSchema = new mongoose.Schema({
   at: { type: Date },
-  by: { type: String },                 // affiliateId OR Operator _id (as string)
-  role: { type: String, enum: ['affiliate', 'operator'] }
+  by: { type: String },                 // affiliateId / Operator _id / customerId (as string)
+  role: { type: String, enum: ['affiliate', 'operator', 'customer'] }
 }, { _id: false });
 
 const orderSchema = new mongoose.Schema({

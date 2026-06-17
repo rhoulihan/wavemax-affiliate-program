@@ -365,7 +365,7 @@ exports.sendAffiliateNewOrderEmail = async (affiliate, customer, order) => {
         NUMBER_OF_BAGS_LABEL: 'Number of Bags',
         SPECIAL_INSTRUCTIONS_LABEL: 'Special Instructions',
         VIEW_ORDER_BUTTON: 'View in Dashboard',
-        PICKUP_REMINDER: 'Please ensure you pick up the laundry during the specified time window. The customer will be expecting you.',
+        PICKUP_REMINDER: 'A customer has started a laundry order for one of your bags. Please coordinate the pickup with them.',
         CLOSING_MESSAGE: 'Best regards,<br>The WaveMAX Laundry Team',
         FOOTER_RIGHTS: 'All rights reserved.',
         FOOTER_AUTOMATED_MESSAGE: 'This is an automated message. Please do not reply to this email.'
@@ -386,7 +386,7 @@ exports.sendAffiliateNewOrderEmail = async (affiliate, customer, order) => {
         NUMBER_OF_BAGS_LABEL: 'Número de Bolsas',
         SPECIAL_INSTRUCTIONS_LABEL: 'Instrucciones Especiales',
         VIEW_ORDER_BUTTON: 'Ver en el Panel',
-        PICKUP_REMINDER: 'Por favor asegúrese de recoger la ropa durante la ventana de tiempo especificada. El cliente lo estará esperando.',
+        PICKUP_REMINDER: 'Un cliente ha iniciado un pedido de lavandería para una de sus bolsas. Por favor, coordine la recogida con él.',
         CLOSING_MESSAGE: 'Saludos cordiales,<br>El Equipo de WaveMAX Laundry',
         FOOTER_RIGHTS: 'Todos los derechos reservados.',
         FOOTER_AUTOMATED_MESSAGE: 'Este es un mensaje automatizado. Por favor no responda a este correo.'
@@ -407,7 +407,7 @@ exports.sendAffiliateNewOrderEmail = async (affiliate, customer, order) => {
         NUMBER_OF_BAGS_LABEL: 'Número de Sacolas',
         SPECIAL_INSTRUCTIONS_LABEL: 'Instruções Especiais',
         VIEW_ORDER_BUTTON: 'Ver no Painel',
-        PICKUP_REMINDER: 'Por favor, certifique-se de coletar a roupa durante a janela de tempo especificada. O cliente estará esperando por você.',
+        PICKUP_REMINDER: 'Um cliente iniciou um pedido de lavanderia para uma de suas sacolas. Por favor, combine a coleta com ele.',
         CLOSING_MESSAGE: 'Atenciosamente,<br>A Equipe WaveMAX Laundry',
         FOOTER_RIGHTS: 'Todos os direitos reservados.',
         FOOTER_AUTOMATED_MESSAGE: 'Esta é uma mensagem automatizada. Por favor, não responda a este e-mail.'
@@ -428,7 +428,7 @@ exports.sendAffiliateNewOrderEmail = async (affiliate, customer, order) => {
         NUMBER_OF_BAGS_LABEL: 'Anzahl der Säcke',
         SPECIAL_INSTRUCTIONS_LABEL: 'Besondere Anweisungen',
         VIEW_ORDER_BUTTON: 'Im Dashboard anzeigen',
-        PICKUP_REMINDER: 'Bitte stellen Sie sicher, dass Sie die Wäsche während des angegebenen Zeitfensters abholen. Der Kunde erwartet Sie.',
+        PICKUP_REMINDER: 'Ein Kunde hat eine Wäschebestellung für einen Ihrer Beutel gestartet. Bitte stimmen Sie die Abholung mit ihm ab.',
         CLOSING_MESSAGE: 'Mit freundlichen Grüßen,<br>Das WaveMAX Laundry Team',
         FOOTER_RIGHTS: 'Alle Rechte vorbehalten.',
         FOOTER_AUTOMATED_MESSAGE: 'Dies ist eine automatisierte Nachricht. Bitte antworten Sie nicht auf diese E-Mail.'
@@ -437,18 +437,15 @@ exports.sendAffiliateNewOrderEmail = async (affiliate, customer, order) => {
 
     const emailTranslations = translations[language] || translations.en;
 
+    // Phase 1 slim model: no pickup date/time, weight, bag count, or special
+    // instructions (those lived in the removed scheduling/pricing flow). The
+    // affiliate just needs to know a customer started an order for this bag.
     const data = {
       affiliate_first_name: affiliate.firstName,
       order_id: order.orderId,
       customer_name: `${customer.firstName} ${customer.lastName}`,
       customer_phone: customer.phone,
       customer_address: `${customer.address}, ${customer.city}, ${customer.state} ${customer.zipCode}`,
-      pickup_date: new Date(order.pickupDate).toLocaleDateString(),
-      pickup_time: formatTimeSlot(order.pickupTime),
-      estimated_weight: order.estimatedWeight ? `${order.estimatedWeight} lbs` : emailTranslations.TO_BE_DETERMINED || 'To be determined',
-      number_of_bags: order.numberOfBags || 1,
-      special_instructions: order.specialPickupInstructions || emailTranslations.NONE || 'None',
-      dashboard_url: 'https://www.wavemaxlaundry.com/austin-tx/wavemax-austin-affiliate-program?login=affiliate',
       current_year: new Date().getFullYear(),
       ...emailTranslations
     };
@@ -471,6 +468,78 @@ exports.sendAffiliateNewOrderEmail = async (affiliate, customer, order) => {
     );
   } catch (error) {
     logger.error('Error sending new order notification email:', error);
+  }
+};
+
+/**
+ * Send "order ready for pickup" notification to affiliate (Phase 1 — fired at
+ * the store-pickup scan when notifications are enabled for the affiliate).
+ */
+exports.sendAffiliateOrderReadyEmail = async (affiliate, order, customer) => {
+  try {
+    const language = affiliate.languagePreference || 'en';
+    const template = await loadTemplate('affiliate-order-ready', language);
+    const affiliateName = affiliate.firstName || affiliate.businessName || 'Partner';
+    const customerName = customer ? `${customer.firstName} ${customer.lastName}` : '';
+
+    const translations = {
+      en: {
+        EMAIL_TITLE: 'Order Ready for Pickup',
+        EMAIL_HEADER: 'Order Ready for Pickup',
+        GREETING: `Hello ${affiliateName},`,
+        READY_MESSAGE: 'An order has been processed and is ready for pickup at the store.',
+        ORDER_ID_LABEL: 'Order ID',
+        CUSTOMER_LABEL: 'Customer',
+        CLOSING_MESSAGE: 'Best regards,<br>The WaveMAX Laundry Team',
+        FOOTER_RIGHTS: 'All rights reserved.',
+        FOOTER_AUTOMATED_MESSAGE: 'This is an automated message. Please do not reply to this email.'
+      },
+      es: {
+        EMAIL_TITLE: 'Pedido Listo para Recoger',
+        EMAIL_HEADER: 'Pedido Listo para Recoger',
+        GREETING: `Hola ${affiliateName},`,
+        READY_MESSAGE: 'Un pedido ha sido procesado y está listo para recoger en la tienda.',
+        ORDER_ID_LABEL: 'ID del Pedido',
+        CUSTOMER_LABEL: 'Cliente',
+        CLOSING_MESSAGE: 'Saludos cordiales,<br>El Equipo de WaveMAX Laundry',
+        FOOTER_RIGHTS: 'Todos los derechos reservados.',
+        FOOTER_AUTOMATED_MESSAGE: 'Este es un mensaje automatizado. Por favor no responda a este correo.'
+      },
+      pt: {
+        EMAIL_TITLE: 'Pedido Pronto para Coleta',
+        EMAIL_HEADER: 'Pedido Pronto para Coleta',
+        GREETING: `Olá ${affiliateName},`,
+        READY_MESSAGE: 'Um pedido foi processado e está pronto para coleta na loja.',
+        ORDER_ID_LABEL: 'ID do Pedido',
+        CUSTOMER_LABEL: 'Cliente',
+        CLOSING_MESSAGE: 'Atenciosamente,<br>A Equipe WaveMAX Laundry',
+        FOOTER_RIGHTS: 'Todos os direitos reservados.',
+        FOOTER_AUTOMATED_MESSAGE: 'Esta é uma mensagem automatizada. Por favor, não responda a este e-mail.'
+      },
+      de: {
+        EMAIL_TITLE: 'Bestellung zur Abholung bereit',
+        EMAIL_HEADER: 'Bestellung zur Abholung bereit',
+        GREETING: `Hallo ${affiliateName},`,
+        READY_MESSAGE: 'Eine Bestellung wurde bearbeitet und ist im Geschäft zur Abholung bereit.',
+        ORDER_ID_LABEL: 'Bestell-ID',
+        CUSTOMER_LABEL: 'Kunde',
+        CLOSING_MESSAGE: 'Mit freundlichen Grüßen,<br>Das WaveMAX Laundry Team',
+        FOOTER_RIGHTS: 'Alle Rechte vorbehalten.',
+        FOOTER_AUTOMATED_MESSAGE: 'Dies ist eine automatisierte Nachricht. Bitte antworten Sie nicht auf diese E-Mail.'
+      }
+    };
+    const emailTranslations = translations[language] || translations.en;
+
+    const html = fillTemplate(template, {
+      order_id: order.orderId,
+      customer_name: customerName,
+      current_year: new Date().getFullYear(),
+      ...emailTranslations
+    });
+
+    await sendEmail(affiliate.email, emailTranslations.EMAIL_TITLE, html);
+  } catch (error) {
+    logger.error('Error sending affiliate order-ready email:', error);
   }
 };
 
