@@ -62,7 +62,7 @@ describe('orderTransitionService', () => {
         .rejects.toMatchObject({ code: 'bag_not_registered' });
     });
 
-    it('maps the duplicate-open E11000 to order_already_open', async () => {
+    it('blocks a second open order for the same bag with order_already_open', async () => {
       await svc.createPendingOrder({ bag: await freshBag(), ...affRole() });
       await expect(svc.createPendingOrder({ bag: await freshBag(), ...affRole() }))
         .rejects.toMatchObject({ code: 'order_already_open', status: 409 });

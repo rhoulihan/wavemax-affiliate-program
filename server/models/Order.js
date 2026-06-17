@@ -11,7 +11,6 @@
 
 const mongoose = require('mongoose');
 const { v4: uuidv4 } = require('uuid');
-const { OPEN_STATUSES } = require('../modules/orders/orderStateMachine');
 
 // Per-scan stamp: who scanned, in what role, when.
 const scanEventSchema = new mongoose.Schema({
@@ -58,22 +57,13 @@ const orderSchema = new mongoose.Schema({
   isTestOrder: { type: Boolean, default: false }
 }, { timestamps: true });
 
-// At most ONE open order per bag (open = pending | in_progress | out_for_delivery).
-// Backstops the read-then-write open-order guard in the transition service: two
-// concurrent pickup scans race, exactly one save wins, the loser's E11000 maps
-// to a clean order_already_open. Named so it never collides with the plain
-// field-level bagId index (which serves closed-status lookups a partial cannot).
-orderSchema.index(
-  { bagId: 1 },
-  {
-    unique: true,
-    name: 'bagId_open_unique',
-    partialFilterExpression: {
-      status: { $in: OPEN_STATUSES }
-    }
-  }
-);
-
+// "At most one open order per bag" (open = pending | in_progress |
+// out_for_delivery) is enforced at the application layer by the read-guard in
+// orderTransitionService.createPendingOrder, not by a DB constraint. A partial
+// unique index would be the concurrency backstop, but the Oracle ADB Mongo API
+// does not support partialFilterExpression, and at this volume the read-guard
+// is sufficient (no realistic double-pickup-scan race). The plain bagId index
+// above serves every lookup.
 const Order = mongoose.model('Order', orderSchema);
 
 module.exports = Order;

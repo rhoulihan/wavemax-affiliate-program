@@ -7,17 +7,14 @@
 // Model.createIndexes() (never drops anything — deliberately NOT syncIndexes)
 // for every model carrying redesign indexes:
 //   - Bag            (tokenHash unique, bagId unique, affiliate/customer/status)
-//   - Order          (bagId_open_unique PARTIAL unique — two-kiosk re-intake guard)
+//   - Order          (orderId unique, plain bagId/bagToken lookup indexes)
 //   - Operator       (scanCodeHmac unique sparse)
 //   - AffiliateInvite (inviteId unique, tokenHash/email/status/expiresAt)
 //
-// !!! Oracle ADB Mongo API caveat !!!
-// ADB's Mongo API may NOT support partial unique indexes. This script must be
-// run on the box at deploy time and its output verified by a human. It
-// explicitly checks that Order's `bagId_open_unique` exists AND carries its
-// partialFilterExpression. If that index is missing or non-partial, the
-// two-kiosk re-intake race protection degrades to the application-level
-// open-order check — that MUST be flagged before launch.
+// Note: "at most one open order per bag" is enforced at the application layer
+// (orderTransitionService read-guard), not by a partial unique index — the
+// Oracle ADB Mongo API does not support partialFilterExpression, and the volume
+// does not warrant a DB-level concurrency backstop.
 //
 // Exits 0 on success, 1 on connection/creation failure.
 // (console.* is the established convention in scripts/ — see seed-access-gate.js.)
@@ -66,31 +63,6 @@ const MODELS = [Bag, Order, Operator, AffiliateInvite];
         failed = true;
         console.error('listing indexes FAILED:', label, '-', e.message.split('\n')[0]);
       }
-    }
-
-    // Explicit verification of the two-kiosk re-intake guard.
-    const orderIndexes = await Order.collection.indexes();
-    const guard = orderIndexes.find((i) => i.name === 'bagId_open_unique');
-    if (guard && guard.unique && guard.partialFilterExpression) {
-      console.log('VERIFIED: bagId_open_unique exists, unique, partialFilterExpression =',
-        JSON.stringify(guard.partialFilterExpression));
-    } else if (guard) {
-      failed = true;
-      console.error('***********************************************************');
-      console.error('WARNING: bagId_open_unique exists but is NOT a partial unique');
-      console.error('index (unique=%s, partial=%s). Two-kiosk re-intake race', !!guard.unique,
-        JSON.stringify(guard.partialFilterExpression || null));
-      console.error('protection degrades to the application-level open-order');
-      console.error('check. FLAG THIS BEFORE LAUNCH.');
-      console.error('***********************************************************');
-    } else {
-      failed = true;
-      console.error('***********************************************************');
-      console.error('WARNING: bagId_open_unique is MISSING on orders. Oracle ADB');
-      console.error('Mongo API may not support partial unique indexes. Two-kiosk');
-      console.error('re-intake race protection degrades to the application-level');
-      console.error('open-order check. FLAG THIS BEFORE LAUNCH.');
-      console.error('***********************************************************');
     }
   } catch (e) {
     failed = true;

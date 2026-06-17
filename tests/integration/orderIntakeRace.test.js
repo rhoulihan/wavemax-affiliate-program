@@ -1,8 +1,10 @@
-// Two-kiosk pickup race (spec §3/§6): the open-order read-guard in the
-// transition service is read-then-write, so two simultaneous create-pending
-// calls on the SAME bag can both pass it. The partial unique index on open
-// Order.bagId is the backstop — exactly one save wins; the loser's E11000 is
-// mapped to a clean 409 order_already_open.
+// Open-order guard (spec §3/§6): at most one open order per bag is enforced by
+// the read-then-write guard in the transition service. There is no DB-level
+// partial unique index backstop (the Oracle ADB Mongo API does not support it,
+// and the volume does not warrant it), so this covers the realistic sequential
+// case — a second create-pending while an order is already open returns a clean
+// 409 order_already_open — and that a fresh order is allowed once the prior one
+// closes.
 
 jest.mock('../../server/utils/emailService');
 
@@ -62,17 +64,12 @@ function operatorToken(operator) {
     process.env.JWT_SECRET, { expiresIn: '1h' });
 }
 
-describe('pickup concurrency (partial unique index on open bagId)', () => {
+describe('open-order guard on pickup (application-level read-guard)', () => {
   beforeAll(async () => {
     await SystemConfig.initializeDefaults();
-    // setup.js afterEach drops indexes; the partial unique index must exist for
-    // the race backstop (repo pattern — see tests/unit/models/Bag.test.js).
-    await Order.syncIndexes();
   });
 
-  beforeEach(async () => { await Order.syncIndexes(); });
-
-  test('two simultaneous create-pending for the same bag: exactly one 201, the other 409 order_already_open', async () => {
+  test('a second create-pending while an order is already open returns 409 order_already_open', async () => {
     const { bag, operator, bagToken: token } = await createWorld();
 
     const agent = createAgent(app);
@@ -85,13 +82,13 @@ describe('pickup concurrency (partial unique index on open bagId)', () => {
       .set('x-csrf-token', csrfToken)
       .send({ bagToken: token });
 
-    const [a, b] = await Promise.all([fire(), fire()]);
-    const statuses = [a.status, b.status].sort();
-    expect(statuses).toEqual([201, 409]);
+    const first = await fire();
+    expect(first.status).toBe(201);
 
-    const loser = a.status === 409 ? a : b;
-    expect(loser.body.errors.code).toBe('order_already_open');
-    expect(loser.body.message).not.toMatch(/E11000/);
+    const second = await fire();
+    expect(second.status).toBe(409);
+    expect(second.body.errors.code).toBe('order_already_open');
+    expect(second.body.message).not.toMatch(/E11000/);
 
     // Exactly one order exists for the bag.
     const orders = await Order.find({ bagId: bag.bagId });

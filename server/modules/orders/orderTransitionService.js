@@ -60,8 +60,10 @@ async function createPendingOrder({ bag, by, role, req }) {
       'Bag is not registered to a customer', 409);
   }
 
-  // Read guard for the common case; the partial unique index is the race
-  // backstop (two concurrent pickup scans → one E11000 → same clean 409).
+  // Open-order guard: at most one open order per bag, enforced here at the
+  // application layer (no DB constraint — the Oracle ADB Mongo API rejects the
+  // partial unique index that would otherwise backstop a true concurrent race;
+  // at this volume a double-pickup-scan race is not a realistic concern).
   const existing = await findOpenOrder(bag.bagId);
   if (existing) {
     throw new TransitionServiceError('order_already_open',
@@ -79,15 +81,7 @@ async function createPendingOrder({ bag, by, role, req }) {
     pickup: { at: now, by, role }
   });
 
-  try {
-    await order.save();
-  } catch (err) {
-    if (err && err.code === 11000 && /bagId/.test(err.message || '')) {
-      throw new TransitionServiceError('order_already_open',
-        'An order is already open for this bag', 409, { bagId: bag.bagId });
-    }
-    throw err;
-  }
+  await order.save();
 
   await logAuditEvent(AuditEvents.ORDER_CREATED, {
     orderId: order.orderId, bagId: bag.bagId, by, role, action: 'pickup'

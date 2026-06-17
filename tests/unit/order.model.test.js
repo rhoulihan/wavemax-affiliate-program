@@ -94,31 +94,19 @@ describe('Order model (slim state record)', () => {
     });
   });
 
-  describe('partial unique index — at most one open order per bag', () => {
-    it('blocks a second open order for the same bag (E11000)', async () => {
+  // "At most one open order per bag" is enforced at the application layer
+  // (orderTransitionService read-guard), not by a DB constraint — the ADB Mongo
+  // API does not support the partial unique index, and the volume does not
+  // warrant it. The model therefore places NO uniqueness constraint on bagId;
+  // multiple open orders for a bag are physically possible and the service guard
+  // is what prevents them. Coverage lives in the transition-service / scan
+  // integration tests (see orderIntakeRace.test.js).
+  describe('no DB-level open-order uniqueness constraint', () => {
+    it('does not enforce open-order uniqueness at the model layer', async () => {
       await Order.syncIndexes();
       const bagId = 'BAG-' + uuidv4();
       await buildOrder({ bagId, status: 'pending' }).save();
-      await expect(buildOrder({ bagId, status: 'pending' }).save())
-        .rejects.toThrow(/E11000|duplicate key/i);
-    });
-
-    it('allows a new order once the prior one is complete', async () => {
-      await Order.syncIndexes();
-      const bagId = 'BAG-' + uuidv4();
-      const first = await buildOrder({ bagId, status: 'pending' }).save();
-      first.status = 'complete';
-      await first.save();
-      const second = await buildOrder({ bagId, status: 'pending' }).save();
-      expect(second.status).toBe('pending');
-    });
-
-    it('allows a new order once the prior one is cancelled', async () => {
-      await Order.syncIndexes();
-      const bagId = 'BAG-' + uuidv4();
-      const first = await buildOrder({ bagId, status: 'pending' }).save();
-      first.status = 'cancelled';
-      await first.save();
+      // No partial unique index → a second open order is not blocked by the DB.
       const second = await buildOrder({ bagId, status: 'pending' }).save();
       expect(second.status).toBe('pending');
     });
