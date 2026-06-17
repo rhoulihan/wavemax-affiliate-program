@@ -723,6 +723,23 @@
       "infoTitle": "Keine Änderung"
     }
   },
+  "expediter": {
+    "title": "Auftrags-Expediter",
+    "accessDenied": "Zugriff verweigert. Öffnen Sie diese Anzeige mit einem gültigen Expediter-Link.",
+    "updated": "Aktualisiert",
+    "pending": "Warten auf Abholung",
+    "inProgress": "In Bearbeitung",
+    "outForDelivery": "Bereit / in Zustellung",
+    "totalActive": "Aktiv gesamt",
+    "byAffiliate": "Aktive Aufträge nach Partner",
+    "partner": "Partner",
+    "total": "Gesamt",
+    "noActive": "Derzeit keine aktiven Aufträge.",
+    "todaySummary": "Heute abgeschlossene Aufträge",
+    "completedToday": "Heute abgeschlossen",
+    "avgProcessing": "Ø Bearbeitung (Min.)",
+    "avgTurnaround": "Ø Durchlaufzeit (Min.)"
+  },
   "administrator": {
     "login": {
       "title": "Administrator-Login",

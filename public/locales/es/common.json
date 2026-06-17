@@ -723,6 +723,23 @@
       "infoTitle": "Sin cambios"
     }
   },
+  "expediter": {
+    "title": "Despachador de Pedidos",
+    "accessDenied": "Acceso denegado. Abra esta pantalla con un enlace de despachador válido.",
+    "updated": "Actualizado",
+    "pending": "Esperando recogida",
+    "inProgress": "En proceso",
+    "outForDelivery": "Listo / en reparto",
+    "totalActive": "Total activos",
+    "byAffiliate": "Pedidos activos por socio",
+    "partner": "Socio",
+    "total": "Total",
+    "noActive": "No hay pedidos activos en este momento.",
+    "todaySummary": "Pedidos completados hoy",
+    "completedToday": "Completados hoy",
+    "avgProcessing": "Procesamiento prom. (min)",
+    "avgTurnaround": "Tiempo total prom. (min)"
+  },
   "administrator": {
     "login": {
       "title": "Acceso de Administrador",

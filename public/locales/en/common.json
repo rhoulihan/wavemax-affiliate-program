@@ -723,6 +723,23 @@
       "infoTitle": "No change"
     }
   },
+  "expediter": {
+    "title": "Order Expediter",
+    "accessDenied": "Access denied. Open this display with a valid expediter link.",
+    "updated": "Updated",
+    "pending": "Awaiting pickup",
+    "inProgress": "In progress",
+    "outForDelivery": "Ready / out for delivery",
+    "totalActive": "Total active",
+    "byAffiliate": "Active orders by partner",
+    "partner": "Partner",
+    "total": "Total",
+    "noActive": "No active orders right now.",
+    "todaySummary": "Today's completed orders",
+    "completedToday": "Completed today",
+    "avgProcessing": "Avg processing (min)",
+    "avgTurnaround": "Avg turnaround (min)"
+  },
   "administrator": {
     "login": {
       "title": "Administrator Login",

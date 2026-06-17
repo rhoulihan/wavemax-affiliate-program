@@ -45,6 +45,7 @@ const EMBED_PAGES = {
     '/privacy-policy': '/privacy-policy.html',
     '/refund-policy': '/refund-policy.html',
     '/operator-scan': '/operator-scan-embed.html',
+    '/order-expediter': '/order-expediter-embed.html',
     '/operator-login': '/operator-login-embed.html',
     '/affiliate-login': '/affiliate-login-embed.html',
     '/affiliate-register': '/affiliate-register-embed.html',
@@ -480,6 +481,7 @@ async function loadPage(route) {
         const excludedRoutes = [
             '/affiliate-landing',  // Requires specific affiliate code
             '/claim',              // Requires a ?bag= token parameter
+            '/order-expediter',    // Requires a ?k= display token
             '/affiliate-login',    // Entry point
             '/affiliate-register', // Entry point
             '/administrator-login' // Entry point
@@ -574,6 +576,7 @@ function initializePageScripts(route) {
         '/terms-and-conditions': ['/assets/js/terms-and-conditions.js'],
         '/operator-login': ['/assets/js/embed-config.js', '/assets/js/i18n.js', '/assets/js/language-switcher.js', '/assets/js/csrf-utils.js', '/assets/js/api-client.js', '/assets/js/operator-login-init.js'],
         '/operator-scan': ['/assets/js/embed-config.js', '/assets/js/i18n.js', '/assets/js/language-switcher.js', '/assets/js/modal-utils.js', '/assets/js/errorHandler.js', '/assets/js/csrf-utils.js', '/assets/js/api-client.js', '/assets/js/bag-token-parser.js', '/assets/js/scan-session.js', '/assets/js/operator-scan-init.js'],
+        '/order-expediter': ['/assets/js/i18n.js', '/assets/js/order-expediter-init.js'],
         '/affiliate-login': ['/assets/js/i18n.js', '/assets/js/language-switcher.js', '/assets/js/modal-utils.js', '/assets/js/csrf-utils.js', '/assets/js/swirl-spinner.js', '/assets/js/api-client.js', '/assets/js/affiliate-login.js'],
         '/affiliate-register': ['/assets/js/embed-config.js', '/assets/js/i18n.js', '/assets/js/language-switcher.js', '/assets/js/modal-utils.js', '/assets/js/errorHandler.js', '/assets/js/csrf-utils.js', '/assets/js/swirl-spinner.js', '/assets/js/api-client.js', '/assets/js/address-validation-component.js', '/assets/js/form-validation.js', '/assets/js/pricing-preview-component.js', 'https://cdnjs.cloudflare.com/ajax/libs/awesomplete/1.1.5/awesomplete.min.js', '/assets/js/service-area-autocomplete.js', '/assets/js/affiliate-register-init.js', '/assets/js/affiliate-register-page-init.js', '/assets/js/affiliate-register-invite.js'],
         '/affiliate-dashboard': ['/assets/js/i18n.js', '/assets/js/language-switcher.js', '/assets/js/address-validation-component.js', '/assets/js/pricing-preview-component.js', 'https://cdnjs.cloudflare.com/ajax/libs/awesomplete/1.1.5/awesomplete.min.js', '/assets/js/service-area-autocomplete.js', '/assets/js/csrf-utils.js', '/assets/js/api-client.js', '/assets/js/affiliate-dashboard-init.js', '/assets/js/affiliate-dashboard-embed.js', '/assets/js/affiliate-dashboard-i18n.js'],

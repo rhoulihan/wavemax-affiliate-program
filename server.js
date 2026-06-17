@@ -54,8 +54,9 @@ process.on('uncaughtException', (err) => {
 });
 
 app.use((req, res, next) => {
-  // Redact short-lived labels tokens (?t=) so they never land in debug logs.
-  const safeUrl = req.url.replace(/([?&]t=)[^&]+/, '$1<redacted>');
+  // Redact short-lived tokens that ride in the query string so they never land
+  // in debug logs: ?t= (label tokens) and ?k= (expediter / explorer display tokens).
+  const safeUrl = req.url.replace(/([?&](?:t|k)=)[^&]+/g, '$1<redacted>');
   logger.debug(`${req.method} ${safeUrl}`);
   next();
 });
@@ -498,7 +499,11 @@ const corsOptions = {
 };
 app.use(cors(corsOptions));
 
-// Request logging in development
+// Request logging. Redact query-string tokens (?t= labels, ?k= display tokens)
+// from the logged URL so they never land in access logs ('dev' + 'combined'
+// both render :url).
+morgan.token('url', (req) =>
+  (req.originalUrl || req.url || '').replace(/([?&](?:t|k)=)[^&]+/g, '$1<redacted>'));
 if (process.env.NODE_ENV !== 'production') {
   app.use(morgan('dev'));
 } else {
@@ -916,6 +921,7 @@ apiV1Router.use('/affiliate-invites', require('./server/routes/affiliateInviteRo
 apiV1Router.use('/customers', customerRoutes);
 apiV1Router.use('/bags', require('./server/routes/bagRoutes'));  // Durable bags: mint/issue/labels/resolve/inventory
 apiV1Router.use('/scan', require('./server/routes/scanRoutes'));  // PR 4 — scan-session engine (auth-once, state-driven resolve/apply/undo)
+apiV1Router.use('/expediter', require('./server/routes/expediterRoutes'));  // Order Expediter — read-only in-store display (EXPEDITER_TOKEN)
 apiV1Router.use('/orders', orderRoutes);
 apiV1Router.use('/administrators', administratorRoutes);
 apiV1Router.use('/operators', operatorRoutes);

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WaveMAX Laundry - Order Expediter</title>
+    <link href="/assets/css/theme.css" rel="stylesheet">
+    <link href="/assets/css/order-expediter.css?v=20260618" rel="stylesheet">
+</head>
+<body class="exp-body">
+    <div class="embed-brand-header">
+        <img class="embed-brand-logo" src="/assets/images/brand/logo-wavemax.png" alt="WaveMAX Laundry">
+    </div>
+
+    <main class="exp-main">
+        <div class="exp-titlerow">
+            <h1 data-i18n="expediter.title">Order Expediter</h1>
+            <span id="exp-updated" class="exp-updated"></span>
+        </div>
+
+        <!-- Access / error state -->
+        <p id="exp-error" class="exp-error" hidden data-i18n="expediter.accessDenied">
+            Access denied. Open this display with a valid expediter link.
+        </p>
+
+        <section id="exp-content" hidden>
+            <!-- Cross-affiliate counters -->
+            <div class="exp-counters">
+                <div class="exp-counter"><span class="exp-num" id="exp-c-pending">0</span><span class="exp-label" data-i18n="expediter.pending">Awaiting pickup</span></div>
+                <div class="exp-counter"><span class="exp-num" id="exp-c-in_progress">0</span><span class="exp-label" data-i18n="expediter.inProgress">In progress</span></div>
+                <div class="exp-counter"><span class="exp-num" id="exp-c-out_for_delivery">0</span><span class="exp-label" data-i18n="expediter.outForDelivery">Ready / out for delivery</span></div>
+                <div class="exp-counter exp-counter-total"><span class="exp-num" id="exp-c-total">0</span><span class="exp-label" data-i18n="expediter.totalActive">Total active</span></div>
+            </div>
+
+            <!-- Active orders by affiliate -->
+            <h2 data-i18n="expediter.byAffiliate">Active orders by partner</h2>
+            <table class="exp-table">
+                <thead>
+                    <tr>
+                        <th data-i18n="expediter.partner">Partner</th>
+                        <th data-i18n="expediter.pending">Awaiting pickup</th>
+                        <th data-i18n="expediter.inProgress">In progress</th>
+                        <th data-i18n="expediter.outForDelivery">Ready / out for delivery</th>
+                        <th data-i18n="expediter.total">Total</th>
+                    </tr>
+                </thead>
+                <tbody id="exp-affiliates"></tbody>
+            </table>
+            <p id="exp-empty" class="exp-empty" hidden data-i18n="expediter.noActive">No active orders right now.</p>
+
+            <!-- Daily completed summary -->
+            <h2 data-i18n="expediter.todaySummary">Today's completed orders</h2>
+            <div class="exp-counters">
+                <div class="exp-counter"><span class="exp-num" id="exp-d-count">0</span><span class="exp-label" data-i18n="expediter.completedToday">Completed today</span></div>
+                <div class="exp-counter"><span class="exp-num" id="exp-d-proc">—</span><span class="exp-label" data-i18n="expediter.avgProcessing">Avg processing (min)</span></div>
+                <div class="exp-counter"><span class="exp-num" id="exp-d-turn">—</span><span class="exp-label" data-i18n="expediter.avgTurnaround">Avg turnaround (min)</span></div>
+            </div>
+        </section>
+    </main>
+</body>
+</html>

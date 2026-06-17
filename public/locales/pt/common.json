@@ -723,6 +723,23 @@
       "infoTitle": "Sem alterações"
     }
   },
+  "expediter": {
+    "title": "Expedidor de Pedidos",
+    "accessDenied": "Acesso negado. Abra esta tela com um link de expedidor válido.",
+    "updated": "Atualizado",
+    "pending": "Aguardando coleta",
+    "inProgress": "Em andamento",
+    "outForDelivery": "Pronto / em entrega",
+    "totalActive": "Total ativos",
+    "byAffiliate": "Pedidos ativos por parceiro",
+    "partner": "Parceiro",
+    "total": "Total",
+    "noActive": "Nenhum pedido ativo no momento.",
+    "todaySummary": "Pedidos concluídos hoje",
+    "completedToday": "Concluídos hoje",
+    "avgProcessing": "Processamento méd. (min)",
+    "avgTurnaround": "Tempo total méd. (min)"
+  },
   "administrator": {
     "login": {
       "title": "Login do Administrador",
