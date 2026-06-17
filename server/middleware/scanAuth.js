@@ -46,7 +46,10 @@ module.exports = function scanAuth(req, res, next) {
     }
 
     if (decoded.scope === 'scan-session') {
-      const type = decoded.actorType === 'operator' ? 'operator' : 'affiliate';
+      // actorType is set by mintSession to one of these exact values.
+      const ALLOWED = { operator: 1, affiliate: 1, customer: 1 };
+      const type = ALLOWED[decoded.actorType] ? decoded.actorType : null;
+      if (!type) continue; // malformed scope token → try next / deny
       req.scanActor = { type, id: decoded.actorId, role: type };
       return next();
     }

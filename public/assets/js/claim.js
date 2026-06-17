@@ -114,6 +114,29 @@
       });
   }
 
+  // Customer self-start (PR C): the registered customer enters their verified
+  // phone/email; the server mints a START-ONLY customer session. Same mint +
+  // resolve/confirm flow as the staff path — the server decides the actor type.
+  function startCustomerSession() {
+    var input = document.getElementById('scan-customer-contact');
+    var errorEl = document.getElementById('scan-customer-error');
+    errorEl.hidden = true;
+    var value = input.value.trim();
+    if (!value) return;
+    window.ScanSession.init({ mode: 'session' });
+    window.ScanSession.mint(bagToken, value)
+      .then(function () {
+        showSessionActive();
+        resolveAndConfirm();
+      })
+      .catch(function (err) {
+        errorEl.textContent = err.status === 429
+          ? t('claim.scan.lockedOut', 'Too many attempts. Please try again later.')
+          : t('claim.scan.badContact', "That phone or email didn't match this bag. Please try again.");
+        errorEl.hidden = false;
+      });
+  }
+
   function resolveAndConfirm() {
     showPanel('claim-scan-confirm-panel');
     showSessionActive();
@@ -192,6 +215,12 @@
           errorEl.textContent = t('claim.scan.stateChanged', 'Bag state changed — please re-scan');
           errorEl.hidden = false;
           resolveAndConfirm();
+          return;
+        }
+        if (err.status === 403 && err.code === 'customer_not_allowed') {
+          errorEl.textContent = t('claim.scan.customerNotAllowed',
+            'This step is handled by store staff. Your order is already in progress.');
+          errorEl.hidden = false;
           return;
         }
         handleScanError(err);
@@ -562,6 +591,8 @@
     // Staff scan-session controls (CSP: addEventListener only, no inline handlers).
     var codeBtn = document.getElementById('scan-code-submit');
     if (codeBtn) codeBtn.addEventListener('click', startSession);
+    var custBtn = document.getElementById('scan-customer-submit');
+    if (custBtn) custBtn.addEventListener('click', startCustomerSession);
     var yesBtn = document.getElementById('scan-confirm-yes');
     if (yesBtn) yesBtn.addEventListener('click', onConfirmYes);
     var noBtn = document.getElementById('scan-confirm-no');

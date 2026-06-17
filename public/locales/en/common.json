@@ -21,6 +21,12 @@
     "raceLost": "Someone just claimed this bag. If that was you on another device, you're all set.",
     "scan": {
       "operatorCodeLabel": "Operator code",
+      "customerStartIntro": "Are you the customer? Start your order with your registered phone or email.",
+      "customerContactLabel": "Phone or email",
+      "customerContactPlaceholder": "Your phone or email",
+      "customerStartButton": "Start my order",
+      "badContact": "That phone or email didn't match this bag. Please try again.",
+      "customerNotAllowed": "This step is handled by store staff. Your order is already in progress.",
       "confirm": {
         "createPending": "Start a new order for this bag?",
         "advanceToInProgress": "Check this bag in at the store?",

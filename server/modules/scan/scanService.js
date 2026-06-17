@@ -17,6 +17,7 @@
 const jwt = require('jsonwebtoken');
 const Affiliate = require('../../models/Affiliate');
 const Operator = require('../../models/Operator');
+const Customer = require('../../models/Customer');
 const SystemConfig = require('../../models/SystemConfig');
 const bagService = require('../bags/bagService');
 const orderTransitionService = require('../orders/orderTransitionService');
@@ -55,6 +56,27 @@ function promptKeyFor(decision) {
 async function getReopenWindowMs() {
   const minutes = await SystemConfig.getValue('order_reopen_window_minutes', 240);
   return minutes * 60 * 1000;
+}
+
+/**
+ * Does the entered value match the registered customer's email or phone? Lets a
+ * customer authenticate a scan with the contact they verified at registration
+ * (instead of an operator/affiliate code). Email: case-insensitive exact. Phone:
+ * compares the last 10 digits, and only when the input clearly looks like a
+ * phone (≥10 digits) so a short staff code can never accidentally match.
+ */
+function matchesCustomerContact(value, customer) {
+  if (!value || !customer) return false;
+  const v = String(value).trim();
+  if (v.includes('@') && customer.email) {
+    return v.toLowerCase() === String(customer.email).trim().toLowerCase();
+  }
+  const digits = v.replace(/\D/g, '');
+  if (digits.length >= 10 && customer.phone) {
+    const custDigits = String(customer.phone).replace(/\D/g, '');
+    return custDigits.length >= 10 && custDigits.slice(-10) === digits.slice(-10);
+  }
+  return false;
 }
 
 /**
@@ -104,6 +126,12 @@ async function mintSession({ bagToken, code, req }) {
     : null;
   const operatorOk = !!operator;
 
+  // Customer self-start: the bag's registered customer can authenticate with the
+  // email or phone they verified at registration. Customer sessions are START-
+  // ONLY (enforced in applyScan/undoScan). Checked unconditionally (no oracle).
+  const customer = await Customer.findOne({ customerId: bag.customerId });
+  const customerOk = !!(code && customer && matchesCustomerContact(code, customer));
+
   let actorType; let actorId;
   if (affiliateOk) {
     actorType = 'affiliate';
@@ -111,6 +139,9 @@ async function mintSession({ bagToken, code, req }) {
   } else if (operatorOk) {
     actorType = 'operator';
     actorId = String(operator._id);
+  } else if (customerOk) {
+    actorType = 'customer';
+    actorId = customer.customerId;
   } else {
     await codeAttemptLockout.registerFailure(key);
     logAuditEvent(AuditEvents.OPERATOR_CODE_FAILED,
@@ -191,8 +222,18 @@ async function applyScan({ bagToken, expectedAction, reopen, paymentConfirmed, a
       'Bag state changed since you scanned — please re-scan', 409);
   }
 
+  // Customer sessions are START-ONLY: the ONLY action they may take is opening a
+  // brand-new pending order. Everything else — advancing (intake/ready/delivery)
+  // AND reopening a just-completed order via the delivery-rescan-prompt window —
+  // stays with staff. (Allowing reopen would let a customer restart a staff-
+  // completed order within the reopen window.)
+  if (actor.type === 'customer' && decision.action !== 'create-pending') {
+    throw new ScanError('customer_not_allowed',
+      'Only store staff can advance or reopen this order', 403);
+  }
+
   const by = actor.id;
-  const role = actor.type; // 'operator' | 'affiliate'
+  const role = actor.type; // 'operator' | 'affiliate' | 'customer' (start-only)
 
   if (decision.action === 'create-pending') {
     const { order } = await orderTransitionService.createPendingOrder({ bag, by, role, req });
@@ -224,6 +265,10 @@ async function applyScan({ bagToken, expectedAction, reopen, paymentConfirmed, a
 
 /** POST /api/v1/scan/undo — reverse the last transition for the bag's order. */
 async function undoScan({ bagToken, actor, req }) {
+  // Undo is a staff safety net — customers (start-only) cannot reverse scans.
+  if (actor && actor.type === 'customer') {
+    throw new ScanError('customer_not_allowed', 'Only store staff can undo a scan', 403);
+  }
   const bag = await resolveRegisteredBag(bagToken);
   const order = await referenceOrderFor(bag.bagId);
   if (!order) {

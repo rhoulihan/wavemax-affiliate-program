@@ -21,6 +21,12 @@
     "raceLost": "Alguien acaba de reclamar esta bolsa. Si fue usted desde otro dispositivo, ya está todo listo.",
     "scan": {
       "operatorCodeLabel": "Código de operador",
+      "customerStartIntro": "¿Es usted el cliente? Inicie su pedido con el teléfono o correo registrado.",
+      "customerContactLabel": "Teléfono o correo",
+      "customerContactPlaceholder": "Su teléfono o correo",
+      "customerStartButton": "Iniciar mi pedido",
+      "badContact": "Ese teléfono o correo no coincide con esta bolsa. Inténtelo de nuevo.",
+      "customerNotAllowed": "Este paso lo realiza el personal de la tienda. Su pedido ya está en proceso.",
       "confirm": {
         "createPending": "¿Iniciar un nuevo pedido para esta bolsa?",
         "advanceToInProgress": "¿Registrar la entrada de esta bolsa en la tienda?",

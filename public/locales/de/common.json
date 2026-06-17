@@ -21,6 +21,12 @@
     "raceLost": "Jemand hat diesen Beutel gerade beansprucht. Falls Sie das auf einem anderen Gerät waren, ist alles erledigt.",
     "scan": {
       "operatorCodeLabel": "Bediener-Code",
+      "customerStartIntro": "Sind Sie der Kunde? Starten Sie Ihre Bestellung mit Ihrer registrierten Telefonnummer oder E-Mail.",
+      "customerContactLabel": "Telefon oder E-Mail",
+      "customerContactPlaceholder": "Ihre Telefonnummer oder E-Mail",
+      "customerStartButton": "Meine Bestellung starten",
+      "badContact": "Diese Telefonnummer oder E-Mail passt nicht zu diesem Beutel. Bitte erneut versuchen.",
+      "customerNotAllowed": "Dieser Schritt wird vom Filialpersonal erledigt. Ihre Bestellung ist bereits in Bearbeitung.",
       "confirm": {
         "createPending": "Einen neuen Auftrag für diesen Beutel starten?",
         "advanceToInProgress": "Diesen Beutel im Geschäft einchecken?",

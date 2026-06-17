@@ -118,6 +118,12 @@
 .claim-panel .btn:hover { background: #16304f; }
 .claim-panel .btn[disabled] { opacity: 0.6; cursor: not-allowed; }
 
+.claim-divider {
+  border: none;
+  border-top: 1px solid #e5e7eb;
+  margin: 20px 0;
+}
+
 .claim-checkbox {
   display: flex;
   align-items: center;

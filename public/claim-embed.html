@@ -12,7 +12,7 @@
     <link href="/assets/css/theme.css" rel="stylesheet">
     <link href="/assets/css/modal-utils.css" rel="stylesheet">
     <link href="/assets/css/swirl-spinner.css" rel="stylesheet">
-    <link href="/assets/css/claim.css?v=20260617" rel="stylesheet">
+    <link href="/assets/css/claim.css?v=20260618" rel="stylesheet">
 </head>
 <body class="bg-white font-sans">
     <div id="language-switcher-container" class="language-switcher-container"></div>
@@ -100,6 +100,16 @@
                        maxlength="12" data-i18n-placeholder="claim.scan.codePlaceholder">
                 <button id="scan-code-submit" type="button" class="btn btn-primary" data-i18n="claim.scan.startSession">Start scanning</button>
                 <p id="scan-code-error" class="claim-error" hidden></p>
+
+                <!-- Customer self-start (PR C): the registered customer can start
+                     their own order with the phone/email they verified. -->
+                <hr class="claim-divider">
+                <p data-i18n="claim.scan.customerStartIntro">Are you the customer? Start your order with your registered phone or email.</p>
+                <label for="scan-customer-contact" data-i18n="claim.scan.customerContactLabel">Phone or email</label>
+                <input id="scan-customer-contact" type="text" autocomplete="off"
+                       data-i18n-placeholder="claim.scan.customerContactPlaceholder">
+                <button id="scan-customer-submit" type="button" class="btn btn-secondary" data-i18n="claim.scan.customerStartButton">Start my order</button>
+                <p id="scan-customer-error" class="claim-error" hidden></p>
             </section>
 
             <section id="claim-scan-confirm-panel" class="claim-panel" hidden>
