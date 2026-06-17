@@ -95,6 +95,9 @@ function isExempt(p) {
     p === '/assets/images/brand/logo-wavemax.png' ||
     p === '/favicon.ico' ||
     p.startsWith('/.well-known/acme-challenge') ||
+    // Public owner-portal marketing page (crhsent.com/owners/) + its assets —
+    // meant to be shared openly, so it bypasses the gate even when enabled.
+    p === '/owners' || p === '/owners/' || p.startsWith('/owners/') ||
     p === '/api/health' ||
     p === '/health'
   );
