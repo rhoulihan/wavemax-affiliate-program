@@ -377,8 +377,15 @@
         showById('phone-otp-block');
         showById('phone-otp-status', t('claim.verify.smsSent', 'Text sent. Enter the code below.'));
       })
-      .catch(function () {
-        showById('phone-verify-error', t('claim.verify.recaptchaError', 'Verification check failed. Please reload and try again.'));
+      .catch(function (err) {
+        // Surface the actual Firebase error (code + message) so config issues
+        // (auth/operation-not-allowed, auth/invalid-app-credential,
+        // auth/captcha-check-failed, …) are diagnosable from the page itself
+        // rather than hidden behind a generic message.
+        if (window.console && console.error) console.error('signInWithPhoneNumber failed:', err);
+        var detail = (err && (err.code || err.message)) ? ' [' + (err.code || '') + ' ' + (err.message || '') + ']' : '';
+        showById('phone-verify-error',
+          t('claim.verify.recaptchaError', 'Verification check failed. Please reload and try again.') + detail);
       });
   }
 
