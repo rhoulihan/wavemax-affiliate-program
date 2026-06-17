@@ -17,24 +17,32 @@ function isEnabled() {
   return process.env.PHONE_VERIFICATION_ENABLED === 'true';
 }
 
-let admin = null;
-function getAdmin() {
-  if (!admin) {
-    // Required lazily so the module (and the whole app) loads without
-    // firebase-admin present until phone verification is switched on.
-    admin = require('firebase-admin');
-  }
-  if (!admin.apps.length) {
-    const path = process.env.FIREBASE_SERVICE_ACCOUNT_PATH;
-    if (!path) {
-      throw new Error('FIREBASE_SERVICE_ACCOUNT_PATH is not configured');
+let authClient = null;
+function getAuthClient() {
+  if (!authClient) {
+    // Required lazily, via the modular firebase-admin/* entry points the SDK
+    // exposes in v14 — the old namespaced default export (`admin.credential`,
+    // `admin.auth()`, `admin.apps`) was removed in v14, so requiring
+    // 'firebase-admin' and reading `.credential` yields undefined. Lazy so the
+    // app boots without firebase-admin until phone verification is switched on.
+    // eslint-disable-next-line global-require
+    const { initializeApp, getApps, cert } = require('firebase-admin/app');
+    // eslint-disable-next-line global-require
+    const { getAuth } = require('firebase-admin/auth');
+    let app = getApps()[0];
+    if (!app) {
+      const path = process.env.FIREBASE_SERVICE_ACCOUNT_PATH;
+      if (!path) {
+        throw new Error('FIREBASE_SERVICE_ACCOUNT_PATH is not configured');
+      }
+      // eslint-disable-next-line global-require, import/no-dynamic-require
+      const serviceAccount = require(path);
+      app = initializeApp({ credential: cert(serviceAccount) });
+      logger.info('Firebase Admin SDK initialized for phone verification');
     }
-    // eslint-disable-next-line global-require, import/no-dynamic-require
-    const serviceAccount = require(path);
-    admin.initializeApp({ credential: admin.credential.cert(serviceAccount) });
-    logger.info('Firebase Admin SDK initialized for phone verification');
+    authClient = getAuth(app);
   }
-  return admin;
+  return authClient;
 }
 
 /**
@@ -45,7 +53,7 @@ async function verifyPhoneToken(idToken) {
   if (!idToken) {
     throw new Error('Missing phone ID token');
   }
-  const decoded = await getAdmin().auth().verifyIdToken(idToken);
+  const decoded = await getAuthClient().verifyIdToken(idToken);
   const phone = decoded && decoded.phone_number;
   if (!phone) {
     throw new Error('ID token has no verified phone number');

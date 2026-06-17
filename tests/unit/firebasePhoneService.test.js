@@ -2,11 +2,15 @@
 // The Admin SDK is mocked: tests never reach Google.
 
 const mockVerifyIdToken = jest.fn();
-jest.mock('firebase-admin', () => ({
-  apps: [{ name: '[DEFAULT]' }], // pretend already initialized → init is a no-op
-  auth: () => ({ verifyIdToken: mockVerifyIdToken }),
-  credential: { cert: jest.fn(() => ({})) },
-  initializeApp: jest.fn()
+// firebase-admin v14 modular entry points (the namespaced default export was
+// removed). Pretend an app is already initialized so init is a no-op.
+jest.mock('firebase-admin/app', () => ({
+  getApps: () => [{ name: '[DEFAULT]' }],
+  initializeApp: jest.fn(),
+  cert: jest.fn(() => ({}))
+}));
+jest.mock('firebase-admin/auth', () => ({
+  getAuth: () => ({ verifyIdToken: mockVerifyIdToken })
 }));
 
 const firebasePhoneService = require('../../server/services/firebasePhoneService');
