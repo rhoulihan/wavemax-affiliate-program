@@ -21,7 +21,7 @@
     "raceLost": "Alguien acaba de reclamar esta bolsa. Si fue usted desde otro dispositivo, ya está todo listo.",
     "scan": {
       "operatorCodeLabel": "Código de operador",
-      "customerStartIntro": "¿Es usted el cliente? Inicie su pedido con el teléfono o correo registrado.",
+      "customerStartIntro": "Inicie su pedido con el teléfono o correo electrónico que registró.",
       "customerContactLabel": "Teléfono o correo",
       "customerContactPlaceholder": "Su teléfono o correo",
       "customerStartButton": "Iniciar mi pedido",
@@ -54,7 +54,9 @@
       "sessionExpired": "Su sesión expiró. Ingrese su código de nuevo.",
       "endSession": "Finalizar sesión",
       "notRegistered": "Bolsa no registrada.",
-      "networkError": "Error de red — inténtelo de nuevo."
+      "networkError": "Error de red — inténtelo de nuevo.",
+      "staffLink": "¿Personal? Ingrese su código",
+      "customerStartTitle": "Inicie su pedido"
     },
     "status": {
       "in_progress": "Tu ropa se está procesando",
@@ -87,8 +89,10 @@
       "phoneMismatch": "El número verificado no coincide con el teléfono que ingresó.",
       "emailRequired": "Verifique su correo electrónico para continuar.",
       "enterPhoneFirst": "Ingrese su número de teléfono primero.",
-      "enterEmailFirst": "Ingrese su correo electrónico primero."
-    }
+      "enterEmailFirst": "Ingrese su correo electrónico primero.",
+      "phoneUnavailable": "La verificación por teléfono no está disponible temporalmente. Recargue la página e inténtelo de nuevo."
+    },
+    "emailOptional": "Correo electrónico (opcional)"
   },
   "bag": {
     "label": {

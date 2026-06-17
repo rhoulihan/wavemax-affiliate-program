@@ -21,7 +21,7 @@
     "raceLost": "Jemand hat diesen Beutel gerade beansprucht. Falls Sie das auf einem anderen Gerät waren, ist alles erledigt.",
     "scan": {
       "operatorCodeLabel": "Bediener-Code",
-      "customerStartIntro": "Sind Sie der Kunde? Starten Sie Ihre Bestellung mit Ihrer registrierten Telefonnummer oder E-Mail.",
+      "customerStartIntro": "Starten Sie Ihre Bestellung mit der registrierten Telefonnummer oder E-Mail-Adresse.",
       "customerContactLabel": "Telefon oder E-Mail",
       "customerContactPlaceholder": "Ihre Telefonnummer oder E-Mail",
       "customerStartButton": "Meine Bestellung starten",
@@ -54,7 +54,9 @@
       "sessionExpired": "Ihre Sitzung ist abgelaufen. Bitte geben Sie Ihren Code erneut ein.",
       "endSession": "Sitzung beenden",
       "notRegistered": "Beutel nicht registriert.",
-      "networkError": "Netzwerkfehler — bitte versuchen Sie es erneut."
+      "networkError": "Netzwerkfehler — bitte versuchen Sie es erneut.",
+      "staffLink": "Personal? Code eingeben",
+      "customerStartTitle": "Bestellung starten"
     },
     "status": {
       "in_progress": "Ihre Wäsche wird bearbeitet",
@@ -87,8 +89,10 @@
       "phoneMismatch": "Die bestätigte Nummer stimmt nicht mit der eingegebenen Telefonnummer überein.",
       "emailRequired": "Bitte bestätigen Sie Ihre E-Mail, um fortzufahren.",
       "enterPhoneFirst": "Geben Sie zuerst Ihre Telefonnummer ein.",
-      "enterEmailFirst": "Geben Sie zuerst Ihre E-Mail ein."
-    }
+      "enterEmailFirst": "Geben Sie zuerst Ihre E-Mail ein.",
+      "phoneUnavailable": "Die Telefonverifizierung ist vorübergehend nicht verfügbar. Bitte laden Sie die Seite neu und versuchen Sie es erneut."
+    },
+    "emailOptional": "E-Mail (optional)"
   },
   "bag": {
     "label": {

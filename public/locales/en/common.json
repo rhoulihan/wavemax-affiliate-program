@@ -21,7 +21,7 @@
     "raceLost": "Someone just claimed this bag. If that was you on another device, you're all set.",
     "scan": {
       "operatorCodeLabel": "Operator code",
-      "customerStartIntro": "Are you the customer? Start your order with your registered phone or email.",
+      "customerStartIntro": "Start your order with the phone or email you registered.",
       "customerContactLabel": "Phone or email",
       "customerContactPlaceholder": "Your phone or email",
       "customerStartButton": "Start my order",
@@ -54,7 +54,9 @@
       "sessionExpired": "Your session expired. Please enter your code again.",
       "endSession": "End session",
       "notRegistered": "Bag not registered.",
-      "networkError": "Network error — please try again."
+      "networkError": "Network error — please try again.",
+      "staffLink": "Staff? Enter your code",
+      "customerStartTitle": "Start your order"
     },
     "status": {
       "in_progress": "Your laundry is being processed",
@@ -87,8 +89,10 @@
       "phoneMismatch": "The verified number does not match the phone you entered.",
       "emailRequired": "Please verify your email to continue.",
       "enterPhoneFirst": "Enter your phone number first.",
-      "enterEmailFirst": "Enter your email first."
-    }
+      "enterEmailFirst": "Enter your email first.",
+      "phoneUnavailable": "Phone verification is temporarily unavailable. Please reload the page and try again."
+    },
+    "emailOptional": "Email (optional)"
   },
   "bag": {
     "label": {

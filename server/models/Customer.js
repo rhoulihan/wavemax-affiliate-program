@@ -13,7 +13,10 @@ const customerSchema = new mongoose.Schema({
   affiliateId: { type: String, required: true, ref: 'Affiliate' },
   firstName: { type: String, required: true },
   lastName: { type: String, required: true },
-  email: { type: String, required: true, unique: true },
+  // Email is OPTIONAL and unverified (2026-06-17). Phone is the verified
+  // identity. sparse so many registrations with no email don't collide on null;
+  // unique so a provided email is still one-per-customer.
+  email: { type: String, unique: true, sparse: true },
   phone: { type: String, required: true },
   address: { type: String, required: true },
   city: { type: String, required: true },
@@ -26,7 +29,7 @@ const customerSchema = new mongoose.Schema({
   // PR 7: registration-only — no customer login/portal in Phase 1, so there is
   // no username or password. Verified contact info is the only identity stored.
   // (PR 6 removed the customer auth surface; PR 7 removes the dead credentials.)
-  emailVerifiedAt: Date,   // set when the email OTP is confirmed
+  emailVerifiedAt: Date,   // legacy — email is no longer verified (kept for old records)
   phoneVerifiedAt: Date,   // set when the Firebase phone token verifies (flag on)
   // Payment is handled externally in Cents. No payment information is stored.
   isActive: { type: Boolean, default: true },

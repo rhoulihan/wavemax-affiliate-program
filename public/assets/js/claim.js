@@ -94,6 +94,30 @@
     }
   }
 
+  // Staff scan is behind a link that opens #staffCodeModal.
+  function openStaffModal(errorText) {
+    var errorEl = document.getElementById('scan-code-error');
+    if (errorEl) { if (errorText) { errorEl.textContent = errorText; errorEl.hidden = false; } else { errorEl.hidden = true; } }
+    var input = document.getElementById('scan-code');
+    if (input) input.value = '';
+    if (window.ModalSystem && typeof window.ModalSystem.showModal === 'function') {
+      window.ModalSystem.showModal('staffCodeModal');
+    } else {
+      var m = document.getElementById('staffCodeModal');
+      if (m) m.classList.add('active');
+    }
+    if (input) input.focus();
+  }
+
+  function closeStaffModal() {
+    if (window.ModalSystem && typeof window.ModalSystem.closeActiveModal === 'function') {
+      window.ModalSystem.closeActiveModal();
+    } else {
+      var m = document.getElementById('staffCodeModal');
+      if (m) m.classList.remove('active');
+    }
+  }
+
   function startSession() {
     var codeInput = document.getElementById('scan-code');
     var errorEl = document.getElementById('scan-code-error');
@@ -101,8 +125,10 @@
     var code = codeInput.value.trim();
     if (!code) return;
     window.ScanSession.init({ mode: 'session' });
+    var s = spin(document.getElementById('scan-code-submit'));
     window.ScanSession.mint(bagToken, code)
       .then(function () {
+        closeStaffModal();
         showSessionActive();
         resolveAndConfirm();
       })
@@ -111,7 +137,8 @@
           ? t('claim.scan.lockedOut', 'Too many attempts. Please try again later.')
           : t('claim.scan.badCode', "That code didn't match. Please try again.");
         errorEl.hidden = false;
-      });
+      })
+      .then(function () { s.hide(); });
   }
 
   // Customer self-start (PR C): the registered customer enters their verified
@@ -124,6 +151,7 @@
     var value = input.value.trim();
     if (!value) return;
     window.ScanSession.init({ mode: 'session' });
+    var s = spin(document.getElementById('scan-customer-submit'));
     window.ScanSession.mint(bagToken, value)
       .then(function () {
         showSessionActive();
@@ -134,7 +162,8 @@
           ? t('claim.scan.lockedOut', 'Too many attempts. Please try again later.')
           : t('claim.scan.badContact', "That phone or email didn't match this bag. Please try again.");
         errorEl.hidden = false;
-      });
+      })
+      .then(function () { s.hide(); });
   }
 
   function resolveAndConfirm() {
@@ -244,6 +273,7 @@
 
   function endSession() {
     if (window.ScanSession) window.ScanSession.clearSession();
+    closeStaffModal();
     showPanel('claim-scan-code-panel');
     var codeInput = document.getElementById('scan-code');
     if (codeInput) codeInput.value = '';
@@ -252,12 +282,11 @@
   function handleScanError(err) {
     var errorEl = document.getElementById('scan-confirm-error');
     if (err.status === 401) {
-      // session expired/invalidated — fall back to the code panel.
+      // session expired/invalidated — fall back to the start panel and reopen
+      // the staff code modal so a partner can re-enter their code.
       if (window.ScanSession) window.ScanSession.clearSession();
-      var codeError = document.getElementById('scan-code-error');
-      codeError.textContent = t('claim.scan.sessionExpired', 'Your session expired. Please enter your code again.');
-      codeError.hidden = false;
       showPanel('claim-scan-code-panel');
+      openStaffModal(t('claim.scan.sessionExpired', 'Your session expired. Please enter your code again.'));
       return;
     }
     errorEl.textContent = (err.status === 404 || err.code === 'bag_not_registered')
@@ -269,10 +298,10 @@
   // ---- customer registration branch (PR 7: email + phone verification) ------
 
   // Verification state held in the closure (never trusted by the server — the
-  // server re-verifies the email token and the Firebase phone token).
-  var emailVerificationToken = null; // minted by the email-OTP verify endpoint
+  // server re-verifies the Firebase phone token). Email is optional/unverified.
   var phoneIdToken = null;           // Firebase phone ID token (flag on)
-  var phoneEnabled = false;          // from /api/v1/firebase-config
+  var phoneRequired = false;         // server says phone verification is required (config.enabled)
+  var phoneEnabled = false;          // the Firebase SDK actually loaded + initialized (Send button works)
   var firebaseConfirmation = null;   // Firebase confirmationResult
   var recaptchaVerifier = null;
 
@@ -300,13 +329,18 @@
 
   // ---- spinner + confirmation-code modal -------------------------------------
 
-  // Show a swirl spinner on a button during a server round-trip; returns a
-  // handle with hide(). Falls back to a plain disable if the lib isn't loaded.
+  // Show a FULL-PAGE swirl spinner during a server round-trip (send SMS / verify
+  // / submit); returns a handle with hide(). The passed button is also disabled
+  // to prevent a double-submit. Falls back to a plain disable if the lib isn't
+  // loaded.
   function spin(btn) {
-    if (btn && window.SwirlSpinnerUtils && typeof window.SwirlSpinnerUtils.showOnButton === 'function') {
-      try { return window.SwirlSpinnerUtils.showOnButton(btn); } catch (e) { /* fall through */ }
-    }
     if (btn) btn.disabled = true;
+    if (window.SwirlSpinnerUtils && typeof window.SwirlSpinnerUtils.showGlobal === 'function') {
+      try {
+        var handle = window.SwirlSpinnerUtils.showGlobal();
+        return { hide: function () { try { handle.hide(); } catch (e) { /* noop */ } if (btn) btn.disabled = false; } };
+      } catch (e) { /* fall through */ }
+    }
     return { hide: function () { if (btn) btn.disabled = false; } };
   }
 
@@ -315,14 +349,9 @@
     if (el && typeof text === 'string') el.textContent = text;
   }
 
-  // One modal serves both the email OTP and the SMS OTP; mode routes verify/resend.
-  var codeModalMode = 'email'; // 'email' | 'phone'
-
-  function openCodeModal(mode, statusText) {
-    codeModalMode = mode;
-    setText('claimCodeTitle', mode === 'phone'
-      ? t('claim.verify.modalTitlePhone', 'Enter your SMS code')
-      : t('claim.verify.modalTitleEmail', 'Enter your email code'));
+  // The code modal is SMS-only (email is no longer verified).
+  function openCodeModal(statusText) {
+    setText('claimCodeTitle', t('claim.verify.modalTitlePhone', 'Enter your SMS code'));
     setText('claimCodeStatus', statusText || '');
     var input = document.getElementById('claimCodeInput');
     if (input) input.value = '';
@@ -345,53 +374,8 @@
     }
   }
 
-  function onCodeVerify() { if (codeModalMode === 'phone') verifyPhoneSms(); else verifyEmailOtp(); }
-  function onCodeResend() { if (codeModalMode === 'phone') sendPhoneSms(true); else requestEmailOtp(true); }
-
-  // ---- email OTP -------------------------------------------------------------
-
-  function requestEmailOtp(isResend) {
-    var email = document.getElementById('email').value.trim();
-    hideById('email-verify-error');
-    hideById('claimCodeError');
-    if (!email) { showById('email-verify-error', t('claim.verify.enterEmailFirst', 'Enter your email first.')); return; }
-    var s = spin(document.getElementById(isResend ? 'claimCodeResend' : 'emailSendCode'));
-    fetch('/api/v1/customers/claim/' + encodeURIComponent(bagToken) + '/email-otp/request', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: email, languagePreference: localStorage.getItem('selectedLanguage') || 'en' })
-    }).then(function () {
-      openCodeModal('email', t('claim.verify.codeSent', 'Code sent. Check your email.'));
-    }).catch(function () {
-      var target = isResend ? 'claimCodeError' : 'email-verify-error';
-      showById(target, t('claim.verify.recaptchaError', 'Verification check failed. Please reload and try again.'));
-    }).then(function () { s.hide(); });
-  }
-
-  function verifyEmailOtp() {
-    var email = document.getElementById('email').value.trim();
-    var code = document.getElementById('claimCodeInput').value.trim();
-    hideById('claimCodeError');
-    var s = spin(document.getElementById('claimCodeVerify'));
-    fetch('/api/v1/customers/claim/' + encodeURIComponent(bagToken) + '/email-otp/verify', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: email, code: code })
-    }).then(function (res) {
-      return res.json().then(function (body) { return { status: res.status, body: body }; });
-    }).then(function (r) {
-      if (r.status === 200 && r.body.emailVerificationToken) {
-        emailVerificationToken = r.body.emailVerificationToken;
-        closeCodeModal();
-        showById('email-verified-badge');
-        updateSubmitState();
-        return;
-      }
-      showById('claimCodeError', r.status === 429
-        ? t('claim.verify.lockedOut', 'Too many attempts. Please try again later.')
-        : t('claim.verify.invalidCode', 'That code is incorrect or expired. Please try again.'));
-    }).catch(function () {
-      showById('claimCodeError', t('claim.verify.invalidCode', 'That code is incorrect or expired. Please try again.'));
-    }).then(function () { s.hide(); });
-  }
+  function onCodeVerify() { verifyPhoneSms(); }
+  function onCodeResend() { sendPhoneSms(true); }
 
   // ---- Firebase phone --------------------------------------------------------
 
@@ -422,16 +406,29 @@
   }
 
   function initFirebasePhone(config) {
-    if (!(config && config.enabled)) { phoneEnabled = false; return; }
+    // phoneRequired is server-driven and is the SUBMIT GATE — independent of
+    // whether the SDK loads. If the SDK fails while phone is required, the form
+    // stays blocked (isVerified) and we surface a clear error rather than
+    // silently letting a submit through that the server will reject.
+    phoneRequired = !!(config && config.enabled);
+    if (!phoneRequired) { phoneEnabled = false; return; }
     // Defer SDK download until we know phone verification is on, then init.
     loadFirebaseSdk()
       .then(function () { setupFirebasePhone(config); updateSubmitState(); })
-      .catch(function () { phoneEnabled = false; });
+      .catch(function () { onPhoneSetupFailed(); });
+  }
+
+  function onPhoneSetupFailed() {
+    phoneEnabled = false;
+    // Phone is required but unavailable — keep submit disabled and explain why.
+    showFormError(t('claim.verify.phoneUnavailable',
+      'Phone verification is temporarily unavailable. Please reload the page and try again.'));
+    updateSubmitState();
   }
 
   function setupFirebasePhone(config) {
     phoneEnabled = !!window.firebase;
-    if (!phoneEnabled) return;
+    if (!phoneEnabled) { onPhoneSetupFailed(); return; }
     try {
       if (!window.firebase.apps || !window.firebase.apps.length) {
         window.firebase.initializeApp({
@@ -444,7 +441,7 @@
       var sendBtn = document.getElementById('phoneSendSms');
       if (sendBtn) sendBtn.hidden = false;
     } catch (e) {
-      phoneEnabled = false;
+      onPhoneSetupFailed();
     }
   }
 
@@ -458,7 +455,7 @@
     window.firebase.auth().signInWithPhoneNumber(e164, recaptchaVerifier)
       .then(function (confirmation) {
         firebaseConfirmation = confirmation;
-        openCodeModal('phone', t('claim.verify.smsSent', 'Text sent. Enter the code below.'));
+        openCodeModal(t('claim.verify.smsSent', 'Text sent. Enter the code below.'));
       })
       .catch(function (err) {
         // Surface the actual Firebase error (code + message) so config issues
@@ -484,6 +481,8 @@
       .then(function (token) {
         phoneIdToken = token;
         closeCodeModal();
+        // Remove the Send button once verified — the badge replaces it.
+        hideById('phoneSendSms');
         showById('phone-verified-badge');
         updateSubmitState();
       })
@@ -496,8 +495,10 @@
   // ---- gating + submit -------------------------------------------------------
 
   function isVerified() {
-    if (!emailVerificationToken) return false;
-    if (phoneEnabled && !phoneIdToken) return false;
+    // Phone is the only required verification — gated on phoneREQUIRED (server),
+    // not on whether the SDK loaded, so an SDK failure can't open the gate.
+    // Email is optional.
+    if (phoneRequired && !phoneIdToken) return false;
     return true;
   }
 
@@ -512,11 +513,7 @@
     var fields = form.elements;
     var submit = document.getElementById('claimSubmit');
 
-    if (!emailVerificationToken) {
-      showFormError(t('claim.verify.emailRequired', 'Please verify your email to continue.'));
-      return;
-    }
-    if (phoneEnabled && !phoneIdToken) {
+    if (phoneRequired && !phoneIdToken) {
       showFormError(t('claim.verify.phoneRequired', 'Please verify your phone number to continue.'));
       return;
     }
@@ -525,16 +522,17 @@
     var payload = {
       firstName: fields.firstName.value.trim(),
       lastName: fields.lastName.value.trim(),
-      email: fields.email.value.trim(),
       phone: fields.phone.value.trim(),
       address: fields.address.value.trim(),
       city: fields.city.value.trim(),
       state: fields.state.value.trim(),
       zipCode: fields.zipCode.value.trim(),
-      emailVerificationToken: emailVerificationToken,
       languagePreference: localStorage.getItem('selectedLanguage') || 'en'
     };
-    if (phoneEnabled && phoneIdToken) payload.phoneIdToken = phoneIdToken;
+    // Email is optional — only send it when provided.
+    var emailVal = fields.email.value.trim();
+    if (emailVal) payload.email = emailVal;
+    if (phoneRequired && phoneIdToken) payload.phoneIdToken = phoneIdToken;
 
     fetch('/api/v1/customers/claim/' + encodeURIComponent(bagToken) + '/register', {
       method: 'POST',
@@ -571,14 +569,12 @@
     document.getElementById('claimRegistrationForm')
       .addEventListener('submit', submitRegistration);
 
-    // PR 7 verification controls (CSP: addEventListener only). Wrap the send
-    // handlers so the click Event isn't passed as the isResend flag.
-    var sendCode = document.getElementById('emailSendCode');
-    if (sendCode) sendCode.addEventListener('click', function () { requestEmailOtp(false); });
+    // Phone verification controls (CSP: addEventListener only). Wrap the send
+    // handler so the click Event isn't passed as the isResend flag.
     var phoneSendSms = document.getElementById('phoneSendSms');
     if (phoneSendSms) phoneSendSms.addEventListener('click', function () { sendPhoneSms(false); });
 
-    // Shared confirmation-code modal (email + SMS).
+    // SMS confirmation-code modal.
     var codeVerify = document.getElementById('claimCodeVerify');
     if (codeVerify) codeVerify.addEventListener('click', onCodeVerify);
     var codeResend = document.getElementById('claimCodeResend');
@@ -589,10 +585,21 @@
     });
 
     // Staff scan-session controls (CSP: addEventListener only, no inline handlers).
-    var codeBtn = document.getElementById('scan-code-submit');
-    if (codeBtn) codeBtn.addEventListener('click', startSession);
+    // Customer self-start is primary; staff code lives behind a link → modal.
     var custBtn = document.getElementById('scan-customer-submit');
     if (custBtn) custBtn.addEventListener('click', startCustomerSession);
+    var custInput = document.getElementById('scan-customer-contact');
+    if (custInput) custInput.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') { e.preventDefault(); startCustomerSession(); }
+    });
+    var staffLink = document.getElementById('scan-staff-link');
+    if (staffLink) staffLink.addEventListener('click', function (e) { e.preventDefault(); openStaffModal(); });
+    var codeBtn = document.getElementById('scan-code-submit');
+    if (codeBtn) codeBtn.addEventListener('click', startSession);
+    var scanCodeInput = document.getElementById('scan-code');
+    if (scanCodeInput) scanCodeInput.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') { e.preventDefault(); startSession(); }
+    });
     var yesBtn = document.getElementById('scan-confirm-yes');
     if (yesBtn) yesBtn.addEventListener('click', onConfirmYes);
     var noBtn = document.getElementById('scan-confirm-no');

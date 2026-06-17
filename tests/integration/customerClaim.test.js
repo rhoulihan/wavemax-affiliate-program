@@ -1,12 +1,12 @@
 // Customer claim flow — resolve + register + verification gate (spec §5/§6.3)
 //
-// The email OTP send is mocked so we can capture the generated 6-digit code.
+// Verification model (2026-06-17): PHONE is the required verification (when
+// PHONE_VERIFICATION_ENABLED is on); EMAIL is an optional, UNVERIFIED field.
 // firebasePhoneService is mocked per-test for the flag-on path; the flag-off
 // path needs no Firebase at all.
 jest.mock('../../server/utils/emailService', () => ({
   sendCustomerWelcomeEmail: jest.fn().mockResolvedValue(true),
-  sendAffiliateNewCustomerEmail: jest.fn().mockResolvedValue(true),
-  sendCustomerEmailOtp: jest.fn().mockResolvedValue(true)
+  sendAffiliateNewCustomerEmail: jest.fn().mockResolvedValue(true)
 }));
 
 const request = require('supertest');
@@ -14,35 +14,11 @@ const app = require('../../server');
 const Affiliate = require('../../server/models/Affiliate');
 const Customer = require('../../server/models/Customer');
 const Bag = require('../../server/modules/bags/Bag');
-const EmailVerification = require('../../server/models/EmailVerification');
 const bagService = require('../../server/modules/bags/bagService');
 const firebasePhoneService = require('../../server/services/firebasePhoneService');
 const emailService = require('../../server/utils/emailService');
 const { hashPassword } = require('../../server/utils/encryption');
 const { getCsrfToken, createAgent } = require('../helpers/csrfHelper');
-
-// The generated 6-digit code is captured from the mocked OTP send (the factory
-// can't safely close over an outer `let`, so we read the call args instead).
-function lastSentOtpCode() {
-  const calls = emailService.sendCustomerEmailOtp.mock.calls;
-  return calls.length ? calls[calls.length - 1][0].code : null;
-}
-
-// Run the email-OTP request+verify dance and return the verification token.
-async function getEmailVerificationToken(token, email) {
-  await request(app).post(`/api/v1/customers/claim/${token}/email-otp/request`).send({ email });
-  const verify = await request(app)
-    .post(`/api/v1/customers/claim/${token}/email-otp/verify`)
-    .send({ email, code: lastSentOtpCode() });
-  return verify.body.emailVerificationToken;
-}
-
-// Build a register body with a fresh verified email token for the given bag.
-async function verifiedBody(token, overrides = {}) {
-  const body = registrationBody(overrides);
-  body.emailVerificationToken = await getEmailVerificationToken(token, body.email);
-  return body;
-}
 
 async function createAffiliate() {
   const { salt, hash } = hashPassword('TestAffiliatePass123!');
@@ -84,9 +60,7 @@ describe('Customer claim', () => {
     await Affiliate.deleteMany({});
     await Customer.deleteMany({});
     await Bag.deleteMany({});
-    await EmailVerification.deleteMany({});
     await require('../../server/models/Order').deleteMany({});
-    emailService.sendCustomerEmailOtp.mockClear();
     delete process.env.PHONE_VERIFICATION_ENABLED; // default flag OFF
     affiliate = await createAffiliate();
   });
@@ -149,40 +123,56 @@ describe('Customer claim', () => {
       const token = await issuedBag(affiliate);
       const res = await request(app)
         .post(`/api/v1/customers/claim/${token}/register`)
-        .send(await verifiedBody(token));
+        .send(registrationBody());
       expect(res.status).toBe(201);
       expect(res.body.customerId).toMatch(/^CUST-/);
       expect(res.body.customerData.affiliateId).toBe(affiliate.affiliateId);
 
       const customer = await Customer.findOne({ customerId: res.body.customerId });
       expect(customer.affiliateId).toBe(affiliate.affiliateId);
-      expect(customer.emailVerifiedAt).toBeTruthy();
+      expect(customer.email).toBe('newcustomer@example.com'); // stored, not verified
       expect(customer.phoneVerifiedAt).toBeFalsy(); // flag off
       expect(customer.username).toBeUndefined();
       expect(customer.passwordHash).toBeUndefined();
       const bag = await Bag.findOne({ tokenHash: Bag.hashToken(token) });
       expect(bag.status).toBe('active');
       expect(bag.customerId).toBe(res.body.customerId);
-      // the single-use OTP record is consumed on success
-      expect(await EmailVerification.countDocuments({})).toBe(0);
     });
 
-    it('400s when the emailVerificationToken is missing', async () => {
+    it('registers with NO email — email is optional', async () => {
       const token = await issuedBag(affiliate);
+      const body = registrationBody();
+      delete body.email;
       const res = await request(app)
         .post(`/api/v1/customers/claim/${token}/register`)
-        .send(registrationBody()); // no emailVerificationToken
-      expect(res.status).toBe(400);
-      expect(await Customer.countDocuments({})).toBe(0);
+        .send(body);
+      expect(res.status).toBe(201);
+      const customer = await Customer.findOne({ customerId: res.body.customerId });
+      expect(customer.email).toBeFalsy();
+      const bag = await Bag.findOne({ tokenHash: Bag.hashToken(token) });
+      expect(bag.status).toBe('active');
     });
 
-    it('400s when the emailVerificationToken is invalid', async () => {
+    it('allows two no-email registrations (sparse unique index, no null collision)', async () => {
+      const t1 = await issuedBag(affiliate);
+      const t2 = await issuedBag(affiliate);
+      const b1 = registrationBody(); delete b1.email;
+      const b2 = registrationBody(); delete b2.email;
+      const r1 = await request(app).post(`/api/v1/customers/claim/${t1}/register`).send(b1);
+      const r2 = await request(app).post(`/api/v1/customers/claim/${t2}/register`).send(b2);
+      expect(r1.status).toBe(201);
+      expect(r2.status).toBe(201);
+      expect(await Customer.countDocuments({})).toBe(2);
+    });
+
+    it('400s when the phone is missing (phone is required)', async () => {
       const token = await issuedBag(affiliate);
+      const body = registrationBody();
+      delete body.phone;
       const res = await request(app)
         .post(`/api/v1/customers/claim/${token}/register`)
-        .send(registrationBody({ emailVerificationToken: 'deadbeef' }));
+        .send(body);
       expect(res.status).toBe(400);
-      expect(res.body.code).toBe('email_not_verified');
       expect(await Customer.countDocuments({})).toBe(0);
     });
 
@@ -190,7 +180,7 @@ describe('Customer claim', () => {
       const token = await issuedBag(affiliate);
       const res = await request(app)
         .post(`/api/v1/customers/claim/${token}/register`)
-        .send(await verifiedBody(token, { affiliateId: 'AFF-attacker' }));
+        .send(registrationBody({ affiliateId: 'AFF-attacker' }));
       expect(res.status).toBe(201);
       const customer = await Customer.findOne({ customerId: res.body.customerId });
       expect(customer.affiliateId).toBe(affiliate.affiliateId);
@@ -202,11 +192,11 @@ describe('Customer claim', () => {
       });
       const minted = await request(app)
         .post(`/api/v1/customers/claim/${bags[0].token}/register`)
-        .send(await verifiedBody(bags[0].token));
+        .send(registrationBody());
       expect(minted.status).toBe(409);
       const unknown = await request(app)
         .post(`/api/v1/customers/claim/${'f'.repeat(32)}/register`)
-        .send(await verifiedBody('f'.repeat(32)));
+        .send(registrationBody());
       expect(unknown.status).toBe(409);
       expect(await Customer.countDocuments({})).toBe(0);
     });
@@ -215,11 +205,11 @@ describe('Customer claim', () => {
       const token = await issuedBag(affiliate);
       await request(app)
         .post(`/api/v1/customers/claim/${token}/register`)
-        .send(await verifiedBody(token));
+        .send(registrationBody());
       const token2 = await issuedBag(affiliate);
       const res = await request(app)
         .post(`/api/v1/customers/claim/${token2}/register`)
-        .send(await verifiedBody(token2)); // same email
+        .send(registrationBody()); // same email
       expect(res.status).toBe(400);
       expect(res.body.code).toBe('duplicate_email');
       const bag2 = await Bag.findOne({ tokenHash: Bag.hashToken(token2) });
@@ -229,8 +219,8 @@ describe('Customer claim', () => {
 
     it('concurrent double-claim: exactly one 201, one 409, no orphan customer', async () => {
       const token = await issuedBag(affiliate);
-      const bodyA = await verifiedBody(token, { email: 'racer-a@example.com' });
-      const bodyB = await verifiedBody(token, { email: 'racer-b@example.com' });
+      const bodyA = registrationBody({ email: 'racer-a@example.com' });
+      const bodyB = registrationBody({ email: 'racer-b@example.com' });
       const [a, b] = await Promise.all([
         request(app).post(`/api/v1/customers/claim/${token}/register`).send(bodyA),
         request(app).post(`/api/v1/customers/claim/${token}/register`).send(bodyB)
@@ -242,6 +232,16 @@ describe('Customer claim', () => {
       const bag = await Bag.findOne({ tokenHash: Bag.hashToken(token) });
       const winner = a.status === 201 ? a : b;
       expect(bag.customerId).toBe(winner.body.customerId);
+    });
+
+    it('the email-OTP endpoints are gone (email is no longer verified)', async () => {
+      const token = await issuedBag(affiliate);
+      const reqRes = await request(app)
+        .post(`/api/v1/customers/claim/${token}/email-otp/request`).send({ email: 'x@example.com' });
+      const verRes = await request(app)
+        .post(`/api/v1/customers/claim/${token}/email-otp/verify`).send({ email: 'x@example.com', code: '000000' });
+      expect(reqRes.status).toBe(404);
+      expect(verRes.status).toBe(404);
     });
 
     it('the legacy public registration route is gone', async () => {
@@ -259,62 +259,22 @@ describe('Customer claim', () => {
     });
 
     it('the legacy customer-register page is gone (PR 11)', async () => {
-      // The page was dead-on-submit once the route above was removed in PR 6;
-      // PR 11 retires the HTML + embed route. Stale bookmarks must 404, not
-      // serve a form that can never submit.
       const res = await request(app).get('/customer-register-embed.html');
       expect(res.status).toBe(404);
     });
   });
 
-  describe('Email OTP (PR 7)', () => {
-    it('request returns generic success and verify mints a token for the right code', async () => {
-      const token = await issuedBag(affiliate);
-      const reqRes = await request(app)
-        .post(`/api/v1/customers/claim/${token}/email-otp/request`)
-        .send({ email: 'otp@example.com' });
-      expect(reqRes.status).toBe(200);
-      expect(reqRes.body.success).toBe(true);
-
-      const verifyRes = await request(app)
-        .post(`/api/v1/customers/claim/${token}/email-otp/verify`)
-        .send({ email: 'otp@example.com', code: lastSentOtpCode() });
-      expect(verifyRes.status).toBe(200);
-      expect(verifyRes.body.emailVerificationToken).toMatch(/^[a-f0-9]{64}$/);
-    });
-
-    it('verify with the wrong code 400s, then locks out after repeated failures', async () => {
-      const token = await issuedBag(affiliate);
-      await request(app).post(`/api/v1/customers/claim/${token}/email-otp/request`).send({ email: 'lock@example.com' });
-
-      const bad = await request(app)
-        .post(`/api/v1/customers/claim/${token}/email-otp/verify`)
-        .send({ email: 'lock@example.com', code: '000000' });
-      expect(bad.status).toBe(400);
-      expect(bad.body.code).toBe('invalid_code');
-
-      let last;
-      for (let i = 0; i < 7; i++) {
-        last = await request(app)
-          .post(`/api/v1/customers/claim/${token}/email-otp/verify`)
-          .send({ email: 'lock@example.com', code: '999999' });
-      }
-      expect(last.status).toBe(429);
-      expect(last.body.code).toBe('locked_out');
-    });
-  });
-
-  describe('Phone verification flag (PR 7)', () => {
+  describe('Phone verification flag', () => {
     afterEach(() => {
       jest.restoreAllMocks();
       delete process.env.PHONE_VERIFICATION_ENABLED;
     });
 
-    it('flag OFF → email-only, registers without a phoneIdToken, phoneVerifiedAt null', async () => {
+    it('flag OFF → registers without a phoneIdToken, phoneVerifiedAt null', async () => {
       const token = await issuedBag(affiliate);
       const res = await request(app)
         .post(`/api/v1/customers/claim/${token}/register`)
-        .send(await verifiedBody(token)); // no phoneIdToken
+        .send(registrationBody()); // no phoneIdToken
       expect(res.status).toBe(201);
       const customer = await Customer.findOne({ customerId: res.body.customerId });
       expect(customer.phoneVerifiedAt).toBeFalsy();
@@ -327,9 +287,25 @@ describe('Customer claim', () => {
       const token = await issuedBag(affiliate);
       const res = await request(app)
         .post(`/api/v1/customers/claim/${token}/register`)
-        .send(await verifiedBody(token, { phone: '512-555-0101', phoneIdToken: 'good-token' }));
+        .send(registrationBody({ phone: '512-555-0101', phoneIdToken: 'good-token' }));
       expect(res.status).toBe(201);
       const customer = await Customer.findOne({ customerId: res.body.customerId });
+      expect(customer.phoneVerifiedAt).toBeTruthy();
+    });
+
+    it('flag ON + no email + matching phone → 201 (email optional even with phone gate)', async () => {
+      process.env.PHONE_VERIFICATION_ENABLED = 'true';
+      jest.spyOn(firebasePhoneService, 'isEnabled').mockReturnValue(true);
+      jest.spyOn(firebasePhoneService, 'verifyPhoneToken').mockResolvedValue('+15125550101');
+      const token = await issuedBag(affiliate);
+      const body = registrationBody({ phone: '512-555-0101', phoneIdToken: 'good-token' });
+      delete body.email;
+      const res = await request(app)
+        .post(`/api/v1/customers/claim/${token}/register`)
+        .send(body);
+      expect(res.status).toBe(201);
+      const customer = await Customer.findOne({ customerId: res.body.customerId });
+      expect(customer.email).toBeFalsy();
       expect(customer.phoneVerifiedAt).toBeTruthy();
     });
 
@@ -340,7 +316,7 @@ describe('Customer claim', () => {
       const token = await issuedBag(affiliate);
       const res = await request(app)
         .post(`/api/v1/customers/claim/${token}/register`)
-        .send(await verifiedBody(token, { phone: '512-555-0101', phoneIdToken: 'good-token' }));
+        .send(registrationBody({ phone: '512-555-0101', phoneIdToken: 'good-token' }));
       expect(res.status).toBe(400);
       expect(res.body.code).toBe('phone_mismatch');
       expect(await Customer.countDocuments({})).toBe(0);
@@ -352,7 +328,7 @@ describe('Customer claim', () => {
       const token = await issuedBag(affiliate);
       const res = await request(app)
         .post(`/api/v1/customers/claim/${token}/register`)
-        .send(await verifiedBody(token)); // no phoneIdToken
+        .send(registrationBody()); // no phoneIdToken
       expect(res.status).toBe(400);
       expect(res.body.code).toBe('phone_not_verified');
       expect(await Customer.countDocuments({})).toBe(0);

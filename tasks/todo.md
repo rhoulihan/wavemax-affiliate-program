@@ -1,38 +1,36 @@
-# Workflow expansion (2026-06-17) — plan: ~/.claude/plans/parsed-spinning-unicorn.md
+# Active task — bag-registration: phone-only verification + order-start panel rework
 
-Locked: omit WDF pounds; customer scan = start-only; new serviceType field; expediter = read-only token.
-Process: TDD, one concern/PR, full gate per PR (⊆ baseline), deploy both boxes per PR.
+User request (2026-06-17):
+1. Bag registration requires **phone** verification only; **email optional + unverified**.
+2. Swirl spinner → **full-page** (global) during server actions (send SMS / verify / submit).
+3. **Remove the Send (SMS) button after the code verifies** (badge replaces it).
+4. Order-start panel: **customer on top**; **staff entry behind a link → staff-code modal**.
 
-## PR A — Affiliate serviceType + per-affiliate notifications (model + admin) ✅ committed
-- [x] Affiliate.js: serviceType + orderNotificationsEnabled (full_service→on default, explicit wins)
-- [x] PATCH /administrators/affiliates/:id (manage_affiliates) → updateAffiliateSettings
-- [x] Admin dashboard: per-affiliate Settings modal + badges; i18n ×4
-- [x] Adversarial review (12 findings) → XSS-escape titles, serviceType re-default, cache-bust; tests 14/14
-- [ ] full gate (A+B) + deploy
+Decisions (confirmed): email dupes = **block when provided** (sparse unique index, many no-email allowed); send button = **hide after verified**.
 
-## PR B — Order transition notifications ✅ committed
-- [x] Customer email on every state change; affiliate email on customer-create + ready (gated)
-- [x] Adapt sendAffiliateNewOrderEmail (slim); new affiliate-order-ready template; Order role enum +customer
-- [x] orderTransitionService tests 17/17
-- [ ] full gate (A+B) + deploy
+## Backend — phone required, email optional+unverified, drop email-OTP
+- [x] customerClaim.test.js: reworked (20/20 green) — email optional, phone gate, dup when provided, OTP endpoints 404.
+- [x] customerRegistrationService.js: removed email-OTP; email optional; dup-check only when present; phone block is the gate.
+- [x] customerController.js: removed requestEmailOtp/verifyEmailOtp + emailOtpService require.
+- [x] customerRoutes.js: removed email-otp routes; register validators → email optional, dropped emailVerificationToken.
+- [x] Customer model: email required:false, unique+sparse. (phone stays required.)
+- [~] Leave emailOtpService.js / EmailVerification / dispatcher as DEAD code (follow-up cleanup; keeps blast radius small + CSRF exemption keeps removed routes returning 404 not 403).
+- [ ] PROD index migration: drop non-sparse `email_1`, recreate sparse unique (data already wiped → safe).
 
-## PR C — Customer-initiated start (phone/email), START ONLY
-- [ ] mintSession customer branch (phone/email match); scanAuth forward 'customer'; Order role enum +customer
-- [ ] Start-only enforcement (customer actor → only create-pending else 403)
-- [ ] claim UI: "or enter phone/email" path in scan-code panel
-- [ ] Tests; gate; deploy
+## Frontend — claim-embed.html + claim.js
+- [x] claim-embed.html: phone first (required) + Send SMS + badge; email plain optional (no send btn / badge); code modal phone-only.
+- [x] claim.js: dropped email-OTP fns; code modal phone-only; gate submit on phone (when enabled); spin()→showGlobal() full-page; hide Send-SMS btn after verify.
 
-## PR D — Order Expediter (read-only token)
-- [ ] EXPEDITER_TOKEN guard; expediterService aggregations (active by affiliate, counters, daily completed summary — NO pounds)
-- [ ] GET /api/v1/expediter/summary; /order-expediter page (EMBED_PAGES + pageScripts + rebuild min)
-- [ ] Tests; Lighthouse; gate; deploy; set EXPEDITER_TOKEN on both boxes
+## Order-start panel — customer top, staff behind link→modal
+- [x] claim-embed.html: customer self-start on top; "Staff? Enter your code" link → #staffCodeModal (code + Start scanning).
+- [x] claim.js: startSession reads modal code input; link→open modal; close on mint; reopen on session-expiry; spinner.
 
-## PR E — Follow-ups
-- [x] operator-login-embed.html inline onclick → <span> (CSP-clean; alert just repeated the link text)
-- [N/A] Email i18n parity — VERIFIED a non-issue: dispatchers loadTemplate(name, lang) + JS-embedded
-      per-lang translations; root template + correct-language strings serve es/pt/de via fallback. No drift.
-- [x] Bag label: WaveMAX Austin address (825 E Rundberg Ln, Suite F1 / Austin, TX 78753) below customer name, both render paths
-- [ ] Gate; deploy
-
-## Done — A,B,C,D deployed; each adversarially reviewed (12/11/16 findings fixed). EXPEDITER_TOKEN set on both boxes.
-## Note: expediter Lighthouse deferred (WSL Chrome flake); internal display, CSP-clean/DOM-only/i18n-complete.
+## Cross-cutting
+- [x] i18n en/es/pt/de: staff link/modal title, email-optional hint, customerStartTitle (SMS modal title key existed).
+- [x] claimPageWiring.test.js: +structure assertions; bump claim.css ?v=; claim.js NOT in ASSETS → no min rebuild.
+- [x] Adversarial review Workflow (ultracode): 7 confirmed → fixed:
+      - CRIT/HIGH: added Customer to scripts/ensure-indexes.js (sparse+unique email idx). Prod customers has ONLY _id_ (no old email_1) → no drop needed, just run ensure-indexes.
+      - HIGH: claim.js hard-gate — phoneRequired (server-driven) gates submit, not SDK-load; SDK failure → visible error (onPhoneSetupFailed + claim.verify.phoneUnavailable ×4).
+      - MED: Enter key on #scan-customer-contact.
+      - LOW: no-email welcome email log error→info.
+- [ ] Full-suite gate (⊆ env baseline) → commit/push → deploy both boxes + `node scripts/ensure-indexes.js` on prod + verify live.

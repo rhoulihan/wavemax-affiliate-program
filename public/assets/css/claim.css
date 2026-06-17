@@ -179,3 +179,17 @@
   padding: 0;
   text-decoration: underline;
 }
+/* Staff scan link sits below the customer-start panel (secondary path). */
+.claim-staff-link-row {
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px solid #e2e8f0;
+  text-align: center;
+}
+.claim-staff-link-row a {
+  color: #64748b;
+  font-size: 14px;
+  text-decoration: underline;
+  cursor: pointer;
+}
+.claim-staff-link-row a:hover { color: #334155; }

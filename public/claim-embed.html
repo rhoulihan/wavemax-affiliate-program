@@ -12,7 +12,7 @@
     <link href="/assets/css/theme.css" rel="stylesheet">
     <link href="/assets/css/modal-utils.css" rel="stylesheet">
     <link href="/assets/css/swirl-spinner.css" rel="stylesheet">
-    <link href="/assets/css/claim.css?v=20260618" rel="stylesheet">
+    <link href="/assets/css/claim.css?v=20260617b" rel="stylesheet">
 </head>
 <body class="bg-white font-sans">
     <div id="language-switcher-container" class="language-switcher-container"></div>
@@ -45,16 +45,9 @@
                             <input type="text" id="firstName" name="firstName" required class="claim-input" data-i18n-placeholder="common.labels.firstName" placeholder="First Name">
                             <input type="text" id="lastName" name="lastName" required class="claim-input" data-i18n-placeholder="common.labels.lastName" placeholder="Last Name">
                         </div>
-                        <!-- Email + email-OTP verification (PR 7). The 6-digit code is
-                             entered in the shared #claimCodeModal, not inline. -->
-                        <div class="claim-verify-row">
-                            <input type="email" id="email" name="email" required class="claim-input" data-i18n-placeholder="common.labels.email" placeholder="Email">
-                            <button type="button" id="emailSendCode" class="claim-verify-btn" data-i18n="claim.verify.sendCode">Send code</button>
-                        </div>
-                        <p id="email-verify-error" class="claim-error" hidden></p>
-                        <p id="email-verified-badge" class="claim-success" hidden data-i18n="claim.verify.verified">Verified</p>
 
-                        <!-- Phone + Firebase phone verification (PR 7; the SMS controls show only when enabled) -->
+                        <!-- Phone is the REQUIRED verification (Firebase SMS). The 6-digit
+                             code is entered in the shared #claimCodeModal, not inline. -->
                         <div class="claim-verify-row">
                             <input type="tel" id="phone" name="phone" required class="claim-input" data-i18n-placeholder="common.labels.phoneNumber" placeholder="Phone Number">
                             <button type="button" id="phoneSendSms" class="claim-verify-btn" hidden data-i18n="claim.verify.sendSms">Send SMS code</button>
@@ -63,6 +56,9 @@
                         <p id="phone-verified-badge" class="claim-success" hidden data-i18n="claim.verify.verified">Verified</p>
                         <!-- reCAPTCHA (invisible) mounts here for Firebase phone auth -->
                         <div id="recaptcha-container"></div>
+
+                        <!-- Email is OPTIONAL and not verified. -->
+                        <input type="email" id="email" name="email" class="claim-input" data-i18n-placeholder="claim.emailOptional" placeholder="Email (optional)">
 
                         <input type="text" id="address" name="address" required class="claim-input" data-i18n-placeholder="common.labels.address" placeholder="Address">
                         <div class="grid grid-cols-3 gap-3">
@@ -93,23 +89,21 @@
                  then batch-scans bag QRs (each a fresh page load; sessionStorage
                  carries the session) confirming one state-driven transition each. -->
             <section id="claim-scan-code-panel" class="claim-panel" hidden>
-                <h1 data-i18n="claim.scan.staffTitle">Staff scan</h1>
-                <p data-i18n="claim.scan.staffIntro">Enter your code to scan this bag.</p>
-                <label for="scan-code" data-i18n="claim.scan.operatorCodeLabel">Operator code</label>
-                <input id="scan-code" type="text" autocomplete="one-time-code" autocapitalize="characters"
-                       maxlength="12" data-i18n-placeholder="claim.scan.codePlaceholder">
-                <button id="scan-code-submit" type="button" class="btn btn-primary" data-i18n="claim.scan.startSession">Start scanning</button>
-                <p id="scan-code-error" class="claim-error" hidden></p>
-
-                <!-- Customer self-start (PR C): the registered customer can start
-                     their own order with the phone/email they verified. -->
-                <hr class="claim-divider">
-                <p data-i18n="claim.scan.customerStartIntro">Are you the customer? Start your order with your registered phone or email.</p>
+                <!-- Customer self-start is now the PRIMARY path (on top): the
+                     registered customer starts their own order with the phone or
+                     email on file. -->
+                <h1 data-i18n="claim.scan.customerStartTitle">Start your order</h1>
+                <p data-i18n="claim.scan.customerStartIntro">Start your order with the phone or email you registered.</p>
                 <label for="scan-customer-contact" data-i18n="claim.scan.customerContactLabel">Phone or email</label>
                 <input id="scan-customer-contact" type="text" autocomplete="off"
                        data-i18n-placeholder="claim.scan.customerContactPlaceholder">
-                <button id="scan-customer-submit" type="button" class="btn btn-secondary" data-i18n="claim.scan.customerStartButton">Start my order</button>
+                <button id="scan-customer-submit" type="button" class="btn btn-primary" data-i18n="claim.scan.customerStartButton">Start my order</button>
                 <p id="scan-customer-error" class="claim-error" hidden></p>
+
+                <!-- Staff scan is secondary, behind a link that opens a code modal. -->
+                <p class="claim-staff-link-row">
+                    <a id="scan-staff-link" href="#" role="button" data-i18n="claim.scan.staffLink">Staff? Enter your code</a>
+                </p>
             </section>
 
             <section id="claim-scan-confirm-panel" class="claim-panel" hidden>
@@ -139,13 +133,13 @@
         </div>
     </div>
 
-    <!-- Shared confirmation-code modal (email OTP + SMS OTP). Static markup so
-         claim.js can drive it CSP-cleanly (no innerHTML); reuses modal-utils
-         styling and its data-modal-close / backdrop / ESC wiring. -->
+    <!-- SMS confirmation-code modal. Static markup so claim.js can drive it
+         CSP-cleanly (no innerHTML); reuses modal-utils styling and its
+         data-modal-close / backdrop / ESC wiring. -->
     <div class="modal" id="claimCodeModal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3 class="modal-title" id="claimCodeTitle" data-i18n="claim.verify.modalTitleEmail">Enter your code</h3>
+                <h3 class="modal-title" id="claimCodeTitle" data-i18n="claim.verify.modalTitlePhone">Enter your SMS code</h3>
                 <button class="modal-close" type="button" data-modal-close aria-label="Close">&times;</button>
             </div>
             <div class="modal-body">
@@ -156,6 +150,27 @@
             <div class="modal-footer">
                 <button type="button" id="claimCodeResend" class="btn btn-secondary" data-i18n="claim.verify.resend">Resend code</button>
                 <button type="button" id="claimCodeVerify" class="btn btn-primary" data-i18n="claim.verify.verify">Verify</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Staff scan-code modal (opened from the "Staff? Enter your code" link).
+         A partner/operator enters their code ONCE to mint a scan session. -->
+    <div class="modal" id="staffCodeModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" data-i18n="claim.scan.staffTitle">Staff scan</h3>
+                <button class="modal-close" type="button" data-modal-close aria-label="Close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p data-i18n="claim.scan.staffIntro">Enter your code to scan this bag.</p>
+                <label for="scan-code" data-i18n="claim.scan.operatorCodeLabel">Operator code</label>
+                <input id="scan-code" type="text" autocomplete="one-time-code" autocapitalize="characters"
+                       maxlength="12" class="claim-input" data-i18n-placeholder="claim.scan.codePlaceholder">
+                <p id="scan-code-error" class="claim-error" hidden></p>
+            </div>
+            <div class="modal-footer">
+                <button id="scan-code-submit" type="button" class="btn btn-primary" data-i18n="claim.scan.startSession">Start scanning</button>
             </div>
         </div>
     </div>

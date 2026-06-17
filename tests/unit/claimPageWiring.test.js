@@ -48,6 +48,46 @@ describe('/claim page wiring', () => {
     expect(html).toContain('/assets/css/swirl-spinner.css');
   });
 
+  it('phone-first verification: optional email (no email send button), phone keeps SMS controls', () => {
+    const html = fs.readFileSync(path.join(ROOT, 'public/claim-embed.html'), 'utf8');
+    // Email is optional + unverified — its send-code button and badge are gone.
+    expect(html).not.toContain('id="emailSendCode"');
+    expect(html).not.toContain('id="email-verified-badge"');
+    expect(html).toContain('data-i18n-placeholder="claim.emailOptional"');
+    // Phone is the required verification and keeps its SMS controls + badge.
+    expect(html).toContain('id="phoneSendSms"');
+    expect(html).toContain('id="phone-verified-badge"');
+  });
+
+  it('order-start panel puts the customer on top, staff behind a link → staff-code modal', () => {
+    const html = fs.readFileSync(path.join(ROOT, 'public/claim-embed.html'), 'utf8');
+    expect(html).toContain('id="staffCodeModal"');
+    expect(html).toContain('id="scan-staff-link"');
+    const panel = html.slice(html.indexOf('id="claim-scan-code-panel"'));
+    // customer self-start appears before the staff link in the panel
+    expect(panel.indexOf('id="scan-customer-submit"'))
+      .toBeLessThan(panel.indexOf('id="scan-staff-link"'));
+  });
+
+  it('claim.js uses a full-page (global) spinner and has dropped the email-OTP flow', () => {
+    const claimSrc = fs.readFileSync(path.join(ROOT, 'public/assets/js/claim.js'), 'utf8');
+    expect(claimSrc).toContain('SwirlSpinnerUtils.showGlobal');
+    expect(claimSrc).not.toContain('showOnButton');
+    expect(claimSrc).not.toContain('email-otp/request');
+    expect(claimSrc).not.toContain('email-otp/verify');
+    expect(claimSrc).not.toContain('emailVerificationToken');
+  });
+
+  it('claim.js hard-gates submit on phoneRequired (server-driven), not on SDK load success', () => {
+    const claimSrc = fs.readFileSync(path.join(ROOT, 'public/assets/js/claim.js'), 'utf8');
+    // The submit gate must depend on phoneRequired so an SDK load failure can't
+    // silently open the gate; an SDK failure surfaces a visible error.
+    expect(claimSrc).toContain('phoneRequired');
+    expect(claimSrc).toMatch(/if \(phoneRequired && !phoneIdToken\) return false/);
+    expect(claimSrc).toContain('onPhoneSetupFailed');
+    expect(claimSrc).toContain('claim.verify.phoneUnavailable');
+  });
+
   it('lazy-loads the Firebase compat SDK from claim.js, keeping it off the render path (PR 8 perf)', () => {
     // The ~170 KB Firebase compat SDK must NOT be eagerly injected via pageScripts —
     // that delayed revealing the registration form (the LCP element). It is loaded on

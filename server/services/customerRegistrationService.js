@@ -6,19 +6,17 @@
 // customer, then claim; on race loss, compensating delete (no Mongo
 // transaction — standalone-mongod portable, spec §13 #4).
 //
-// PR 7 — verification gate (spec §5): the email is ALWAYS re-verified
-// server-side via a one-time emailVerificationToken minted by the email OTP
-// flow. When PHONE_VERIFICATION_ENABLED is on, the Firebase phone ID token is
-// re-verified and the returned E.164 must match the entered phone; off → phone
-// is collected but not verified. Phase 1 has no customer login, so no username
-// or password is stored.
+// Verification gate (2026-06-17): PHONE is the required verification — when
+// PHONE_VERIFICATION_ENABLED is on, the Firebase phone ID token is re-verified
+// and the returned E.164 must match the entered phone. EMAIL is an OPTIONAL,
+// UNVERIFIED field (stored as-is when provided; a duplicate is still rejected).
+// Phase 1 has no customer login, so no username or password is stored.
 
 const { v4: uuidv4 } = require('uuid');
 
 const Customer = require('../models/Customer');
 const bagClaimService = require('./bagClaimService');
 const emailService = require('../utils/emailService');
-const emailOtpService = require('./emailOtpService');
 const firebasePhoneService = require('./firebasePhoneService');
 const Formatters = require('../utils/formatters');
 const logger = require('../utils/logger');
@@ -31,7 +29,7 @@ const logger = require('../utils/logger');
 class RegistrationError extends Error {
   constructor(code, message, extras = {}) {
     super(message);
-    this.code = code;        // 'bag_not_claimable' | 'bag_already_claimed' | 'duplicate_email' | 'email_not_verified' | 'phone_not_verified' | 'phone_mismatch'
+    this.code = code;        // 'bag_not_claimable' | 'bag_already_claimed' | 'duplicate_email' | 'phone_not_verified' | 'phone_mismatch'
     this.status = extras.status || 400;
     this.extras = extras;
     this.isRegistrationError = true;
@@ -56,7 +54,6 @@ async function registerCustomer(payload) {
     zipCode,
     specialInstructions,
     affiliateSpecialInstructions,
-    emailVerificationToken,
     phoneIdToken,
     languagePreference
   } = payload;
@@ -70,20 +67,16 @@ async function registerCustomer(payload) {
   }
   const { bag, affiliate } = resolved;
 
-  const existingEmail = await Customer.findOne({ email: String(email || '').toLowerCase() });
-  if (existingEmail) {
-    throw new RegistrationError('duplicate_email', 'Email already registered', { field: 'email' });
+  // --- Email (optional, unverified) ----------------------------------------
+  // Normalize when present; reject a duplicate so a provided email stays
+  // one-per-customer. Absent email → the field is left unset (sparse index).
+  const normalizedEmail = email ? String(email).trim().toLowerCase() : '';
+  if (normalizedEmail) {
+    const existingEmail = await Customer.findOne({ email: normalizedEmail });
+    if (existingEmail) {
+      throw new RegistrationError('duplicate_email', 'Email already registered', { field: 'email' });
+    }
   }
-
-  // --- Email verification (always required) --------------------------------
-  // Re-verify the one-time token server-side; the client cannot self-assert.
-  const emailVerified = await emailOtpService.consumeVerification({
-    bagToken, email, verificationToken: emailVerificationToken
-  });
-  if (!emailVerified) {
-    throw new RegistrationError('email_not_verified', 'Email not verified', { field: 'email' });
-  }
-  const emailVerifiedAt = new Date();
 
   // --- Phone verification (gated by the feature flag) ----------------------
   let phoneVerifiedAt = null;
@@ -110,7 +103,6 @@ async function registerCustomer(payload) {
     affiliateId: affiliate.affiliateId,   // derived from the bag
     firstName: Formatters.name(firstName),
     lastName: Formatters.name(lastName),
-    email: email.toLowerCase(),
     phone: Formatters.phone(phone, 'us'),
     address,
     city,
@@ -118,10 +110,12 @@ async function registerCustomer(payload) {
     zipCode,
     specialInstructions,
     affiliateSpecialInstructions,
-    emailVerifiedAt,
     phoneVerifiedAt,
     languagePreference: languagePreference || 'en'
   });
+  // Only set email when provided — leaving it undefined keeps the sparse
+  // unique index from treating multiple no-email customers as collisions.
+  if (normalizedEmail) newCustomer.email = normalizedEmail;
 
   await newCustomer.save();
 
@@ -135,13 +129,6 @@ async function registerCustomer(payload) {
       throw new RegistrationError('bag_already_claimed', 'This bag has already been claimed', { status: 409 });
     }
     throw err;
-  }
-
-  // The single-use email OTP record is no longer needed.
-  try {
-    await emailOtpService.clearVerification({ bagToken, email });
-  } catch (err) {
-    logger.warn('Failed to clear email verification record', { error: err.message });
   }
 
   // Emails are best-effort — never fail registration on SMTP hiccup.

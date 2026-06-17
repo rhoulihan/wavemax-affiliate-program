@@ -12,7 +12,6 @@ const { validationResult } = require('express-validator');
 // Extracted services
 const customerRegistrationService = require('../services/customerRegistrationService');
 const bagClaimService = require('../services/bagClaimService');
-const emailOtpService = require('../services/emailOtpService');
 
 // Utility modules
 const ControllerHelpers = require('../utils/controllerHelpers');
@@ -48,49 +47,6 @@ exports.resolveClaim = ControllerHelpers.asyncWrapper(async (req, res) => {
     return ControllerHelpers.sendSuccess(res, { state: 'claimed', order: resolved.order });
   }
   return ControllerHelpers.sendSuccess(res, { state: 'invalid' });
-});
-
-/**
- * Request a 6-digit email-verification OTP for (bagToken, email).
- * Generic success regardless of state (anti-enumeration).
- * @route POST /api/v1/customers/claim/:bagToken/email-otp/request
- */
-exports.requestEmailOtp = ControllerHelpers.asyncWrapper(async (req, res) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return ControllerHelpers.sendError(res, 'Validation failed', 400, errors.array());
-  }
-  await emailOtpService.requestOtp({
-    bagToken: req.params.bagToken,
-    email: req.body.email,
-    languagePreference: req.body.languagePreference
-  });
-  // Generic success — never reveals whether the bag/email is valid.
-  return res.json({ success: true, message: 'If the email is valid, a code has been sent.' });
-});
-
-/**
- * Verify an email OTP and mint a one-time emailVerificationToken.
- * @route POST /api/v1/customers/claim/:bagToken/email-otp/verify
- */
-exports.verifyEmailOtp = ControllerHelpers.asyncWrapper(async (req, res) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return ControllerHelpers.sendError(res, 'Validation failed', 400, errors.array());
-  }
-  const result = await emailOtpService.verifyOtp({
-    bagToken: req.params.bagToken,
-    email: req.body.email,
-    code: req.body.code,
-    req
-  });
-  if (result.lockedOut) {
-    return res.status(429).json({ success: false, code: 'locked_out', message: 'Too many attempts — please try again later' });
-  }
-  if (!result.success) {
-    return res.status(400).json({ success: false, code: 'invalid_code', message: 'Invalid or expired code' });
-  }
-  return res.json({ success: true, emailVerificationToken: result.verificationToken });
 });
 
 /**

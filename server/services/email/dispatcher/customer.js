@@ -31,7 +31,9 @@ exports.sendCustomerWelcomeEmail = async (customer, affiliate, bagInfo = {}) => 
     }
 
     if (!customer.email) {
-      logger.error('Customer email is missing or undefined');
+      // Email is optional (2026-06-17) — no address means nothing to send; this
+      // is expected, not an error. Log at info so it doesn't pollute error logs.
+      logger.info('Skipping customer welcome email — no email on file (optional)');
       return;
     }
 
