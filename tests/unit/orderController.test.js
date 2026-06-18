@@ -153,7 +153,7 @@ describe('Order Controller', () => {
         save: jest.fn()
       };
 
-      const mockCustomer = { customerId: 'CUST123' };
+      const mockCustomer = { customerId: 'CUST123', emailVerified: true };
 
       req.params.orderId = 'ORD123';
       req.body = { status: 'in_progress' };
@@ -263,7 +263,7 @@ describe('Order Controller', () => {
         save: jest.fn()
       };
 
-      const mockCustomer = { customerId: 'CUST123' };
+      const mockCustomer = { customerId: 'CUST123', emailVerified: true };
       const mockAffiliate = { affiliateId: 'AFF123' };
 
       req.params.orderId = 'ORD123';

@@ -33,7 +33,7 @@ const customerSchema = new mongoose.Schema({
   // single-use link; only verified addresses receive any further email.
   emailVerified: { type: Boolean, default: false },
   emailVerifiedAt: Date,            // set when the confirm link is consumed
-  emailVerifyTokenHash: String,     // sha256 of the raw token (raw lives only in the link)
+  emailVerifyTokenHash: { type: String, index: true, sparse: true }, // sha256 of the raw token (raw lives only in the link); indexed for the verify lookup
   emailVerifyTokenExpires: Date,    // confirm link expiry (~30 days)
   phoneVerifiedAt: Date,   // set when the Firebase phone token verifies (flag on)
   // Set when a customer changes their phone via "Edit my info" — surfaces a

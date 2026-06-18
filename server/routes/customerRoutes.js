@@ -23,6 +23,15 @@ const claimResolveLimiter = createCustomLimiter({
   skip: () => process.env.NODE_ENV === 'test'
 });
 
+// Backstop limiter on the email-confirm link (the token is 256-bit, so this is
+// abuse protection, not the security boundary).
+const emailVerifyLimiter = createCustomLimiter({
+  windowMs: 15 * 60 * 1000,
+  max: 60,
+  name: 'email-verify',
+  skip: () => process.env.NODE_ENV === 'test'
+});
+
 /**
  * @route   GET /api/customers/check-rate-limit
  * @desc    Check if registration rate limit would be exceeded
@@ -58,15 +67,17 @@ router.get('/claim/:bagToken', claimResolveLimiter, customerController.resolveCl
  * @route   GET /api/v1/customers/verify-email/:token
  * @desc    Consume the welcome-email confirm link → verify the customer's email
  *          (single-use). Serves a branded landing page. Public; no CSRF (GET link).
+ *          Rate-limited as a backstop (the token is 256-bit; brute force is moot).
  * @access  Public
  */
-router.get('/verify-email/:token', customerController.verifyEmail);
+router.get('/verify-email/:token', emailVerifyLimiter, customerController.verifyEmail);
 
 /**
  * @route   POST /api/v1/customers/claim/:bagToken/register
  * @desc    Register a new customer against an issued bag (affiliate derived from the bag).
  *          Phone is the required verification (a Firebase phoneIdToken when phone
- *          verification is enabled). Email is optional and unverified. No username/password.
+ *          verification is enabled). Email is REQUIRED and stored unverified —
+ *          verified later via the welcome-email confirm link. No username/password.
  * @access  Public (registrationLimiter; CSRF-exempt registration class)
  */
 router.post('/claim/:bagToken/register', registrationLimiter, [

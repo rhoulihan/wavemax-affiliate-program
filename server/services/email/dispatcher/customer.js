@@ -31,9 +31,9 @@ exports.sendCustomerWelcomeEmail = async (customer, affiliate, bagInfo = {}) => 
     }
 
     if (!customer.email) {
-      // Email is optional (2026-06-17) — no address means nothing to send; this
-      // is expected, not an error. Log at info so it doesn't pollute error logs.
-      logger.info('Skipping customer welcome email — no email on file (optional)');
+      // Email is required at registration (2026-06-18); this is a defensive
+      // fallback for legacy/no-email records only — nothing to send.
+      logger.info('Skipping customer welcome email — no email on file');
       return;
     }
 

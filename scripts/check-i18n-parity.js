@@ -96,8 +96,7 @@ const REQUIRED_EMAIL_TEMPLATES = [
   'affiliate-invite',
   'customer-order-delivered',
   'order-ready',
-  'customer-on-the-way',
-  'customer-email-otp'
+  'customer-on-the-way'
 ];
 
 function flattenKeys(obj, prefix = '', out = []) {

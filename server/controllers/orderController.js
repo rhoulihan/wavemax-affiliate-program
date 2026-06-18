@@ -123,8 +123,9 @@ exports.updateOrderStatus = async (req, res) => {
     });
     await order.save();
 
-    // Status-update notice to the customer (no money framing).
-    if (customer && ['in_progress', 'out_for_delivery', 'complete'].includes(status)) {
+    // Status-update notice to the customer (no money framing). Only to a verified
+    // email — the welcome email is the only mail an unverified address receives.
+    if (customer && customer.emailVerified && ['in_progress', 'out_for_delivery', 'complete'].includes(status)) {
       try {
         await emailService.sendOrderStatusUpdateEmail(customer, order, status);
       } catch (emailError) {
@@ -183,7 +184,7 @@ exports.cancelOrder = ControllerHelpers.asyncWrapper(async (req, res) => {
 
   // Send cancellation emails (don't let email failures stop the cancellation)
   try {
-    if (customer) {
+    if (customer && customer.emailVerified) {
       await emailService.sendOrderCancellationEmail(customer, order);
     }
 

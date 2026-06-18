@@ -204,6 +204,23 @@ describe('Customer claim', () => {
       expect(v.status).toBe(410);
     });
 
+    it('an EXPIRED confirm token returns 410 and does not verify', async () => {
+      const token = await issuedBag(affiliate);
+      const res = await request(app)
+        .post(`/api/v1/customers/claim/${token}/register`)
+        .send(registrationBody());
+      const rawToken = emailService.sendCustomerWelcomeEmail.mock.calls.at(-1)[2].emailVerifyToken;
+      // force the token past expiry
+      await Customer.updateOne(
+        { customerId: res.body.customerId },
+        { $set: { emailVerifyTokenExpires: new Date(Date.now() - 1000) } }
+      );
+      const v = await request(app).get(`/api/v1/customers/verify-email/${rawToken}`);
+      expect(v.status).toBe(410);
+      const after = await Customer.findOne({ customerId: res.body.customerId });
+      expect(after.emailVerified).toBe(false);
+    });
+
     it('400s when the phone is missing (phone is required)', async () => {
       const token = await issuedBag(affiliate);
       const body = registrationBody();
