@@ -73,6 +73,26 @@ router.get('/claim/:bagToken', claimResolveLimiter, customerController.resolveCl
 router.get('/verify-email/:token', emailVerifyLimiter, customerController.verifyEmail);
 
 /**
+ * @route   GET/PATCH /api/v1/customers/me
+ * @desc    The registered customer reads/updates their own contact info from the
+ *          "Edit my info" form. Authorized by the customer scan-session (scanAuth);
+ *          CSRF-exempt (x-scan-session header, no ambient cookie).
+ * @access  Customer scan-session
+ */
+const scanAuth = require('../middleware/scanAuth');
+router.get('/me', scanAuth, customerController.getMe);
+router.patch('/me', scanAuth, [
+  body('firstName').optional().trim().notEmpty().isLength({ max: 50 }),
+  body('lastName').optional().trim().notEmpty().isLength({ max: 50 }),
+  body('email').optional().isEmail().withMessage('A valid email is required'),
+  body('phone').optional().trim().notEmpty().withMessage('Phone cannot be empty'),
+  body('address').optional().trim().notEmpty().isLength({ max: 200 }),
+  body('city').optional().trim().notEmpty().isLength({ max: 100 }),
+  body('state').optional().trim().notEmpty().isLength({ max: 50 }),
+  body('zipCode').optional().trim().notEmpty().isLength({ max: 20 })
+], handleValidationErrors, customerController.updateMe);
+
+/**
  * @route   POST /api/v1/customers/claim/:bagToken/register
  * @desc    Register a new customer against an issued bag (affiliate derived from the bag).
  *          Phone is the required verification (a Firebase phoneIdToken when phone

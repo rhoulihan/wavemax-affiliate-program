@@ -81,6 +81,11 @@ const CSRF_CONFIG = {
     '/api/v1/scan/apply',
     '/api/v1/scan/undo',
 
+    // Customer self-service edit (Edit my info) — authorized by the same
+    // scan-session token (x-scan-session header), no ambient cookie, same
+    // CSRF rationale as the scan engine above.
+    '/api/v1/customers/me',
+
     // Test endpoints (development only)
     '/api/v1/test/customer',
     '/api/v1/test/order',

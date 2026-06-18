@@ -10,8 +10,11 @@ const Customer = require('../models/Customer');
 const { validationResult } = require('express-validator');
 
 // Extracted services
+const crypto = require('crypto');
 const customerRegistrationService = require('../services/customerRegistrationService');
 const bagClaimService = require('../services/bagClaimService');
+const firebasePhoneService = require('../services/firebasePhoneService');
+const emailService = require('../utils/emailService');
 
 // Utility modules
 const ControllerHelpers = require('../utils/controllerHelpers');
@@ -99,6 +102,98 @@ exports.verifyEmail = ControllerHelpers.asyncWrapper(async (req, res) => {
     html = `<!doctype html><meta charset="utf-8"><h1>${copy.t}</h1><p>${copy.m}</p>`;
   }
   res.status(ok ? 200 : 410).type('html').send(html);
+});
+
+/**
+ * GET /api/v1/customers/me — the registered customer reads their own contact
+ * info to prefill the "Edit my info" form. Authorized by the customer
+ * scan-session (scanAuth → req.scanActor.type === 'customer').
+ */
+exports.getMe = ControllerHelpers.asyncWrapper(async (req, res) => {
+  if (!req.scanActor || req.scanActor.type !== 'customer') {
+    return ControllerHelpers.sendError(res, 'Not authorized', 403);
+  }
+  const c = await Customer.findOne({ customerId: req.scanActor.id })
+    .select('firstName lastName email phone address city state zipCode emailVerified');
+  if (!c) return ControllerHelpers.sendError(res, 'Customer not found', 404);
+  return ControllerHelpers.sendSuccess(res, {
+    customer: {
+      firstName: c.firstName, lastName: c.lastName, email: c.email, phone: c.phone,
+      address: c.address, city: c.city, state: c.state, zipCode: c.zipCode,
+      emailVerified: c.emailVerified
+    }
+  });
+});
+
+/**
+ * PATCH /api/v1/customers/me — the registered customer updates their own contact
+ * info. Phone change → SMS re-verify (when enabled) + Cents-sync flag for the
+ * operator; email change → set unverified + send a fresh confirm link.
+ */
+exports.updateMe = ControllerHelpers.asyncWrapper(async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) return ControllerHelpers.sendError(res, 'Validation failed', 400, errors.array());
+  if (!req.scanActor || req.scanActor.type !== 'customer') {
+    return ControllerHelpers.sendError(res, 'Not authorized', 403);
+  }
+  const customer = await Customer.findOne({ customerId: req.scanActor.id });
+  if (!customer) return ControllerHelpers.sendError(res, 'Customer not found', 404);
+
+  const { firstName, lastName, email, phone, address, city, state, zipCode, phoneIdToken } = req.body;
+
+  // Phone change (option a): re-verify the new number, flag Cents for the operator.
+  if (phone !== undefined && Formatters.e164(phone, 'us') !== Formatters.e164(customer.phone, 'us')) {
+    if (firebasePhoneService.isEnabled()) {
+      if (!phoneIdToken) return ControllerHelpers.sendError(res, 'Phone not verified', 400, [{ code: 'phone_not_verified' }]);
+      let verified;
+      try { verified = await firebasePhoneService.verifyPhoneToken(phoneIdToken); }
+      catch (e) { return ControllerHelpers.sendError(res, 'Phone not verified', 400, [{ code: 'phone_not_verified' }]); }
+      if (Formatters.e164(phone, 'us') !== Formatters.e164(verified, 'us')) {
+        return ControllerHelpers.sendError(res, 'Phone number does not match the verified number', 400, [{ code: 'phone_mismatch' }]);
+      }
+      customer.phoneVerifiedAt = new Date();
+    }
+    customer.phone = Formatters.phone(phone, 'us');
+    customer.centsSyncNeeded = true; // operator must update the number in Cents
+  }
+
+  // Email change → unverified + fresh single-use confirm link.
+  let emailConfirmToken = null;
+  if (email !== undefined) {
+    const newEmail = String(email).trim().toLowerCase();
+    if (newEmail && newEmail !== customer.email) {
+      const dup = await Customer.findOne({ email: newEmail, customerId: { $ne: customer.customerId } });
+      if (dup) return ControllerHelpers.sendError(res, 'Email already registered', 400, [{ code: 'duplicate_email' }]);
+      customer.email = newEmail;
+      customer.emailVerified = false;
+      emailConfirmToken = crypto.randomBytes(32).toString('hex');
+      customer.emailVerifyTokenHash = Customer.hashEmailToken(emailConfirmToken);
+      customer.emailVerifyTokenExpires = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+    }
+  }
+
+  if (firstName !== undefined) customer.firstName = Formatters.name(firstName);
+  if (lastName !== undefined) customer.lastName = Formatters.name(lastName);
+  if (address !== undefined) customer.address = address;
+  if (city !== undefined) customer.city = city;
+  if (state !== undefined) customer.state = String(state).toUpperCase();
+  if (zipCode !== undefined) customer.zipCode = zipCode;
+
+  await customer.save();
+
+  if (emailConfirmToken) {
+    // Best-effort — never fail the save on an SMTP hiccup.
+    try { await emailService.sendCustomerEmailConfirmation(customer, { emailVerifyToken: emailConfirmToken }); }
+    catch (e) { /* non-blocking */ }
+  }
+
+  return ControllerHelpers.sendSuccess(res, {
+    customer: {
+      firstName: customer.firstName, lastName: customer.lastName, email: customer.email,
+      phone: customer.phone, address: customer.address, city: customer.city,
+      state: customer.state, zipCode: customer.zipCode, emailVerified: customer.emailVerified
+    }
+  }, 'Your info was updated');
 });
 
 /**

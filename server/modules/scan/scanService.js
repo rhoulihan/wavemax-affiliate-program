@@ -177,9 +177,11 @@ async function resolveScan({ bagToken }) {
   const decision = resolveScanAction(reference, { now, reopenWindowMs });
 
   // Customer display info (intake screen only — first/last name, no PII beyond).
+  // centsSyncNeeded warns staff that the customer changed their phone and Cents
+  // needs updating; the new phone is included so the operator can copy it across.
   const Customer = require('../../models/Customer');
   const customer = await Customer.findOne({ customerId: bag.customerId })
-    .select('firstName lastName');
+    .select('firstName lastName centsSyncNeeded phone');
 
   const currentStatus = reference && OPEN_STATUSES.includes(reference.status)
     ? reference.status : 'none';
@@ -191,6 +193,7 @@ async function resolveScan({ bagToken }) {
     proposedAction: decision.action,
     ...(decision.to ? { to: decision.to } : {}),
     ...(decision.orderId ? { orderId: decision.orderId } : {}),
+    ...(customer && customer.centsSyncNeeded ? { centsSyncNeeded: true, customerPhone: customer.phone } : {}),
     promptKey: promptKeyFor(decision),
     requiresConfirm: true
   };
@@ -235,32 +238,45 @@ async function applyScan({ bagToken, expectedAction, reopen, paymentConfirmed, a
   const by = actor.id;
   const role = actor.type; // 'operator' | 'affiliate' | 'customer' (start-only)
 
+  let result;
   if (decision.action === 'create-pending') {
     const { order } = await orderTransitionService.createPendingOrder({ bag, by, role, req });
-    return { orderId: order.orderId, newStatus: order.status, action: 'create-pending' };
-  }
-
-  if (decision.action === 'advance') {
-    const result = await orderTransitionService.advanceOrder({
+    result = { orderId: order.orderId, newStatus: order.status, action: 'create-pending' };
+  } else if (decision.action === 'advance') {
+    const adv = await orderTransitionService.advanceOrder({
       bag, by, role, paymentConfirmed: !!paymentConfirmed, req
     });
-    return {
-      orderId: result.order ? result.order.orderId : decision.orderId,
-      newStatus: result.order ? result.order.status : undefined,
+    result = {
+      orderId: adv.order ? adv.order.orderId : decision.orderId,
+      newStatus: adv.order ? adv.order.status : undefined,
       action: 'advance'
     };
-  }
-
-  if (decision.action === 'delivery-rescan-prompt') {
+  } else if (decision.action === 'delivery-rescan-prompt') {
     if (reopen === true) {
       const { order } = await orderTransitionService.createPendingOrder({ bag, by, role, req });
-      return { orderId: order.orderId, newStatus: order.status, action: 'create-pending' };
+      result = { orderId: order.orderId, newStatus: order.status, action: 'create-pending' };
+    } else {
+      // reopen:false -> explicit no-op (the operator chose not to start a new cycle)
+      result = { orderId: decision.orderId, action: 'no-op' };
     }
-    // reopen:false -> explicit no-op (the operator chose not to start a new cycle)
-    return { orderId: decision.orderId, action: 'no-op' };
+  } else {
+    throw new ScanError('not_applicable', 'No applicable scan action', 409);
   }
 
-  throw new ScanError('not_applicable', 'No applicable scan action', 409);
+  // Staff handled the bag → clear any pending Cents phone-sync warning (the
+  // operator has seen it and is processing the bag). Customers (start-only)
+  // never clear it. Best-effort; never fails the scan.
+  if (actor.type !== 'customer') {
+    try {
+      const Customer = require('../../models/Customer');
+      await Customer.updateOne(
+        { customerId: bag.customerId, centsSyncNeeded: true },
+        { $set: { centsSyncNeeded: false } }
+      );
+    } catch (_e) { /* non-blocking */ }
+  }
+
+  return result;
 }
 
 /** POST /api/v1/scan/undo — reverse the last transition for the bag's order. */

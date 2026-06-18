@@ -523,4 +523,38 @@ exports.sendCustomerDeliveredEmail = async (customer, order, { affiliateName } =
   }
 };
 
+/**
+ * Send a fresh "confirm your email" link after a customer changes their email
+ * in "Edit my info". Until they click it, order emails stay suppressed.
+ * @param {{email,firstName,languagePreference}} customer
+ * @param {{emailVerifyToken:string}} opts
+ */
+exports.sendCustomerEmailConfirmation = async (customer, { emailVerifyToken } = {}) => {
+  try {
+    if (!customer || !customer.email || !emailVerifyToken) {
+      logger.error('sendCustomerEmailConfirmation: missing email or token');
+      return false;
+    }
+    const language = customer.languagePreference || 'en';
+    const template = await loadTemplate('customer-confirm-email', language);
+    const baseUrl = process.env.BASE_URL || 'https://rundberglaundry.com';
+    const verifyUrl = `${baseUrl}/api/v1/customers/verify-email/${encodeURIComponent(emailVerifyToken)}`;
+
+    const T = {
+      en: { EMAIL_TITLE: 'Confirm your email', EMAIL_HEADER: 'Confirm your new email', GREETING: `Hi ${customer.firstName || ''},`, CONFIRM_EMAIL_MESSAGE: 'You updated your email. Confirm it so we can send you order updates — until you confirm, we won\'t email you.', CONFIRM_EMAIL_BUTTON: 'Confirm your email', FOOTER_SUPPORT: 'If you didn\'t change your email, please contact your service provider.', FOOTER_RIGHTS: 'All rights reserved.' },
+      es: { EMAIL_TITLE: 'Confirme su correo', EMAIL_HEADER: 'Confirme su nuevo correo', GREETING: `Hola ${customer.firstName || ''},`, CONFIRM_EMAIL_MESSAGE: 'Actualizó su correo. Confírmelo para que podamos enviarle actualizaciones de su pedido. Hasta que confirme, no le enviaremos correos.', CONFIRM_EMAIL_BUTTON: 'Confirmar correo', FOOTER_SUPPORT: 'Si no cambió su correo, contacte a su proveedor de servicio.', FOOTER_RIGHTS: 'Todos los derechos reservados.' },
+      pt: { EMAIL_TITLE: 'Confirme seu e-mail', EMAIL_HEADER: 'Confirme seu novo e-mail', GREETING: `Olá ${customer.firstName || ''},`, CONFIRM_EMAIL_MESSAGE: 'Você atualizou seu e-mail. Confirme-o para que possamos enviar atualizações do pedido. Até confirmar, não enviaremos e-mails.', CONFIRM_EMAIL_BUTTON: 'Confirmar e-mail', FOOTER_SUPPORT: 'Se você não alterou seu e-mail, contate seu provedor de serviço.', FOOTER_RIGHTS: 'Todos os direitos reservados.' },
+      de: { EMAIL_TITLE: 'Bestätigen Sie Ihre E-Mail', EMAIL_HEADER: 'Bestätigen Sie Ihre neue E-Mail', GREETING: `Hallo ${customer.firstName || ''},`, CONFIRM_EMAIL_MESSAGE: 'Sie haben Ihre E-Mail aktualisiert. Bestätigen Sie sie, damit wir Ihnen Bestellaktualisierungen senden können. Bis zur Bestätigung senden wir keine E-Mails.', CONFIRM_EMAIL_BUTTON: 'E-Mail bestätigen', FOOTER_SUPPORT: 'Wenn Sie Ihre E-Mail nicht geändert haben, kontaktieren Sie Ihren Dienstleister.', FOOTER_RIGHTS: 'Alle Rechte vorbehalten.' }
+    };
+    const t = T[language] || T.en;
+    const html = fillTemplate(template, { ...t, VERIFY_URL: verifyUrl, CURRENT_YEAR: String(new Date().getFullYear()) });
+    await sendEmail(customer.email, t.EMAIL_TITLE, html);
+    logger.info('Customer email-confirmation sent', { customerId: customer.customerId });
+    return true;
+  } catch (error) {
+    logger.error('Error sending customer email confirmation:', error);
+    return false;
+  }
+};
+
 module.exports = exports;
