@@ -80,6 +80,31 @@ describe('Admin affiliate settings API', () => {
     expect(res.body.affiliate.serviceType).toBe('full_service');
   });
 
+  it('updates pickupInstructions and persists', async () => {
+    const aff = await makeAffiliate({ pickupInstructions: 'old text' });
+    const res = await agent
+      .patch(`/api/v1/administrators/affiliates/${aff.affiliateId}`)
+      .set('Authorization', `Bearer ${adminToken}`)
+      .set('x-csrf-token', csrfToken)
+      .send({ pickupInstructions: 'Leave bag on the porch by 8am.' });
+    expect(res.status).toBe(200);
+    expect(res.body.affiliate.pickupInstructions).toBe('Leave bag on the porch by 8am.');
+    const reloaded = await Affiliate.findOne({ affiliateId: aff.affiliateId });
+    expect(reloaded.pickupInstructions).toBe('Leave bag on the porch by 8am.');
+  });
+
+  it('rejects blanking pickupInstructions (cannot be emptied)', async () => {
+    const aff = await makeAffiliate({ pickupInstructions: 'keep me' });
+    const res = await agent
+      .patch(`/api/v1/administrators/affiliates/${aff.affiliateId}`)
+      .set('Authorization', `Bearer ${adminToken}`)
+      .set('x-csrf-token', csrfToken)
+      .send({ pickupInstructions: '   ' });
+    expect(res.status).toBe(400);
+    const reloaded = await Affiliate.findOne({ affiliateId: aff.affiliateId });
+    expect(reloaded.pickupInstructions).toBe('keep me');
+  });
+
   it('rejects an invalid serviceType with 400', async () => {
     const aff = await makeAffiliate();
     const res = await agent
@@ -118,7 +143,8 @@ describe('Admin affiliate settings API', () => {
       .send({
         firstName: 'Full', lastName: 'Service', email: `fs${uniq}@example.com`,
         phone: '5125550002', address: '2 B St', city: 'Austin', state: 'TX', zipCode: '78702',
-        username: `fs${uniq}`, affiliateType: 'standard', serviceType: 'full_service'
+        username: `fs${uniq}`, affiliateType: 'standard', serviceType: 'full_service',
+        pickupInstructions: 'Leave your bag by the door.'
       });
     expect(res.status).toBe(201);
     const created = await Affiliate.findOne({ affiliateId: res.body.affiliateId });
@@ -135,7 +161,7 @@ describe('Admin affiliate settings API', () => {
       .send({
         firstName: 'Pick', lastName: 'Up', email: `pu${uniq}@example.com`,
         phone: '5125550003', address: '3 C St', city: 'Austin', state: 'TX', zipCode: '78703',
-        username: `pu${uniq}`
+        username: `pu${uniq}`, pickupInstructions: 'Drop at the counter, 9–5.'
       });
     expect(res.status).toBe(201);
     const created = await Affiliate.findOne({ affiliateId: res.body.affiliateId });
@@ -152,7 +178,8 @@ describe('Admin affiliate settings API', () => {
       .send({
         firstName: 'Loc', lastName: 'Full', email: `lf${uniq}@example.com`,
         phone: '5125550004', address: '4 D St', city: 'Austin', state: 'TX', zipCode: '78704',
-        username: `lf${uniq}`, affiliateType: 'location', serviceType: 'full_service'
+        username: `lf${uniq}`, affiliateType: 'location', serviceType: 'full_service',
+        pickupInstructions: 'Bags collected daily at 10am.'
       });
     expect(res.status).toBe(201);
     const created = await Affiliate.findOne({ affiliateId: res.body.affiliateId });

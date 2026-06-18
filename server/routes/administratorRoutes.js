@@ -53,6 +53,10 @@ router.post('/affiliates',
     body('affiliateType').optional().isIn(['standard', 'location']),
     body('serviceType').optional().isIn(['pickup_location', 'full_service']),
     body('orderNotificationsEnabled').optional().isBoolean(),
+    // Customer-facing pickup instructions — required for every partner.
+    // trim() BEFORE notEmpty() so a whitespace-only value is rejected.
+    body('pickupInstructions').trim().notEmpty().isLength({ max: 2000 })
+      .withMessage('Pickup instructions are required'),
     body('minimumDeliveryFee').optional().isFloat({ min: 0, max: 100 }),
     body('perBagDeliveryFee').optional().isFloat({ min: 0, max: 50 })
   ],
@@ -67,6 +71,10 @@ router.patch('/affiliates/:affiliateId',
     body('serviceType').optional().isIn(['pickup_location', 'full_service']),
     body('orderNotificationsEnabled').optional().isBoolean(),
     body('isActive').optional().isBoolean(),
+    // Optional on edit, but if present it can't be blanked (every partner keeps
+    // non-empty instructions). trim() BEFORE notEmpty() rejects whitespace-only.
+    body('pickupInstructions').optional().trim().notEmpty().isLength({ max: 2000 })
+      .withMessage('Pickup instructions cannot be empty'),
     body('minimumDeliveryFee').optional().isFloat({ min: 0, max: 100 }),
     body('perBagDeliveryFee').optional().isFloat({ min: 0, max: 50 })
   ],

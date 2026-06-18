@@ -84,7 +84,11 @@ exports.claimRegister = ControllerHelpers.asyncWrapper(async (req, res) => {
         affiliateData: {
           businessName: affiliate.businessName,
           firstName: affiliate.firstName,
-          lastName: affiliate.lastName
+          lastName: affiliate.lastName,
+          // Drives the confirmation page: full_service → "Request pickup now"
+          // then show the instructions; pickup_location → show them directly.
+          serviceType: affiliate.serviceType,
+          pickupInstructions: affiliate.pickupInstructions || ''
         }
       },
       'Customer registration successful',

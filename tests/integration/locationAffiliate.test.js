@@ -38,6 +38,7 @@ describe('Location affiliates (admin manual-create)', () => {
       state: 'TX',
       zipCode: '78753',
       username: 'locpoint1',
+      pickupInstructions: 'Drop your bag at the front desk, Mon–Fri 8am–6pm.',
       ...overrides
     });
 
@@ -137,6 +138,23 @@ describe('Location affiliates (admin manual-create)', () => {
     test('400 on invalid email', async () => {
       const res = await post(createBody({ email: 'not-an-email' }));
       expect(res.status).toBe(400);
+    });
+
+    test('400 when pickupInstructions is missing (required for every partner)', async () => {
+      const body = createBody();
+      delete body.pickupInstructions;
+      const res = await post(body);
+      expect(res.status).toBe(400);
+      expect(await Affiliate.countDocuments()).toBe(0);
+    });
+
+    test('persists pickupInstructions on create', async () => {
+      const res = await post(createBody({
+        pickupInstructions: 'Ring the bell at the side door for pickup.'
+      }));
+      expect(res.status).toBe(201);
+      const persisted = await Affiliate.findOne({ affiliateId: res.body.affiliateId });
+      expect(persisted.pickupInstructions).toBe('Ring the bell at the side door for pickup.');
     });
   });
 });

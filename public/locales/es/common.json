@@ -92,7 +92,17 @@
       "enterEmailFirst": "Ingrese su correo electrónico primero.",
       "phoneUnavailable": "La verificación por teléfono no está disponible temporalmente. Recargue la página e inténtelo de nuevo."
     },
-    "emailOptional": "Correo electrónico (opcional)"
+    "emailOptional": "Correo electrónico (opcional)",
+    "pickup": {
+      "requestNow": "Solicitar recogida ahora",
+      "requestedTitle": "Recogida solicitada — su proveedor ha sido notificado",
+      "dropOffTitle": "Cómo entregar su bolsa",
+      "fallback": "Su socio de lavandería se pondrá en contacto con los próximos pasos.",
+      "error": "No se pudo solicitar la recogida. Inténtelo de nuevo.",
+      "tooManyAttempts": "Demasiados intentos. Inténtelo de nuevo en unos minutos.",
+      "cannotVerify": "No pudimos iniciar su pedido automáticamente. Su proveedor se pondrá en contacto.",
+      "alreadyStartedTitle": "Su pedido ya está en proceso"
+    }
   },
   "bag": {
     "label": {
@@ -1361,7 +1371,10 @@
       "notificationsOn": "Notificaciones de pedidos activadas",
       "notificationsOff": "Notificaciones de pedidos desactivadas",
       "saved": "Configuración del afiliado guardada",
-      "saveError": "No se pudo guardar la configuración"
+      "saveError": "No se pudo guardar la configuración",
+      "pickupInstructionsLabel": "Instrucciones de recogida / entrega para el cliente",
+      "pickupInstructionsPlaceholder": "Se muestran al cliente después de registrar una bolsa.",
+      "instructionsRequired": "Las instrucciones de recogida son obligatorias."
     },
     "bagLabels": {
       "button": "Imprimir etiquetas",

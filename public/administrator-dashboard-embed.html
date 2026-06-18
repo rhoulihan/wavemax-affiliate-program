@@ -455,6 +455,14 @@
                         <span data-i18n="admin.affiliateSettings.notificationsLabel">Send order notifications to this affiliate</span>
                     </label>
                 </div>
+                <div class="form-group margin-bottom-20">
+                    <label class="font-weight-600 margin-bottom-10" for="affiliateSettingsPickupInstructions"
+                           data-i18n="admin.affiliateSettings.pickupInstructionsLabel">Customer pickup / drop-off instructions</label>
+                    <textarea id="affiliateSettingsPickupInstructions" class="form-control" rows="4"
+                              data-i18n-placeholder="admin.affiliateSettings.pickupInstructionsPlaceholder"
+                              placeholder="Shown to the customer after they register a bag."></textarea>
+                    <p id="affiliateSettingsError" class="claim-error" hidden></p>
+                </div>
                 <div class="form-actions justify-content-center margin-top-30">
                     <button type="button" class="btn btn-secondary" id="cancelAffiliateSettings" data-i18n="common.buttons.cancel">Cancel</button>
                     <button type="button" class="btn btn-primary" id="saveAffiliateSettings" data-i18n="common.buttons.save">Save</button>

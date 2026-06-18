@@ -78,6 +78,29 @@ describe('/claim page wiring', () => {
     expect(claimSrc).not.toContain('emailVerificationToken');
   });
 
+  it('registered confirmation has the Request-pickup button + instructions block', () => {
+    const html = fs.readFileSync(path.join(ROOT, 'public/claim-embed.html'), 'utf8');
+    expect(html).toContain('id="requestPickupBtn"');
+    expect(html).toContain('id="pickupInstructionsBlock"');
+    expect(html).toContain('data-i18n="claim.pickup.requestNow"');
+    const claimSrc = fs.readFileSync(path.join(ROOT, 'public/assets/js/claim.js'), 'utf8');
+    // full_service → button; otherwise instructions shown directly
+    expect(claimSrc).toContain('renderRegistered');
+    expect(claimSrc).toContain('requestPickupNow');
+    expect(claimSrc).toContain("'create-pending'");
+    expect(claimSrc).toContain('full_service');
+  });
+
+  it('ships claim.pickup.* keys in all four languages', () => {
+    for (const lang of ['en', 'es', 'pt', 'de']) {
+      const dict = JSON.parse(fs.readFileSync(path.join(ROOT, `public/locales/${lang}/common.json`), 'utf8'));
+      const p = dict.claim && dict.claim.pickup;
+      for (const k of ['requestNow', 'requestedTitle', 'dropOffTitle', 'fallback', 'error']) {
+        expect(`${lang}:claim.pickup.${k}:${typeof (p && p[k])}`).toBe(`${lang}:claim.pickup.${k}:string`);
+      }
+    }
+  });
+
   it('claim.js hard-gates submit on phoneRequired (server-driven), not on SDK load success', () => {
     const claimSrc = fs.readFileSync(path.join(ROOT, 'public/assets/js/claim.js'), 'utf8');
     // The submit gate must depend on phoneRequired so an SDK load failure can't

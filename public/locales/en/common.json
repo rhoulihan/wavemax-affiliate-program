@@ -92,7 +92,17 @@
       "enterEmailFirst": "Enter your email first.",
       "phoneUnavailable": "Phone verification is temporarily unavailable. Please reload the page and try again."
     },
-    "emailOptional": "Email (optional)"
+    "emailOptional": "Email (optional)",
+    "pickup": {
+      "requestNow": "Request pickup now",
+      "requestedTitle": "Pickup requested — your provider has been notified",
+      "dropOffTitle": "How to drop off your bag",
+      "fallback": "Your laundry partner will be in touch with what to do next.",
+      "error": "Could not request pickup. Please try again.",
+      "tooManyAttempts": "Too many attempts. Please try again in a few minutes.",
+      "cannotVerify": "We couldn't start your order automatically. Your provider will be in touch.",
+      "alreadyStartedTitle": "Your order is already in progress"
+    }
   },
   "bag": {
     "label": {
@@ -1361,7 +1371,10 @@
       "notificationsOn": "Order notifications on",
       "notificationsOff": "Order notifications off",
       "saved": "Affiliate settings saved",
-      "saveError": "Failed to save settings"
+      "saveError": "Failed to save settings",
+      "pickupInstructionsLabel": "Customer pickup / drop-off instructions",
+      "pickupInstructionsPlaceholder": "Shown to the customer after they register a bag.",
+      "instructionsRequired": "Pickup instructions are required."
     },
     "bagLabels": {
       "button": "Print Labels",

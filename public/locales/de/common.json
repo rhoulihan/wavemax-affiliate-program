@@ -92,7 +92,17 @@
       "enterEmailFirst": "Geben Sie zuerst Ihre E-Mail ein.",
       "phoneUnavailable": "Die Telefonverifizierung ist vorübergehend nicht verfügbar. Bitte laden Sie die Seite neu und versuchen Sie es erneut."
     },
-    "emailOptional": "E-Mail (optional)"
+    "emailOptional": "E-Mail (optional)",
+    "pickup": {
+      "requestNow": "Jetzt Abholung anfordern",
+      "requestedTitle": "Abholung angefordert — Ihr Anbieter wurde benachrichtigt",
+      "dropOffTitle": "So geben Sie Ihren Beutel ab",
+      "fallback": "Ihr Wäschepartner meldet sich mit den nächsten Schritten.",
+      "error": "Abholung konnte nicht angefordert werden. Bitte erneut versuchen.",
+      "tooManyAttempts": "Zu viele Versuche. Bitte versuchen Sie es in einigen Minuten erneut.",
+      "cannotVerify": "Ihre Bestellung konnte nicht automatisch gestartet werden. Ihr Anbieter meldet sich.",
+      "alreadyStartedTitle": "Ihre Bestellung ist bereits in Bearbeitung"
+    }
   },
   "bag": {
     "label": {
@@ -1361,7 +1371,10 @@
       "notificationsOn": "Bestellbenachrichtigungen aktiviert",
       "notificationsOff": "Bestellbenachrichtigungen deaktiviert",
       "saved": "Partner-Einstellungen gespeichert",
-      "saveError": "Einstellungen konnten nicht gespeichert werden"
+      "saveError": "Einstellungen konnten nicht gespeichert werden",
+      "pickupInstructionsLabel": "Abhol-/Abgabehinweise für Kunden",
+      "pickupInstructionsPlaceholder": "Wird dem Kunden nach der Beutelregistrierung angezeigt.",
+      "instructionsRequired": "Abholhinweise sind erforderlich."
     },
     "bagLabels": {
       "button": "Etiketten drucken",

@@ -469,7 +469,7 @@ exports.getAffiliatesList = async (req, res) => {
 
     const affiliates = await Affiliate.find(query)
       .select('affiliateId firstName lastName businessName email isActive serviceArea ' +
-              'affiliateType serviceType orderNotificationsEnabled minimumDeliveryFee perBagDeliveryFee')
+              'affiliateType serviceType orderNotificationsEnabled pickupInstructions minimumDeliveryFee perBagDeliveryFee')
       .limit(parseInt(limit, 10))
       .sort('businessName');
 

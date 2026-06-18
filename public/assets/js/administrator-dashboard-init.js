@@ -2043,6 +2043,7 @@
                                         data-affiliate-name="${escapeHtml(name)}"
                                         data-service-type="${escapeHtml(serviceType)}"
                                         data-notifications="${notifyOn ? '1' : '0'}"
+                                        data-pickup-instructions="${escapeHtml(aff.pickupInstructions || '')}"
                                         title="${escapeHtml(t('admin.affiliateSettings.button', 'Settings'))}">
                                     <i class="fas fa-cog"></i> ${escapeHtml(t('admin.affiliateSettings.button', 'Settings'))}
                                 </button>
@@ -2082,7 +2083,8 @@
             affiliateId: settingsBtn.getAttribute('data-affiliate-id'),
             name: settingsBtn.getAttribute('data-affiliate-name'),
             serviceType: settingsBtn.getAttribute('data-service-type'),
-            notifications: settingsBtn.getAttribute('data-notifications') === '1'
+            notifications: settingsBtn.getAttribute('data-notifications') === '1',
+            pickupInstructions: settingsBtn.getAttribute('data-pickup-instructions') || ''
           });
         }
       });
@@ -2092,7 +2094,7 @@
   // ── Per-affiliate settings modal (serviceType + order notifications) ──────
   let affiliateSettingsId = null;
 
-  function showAffiliateSettingsModal({ affiliateId, name, serviceType, notifications }) {
+  function showAffiliateSettingsModal({ affiliateId, name, serviceType, notifications, pickupInstructions }) {
     const modal = document.getElementById('affiliateSettingsModal');
     if (!modal) return;
     affiliateSettingsId = affiliateId;
@@ -2102,6 +2104,10 @@
     if (typeSel) typeSel.value = serviceType === 'full_service' ? 'full_service' : 'pickup_location';
     const notifyChk = document.getElementById('affiliateSettingsNotifications');
     if (notifyChk) notifyChk.checked = !!notifications;
+    const instrEl = document.getElementById('affiliateSettingsPickupInstructions');
+    if (instrEl) instrEl.value = pickupInstructions || '';
+    const errEl = document.getElementById('affiliateSettingsError');
+    if (errEl) errEl.hidden = true;
     modal.classList.remove('hidden');
     modal.style.display = 'flex';
   }
@@ -2117,12 +2123,23 @@
     const t = window.i18n ? window.i18n.t.bind(window.i18n) : (k, f) => f || k;
     const serviceType = document.getElementById('affiliateSettingsServiceType').value;
     const orderNotificationsEnabled = document.getElementById('affiliateSettingsNotifications').checked;
+    const pickupInstructions = (document.getElementById('affiliateSettingsPickupInstructions').value || '').trim();
+    const errEl = document.getElementById('affiliateSettingsError');
+    // Every partner must have customer-facing pickup instructions.
+    if (!pickupInstructions) {
+      if (errEl) {
+        errEl.textContent = t('admin.affiliateSettings.instructionsRequired', 'Pickup instructions are required.');
+        errEl.hidden = false;
+      }
+      return;
+    }
+    if (errEl) errEl.hidden = true;
     const saveBtn = document.getElementById('saveAffiliateSettings');
     try {
       if (saveBtn) saveBtn.disabled = true;
       const response = await adminFetch(`/api/v1/administrators/affiliates/${affiliateSettingsId}`, {
         method: 'PATCH',
-        body: JSON.stringify({ serviceType, orderNotificationsEnabled })
+        body: JSON.stringify({ serviceType, orderNotificationsEnabled, pickupInstructions })
       });
       const data = await response.json();
       if (response.ok && data.success) {

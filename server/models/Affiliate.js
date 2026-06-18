@@ -35,6 +35,12 @@ const affiliateSchema = new mongoose.Schema({
   // (set in the pre-validate hook when not explicitly provided). When on, the
   // affiliate is emailed when a customer starts an order and when it's ready.
   orderNotificationsEnabled: { type: Boolean },
+  // Customer-facing pickup/drop-off instructions, shown on the bag-claim
+  // confirmation page (full_service: after "Request pickup now"; pickup_location:
+  // directly, to follow for drop-off). Required for every partner at the ADMIN
+  // config layer (create + settings); left optional at the schema level so
+  // invite self-registration — which doesn't collect it — still saves.
+  pickupInstructions: { type: String, trim: true },
   firstName: { type: String, required: true },
   lastName: { type: String, required: true },
   email: { type: String, required: true, unique: true },

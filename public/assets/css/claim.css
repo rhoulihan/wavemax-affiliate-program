@@ -179,6 +179,28 @@
   padding: 0;
   text-decoration: underline;
 }
+/* Pickup / drop-off instructions on the registered-confirmation screen. */
+.claim-instructions {
+  margin-top: 20px;
+  padding: 16px 18px;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  text-align: left;
+}
+.claim-instructions-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1e3a8a;
+  margin: 0 0 8px;
+}
+.claim-instructions-text {
+  font-size: 15px;
+  color: #334155;
+  white-space: pre-wrap;
+  margin: 0;
+}
+
 /* Staff scan link sits below the customer-start panel (secondary path). */
 .claim-staff-link-row {
   margin-top: 18px;

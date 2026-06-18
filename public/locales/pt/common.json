@@ -92,7 +92,17 @@
       "enterEmailFirst": "Digite seu e-mail primeiro.",
       "phoneUnavailable": "A verificação por telefone está temporariamente indisponível. Recarregue a página e tente novamente."
     },
-    "emailOptional": "E-mail (opcional)"
+    "emailOptional": "E-mail (opcional)",
+    "pickup": {
+      "requestNow": "Solicitar coleta agora",
+      "requestedTitle": "Coleta solicitada — seu provedor foi notificado",
+      "dropOffTitle": "Como entregar sua sacola",
+      "fallback": "Seu parceiro de lavanderia entrará em contato com os próximos passos.",
+      "error": "Não foi possível solicitar a coleta. Tente novamente.",
+      "tooManyAttempts": "Muitas tentativas. Tente novamente em alguns minutos.",
+      "cannotVerify": "Não foi possível iniciar seu pedido automaticamente. Seu provedor entrará em contato.",
+      "alreadyStartedTitle": "Seu pedido já está em andamento"
+    }
   },
   "bag": {
     "label": {
@@ -1361,7 +1371,10 @@
       "notificationsOn": "Notificações de pedidos ativadas",
       "notificationsOff": "Notificações de pedidos desativadas",
       "saved": "Configurações do afiliado salvas",
-      "saveError": "Falha ao salvar as configurações"
+      "saveError": "Falha ao salvar as configurações",
+      "pickupInstructionsLabel": "Instruções de coleta / entrega para o cliente",
+      "pickupInstructionsPlaceholder": "Mostradas ao cliente após registrar uma sacola.",
+      "instructionsRequired": "As instruções de coleta são obrigatórias."
     },
     "bagLabels": {
       "button": "Imprimir etiquetas",

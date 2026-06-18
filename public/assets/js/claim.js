@@ -494,6 +494,86 @@
 
   // ---- gating + submit -------------------------------------------------------
 
+  // ---- registered confirmation: pickup / drop-off instructions ---------------
+
+  var registeredPhone = null;     // the phone just registered (to mint a customer session)
+  var registeredAffiliate = null; // { serviceType, pickupInstructions } from the register response
+
+  function renderRegistered(affiliateData) {
+    registeredAffiliate = affiliateData || {};
+    show('registered');
+    if (registeredAffiliate.serviceType === 'full_service') {
+      // Full-service: offer to start the order now; instructions show after.
+      showById('requestPickupBtn');
+      hideById('pickupInstructionsBlock');
+    } else {
+      // Pickup location (or unconfigured): show the drop-off instructions now.
+      hideById('requestPickupBtn');
+      showPickupInstructions(t('claim.pickup.dropOffTitle', 'How to drop off your bag'));
+    }
+  }
+
+  function instructionsText() {
+    var txt = registeredAffiliate && registeredAffiliate.pickupInstructions;
+    return (txt && String(txt).trim())
+      ? txt
+      : t('claim.pickup.fallback', 'Your laundry partner will be in touch with what to do next.');
+  }
+
+  function showPickupInstructions(title) {
+    setText('pickupInstructionsTitle', title);
+    setText('pickupInstructionsText', instructionsText());
+    showById('pickupInstructionsBlock');
+  }
+
+  // "Request pickup now" — start the order with the just-registered phone,
+  // reusing the customer-initiated scan flow (mint → resolve → create-pending).
+  var pickupRequesting = false; // re-entry guard against double-taps
+
+  function pickupErrorFor(err) {
+    var s = err && err.status;
+    if (s === 429) return t('claim.pickup.tooManyAttempts', 'Too many attempts. Please try again in a few minutes.');
+    if (s === 401 || s === 403) return t('claim.pickup.cannotVerify', "We couldn't start your order automatically. Your provider will be in touch.");
+    return t('claim.pickup.error', 'Could not request pickup. Please try again.');
+  }
+
+  function requestPickupNow() {
+    hideById('requestPickupError');
+    if (pickupRequesting) return; // ignore double-taps
+    // Normalize to digits so the contact reliably matches the bag's customer
+    // (matchesCustomerContact compares last-10 digits; needs ≥10).
+    var contact = String(registeredPhone || '').replace(/\D/g, '');
+    if (contact.length < 10 || !window.ScanSession) {
+      showById('requestPickupError', t('claim.pickup.error', 'Could not request pickup. Please try again.'));
+      return;
+    }
+    pickupRequesting = true;
+    var btn = document.getElementById('requestPickupBtn');
+    var s = spin(btn);
+    var orderCreated = false;
+    window.ScanSession.init({ mode: 'session' });
+    window.ScanSession.mint(bagToken, contact)
+      .then(function () { return window.ScanSession.resolve(bagToken); })
+      .then(function (resolveData) {
+        if (resolveData && resolveData.proposedAction && resolveData.proposedAction !== 'create-pending') {
+          // An order already exists for this bag — nothing new to create.
+          return null;
+        }
+        orderCreated = true;
+        return window.ScanSession.apply(bagToken, 'create-pending');
+      })
+      .then(function () {
+        hideById('requestPickupBtn');
+        showPickupInstructions(orderCreated
+          ? t('claim.pickup.requestedTitle', 'Pickup requested — your provider has been notified')
+          : t('claim.pickup.alreadyStartedTitle', 'Your order is already in progress'));
+      })
+      .catch(function (err) {
+        showById('requestPickupError', pickupErrorFor(err));
+      })
+      .then(function () { s.hide(); pickupRequesting = false; });
+  }
+
   function isVerified() {
     // Phone is the only required verification — gated on phoneREQUIRED (server),
     // not on whether the SDK loaded, so an SDK failure can't open the gate.
@@ -543,8 +623,9 @@
       .then(function (result) {
         if (result.status === 201) {
           // Phase 1: registration-only — no customer portal to land in.
-          // Show a simple success state right here on the claim page.
-          show('registered');
+          // Show the success state with the right next step for this partner.
+          registeredPhone = payload.phone;
+          renderRegistered((result.body && result.body.affiliateData) || {});
           return;
         }
         if (result.status === 409) {
@@ -573,6 +654,10 @@
     // handler so the click Event isn't passed as the isResend flag.
     var phoneSendSms = document.getElementById('phoneSendSms');
     if (phoneSendSms) phoneSendSms.addEventListener('click', function () { sendPhoneSms(false); });
+
+    // Registered-confirmation "Request pickup now" (full-service partners).
+    var pickupBtn = document.getElementById('requestPickupBtn');
+    if (pickupBtn) pickupBtn.addEventListener('click', requestPickupNow);
 
     // SMS confirmation-code modal.
     var codeVerify = document.getElementById('claimCodeVerify');

@@ -69,6 +69,7 @@ exports.createAffiliateManually = ControllerHelpers.asyncWrapper(async (req, res
     affiliateType = 'location',
     serviceType,
     orderNotificationsEnabled,
+    pickupInstructions,
     minimumDeliveryFee, perBagDeliveryFee
   } = req.body;
 
@@ -103,6 +104,7 @@ exports.createAffiliateManually = ControllerHelpers.asyncWrapper(async (req, res
     // when orderNotificationsEnabled isn't explicitly provided.
     ...(serviceType !== undefined ? { serviceType } : {}),
     ...(orderNotificationsEnabled !== undefined ? { orderNotificationsEnabled } : {}),
+    pickupInstructions: String(pickupInstructions).trim(),
     firstName, lastName,
     email: normalizedEmail,
     phone, businessName,
@@ -195,6 +197,10 @@ exports.updateAffiliateSettings = ControllerHelpers.asyncWrapper(async (req, res
     affiliate.isActive = !!req.body.isActive;
     changed.isActive = affiliate.isActive;
   }
+  if (req.body.pickupInstructions !== undefined) {
+    affiliate.pickupInstructions = String(req.body.pickupInstructions).trim();
+    changed.pickupInstructions = affiliate.pickupInstructions;
+  }
   if (req.body.minimumDeliveryFee !== undefined) {
     affiliate.minimumDeliveryFee = parseFloat(req.body.minimumDeliveryFee);
     changed.minimumDeliveryFee = affiliate.minimumDeliveryFee;
@@ -221,6 +227,7 @@ exports.updateAffiliateSettings = ControllerHelpers.asyncWrapper(async (req, res
       serviceType: affiliate.serviceType,
       orderNotificationsEnabled: affiliate.orderNotificationsEnabled,
       isActive: affiliate.isActive,
+      pickupInstructions: affiliate.pickupInstructions,
       minimumDeliveryFee: affiliate.minimumDeliveryFee,
       perBagDeliveryFee: affiliate.perBagDeliveryFee
     }

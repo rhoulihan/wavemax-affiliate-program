@@ -298,6 +298,7 @@ async function getAffiliateAnalytics({ startDate, endDate }) {
         affiliateType: 1,
         serviceType: 1,
         orderNotificationsEnabled: 1,
+        pickupInstructions: 1,
         email: 1,
         metrics: {
           totalCustomers: { $size: '$customers' },

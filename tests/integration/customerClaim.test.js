@@ -139,6 +139,20 @@ describe('Customer claim', () => {
       expect(bag.customerId).toBe(res.body.customerId);
     });
 
+    it('register response carries the affiliate serviceType + pickupInstructions (drives the confirmation page)', async () => {
+      affiliate.serviceType = 'full_service';
+      affiliate.pickupInstructions = 'Leave your bag by the front door; we text when on the way.';
+      await affiliate.save();
+      const token = await issuedBag(affiliate);
+      const res = await request(app)
+        .post(`/api/v1/customers/claim/${token}/register`)
+        .send(registrationBody());
+      expect(res.status).toBe(201);
+      expect(res.body.affiliateData.serviceType).toBe('full_service');
+      expect(res.body.affiliateData.pickupInstructions)
+        .toBe('Leave your bag by the front door; we text when on the way.');
+    });
+
     it('registers with NO email — email is optional', async () => {
       const token = await issuedBag(affiliate);
       const body = registrationBody();
