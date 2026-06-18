@@ -178,6 +178,8 @@
   var editOriginalPhone = '';
   var editPhoneIdToken = null;       // Firebase token for a changed phone
   var pendingPhoneVerify = null;     // { resolve, reject, e164 } while the code modal is open for an edit
+  var editFirebaseReady = null;      // cached promise: Firebase loaded for the edit form
+  var patchInFlight = false;         // re-entry guard on the save (PATCH /me)
 
   function custSessionHeaders() {
     var s = window.ScanSession && window.ScanSession.getSession();
@@ -208,10 +210,28 @@
       .then(function () { s.hide(); });
   }
 
+  // Approximate E.164 the same way the SMS-verify + the server (Formatters.e164)
+  // do, so client-side change detection matches the server's.
+  function toE164(v) {
+    var x = String(v || '').trim();
+    return x.charAt(0) === '+' ? x.replace(/[^\d+]/g, '') : '+1' + digits(x);
+  }
+
+  // Returns a promise that resolves once Firebase phone-verify is ready (or
+  // not needed). Claimed bags never ran the registration init, so the edit form
+  // lazily loads the SDK and MUST await this before verifying a phone change.
   function ensureEditFirebase() {
-    if (phoneRequired || phoneEnabled) return; // config already fetched on a claimable load, or not needed
-    fetch('/api/v1/firebase-config').then(function (r) { return r.json(); })
-      .then(function (cfg) { initFirebasePhone(cfg); }).catch(function () { /* phone edit will error if changed */ });
+    if (phoneEnabled) return Promise.resolve();          // already initialized
+    if (editFirebaseReady) return editFirebaseReady;     // load in flight/done
+    editFirebaseReady = fetch('/api/v1/firebase-config')
+      .then(function (r) { return r.json(); })
+      .then(function (cfg) {
+        phoneRequired = !!(cfg && cfg.enabled);
+        if (!phoneRequired) return;
+        return loadFirebaseSdk().then(function () { setupFirebasePhone(cfg); });
+      })
+      .catch(function () { /* leave phoneEnabled false → a phone change errors clearly */ });
+    return editFirebaseReady;
   }
 
   // Verify a NEW phone number via SMS; resolves with the Firebase ID token.
@@ -219,6 +239,7 @@
   function verifyNewPhoneViaSms(e164) {
     return new Promise(function (resolve, reject) {
       if (!window.firebase || !recaptchaVerifier) { reject(new Error('phone verify unavailable')); return; }
+      pendingPhoneVerify = null; // supersede any abandoned verify before starting
       var s = spin(document.getElementById('edit-info-save'));
       window.firebase.auth().signInWithPhoneNumber(e164, recaptchaVerifier)
         .then(function (confirmation) {
@@ -233,32 +254,36 @@
 
   function saveEditInfo() {
     hideById('edit-info-error'); hideById('edit-info-success');
-    var payload = {
-      firstName: document.getElementById('edit-firstName').value.trim(),
-      lastName: document.getElementById('edit-lastName').value.trim(),
-      email: document.getElementById('edit-email').value.trim(),
-      address: document.getElementById('edit-address').value.trim(),
-      city: document.getElementById('edit-city').value.trim(),
-      state: document.getElementById('edit-state').value.trim(),
-      zipCode: document.getElementById('edit-zipCode').value.trim()
-    };
-    var newPhone = document.getElementById('edit-phone').value.trim();
-    var phoneChanged = digits(newPhone).slice(-10) !== digits(editOriginalPhone).slice(-10);
-    if (phoneChanged) {
-      payload.phone = newPhone;
-      if (phoneRequired && !editPhoneIdToken) {
-        var e164 = newPhone.charAt(0) === '+' ? newPhone.replace(/[^\d+]/g, '') : '+1' + digits(newPhone);
-        verifyNewPhoneViaSms(e164)
-          .then(function (token) { editPhoneIdToken = token; payload.phoneIdToken = token; patchMe(payload); })
-          .catch(function () { showById('edit-info-error', t('claim.edit.phoneVerifyFailed', 'Phone verification failed. Please try again.')); });
-        return;
+    ensureEditFirebase().then(function () {
+      var payload = {
+        firstName: document.getElementById('edit-firstName').value.trim(),
+        lastName: document.getElementById('edit-lastName').value.trim(),
+        email: document.getElementById('edit-email').value.trim(),
+        address: document.getElementById('edit-address').value.trim(),
+        city: document.getElementById('edit-city').value.trim(),
+        state: document.getElementById('edit-state').value.trim(),
+        zipCode: document.getElementById('edit-zipCode').value.trim()
+      };
+      var newPhone = document.getElementById('edit-phone').value.trim();
+      // Normalize both to E.164 before comparing — matches the server's check.
+      var phoneChanged = toE164(newPhone) !== toE164(editOriginalPhone);
+      if (phoneChanged) {
+        payload.phone = newPhone;
+        if (phoneRequired && !editPhoneIdToken) {
+          verifyNewPhoneViaSms(toE164(newPhone))
+            .then(function (token) { editPhoneIdToken = token; payload.phoneIdToken = token; patchMe(payload); })
+            .catch(function () { showById('edit-info-error', t('claim.edit.phoneVerifyFailed', 'Phone verification failed. Please try again.')); });
+          return;
+        }
+        if (editPhoneIdToken) payload.phoneIdToken = editPhoneIdToken;
       }
-      if (editPhoneIdToken) payload.phoneIdToken = editPhoneIdToken;
-    }
-    patchMe(payload);
+      patchMe(payload);
+    });
   }
 
   function patchMe(payload) {
+    if (patchInFlight) return; // re-entry guard against double-save
+    patchInFlight = true;
     var s = spin(document.getElementById('edit-info-save'));
     fetch('/api/v1/customers/me', {
       method: 'PATCH',
@@ -280,7 +305,7 @@
         showById('edit-info-error', msg);
       })
       .catch(function () { showById('edit-info-error', t('claim.edit.saveError', 'Could not save. Please check your info and try again.')); })
-      .then(function () { s.hide(); });
+      .then(function () { s.hide(); patchInFlight = false; });
   }
 
   function resolveAndConfirm() {
@@ -595,6 +620,9 @@
   }
 
   function sendPhoneSms(isResend) {
+    // Registration phone verify — clear any abandoned edit-flow promise so a
+    // stale pendingPhoneVerify can't hijack this registration token.
+    pendingPhoneVerify = null;
     var phone = document.getElementById('phone').value.trim();
     hideById('phone-verify-error');
     hideById('claimCodeError');

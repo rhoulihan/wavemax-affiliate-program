@@ -172,5 +172,24 @@ describe('Customer self-service (/customers/me)', () => {
       const after = await Customer.findOne({ customerId: customer.customerId });
       expect(after.centsSyncNeeded).toBe(false);
     });
+
+    it('a CUSTOMER apply (start-only) does NOT clear the warning — only staff do', async () => {
+      const { customer, token } = await setup();
+      await request(app).patch('/api/v1/customers/me')
+        .set('x-scan-session', custSession(customer.customerId))
+        .send({ phone: '512-555-8888' });
+      // customer self-starts (mint customer session, then apply create-pending)
+      const mint = await request(app).post('/api/v1/scan/session')
+        .send({ bagToken: token, code: '5125558888' });
+      expect(mint.status).toBe(200);
+      const sess = mint.body.sessionToken || mint.body.token;
+      const resolved = await request(app).post('/api/v1/scan/resolve')
+        .set('x-scan-session', sess).send({ bagToken: token });
+      await request(app).post('/api/v1/scan/apply')
+        .set('x-scan-session', sess)
+        .send({ bagToken: token, expectedAction: resolved.body.proposedAction });
+      const after = await Customer.findOne({ customerId: customer.customerId });
+      expect(after.centsSyncNeeded).toBe(true); // still flagged — operator hasn't handled it
+    });
   });
 });

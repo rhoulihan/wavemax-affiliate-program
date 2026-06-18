@@ -89,7 +89,8 @@ router.patch('/me', scanAuth, [
   body('address').optional().trim().notEmpty().isLength({ max: 200 }),
   body('city').optional().trim().notEmpty().isLength({ max: 100 }),
   body('state').optional().trim().notEmpty().isLength({ max: 50 }),
-  body('zipCode').optional().trim().notEmpty().isLength({ max: 20 })
+  body('zipCode').optional().trim().notEmpty().isLength({ max: 20 }),
+  body('phoneIdToken').optional().isString().isLength({ max: 4096 })
 ], handleValidationErrors, customerController.updateMe);
 
 /**
