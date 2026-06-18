@@ -13,9 +13,9 @@ const customerSchema = new mongoose.Schema({
   affiliateId: { type: String, required: true, ref: 'Affiliate' },
   firstName: { type: String, required: true },
   lastName: { type: String, required: true },
-  // Email is OPTIONAL and unverified (2026-06-17). Phone is the verified
-  // identity. sparse so many registrations with no email don't collide on null;
-  // unique so a provided email is still one-per-customer.
+  // Email is REQUIRED (2026-06-18) but verified ASYNCHRONOUSLY via a confirm
+  // link in the welcome email — registration is gated on PHONE only. sparse+unique
+  // is kept (harmless; legacy no-email records may exist).
   email: { type: String, unique: true, sparse: true },
   phone: { type: String, required: true },
   address: { type: String, required: true },
@@ -29,8 +29,17 @@ const customerSchema = new mongoose.Schema({
   // PR 7: registration-only — no customer login/portal in Phase 1, so there is
   // no username or password. Verified contact info is the only identity stored.
   // (PR 6 removed the customer auth surface; PR 7 removes the dead credentials.)
-  emailVerifiedAt: Date,   // legacy — email is no longer verified (kept for old records)
+  // Email confirm-link verification (2026-06-18): the welcome email carries a
+  // single-use link; only verified addresses receive any further email.
+  emailVerified: { type: Boolean, default: false },
+  emailVerifiedAt: Date,            // set when the confirm link is consumed
+  emailVerifyTokenHash: String,     // sha256 of the raw token (raw lives only in the link)
+  emailVerifyTokenExpires: Date,    // confirm link expiry (~30 days)
   phoneVerifiedAt: Date,   // set when the Firebase phone token verifies (flag on)
+  // Set when a customer changes their phone via "Edit my info" — surfaces a
+  // warning to the operator at scan time to update the number in Cents. Cleared
+  // on the next operator/affiliate scan-apply for the bag.
+  centsSyncNeeded: { type: Boolean, default: false },
   // Payment is handled externally in Cents. No payment information is stored.
   isActive: { type: Boolean, default: true },
   registrationDate: { type: Date, default: Date.now },
@@ -52,6 +61,12 @@ const customerSchema = new mongoose.Schema({
 
 // No longer need encryption middleware as payment data is not stored.
 // No login lockout machinery: Phase 1 customers have no password/login (PR 7).
+
+// Hash an email-confirm token for at-rest storage. The raw token (high-entropy
+// random) travels only in the welcome-email link; we store/look up by its sha256
+// so a DB read can't replay it.
+customerSchema.statics.hashEmailToken = (raw) =>
+  require('crypto').createHash('sha256').update(String(raw)).digest('hex');
 
 // Create model
 const Customer = mongoose.model('Customer', customerSchema);

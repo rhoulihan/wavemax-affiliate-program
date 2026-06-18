@@ -89,6 +89,9 @@ async function ensureTestCustomer(options = {}) {
       zipCode: options.zipCode || '78701',
       affiliateId,
       languagePreference: options.languagePreference || 'en',
+      // Default verified so email-behavior tests get a normal customer; pass
+      // emailVerified:false to exercise the unverified-suppression gate.
+      emailVerified: options.emailVerified !== undefined ? options.emailVerified : true,
       registrationVersion: 'v2',
       initialBagsRequested: options.initialBagsRequested || 2,
       bagCredit: options.bagCredit || 2,

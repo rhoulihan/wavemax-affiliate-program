@@ -50,6 +50,58 @@ exports.resolveClaim = ControllerHelpers.asyncWrapper(async (req, res) => {
 });
 
 /**
+ * Consume an email-confirm link (single-use) → mark the customer's email
+ * verified, which turns on order notifications. GET because it's a clicked link.
+ * Serves a small branded landing page (CSP-clean) in the customer's language.
+ * @route GET /api/v1/customers/verify-email/:token
+ */
+const VERIFY_LANDING = require('path').join(__dirname, '..', '..', 'public', 'email-verified.html');
+const { readHTMLWithNonce } = require('../utils/cspHelper');
+const VERIFY_COPY = {
+  ok: {
+    en: { t: 'Email confirmed', m: "Thanks — your email is confirmed. You'll now receive order updates." },
+    es: { t: 'Correo confirmado', m: 'Gracias — su correo está confirmado. Ahora recibirá actualizaciones de su pedido.' },
+    pt: { t: 'E-mail confirmado', m: 'Obrigado — seu e-mail está confirmado. Você agora receberá atualizações do pedido.' },
+    de: { t: 'E-Mail bestätigt', m: 'Danke — Ihre E-Mail ist bestätigt. Sie erhalten ab jetzt Bestellaktualisierungen.' }
+  },
+  fail: {
+    en: { t: 'Link invalid or expired', m: 'This confirmation link is invalid or has already been used. Contact your provider if you need help.' },
+    es: { t: 'Enlace inválido o expirado', m: 'Este enlace de confirmación es inválido o ya fue utilizado. Contacte a su proveedor si necesita ayuda.' },
+    pt: { t: 'Link inválido ou expirado', m: 'Este link de confirmação é inválido ou já foi usado. Contate seu provedor se precisar de ajuda.' },
+    de: { t: 'Link ungültig oder abgelaufen', m: 'Dieser Bestätigungslink ist ungültig oder wurde bereits verwendet. Kontaktieren Sie Ihren Anbieter bei Bedarf.' }
+  }
+};
+
+exports.verifyEmail = ControllerHelpers.asyncWrapper(async (req, res) => {
+  const raw = req.params.token || '';
+  let ok = false;
+  let lang = 'en';
+  if (raw) {
+    const customer = await Customer.findOne({ emailVerifyTokenHash: Customer.hashEmailToken(raw) });
+    if (customer) {
+      lang = ['en', 'es', 'pt', 'de'].includes(customer.languagePreference) ? customer.languagePreference : 'en';
+      if (customer.emailVerifyTokenExpires && customer.emailVerifyTokenExpires.getTime() > Date.now()) {
+        customer.emailVerified = true;
+        customer.emailVerifiedAt = new Date();
+        customer.emailVerifyTokenHash = undefined;   // single-use
+        customer.emailVerifyTokenExpires = undefined;
+        await customer.save();
+        ok = true;
+      }
+    }
+  }
+  const copy = (ok ? VERIFY_COPY.ok : VERIFY_COPY.fail)[lang];
+  let html;
+  try {
+    html = await readHTMLWithNonce(VERIFY_LANDING, res.locals.cspNonce);
+    html = html.replace(/\[TITLE\]/g, copy.t).replace(/\[MESSAGE\]/g, copy.m);
+  } catch (e) {
+    html = `<!doctype html><meta charset="utf-8"><h1>${copy.t}</h1><p>${copy.m}</p>`;
+  }
+  res.status(ok ? 200 : 410).type('html').send(html);
+});
+
+/**
  * Claim-bound customer registration — the affiliate is derived from the bag.
  * @route POST /api/v1/customers/claim/:bagToken/register
  */

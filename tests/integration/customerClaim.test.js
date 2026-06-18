@@ -61,6 +61,7 @@ describe('Customer claim', () => {
     await Customer.deleteMany({});
     await Bag.deleteMany({});
     await require('../../server/models/Order').deleteMany({});
+    emailService.sendCustomerWelcomeEmail.mockClear();
     delete process.env.PHONE_VERIFICATION_ENABLED; // default flag OFF
     affiliate = await createAffiliate();
   });
@@ -153,30 +154,54 @@ describe('Customer claim', () => {
         .toBe('Leave your bag by the front door; we text when on the way.');
     });
 
-    it('registers with NO email — email is optional', async () => {
+    it('400s when email is missing (email is required)', async () => {
       const token = await issuedBag(affiliate);
       const body = registrationBody();
       delete body.email;
       const res = await request(app)
         .post(`/api/v1/customers/claim/${token}/register`)
         .send(body);
-      expect(res.status).toBe(201);
-      const customer = await Customer.findOne({ customerId: res.body.customerId });
-      expect(customer.email).toBeFalsy();
-      const bag = await Bag.findOne({ tokenHash: Bag.hashToken(token) });
-      expect(bag.status).toBe('active');
+      expect(res.status).toBe(400);
+      expect(await Customer.countDocuments({})).toBe(0);
     });
 
-    it('allows two no-email registrations (sparse unique index, no null collision)', async () => {
-      const t1 = await issuedBag(affiliate);
-      const t2 = await issuedBag(affiliate);
-      const b1 = registrationBody(); delete b1.email;
-      const b2 = registrationBody(); delete b2.email;
-      const r1 = await request(app).post(`/api/v1/customers/claim/${t1}/register`).send(b1);
-      const r2 = await request(app).post(`/api/v1/customers/claim/${t2}/register`).send(b2);
-      expect(r1.status).toBe(201);
-      expect(r2.status).toBe(201);
-      expect(await Customer.countDocuments({})).toBe(2);
+    it('stores the email UNVERIFIED at registration (gated on phone, not email)', async () => {
+      const token = await issuedBag(affiliate);
+      const res = await request(app)
+        .post(`/api/v1/customers/claim/${token}/register`)
+        .send(registrationBody());
+      expect(res.status).toBe(201);
+      const customer = await Customer.findOne({ customerId: res.body.customerId });
+      expect(customer.email).toBe('newcustomer@example.com');
+      expect(customer.emailVerified).toBe(false);
+      expect(customer.emailVerifyTokenHash).toBeTruthy();
+    });
+
+    it('the welcome-email confirm link verifies the email (single-use)', async () => {
+      const token = await issuedBag(affiliate);
+      const res = await request(app)
+        .post(`/api/v1/customers/claim/${token}/register`)
+        .send(registrationBody());
+      expect(res.status).toBe(201);
+      // the raw confirm token travels only in the welcome email (mocked)
+      const call = emailService.sendCustomerWelcomeEmail.mock.calls.at(-1);
+      const rawToken = call[2].emailVerifyToken;
+      expect(rawToken).toMatch(/^[a-f0-9]{64}$/);
+
+      const v1 = await request(app).get(`/api/v1/customers/verify-email/${rawToken}`);
+      expect(v1.status).toBe(200);
+      const verified = await Customer.findOne({ customerId: res.body.customerId });
+      expect(verified.emailVerified).toBe(true);
+      expect(verified.emailVerifiedAt).toBeTruthy();
+
+      // single-use: a second click no longer verifies
+      const v2 = await request(app).get(`/api/v1/customers/verify-email/${rawToken}`);
+      expect(v2.status).toBe(410);
+    });
+
+    it('an unknown confirm token returns 410', async () => {
+      const v = await request(app).get(`/api/v1/customers/verify-email/${'0'.repeat(64)}`);
+      expect(v.status).toBe(410);
     });
 
     it('400s when the phone is missing (phone is required)', async () => {
@@ -248,16 +273,6 @@ describe('Customer claim', () => {
       expect(bag.customerId).toBe(winner.body.customerId);
     });
 
-    it('the email-OTP endpoints are gone (email is no longer verified)', async () => {
-      const token = await issuedBag(affiliate);
-      const reqRes = await request(app)
-        .post(`/api/v1/customers/claim/${token}/email-otp/request`).send({ email: 'x@example.com' });
-      const verRes = await request(app)
-        .post(`/api/v1/customers/claim/${token}/email-otp/verify`).send({ email: 'x@example.com', code: '000000' });
-      expect(reqRes.status).toBe(404);
-      expect(verRes.status).toBe(404);
-    });
-
     it('the legacy public registration route is gone', async () => {
       // This task ALSO removes '/api/v1/customers/register' from the CSRF
       // REGISTRATION_ENDPOINTS exemption — a tokenless POST would then 403 on
@@ -307,19 +322,18 @@ describe('Customer claim', () => {
       expect(customer.phoneVerifiedAt).toBeTruthy();
     });
 
-    it('flag ON + no email + matching phone → 201 (email optional even with phone gate)', async () => {
+    it('flag ON + matching phone → 201; email stored unverified (gate is phone, not email)', async () => {
       process.env.PHONE_VERIFICATION_ENABLED = 'true';
       jest.spyOn(firebasePhoneService, 'isEnabled').mockReturnValue(true);
       jest.spyOn(firebasePhoneService, 'verifyPhoneToken').mockResolvedValue('+15125550101');
       const token = await issuedBag(affiliate);
-      const body = registrationBody({ phone: '512-555-0101', phoneIdToken: 'good-token' });
-      delete body.email;
       const res = await request(app)
         .post(`/api/v1/customers/claim/${token}/register`)
-        .send(body);
+        .send(registrationBody({ phone: '512-555-0101', phoneIdToken: 'good-token' }));
       expect(res.status).toBe(201);
       const customer = await Customer.findOne({ customerId: res.body.customerId });
-      expect(customer.email).toBeFalsy();
+      expect(customer.email).toBe('newcustomer@example.com');
+      expect(customer.emailVerified).toBe(false);
       expect(customer.phoneVerifiedAt).toBeTruthy();
     });
 

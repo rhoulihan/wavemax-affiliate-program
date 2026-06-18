@@ -12,6 +12,7 @@
 // UNVERIFIED field (stored as-is when provided; a duplicate is still rejected).
 // Phase 1 has no customer login, so no username or password is stored.
 
+const crypto = require('crypto');
 const { v4: uuidv4 } = require('uuid');
 
 const Customer = require('../models/Customer');
@@ -29,7 +30,7 @@ const logger = require('../utils/logger');
 class RegistrationError extends Error {
   constructor(code, message, extras = {}) {
     super(message);
-    this.code = code;        // 'bag_not_claimable' | 'bag_already_claimed' | 'duplicate_email' | 'phone_not_verified' | 'phone_mismatch'
+    this.code = code;        // 'bag_not_claimable' | 'bag_already_claimed' | 'duplicate_email' | 'email_required' | 'phone_not_verified' | 'phone_mismatch'
     this.status = extras.status || 400;
     this.extras = extras;
     this.isRegistrationError = true;
@@ -67,16 +68,22 @@ async function registerCustomer(payload) {
   }
   const { bag, affiliate } = resolved;
 
-  // --- Email (optional, unverified) ----------------------------------------
-  // Normalize when present; reject a duplicate so a provided email stays
-  // one-per-customer. Absent email → the field is left unset (sparse index).
-  const normalizedEmail = email ? String(email).trim().toLowerCase() : '';
-  if (normalizedEmail) {
-    const existingEmail = await Customer.findOne({ email: normalizedEmail });
-    if (existingEmail) {
-      throw new RegistrationError('duplicate_email', 'Email already registered', { field: 'email' });
-    }
+  // --- Email (required; verified later via a confirm link) -----------------
+  // Required field (route validator enforces format); registration does NOT
+  // block on email verification — only on phone. A duplicate is rejected so an
+  // email stays one-per-customer.
+  const normalizedEmail = String(email || '').trim().toLowerCase();
+  if (!normalizedEmail) {
+    throw new RegistrationError('email_required', 'Email is required', { field: 'email' });
   }
+  const existingEmail = await Customer.findOne({ email: normalizedEmail });
+  if (existingEmail) {
+    throw new RegistrationError('duplicate_email', 'Email already registered', { field: 'email' });
+  }
+  // Mint a single-use confirm token (raw travels only in the welcome link).
+  const emailVerifyToken = crypto.randomBytes(32).toString('hex');
+  const emailVerifyTokenHash = Customer.hashEmailToken(emailVerifyToken);
+  const emailVerifyTokenExpires = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // ~30 days
 
   // --- Phone verification (gated by the feature flag) ----------------------
   let phoneVerifiedAt = null;
@@ -108,14 +115,15 @@ async function registerCustomer(payload) {
     city,
     state: state.toUpperCase(),
     zipCode,
+    email: normalizedEmail,
+    emailVerified: false,
+    emailVerifyTokenHash,
+    emailVerifyTokenExpires,
     specialInstructions,
     affiliateSpecialInstructions,
     phoneVerifiedAt,
     languagePreference: languagePreference || 'en'
   });
-  // Only set email when provided — leaving it undefined keeps the sparse
-  // unique index from treating multiple no-email customers as collisions.
-  if (normalizedEmail) newCustomer.email = normalizedEmail;
 
   await newCustomer.save();
 
@@ -132,16 +140,17 @@ async function registerCustomer(payload) {
   }
 
   // Emails are best-effort — never fail registration on SMTP hiccup.
-  await sendWelcomeEmails(newCustomer, affiliate, bagToken);
+  await sendWelcomeEmails(newCustomer, affiliate, bagToken, emailVerifyToken);
 
   return { customer: newCustomer, affiliate, bag: claimedBag };
 }
 
-async function sendWelcomeEmails(customer, affiliate, bagToken) {
+async function sendWelcomeEmails(customer, affiliate, bagToken, emailVerifyToken) {
   try {
-    // bagToken drives the welcome email's "Request a pickup" button (the bag's
-    // claim URL = what the QR encodes), so the customer can start an order.
-    await emailService.sendCustomerWelcomeEmail(customer, affiliate, { bagToken });
+    // bagToken drives the "Request a pickup" button (= the QR's claim URL);
+    // emailVerifyToken drives the "Confirm your email" link. The welcome email is
+    // the ONLY email sent to an unverified address.
+    await emailService.sendCustomerWelcomeEmail(customer, affiliate, { bagToken, emailVerifyToken });
   } catch (emailError) {
     logger.error('Failed to send welcome email:', emailError);
   }

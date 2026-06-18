@@ -174,8 +174,11 @@ async function notifyTransition(order, { event }) {
 
     const sends = [];
 
-    // Customer — every state change.
-    if (customer && customer.email) {
+    // Customer — every state change, but ONLY to a verified email. The welcome
+    // email (sent at registration) is the one exception that reaches an
+    // unverified address; until the customer clicks its confirm link, we send
+    // no order emails.
+    if (customer && customer.email && customer.emailVerified) {
       if (event === 'created') {
         sends.push(emailService.sendOrderStatusUpdateEmail(customer, order, 'pending'));
       } else if (event === 'in_progress' || event === 'out_for_delivery') {

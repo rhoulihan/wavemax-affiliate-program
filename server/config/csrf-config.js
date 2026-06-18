@@ -120,11 +120,7 @@ const CSRF_CONFIG = {
   REGISTRATION_ENDPOINTS: [
     '/api/affiliates/register',
     '/api/v1/affiliates/register',
-    '/api/v1/customers/claim/:bagToken/register',
-    // PR 7 — email-OTP request/verify are part of the registration flow
-    // (CAPTCHA/lockout-gated instead of CSRF, like the register POST).
-    '/api/v1/customers/claim/:bagToken/email-otp/request',
-    '/api/v1/customers/claim/:bagToken/email-otp/verify'
+    '/api/v1/customers/claim/:bagToken/register'
   ],
 
   // CRITICAL endpoints that MUST have CSRF protection (Phase 1)

@@ -203,6 +203,15 @@ describe('orderTransitionService', () => {
       // ...but the customer still got status emails
       expect(email.sendOrderStatusUpdateEmail).toHaveBeenCalled();
     });
+
+    it('an UNVERIFIED customer email gets NO order emails (only the welcome reaches unverified)', async () => {
+      customer.emailVerified = false; await customer.save();
+      await svc.createPendingOrder({ bag: await freshBag(), ...affRole() });
+      await svc.advanceOrder({ bag: await freshBag(), ...opRole }); // in_progress
+      await svc.advanceOrder({ bag: await freshBag(), ...opRole }); // out_for_delivery
+      expect(email.sendOrderStatusUpdateEmail).not.toHaveBeenCalled();
+      expect(email.sendCustomerDeliveredEmail).not.toHaveBeenCalled();
+    });
   });
 
   describe('undoLastTransition', () => {

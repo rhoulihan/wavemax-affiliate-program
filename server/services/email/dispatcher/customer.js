@@ -52,6 +52,11 @@ exports.sendCustomerWelcomeEmail = async (customer, affiliate, bagInfo = {}) => 
     const pickupUrl = bagInfo.bagToken
       ? `${baseUrl}/embed-app-v2.html?route=/claim&bag=${encodeURIComponent(bagInfo.bagToken)}`
       : `${baseUrl}/embed-app-v2.html?route=/claim`;
+    // Confirm-email link — clicking it verifies ownership and turns on order
+    // notifications. Single-use; the raw token lives only in this link.
+    const verifyUrl = bagInfo.emailVerifyToken
+      ? `${baseUrl}/api/v1/customers/verify-email/${encodeURIComponent(bagInfo.emailVerifyToken)}`
+      : '';
 
     // Get translations for the email content
     const translations = {
@@ -60,6 +65,9 @@ exports.sendCustomerWelcomeEmail = async (customer, affiliate, bagInfo = {}) => 
         EMAIL_HEADER: 'Welcome to WaveMAX Laundry!',
         GREETING: `Hi ${customer.firstName},`,
         WELCOME_MESSAGE: 'Your bag is registered and your account is ready. Whenever you have laundry to send, just request a pickup.',
+        CONFIRM_EMAIL_TITLE: 'Confirm your email',
+        CONFIRM_EMAIL_MESSAGE: 'Confirm your email so we can send you order updates. Until you confirm, we won\'t email you.',
+        CONFIRM_EMAIL_BUTTON: 'Confirm your email',
         YOUR_INFO_TITLE: 'Your Account',
         CUSTOMER_ID_LABEL: 'Customer ID',
         SERVICE_PROVIDER_LABEL: 'Your Service Provider',
@@ -79,6 +87,9 @@ exports.sendCustomerWelcomeEmail = async (customer, affiliate, bagInfo = {}) => 
         EMAIL_HEADER: '¡Bienvenido a WaveMAX Laundry!',
         GREETING: `Hola ${customer.firstName},`,
         WELCOME_MESSAGE: 'Su bolsa está registrada y su cuenta está lista. Cuando tenga ropa para enviar, solo solicite una recogida.',
+        CONFIRM_EMAIL_TITLE: 'Confirme su correo electrónico',
+        CONFIRM_EMAIL_MESSAGE: 'Confirme su correo para que podamos enviarle actualizaciones de su pedido. Hasta que confirme, no le enviaremos correos.',
+        CONFIRM_EMAIL_BUTTON: 'Confirmar correo',
         YOUR_INFO_TITLE: 'Su Cuenta',
         CUSTOMER_ID_LABEL: 'ID de Cliente',
         SERVICE_PROVIDER_LABEL: 'Su Proveedor de Servicio',
@@ -98,6 +109,9 @@ exports.sendCustomerWelcomeEmail = async (customer, affiliate, bagInfo = {}) => 
         EMAIL_HEADER: 'Bem-vindo ao WaveMAX Laundry!',
         GREETING: `Olá ${customer.firstName},`,
         WELCOME_MESSAGE: 'Sua sacola está registrada e sua conta está pronta. Sempre que tiver roupas para enviar, basta solicitar uma coleta.',
+        CONFIRM_EMAIL_TITLE: 'Confirme seu e-mail',
+        CONFIRM_EMAIL_MESSAGE: 'Confirme seu e-mail para que possamos enviar atualizações do seu pedido. Até confirmar, não enviaremos e-mails.',
+        CONFIRM_EMAIL_BUTTON: 'Confirmar e-mail',
         YOUR_INFO_TITLE: 'Sua Conta',
         CUSTOMER_ID_LABEL: 'ID do Cliente',
         SERVICE_PROVIDER_LABEL: 'Seu Provedor de Serviço',
@@ -117,6 +131,9 @@ exports.sendCustomerWelcomeEmail = async (customer, affiliate, bagInfo = {}) => 
         EMAIL_HEADER: 'Willkommen bei WaveMAX Laundry!',
         GREETING: `Hallo ${customer.firstName},`,
         WELCOME_MESSAGE: 'Ihr Beutel ist registriert und Ihr Konto ist bereit. Wann immer Sie Wäsche zu senden haben, fordern Sie einfach eine Abholung an.',
+        CONFIRM_EMAIL_TITLE: 'Bestätigen Sie Ihre E-Mail',
+        CONFIRM_EMAIL_MESSAGE: 'Bestätigen Sie Ihre E-Mail, damit wir Ihnen Bestellaktualisierungen senden können. Bis zur Bestätigung senden wir keine E-Mails.',
+        CONFIRM_EMAIL_BUTTON: 'E-Mail bestätigen',
         YOUR_INFO_TITLE: 'Ihr Konto',
         CUSTOMER_ID_LABEL: 'Kunden-ID',
         SERVICE_PROVIDER_LABEL: 'Ihr Dienstleister',
@@ -143,6 +160,7 @@ exports.sendCustomerWelcomeEmail = async (customer, affiliate, bagInfo = {}) => 
       affiliate_phone: affiliate.phone || 'Contact for details',
       affiliate_email: affiliate.email || 'support@rundberglaundry.com',
       pickup_url: pickupUrl,
+      verify_url: verifyUrl,
       current_year: new Date().getFullYear(),
       ...emailTranslations
     };
@@ -501,75 +519,6 @@ exports.sendCustomerDeliveredEmail = async (customer, order, { affiliateName } =
     return true;
   } catch (error) {
     logger.error('Error sending customer delivered email:', error);
-    return false;
-  }
-};
-
-/**
- * Send the 6-digit email-verification OTP at bag-claim registration (PR 7).
- * Best-effort: logs and returns false on failure, never throws.
- * @param {{email:string, code:string, languagePreference?:string}} opts
- */
-exports.sendCustomerEmailOtp = async ({ email, code, languagePreference } = {}) => {
-  try {
-    if (!email || !code) {
-      logger.error('sendCustomerEmailOtp: missing email or code');
-      return false;
-    }
-    const language = languagePreference || 'en';
-    const template = await loadTemplate('customer-email-otp', language);
-
-    const translations = {
-      en: {
-        EMAIL_TITLE: 'Your WaveMAX verification code',
-        EMAIL_HEADER: 'Verify your email',
-        GREETING: 'Hello,',
-        INTRO: 'Enter this code to verify your email and finish claiming your laundry bag:',
-        EXPIRY_NOTE: 'This code expires in 10 minutes. If you didn\'t request it, you can ignore this email.',
-        FOOTER_RIGHTS: 'All rights reserved.',
-        FOOTER_AUTOMATED_MESSAGE: 'This is an automated message. Please do not reply to this email.'
-      },
-      es: {
-        EMAIL_TITLE: 'Su código de verificación de WaveMAX',
-        EMAIL_HEADER: 'Verifique su correo electrónico',
-        GREETING: 'Hola,',
-        INTRO: 'Ingrese este código para verificar su correo electrónico y terminar de reclamar su bolsa de ropa:',
-        EXPIRY_NOTE: 'Este código caduca en 10 minutos. Si no lo solicitó, puede ignorar este correo.',
-        FOOTER_RIGHTS: 'Todos los derechos reservados.',
-        FOOTER_AUTOMATED_MESSAGE: 'Este es un mensaje automatizado. Por favor no responda a este correo.'
-      },
-      pt: {
-        EMAIL_TITLE: 'Seu código de verificação WaveMAX',
-        EMAIL_HEADER: 'Verifique seu e-mail',
-        GREETING: 'Olá,',
-        INTRO: 'Digite este código para verificar seu e-mail e concluir o registro da sua sacola de roupa:',
-        EXPIRY_NOTE: 'Este código expira em 10 minutos. Se você não o solicitou, pode ignorar este e-mail.',
-        FOOTER_RIGHTS: 'Todos os direitos reservados.',
-        FOOTER_AUTOMATED_MESSAGE: 'Esta é uma mensagem automática. Por favor, não responda a este e-mail.'
-      },
-      de: {
-        EMAIL_TITLE: 'Ihr WaveMAX-Bestätigungscode',
-        EMAIL_HEADER: 'Bestätigen Sie Ihre E-Mail',
-        GREETING: 'Hallo,',
-        INTRO: 'Geben Sie diesen Code ein, um Ihre E-Mail zu bestätigen und die Registrierung Ihres Wäschebeutels abzuschließen:',
-        EXPIRY_NOTE: 'Dieser Code läuft in 10 Minuten ab. Wenn Sie ihn nicht angefordert haben, können Sie diese E-Mail ignorieren.',
-        FOOTER_RIGHTS: 'Alle Rechte vorbehalten.',
-        FOOTER_AUTOMATED_MESSAGE: 'Dies ist eine automatische Nachricht. Bitte antworten Sie nicht auf diese E-Mail.'
-      }
-    };
-    const t = translations[language] || translations.en;
-
-    const html = fillTemplate(template, {
-      ...t,
-      OTP_CODE: code,
-      CURRENT_YEAR: String(new Date().getFullYear())
-    });
-
-    await sendEmail(email, t.EMAIL_TITLE, html);
-    logger.info('Customer email OTP sent', { email });
-    return true;
-  } catch (error) {
-    logger.error('Error sending customer email OTP:', error);
     return false;
   }
 };

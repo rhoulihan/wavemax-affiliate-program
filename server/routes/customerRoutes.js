@@ -55,6 +55,14 @@ router.get('/check-rate-limit', (req, res, next) => {
 router.get('/claim/:bagToken', claimResolveLimiter, customerController.resolveClaim);
 
 /**
+ * @route   GET /api/v1/customers/verify-email/:token
+ * @desc    Consume the welcome-email confirm link → verify the customer's email
+ *          (single-use). Serves a branded landing page. Public; no CSRF (GET link).
+ * @access  Public
+ */
+router.get('/verify-email/:token', customerController.verifyEmail);
+
+/**
  * @route   POST /api/v1/customers/claim/:bagToken/register
  * @desc    Register a new customer against an issued bag (affiliate derived from the bag).
  *          Phone is the required verification (a Firebase phoneIdToken when phone
@@ -64,7 +72,7 @@ router.get('/claim/:bagToken', claimResolveLimiter, customerController.resolveCl
 router.post('/claim/:bagToken/register', registrationLimiter, [
   body('firstName').notEmpty().withMessage('First name is required'),
   body('lastName').notEmpty().withMessage('Last name is required'),
-  body('email').optional({ checkFalsy: true }).isEmail().withMessage('Enter a valid email or leave it blank'),
+  body('email').isEmail().withMessage('A valid email is required'),
   body('phone').notEmpty().withMessage('Phone number is required'),
   body('address').notEmpty().withMessage('Address is required'),
   body('city').notEmpty().withMessage('City is required'),

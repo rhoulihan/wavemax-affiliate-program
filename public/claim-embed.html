@@ -57,8 +57,8 @@
                         <!-- reCAPTCHA (invisible) mounts here for Firebase phone auth -->
                         <div id="recaptcha-container"></div>
 
-                        <!-- Email is OPTIONAL and not verified. -->
-                        <input type="email" id="email" name="email" class="claim-input" data-i18n-placeholder="claim.emailOptional" placeholder="Email (optional)">
+                        <!-- Email is REQUIRED; verified later via a confirm link in the welcome email. -->
+                        <input type="email" id="email" name="email" required class="claim-input" data-i18n-placeholder="common.labels.email" placeholder="Email">
 
                         <input type="text" id="address" name="address" required class="claim-input" data-i18n-placeholder="common.labels.address" placeholder="Address">
                         <div class="grid grid-cols-3 gap-3">

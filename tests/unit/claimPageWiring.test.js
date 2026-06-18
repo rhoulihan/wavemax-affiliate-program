@@ -48,12 +48,13 @@ describe('/claim page wiring', () => {
     expect(html).toContain('/assets/css/swirl-spinner.css');
   });
 
-  it('phone-first verification: optional email (no email send button), phone keeps SMS controls', () => {
+  it('phone-first verification: email required (no inline email code), phone keeps SMS controls', () => {
     const html = fs.readFileSync(path.join(ROOT, 'public/claim-embed.html'), 'utf8');
-    // Email is optional + unverified — its send-code button and badge are gone.
+    // Email is verified async via the welcome-email confirm link — no inline code UI.
     expect(html).not.toContain('id="emailSendCode"');
     expect(html).not.toContain('id="email-verified-badge"');
-    expect(html).toContain('data-i18n-placeholder="claim.emailOptional"');
+    // Email is now a required field.
+    expect(html).toMatch(/<input[^>]*id="email"[^>]*\srequired/);
     // Phone is the required verification and keeps its SMS controls + badge.
     expect(html).toContain('id="phoneSendSms"');
     expect(html).toContain('id="phone-verified-badge"');
