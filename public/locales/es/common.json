@@ -56,7 +56,10 @@
       "notRegistered": "Bolsa no registrada.",
       "networkError": "Error de red — inténtelo de nuevo.",
       "staffLink": "¿Personal? Ingrese su código",
-      "customerStartTitle": "Inicie su pedido"
+      "customerStartTitle": "Inicie su pedido",
+      "customerContinue": "Continuar",
+      "actionsTitle": "¿Qué le gustaría hacer?",
+      "centsSyncWarning": "Teléfono cambiado — actualice este número en Cents:"
     },
     "status": {
       "in_progress": "Tu ropa se está procesando",
@@ -102,6 +105,18 @@
       "tooManyAttempts": "Demasiados intentos. Inténtelo de nuevo en unos minutos.",
       "cannotVerify": "No pudimos iniciar su pedido automáticamente. Su proveedor se pondrá en contacto.",
       "alreadyStartedTitle": "Su pedido ya está en proceso"
+    },
+    "edit": {
+      "button": "Editar mi información",
+      "title": "Edite su información",
+      "phoneChangeNote": "Cambiar su teléfono requiere una verificación rápida por mensaje.",
+      "saved": "Su información fue actualizada.",
+      "cancel": "Cancelar",
+      "save": "Guardar",
+      "loadError": "No se pudo cargar su información. Inténtelo de nuevo.",
+      "saveError": "No se pudo guardar. Verifique su información e inténtelo de nuevo.",
+      "dupEmail": "Ese correo ya está en uso.",
+      "phoneVerifyFailed": "La verificación del teléfono falló. Inténtelo de nuevo."
     }
   },
   "bag": {
@@ -734,7 +749,8 @@
       "successTitle": "Éxito",
       "errorTitle": "Error",
       "noChange": "Sin cambios — el pedido queda como entregado",
-      "infoTitle": "Sin cambios"
+      "infoTitle": "Sin cambios",
+      "centsSyncWarning": "Teléfono cambiado — actualice este número en Cents:"
     }
   },
   "expediter": {

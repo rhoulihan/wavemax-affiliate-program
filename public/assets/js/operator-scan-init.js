@@ -23,6 +23,7 @@
   var confirmModal = document.getElementById('scanConfirmModal');
   var confirmPrompt = document.getElementById('scanConfirmPrompt');
   var confirmCustomer = document.getElementById('scanConfirmCustomer');
+  var centsWarning = document.getElementById('scanCentsWarning');
   var paymentRow = document.getElementById('scanPaymentRow');
   var paymentCheckbox = document.getElementById('scanPaymentConfirmed');
   var confirmYes = document.getElementById('scanConfirmYes');
@@ -85,6 +86,17 @@
     confirmCustomer.textContent = c
       ? ((c.firstName || '') + ' ' + (c.lastName || '')).trim()
       : '';
+
+    // Warn the operator to update Cents when the customer changed their phone.
+    if (centsWarning) {
+      if (resolveData.centsSyncNeeded) {
+        centsWarning.textContent = t('operator.scan.centsSyncWarning', 'Phone changed — update this number in Cents:') +
+          ' ' + (resolveData.customerPhone || '');
+        centsWarning.hidden = false;
+      } else {
+        centsWarning.hidden = true;
+      }
+    }
 
     // Payment-confirmed checkbox only when handing a bag back for delivery.
     var needsPayment = resolveData.proposedAction === 'advance' &&

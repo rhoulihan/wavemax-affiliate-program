@@ -15,7 +15,7 @@
   var bagToken = new URLSearchParams(window.location.search).get('bag');
 
   var SECTIONS = ['resolving', 'claimable', 'registered', 'claimed', 'invalid'];
-  var PANELS = ['claim-scan-code-panel', 'claim-scan-confirm-panel'];
+  var PANELS = ['claim-scan-code-panel', 'claim-customer-actions', 'claim-edit-info', 'claim-scan-confirm-panel'];
 
   function show(state) {
     SECTIONS.forEach(function (name) {
@@ -158,8 +158,7 @@
     var s = spin(document.getElementById('scan-customer-submit'));
     window.ScanSession.mint(bagToken, value)
       .then(function () {
-        showSessionActive();
-        resolveAndConfirm();
+        showCustomerActions();
       })
       .catch(function (err) {
         errorEl.textContent = err.status === 429
@@ -170,11 +169,126 @@
       .then(function () { s.hide(); });
   }
 
+  // After the customer verifies their contact, offer Edit my info / Start order.
+  function showCustomerActions() {
+    showPanel('claim-customer-actions');
+  }
+
+  // ---- Edit my info (customer self-service via the scan session) --------------
+  var editOriginalPhone = '';
+  var editPhoneIdToken = null;       // Firebase token for a changed phone
+  var pendingPhoneVerify = null;     // { resolve, reject, e164 } while the code modal is open for an edit
+
+  function custSessionHeaders() {
+    var s = window.ScanSession && window.ScanSession.getSession();
+    return (s && s.sessionToken) ? { 'x-scan-session': s.sessionToken } : {};
+  }
+  function setVal(id, v) { var el = document.getElementById(id); if (el) el.value = v || ''; }
+  function digits(v) { return String(v || '').replace(/\D/g, ''); }
+
+  function openEditInfo() {
+    hideById('edit-info-error'); hideById('edit-info-success');
+    editPhoneIdToken = null; pendingPhoneVerify = null;
+    var s = spin(document.getElementById('customer-edit-info'));
+    fetch('/api/v1/customers/me', { headers: custSessionHeaders() })
+      .then(function (res) { return res.json(); })
+      .then(function (body) {
+        var c = (body && body.customer) || {};
+        setVal('edit-firstName', c.firstName); setVal('edit-lastName', c.lastName);
+        setVal('edit-phone', c.phone); setVal('edit-email', c.email);
+        setVal('edit-address', c.address); setVal('edit-city', c.city);
+        setVal('edit-state', c.state); setVal('edit-zipCode', c.zipCode);
+        editOriginalPhone = c.phone || '';
+        var note = document.getElementById('edit-phone-note');
+        if (note) note.hidden = !phoneRequired;
+        showPanel('claim-edit-info');
+        ensureEditFirebase(); // ready Firebase so a phone change can re-verify
+      })
+      .catch(function () { showById('edit-info-error', t('claim.edit.loadError', 'Could not load your info. Please try again.')); })
+      .then(function () { s.hide(); });
+  }
+
+  function ensureEditFirebase() {
+    if (phoneRequired || phoneEnabled) return; // config already fetched on a claimable load, or not needed
+    fetch('/api/v1/firebase-config').then(function (r) { return r.json(); })
+      .then(function (cfg) { initFirebasePhone(cfg); }).catch(function () { /* phone edit will error if changed */ });
+  }
+
+  // Verify a NEW phone number via SMS; resolves with the Firebase ID token.
+  // Reuses the shared code modal via pendingPhoneVerify.
+  function verifyNewPhoneViaSms(e164) {
+    return new Promise(function (resolve, reject) {
+      if (!window.firebase || !recaptchaVerifier) { reject(new Error('phone verify unavailable')); return; }
+      var s = spin(document.getElementById('edit-info-save'));
+      window.firebase.auth().signInWithPhoneNumber(e164, recaptchaVerifier)
+        .then(function (confirmation) {
+          firebaseConfirmation = confirmation;
+          pendingPhoneVerify = { resolve: resolve, reject: reject, e164: e164 };
+          openCodeModal(t('claim.verify.smsSent', 'Text sent. Enter the code below.'));
+        })
+        .catch(function (err) { reject(err); })
+        .then(function () { s.hide(); });
+    });
+  }
+
+  function saveEditInfo() {
+    hideById('edit-info-error'); hideById('edit-info-success');
+    var payload = {
+      firstName: document.getElementById('edit-firstName').value.trim(),
+      lastName: document.getElementById('edit-lastName').value.trim(),
+      email: document.getElementById('edit-email').value.trim(),
+      address: document.getElementById('edit-address').value.trim(),
+      city: document.getElementById('edit-city').value.trim(),
+      state: document.getElementById('edit-state').value.trim(),
+      zipCode: document.getElementById('edit-zipCode').value.trim()
+    };
+    var newPhone = document.getElementById('edit-phone').value.trim();
+    var phoneChanged = digits(newPhone).slice(-10) !== digits(editOriginalPhone).slice(-10);
+    if (phoneChanged) {
+      payload.phone = newPhone;
+      if (phoneRequired && !editPhoneIdToken) {
+        var e164 = newPhone.charAt(0) === '+' ? newPhone.replace(/[^\d+]/g, '') : '+1' + digits(newPhone);
+        verifyNewPhoneViaSms(e164)
+          .then(function (token) { editPhoneIdToken = token; payload.phoneIdToken = token; patchMe(payload); })
+          .catch(function () { showById('edit-info-error', t('claim.edit.phoneVerifyFailed', 'Phone verification failed. Please try again.')); });
+        return;
+      }
+      if (editPhoneIdToken) payload.phoneIdToken = editPhoneIdToken;
+    }
+    patchMe(payload);
+  }
+
+  function patchMe(payload) {
+    var s = spin(document.getElementById('edit-info-save'));
+    fetch('/api/v1/customers/me', {
+      method: 'PATCH',
+      headers: Object.assign({ 'Content-Type': 'application/json' }, custSessionHeaders()),
+      body: JSON.stringify(payload)
+    })
+      .then(function (res) { return res.json().then(function (b) { return { status: res.status, body: b }; }); })
+      .then(function (r) {
+        if (r.status === 200) {
+          editOriginalPhone = (r.body.customer && r.body.customer.phone) || editOriginalPhone;
+          editPhoneIdToken = null;
+          showById('edit-info-success');
+          return;
+        }
+        var code = r.body && r.body.errors && r.body.errors[0] && r.body.errors[0].code;
+        var msg = code === 'duplicate_email' ? t('claim.edit.dupEmail', 'That email is already in use.')
+          : (code === 'phone_mismatch' || code === 'phone_not_verified') ? t('claim.edit.phoneVerifyFailed', 'Phone verification failed. Please try again.')
+            : t('claim.edit.saveError', 'Could not save. Please check your info and try again.');
+        showById('edit-info-error', msg);
+      })
+      .catch(function () { showById('edit-info-error', t('claim.edit.saveError', 'Could not save. Please check your info and try again.')); })
+      .then(function () { s.hide(); });
+  }
+
   function resolveAndConfirm() {
     showPanel('claim-scan-confirm-panel');
     showSessionActive();
     document.getElementById('scan-confirm-result').hidden = true;
     document.getElementById('scan-confirm-error').hidden = true;
+    hideById('scan-cents-warning');
     window.ScanSession.resolve(bagToken)
       .then(renderConfirm)
       .catch(handleScanError);
@@ -182,6 +296,15 @@
 
   function renderConfirm(resolveData) {
     pending = resolveData;
+    // Operator/affiliate only: warn that the customer changed their phone and
+    // Cents needs updating (a customer self-starting doesn't see this).
+    if (!selfStartByCustomer && resolveData.centsSyncNeeded) {
+      var phone = resolveData.customerPhone || '';
+      showById('scan-cents-warning',
+        t('claim.scan.centsSyncWarning', 'Phone changed — update this number in Cents:') + ' ' + phone);
+    } else {
+      hideById('scan-cents-warning');
+    }
     var promptKey = resolveData.promptKey ? 'claim.' + resolveData.promptKey : null;
     document.getElementById('scan-confirm-prompt').textContent = promptKey
       ? t(promptKey, t('claim.scan.confirmGeneric', 'Apply this scan?'))
@@ -391,7 +514,17 @@
   }
 
   function onCodeVerify() { verifyPhoneSms(); }
-  function onCodeResend() { sendPhoneSms(true); }
+  function onCodeResend() {
+    // Edit-flow re-verification resends to the new number; else the registration phone.
+    if (pendingPhoneVerify && window.firebase && recaptchaVerifier) {
+      var e164 = pendingPhoneVerify.e164;
+      window.firebase.auth().signInWithPhoneNumber(e164, recaptchaVerifier)
+        .then(function (confirmation) { firebaseConfirmation = confirmation; })
+        .catch(function () { showById('claimCodeError', t('claim.verify.recaptchaError', 'Verification check failed. Please reload and try again.')); });
+      return;
+    }
+    sendPhoneSms(true);
+  }
 
   // ---- Firebase phone --------------------------------------------------------
 
@@ -495,8 +628,13 @@
     firebaseConfirmation.confirm(code)
       .then(function (result) { return result.user.getIdToken(); })
       .then(function (token) {
-        phoneIdToken = token;
         closeCodeModal();
+        // Edit-my-info phone re-verification: hand the token back to saveEditInfo.
+        if (pendingPhoneVerify) {
+          var p = pendingPhoneVerify; pendingPhoneVerify = null; p.resolve(token); return;
+        }
+        // Registration path.
+        phoneIdToken = token;
         // Remove the Send button once verified — the badge replaces it.
         hideById('phoneSendSms');
         showById('phone-verified-badge');
@@ -695,6 +833,16 @@
     });
     var staffLink = document.getElementById('scan-staff-link');
     if (staffLink) staffLink.addEventListener('click', function (e) { e.preventDefault(); openStaffModal(); });
+
+    // Customer two-button actions + edit-my-info form.
+    var startOrderBtn = document.getElementById('customer-start-order');
+    if (startOrderBtn) startOrderBtn.addEventListener('click', function () { selfStartByCustomer = true; resolveAndConfirm(); });
+    var editInfoBtn = document.getElementById('customer-edit-info');
+    if (editInfoBtn) editInfoBtn.addEventListener('click', openEditInfo);
+    var editSave = document.getElementById('edit-info-save');
+    if (editSave) editSave.addEventListener('click', saveEditInfo);
+    var editCancel = document.getElementById('edit-info-cancel');
+    if (editCancel) editCancel.addEventListener('click', showCustomerActions);
     var codeBtn = document.getElementById('scan-code-submit');
     if (codeBtn) codeBtn.addEventListener('click', startSession);
     var scanCodeInput = document.getElementById('scan-code');

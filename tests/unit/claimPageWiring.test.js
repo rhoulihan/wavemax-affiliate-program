@@ -92,6 +92,32 @@ describe('/claim page wiring', () => {
     expect(claimSrc).toContain('full_service');
   });
 
+  it('has the customer two-button actions panel + edit-my-info form + cents warning', () => {
+    const html = fs.readFileSync(path.join(ROOT, 'public/claim-embed.html'), 'utf8');
+    expect(html).toContain('id="claim-customer-actions"');
+    expect(html).toContain('id="customer-start-order"');
+    expect(html).toContain('id="customer-edit-info"');
+    expect(html).toContain('id="claim-edit-info"');
+    expect(html).toContain('id="edit-info-save"');
+    expect(html).toContain('id="scan-cents-warning"');
+    const claimSrc = fs.readFileSync(path.join(ROOT, 'public/assets/js/claim.js'), 'utf8');
+    expect(claimSrc).toContain('openEditInfo');
+    expect(claimSrc).toContain('/api/v1/customers/me');
+    expect(claimSrc).toContain('verifyNewPhoneViaSms');
+    expect(claimSrc).toContain('centsSyncNeeded');
+  });
+
+  it('ships claim.edit.* + claim.scan cents keys in all four languages', () => {
+    for (const lang of ['en', 'es', 'pt', 'de']) {
+      const dict = JSON.parse(fs.readFileSync(path.join(ROOT, `public/locales/${lang}/common.json`), 'utf8'));
+      for (const k of ['button', 'title', 'save', 'cancel', 'saveError']) {
+        expect(`${lang}:claim.edit.${k}:${typeof (dict.claim.edit && dict.claim.edit[k])}`).toBe(`${lang}:claim.edit.${k}:string`);
+      }
+      expect(typeof dict.claim.scan.centsSyncWarning).toBe('string');
+      expect(typeof dict.operator.scan.centsSyncWarning).toBe('string');
+    }
+  });
+
   it('ships claim.pickup.* keys in all four languages', () => {
     for (const lang of ['en', 'es', 'pt', 'de']) {
       const dict = JSON.parse(fs.readFileSync(path.join(ROOT, `public/locales/${lang}/common.json`), 'utf8'));

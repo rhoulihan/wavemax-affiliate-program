@@ -56,7 +56,10 @@
       "notRegistered": "Beutel nicht registriert.",
       "networkError": "Netzwerkfehler — bitte versuchen Sie es erneut.",
       "staffLink": "Personal? Code eingeben",
-      "customerStartTitle": "Bestellung starten"
+      "customerStartTitle": "Bestellung starten",
+      "customerContinue": "Weiter",
+      "actionsTitle": "Was möchten Sie tun?",
+      "centsSyncWarning": "Telefon geändert — diese Nummer in Cents aktualisieren:"
     },
     "status": {
       "in_progress": "Ihre Wäsche wird bearbeitet",
@@ -102,6 +105,18 @@
       "tooManyAttempts": "Zu viele Versuche. Bitte versuchen Sie es in einigen Minuten erneut.",
       "cannotVerify": "Ihre Bestellung konnte nicht automatisch gestartet werden. Ihr Anbieter meldet sich.",
       "alreadyStartedTitle": "Ihre Bestellung ist bereits in Bearbeitung"
+    },
+    "edit": {
+      "button": "Meine Daten bearbeiten",
+      "title": "Bearbeiten Sie Ihre Daten",
+      "phoneChangeNote": "Eine Telefonänderung erfordert eine kurze SMS-Verifizierung.",
+      "saved": "Ihre Daten wurden aktualisiert.",
+      "cancel": "Abbrechen",
+      "save": "Speichern",
+      "loadError": "Ihre Daten konnten nicht geladen werden. Bitte versuchen Sie es erneut.",
+      "saveError": "Speichern fehlgeschlagen. Bitte prüfen Sie Ihre Daten und versuchen Sie es erneut.",
+      "dupEmail": "Diese E-Mail wird bereits verwendet.",
+      "phoneVerifyFailed": "Telefonverifizierung fehlgeschlagen. Bitte erneut versuchen."
     }
   },
   "bag": {
@@ -734,7 +749,8 @@
       "successTitle": "Erfolg",
       "errorTitle": "Fehler",
       "noChange": "Keine Änderung — Bestellung bleibt als zugestellt",
-      "infoTitle": "Keine Änderung"
+      "infoTitle": "Keine Änderung",
+      "centsSyncWarning": "Telefon geändert — diese Nummer in Cents aktualisieren:"
     }
   },
   "expediter": {

@@ -56,7 +56,10 @@
       "notRegistered": "Sacola não registrada.",
       "networkError": "Erro de rede — tente novamente.",
       "staffLink": "Equipe? Insira seu código",
-      "customerStartTitle": "Inicie seu pedido"
+      "customerStartTitle": "Inicie seu pedido",
+      "customerContinue": "Continuar",
+      "actionsTitle": "O que você gostaria de fazer?",
+      "centsSyncWarning": "Telefone alterado — atualize este número no Cents:"
     },
     "status": {
       "in_progress": "Sua roupa está sendo processada",
@@ -102,6 +105,18 @@
       "tooManyAttempts": "Muitas tentativas. Tente novamente em alguns minutos.",
       "cannotVerify": "Não foi possível iniciar seu pedido automaticamente. Seu provedor entrará em contato.",
       "alreadyStartedTitle": "Seu pedido já está em andamento"
+    },
+    "edit": {
+      "button": "Editar minhas informações",
+      "title": "Edite suas informações",
+      "phoneChangeNote": "Alterar seu telefone requer uma verificação rápida por mensagem.",
+      "saved": "Suas informações foram atualizadas.",
+      "cancel": "Cancelar",
+      "save": "Salvar",
+      "loadError": "Não foi possível carregar suas informações. Tente novamente.",
+      "saveError": "Não foi possível salvar. Verifique suas informações e tente novamente.",
+      "dupEmail": "Esse e-mail já está em uso.",
+      "phoneVerifyFailed": "A verificação do telefone falhou. Tente novamente."
     }
   },
   "bag": {
@@ -734,7 +749,8 @@
       "successTitle": "Sucesso",
       "errorTitle": "Erro",
       "noChange": "Sem alterações — o pedido permanece como entregue",
-      "infoTitle": "Sem alterações"
+      "infoTitle": "Sem alterações",
+      "centsSyncWarning": "Telefone alterado — atualize este número no Cents:"
     }
   },
   "expediter": {

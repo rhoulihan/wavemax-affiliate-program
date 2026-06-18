@@ -108,7 +108,7 @@
                 <label for="scan-customer-contact" data-i18n="claim.scan.customerContactLabel">Phone or email</label>
                 <input id="scan-customer-contact" type="text" autocomplete="off"
                        data-i18n-placeholder="claim.scan.customerContactPlaceholder">
-                <button id="scan-customer-submit" type="button" class="btn btn-primary" data-i18n="claim.scan.customerStartButton">Start my order</button>
+                <button id="scan-customer-submit" type="button" class="btn btn-primary" data-i18n="claim.scan.customerContinue">Continue</button>
                 <p id="scan-customer-error" class="claim-error" hidden></p>
 
                 <!-- Staff scan is secondary, behind a link that opens a code modal. -->
@@ -117,7 +117,40 @@
                 </p>
             </section>
 
+            <!-- After the customer verifies their phone/email: choose to edit
+                 their info or start an order. -->
+            <section id="claim-customer-actions" class="claim-panel" hidden>
+                <h1 data-i18n="claim.scan.actionsTitle">What would you like to do?</h1>
+                <button id="customer-start-order" type="button" class="btn btn-primary" data-i18n="claim.scan.customerStartButton">Start my order</button>
+                <button id="customer-edit-info" type="button" class="btn btn-secondary" data-i18n="claim.edit.button">Edit my info</button>
+            </section>
+
+            <!-- Edit-my-info form (customer self-service). -->
+            <section id="claim-edit-info" class="claim-panel" hidden>
+                <h1 data-i18n="claim.edit.title">Edit your info</h1>
+                <div class="grid grid-cols-2 gap-3">
+                    <input type="text" id="edit-firstName" class="claim-input" data-i18n-placeholder="common.labels.firstName" placeholder="First Name">
+                    <input type="text" id="edit-lastName" class="claim-input" data-i18n-placeholder="common.labels.lastName" placeholder="Last Name">
+                </div>
+                <input type="tel" id="edit-phone" class="claim-input" data-i18n-placeholder="common.labels.phoneNumber" placeholder="Phone Number">
+                <p id="edit-phone-note" class="claim-verify-note" hidden data-i18n="claim.edit.phoneChangeNote">Changing your phone needs a quick text verification.</p>
+                <input type="email" id="edit-email" class="claim-input" data-i18n-placeholder="common.labels.email" placeholder="Email">
+                <input type="text" id="edit-address" class="claim-input" data-i18n-placeholder="common.labels.address" placeholder="Address">
+                <div class="grid grid-cols-3 gap-3">
+                    <input type="text" id="edit-city" class="claim-input" data-i18n-placeholder="common.labels.city" placeholder="City">
+                    <input type="text" id="edit-state" maxlength="2" class="claim-input" data-i18n-placeholder="common.labels.state" placeholder="State">
+                    <input type="text" id="edit-zipCode" class="claim-input" data-i18n-placeholder="common.labels.zipCode" placeholder="Zip Code">
+                </div>
+                <p id="edit-info-error" class="claim-error" hidden></p>
+                <p id="edit-info-success" class="claim-success" hidden data-i18n="claim.edit.saved">Your info was updated.</p>
+                <div class="scan-confirm-actions">
+                    <button id="edit-info-cancel" type="button" class="btn btn-secondary" data-i18n="claim.edit.cancel">Cancel</button>
+                    <button id="edit-info-save" type="button" class="btn btn-primary" data-i18n="claim.edit.save">Save</button>
+                </div>
+            </section>
+
             <section id="claim-scan-confirm-panel" class="claim-panel" hidden>
+                <p id="scan-cents-warning" class="claim-error" hidden></p>
                 <p id="scan-session-active" class="claim-session-note" hidden></p>
                 <h1 id="scan-confirm-prompt"></h1>
                 <p id="scan-confirm-customer"></p>

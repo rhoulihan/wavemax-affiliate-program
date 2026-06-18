@@ -627,3 +627,15 @@ body {
     border-left: 4px solid #dc3545;
 }
 
+
+/* Cents-sync warning in the scan-confirm dialog: the customer changed their
+   phone, so the operator must update the number in Cents. */
+.scan-cents-warning {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #b91c1c;
+  border-radius: 6px;
+  padding: 10px 12px;
+  margin: 8px 0;
+  font-weight: 600;
+}

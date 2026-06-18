@@ -56,7 +56,10 @@
       "notRegistered": "Bag not registered.",
       "networkError": "Network error — please try again.",
       "staffLink": "Staff? Enter your code",
-      "customerStartTitle": "Start your order"
+      "customerStartTitle": "Start your order",
+      "customerContinue": "Continue",
+      "actionsTitle": "What would you like to do?",
+      "centsSyncWarning": "Phone changed — update this number in Cents:"
     },
     "status": {
       "in_progress": "Your laundry is being processed",
@@ -102,6 +105,18 @@
       "tooManyAttempts": "Too many attempts. Please try again in a few minutes.",
       "cannotVerify": "We couldn't start your order automatically. Your provider will be in touch.",
       "alreadyStartedTitle": "Your order is already in progress"
+    },
+    "edit": {
+      "button": "Edit my info",
+      "title": "Edit your info",
+      "phoneChangeNote": "Changing your phone needs a quick text verification.",
+      "saved": "Your info was updated.",
+      "cancel": "Cancel",
+      "save": "Save",
+      "loadError": "Could not load your info. Please try again.",
+      "saveError": "Could not save. Please check your info and try again.",
+      "dupEmail": "That email is already in use.",
+      "phoneVerifyFailed": "Phone verification failed. Please try again."
     }
   },
   "bag": {
@@ -734,7 +749,8 @@
       "successTitle": "Success",
       "errorTitle": "Error",
       "noChange": "No change — order left as delivered",
-      "infoTitle": "No change"
+      "infoTitle": "No change",
+      "centsSyncWarning": "Phone changed — update this number in Cents:"
     }
   },
   "expediter": {
