@@ -35,7 +35,8 @@ async function createWorld({ orderStatus } = {}) {
     affiliateId: affiliate.affiliateId,
     firstName: 'Fix', lastName: 'Customer', email: `fixcust${uniq}@example.com`,
     phone: '5125552222', address: '2 Fixture St', city: 'Austin', state: 'TX', zipCode: '78702',
-    username: `fixcust${uniq}`, passwordSalt: salt, passwordHash: hash
+    username: `fixcust${uniq}`, passwordSalt: salt, passwordHash: hash,
+    emailVerified: true // verified so the delivered email isn't suppressed by the gate
   });
 
   const operator = await Operator.create({
