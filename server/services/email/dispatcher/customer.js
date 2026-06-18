@@ -45,16 +45,13 @@ exports.sendCustomerWelcomeEmail = async (customer, affiliate, bagInfo = {}) => 
       `${affiliate.firstName || ''} ${affiliate.lastName || ''}`.trim() ||
       'Your WaveMAX Partner';
 
-    // Extract bag information with defaults
-    const numberOfBags = bagInfo.numberOfBags || 0;
-    const bagFee = bagInfo.bagFee || 0;
-    const totalCredit = bagInfo.totalCredit || 0;
-
-    // Post-weigh workflow: always true. V1-era "upfront bag credit" and "free first bag"
-    // code paths below are dead and will be collapsed when emailService.js is split in
-    // Phase 2 step 4. Left readable for now so the diff stays reviewable.
-    const isV2Registration = true;
-    const isFreeRegistration = false;
+    // The bag's claim URL drives the "Request a pickup" button — and is exactly
+    // what the QR on the bag encodes, so tapping the button OR scanning the bag
+    // both land the customer on the order-start (enter registered phone).
+    const baseUrl = process.env.BASE_URL || 'https://rundberglaundry.com';
+    const pickupUrl = bagInfo.bagToken
+      ? `${baseUrl}/embed-app-v2.html?route=/claim&bag=${encodeURIComponent(bagInfo.bagToken)}`
+      : `${baseUrl}/embed-app-v2.html?route=/claim`;
 
     // Get translations for the email content
     const translations = {
@@ -62,169 +59,77 @@ exports.sendCustomerWelcomeEmail = async (customer, affiliate, bagInfo = {}) => 
         EMAIL_TITLE: 'Welcome to WaveMAX Laundry Service',
         EMAIL_HEADER: 'Welcome to WaveMAX Laundry!',
         GREETING: `Hi ${customer.firstName},`,
-        WELCOME_MESSAGE: 'Welcome to WaveMAX Laundry Service! Your account has been successfully created and you\'re ready to enjoy premium wash, dry, fold laundry services.',
-        YOUR_INFO_TITLE: 'Your Account Information',
+        WELCOME_MESSAGE: 'Your bag is registered and your account is ready. Whenever you have laundry to send, just request a pickup.',
+        YOUR_INFO_TITLE: 'Your Account',
         CUSTOMER_ID_LABEL: 'Customer ID',
         SERVICE_PROVIDER_LABEL: 'Your Service Provider',
-        BAG_INFO_TITLE: isV2Registration ? 'How Our Service Works' : (isFreeRegistration ? 'Your FREE Laundry Bag' : 'Your Laundry Bags'),
-        BAG_INFO_MESSAGE: isV2Registration ?
-          'After we pick up and weigh your laundry, you\'ll receive an invoice. Pay conveniently via credit card, Venmo, PayPal, or CashApp.' :
-          (isFreeRegistration ?
-            'Great news! Your first laundry bag is FREE! It will be delivered to you by your service provider.' :
-            'Your laundry bags are ready! Your service provider will bring them when you place your first order.'),
-        BAG_CREDIT_TITLE: 'Account Credit Details',
-        BAGS_PURCHASED_LABEL: isFreeRegistration ? 'Bags Received' : 'Bags Purchased',
-        COST_PER_BAG_LABEL: 'Cost per Bag',
-        TOTAL_CREDIT_LABEL: 'Total Account Credit',
-        NOTE_LABEL: 'Note',
-        CREDIT_NOTE_MESSAGE: isV2Registration ?
-          'No upfront payment required. You\'ll pay after your laundry is picked up and weighed.' :
-          (isFreeRegistration ?
-            'Your first bag was FREE! Each bag holds approximately 20-25 lbs of laundry.' :
-            'Your service provider will deliver your bags when you schedule your first pickup. Each bag holds approximately 20-25 lbs of laundry.'),
-        HOW_IT_WORKS_TITLE: 'How It Works',
-        STEP_1_TITLE: 'Schedule a Pickup',
-        STEP_1_DESC: 'Login to your dashboard and schedule a convenient pickup time.',
-        STEP_2_TITLE: 'Prepare Your Laundry',
-        STEP_2_DESC: 'Your requested laundry bags will be provided with your first order.',
-        STEP_3_TITLE: 'We Do the Rest',
-        STEP_3_DESC: 'Your laundry is professionally washed, dried, and folded at our facility.',
-        STEP_4_TITLE: 'Delivery to Your Door',
-        STEP_4_DESC: 'Your clean, fresh laundry is delivered back to you, usually within 24-48 hours.',
+        PICKUP_BUTTON: 'Request a pickup',
+        HOW_TO_START_TITLE: 'How to start an order',
+        HOW_TO_START_MESSAGE: 'Tap "Request a pickup" above, or scan the QR code on your bag and enter your registered phone number.',
         QUESTIONS_TITLE: 'Questions?',
-        QUESTIONS_MESSAGE: 'Your service provider is here to help! Feel free to reach out:',
+        QUESTIONS_MESSAGE: 'Your service provider is here to help:',
         NAME_LABEL: 'Name',
         PHONE_LABEL: 'Phone',
         EMAIL_LABEL: 'Email',
-        FOOTER_SUPPORT: 'If you have any questions, please contact our support team.',
-        FOOTER_RIGHTS: 'All rights reserved.',
-        FOOTER_ADDRESS: '123 Main Street, Austin, TX 78701'
+        FOOTER_SUPPORT: 'If you have any questions, please contact your service provider.',
+        FOOTER_RIGHTS: 'All rights reserved.'
       },
       es: {
         EMAIL_TITLE: 'Bienvenido al Servicio de Lavandería WaveMAX',
         EMAIL_HEADER: '¡Bienvenido a WaveMAX Laundry!',
-        GREETING: `Hola ${affiliate.firstName},`,
-        WELCOME_MESSAGE: '¡Bienvenido al Servicio de Lavandería WaveMAX! Su cuenta ha sido creada exitosamente y está listo para disfrutar de servicios premium de lavado, secado y doblado.',
-        YOUR_INFO_TITLE: 'Información de Su Cuenta',
+        GREETING: `Hola ${customer.firstName},`,
+        WELCOME_MESSAGE: 'Su bolsa está registrada y su cuenta está lista. Cuando tenga ropa para enviar, solo solicite una recogida.',
+        YOUR_INFO_TITLE: 'Su Cuenta',
         CUSTOMER_ID_LABEL: 'ID de Cliente',
         SERVICE_PROVIDER_LABEL: 'Su Proveedor de Servicio',
-        BAG_INFO_TITLE: isV2Registration ? 'Cómo Funciona Nuestro Servicio' : (isFreeRegistration ? 'Su Bolsa de Lavandería GRATIS' : 'Sus Bolsas de Lavandería'),
-        BAG_INFO_MESSAGE: isV2Registration ?
-          'Después de recoger y pesar su ropa, recibirá una factura. Pague cómodamente con tarjeta de crédito, Venmo, PayPal o CashApp.' :
-          (isFreeRegistration ?
-            '¡Excelentes noticias! ¡Su primera bolsa de lavandería es GRATIS! Será entregada por su proveedor de servicio.' :
-            '¡Sus bolsas de lavandería están listas! Su proveedor de servicio las traerá cuando haga su primer pedido.'),
-        BAG_CREDIT_TITLE: 'Detalles del Crédito de Cuenta',
-        BAGS_PURCHASED_LABEL: isFreeRegistration ? 'Bolsas Recibidas' : 'Bolsas Compradas',
-        COST_PER_BAG_LABEL: 'Costo por Bolsa',
-        TOTAL_CREDIT_LABEL: 'Crédito Total de Cuenta',
-        NOTE_LABEL: 'Nota',
-        CREDIT_NOTE_MESSAGE: isV2Registration ?
-          'No se requiere pago por adelantado. Pagará después de que su ropa sea recogida y pesada.' :
-          (isFreeRegistration ?
-            '¡Su primera bolsa fue GRATIS! Cada bolsa contiene aproximadamente 20-25 libras de ropa.' :
-            'Su proveedor de servicio entregará sus bolsas cuando programe su primera recogida. Cada bolsa contiene aproximadamente 20-25 libras de ropa.'),
-        HOW_IT_WORKS_TITLE: 'Cómo Funciona',
-        STEP_1_TITLE: 'Programe una Recogida',
-        STEP_1_DESC: 'Inicie sesión en su panel y programe un horario conveniente de recogida.',
-        STEP_2_TITLE: 'Prepare Su Ropa',
-        STEP_2_DESC: 'Sus bolsas de lavandería solicitadas se proporcionarán con su primer pedido.',
-        STEP_3_TITLE: 'Nosotros Hacemos el Resto',
-        STEP_3_DESC: 'Su ropa es lavada, secada y doblada profesionalmente en nuestras instalaciones.',
-        STEP_4_TITLE: 'Entrega a Su Puerta',
-        STEP_4_DESC: 'Su ropa limpia y fresca es entregada, generalmente dentro de 24-48 horas.',
+        PICKUP_BUTTON: 'Solicitar una recogida',
+        HOW_TO_START_TITLE: 'Cómo iniciar un pedido',
+        HOW_TO_START_MESSAGE: 'Toque "Solicitar una recogida" arriba, o escanee el código QR de su bolsa e ingrese su número de teléfono registrado.',
         QUESTIONS_TITLE: '¿Preguntas?',
-        QUESTIONS_MESSAGE: '¡Su proveedor de servicio está aquí para ayudar! No dude en contactar:',
+        QUESTIONS_MESSAGE: 'Su proveedor de servicio está aquí para ayudar:',
         NAME_LABEL: 'Nombre',
         PHONE_LABEL: 'Teléfono',
         EMAIL_LABEL: 'Correo',
-        FOOTER_SUPPORT: 'Si tiene alguna pregunta, contacte a nuestro equipo de soporte.',
-        FOOTER_RIGHTS: 'Todos los derechos reservados.',
-        FOOTER_ADDRESS: '123 Main Street, Austin, TX 78701'
+        FOOTER_SUPPORT: 'Si tiene alguna pregunta, contacte a su proveedor de servicio.',
+        FOOTER_RIGHTS: 'Todos los derechos reservados.'
       },
       pt: {
         EMAIL_TITLE: 'Bem-vindo ao Serviço de Lavanderia WaveMAX',
         EMAIL_HEADER: 'Bem-vindo ao WaveMAX Laundry!',
         GREETING: `Olá ${customer.firstName},`,
-        WELCOME_MESSAGE: 'Bem-vindo ao Serviço de Lavanderia WaveMAX! Sua conta foi criada com sucesso e você está pronto para desfrutar de serviços premium de lavar, secar e dobrar roupas.',
-        YOUR_INFO_TITLE: 'Informações da Sua Conta',
+        WELCOME_MESSAGE: 'Sua sacola está registrada e sua conta está pronta. Sempre que tiver roupas para enviar, basta solicitar uma coleta.',
+        YOUR_INFO_TITLE: 'Sua Conta',
         CUSTOMER_ID_LABEL: 'ID do Cliente',
         SERVICE_PROVIDER_LABEL: 'Seu Provedor de Serviço',
-        BAG_INFO_TITLE: isV2Registration ? 'Como Funciona Nosso Serviço' : (isFreeRegistration ? 'Sua Sacola de Lavanderia GRÁTIS' : 'Suas Sacolas de Lavanderia'),
-        BAG_INFO_MESSAGE: isV2Registration ?
-          'Depois de coletarmos e pesarmos suas roupas, você receberá uma fatura. Pague convenientemente via cartão de crédito, Venmo, PayPal ou CashApp.' :
-          (isFreeRegistration ?
-            'Ótimas notícias! Sua primeira sacola de lavanderia é GRÁTIS! Ela será entregue pelo seu provedor de serviço.' :
-            'Suas sacolas de lavanderia estão prontas! Seu provedor de serviço as trará quando você fizer seu primeiro pedido.'),
-        BAG_CREDIT_TITLE: 'Detalhes do Crédito da Conta',
-        BAGS_PURCHASED_LABEL: isFreeRegistration ? 'Sacolas Recebidas' : 'Sacolas Compradas',
-        COST_PER_BAG_LABEL: 'Custo por Sacola',
-        TOTAL_CREDIT_LABEL: 'Crédito Total da Conta',
-        NOTE_LABEL: 'Nota',
-        CREDIT_NOTE_MESSAGE: isV2Registration ?
-          'Não é necessário pagamento antecipado. Você pagará depois que suas roupas forem coletadas e pesadas.' :
-          (isFreeRegistration ?
-            'Sua primeira sacola foi GRÁTIS! Cada sacola comporta aproximadamente 20-25 libras de roupa.' :
-            'Seu provedor de serviço entregará suas sacolas quando você agendar sua primeira coleta. Cada sacola comporta aproximadamente 20-25 libras de roupa.'),
-        HOW_IT_WORKS_TITLE: 'Como Funciona',
-        STEP_1_TITLE: 'Agende uma Coleta',
-        STEP_1_DESC: 'Faça login no seu painel e agende um horário conveniente para coleta.',
-        STEP_2_TITLE: 'Prepare Sua Roupa',
-        STEP_2_DESC: 'Suas sacolas de lavanderia solicitadas serão fornecidas com seu primeiro pedido.',
-        STEP_3_TITLE: 'Nós Fazemos o Resto',
-        STEP_3_DESC: 'Sua roupa é lavada, seca e dobrada profissionalmente em nossas instalações.',
-        STEP_4_TITLE: 'Entrega em Sua Porta',
-        STEP_4_DESC: 'Sua roupa limpa e fresca é entregue, geralmente dentro de 24-48 horas.',
+        PICKUP_BUTTON: 'Solicitar uma coleta',
+        HOW_TO_START_TITLE: 'Como iniciar um pedido',
+        HOW_TO_START_MESSAGE: 'Toque em "Solicitar uma coleta" acima, ou escaneie o código QR da sua sacola e insira seu número de telefone registrado.',
         QUESTIONS_TITLE: 'Dúvidas?',
-        QUESTIONS_MESSAGE: 'Seu provedor de serviço está aqui para ajudar! Sinta-se à vontade para entrar em contato:',
+        QUESTIONS_MESSAGE: 'Seu provedor de serviço está aqui para ajudar:',
         NAME_LABEL: 'Nome',
         PHONE_LABEL: 'Telefone',
         EMAIL_LABEL: 'E-mail',
-        FOOTER_SUPPORT: 'Se você tiver alguma dúvida, entre em contato com nossa equipe de suporte.',
-        FOOTER_RIGHTS: 'Todos os direitos reservados.',
-        FOOTER_ADDRESS: '123 Main Street, Austin, TX 78701'
+        FOOTER_SUPPORT: 'Se você tiver alguma dúvida, entre em contato com seu provedor de serviço.',
+        FOOTER_RIGHTS: 'Todos os direitos reservados.'
       },
       de: {
         EMAIL_TITLE: 'Willkommen beim WaveMAX Wäscheservice',
         EMAIL_HEADER: 'Willkommen bei WaveMAX Laundry!',
         GREETING: `Hallo ${customer.firstName},`,
-        WELCOME_MESSAGE: 'Willkommen beim WaveMAX Wäscheservice! Ihr Konto wurde erfolgreich erstellt und Sie können nun Premium-Wasch-, Trocken- und Faltservice genießen.',
-        YOUR_INFO_TITLE: 'Ihre Kontoinformationen',
+        WELCOME_MESSAGE: 'Ihr Beutel ist registriert und Ihr Konto ist bereit. Wann immer Sie Wäsche zu senden haben, fordern Sie einfach eine Abholung an.',
+        YOUR_INFO_TITLE: 'Ihr Konto',
         CUSTOMER_ID_LABEL: 'Kunden-ID',
         SERVICE_PROVIDER_LABEL: 'Ihr Dienstleister',
-        BAG_INFO_TITLE: isV2Registration ? 'So Funktioniert Unser Service' : (isFreeRegistration ? 'Ihr KOSTENLOSER Wäschesack' : 'Ihre Wäschesäcke'),
-        BAG_INFO_MESSAGE: isV2Registration ?
-          'Nachdem wir Ihre Wäsche abgeholt und gewogen haben, erhalten Sie eine Rechnung. Bezahlen Sie bequem per Kreditkarte, Venmo, PayPal oder CashApp.' :
-          (isFreeRegistration ?
-            'Großartige Neuigkeiten! Ihr erster Wäschesack ist KOSTENLOS! Er wird von Ihrem Dienstleister geliefert.' :
-            'Ihre Wäschesäcke sind bereit! Ihr Dienstleister wird sie bei Ihrer ersten Bestellung mitbringen.'),
-        BAG_CREDIT_TITLE: 'Kontoguthaben Details',
-        BAGS_PURCHASED_LABEL: isFreeRegistration ? 'Erhaltene Säcke' : 'Gekaufte Säcke',
-        COST_PER_BAG_LABEL: 'Kosten pro Sack',
-        TOTAL_CREDIT_LABEL: 'Gesamtguthaben',
-        NOTE_LABEL: 'Hinweis',
-        CREDIT_NOTE_MESSAGE: isV2Registration ?
-          'Keine Vorauszahlung erforderlich. Sie bezahlen, nachdem Ihre Wäsche abgeholt und gewogen wurde.' :
-          (isFreeRegistration ?
-            'Ihr erster Sack war KOSTENLOS! Jeder Sack fasst etwa 20-25 Pfund Wäsche.' :
-            'Ihr Dienstleister wird Ihre Säcke liefern, wenn Sie Ihre erste Abholung planen. Jeder Sack fasst etwa 20-25 Pfund Wäsche.'),
-        HOW_IT_WORKS_TITLE: 'So funktioniert es',
-        STEP_1_TITLE: 'Abholung planen',
-        STEP_1_DESC: 'Melden Sie sich in Ihrem Dashboard an und planen Sie eine passende Abholzeit.',
-        STEP_2_TITLE: 'Wäsche vorbereiten',
-        STEP_2_DESC: 'Ihre angeforderten Wäschesäcke werden mit Ihrer ersten Bestellung geliefert.',
-        STEP_3_TITLE: 'Wir erledigen den Rest',
-        STEP_3_DESC: 'Ihre Wäsche wird professionell in unserer Einrichtung gewaschen, getrocknet und gefaltet.',
-        STEP_4_TITLE: 'Lieferung an Ihre Tür',
-        STEP_4_DESC: 'Ihre saubere, frische Wäsche wird geliefert, normalerweise innerhalb von 24-48 Stunden.',
+        PICKUP_BUTTON: 'Abholung anfordern',
+        HOW_TO_START_TITLE: 'So starten Sie eine Bestellung',
+        HOW_TO_START_MESSAGE: 'Tippen Sie oben auf "Abholung anfordern" oder scannen Sie den QR-Code auf Ihrem Beutel und geben Sie Ihre registrierte Telefonnummer ein.',
         QUESTIONS_TITLE: 'Fragen?',
-        QUESTIONS_MESSAGE: 'Ihr Dienstleister ist hier, um zu helfen! Zögern Sie nicht, Kontakt aufzunehmen:',
+        QUESTIONS_MESSAGE: 'Ihr Dienstleister hilft Ihnen gerne:',
         NAME_LABEL: 'Name',
         PHONE_LABEL: 'Telefon',
         EMAIL_LABEL: 'E-Mail',
-        FOOTER_SUPPORT: 'Bei Fragen wenden Sie sich bitte an unser Support-Team.',
-        FOOTER_RIGHTS: 'Alle Rechte vorbehalten.',
-        FOOTER_ADDRESS: '123 Main Street, Austin, TX 78701'
+        FOOTER_SUPPORT: 'Bei Fragen wenden Sie sich bitte an Ihren Dienstleister.',
+        FOOTER_RIGHTS: 'Alle Rechte vorbehalten.'
       }
     };
 
@@ -237,9 +142,7 @@ exports.sendCustomerWelcomeEmail = async (customer, affiliate, bagInfo = {}) => 
       affiliate_name: affiliateName,
       affiliate_phone: affiliate.phone || 'Contact for details',
       affiliate_email: affiliate.email || 'support@rundberglaundry.com',
-      number_of_bags: numberOfBags,
-      bag_fee: bagFee.toFixed(2),
-      total_credit: totalCredit.toFixed(2),
+      pickup_url: pickupUrl,
       current_year: new Date().getFullYear(),
       ...emailTranslations
     };

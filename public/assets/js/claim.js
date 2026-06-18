@@ -70,8 +70,10 @@
   // ---- staff scan-session flow -----------------------------------------------
 
   var pending = null; // last resolveData awaiting confirm
+  var selfStartByCustomer = false; // true when the registered customer started the order (vs staff)
 
   function enterStaffScan() {
+    selfStartByCustomer = false; // a resumed batch session is staff
     // Batch-across-QR: a live session skips the code panel.
     if (window.ScanSession && window.ScanSession.getSession() && !window.ScanSession.isExpired()) {
       window.ScanSession.init({ mode: 'session' });
@@ -124,6 +126,7 @@
     errorEl.hidden = true;
     var code = codeInput.value.trim();
     if (!code) return;
+    selfStartByCustomer = false; // staff session
     window.ScanSession.init({ mode: 'session' });
     var s = spin(document.getElementById('scan-code-submit'));
     window.ScanSession.mint(bagToken, code)
@@ -150,6 +153,7 @@
     errorEl.hidden = true;
     var value = input.value.trim();
     if (!value) return;
+    selfStartByCustomer = true; // registered customer starting their own order
     window.ScanSession.init({ mode: 'session' });
     var s = spin(document.getElementById('scan-customer-submit'));
     window.ScanSession.mint(bagToken, value)
@@ -229,6 +233,18 @@
     window.ScanSession.apply(bagToken, expectedAction, opts)
       .then(function (result) {
         pending = null;
+        if (selfStartByCustomer) {
+          // Customer started their own order — acknowledge the request; no staff
+          // batch controls (a customer can't scan-next / undo / run a session).
+          resultEl.textContent = t('claim.pickup.requestedTitle', 'Your order request has been received');
+          resultEl.hidden = false;
+          document.getElementById('scan-confirm-prompt').textContent = '';
+          document.getElementById('scan-confirm-customer').textContent = '';
+          document.getElementById('scan-payment-row').hidden = true;
+          hideById('scan-undo');
+          hideById('scan-end-session');
+          return;
+        }
         if (result.action !== 'no-op') {
           document.getElementById('scan-undo').hidden = false;
         }
@@ -565,7 +581,7 @@
       .then(function () {
         hideById('requestPickupBtn');
         showPickupInstructions(orderCreated
-          ? t('claim.pickup.requestedTitle', 'Pickup requested — your provider has been notified')
+          ? t('claim.pickup.requestedTitle', 'Your order request has been received')
           : t('claim.pickup.alreadyStartedTitle', 'Your order is already in progress'));
       })
       .catch(function (err) {

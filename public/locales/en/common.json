@@ -95,7 +95,7 @@
     "emailOptional": "Email (optional)",
     "pickup": {
       "requestNow": "Request pickup now",
-      "requestedTitle": "Pickup requested — your provider has been notified",
+      "requestedTitle": "Your order request has been received",
       "dropOffTitle": "How to drop off your bag",
       "fallback": "Your laundry partner will be in touch with what to do next.",
       "error": "Could not request pickup. Please try again.",

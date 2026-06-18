@@ -95,7 +95,7 @@
     "emailOptional": "Correo electrónico (opcional)",
     "pickup": {
       "requestNow": "Solicitar recogida ahora",
-      "requestedTitle": "Recogida solicitada — su proveedor ha sido notificado",
+      "requestedTitle": "Hemos recibido su solicitud de pedido",
       "dropOffTitle": "Cómo entregar su bolsa",
       "fallback": "Su socio de lavandería se pondrá en contacto con los próximos pasos.",
       "error": "No se pudo solicitar la recogida. Inténtelo de nuevo.",

@@ -95,7 +95,7 @@
     "emailOptional": "E-Mail (optional)",
     "pickup": {
       "requestNow": "Jetzt Abholung anfordern",
-      "requestedTitle": "Abholung angefordert — Ihr Anbieter wurde benachrichtigt",
+      "requestedTitle": "Ihre Bestellanfrage ist eingegangen",
       "dropOffTitle": "So geben Sie Ihren Beutel ab",
       "fallback": "Ihr Wäschepartner meldet sich mit den nächsten Schritten.",
       "error": "Abholung konnte nicht angefordert werden. Bitte erneut versuchen.",

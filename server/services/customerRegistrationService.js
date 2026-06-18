@@ -132,14 +132,16 @@ async function registerCustomer(payload) {
   }
 
   // Emails are best-effort — never fail registration on SMTP hiccup.
-  await sendWelcomeEmails(newCustomer, affiliate);
+  await sendWelcomeEmails(newCustomer, affiliate, bagToken);
 
   return { customer: newCustomer, affiliate, bag: claimedBag };
 }
 
-async function sendWelcomeEmails(customer, affiliate) {
+async function sendWelcomeEmails(customer, affiliate, bagToken) {
   try {
-    await emailService.sendCustomerWelcomeEmail(customer, affiliate, { numberOfBags: 0, totalCredit: 0, bagFee: 0 });
+    // bagToken drives the welcome email's "Request a pickup" button (the bag's
+    // claim URL = what the QR encodes), so the customer can start an order.
+    await emailService.sendCustomerWelcomeEmail(customer, affiliate, { bagToken });
   } catch (emailError) {
     logger.error('Failed to send welcome email:', emailError);
   }

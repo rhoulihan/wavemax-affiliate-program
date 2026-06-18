@@ -36,23 +36,25 @@
     }
     .button {
       display: inline-block;
-      background-color: #ffffff !important;
+      background-color: #1e3a8a !important;
       color: #ffffff !important;
-      padding: 12px 20px;
+      padding: 14px 28px;
       text-decoration: none !important;
-      border-radius: 4px;
+      border-radius: 6px;
       font-weight: bold;
+      font-size: 16px;
     }
-    a.button {
-      color: #ffffff !important;
-      text-decoration: none !important;
-    }
+    a.button,
     a.button:link,
     a.button:visited,
     a.button:hover,
     a.button:active {
       color: #ffffff !important;
       text-decoration: none !important;
+    }
+    .cta {
+      text-align: center;
+      margin: 28px 0;
     }
     .footer {
       background-color: #f5f5f5;
@@ -61,6 +63,12 @@
       font-size: 12px;
       color: #666666;
     }
+    .highlight {
+      background-color: #f0f7ff;
+      border-left: 4px solid #1e3a8a;
+      padding: 15px;
+      margin: 20px 0;
+    }
     .service-box {
       border: 1px solid #e0e0e0;
       border-radius: 4px;
@@ -68,48 +76,14 @@
       margin: 20px 0;
       background-color: #f9f9f9;
     }
-    .highlight {
-      background-color: #f0f7ff;
-      border-left: 4px solid #1e3a8a;
-      padding: 15px;
-      margin: 20px 0;
-    }
-    .steps {
-      padding: 0;
-    }
-    .step {
-      display: flex;
-      margin-bottom: 15px;
-      align-items: flex-start;
-    }
-    .step-number {
-      background-color: #1e3a8a;
-      color: #ffffff !important;
-      width: 25px;
-      height: 25px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: bold;
-      margin-right: 10px;
-      flex-shrink: 0;
-    }
-    .step-content {
-      flex: 1;
-    }
     .divider {
       height: 1px;
       background-color: #e0e0e0;
       margin: 20px 0;
     }
     @media (max-width: 480px) {
-      .container {
-        padding: 10px;
-      }
-      .content {
-        padding: 15px;
-      }
+      .container { padding: 10px; }
+      .content { padding: 15px; }
     }
   </style>
 </head>
@@ -119,58 +93,28 @@
       <img src="[BASE_URL]/assets/images/brand/logo-wavemax.png" alt="WaveMAX Laundry" class="logo">
       <h1>[EMAIL_HEADER]</h1>
     </div>
-    
+
     <div class="content">
       <div class="section">
         <h2>[GREETING]</h2>
         <p>[WELCOME_MESSAGE]</p>
       </div>
-      
+
       <div class="highlight">
         <h3>[YOUR_INFO_TITLE]</h3>
         <p><strong>[CUSTOMER_ID_LABEL]:</strong> [CUSTOMER_ID]</p>
         <p><strong>[SERVICE_PROVIDER_LABEL]:</strong> [AFFILIATE_NAME]</p>
       </div>
-      
-      <div class="service-box" style="background-color: #f0f7ff; border: 1px solid #3b82f6;">
-        <h3>[BAG_INFO_TITLE]</h3>
-        <p>[BAG_INFO_MESSAGE]</p>
+
+      <div class="cta">
+        <a href="[PICKUP_URL]" class="button">[PICKUP_BUTTON]</a>
       </div>
-      
+
       <div class="service-box">
-        <h3>[HOW_IT_WORKS_TITLE]</h3>
-        <div class="steps">
-          <div class="step">
-            <div class="step-number">1</div>
-            <div class="step-content">
-              <strong>[STEP_1_TITLE]</strong>
-              <p>[STEP_1_DESC]</p>
-            </div>
-          </div>
-          <div class="step">
-            <div class="step-number">2</div>
-            <div class="step-content">
-              <strong>[STEP_2_TITLE]</strong>
-              <p>[STEP_2_DESC]</p>
-            </div>
-          </div>
-          <div class="step">
-            <div class="step-number">3</div>
-            <div class="step-content">
-              <strong>[STEP_3_TITLE]</strong>
-              <p>[STEP_3_DESC]</p>
-            </div>
-          </div>
-          <div class="step">
-            <div class="step-number">4</div>
-            <div class="step-content">
-              <strong>[STEP_4_TITLE]</strong>
-              <p>[STEP_4_DESC]</p>
-            </div>
-          </div>
-        </div>
+        <h3>[HOW_TO_START_TITLE]</h3>
+        <p>[HOW_TO_START_MESSAGE]</p>
       </div>
-      
+
       <div class="divider"></div>
 
       <div class="section">
@@ -181,11 +125,10 @@
         <strong>[EMAIL_LABEL]:</strong> [AFFILIATE_EMAIL]</p>
       </div>
     </div>
-    
+
     <div class="footer">
       <p>[FOOTER_SUPPORT]</p>
       <p>&copy; [CURRENT_YEAR] CRHS Enterprises, LLC. [FOOTER_RIGHTS]</p>
-      <p>[FOOTER_ADDRESS]</p>
     </div>
   </div>
 </body>

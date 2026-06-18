@@ -95,7 +95,7 @@
     "emailOptional": "E-mail (opcional)",
     "pickup": {
       "requestNow": "Solicitar coleta agora",
-      "requestedTitle": "Coleta solicitada — seu provedor foi notificado",
+      "requestedTitle": "Sua solicitação de pedido foi recebida",
       "dropOffTitle": "Como entregar sua sacola",
       "fallback": "Seu parceiro de lavanderia entrará em contato com os próximos passos.",
       "error": "Não foi possível solicitar a coleta. Tente novamente.",
