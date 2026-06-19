@@ -13,6 +13,9 @@ const KEYS = [
   'claim.scan.nothingToUndo', 'claim.scan.sessionActiveUntil',
   'claim.scan.sessionExpired', 'claim.scan.endSession', 'claim.scan.notRegistered',
   'claim.scan.networkError',
+  // order-start redesign (no persistent session): customer/staff start prompt + result
+  'claim.scan.startAnOrder', 'claim.scan.startBtn', 'claim.scan.cancelBtn',
+  'claim.scan.orderReceived', 'claim.scan.alreadyInProgress',
   // kiosk
   'operator.scan.heading', 'operator.scan.subheading', 'operator.scan.tallyLabel',
   'operator.scan.legend.intake', 'operator.scan.legend.outForDelivery',

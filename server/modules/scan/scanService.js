@@ -179,9 +179,13 @@ async function resolveScan({ bagToken }) {
   // Customer display info (intake screen only — first/last name, no PII beyond).
   // centsSyncNeeded warns staff that the customer changed their phone and Cents
   // needs updating; the new phone is included so the operator can copy it across.
-  const Customer = require('../../models/Customer');
   const customer = await Customer.findOne({ customerId: bag.customerId })
     .select('firstName lastName centsSyncNeeded phone');
+
+  // The partner's pickup instructions — shown to the customer after they start
+  // their order (not to staff). Public partner copy, not sensitive.
+  const affiliate = await Affiliate.findOne({ affiliateId: bag.affiliateId })
+    .select('pickupInstructions serviceType');
 
   const currentStatus = reference && OPEN_STATUSES.includes(reference.status)
     ? reference.status : 'none';
@@ -194,6 +198,8 @@ async function resolveScan({ bagToken }) {
     ...(decision.to ? { to: decision.to } : {}),
     ...(decision.orderId ? { orderId: decision.orderId } : {}),
     ...(customer && customer.centsSyncNeeded ? { centsSyncNeeded: true, customerPhone: customer.phone } : {}),
+    pickupInstructions: affiliate ? (affiliate.pickupInstructions || '') : '',
+    serviceType: affiliate ? affiliate.serviceType : undefined,
     promptKey: promptKeyFor(decision),
     requiresConfirm: true
   };
@@ -268,7 +274,6 @@ async function applyScan({ bagToken, expectedAction, reopen, paymentConfirmed, a
   // never clear it. Best-effort; never fails the scan.
   if (actor.type !== 'customer') {
     try {
-      const Customer = require('../../models/Customer');
       await Customer.updateOne(
         { customerId: bag.customerId, centsSyncNeeded: true },
         { $set: { centsSyncNeeded: false } }

@@ -2,20 +2,24 @@
 //
 // Two audiences hit the same URL:
 //   1. A CUSTOMER scanning an unregistered ('claimable') bag → registration form.
-//   2. STAFF (partner/operator) scanning a registered ('claimed') bag → a
-//      scan-session panel: enter a code once → batch-scan transitions.
+//   2. A scan of a registered ('claimed') bag → an order-start panel.
 //
-// Batch-across-QR persistence: each bag QR opens a fresh full-page /claim load.
-// Only sessionStorage survives those loads, so on every 'claimed' load we check
-// ScanSession.getSession(); a live session SKIPS the code panel and goes straight
-// to resolve → confirm. (Registration OTP / Firebase phone gates arrive in PR 8.)
+// No persistent batch session (2026-06-18): each bag QR opens a fresh full-page
+// /claim load with no carried-over session, so EVERY scan re-authenticates.
+//   - CUSTOMER: enter the registered phone/email → mint a START-ONLY session →
+//     [Start my order] starts directly and shows the partner pickup instructions
+//     + "order received". (Also [Edit my info].)
+//   - STAFF: behind a "Staff? Enter your code" link → a code mints a session →
+//     for a new order, a "Start an order?" [Start]/[Cancel] confirm → "order
+//     received" (no instructions); for an in-progress bag, the state-driven
+//     advance confirm. Either start emails the customer if their email is verified.
 (function () {
   'use strict';
 
   var bagToken = new URLSearchParams(window.location.search).get('bag');
 
   var SECTIONS = ['resolving', 'claimable', 'registered', 'claimed', 'invalid'];
-  var PANELS = ['claim-scan-code-panel', 'claim-customer-actions', 'claim-edit-info', 'claim-scan-confirm-panel'];
+  var PANELS = ['claim-scan-code-panel', 'claim-customer-actions', 'claim-edit-info', 'claim-scan-confirm-panel', 'claim-order-result'];
 
   function show(state) {
     SECTIONS.forEach(function (name) {
@@ -70,30 +74,13 @@
   // ---- staff scan-session flow -----------------------------------------------
 
   var pending = null; // last resolveData awaiting confirm
-  var selfStartByCustomer = false; // true when the registered customer started the order (vs staff)
+  var pendingPickupInstructions = ''; // partner instructions from the last resolve (shown to the customer on start)
 
   function enterStaffScan() {
-    selfStartByCustomer = false; // a resumed batch session is staff
-    // Batch-across-QR: a live session skips the code panel.
-    if (window.ScanSession && window.ScanSession.getSession() && !window.ScanSession.isExpired()) {
-      window.ScanSession.init({ mode: 'session' });
-      showSessionActive();
-      resolveAndConfirm();
-    } else {
-      if (window.ScanSession) window.ScanSession.clearSession();
-      showPanel('claim-scan-code-panel');
-    }
-  }
-
-  function showSessionActive() {
-    var note = document.getElementById('scan-session-active');
-    if (!note) return;
-    var s = window.ScanSession.getSession();
-    if (s && s.expiresAt) {
-      var time = new Date(s.expiresAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-      note.textContent = t('claim.scan.sessionActiveUntil', 'Session active until') + ' ' + time;
-      note.hidden = false;
-    }
+    // No persistent session anymore: every bag QR requires a fresh code, so we
+    // always show the entry panel (customer phone/email, or the staff-code link).
+    if (window.ScanSession) window.ScanSession.clearSession();
+    showPanel('claim-scan-code-panel');
   }
 
   // Staff scan is behind a link that opens #staffCodeModal.
@@ -126,13 +113,11 @@
     errorEl.hidden = true;
     var code = codeInput.value.trim();
     if (!code) return;
-    selfStartByCustomer = false; // staff session
     window.ScanSession.init({ mode: 'session' });
     var s = spin(document.getElementById('scan-code-submit'));
     window.ScanSession.mint(bagToken, code)
       .then(function () {
         closeStaffModal();
-        showSessionActive();
         resolveAndConfirm();
       })
       .catch(function (err) {
@@ -153,7 +138,6 @@
     errorEl.hidden = true;
     var value = input.value.trim();
     if (!value) return;
-    selfStartByCustomer = true; // registered customer starting their own order
     window.ScanSession.init({ mode: 'session' });
     var s = spin(document.getElementById('scan-customer-submit'));
     window.ScanSession.mint(bagToken, value)
@@ -310,7 +294,6 @@
 
   function resolveAndConfirm() {
     showPanel('claim-scan-confirm-panel');
-    showSessionActive();
     document.getElementById('scan-confirm-result').hidden = true;
     document.getElementById('scan-confirm-error').hidden = true;
     hideById('scan-cents-warning');
@@ -319,21 +302,28 @@
       .catch(handleScanError);
   }
 
+  // The staff confirm panel. (Customers never reach this — they start directly
+  // via customerStartOrder.) create-pending → "Start an order?"; in-progress →
+  // the existing advance confirm.
   function renderConfirm(resolveData) {
     pending = resolveData;
-    // Operator/affiliate only: warn that the customer changed their phone and
-    // Cents needs updating (a customer self-starting doesn't see this).
-    if (!selfStartByCustomer && resolveData.centsSyncNeeded) {
-      var phone = resolveData.customerPhone || '';
+    pendingPickupInstructions = resolveData.pickupInstructions || '';
+    // Warn staff that the customer changed their phone and Cents needs updating.
+    if (resolveData.centsSyncNeeded) {
       showById('scan-cents-warning',
-        t('claim.scan.centsSyncWarning', 'Phone changed — update this number in Cents:') + ' ' + phone);
+        t('claim.scan.centsSyncWarning', 'Phone changed — update this number in Cents:') + ' ' + (resolveData.customerPhone || ''));
     } else {
       hideById('scan-cents-warning');
     }
+
+    var isStart = resolveData.proposedAction === 'create-pending';
     var promptKey = resolveData.promptKey ? 'claim.' + resolveData.promptKey : null;
-    document.getElementById('scan-confirm-prompt').textContent = promptKey
-      ? t(promptKey, t('claim.scan.confirmGeneric', 'Apply this scan?'))
-      : t('claim.scan.confirmGeneric', 'Apply this scan?');
+    document.getElementById('scan-confirm-prompt').textContent = isStart
+      ? t('claim.scan.startAnOrder', 'Start an order?')
+      : (promptKey ? t(promptKey, t('claim.scan.confirmGeneric', 'Apply this scan?')) : t('claim.scan.confirmGeneric', 'Apply this scan?'));
+    // Start/Cancel for a new order; Yes/No for an advance.
+    setText('scan-confirm-yes', isStart ? t('claim.scan.startBtn', 'Start') : t('claim.scan.yes', 'Yes'));
+    setText('scan-confirm-no', isStart ? t('claim.scan.cancelBtn', 'Cancel') : t('claim.scan.no', 'No'));
 
     var c = resolveData.customer;
     document.getElementById('scan-confirm-customer').textContent = c
@@ -365,12 +355,61 @@
       applyAction('delivery-rescan-prompt', { reopen: false });
       return;
     }
-    // Other actions: just dismiss this bag.
+    // Cancel — no order started; back to the entry panel.
     pending = null;
-    document.getElementById('scan-confirm-prompt').textContent =
-      t('claim.scan.scanNext', 'Scan the next bag.');
-    document.getElementById('scan-confirm-customer').textContent = '';
-    document.getElementById('scan-payment-row').hidden = true;
+    showPanel('claim-scan-code-panel');
+  }
+
+  // Customer self-start: start the order directly (no extra confirm — the
+  // [Start my order] button IS the confirmation) and show the partner pickup
+  // instructions + "order received".
+  function customerStartOrder() {
+    hideById('customer-start-error');
+    var s = spin(document.getElementById('customer-start-order'));
+    window.ScanSession.resolve(bagToken)
+      .then(function (rd) {
+        pendingPickupInstructions = rd.pickupInstructions || '';
+        if (rd.proposedAction === 'create-pending') {
+          return window.ScanSession.apply(bagToken, 'create-pending')
+            .then(function () { showOrderResult({ customer: true, alreadyInProgress: false }); });
+        }
+        // Customer is start-only; an order already exists for this bag.
+        showOrderResult({ customer: true, alreadyInProgress: true });
+      })
+      .catch(function (err) {
+        // Race: an order was opened between this customer's resolve and apply —
+        // either the action drifted (409) or the customer is start-only and the
+        // bag now has an advancing order (403). Either way it's in progress.
+        if (err && (err.code === 'state_changed' || err.code === 'customer_not_allowed')) {
+          showOrderResult({ customer: true, alreadyInProgress: true });
+          return;
+        }
+        if (err && err.status === 401) {
+          // Their short-lived start session lapsed — re-enter the contact.
+          if (window.ScanSession) window.ScanSession.clearSession();
+          showPanel('claim-scan-code-panel');
+          showById('scan-customer-error', t('claim.scan.sessionExpired', 'Your session expired. Please enter your code again.'));
+          return;
+        }
+        showById('customer-start-error', t('claim.pickup.error', 'Could not request pickup. Please try again.'));
+      })
+      .then(function () { s.hide(); });
+  }
+
+  // Final "order received" screen. Customers also see the partner pickup
+  // instructions; staff do not.
+  function showOrderResult(opts) {
+    showPanel('claim-order-result');
+    setText('order-result-title', opts.alreadyInProgress
+      ? t('claim.scan.alreadyInProgress', 'Your order is already in progress.')
+      : t('claim.scan.orderReceived', 'Order received — your provider has been notified.'));
+    var block = document.getElementById('order-result-instructions');
+    if (opts.customer && pendingPickupInstructions) {
+      setText('order-result-instructions-text', pendingPickupInstructions);
+      if (block) block.hidden = false;
+    } else if (block) {
+      block.hidden = true;
+    }
   }
 
   function applyAction(expectedAction, opts) {
@@ -381,25 +420,18 @@
     window.ScanSession.apply(bagToken, expectedAction, opts)
       .then(function (result) {
         pending = null;
-        if (selfStartByCustomer) {
-          // Customer started their own order — acknowledge the request; no staff
-          // batch controls (a customer can't scan-next / undo / run a session).
-          resultEl.textContent = t('claim.pickup.requestedTitle', 'Your order request has been received');
-          resultEl.hidden = false;
-          document.getElementById('scan-confirm-prompt').textContent = '';
-          document.getElementById('scan-confirm-customer').textContent = '';
-          document.getElementById('scan-payment-row').hidden = true;
-          hideById('scan-undo');
-          hideById('scan-end-session');
+        if (result.action === 'create-pending') {
+          // Staff started the order → "order received" (no pickup instructions).
+          showOrderResult({ customer: false });
           return;
         }
+        // Advance / no-op on an in-progress bag (staff). No batch "scan next".
         if (result.action !== 'no-op') {
           document.getElementById('scan-undo').hidden = false;
         }
-        resultEl.textContent = t('claim.scan.applied', 'Done — scan the next bag.');
+        resultEl.textContent = t('claim.scan.applied', 'Done.');
         resultEl.hidden = false;
-        document.getElementById('scan-confirm-prompt').textContent =
-          t('claim.scan.scanNext', 'Scan the next bag.');
+        document.getElementById('scan-confirm-prompt').textContent = '';
         document.getElementById('scan-confirm-customer').textContent = '';
         document.getElementById('scan-payment-row').hidden = true;
       })
@@ -433,14 +465,6 @@
         document.getElementById('scan-undo').hidden = true;
       })
       .catch(handleScanError);
-  }
-
-  function endSession() {
-    if (window.ScanSession) window.ScanSession.clearSession();
-    closeStaffModal();
-    showPanel('claim-scan-code-panel');
-    var codeInput = document.getElementById('scan-code');
-    if (codeInput) codeInput.value = '';
   }
 
   function handleScanError(err) {
@@ -823,7 +847,7 @@
         showFormError(msg);
       })
       .catch(function () {
-        showFormError('Network error — please try again.');
+        showFormError(t('claim.networkError', 'Network error — please try again.'));
       })
       .then(function () { s.hide(); });
   }
@@ -864,7 +888,7 @@
 
     // Customer two-button actions + edit-my-info form.
     var startOrderBtn = document.getElementById('customer-start-order');
-    if (startOrderBtn) startOrderBtn.addEventListener('click', function () { selfStartByCustomer = true; resolveAndConfirm(); });
+    if (startOrderBtn) startOrderBtn.addEventListener('click', customerStartOrder);
     var editInfoBtn = document.getElementById('customer-edit-info');
     if (editInfoBtn) editInfoBtn.addEventListener('click', openEditInfo);
     var editSave = document.getElementById('edit-info-save');
@@ -883,8 +907,6 @@
     if (noBtn) noBtn.addEventListener('click', onConfirmNo);
     var undoBtn = document.getElementById('scan-undo');
     if (undoBtn) undoBtn.addEventListener('click', onUndo);
-    var endBtn = document.getElementById('scan-end-session');
-    if (endBtn) endBtn.addEventListener('click', endSession);
 
     resolveBag();
   }

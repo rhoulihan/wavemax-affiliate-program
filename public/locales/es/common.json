@@ -19,6 +19,7 @@
     "invalidTitle": "Bolsa no reconocida",
     "invalidBody": "No pudimos reconocer esta bolsa. Comunícate con tu proveedor de servicio de lavandería.",
     "raceLost": "Alguien acaba de reclamar esta bolsa. Si fue usted desde otro dispositivo, ya está todo listo.",
+    "networkError": "Error de red — inténtelo de nuevo.",
     "scan": {
       "operatorCodeLabel": "Código de operador",
       "customerStartIntro": "Inicie su pedido con el teléfono o correo electrónico que registró.",
@@ -59,7 +60,12 @@
       "customerStartTitle": "Inicie su pedido",
       "customerContinue": "Continuar",
       "actionsTitle": "¿Qué le gustaría hacer?",
-      "centsSyncWarning": "Teléfono cambiado — actualice este número en Cents:"
+      "centsSyncWarning": "Teléfono cambiado — actualice este número en Cents:",
+      "startAnOrder": "¿Iniciar un pedido?",
+      "startBtn": "Iniciar",
+      "cancelBtn": "Cancelar",
+      "orderReceived": "Pedido recibido: tu proveedor ha sido notificado.",
+      "alreadyInProgress": "Tu pedido ya está en curso."
     },
     "status": {
       "in_progress": "Tu ropa se está procesando",

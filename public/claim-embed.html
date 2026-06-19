@@ -123,6 +123,7 @@
                 <h1 data-i18n="claim.scan.actionsTitle">What would you like to do?</h1>
                 <button id="customer-start-order" type="button" class="btn btn-primary" data-i18n="claim.scan.customerStartButton">Start my order</button>
                 <button id="customer-edit-info" type="button" class="btn btn-secondary" data-i18n="claim.edit.button">Edit my info</button>
+                <p id="customer-start-error" class="claim-error" hidden></p>
             </section>
 
             <!-- Edit-my-info form (customer self-service). -->
@@ -151,7 +152,6 @@
 
             <section id="claim-scan-confirm-panel" class="claim-panel" hidden>
                 <p id="scan-cents-warning" class="claim-error" hidden></p>
-                <p id="scan-session-active" class="claim-session-note" hidden></p>
                 <h1 id="scan-confirm-prompt"></h1>
                 <p id="scan-confirm-customer"></p>
                 <label class="claim-checkbox" id="scan-payment-row" hidden>
@@ -165,7 +165,17 @@
                 <p id="scan-confirm-result" class="claim-success" hidden></p>
                 <p id="scan-confirm-error" class="claim-error" hidden></p>
                 <button id="scan-undo" type="button" class="btn btn-secondary" hidden data-i18n="claim.scan.undo">Undo last scan</button>
-                <button id="scan-end-session" type="button" class="btn btn-secondary" data-i18n="claim.scan.endSession">End session</button>
+            </section>
+
+            <!-- Final "order received" screen (customer self-start, or staff
+                 starting a new order). Customers also see the partner pickup
+                 instructions here; staff do not. -->
+            <section id="claim-order-result" class="claim-panel" hidden>
+                <h1 id="order-result-title"></h1>
+                <div id="order-result-instructions" class="claim-instructions" hidden>
+                    <h2 class="claim-instructions-title" data-i18n="claim.pickup.dropOffTitle">How to drop off your bag</h2>
+                    <p id="order-result-instructions-text" class="claim-instructions-text"></p>
+                </div>
             </section>
 
             <!-- STATE: invalid -->

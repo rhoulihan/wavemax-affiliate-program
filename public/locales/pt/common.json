@@ -19,6 +19,7 @@
     "invalidTitle": "Sacola não reconhecida",
     "invalidBody": "Não foi possível reconhecer esta sacola. Entre em contato com seu provedor de serviço de lavanderia.",
     "raceLost": "Alguém acabou de reivindicar esta sacola. Se foi você em outro dispositivo, está tudo pronto.",
+    "networkError": "Erro de rede — tente novamente.",
     "scan": {
       "operatorCodeLabel": "Código do operador",
       "customerStartIntro": "Inicie seu pedido com o telefone ou e-mail que você registrou.",
@@ -59,7 +60,12 @@
       "customerStartTitle": "Inicie seu pedido",
       "customerContinue": "Continuar",
       "actionsTitle": "O que você gostaria de fazer?",
-      "centsSyncWarning": "Telefone alterado — atualize este número no Cents:"
+      "centsSyncWarning": "Telefone alterado — atualize este número no Cents:",
+      "startAnOrder": "Iniciar um pedido?",
+      "startBtn": "Iniciar",
+      "cancelBtn": "Cancelar",
+      "orderReceived": "Pedido recebido — o seu fornecedor foi notificado.",
+      "alreadyInProgress": "O seu pedido já está em andamento."
     },
     "status": {
       "in_progress": "Sua roupa está sendo processada",

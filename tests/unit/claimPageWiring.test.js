@@ -107,6 +107,58 @@ describe('/claim page wiring', () => {
     expect(claimSrc).toContain('centsSyncNeeded');
   });
 
+  it('order-start redesign: order-result panel, no batch session affordance', () => {
+    const html = fs.readFileSync(path.join(ROOT, 'public/claim-embed.html'), 'utf8');
+    // The "order received" screen exists with a title + a customer-only
+    // pickup-instructions block.
+    expect(html).toContain('id="claim-order-result"');
+    expect(html).toContain('id="order-result-title"');
+    expect(html).toContain('id="order-result-instructions"');
+    expect(html).toContain('id="order-result-instructions-text"');
+    // The batch "End session" / "session active" affordances are gone.
+    expect(html).not.toContain('id="scan-end-session"');
+    expect(html).not.toContain('id="scan-session-active"');
+
+    const claimSrc = fs.readFileSync(path.join(ROOT, 'public/assets/js/claim.js'), 'utf8');
+    // Customer self-start goes straight through (no extra confirm) and renders
+    // the order-result screen; staff create-pending also lands there.
+    expect(claimSrc).toContain('customerStartOrder');
+    expect(claimSrc).toContain('showOrderResult');
+    expect(claimSrc).toContain("'claim-order-result'");
+    expect(claimSrc).toContain('claim.scan.startAnOrder');
+    expect(claimSrc).toContain('claim.scan.orderReceived');
+    // the batch session helper is gone
+    expect(claimSrc).not.toContain('endSession');
+    expect(claimSrc).not.toContain('showSessionActive');
+    // Pickup instructions are CUSTOMER-only: the result panel reveals them only
+    // when opts.customer is set, so the STAFF create-pending result never shows
+    // partner instructions.
+    expect(claimSrc).toMatch(/opts\.customer && pendingPickupInstructions/);
+    expect(claimSrc).toMatch(/showOrderResult\(\{\s*customer:\s*false\s*\}\)/);
+    // The instructions text is sourced from the resolve response, not stale state.
+    expect(claimSrc).toMatch(/pendingPickupInstructions = rd\.pickupInstructions/);
+  });
+
+  it('scan-session.js holds the minted session in-memory only (no cross-load persistence)', () => {
+    const src = fs.readFileSync(path.join(ROOT, 'public/assets/js/scan-session.js'), 'utf8');
+    // No persistence across the fresh /claim load each bag QR opens: the minted
+    // session must never be written to web storage (only the operator JWT is read
+    // from localStorage in operator mode — a getItem read, not a session write).
+    expect(src).not.toMatch(/sessionStorage\.(set|get|remove)Item/);
+    expect(src).not.toMatch(/localStorage\.setItem/);
+    expect(src).toMatch(/var currentSession/);
+  });
+
+  it('ships claim.scan order-start keys in all four languages', () => {
+    for (const lang of ['en', 'es', 'pt', 'de']) {
+      const dict = JSON.parse(fs.readFileSync(path.join(ROOT, `public/locales/${lang}/common.json`), 'utf8'));
+      for (const k of ['startAnOrder', 'startBtn', 'cancelBtn', 'orderReceived', 'alreadyInProgress']) {
+        expect(`${lang}:claim.scan.${k}:${typeof (dict.claim.scan && dict.claim.scan[k])}`)
+          .toBe(`${lang}:claim.scan.${k}:string`);
+      }
+    }
+  });
+
   it('ships claim.edit.* + claim.scan cents keys in all four languages', () => {
     for (const lang of ['en', 'es', 'pt', 'de']) {
       const dict = JSON.parse(fs.readFileSync(path.join(ROOT, `public/locales/${lang}/common.json`), 'utf8'));

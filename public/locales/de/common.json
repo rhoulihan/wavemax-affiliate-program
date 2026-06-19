@@ -19,6 +19,7 @@
     "invalidTitle": "Beutel nicht erkannt",
     "invalidBody": "Wir konnten diesen Beutel nicht erkennen. Bitte wenden Sie sich an Ihren Wäscheservice-Anbieter.",
     "raceLost": "Jemand hat diesen Beutel gerade beansprucht. Falls Sie das auf einem anderen Gerät waren, ist alles erledigt.",
+    "networkError": "Netzwerkfehler — bitte versuchen Sie es erneut.",
     "scan": {
       "operatorCodeLabel": "Bediener-Code",
       "customerStartIntro": "Starten Sie Ihre Bestellung mit der registrierten Telefonnummer oder E-Mail-Adresse.",
@@ -59,7 +60,12 @@
       "customerStartTitle": "Bestellung starten",
       "customerContinue": "Weiter",
       "actionsTitle": "Was möchten Sie tun?",
-      "centsSyncWarning": "Telefon geändert — diese Nummer in Cents aktualisieren:"
+      "centsSyncWarning": "Telefon geändert — diese Nummer in Cents aktualisieren:",
+      "startAnOrder": "Auftrag starten?",
+      "startBtn": "Starten",
+      "cancelBtn": "Abbrechen",
+      "orderReceived": "Auftrag erhalten – Ihr Anbieter wurde benachrichtigt.",
+      "alreadyInProgress": "Ihr Auftrag ist bereits in Bearbeitung."
     },
     "status": {
       "in_progress": "Ihre Wäsche wird bearbeitet",

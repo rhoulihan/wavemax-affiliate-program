@@ -9,40 +9,32 @@
 // cookie credential (auth is the Bearer JWT or the x-scan-session token), so we
 // never attach x-csrf-token here.
 //
-// Persistence primitive: the minted session lives in sessionStorage under
-// `wavemax_scan_session`. Each bag QR opens a fresh full-page /claim load; only
-// sessionStorage survives across those loads, which is exactly what lets a
-// partner authenticate once and then scan bag after bag (each a new QR open)
-// without re-entering their code until the session expires.
+// Session lifetime (2026-06-18): the minted scan-session is held IN-MEMORY only
+// (NOT sessionStorage), so it does NOT survive a page load. Each bag QR opens a
+// fresh /claim load with no session → a code (customer phone/email or staff code)
+// must be entered to start every bag's order; there is no batch "authenticate
+// once, scan many" anymore. The kiosk is unaffected — it uses mode:'operator'
+// (a Bearer login token), never this in-memory session.
 (function (root) {
   'use strict';
 
-  var SESSION_KEY = 'wavemax_scan_session';
-
-  // --- session store (sessionStorage-backed) --------------------------------
+  // --- session store (in-memory; cleared on page load) ----------------------
+  var currentSession = null;
 
   function getSession() {
-    try {
-      var raw = sessionStorage.getItem(SESSION_KEY);
-      if (!raw) return null;
-      var parsed = JSON.parse(raw);
-      if (!parsed || !parsed.sessionToken) return null;
-      return parsed;
-    } catch (e) {
-      return null;
-    }
+    return (currentSession && currentSession.sessionToken) ? currentSession : null;
   }
 
   function setSession(session) {
-    sessionStorage.setItem(SESSION_KEY, JSON.stringify({
+    currentSession = {
       sessionToken: session.sessionToken,
       actorType: session.actorType,
       expiresAt: session.expiresAt
-    }));
+    };
   }
 
   function clearSession() {
-    sessionStorage.removeItem(SESSION_KEY);
+    currentSession = null;
   }
 
   function isExpired() {
