@@ -29,4 +29,6 @@ Decisions:
 - [x] Two adversarial reviewers; fixes: dead selfStartByCustomer removed, redundant inner requires cleaned,
       hardcoded network-error string i18n'd, instruction-gate tests added. (PROMPT_KEYS namespacing = false alarm.)
 - [x] Full gate: failing set ⊆ 14-suite environmental baseline (exit 0).
-- [ ] Deploy both OCI boxes (git pull --ff-only + pm2 reload — scanService.js is server code) + verify live.
+- [x] Deploy both OCI boxes (git pull --ff-only + pm2 reload) + verify live. Commit 80ccfa5; both boxes
+      online; CF-live verified (claim.js customerStartOrder×3, scan-session in-memory, #claim-order-result,
+      en/es/pt/de startAnOrder).
