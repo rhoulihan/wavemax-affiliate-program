@@ -6,6 +6,7 @@ const authController = require('../controllers/authController');
 const { authenticate } = require('../middleware/auth');
 const { authLimiter, passwordResetLimiter, registrationLimiter, adminLoginLimiter } = require('../middleware/rateLimiting');
 const adminIpGate = require('../middleware/adminIpGate');
+const operatorIpGate = require('../middleware/operatorIpGate');
 const { body, validationResult } = require('express-validator');
 const { customPasswordValidator } = require('../utils/passwordValidator');
 
@@ -57,12 +58,6 @@ router.post('/administrator/login',
   authController.administratorLogin
 );
 
-/**
- * @route   GET /api/auth/operator/login
- * @desc    Auto-login operator from store IP
- * @access  Public (restricted by IP)
- */
-router.get('/operator/login', authController.operatorAutoLogin);
 
 /**
  * @route   POST /api/auth/operator/login
@@ -70,6 +65,7 @@ router.get('/operator/login', authController.operatorAutoLogin);
  * @access  Public
  */
 router.post('/operator/login',
+  operatorIpGate,
   authLimiter,
   [
     body('pinCode').trim().notEmpty().withMessage('PIN code is required')

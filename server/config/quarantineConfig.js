@@ -32,8 +32,8 @@ const ALLOWLIST = [
   /^\/data\/franchises\.json$/,     // franchise index (used by clients/sitemap; not per-franchise data)
   /^\/embed-app(-v2)?\.html$/,      // SPA shell
   /^\/admin\/?$/,                   // clean admin URL (IP-gated by adminIpGate; must reach its handler, not redirect to corporate)
+  /^\/operator\/?$/,                // clean operator URL (IP-gated by operatorIpGate; must reach its handler)
   /^\/[a-z0-9-]+-embed\.html$/,     // any *-embed.html (affiliate-login, customer-register, etc.)
-  /^\/operator-login-store\.html$/, // store-IP-gated operator login
   /^\/design-explorer(\/.*)?$/,     // token-gated franchisor design review tool (explorerGuard enforces EXPLORER_TOKEN)
   /^\/registration-success\.html$/,
 

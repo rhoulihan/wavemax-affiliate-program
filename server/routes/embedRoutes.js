@@ -3,6 +3,7 @@ const express = require('express');
 const router = express.Router();
 const { serveHTMLWithNonce } = require('../utils/cspHelper');
 const adminIpGate = require('../middleware/adminIpGate');
+const operatorIpGate = require('../middleware/operatorIpGate');
 
 // Main embed app container V2 - CSP compliant version
 router.get('/embed-app-v2.html', serveHTMLWithNonce('embed-app-v2.html'));
@@ -17,7 +18,8 @@ router.get('/terms-and-conditions-embed.html', serveHTMLWithNonce('terms-and-con
 router.get('/privacy-policy.html', serveHTMLWithNonce('privacy-policy.html'));
 
 // Operator Scan
-router.get('/operator-scan-embed.html', serveHTMLWithNonce('operator-scan-embed.html'));
+router.get('/operator-login-embed.html', operatorIpGate, serveHTMLWithNonce('operator-login-embed.html'));
+router.get('/operator-scan-embed.html', operatorIpGate, serveHTMLWithNonce('operator-scan-embed.html'));
 
 // Affiliate Login
 router.get('/affiliate-login-embed.html', serveHTMLWithNonce('affiliate-login-embed.html'));

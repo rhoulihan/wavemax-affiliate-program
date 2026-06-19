@@ -26,6 +26,7 @@ function isExempt(p) {
     // SPA shell, its embed page fragments, and the i18n locale files.
     p === '/embed-app-v2.html' ||
     p === '/admin' || p === '/admin/' ||     // clean admin URL (IP-gated)
+    p === '/operator' || p === '/operator/' || // clean operator URL (IP-gated)
     p.endsWith('-embed.html') ||
     p.startsWith('/locales/') ||
     p.startsWith('/.well-known/') ||         // ACME cert renewal, etc.

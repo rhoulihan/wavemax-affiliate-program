@@ -23,6 +23,7 @@ const customerRoutes = require('./server/routes/customerRoutes');
 const orderRoutes = require('./server/routes/orderRoutes');
 const administratorRoutes = require('./server/routes/administratorRoutes');
 const adminIpGate = require('./server/middleware/adminIpGate');
+const operatorIpGate = require('./server/middleware/operatorIpGate');
 const operatorRoutes = require('./server/routes/operatorRoutes');
 const monitoringRoutes = require('./server/routes/monitoringRoutes');
 const systemConfigRoutes = require('./server/routes/systemConfigRoutes');
@@ -279,7 +280,8 @@ app.use((req, res, next) => {
     '/embed-landing.html',
     '/embed-app-v2.html',
     '/admin',
-    '/operator-login-store.html',
+    '/operator',
+    '/operator-login-embed.html',
     '/affiliate-register-embed.html',
     '/affiliate-login-embed.html',
     '/affiliate-dashboard-embed.html',
@@ -768,6 +770,10 @@ app.use((req, res, next) => {
   if (/^\/admin\/?$/i.test(p) || /administrator-(login|dashboard)-embed\.html$/i.test(p)) {
     return adminIpGate(req, res, next);
   }
+  // Same defense for the operator surface (store-IP gated).
+  if (/^\/operator\/?$/i.test(p) || /operator-(login|scan)-embed\.html$/i.test(p)) {
+    return operatorIpGate(req, res, next);
+  }
   return next();
 });
 
@@ -1056,6 +1062,24 @@ app.get(['/admin', '/admin/'], adminIpGate, async (req, res) => {
 app.get('/admin/*', adminIpGate, (req, res, next) => {
   res.locals.csrfToken = req.csrfToken ? req.csrfToken() : null;
   next();
+});
+
+// Clean operator URL: GET /operator serves the SPA shell pointed at the operator
+// login (clean address bar), IP-gated to the store location(s) + admin IP. Mirrors
+// the /admin handler; SessionManager then sends an authenticated operator to the
+// scan page and everyone else to the PIN login.
+app.get(['/operator', '/operator/'], operatorIpGate, async (req, res) => {
+  try {
+    const nonce = res.locals.cspNonce;
+    let html = await adminReadHTML(path.join(__dirname, 'public', 'embed-app-v2.html'), nonce);
+    const inject = `<script nonce="${nonce}">window.__DEFAULT_ROUTE='/operator-login';</script>`;
+    html = html.replace('</head>', `${inject}</head>`);
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.type('html').send(html);
+  } catch (err) {
+    logger.error('Error serving /operator shell:', err);
+    res.status(500).send('Internal Server Error');
+  }
 });
 
 // Health check endpoint
