@@ -21,7 +21,7 @@
     "raceLost": "Someone just claimed this bag. If that was you on another device, you're all set.",
     "networkError": "Network error — please try again.",
     "scan": {
-      "operatorCodeLabel": "Operator code",
+      "operatorCodeLabel": "Staff or operator code",
       "customerStartIntro": "Enter the phone or email you registered to continue.",
       "customerContactLabel": "Phone or email",
       "customerContactPlaceholder": "Your phone or email",

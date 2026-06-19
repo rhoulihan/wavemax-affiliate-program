@@ -139,7 +139,7 @@ exports.registerAffiliate = async (req, res) => {
 
     // PR 9: provision the vendor delivery code at invited registration (§4.6).
     const deliveryCodeLength = await SystemConfig.getValue('affiliate_delivery_code_length', 6);
-    const deliveryCode = roleCodes.generateCode(deliveryCodeLength);
+    const deliveryCode = roleCodes.generateNumericCode(deliveryCodeLength); // 6-digit partner staff code
     newAffiliate.affiliateDeliveryCodeHash = roleCodes.hashCode(deliveryCode);
     newAffiliate.affiliateDeliveryCodeSetAt = new Date();
 
@@ -1033,7 +1033,7 @@ exports.resetDeliveryCode = ControllerHelpers.asyncWrapper(async (req, res) => {
   if (!affiliate) return ControllerHelpers.sendError(res, 'Affiliate not found', 404);
 
   const codeLength = await SystemConfig.getValue('affiliate_delivery_code_length', 6);
-  const deliveryCode = roleCodes.generateCode(codeLength);
+  const deliveryCode = roleCodes.generateNumericCode(codeLength); // 6-digit partner staff code
   affiliate.affiliateDeliveryCodeHash = roleCodes.hashCode(deliveryCode);
   affiliate.affiliateDeliveryCodeSetAt = new Date();
   await affiliate.save();

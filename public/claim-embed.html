@@ -240,6 +240,9 @@
             <div class="modal-body">
                 <p data-i18n="claim.scan.staffIntro">Enter your code to scan this bag.</p>
                 <label for="scan-code" data-i18n="claim.scan.operatorCodeLabel">Operator code</label>
+                <!-- Accepts EITHER the partner's 6-digit staff code OR a WaveMAX
+                     operator's alphanumeric scan code (mintSession tries both), so
+                     this is a plain text field (no numeric-only constraint). -->
                 <input id="scan-code" type="text" autocomplete="one-time-code" autocapitalize="characters"
                        maxlength="12" class="claim-input" data-i18n-placeholder="claim.scan.codePlaceholder">
                 <p id="scan-code-error" class="claim-error" hidden></p>

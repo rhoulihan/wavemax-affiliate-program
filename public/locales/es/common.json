@@ -21,7 +21,7 @@
     "raceLost": "Alguien acaba de reclamar esta bolsa. Si fue usted desde otro dispositivo, ya está todo listo.",
     "networkError": "Error de red — inténtelo de nuevo.",
     "scan": {
-      "operatorCodeLabel": "Código de operador",
+      "operatorCodeLabel": "Código de personal u operador",
       "customerStartIntro": "Ingrese el teléfono o correo electrónico que registró para continuar.",
       "customerContactLabel": "Teléfono o correo",
       "customerContactPlaceholder": "Su teléfono o correo",

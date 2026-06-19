@@ -21,7 +21,7 @@
     "raceLost": "Jemand hat diesen Beutel gerade beansprucht. Falls Sie das auf einem anderen Gerät waren, ist alles erledigt.",
     "networkError": "Netzwerkfehler — bitte versuchen Sie es erneut.",
     "scan": {
-      "operatorCodeLabel": "Bediener-Code",
+      "operatorCodeLabel": "Personal- oder Operator-Code",
       "customerStartIntro": "Geben Sie die registrierte Telefonnummer oder E-Mail-Adresse ein, um fortzufahren.",
       "customerContactLabel": "Telefon oder E-Mail",
       "customerContactPlaceholder": "Ihre Telefonnummer oder E-Mail",

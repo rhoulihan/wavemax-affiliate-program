@@ -16,6 +16,17 @@ describe('roleCodes utility', () => {
     expect(seen.size).toBe(50);
   });
 
+  test('generateNumericCode returns digits-only of the requested length (the 6-digit partner staff code)', () => {
+    for (const len of [4, 6, 8]) {
+      const code = roleCodes.generateNumericCode(len);
+      expect(code).toHaveLength(len);
+      expect(code).toMatch(/^[0-9]+$/);
+    }
+    // round-trips through hash/verify like any other code
+    const c = roleCodes.generateNumericCode(6);
+    expect(roleCodes.verifyCode(c, roleCodes.hashCode(c))).toBe(true);
+  });
+
   test('hashCode/verifyCode round-trip, case- and whitespace-insensitive input', () => {
     const code = roleCodes.generateCode(6);
     const stored = roleCodes.hashCode(code);

@@ -33,6 +33,21 @@ function generateCode(length) {
 }
 
 /**
+ * Generate a purely NUMERIC code (e.g. the 6-digit partner/affiliate staff code).
+ * Digits can lead with 0 — it's a string code, not a number. Easy to read off a
+ * card and type on any keypad.
+ * @param {number} length - number of digits
+ * @returns {string}
+ */
+function generateNumericCode(length) {
+  let out = '';
+  for (let i = 0; i < length; i++) {
+    out += String(crypto.randomInt(10)); // unbiased 0-9
+  }
+  return out;
+}
+
+/**
  * PBKDF2-hash a code for at-rest storage. Returns "hash:salt" (single field).
  */
 function hashCode(code) {
@@ -65,4 +80,4 @@ function hmacCode(code) {
     .digest('hex');
 }
 
-module.exports = { generateCode, hashCode, verifyCode, hmacCode, normalizeCode, CODE_ALPHABET };
+module.exports = { generateCode, generateNumericCode, hashCode, verifyCode, hmacCode, normalizeCode, CODE_ALPHABET };

@@ -93,7 +93,7 @@ exports.createAffiliateManually = ControllerHelpers.asyncWrapper(async (req, res
   const temporaryPassword = generateTemporaryPassword();
   const { salt, hash } = encryptionUtil.hashPassword(temporaryPassword);
   const deliveryCodeLength = await SystemConfig.getValue('affiliate_delivery_code_length', 6);
-  const deliveryCode = roleCodes.generateCode(deliveryCodeLength);
+  const deliveryCode = roleCodes.generateNumericCode(deliveryCodeLength); // 6-digit partner staff code
 
   // Location affiliates charge no delivery fees unless the admin says otherwise.
   const isLocation = affiliateType === 'location';
