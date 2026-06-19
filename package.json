@@ -26,7 +26,9 @@
     "ensure-indexes": "node scripts/ensure-indexes.js",
     "generate:sample-data:clean": "node scripts/setup/generate-sample-data.js --clean",
     "build:explorer": "node design-explorer/build.js",
-    "check:i18n": "node scripts/check-i18n-parity.js"
+    "check:i18n": "node scripts/check-i18n-parity.js",
+    "clear:customer-data": "node scripts/admin/clear-customer-data.js",
+    "clear:customer-data:confirm": "node scripts/admin/clear-customer-data.js --yes"
   },
   "repository": {
     "type": "git",
