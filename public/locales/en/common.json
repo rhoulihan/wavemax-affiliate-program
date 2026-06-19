@@ -22,7 +22,7 @@
     "networkError": "Network error — please try again.",
     "scan": {
       "operatorCodeLabel": "Operator code",
-      "customerStartIntro": "Start your order with the phone or email you registered.",
+      "customerStartIntro": "Enter the phone or email you registered to continue.",
       "customerContactLabel": "Phone or email",
       "customerContactPlaceholder": "Your phone or email",
       "customerStartButton": "Start my order",
@@ -57,7 +57,7 @@
       "notRegistered": "Bag not registered.",
       "networkError": "Network error — please try again.",
       "staffLink": "Staff? Enter your code",
-      "customerStartTitle": "Start your order",
+      "customerStartTitle": "Continue with your bag",
       "customerContinue": "Continue",
       "actionsTitle": "What would you like to do?",
       "centsSyncWarning": "Phone changed — update this number in Cents:",
@@ -65,7 +65,8 @@
       "startBtn": "Start",
       "cancelBtn": "Cancel",
       "orderReceived": "Order received — your provider has been notified.",
-      "alreadyInProgress": "Your order is already in progress."
+      "alreadyInProgress": "Your order is already in progress.",
+      "deliveredConfirmed": "Delivered — thank you! This order is complete."
     },
     "status": {
       "in_progress": "Your laundry is being processed",

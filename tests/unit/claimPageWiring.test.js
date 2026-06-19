@@ -100,6 +100,20 @@ describe('/claim page wiring', () => {
     expect(claimSrc).toContain('registeredEmail');
   });
 
+  it('out-for-delivery scan confirms DELIVERY (complete) — not a new order', () => {
+    const claimSrc = fs.readFileSync(path.join(ROOT, 'public/assets/js/claim.js'), 'utf8');
+    // After the customer mints, an out_for_delivery bag routes to the confirm
+    // dialog (delivery), not the "start an order" actions panel.
+    expect(claimSrc).toMatch(/proposedAction === 'advance' && rd\.to === 'complete'/);
+    // A completed advance shows the delivery confirmation, not "Done."
+    expect(claimSrc).toMatch(/result\.newStatus === 'complete'/);
+    expect(claimSrc).toContain('claim.scan.deliveredConfirmed');
+    for (const lang of ['en', 'es', 'pt', 'de']) {
+      const dict = JSON.parse(fs.readFileSync(path.join(ROOT, `public/locales/${lang}/common.json`), 'utf8'));
+      expect(typeof dict.claim.scan.deliveredConfirmed).toBe('string');
+    }
+  });
+
   it('first-order reminders (confirm-email + Cents SMS) on the order-start screens', () => {
     const html = fs.readFileSync(path.join(ROOT, 'public/claim-embed.html'), 'utf8');
     // scan-start result panel + post-registration confirmation each surface them
@@ -178,7 +192,7 @@ describe('/claim page wiring', () => {
     // Pickup instructions are CUSTOMER-only: the result panel reveals them only
     // when opts.customer is set, so the STAFF create-pending result never shows
     // partner instructions.
-    expect(claimSrc).toMatch(/opts\.customer && pendingPickupInstructions/);
+    expect(claimSrc).toMatch(/opts\.customer && !opts\.delivered && pendingPickupInstructions/);
     expect(claimSrc).toMatch(/showOrderResult\(\{\s*customer:\s*false\s*\}\)/);
     // The instructions text is sourced from the resolve response, not stale state.
     expect(claimSrc).toMatch(/pendingPickupInstructions = rd\.pickupInstructions/);

@@ -22,7 +22,7 @@
     "networkError": "Error de red — inténtelo de nuevo.",
     "scan": {
       "operatorCodeLabel": "Código de operador",
-      "customerStartIntro": "Inicie su pedido con el teléfono o correo electrónico que registró.",
+      "customerStartIntro": "Ingrese el teléfono o correo electrónico que registró para continuar.",
       "customerContactLabel": "Teléfono o correo",
       "customerContactPlaceholder": "Su teléfono o correo",
       "customerStartButton": "Iniciar mi pedido",
@@ -57,7 +57,7 @@
       "notRegistered": "Bolsa no registrada.",
       "networkError": "Error de red — inténtelo de nuevo.",
       "staffLink": "¿Personal? Ingrese su código",
-      "customerStartTitle": "Inicie su pedido",
+      "customerStartTitle": "Continúe con su bolsa",
       "customerContinue": "Continuar",
       "actionsTitle": "¿Qué le gustaría hacer?",
       "centsSyncWarning": "Teléfono cambiado — actualice este número en Cents:",
@@ -65,7 +65,8 @@
       "startBtn": "Iniciar",
       "cancelBtn": "Cancelar",
       "orderReceived": "Pedido recibido: tu proveedor ha sido notificado.",
-      "alreadyInProgress": "Tu pedido ya está en curso."
+      "alreadyInProgress": "Tu pedido ya está en curso.",
+      "deliveredConfirmed": "Entregado — ¡gracias! Este pedido está completo."
     },
     "status": {
       "in_progress": "Tu ropa se está procesando",

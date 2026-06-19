@@ -231,12 +231,15 @@ async function applyScan({ bagToken, expectedAction, reopen, paymentConfirmed, a
       'Bag state changed since you scanned — please re-scan', 409);
   }
 
-  // Customer sessions are START-ONLY: the ONLY action they may take is opening a
-  // brand-new pending order. Everything else — advancing (intake/ready/delivery)
-  // AND reopening a just-completed order via the delivery-rescan-prompt window —
-  // stays with staff. (Allowing reopen would let a customer restart a staff-
-  // completed order within the reopen window.)
-  if (actor.type === 'customer' && decision.action !== 'create-pending') {
+  // Customer sessions are limited to the two ends they own: STARTING a brand-new
+  // pending order (pickup), and CONFIRMING delivery of their own bag
+  // (out_for_delivery -> complete). The store-side middle steps (intake, store
+  // pickup) and reopening a just-completed order (delivery-rescan-prompt) stay
+  // with staff — a customer must not be able to advance an in-store order or
+  // restart a staff-completed one within the reopen window.
+  const customerAllowed = decision.action === 'create-pending' ||
+    (decision.action === 'advance' && decision.to === 'complete');
+  if (actor.type === 'customer' && !customerAllowed) {
     throw new ScanError('customer_not_allowed',
       'Only store staff can advance or reopen this order', 403);
   }

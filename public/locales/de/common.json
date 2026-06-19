@@ -22,7 +22,7 @@
     "networkError": "Netzwerkfehler — bitte versuchen Sie es erneut.",
     "scan": {
       "operatorCodeLabel": "Bediener-Code",
-      "customerStartIntro": "Starten Sie Ihre Bestellung mit der registrierten Telefonnummer oder E-Mail-Adresse.",
+      "customerStartIntro": "Geben Sie die registrierte Telefonnummer oder E-Mail-Adresse ein, um fortzufahren.",
       "customerContactLabel": "Telefon oder E-Mail",
       "customerContactPlaceholder": "Ihre Telefonnummer oder E-Mail",
       "customerStartButton": "Meine Bestellung starten",
@@ -57,7 +57,7 @@
       "notRegistered": "Beutel nicht registriert.",
       "networkError": "Netzwerkfehler — bitte versuchen Sie es erneut.",
       "staffLink": "Personal? Code eingeben",
-      "customerStartTitle": "Bestellung starten",
+      "customerStartTitle": "Mit Ihrem Beutel fortfahren",
       "customerContinue": "Weiter",
       "actionsTitle": "Was möchten Sie tun?",
       "centsSyncWarning": "Telefon geändert — diese Nummer in Cents aktualisieren:",
@@ -65,7 +65,8 @@
       "startBtn": "Starten",
       "cancelBtn": "Abbrechen",
       "orderReceived": "Auftrag erhalten – Ihr Anbieter wurde benachrichtigt.",
-      "alreadyInProgress": "Ihr Auftrag ist bereits in Bearbeitung."
+      "alreadyInProgress": "Ihr Auftrag ist bereits in Bearbeitung.",
+      "deliveredConfirmed": "Zugestellt — vielen Dank! Diese Bestellung ist abgeschlossen."
     },
     "status": {
       "in_progress": "Ihre Wäsche wird bearbeitet",

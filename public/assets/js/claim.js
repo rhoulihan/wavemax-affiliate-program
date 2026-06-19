@@ -141,8 +141,20 @@
     window.ScanSession.init({ mode: 'session' });
     var s = spin(document.getElementById('scan-customer-submit'));
     window.ScanSession.mint(bagToken, value)
-      .then(function () {
-        showCustomerActions();
+      .then(function () { return window.ScanSession.resolve(bagToken); })
+      .then(function (rd) {
+        pendingPickupInstructions = rd.pickupInstructions || '';
+        if (rd.proposedAction === 'advance' && rd.to === 'complete') {
+          // Bag is out for delivery → this scan is the DELIVERY confirmation, not
+          // a new order. Confirm "mark delivered?" then complete.
+          resolveAndConfirm();
+        } else if (rd.proposedAction === 'create-pending') {
+          showCustomerActions(); // [Start my order] / [Edit my info]
+        } else {
+          // An in-store order is mid-flow (intake/store-pickup) or just delivered;
+          // the customer is not the actor for those — just report status.
+          showOrderResult({ customer: true, alreadyInProgress: true });
+        }
       })
       .catch(function (err) {
         errorEl.textContent = err.status === 429
@@ -302,14 +314,17 @@
       .catch(handleScanError);
   }
 
-  // The staff confirm panel. (Customers never reach this — they start directly
-  // via customerStartOrder.) create-pending → "Start an order?"; in-progress →
-  // the existing advance confirm.
+  // The confirm panel. Reached by STAFF (any advance) and now by a CUSTOMER
+  // confirming their own delivery (out_for_delivery → complete). create-pending →
+  // "Start an order?"; advance → the state-driven confirm.
   function renderConfirm(resolveData) {
     pending = resolveData;
     pendingPickupInstructions = resolveData.pickupInstructions || '';
-    // Warn staff that the customer changed their phone and Cents needs updating.
-    if (resolveData.centsSyncNeeded) {
+    // The "update this number in Cents" warning is for STORE STAFF — never show it
+    // to a customer confirming their own delivery (it's an out-of-context message).
+    var sess = window.ScanSession && window.ScanSession.getSession();
+    var isCustomerSession = !!(sess && sess.actorType === 'customer');
+    if (resolveData.centsSyncNeeded && !isCustomerSession) {
       showById('scan-cents-warning',
         t('claim.scan.centsSyncWarning', 'Phone changed — update this number in Cents:') + ' ' + (resolveData.customerPhone || ''));
     } else {
@@ -406,11 +421,18 @@
   // instructions; staff do not.
   function showOrderResult(opts) {
     showPanel('claim-order-result');
-    setText('order-result-title', opts.alreadyInProgress
-      ? t('claim.scan.alreadyInProgress', 'Your order is already in progress.')
-      : t('claim.scan.orderReceived', 'Order received — your provider has been notified.'));
+    var title;
+    if (opts.delivered) {
+      title = t('claim.scan.deliveredConfirmed', 'Delivered — thank you! This order is complete.');
+    } else if (opts.alreadyInProgress) {
+      title = t('claim.scan.alreadyInProgress', 'Your order is already in progress.');
+    } else {
+      title = t('claim.scan.orderReceived', 'Order received — your provider has been notified.');
+    }
+    setText('order-result-title', title);
     var block = document.getElementById('order-result-instructions');
-    if (opts.customer && pendingPickupInstructions) {
+    // Pickup/drop-off instructions are for a NEW order start, not a delivery.
+    if (opts.customer && !opts.delivered && pendingPickupInstructions) {
       setText('order-result-instructions-text', pendingPickupInstructions);
       if (block) block.hidden = false;
     } else if (block) {
@@ -441,6 +463,12 @@
         if (result.action === 'create-pending') {
           // Staff started the order → "order received" (no pickup instructions).
           showOrderResult({ customer: false });
+          return;
+        }
+        if (result.newStatus === 'complete') {
+          // Delivery confirmed (out_for_delivery → complete) — by an operator code
+          // or the registered bag owner's phone. Show the delivery confirmation.
+          showOrderResult({ delivered: true });
           return;
         }
         // Advance / no-op on an in-progress bag (staff). No batch "scan next".

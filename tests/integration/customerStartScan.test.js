@@ -106,6 +106,23 @@ describe('customer-initiated start (phone/email)', () => {
     expect(res.body.errors ? res.body.errors.code : res.body.code).toBe('customer_not_allowed');
   });
 
+  test('customer session CAN confirm delivery (out_for_delivery → complete)', async () => {
+    const { bagToken, bag } = await createWorld();
+    // operator drives the order to out_for_delivery
+    const op = (await mint(bagToken, OP_CODE)).body.sessionToken;
+    await applyWith(op, bagToken, 'create-pending');
+    await applyWith(op, bagToken, 'advance'); // -> in_progress
+    await applyWith(op, bagToken, 'advance'); // -> out_for_delivery
+    // the registered bag owner scans + confirms delivery with their phone
+    const cust = (await mint(bagToken, '5125552222')).body.sessionToken;
+    const res = await applyWith(cust, bagToken, 'advance'); // out_for_delivery -> complete
+    expect(res.status).toBe(200);
+    expect(res.body.newStatus).toBe('complete');
+    const order = await Order.findOne({ bagId: bag.bagId });
+    expect(order.status).toBe('complete');
+    expect(order.delivery.role).toBe('customer');
+  });
+
   test('customer session CANNOT undo (403)', async () => {
     const { bagToken } = await createWorld();
     const custSession = (await mint(bagToken, '5125552222')).body.sessionToken;
