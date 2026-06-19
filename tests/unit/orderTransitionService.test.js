@@ -70,6 +70,40 @@ describe('orderTransitionService', () => {
         .rejects.toMatchObject({ code: 'order_already_open', status: 409 });
       expect(await Order.countDocuments({ bagId: bag.bagId })).toBe(1);
     });
+
+    // Order-start reminder flags (PR-A2): firstOrder + emailVerified.
+    async function priorOrder(status) {
+      await Order.create({
+        customerId: customer.customerId, affiliateId: affiliate.affiliateId,
+        bagId: 'BAG-prior-' + status, bagToken: status.padEnd(32, '0').slice(0, 32),
+        status, pickup: { at: new Date(), by: affiliate.affiliateId, role: 'affiliate' }
+      });
+    }
+
+    it('flags the first order (firstOrder true) and mirrors the customer emailVerified', async () => {
+      customer.emailVerified = true; await customer.save();
+      const res = await svc.createPendingOrder({ bag: await freshBag(), ...affRole() });
+      expect(res.firstOrder).toBe(true);
+      expect(res.emailVerified).toBe(true);
+    });
+
+    it('firstOrder is false once the customer has a prior non-cancelled order', async () => {
+      await priorOrder('complete');
+      const res = await svc.createPendingOrder({ bag: await freshBag(), ...affRole() });
+      expect(res.firstOrder).toBe(false);
+    });
+
+    it('a cancelled prior order does not count — still the first (real) order', async () => {
+      await priorOrder('cancelled');
+      const res = await svc.createPendingOrder({ bag: await freshBag(), ...affRole() });
+      expect(res.firstOrder).toBe(true);
+    });
+
+    it('emailVerified is false when the customer email is unverified', async () => {
+      customer.emailVerified = false; await customer.save();
+      const res = await svc.createPendingOrder({ bag: await freshBag(), ...affRole() });
+      expect(res.emailVerified).toBe(false);
+    });
   });
 
   describe('advanceOrder (state-driven)', () => {

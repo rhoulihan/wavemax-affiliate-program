@@ -100,6 +100,27 @@ describe('/claim page wiring', () => {
     expect(claimSrc).toContain('registeredEmail');
   });
 
+  it('first-order reminders (confirm-email + Cents SMS) on the order-start screens', () => {
+    const html = fs.readFileSync(path.join(ROOT, 'public/claim-embed.html'), 'utf8');
+    // scan-start result panel + post-registration confirmation each surface them
+    expect(html).toContain('id="order-reminders"');
+    expect(html).toContain('id="order-reminder-email"');
+    expect(html).toContain('id="cents-sms-notice"');
+    expect(html).toContain('data-i18n="claim.start.centsSms"');
+    expect(html).toContain('data-i18n="claim.start.confirmEmailReminder"');
+    const claimSrc = fs.readFileSync(path.join(ROOT, 'public/assets/js/claim.js'), 'utf8');
+    expect(claimSrc).toContain('showStartReminders');
+    expect(claimSrc).toMatch(/firstOrder/);
+    expect(claimSrc).toMatch(/emailVerified/);
+    for (const lang of ['en', 'es', 'pt', 'de']) {
+      const dict = JSON.parse(fs.readFileSync(path.join(ROOT, `public/locales/${lang}/common.json`), 'utf8'));
+      for (const k of ['centsSms', 'confirmEmailReminder']) {
+        expect(`${lang}:claim.start.${k}:${typeof (dict.claim.start && dict.claim.start[k])}`)
+          .toBe(`${lang}:claim.start.${k}:string`);
+      }
+    }
+  });
+
   it('the registration phone field becomes immutable (readOnly) after SMS verification', () => {
     const claimSrc = fs.readFileSync(path.join(ROOT, 'public/assets/js/claim.js'), 'utf8');
     // In the registration verify path, the verified number is locked.

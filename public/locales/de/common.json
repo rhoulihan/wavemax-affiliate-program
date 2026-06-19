@@ -117,7 +117,9 @@
       "callout": "Jetzt klicken oder später den QR-Code Ihres Beutels scannen, um Ihre Bestellung zu starten.",
       "emailSent": "Wir haben Ihre Willkommensnachricht gesendet an",
       "emailConfirm": "Bestätigen Sie Ihre E-Mail über diese Nachricht, um künftige Bestellbenachrichtigungen zu erhalten.",
-      "emailSpam": "Nicht zu sehen? Prüfen Sie Ihren Spam-Ordner."
+      "emailSpam": "Nicht zu sehen? Prüfen Sie Ihren Spam-Ordner.",
+      "centsSms": "Sie erhalten außerdem eine SMS von unserem Zahlungspartner Cents — schließen Sie sie ab, um Zahlungsbenachrichtigungen zu erhalten.",
+      "confirmEmailReminder": "Ihre E-Mail noch nicht bestätigt? Bestätigen Sie sie über Ihre Willkommens-E-Mail, um Bestellaktualisierungen zu erhalten."
     },
     "edit": {
       "button": "Meine Daten bearbeiten",

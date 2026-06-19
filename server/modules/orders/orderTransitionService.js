@@ -88,7 +88,27 @@ async function createPendingOrder({ bag, by, role, req }) {
   }, req);
   logger.info('Order created at pickup', { orderId: order.orderId, bagId: bag.bagId });
   await notifyTransition(order, { event: 'created' });
-  return { order };
+
+  // First-order + email-verified flags drive the order-start reminders on /claim
+  // (confirm-your-email + the Cents payment-SMS notice shown on the first order).
+  // Best-effort + non-blocking: this is cosmetic metadata fetched AFTER the order
+  // is committed + the customer notified, so a DB hiccup here must NEVER fail a
+  // created order — default to safe (no reminders). "First" = first non-cancelled
+  // order (a cancelled-then-retried first order still counts as first); the
+  // { limit: 2 } bounds the count on the hot scan path.
+  let firstOrder = false;
+  let emailVerified = false;
+  try {
+    const [activeCount, customer] = await Promise.all([
+      Order.countDocuments({ customerId: bag.customerId, status: { $ne: 'cancelled' } }, { limit: 2 }),
+      Customer.findOne({ customerId: bag.customerId }).select('emailVerified')
+    ]);
+    firstOrder = activeCount === 1;
+    emailVerified = !!(customer && customer.emailVerified);
+  } catch (e) {
+    logger.warn('order-start reminder flags fetch failed (non-blocking)', { orderId: order.orderId, error: e.message });
+  }
+  return { order, firstOrder, emailVerified };
 }
 
 /**

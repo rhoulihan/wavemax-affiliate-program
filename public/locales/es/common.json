@@ -117,7 +117,9 @@
       "callout": "Hágalo ahora, o escanee el código QR de su bolsa más tarde, para iniciar su pedido.",
       "emailSent": "Hemos enviado su mensaje de bienvenida a",
       "emailConfirm": "Confirme su correo electrónico desde ese mensaje para recibir futuras notificaciones de pedidos.",
-      "emailSpam": "¿No lo ve? Revise su carpeta de spam."
+      "emailSpam": "¿No lo ve? Revise su carpeta de spam.",
+      "centsSms": "También recibirá un mensaje de texto de nuestro socio de pagos, Cents — complételo para recibir notificaciones de pago.",
+      "confirmEmailReminder": "¿Aún no ha confirmado su correo electrónico? Confírmelo desde su correo de bienvenida para recibir actualizaciones del pedido."
     },
     "edit": {
       "button": "Editar mi información",

@@ -117,7 +117,9 @@
       "callout": "Faça agora, ou escaneie o código QR da sua sacola mais tarde, para iniciar o seu pedido.",
       "emailSent": "Enviámos a sua mensagem de boas-vindas para",
       "emailConfirm": "Confirme o seu e-mail nessa mensagem para receber futuras notificações de pedidos.",
-      "emailSpam": "Não vê o e-mail? Verifique a pasta de spam."
+      "emailSpam": "Não vê o e-mail? Verifique a pasta de spam.",
+      "centsSms": "Também receberá uma mensagem de texto do nosso parceiro de pagamentos, Cents — conclua-a para receber notificações de pagamento.",
+      "confirmEmailReminder": "Ainda não confirmou o seu e-mail? Confirme-o a partir do seu e-mail de boas-vindas para receber atualizações do pedido."
     },
     "edit": {
       "button": "Editar minhas informações",

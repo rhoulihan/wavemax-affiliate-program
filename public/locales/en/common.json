@@ -117,7 +117,9 @@
       "callout": "Click now, or scan your bag’s QR code later, to start your order.",
       "emailSent": "We’ve emailed your welcome message to",
       "emailConfirm": "Confirm your email from that message to receive future order notifications.",
-      "emailSpam": "Don’t see it? Check your spam folder."
+      "emailSpam": "Don’t see it? Check your spam folder.",
+      "centsSms": "You'll also receive a text from our payment partner, Cents — complete it to receive payment notifications.",
+      "confirmEmailReminder": "Haven't confirmed your email yet? Confirm it from your welcome email to receive order updates."
     },
     "edit": {
       "button": "Edit my info",

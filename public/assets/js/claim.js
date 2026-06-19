@@ -371,7 +371,13 @@
         pendingPickupInstructions = rd.pickupInstructions || '';
         if (rd.proposedAction === 'create-pending') {
           return window.ScanSession.apply(bagToken, 'create-pending')
-            .then(function () { showOrderResult({ customer: true, alreadyInProgress: false }); });
+            .then(function (res) {
+              showOrderResult({
+                customer: true, alreadyInProgress: false,
+                firstOrder: !!(res && res.firstOrder),
+                emailVerified: !!(res && res.emailVerified)
+              });
+            });
         }
         // Customer is start-only; an order already exists for this bag.
         showOrderResult({ customer: true, alreadyInProgress: true });
@@ -410,6 +416,18 @@
     } else if (block) {
       block.hidden = true;
     }
+    showStartReminders(opts);
+  }
+
+  // First-order onboarding reminders shown on the "order received" screen:
+  // confirm-your-email (only if not yet verified) + the Cents payment-SMS notice.
+  function showStartReminders(opts) {
+    var wrap = document.getElementById('order-reminders');
+    if (!wrap) return;
+    if (!opts || !opts.firstOrder) { wrap.hidden = true; return; }
+    var emailLine = document.getElementById('order-reminder-email');
+    if (emailLine) emailLine.hidden = !!opts.emailVerified; // hide once email is confirmed
+    wrap.hidden = false;
   }
 
   function applyAction(expectedAction, opts) {
@@ -783,12 +801,15 @@
         orderCreated = true;
         return window.ScanSession.apply(bagToken, 'create-pending');
       })
-      .then(function () {
+      .then(function (res) {
         hideById('requestPickupBtn');
         hideById('start-order-callout');
         showPickupInstructions(orderCreated
           ? t('claim.pickup.requestedTitle', 'Your order request has been received')
           : t('claim.pickup.alreadyStartedTitle', 'Your order is already in progress'));
+        // First order: also surface the Cents payment-SMS notice (the welcome-email
+        // confirm reminder is already shown on this registration confirmation).
+        if (orderCreated && res && res.firstOrder) showById('cents-sms-notice');
       })
       .catch(function (err) {
         showById('requestPickupError', pickupErrorFor(err));

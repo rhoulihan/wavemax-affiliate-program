@@ -93,6 +93,9 @@
                     <p class="claim-verify-note" data-i18n="claim.start.emailSpam">Don't see it? Check your spam folder.</p>
                 </div>
 
+                <!-- Cents payment-SMS notice — shown when the first order is started. -->
+                <p id="cents-sms-notice" class="claim-verify-note" hidden data-i18n="claim.start.centsSms">You'll also receive a text from our payment partner, Cents — complete it to receive payment notifications.</p>
+
                 <!-- Partner pickup/drop-off instructions. Shown directly for a
                      pickup location, or after the order is started for full-service. -->
                 <div id="pickupInstructionsBlock" class="claim-instructions" hidden>
@@ -187,6 +190,12 @@
                 <div id="order-result-instructions" class="claim-instructions" hidden>
                     <h2 class="claim-instructions-title" data-i18n="claim.pickup.dropOffTitle">How to drop off your bag</h2>
                     <p id="order-result-instructions-text" class="claim-instructions-text"></p>
+                </div>
+
+                <!-- First-order reminders: confirm-your-email (if unverified) + Cents payment SMS. -->
+                <div id="order-reminders" class="claim-instructions" hidden>
+                    <p id="order-reminder-email" class="claim-verify-note" hidden data-i18n="claim.start.confirmEmailReminder">Haven't confirmed your email yet? Confirm it from your welcome email to receive order updates.</p>
+                    <p class="claim-verify-note" data-i18n="claim.start.centsSms">You'll also receive a text from our payment partner, Cents — complete it to receive payment notifications.</p>
                 </div>
             </section>
 

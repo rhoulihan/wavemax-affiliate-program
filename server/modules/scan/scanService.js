@@ -246,8 +246,8 @@ async function applyScan({ bagToken, expectedAction, reopen, paymentConfirmed, a
 
   let result;
   if (decision.action === 'create-pending') {
-    const { order } = await orderTransitionService.createPendingOrder({ bag, by, role, req });
-    result = { orderId: order.orderId, newStatus: order.status, action: 'create-pending' };
+    const { order, firstOrder, emailVerified } = await orderTransitionService.createPendingOrder({ bag, by, role, req });
+    result = { orderId: order.orderId, newStatus: order.status, action: 'create-pending', firstOrder, emailVerified };
   } else if (decision.action === 'advance') {
     const adv = await orderTransitionService.advanceOrder({
       bag, by, role, paymentConfirmed: !!paymentConfirmed, req
