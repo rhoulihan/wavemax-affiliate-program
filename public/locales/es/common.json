@@ -112,6 +112,13 @@
       "cannotVerify": "No pudimos iniciar su pedido automáticamente. Su proveedor se pondrá en contacto.",
       "alreadyStartedTitle": "Su pedido ya está en proceso"
     },
+    "start": {
+      "button": "Iniciar pedido",
+      "callout": "Hágalo ahora, o escanee el código QR de su bolsa más tarde, para iniciar su pedido.",
+      "emailSent": "Hemos enviado su mensaje de bienvenida a",
+      "emailConfirm": "Confirme su correo electrónico desde ese mensaje para recibir futuras notificaciones de pedidos.",
+      "emailSpam": "¿No lo ve? Revise su carpeta de spam."
+    },
     "edit": {
       "button": "Editar mi información",
       "title": "Edite su información",

@@ -690,6 +690,10 @@
         // Remove the Send button once verified — the badge replaces it.
         hideById('phoneSendSms');
         showById('phone-verified-badge');
+        // The verified number is now immutable — editing it would invalidate the
+        // SMS token. (To change it, the user reloads and re-verifies.)
+        var phoneInput = document.getElementById('phone');
+        if (phoneInput) { phoneInput.readOnly = true; phoneInput.setAttribute('aria-readonly', 'true'); }
         updateSubmitState();
       })
       .catch(function () {
@@ -703,20 +707,31 @@
   // ---- registered confirmation: pickup / drop-off instructions ---------------
 
   var registeredPhone = null;     // the phone just registered (to mint a customer session)
+  var registeredEmail = null;     // the email just registered (shown in the confirm-email notice)
   var registeredAffiliate = null; // { serviceType, pickupInstructions } from the register response
 
   function renderRegistered(affiliateData) {
     registeredAffiliate = affiliateData || {};
     show('registered');
+    // Every partner type: offer to start the order now (or scan the bag QR later),
+    // and tell the customer to confirm their email for future notifications.
+    showById('requestPickupBtn');
+    showById('start-order-callout');
+    showEmailNotice();
     if (registeredAffiliate.serviceType === 'full_service') {
-      // Full-service: offer to start the order now; instructions show after.
-      showById('requestPickupBtn');
+      // Full-service: instructions appear after the order is started.
       hideById('pickupInstructionsBlock');
     } else {
-      // Pickup location (or unconfigured): show the drop-off instructions now.
-      hideById('requestPickupBtn');
+      // Pickup location (or unconfigured): show the drop-off instructions now too.
       showPickupInstructions(t('claim.pickup.dropOffTitle', 'How to drop off your bag'));
     }
+  }
+
+  // Welcome-email confirmation notice: shows the address we emailed + the
+  // confirm-for-notifications + check-spam guidance.
+  function showEmailNotice() {
+    setText('claim-email-address', registeredEmail || '');
+    showById('claim-email-notice');
   }
 
   function instructionsText() {
@@ -770,6 +785,7 @@
       })
       .then(function () {
         hideById('requestPickupBtn');
+        hideById('start-order-callout');
         showPickupInstructions(orderCreated
           ? t('claim.pickup.requestedTitle', 'Your order request has been received')
           : t('claim.pickup.alreadyStartedTitle', 'Your order is already in progress'));
@@ -831,6 +847,7 @@
           // Phase 1: registration-only — no customer portal to land in.
           // Show the success state with the right next step for this partner.
           registeredPhone = payload.phone;
+          registeredEmail = (result.body && result.body.customerData && result.body.customerData.email) || payload.email || '';
           renderRegistered((result.body && result.body.affiliateData) || {});
           return;
         }

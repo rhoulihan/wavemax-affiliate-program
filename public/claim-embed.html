@@ -77,12 +77,24 @@
                 <h1 class="text-2xl font-bold mb-2" data-i18n="claim.registeredTitle">You're all set!</h1>
                 <p class="text-gray-600" data-i18n="claim.registeredBody">Your bag is now linked to your account.</p>
 
-                <!-- Full-service partner: request pickup → starts the order. -->
-                <button type="button" id="requestPickupBtn" class="claim-submit" hidden data-i18n="claim.pickup.requestNow">Request pickup now</button>
+                <!-- Start the order now, or scan the bag QR code later. Shown for
+                     every partner type (id kept for back-compat with the start flow). -->
+                <button type="button" id="requestPickupBtn" class="claim-submit" hidden data-i18n="claim.start.button">Start order</button>
+                <p id="start-order-callout" class="claim-verify-note" hidden data-i18n="claim.start.callout">Click now, or scan your bag's QR code later, to start your order.</p>
                 <p id="requestPickupError" class="claim-error" hidden></p>
 
+                <!-- Welcome-email confirmation notice (email is required at registration). -->
+                <div id="claim-email-notice" hidden>
+                    <p class="claim-verify-note">
+                        <span data-i18n="claim.start.emailSent">We've emailed your welcome message to</span>
+                        <strong id="claim-email-address"></strong>
+                    </p>
+                    <p class="claim-verify-note" data-i18n="claim.start.emailConfirm">Confirm your email from that message to receive future order notifications.</p>
+                    <p class="claim-verify-note" data-i18n="claim.start.emailSpam">Don't see it? Check your spam folder.</p>
+                </div>
+
                 <!-- Partner pickup/drop-off instructions. Shown directly for a
-                     pickup location, or after pickup is requested for full-service. -->
+                     pickup location, or after the order is started for full-service. -->
                 <div id="pickupInstructionsBlock" class="claim-instructions" hidden>
                     <h2 id="pickupInstructionsTitle" class="claim-instructions-title"></h2>
                     <p id="pickupInstructionsText" class="claim-instructions-text"></p>

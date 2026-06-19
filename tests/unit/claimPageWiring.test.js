@@ -79,17 +79,41 @@ describe('/claim page wiring', () => {
     expect(claimSrc).not.toContain('emailVerificationToken');
   });
 
-  it('registered confirmation has the Request-pickup button + instructions block', () => {
+  it('registered confirmation: Start-order button + callout + email-confirm notice + instructions', () => {
     const html = fs.readFileSync(path.join(ROOT, 'public/claim-embed.html'), 'utf8');
     expect(html).toContain('id="requestPickupBtn"');
     expect(html).toContain('id="pickupInstructionsBlock"');
-    expect(html).toContain('data-i18n="claim.pickup.requestNow"');
+    // relabelled to "Start order" with a click-now-or-scan-QR-later callout
+    expect(html).toContain('data-i18n="claim.start.button"');
+    expect(html).toContain('id="start-order-callout"');
+    expect(html).toContain('data-i18n="claim.start.callout"');
+    // welcome-email confirm + check-spam notice
+    expect(html).toContain('id="claim-email-notice"');
+    expect(html).toContain('id="claim-email-address"');
+    expect(html).toContain('data-i18n="claim.start.emailConfirm"');
+    expect(html).toContain('data-i18n="claim.start.emailSpam"');
     const claimSrc = fs.readFileSync(path.join(ROOT, 'public/assets/js/claim.js'), 'utf8');
-    // full_service → button; otherwise instructions shown directly
     expect(claimSrc).toContain('renderRegistered');
     expect(claimSrc).toContain('requestPickupNow');
     expect(claimSrc).toContain("'create-pending'");
-    expect(claimSrc).toContain('full_service');
+    expect(claimSrc).toContain('showEmailNotice');
+    expect(claimSrc).toContain('registeredEmail');
+  });
+
+  it('the registration phone field becomes immutable (readOnly) after SMS verification', () => {
+    const claimSrc = fs.readFileSync(path.join(ROOT, 'public/assets/js/claim.js'), 'utf8');
+    // In the registration verify path, the verified number is locked.
+    expect(claimSrc).toMatch(/getElementById\('phone'\)[\s\S]{0,120}readOnly = true/);
+  });
+
+  it('ships claim.start.* keys (start button, callout, email confirm/spam) in all four languages', () => {
+    for (const lang of ['en', 'es', 'pt', 'de']) {
+      const dict = JSON.parse(fs.readFileSync(path.join(ROOT, `public/locales/${lang}/common.json`), 'utf8'));
+      for (const k of ['button', 'callout', 'emailSent', 'emailConfirm', 'emailSpam']) {
+        expect(`${lang}:claim.start.${k}:${typeof (dict.claim.start && dict.claim.start[k])}`)
+          .toBe(`${lang}:claim.start.${k}:string`);
+      }
+    }
   });
 
   it('has the customer two-button actions panel + edit-my-info form + cents warning', () => {

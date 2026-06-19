@@ -112,6 +112,13 @@
       "cannotVerify": "Ihre Bestellung konnte nicht automatisch gestartet werden. Ihr Anbieter meldet sich.",
       "alreadyStartedTitle": "Ihre Bestellung ist bereits in Bearbeitung"
     },
+    "start": {
+      "button": "Bestellung starten",
+      "callout": "Jetzt klicken oder später den QR-Code Ihres Beutels scannen, um Ihre Bestellung zu starten.",
+      "emailSent": "Wir haben Ihre Willkommensnachricht gesendet an",
+      "emailConfirm": "Bestätigen Sie Ihre E-Mail über diese Nachricht, um künftige Bestellbenachrichtigungen zu erhalten.",
+      "emailSpam": "Nicht zu sehen? Prüfen Sie Ihren Spam-Ordner."
+    },
     "edit": {
       "button": "Meine Daten bearbeiten",
       "title": "Bearbeiten Sie Ihre Daten",

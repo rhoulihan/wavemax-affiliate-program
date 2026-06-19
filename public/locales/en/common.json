@@ -112,6 +112,13 @@
       "cannotVerify": "We couldn't start your order automatically. Your provider will be in touch.",
       "alreadyStartedTitle": "Your order is already in progress"
     },
+    "start": {
+      "button": "Start order",
+      "callout": "Click now, or scan your bag’s QR code later, to start your order.",
+      "emailSent": "We’ve emailed your welcome message to",
+      "emailConfirm": "Confirm your email from that message to receive future order notifications.",
+      "emailSpam": "Don’t see it? Check your spam folder."
+    },
     "edit": {
       "button": "Edit my info",
       "title": "Edit your info",
