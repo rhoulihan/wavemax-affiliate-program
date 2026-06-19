@@ -31,6 +31,7 @@ const ALLOWLIST = [
   /^\/franchise-default\//,         // internal iframe content for default franchise pages
   /^\/data\/franchises\.json$/,     // franchise index (used by clients/sitemap; not per-franchise data)
   /^\/embed-app(-v2)?\.html$/,      // SPA shell
+  /^\/admin\/?$/,                   // clean admin URL (IP-gated by adminIpGate; must reach its handler, not redirect to corporate)
   /^\/[a-z0-9-]+-embed\.html$/,     // any *-embed.html (affiliate-login, customer-register, etc.)
   /^\/operator-login-store\.html$/, // store-IP-gated operator login
   /^\/design-explorer(\/.*)?$/,     // token-gated franchisor design review tool (explorerGuard enforces EXPLORER_TOKEN)

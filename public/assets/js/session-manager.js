@@ -120,10 +120,13 @@
             return requestedRoute;
           }
           
-          // If requesting the login page for this role, redirect to dashboard
+          // If requesting the login page for this role, redirect to the role's
+          // real protected landing route. NOT `/${role}-dashboard` — the operator
+          // has no dashboard; its protected route is /operator-scan (an unknown
+          // route would fall through to the marketing landing page).
           if (requestedRoute === this.LOGIN_ROUTES[role]) {
             this.updateActivity(role);
-            return `/${role}-dashboard`;
+            return protectedRoutes[0];
           }
           
           // If requesting a different role's protected route, continue checking

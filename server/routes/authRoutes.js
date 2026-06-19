@@ -5,6 +5,7 @@ const router = express.Router();
 const authController = require('../controllers/authController');
 const { authenticate } = require('../middleware/auth');
 const { authLimiter, passwordResetLimiter, registrationLimiter, adminLoginLimiter } = require('../middleware/rateLimiting');
+const adminIpGate = require('../middleware/adminIpGate');
 const { body, validationResult } = require('express-validator');
 const { customPasswordValidator } = require('../utils/passwordValidator');
 
@@ -46,6 +47,7 @@ router.post('/affiliate/login',
  * @access  Public
  */
 router.post('/administrator/login',
+  adminIpGate,
   adminLoginLimiter,
   [
     body('email').trim().isEmail().withMessage('Valid email is required'),

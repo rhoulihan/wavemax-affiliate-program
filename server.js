@@ -22,6 +22,7 @@ const affiliateRoutes = require('./server/routes/affiliateRoutes');
 const customerRoutes = require('./server/routes/customerRoutes');
 const orderRoutes = require('./server/routes/orderRoutes');
 const administratorRoutes = require('./server/routes/administratorRoutes');
+const adminIpGate = require('./server/middleware/adminIpGate');
 const operatorRoutes = require('./server/routes/operatorRoutes');
 const monitoringRoutes = require('./server/routes/monitoringRoutes');
 const systemConfigRoutes = require('./server/routes/systemConfigRoutes');
@@ -277,6 +278,7 @@ app.use((req, res, next) => {
     '/affiliate-landing-embed.html',
     '/embed-landing.html',
     '/embed-app-v2.html',
+    '/admin',
     '/operator-login-store.html',
     '/affiliate-register-embed.html',
     '/affiliate-login-embed.html',
@@ -753,6 +755,22 @@ app.use(locationQuarantine);
 // Mount embed routes with CSP nonce support BEFORE static file serving
 const embedRoutes = require('./server/routes/embedRoutes');
 
+// Defense-in-depth for the admin IP gate: express.static (mounted below) resolves
+// paths with its own normalization, so a variant like //administrator-dashboard-
+// embed.html or a %2F-encoded path could serve the admin HTML while skipping the
+// exact-match gated routes. Normalize the path and apply the IP gate to any admin
+// embed page or the /admin clean URL BEFORE any handler (embedRoutes or static)
+// can serve it. (Idempotent with the per-route gates — a second pass just re-checks.)
+app.use((req, res, next) => {
+  let p = req.path || '';
+  try { p = decodeURIComponent(p); } catch (_e) { /* keep raw on malformed escapes */ }
+  p = p.replace(/\/{2,}/g, '/');
+  if (/^\/admin\/?$/i.test(p) || /administrator-(login|dashboard)-embed\.html$/i.test(p)) {
+    return adminIpGate(req, res, next);
+  }
+  return next();
+});
+
 app.use('/', embedRoutes);
 
 
@@ -923,7 +941,7 @@ apiV1Router.use('/bags', require('./server/routes/bagRoutes'));  // Durable bags
 apiV1Router.use('/scan', require('./server/routes/scanRoutes'));  // PR 4 — scan-session engine (auth-once, state-driven resolve/apply/undo)
 apiV1Router.use('/expediter', require('./server/routes/expediterRoutes'));  // Order Expediter — read-only in-store display (EXPEDITER_TOKEN)
 apiV1Router.use('/orders', orderRoutes);
-apiV1Router.use('/administrators', administratorRoutes);
+apiV1Router.use('/administrators', adminIpGate, administratorRoutes);
 apiV1Router.use('/operators', operatorRoutes);
 apiV1Router.use('/system/config', systemConfigRoutes);
 apiV1Router.use('/service-area', serviceAreaRoutes);  // Service area and location validation
@@ -1014,8 +1032,28 @@ app.get(['/laundromat-investment-guide', '/laundromat-investment-guide/'], (req,
 // next() and Express returns the standard 404.
 app.use('/', require('./server/routes/franchiseRoutes'));
 
+// Clean admin URL: GET /admin serves the SPA shell pointed at the administrator
+// portal (no visible ?route= in the address bar). IP-gated to the admin allowlist
+// (stealth 404 otherwise). The injected window.__DEFAULT_ROUTE is read by
+// embed-app-v2.js getRouteFromUrl(); SessionManager then routes an authenticated
+// admin to the dashboard and everyone else to the login page.
+const { readHTMLWithNonce: adminReadHTML } = require('./server/utils/cspHelper');
+app.get(['/admin', '/admin/'], adminIpGate, async (req, res) => {
+  try {
+    const nonce = res.locals.cspNonce;
+    let html = await adminReadHTML(path.join(__dirname, 'public', 'embed-app-v2.html'), nonce);
+    const inject = `<script nonce="${nonce}">window.__DEFAULT_ROUTE='/administrator-login';</script>`;
+    html = html.replace('</head>', `${inject}</head>`);
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.type('html').send(html);
+  } catch (err) {
+    logger.error('Error serving /admin shell:', err);
+    res.status(500).send('Internal Server Error');
+  }
+});
+
 // Admin routes with CSRF
-app.get('/admin/*', (req, res, next) => {
+app.get('/admin/*', adminIpGate, (req, res, next) => {
   res.locals.csrfToken = req.csrfToken ? req.csrfToken() : null;
   next();
 });

@@ -25,6 +25,7 @@ function isExempt(p) {
     // pass through while the public franchise/marketing pages stay held. The
     // SPA shell, its embed page fragments, and the i18n locale files.
     p === '/embed-app-v2.html' ||
+    p === '/admin' || p === '/admin/' ||     // clean admin URL (IP-gated)
     p.endsWith('-embed.html') ||
     p.startsWith('/locales/') ||
     p.startsWith('/.well-known/') ||         // ACME cert renewal, etc.

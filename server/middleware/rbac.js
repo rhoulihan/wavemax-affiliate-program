@@ -1,5 +1,34 @@
 const logger = require('../utils/logger');
+const adminIpGate = require('./adminIpGate');
 // Role-Based Access Control Middleware for WaveMAX Laundry Affiliate Program
+
+/**
+ * When the acting user is an administrator, the IP allowlist must hold — this is
+ * the authorization-layer backstop so EVERY admin-authorized route (operators,
+ * system config, etc., not just /administrators) and ANY admin token (incl. one
+ * minted via /auth/refresh-token, or stolen) is rejected off-allowlist. Stealth
+ * 404 to match the route-level gate. Only enforced when an allowlist is actually
+ * configured: with none set, the fail-closed login gate already blocks minting an
+ * admin token in prod, and test suites (which mint admin tokens directly from
+ * loopback with no allowlist) keep working.
+ * @returns {boolean} true if the request was blocked (response sent)
+ */
+function blockedByAdminIp(req, res) {
+  const role = req.user && req.user.role;
+  if (role !== 'administrator' && role !== 'admin') return false;
+  if (!adminIpGate.isConfigured()) return false;
+  if (adminIpGate.isAllowed(req)) return false;
+  logger.warn('Admin request blocked by IP allowlist (authz layer)', {
+    path: (req && req.originalUrl) || '', ip: adminIpGate.clientIp(req) || '(none)'
+  });
+  res.status(404);
+  if (String((req && req.originalUrl) || '').startsWith('/api/')) {
+    res.json({ success: false, message: 'Not found' });
+  } else {
+    res.type('html').send('<!DOCTYPE html><html><head><title>404 Not Found</title></head><body><h1>404 Not Found</h1></body></html>');
+  }
+  return true;
+}
 
 // Define role hierarchy
 const roleHierarchy = {
@@ -58,6 +87,9 @@ exports.checkRole = (requiredRoles) => {
         message: 'Access denied: Insufficient privileges'
       });
     }
+
+    // Administrators may only operate from an allowlisted IP.
+    if (blockedByAdminIp(req, res)) return;
 
     next();
   };
@@ -155,6 +187,9 @@ exports.checkAdminPermission = (requiredPermissions) => {
         message: 'Access denied: Administrator role required'
       });
     }
+
+    // Administrators may only operate from an allowlisted IP (authz backstop).
+    if (blockedByAdminIp(req, res)) return;
 
     try {
       const Administrator = require('../models/Administrator');

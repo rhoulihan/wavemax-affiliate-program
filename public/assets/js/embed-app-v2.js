@@ -77,9 +77,12 @@ let currentRoute = '/';
 // Get route from URL parameter
 function getRouteFromUrl() {
     const params = new URLSearchParams(window.location.search);
-    
-    let route = params.get('route');
-    
+
+    // window.__DEFAULT_ROUTE is set by a server-injected inline script on clean
+    // URLs (e.g. GET /admin) so the SPA loads the right page without a visible
+    // ?route= in the address bar. An explicit ?route= still wins.
+    let route = params.get('route') || (typeof window !== 'undefined' ? window.__DEFAULT_ROUTE : null) || null;
+
     // Handle legacy login parameter for backward compatibility with emails
     if (!route && params.get('login')) {
         const loginType = params.get('login');
@@ -302,9 +305,13 @@ async function loadPage(route) {
     console.log('Loading page for route:', route);
     console.log('Current window.location.search:', window.location.search);
     
-    // Check if route needs authentication adjustment
-    if (window.SessionManager && window.SessionManager.adjustRouteForAuth) {
-        const adjustedRoute = window.SessionManager.adjustRouteForAuth(route);
+    // Check if route needs authentication adjustment. (An earlier typo called a
+    // non-existent SessionManager method here, leaving this swap dead; using the
+    // real getAuthenticatedRoute now sends an authenticated admin hitting
+    // /administrator-login to the dashboard, and an unauthenticated user hitting a
+    // protected route to login.)
+    if (window.SessionManager && window.SessionManager.getAuthenticatedRoute) {
+        const adjustedRoute = window.SessionManager.getAuthenticatedRoute(route);
         if (adjustedRoute !== route) {
             console.log(`SessionManager adjusted route from ${route} to: ${adjustedRoute}`);
             route = adjustedRoute;
