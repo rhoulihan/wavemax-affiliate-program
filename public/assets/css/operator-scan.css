@@ -345,6 +345,52 @@ body {
     gap: 15px;
 }
 
+/* Scan CONFIRM dialog — a real centered modal with a backdrop (the .confirmation-modal
+   base styles it as a corner toast; these id-scoped rules win regardless of which
+   stylesheet loads last). It is revealed by adding the .block class in openConfirm
+   (the same show-toggle the toast uses), since removing [hidden] alone can't beat the
+   base `display:none`. */
+#scanConfirmModal {
+    inset: 0;
+    top: 0; right: 0; left: 0; bottom: 0;
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    padding: 24px;
+    background: rgba(15, 23, 42, 0.55);
+    border-radius: 0;
+    box-shadow: none;
+    animation: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+#scanConfirmModal.block { display: flex !important; }
+#scanConfirmModal .confirmation-content {
+    display: block;
+    text-align: center;
+    background: #fff;
+    border-radius: 16px;
+    padding: 28px 24px;
+    max-width: 440px;
+    width: 100%;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+#scanConfirmModal h4 { font-size: 1.25rem; margin-bottom: 8px; }
+#scanConfirmModal #scanConfirmCustomer { font-weight: 600; margin-bottom: 6px; }
+.scan-order-status {
+    display: inline-block;
+    margin-bottom: 14px;
+    padding: 4px 12px;
+    border-radius: 999px;
+    background: #e0e7ff;
+    color: #1e3a8a;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+.scan-confirm-payment { display: block; margin: 14px 0; text-align: left; }
+#scanConfirmModal .action-buttons { display: flex; gap: 12px; justify-content: center; margin-top: 18px; }
+
 .confirmation-icon {
     font-size: 40px;
 }

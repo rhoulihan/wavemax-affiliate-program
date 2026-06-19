@@ -30,8 +30,8 @@
       "customerNotAllowed": "Esta etapa é feita pela equipe da loja. Seu pedido já está em andamento.",
       "confirm": {
         "createPending": "Iniciar um novo pedido para esta sacola?",
-        "advanceToInProgress": "Registrar a entrada desta sacola na loja?",
-        "advanceToOutForDelivery": "Devolver esta sacola para entrega? (confirmar pagamento)",
+        "advanceToInProgress": "Confirmar que o pedido está lançado no Cents e dar entrada na sacola?",
+        "advanceToOutForDelivery": "Confirmar que o pedido está processado, pago no Cents e com o recibo anexado, e devolvê-lo para entrega?",
         "advanceToComplete": "Marcar esta sacola como entregue?",
         "deliveryRescan": "Esta sacola acabou de ser entregue. Iniciar um novo pedido?"
       },
@@ -748,7 +748,7 @@
         "outForDelivery": "Sacola registrada → devolva para entrega (confirmar pagamento).",
         "complete": "Sacola em entrega → marque como entregue."
       },
-      "paymentConfirmed": "Pagamento confirmado",
+      "paymentConfirmed": "Pagamento recebido no Cents e recibo anexado à sacola",
       "yes": "Sim",
       "no": "Não",
       "undo": "Desfazer última leitura",
@@ -763,7 +763,10 @@
       "errorTitle": "Erro",
       "noChange": "Sem alterações — o pedido permanece como entregue",
       "infoTitle": "Sem alterações",
-      "centsSyncWarning": "Telefone alterado — atualize este número no Cents:"
+      "centsSyncWarning": "Telefone alterado — atualize este número no Cents:",
+      "confirm": "Confirmar",
+      "cancel": "Cancelar",
+      "statusNone": "Sem pedido ativo"
     }
   },
   "expediter": {
@@ -1428,7 +1431,10 @@
       "ready_for_pickup": "Pronto para retirada",
       "picked_up": "Saiu para entrega",
       "delivered": "Entregue",
-      "cancelled": "Cancelado"
+      "cancelled": "Cancelado",
+      "pending": "Pendente",
+      "out_for_delivery": "Em entrega",
+      "complete": "Concluído"
     }
   },
   "forgotPassword": {

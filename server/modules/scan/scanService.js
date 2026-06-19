@@ -193,7 +193,7 @@ async function resolveScan({ bagToken }) {
   return {
     bagId: bag.bagId,
     currentStatus,
-    customer: customer ? { firstName: customer.firstName, lastName: customer.lastName } : null,
+    customer: customer ? { firstName: customer.firstName, lastName: customer.lastName, phone: customer.phone } : null,
     proposedAction: decision.action,
     ...(decision.to ? { to: decision.to } : {}),
     ...(decision.orderId ? { orderId: decision.orderId } : {}),
@@ -208,7 +208,7 @@ async function resolveScan({ bagToken }) {
 /**
  * POST /api/v1/scan/apply — re-resolve (drift guard), then apply via the
  * transition service stamping by/role from req.scanActor.
- * @returns {{orderId, newStatus, action, sessionTally?}}
+ * @returns {{orderId, newStatus, action}}
  */
 async function applyScan({ bagToken, expectedAction, reopen, paymentConfirmed, actor, req }) {
   // expectedAction is required: without it the drift guard below is skipped

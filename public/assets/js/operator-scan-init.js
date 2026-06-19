@@ -1,7 +1,8 @@
 // Store kiosk scanner (Phase 1 PR 5/§6). Operator is already authenticated
 // (JWT). Each scan is STATE-DRIVEN: resolve the bag against the PR 4 engine,
-// show ONE confirm dialog for the proposed transition, apply on Yes, bump a
-// running session tally. Undo reverses the last bag scanned this session.
+// then show ONE confirm dialog (customer + current order status + next step)
+// and apply on Confirm. Undo reverses the last bag scanned this session.
+// Order metrics live on the expediter, not here.
 //
 // No weight / add-ons / pricing in Phase 1 — the old intake/processed modals and
 // their retired operator endpoints are gone; everything goes through ScanSession
@@ -17,12 +18,13 @@
 
   // --- DOM ------------------------------------------------------------------
   var scanInput = document.getElementById('scanInput');
-  var sessionTally = document.getElementById('sessionTally');
   var undoBtn = document.getElementById('undoBtn');
 
   var confirmModal = document.getElementById('scanConfirmModal');
   var confirmPrompt = document.getElementById('scanConfirmPrompt');
   var confirmCustomer = document.getElementById('scanConfirmCustomer');
+  var confirmPhone = document.getElementById('scanConfirmPhone');
+  var orderStatusEl = document.getElementById('scanOrderStatus');
   var centsWarning = document.getElementById('scanCentsWarning');
   var paymentRow = document.getElementById('scanPaymentRow');
   var paymentCheckbox = document.getElementById('scanPaymentConfirmed');
@@ -38,9 +40,14 @@
   var scanBuffer = '';
   var scanTimeout = null;
   var toastTimeout = null;
-  var tally = 0;
   var lastBagToken = null; // last bag this session applied a transition to (undo target)
   var pending = null;      // { bagToken, resolveData }
+
+  // Order-status display labels (current state shown in the confirm modal).
+  function statusLabel(status) {
+    if (!status || status === 'none') return t('operator.scan.statusNone', 'No active order');
+    return t('order.status.' + status, status);
+  }
 
   // --- toast ----------------------------------------------------------------
   function showToast(message, icon, type) {
@@ -68,8 +75,10 @@
   // --- confirm dialog -------------------------------------------------------
   function hideConfirm() {
     confirmModal.hidden = true;
+    confirmModal.classList.remove('block');
     paymentRow.hidden = true;
     paymentCheckbox.checked = false;
+    confirmYes.disabled = false;
     pending = null;
   }
 
@@ -81,11 +90,18 @@
       ? t(promptKey, t('operator.scan.confirmGeneric', 'Apply this scan?'))
       : t('operator.scan.confirmGeneric', 'Apply this scan?');
 
-    // Customer first/last for the intake screen.
+    // Customer first/last + phone for the intake screen.
     var c = resolveData.customer;
     confirmCustomer.textContent = c
       ? ((c.firstName || '') + ' ' + (c.lastName || '')).trim()
       : '';
+    if (confirmPhone) confirmPhone.textContent = (c && c.phone) || resolveData.customerPhone || '';
+
+    // Current order status pill.
+    if (orderStatusEl) {
+      orderStatusEl.textContent = statusLabel(resolveData.currentStatus);
+      orderStatusEl.hidden = false;
+    }
 
     // Warn the operator to update Cents when the customer changed their phone.
     if (centsWarning) {
@@ -98,13 +114,17 @@
       }
     }
 
-    // Payment-confirmed checkbox only when handing a bag back for delivery.
+    // Payment + receipt confirmation is REQUIRED before handing a bag back for
+    // delivery: the checkbox must be ticked to enable Confirm (the server also
+    // hard-rejects the transition without it).
     var needsPayment = resolveData.proposedAction === 'advance' &&
       resolveData.to === 'out_for_delivery';
     paymentRow.hidden = !needsPayment;
     paymentCheckbox.checked = false;
+    confirmYes.disabled = needsPayment; // must tick the box first
 
     confirmModal.hidden = false;
+    confirmModal.classList.add('block'); // actually reveal it (base style is display:none)
   }
 
   function expectedActionFor(resolveData) {
@@ -153,8 +173,6 @@
         // left as-is. Acknowledge with a neutral toast, not a success one.
         showToast(t('operator.scan.noChange', 'No change — order left as delivered'), 'ℹ️', 'info');
       } else {
-        tally += 1;
-        sessionTally.textContent = String(tally);
         undoBtn.hidden = false;
         showToast(t('operator.scan.applied', 'Done'), '✅', 'success');
       }
@@ -199,7 +217,6 @@
     try {
       var result = await window.ScanSession.undo(lastBagToken);
       if (result.undone) {
-        if (tally > 0) { tally -= 1; sessionTally.textContent = String(tally); }
         showToast(t('operator.scan.undone', 'Last scan undone'), '↩️', 'success');
       } else {
         showError(t('operator.scan.nothingToUndo', 'Nothing to undo'));
@@ -301,6 +318,10 @@
     });
     confirmYes.addEventListener('click', onConfirmYes);
     confirmNo.addEventListener('click', onConfirmNo);
+    // Payment+receipt gate: Confirm stays disabled until the box is ticked.
+    paymentCheckbox.addEventListener('change', function () {
+      if (!paymentRow.hidden) confirmYes.disabled = !paymentCheckbox.checked;
+    });
     undoBtn.addEventListener('click', onUndo);
     document.addEventListener('keydown', function (e) {
       if (e.key === 'Escape') hideConfirm();

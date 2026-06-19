@@ -13,7 +13,7 @@
     <link rel="icon" href="data:,">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="/assets/css/wavemax-embed.css">
-    <link rel="stylesheet" href="/assets/css/operator-scan.css?v=20260618">
+    <link rel="stylesheet" href="/assets/css/operator-scan.css?v=20260619">
     <link rel="stylesheet" href="/assets/css/operator-scan-embed.css">
     <link rel="stylesheet" href="/assets/css/language-switcher.css">
     <link href="/assets/css/theme.css" rel="stylesheet">
@@ -26,14 +26,6 @@
           <img class="embed-brand-logo" src="/assets/images/brand/logo-wavemax.png" alt="WaveMAX Laundry">
         </div>
         <div class="top-spacer"></div>
-
-        <!-- Session tally: orders advanced/created this scan session -->
-        <div class="stats-summary">
-            <div class="stat-card">
-                <div class="stat-value" id="sessionTally">0</div>
-                <div class="stat-label" data-i18n="operator.scan.tallyLabel">Orders this session</div>
-            </div>
-        </div>
 
         <!-- Scan Prompt -->
         <div class="scan-prompt">
@@ -73,16 +65,18 @@
         <div class="confirmation-content">
             <h4 id="scanConfirmPrompt"></h4>
             <p id="scanConfirmCustomer"></p>
+            <p id="scanConfirmPhone"></p>
+            <span id="scanOrderStatus" class="scan-order-status" hidden></span>
             <p id="scanCentsWarning" class="scan-cents-warning" hidden></p>
             <label class="scan-confirm-payment" id="scanPaymentRow" hidden>
                 <input type="checkbox" id="scanPaymentConfirmed">
-                <span data-i18n="operator.scan.paymentConfirmed">Payment confirmed</span>
+                <span data-i18n="operator.scan.paymentConfirmed">Payment received in Cents and receipt attached to the bag</span>
             </label>
             <div class="action-buttons">
                 <button type="button" class="btn btn-secondary" id="scanConfirmNo"
-                        data-i18n="operator.scan.no">No</button>
+                        data-i18n="operator.scan.cancel">Cancel</button>
                 <button type="button" class="btn btn-primary" id="scanConfirmYes"
-                        data-i18n="operator.scan.yes">Yes</button>
+                        data-i18n="operator.scan.confirm">Confirm</button>
             </div>
         </div>
     </div>

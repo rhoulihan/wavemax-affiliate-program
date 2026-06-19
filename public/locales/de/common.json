@@ -30,8 +30,8 @@
       "customerNotAllowed": "Dieser Schritt wird vom Filialpersonal erledigt. Ihre Bestellung ist bereits in Bearbeitung.",
       "confirm": {
         "createPending": "Einen neuen Auftrag für diesen Beutel starten?",
-        "advanceToInProgress": "Diesen Beutel im Geschäft einchecken?",
-        "advanceToOutForDelivery": "Diesen Beutel zur Lieferung zurückgeben? (Zahlung bestätigen)",
+        "advanceToInProgress": "Bestätigen, dass der Auftrag in Cents erfasst ist, und den Beutel einchecken?",
+        "advanceToOutForDelivery": "Bestätigen, dass der Auftrag bearbeitet, in Cents bezahlt und der Beleg angebracht ist, und ihn zur Zustellung übergeben?",
         "advanceToComplete": "Diesen Beutel als geliefert markieren?",
         "deliveryRescan": "Dieser Beutel wurde gerade geliefert. Einen neuen Auftrag starten?"
       },
@@ -748,7 +748,7 @@
         "outForDelivery": "Eingecheckter Beutel → zur Lieferung zurückgeben (Zahlung bestätigen).",
         "complete": "Beutel in Lieferung → als geliefert markieren."
       },
-      "paymentConfirmed": "Zahlung bestätigt",
+      "paymentConfirmed": "Zahlung in Cents erhalten und Beleg am Beutel angebracht",
       "yes": "Ja",
       "no": "Nein",
       "undo": "Letzten Scan rückgängig machen",
@@ -763,7 +763,10 @@
       "errorTitle": "Fehler",
       "noChange": "Keine Änderung — Bestellung bleibt als zugestellt",
       "infoTitle": "Keine Änderung",
-      "centsSyncWarning": "Telefon geändert — diese Nummer in Cents aktualisieren:"
+      "centsSyncWarning": "Telefon geändert — diese Nummer in Cents aktualisieren:",
+      "confirm": "Bestätigen",
+      "cancel": "Abbrechen",
+      "statusNone": "Kein aktiver Auftrag"
     }
   },
   "expediter": {
@@ -1428,7 +1431,10 @@
       "ready_for_pickup": "Abholbereit",
       "picked_up": "Unterwegs",
       "delivered": "Geliefert",
-      "cancelled": "Storniert"
+      "cancelled": "Storniert",
+      "pending": "Ausstehend",
+      "out_for_delivery": "In Zustellung",
+      "complete": "Abgeschlossen"
     }
   },
   "forgotPassword": {

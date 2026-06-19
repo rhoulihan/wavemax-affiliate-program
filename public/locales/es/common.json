@@ -30,8 +30,8 @@
       "customerNotAllowed": "Este paso lo realiza el personal de la tienda. Su pedido ya está en proceso.",
       "confirm": {
         "createPending": "¿Iniciar un nuevo pedido para esta bolsa?",
-        "advanceToInProgress": "¿Registrar la entrada de esta bolsa en la tienda?",
-        "advanceToOutForDelivery": "¿Devolver esta bolsa para entrega? (confirmar pago)",
+        "advanceToInProgress": "¿Confirmar que el pedido está ingresado en Cents y registrar la bolsa?",
+        "advanceToOutForDelivery": "¿Confirmar que el pedido está procesado, pagado en Cents y con el recibo adjunto, y entregarlo para reparto?",
         "advanceToComplete": "¿Marcar esta bolsa como entregada?",
         "deliveryRescan": "Esta bolsa acaba de entregarse. ¿Iniciar un nuevo pedido?"
       },
@@ -748,7 +748,7 @@
         "outForDelivery": "Bolsa registrada → devuélvala para entrega (confirmar pago).",
         "complete": "Bolsa en entrega → márquela como entregada."
       },
-      "paymentConfirmed": "Pago confirmado",
+      "paymentConfirmed": "Pago recibido en Cents y recibo adjunto a la bolsa",
       "yes": "Sí",
       "no": "No",
       "undo": "Deshacer último escaneo",
@@ -763,7 +763,10 @@
       "errorTitle": "Error",
       "noChange": "Sin cambios — el pedido queda como entregado",
       "infoTitle": "Sin cambios",
-      "centsSyncWarning": "Teléfono cambiado — actualice este número en Cents:"
+      "centsSyncWarning": "Teléfono cambiado — actualice este número en Cents:",
+      "confirm": "Confirmar",
+      "cancel": "Cancelar",
+      "statusNone": "Sin pedido activo"
     }
   },
   "expediter": {
@@ -1428,7 +1431,10 @@
       "ready_for_pickup": "Listo para recoger",
       "picked_up": "En reparto",
       "delivered": "Entregado",
-      "cancelled": "Cancelado"
+      "cancelled": "Cancelado",
+      "pending": "Pendiente",
+      "out_for_delivery": "En reparto",
+      "complete": "Completado"
     }
   },
   "forgotPassword": {

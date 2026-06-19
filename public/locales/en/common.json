@@ -30,8 +30,8 @@
       "customerNotAllowed": "This step is handled by store staff. Your order is already in progress.",
       "confirm": {
         "createPending": "Start a new order for this bag?",
-        "advanceToInProgress": "Check this bag in at the store?",
-        "advanceToOutForDelivery": "Hand this bag back for delivery? (confirm payment)",
+        "advanceToInProgress": "Confirm the order is entered into Cents, then check this bag in?",
+        "advanceToOutForDelivery": "Confirm the order is processed, paid in Cents, and the receipt is attached, then hand it back for delivery?",
         "advanceToComplete": "Mark this bag delivered?",
         "deliveryRescan": "This bag was just delivered. Start a new order?"
       },
@@ -748,7 +748,7 @@
         "outForDelivery": "Checked-in bag → hand back for delivery (confirm payment).",
         "complete": "Out-for-delivery bag → mark delivered."
       },
-      "paymentConfirmed": "Payment confirmed",
+      "paymentConfirmed": "Payment received in Cents and receipt attached to the bag",
       "yes": "Yes",
       "no": "No",
       "undo": "Undo last scan",
@@ -763,7 +763,10 @@
       "errorTitle": "Error",
       "noChange": "No change — order left as delivered",
       "infoTitle": "No change",
-      "centsSyncWarning": "Phone changed — update this number in Cents:"
+      "centsSyncWarning": "Phone changed — update this number in Cents:",
+      "confirm": "Confirm",
+      "cancel": "Cancel",
+      "statusNone": "No active order"
     }
   },
   "expediter": {
@@ -1428,7 +1431,10 @@
       "ready_for_pickup": "Ready for pickup",
       "picked_up": "Out for delivery",
       "delivered": "Delivered",
-      "cancelled": "Cancelled"
+      "cancelled": "Cancelled",
+      "pending": "Pending",
+      "out_for_delivery": "Out for delivery",
+      "complete": "Complete"
     }
   },
   "forgotPassword": {
