@@ -42,6 +42,103 @@
     return (v && v !== key) ? v : (fallback || key);
   }
 
+  // ---- order options: add-ons + special instructions (start-order form) -------
+  // Catalog fetched once; rendered into a container per start surface. CSP-clean
+  // (DOM built via createElement/textContent — never innerHTML).
+  var addonCatalogPromise = null;
+  function loadAddOnCatalog() {
+    if (addonCatalogPromise) return addonCatalogPromise;
+    addonCatalogPromise = fetch('/api/v1/addons')
+      .then(function (r) { return r.json(); })
+      .then(function (body) { return (body && body.addOns) || []; })
+      .catch(function () { return []; });
+    return addonCatalogPromise;
+  }
+
+  // Localized add-on label: the active language's translation, else English name.
+  function addonLabel(a) {
+    var lang = (window.i18n && window.i18n.getLanguage && window.i18n.getLanguage()) || 'en';
+    if (lang !== 'en' && a.translations && a.translations[lang]) return a.translations[lang];
+    return a.name;
+  }
+
+  // Render the add-on checkboxes + special-instructions textarea into a container.
+  // Idempotent: renders once (re-showing keeps the customer's selections).
+  function renderOrderOptions(containerId) {
+    var c = document.getElementById(containerId);
+    if (!c) return Promise.resolve();
+    if (c.getAttribute('data-rendered') === '1') { c.hidden = false; return Promise.resolve(); }
+    return loadAddOnCatalog().then(function (addOns) {
+      while (c.firstChild) c.removeChild(c.firstChild);
+      if (addOns.length) {
+        var title = document.createElement('p');
+        title.className = 'order-options-title';
+        title.setAttribute('data-i18n', 'claim.order.addonsTitle'); // re-translates on language switch
+        title.textContent = t('claim.order.addonsTitle', 'Add-ons (optional)');
+        c.appendChild(title);
+        addOns.forEach(function (a) {
+          var label = document.createElement('label');
+          label.className = 'order-addon';
+          var cb = document.createElement('input');
+          cb.type = 'checkbox';
+          cb.className = 'order-addon-check';
+          cb.value = a.key;
+          cb.setAttribute('data-key', a.key);
+          var span = document.createElement('span');
+          span.textContent = addonLabel(a);
+          label.appendChild(cb);
+          label.appendChild(span);
+          c.appendChild(label);
+        });
+      }
+      var instrLabel = document.createElement('label');
+      instrLabel.className = 'order-options-label';
+      instrLabel.setAttribute('data-i18n', 'claim.order.instructionsLabel');
+      instrLabel.textContent = t('claim.order.instructionsLabel', 'Special instructions (optional)');
+      var ta = document.createElement('textarea');
+      ta.className = 'order-options-textarea';
+      ta.setAttribute('maxlength', '1000');
+      ta.setAttribute('rows', '3');
+      ta.setAttribute('data-i18n-placeholder', 'claim.order.instructionsPlaceholder');
+      ta.placeholder = t('claim.order.instructionsPlaceholder', 'Anything we should know? (e.g. fold preferences)');
+      c.appendChild(instrLabel);
+      c.appendChild(ta);
+      c.setAttribute('data-rendered', '1');
+      c.hidden = false;
+    });
+  }
+
+  // Read the customer's selections back out of a rendered container.
+  function collectOrderOptions(containerId) {
+    var c = document.getElementById(containerId);
+    if (!c) return { addOns: [], specialInstructions: '' };
+    var addOns = Array.prototype.slice.call(c.querySelectorAll('.order-addon-check'))
+      .filter(function (cb) { return cb.checked; })
+      .map(function (cb) { return cb.getAttribute('data-key'); });
+    var ta = c.querySelector('.order-options-textarea');
+    return { addOns: addOns, specialInstructions: ta ? ta.value.trim() : '' };
+  }
+
+  // On a language switch, re-localize the DYNAMIC add-on labels in place (the
+  // static title/label/placeholder carry data-i18n and are handled by
+  // i18n.translatePage()). Updating textContent in place preserves the
+  // customer's checkbox selections + any typed instructions.
+  window.addEventListener('languageChanged', function () {
+    loadAddOnCatalog().then(function (addOns) {
+      var byKey = {};
+      addOns.forEach(function (a) { byKey[a.key] = a; });
+      ['customer-order-options', 'pickup-order-options'].forEach(function (id) {
+        var c = document.getElementById(id);
+        if (!c || c.getAttribute('data-rendered') !== '1') return;
+        Array.prototype.slice.call(c.querySelectorAll('.order-addon-check')).forEach(function (cb) {
+          var a = byKey[cb.getAttribute('data-key')];
+          var span = cb.parentNode && cb.parentNode.querySelector('span');
+          if (a && span) span.textContent = addonLabel(a);
+        });
+      });
+    });
+  });
+
   function renderState(state, data) {
     switch (state) {
     case 'claimable': {
@@ -168,6 +265,7 @@
   // After the customer verifies their contact, offer Edit my info / Start order.
   function showCustomerActions() {
     showPanel('claim-customer-actions');
+    renderOrderOptions('customer-order-options');
   }
 
   // ---- Edit my info (customer self-service via the scan session) --------------
@@ -380,12 +478,13 @@
   // instructions + "order received".
   function customerStartOrder() {
     hideById('customer-start-error');
+    var orderOptions = collectOrderOptions('customer-order-options');
     var s = spin(document.getElementById('customer-start-order'));
     window.ScanSession.resolve(bagToken)
       .then(function (rd) {
         pendingPickupInstructions = rd.pickupInstructions || '';
         if (rd.proposedAction === 'create-pending') {
-          return window.ScanSession.apply(bagToken, 'create-pending')
+          return window.ScanSession.apply(bagToken, 'create-pending', orderOptions)
             .then(function (res) {
               showOrderResult({
                 customer: true, alreadyInProgress: false,
@@ -763,6 +862,7 @@
     // and tell the customer to confirm their email for future notifications.
     showById('requestPickupBtn');
     showById('start-order-callout');
+    renderOrderOptions('pickup-order-options');
     showEmailNotice();
     if (registeredAffiliate.serviceType === 'full_service') {
       // Full-service: instructions appear after the order is started.
@@ -807,6 +907,7 @@
   function requestPickupNow() {
     hideById('requestPickupError');
     if (pickupRequesting) return; // ignore double-taps
+    var orderOptions = collectOrderOptions('pickup-order-options');
     // Normalize to digits so the contact reliably matches the bag's customer
     // (matchesCustomerContact compares last-10 digits; needs ≥10).
     var contact = String(registeredPhone || '').replace(/\D/g, '');
@@ -827,11 +928,12 @@
           return null;
         }
         orderCreated = true;
-        return window.ScanSession.apply(bagToken, 'create-pending');
+        return window.ScanSession.apply(bagToken, 'create-pending', orderOptions);
       })
       .then(function (res) {
         hideById('requestPickupBtn');
         hideById('start-order-callout');
+        hideById('pickup-order-options'); // order placed → retire the now-dead add-on form
         showPickupInstructions(orderCreated
           ? t('claim.pickup.requestedTitle', 'Your order request has been received')
           : t('claim.pickup.alreadyStartedTitle', 'Your order is already in progress'));

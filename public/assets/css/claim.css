@@ -215,3 +215,48 @@
   cursor: pointer;
 }
 .claim-staff-link-row a:hover { color: #334155; }
+
+/* Order options on the start-order form: add-on checkboxes + special-instructions
+   textarea. Left-aligned card, comfortable tap targets for mobile. */
+.order-options {
+  margin: 18px 0;
+  text-align: left;
+}
+.order-options-title {
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 8px;
+}
+.order-addon {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  margin: 4px 0;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 15px;
+}
+.order-addon input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  flex: 0 0 20px;
+  accent-color: #1e3a8a;
+  cursor: pointer;
+}
+.order-options-label {
+  display: block;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 14px 0 6px;
+}
+.order-options-textarea {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 10px 12px;
+  font: inherit;
+  resize: vertical;
+}

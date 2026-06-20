@@ -133,6 +133,11 @@
       "saveError": "No se pudo guardar. Verifique su información e inténtelo de nuevo.",
       "dupEmail": "Ese correo ya está en uso.",
       "phoneVerifyFailed": "La verificación del teléfono falló. Inténtelo de nuevo."
+    },
+    "order": {
+      "addonsTitle": "Complementos (opcional)",
+      "instructionsLabel": "Instrucciones especiales (opcional)",
+      "instructionsPlaceholder": "¿Algo que debamos saber? (p. ej., preferencias de doblado)"
     }
   },
   "bag": {
@@ -769,7 +774,9 @@
       "centsSyncWarning": "Teléfono cambiado — actualice este número en Cents:",
       "confirm": "Confirmar",
       "cancel": "Cancelar",
-      "statusNone": "Sin pedido activo"
+      "statusNone": "Sin pedido activo",
+      "addonsLabel": "Complementos",
+      "instructionsLabel": "Instrucciones especiales"
     }
   },
   "expediter": {
@@ -854,7 +861,8 @@
         "affiliates": "Afiliados",
         "auditlog": "Registro de Auditoría",
         "config": "Configuración",
-        "invites": "Invitaciones"
+        "invites": "Invitaciones",
+        "addons": "Complementos"
       },
       "subtabs": {
         "overview": "Resumen",
@@ -1420,6 +1428,34 @@
       "success": "Etiquetas de bolsas generadas.",
       "error": "No se pudieron generar las etiquetas de bolsas.",
       "quantityInvalid": "Introduzca una cantidad entre 1 y 200."
+    },
+    "addons": {
+      "title": "Gestión de complementos",
+      "add": "Agregar complemento",
+      "name": "Nombre",
+      "key": "Clave",
+      "sortOrder": "Orden",
+      "active": "Activo",
+      "inactive": "Inactivo",
+      "actions": "Acciones",
+      "edit": "Editar",
+      "deactivate": "Desactivar",
+      "save": "Guardar",
+      "cancel": "Cancelar",
+      "modalTitleAdd": "Agregar complemento",
+      "modalTitleEdit": "Editar complemento",
+      "noAddOns": "Aún no hay complementos",
+      "nameEnglish": "Nombre (inglés)",
+      "nameSpanish": "Nombre (español)",
+      "namePortuguese": "Nombre (portugués)",
+      "nameGerman": "Nombre (alemán)",
+      "activeLabel": "Activo (visible para los clientes)",
+      "nameRequired": "El nombre es obligatorio",
+      "saved": "Complemento guardado",
+      "saveError": "No se pudo guardar el complemento",
+      "deactivated": "Complemento desactivado",
+      "deactivateConfirm": "¿Desactivar este complemento? Los clientes ya no lo verán.",
+      "loadError": "No se pudieron cargar los complementos"
     }
   },
   "email": {

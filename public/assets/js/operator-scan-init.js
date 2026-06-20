@@ -27,6 +27,8 @@
   var confirmEmail = document.getElementById('scanConfirmEmail');
   var confirmAddress = document.getElementById('scanConfirmAddress');
   var orderStatusEl = document.getElementById('scanOrderStatus');
+  var addOnsEl = document.getElementById('scanAddOns');
+  var instructionsEl = document.getElementById('scanInstructions');
   var centsWarning = document.getElementById('scanCentsWarning');
   var paymentRow = document.getElementById('scanPaymentRow');
   var paymentCheckbox = document.getElementById('scanPaymentConfirmed');
@@ -56,6 +58,62 @@
     if (!el) return;
     if (value) { el.textContent = value; el.hidden = false; }
     else { el.textContent = ''; el.hidden = true; }
+  }
+
+  function clearChildren(el) { while (el && el.firstChild) el.removeChild(el.firstChild); }
+
+  // Localized add-on label: active language's translation, else English name/key.
+  function addonLabel(a) {
+    var lang = (window.i18n && window.i18n.getLanguage && window.i18n.getLanguage()) || 'en';
+    if (lang !== 'en' && a.translations && a.translations[lang]) return a.translations[lang];
+    return a.name || a.key;
+  }
+
+  // Render the order's add-ons + special instructions — ONLY at intake (the order
+  // is still pending and the next scan checks it in). Suppressed on every later
+  // scan ("not needed on scan-out"). CSP-clean (createElement/textContent).
+  function renderOrderExtras(resolveData) {
+    var atIntake = resolveData.currentStatus === 'pending';
+    var addOns = (atIntake && Array.isArray(resolveData.addOns)) ? resolveData.addOns : [];
+    var instructions = atIntake ? (resolveData.specialInstructions || '') : '';
+
+    if (addOnsEl) {
+      clearChildren(addOnsEl);
+      if (addOns.length) {
+        var aLabel = document.createElement('span');
+        aLabel.className = 'scan-addons-label';
+        aLabel.textContent = t('operator.scan.addonsLabel', 'Add-ons');
+        addOnsEl.appendChild(aLabel);
+        var ul = document.createElement('ul');
+        ul.className = 'scan-addons-list';
+        addOns.forEach(function (a) {
+          var li = document.createElement('li');
+          li.textContent = addonLabel(a);
+          ul.appendChild(li);
+        });
+        addOnsEl.appendChild(ul);
+        addOnsEl.hidden = false;
+      } else {
+        addOnsEl.hidden = true;
+      }
+    }
+
+    if (instructionsEl) {
+      clearChildren(instructionsEl);
+      if (instructions) {
+        var iLabel = document.createElement('span');
+        iLabel.className = 'scan-instructions-label';
+        iLabel.textContent = t('operator.scan.instructionsLabel', 'Special instructions');
+        var p = document.createElement('p');
+        p.className = 'scan-instructions-text';
+        p.textContent = instructions;
+        instructionsEl.appendChild(iLabel);
+        instructionsEl.appendChild(p);
+        instructionsEl.hidden = false;
+      } else {
+        instructionsEl.hidden = true;
+      }
+    }
   }
 
   // --- toast ----------------------------------------------------------------
@@ -88,6 +146,8 @@
     paymentRow.hidden = true;
     paymentCheckbox.checked = false;
     confirmYes.disabled = false;
+    if (addOnsEl) addOnsEl.hidden = true;
+    if (instructionsEl) instructionsEl.hidden = true;
     pending = null;
   }
 
@@ -113,6 +173,9 @@
       orderStatusEl.textContent = statusLabel(resolveData.currentStatus);
       orderStatusEl.hidden = false;
     }
+
+    // Add-ons + special instructions (only at intake / pending).
+    renderOrderExtras(resolveData);
 
     // Warn the operator to update Cents when the customer changed their phone.
     if (centsWarning) {

@@ -29,6 +29,7 @@
             <button class="nav-tab" data-tab="customers" data-i18n="administrator.dashboard.tabs.customers">Customers</button>
             <button class="nav-tab" data-tab="affiliates" data-i18n="administrator.dashboard.tabs.affiliates">Affiliates</button>
             <button class="nav-tab" data-tab="invites" data-i18n="administrator.dashboard.tabs.invites">Invites</button>
+            <button class="nav-tab" data-tab="addons" data-i18n="administrator.dashboard.tabs.addons">Add-ons</button>
             <button class="nav-tab" data-tab="config" data-i18n="administrator.dashboard.tabs.config">Config</button>
         </nav>
 
@@ -368,6 +369,21 @@
 
 
         <!-- System Config Tab -->
+        <!-- Add-ons Tab — manage the order add-on catalog -->
+        <div class="tab-content" id="addons-tab">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title" data-i18n="admin.addons.title">Add-on Management</h2>
+                    <button class="btn" id="addAddOnBtn" data-i18n="admin.addons.add">Add add-on</button>
+                </div>
+                <div id="addonsList">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div class="tab-content" id="config-tab">
             <!-- Sub-tabs for Config -->
             <div class="sub-nav-tabs">
@@ -466,6 +482,54 @@
                 <div class="form-actions justify-content-center margin-top-30">
                     <button type="button" class="btn btn-secondary" id="cancelAffiliateSettings" data-i18n="common.buttons.cancel">Cancel</button>
                     <button type="button" class="btn btn-primary" id="saveAffiliateSettings" data-i18n="common.buttons.save">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add / Edit add-on modal -->
+    <div class="modal hidden" id="addonModal">
+        <div class="modal-content max-width-400">
+            <div class="modal-header">
+                <h3 id="addonModalTitle" data-i18n="admin.addons.modalTitleAdd">Add add-on</h3>
+                <button class="modal-close" id="closeAddOnModal">&times;</button>
+            </div>
+            <div class="modal-body padding-30">
+                <div class="form-group margin-bottom-20">
+                    <label class="font-weight-600 margin-bottom-10" for="addonName"
+                           data-i18n="admin.addons.nameEnglish">Name (English)</label>
+                    <input type="text" id="addonName" class="form-control" maxlength="100">
+                </div>
+                <div class="form-group margin-bottom-20">
+                    <label class="font-weight-600 margin-bottom-10" for="addonNameEs"
+                           data-i18n="admin.addons.nameSpanish">Name (Spanish)</label>
+                    <input type="text" id="addonNameEs" class="form-control" maxlength="100">
+                </div>
+                <div class="form-group margin-bottom-20">
+                    <label class="font-weight-600 margin-bottom-10" for="addonNamePt"
+                           data-i18n="admin.addons.namePortuguese">Name (Portuguese)</label>
+                    <input type="text" id="addonNamePt" class="form-control" maxlength="100">
+                </div>
+                <div class="form-group margin-bottom-20">
+                    <label class="font-weight-600 margin-bottom-10" for="addonNameDe"
+                           data-i18n="admin.addons.nameGerman">Name (German)</label>
+                    <input type="text" id="addonNameDe" class="form-control" maxlength="100">
+                </div>
+                <div class="form-group margin-bottom-20">
+                    <label class="font-weight-600 margin-bottom-10" for="addonSortOrder"
+                           data-i18n="admin.addons.sortOrder">Sort order</label>
+                    <input type="number" id="addonSortOrder" class="form-control" min="0" max="9999" value="0">
+                </div>
+                <div class="form-group margin-bottom-20">
+                    <label class="font-weight-600">
+                        <input type="checkbox" id="addonActive" checked>
+                        <span data-i18n="admin.addons.activeLabel">Active (shown to customers)</span>
+                    </label>
+                </div>
+                <p id="addonModalError" class="claim-error" hidden></p>
+                <div class="form-actions justify-content-center margin-top-30">
+                    <button type="button" class="btn btn-secondary" id="cancelAddOnBtn" data-i18n="admin.addons.cancel">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="saveAddOnBtn" data-i18n="admin.addons.save">Save</button>
                 </div>
             </div>
         </div>

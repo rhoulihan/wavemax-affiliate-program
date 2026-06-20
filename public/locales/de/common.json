@@ -133,6 +133,11 @@
       "saveError": "Speichern fehlgeschlagen. Bitte prüfen Sie Ihre Daten und versuchen Sie es erneut.",
       "dupEmail": "Diese E-Mail wird bereits verwendet.",
       "phoneVerifyFailed": "Telefonverifizierung fehlgeschlagen. Bitte erneut versuchen."
+    },
+    "order": {
+      "addonsTitle": "Zusatzoptionen (optional)",
+      "instructionsLabel": "Besondere Hinweise (optional)",
+      "instructionsPlaceholder": "Sollen wir etwas wissen? (z. B. Faltvorlieben)"
     }
   },
   "bag": {
@@ -769,7 +774,9 @@
       "centsSyncWarning": "Telefon geändert — diese Nummer in Cents aktualisieren:",
       "confirm": "Bestätigen",
       "cancel": "Abbrechen",
-      "statusNone": "Kein aktiver Auftrag"
+      "statusNone": "Kein aktiver Auftrag",
+      "addonsLabel": "Zusatzoptionen",
+      "instructionsLabel": "Besondere Hinweise"
     }
   },
   "expediter": {
@@ -854,7 +861,8 @@
         "affiliates": "Partner",
         "auditlog": "Audit-Protokoll",
         "config": "Konfiguration",
-        "invites": "Einladungen"
+        "invites": "Einladungen",
+        "addons": "Zusatzoptionen"
       },
       "subtabs": {
         "overview": "Übersicht",
@@ -1420,6 +1428,34 @@
       "success": "Beutel-Etiketten wurden erstellt.",
       "error": "Beutel-Etiketten konnten nicht erstellt werden.",
       "quantityInvalid": "Bitte geben Sie eine Menge zwischen 1 und 200 ein."
+    },
+    "addons": {
+      "title": "Zusatzoptionen-Verwaltung",
+      "add": "Zusatzoption hinzufügen",
+      "name": "Name",
+      "key": "Schlüssel",
+      "sortOrder": "Reihenfolge",
+      "active": "Aktiv",
+      "inactive": "Inaktiv",
+      "actions": "Aktionen",
+      "edit": "Bearbeiten",
+      "deactivate": "Deaktivieren",
+      "save": "Speichern",
+      "cancel": "Abbrechen",
+      "modalTitleAdd": "Zusatzoption hinzufügen",
+      "modalTitleEdit": "Zusatzoption bearbeiten",
+      "noAddOns": "Noch keine Zusatzoptionen",
+      "nameEnglish": "Name (Englisch)",
+      "nameSpanish": "Name (Spanisch)",
+      "namePortuguese": "Name (Portugiesisch)",
+      "nameGerman": "Name (Deutsch)",
+      "activeLabel": "Aktiv (für Kunden sichtbar)",
+      "nameRequired": "Name ist erforderlich",
+      "saved": "Zusatzoption gespeichert",
+      "saveError": "Zusatzoption konnte nicht gespeichert werden",
+      "deactivated": "Zusatzoption deaktiviert",
+      "deactivateConfirm": "Diese Zusatzoption deaktivieren? Kunden sehen sie dann nicht mehr.",
+      "loadError": "Zusatzoptionen konnten nicht geladen werden"
     }
   },
   "email": {

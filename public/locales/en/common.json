@@ -133,6 +133,11 @@
       "saveError": "Could not save. Please check your info and try again.",
       "dupEmail": "That email is already in use.",
       "phoneVerifyFailed": "Phone verification failed. Please try again."
+    },
+    "order": {
+      "addonsTitle": "Add-ons (optional)",
+      "instructionsLabel": "Special instructions (optional)",
+      "instructionsPlaceholder": "Anything we should know? (e.g. fold preferences)"
     }
   },
   "bag": {
@@ -769,7 +774,9 @@
       "centsSyncWarning": "Phone changed — update this number in Cents:",
       "confirm": "Confirm",
       "cancel": "Cancel",
-      "statusNone": "No active order"
+      "statusNone": "No active order",
+      "addonsLabel": "Add-ons",
+      "instructionsLabel": "Special instructions"
     }
   },
   "expediter": {
@@ -854,7 +861,8 @@
         "affiliates": "Affiliates",
         "auditlog": "Audit Log",
         "config": "Configuration",
-        "invites": "Invites"
+        "invites": "Invites",
+        "addons": "Add-ons"
       },
       "subtabs": {
         "overview": "Overview",
@@ -1420,6 +1428,34 @@
       "success": "Bag labels generated.",
       "error": "Could not generate bag labels.",
       "quantityInvalid": "Enter a quantity between 1 and 200."
+    },
+    "addons": {
+      "title": "Add-on Management",
+      "add": "Add add-on",
+      "name": "Name",
+      "key": "Key",
+      "sortOrder": "Sort order",
+      "active": "Active",
+      "inactive": "Inactive",
+      "actions": "Actions",
+      "edit": "Edit",
+      "deactivate": "Deactivate",
+      "save": "Save",
+      "cancel": "Cancel",
+      "modalTitleAdd": "Add add-on",
+      "modalTitleEdit": "Edit add-on",
+      "noAddOns": "No add-ons yet",
+      "nameEnglish": "Name (English)",
+      "nameSpanish": "Name (Spanish)",
+      "namePortuguese": "Name (Portuguese)",
+      "nameGerman": "Name (German)",
+      "activeLabel": "Active (shown to customers)",
+      "nameRequired": "Name is required",
+      "saved": "Add-on saved",
+      "saveError": "Failed to save add-on",
+      "deactivated": "Add-on deactivated",
+      "deactivateConfirm": "Deactivate this add-on? Customers will no longer see it.",
+      "loadError": "Failed to load add-ons"
     }
   },
   "email": {

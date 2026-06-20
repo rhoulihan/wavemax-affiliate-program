@@ -296,6 +296,9 @@
     case 'invites':
       await loadInvites();
       break;
+    case 'addons':
+      await loadAddOns();
+      break;
     case 'config':
       await loadSystemConfig();
       break;
@@ -2167,6 +2170,197 @@
     if (close) close.addEventListener('click', closeAffiliateSettingsModal);
     const modal = document.getElementById('affiliateSettingsModal');
     if (modal) modal.addEventListener('click', (e) => { if (e.target === modal) closeAffiliateSettingsModal(); });
+  })();
+
+  // ── Add-on catalog management (list + create + edit + soft-delete) ──────────
+  let editingAddOnId = null; // null = creating; ADDON-… = editing
+
+  function escapeHtml(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
+
+  async function loadAddOns() {
+    const list = document.getElementById('addonsList');
+    const t = window.i18n ? window.i18n.t.bind(window.i18n) : (k, f) => f || k;
+    try {
+      const response = await adminFetch('/api/v1/administrators/addons');
+      const data = await response.json();
+      if (response.ok && data.success) {
+        renderAddOnsList(data.addOns || []);
+      } else {
+        if (list) list.innerHTML = `<p class="p-20 text-center text-muted">${t('admin.addons.loadError', 'Failed to load add-ons')}</p>`;
+      }
+    } catch (err) {
+      console.error('Error loading add-ons:', err);
+      if (list) list.innerHTML = `<p class="p-20 text-center text-muted">${t('admin.addons.loadError', 'Failed to load add-ons')}</p>`;
+    }
+  }
+
+  function renderAddOnsList(addOns) {
+    const t = window.i18n ? window.i18n.t.bind(window.i18n) : (k, f) => f || k;
+    const list = document.getElementById('addonsList');
+    if (!list) return;
+    if (!addOns.length) {
+      list.innerHTML = `<p class="p-20 text-center text-muted">${t('admin.addons.noAddOns', 'No add-ons yet')}</p>`;
+      return;
+    }
+    list.innerHTML = `
+            <table>
+                <thead>
+                    <tr>
+                        <th>${t('admin.addons.name', 'Name')}</th>
+                        <th>${t('admin.addons.key', 'Key')}</th>
+                        <th>${t('admin.addons.sortOrder', 'Sort order')}</th>
+                        <th>${t('admin.addons.active', 'Active')}</th>
+                        <th>${t('admin.addons.actions', 'Actions')}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${addOns.map(a => `
+                        <tr>
+                            <td>${escapeHtml(a.name)}</td>
+                            <td><code>${escapeHtml(a.key)}</code></td>
+                            <td>${a.sortOrder}</td>
+                            <td>
+                                <span class="status-badge ${a.isActive ? 'active' : 'inactive'}">
+                                    ${a.isActive ? t('admin.addons.active', 'Active') : t('admin.addons.inactive', 'Inactive')}
+                                </span>
+                            </td>
+                            <td>
+                                <button class="btn btn-sm" data-addon-edit="${escapeHtml(a.addOnId)}" data-i18n="admin.addons.edit">Edit</button>
+                                ${a.isActive ? `<button class="btn btn-sm btn-danger" data-addon-deactivate="${escapeHtml(a.addOnId)}" data-i18n="admin.addons.deactivate">Deactivate</button>` : ''}
+                            </td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>`;
+    if (window.i18n && window.i18n.translatePage) window.i18n.translatePage();
+  }
+
+  function openAddOnModal(addOn) {
+    const t = window.i18n ? window.i18n.t.bind(window.i18n) : (k, f) => f || k;
+    editingAddOnId = addOn ? addOn.addOnId : null;
+    const modal = document.getElementById('addonModal');
+    if (!modal) return;
+    const titleEl = document.getElementById('addonModalTitle');
+    if (titleEl) titleEl.textContent = addOn
+      ? t('admin.addons.modalTitleEdit', 'Edit add-on')
+      : t('admin.addons.modalTitleAdd', 'Add add-on');
+    const tr = (addOn && addOn.translations) || {};
+    document.getElementById('addonName').value = addOn ? (addOn.name || '') : '';
+    document.getElementById('addonNameEs').value = tr.es || '';
+    document.getElementById('addonNamePt').value = tr.pt || '';
+    document.getElementById('addonNameDe').value = tr.de || '';
+    document.getElementById('addonSortOrder').value = addOn ? (addOn.sortOrder || 0) : 0;
+    document.getElementById('addonActive').checked = addOn ? !!addOn.isActive : true;
+    // The English name field is the source of the key on create; on edit the key
+    // is fixed (not editable), so the name still edits but the key never changes.
+    const err = document.getElementById('addonModalError');
+    if (err) err.hidden = true;
+    modal.classList.remove('hidden');
+    modal.style.display = 'flex';
+  }
+
+  function closeAddOnModal() {
+    const modal = document.getElementById('addonModal');
+    if (modal) { modal.style.display = 'none'; modal.classList.add('hidden'); }
+    editingAddOnId = null;
+  }
+
+  async function saveAddOn() {
+    const t = window.i18n ? window.i18n.t.bind(window.i18n) : (k, f) => f || k;
+    const name = (document.getElementById('addonName').value || '').trim();
+    const err = document.getElementById('addonModalError');
+    if (!name) {
+      if (err) { err.textContent = t('admin.addons.nameRequired', 'Name is required'); err.hidden = false; }
+      return;
+    }
+    if (err) err.hidden = true;
+    const payload = {
+      name,
+      translations: {
+        es: (document.getElementById('addonNameEs').value || '').trim(),
+        pt: (document.getElementById('addonNamePt').value || '').trim(),
+        de: (document.getElementById('addonNameDe').value || '').trim()
+      },
+      sortOrder: parseInt(document.getElementById('addonSortOrder').value, 10) || 0,
+      isActive: document.getElementById('addonActive').checked
+    };
+    const editing = editingAddOnId;
+    const url = editing
+      ? `/api/v1/administrators/addons/${editing}`
+      : '/api/v1/administrators/addons';
+    const method = editing ? 'PATCH' : 'POST';
+    const saveBtn = document.getElementById('saveAddOnBtn');
+    try {
+      if (saveBtn) saveBtn.disabled = true;
+      const response = await adminFetch(url, { method, body: JSON.stringify(payload) });
+      const data = await response.json();
+      if (response.ok && data.success) {
+        showNotification(t('admin.addons.saved', 'Add-on saved'), 'success');
+        closeAddOnModal();
+        await loadAddOns();
+      } else {
+        const msg = data.message || t('admin.addons.saveError', 'Failed to save add-on');
+        if (err) { err.textContent = msg; err.hidden = false; }
+        else showNotification(msg, 'error');
+      }
+    } catch (e) {
+      console.error('Error saving add-on:', e);
+      showNotification(t('admin.addons.saveError', 'Failed to save add-on'), 'error');
+    } finally {
+      if (saveBtn) saveBtn.disabled = false;
+    }
+  }
+
+  async function deactivateAddOn(addOnId) {
+    const t = window.i18n ? window.i18n.t.bind(window.i18n) : (k, f) => f || k;
+    if (!window.confirm(t('admin.addons.deactivateConfirm', 'Deactivate this add-on? Customers will no longer see it.'))) return;
+    try {
+      const response = await adminFetch(`/api/v1/administrators/addons/${addOnId}`, { method: 'DELETE' });
+      const data = await response.json();
+      if (response.ok && data.success) {
+        showNotification(t('admin.addons.deactivated', 'Add-on deactivated'), 'success');
+        await loadAddOns();
+      } else {
+        showNotification(data.message || t('admin.addons.saveError', 'Failed to deactivate add-on'), 'error');
+      }
+    } catch (e) {
+      console.error('Error deactivating add-on:', e);
+      showNotification(t('admin.addons.saveError', 'Failed to deactivate add-on'), 'error');
+    }
+  }
+
+  // Wire the add-on UI once (button + modal controls + list action delegation).
+  (function wireAddOnUi() {
+    const addBtn = document.getElementById('addAddOnBtn');
+    if (addBtn) addBtn.addEventListener('click', () => openAddOnModal(null));
+    const save = document.getElementById('saveAddOnBtn');
+    if (save) save.addEventListener('click', saveAddOn);
+    const cancel = document.getElementById('cancelAddOnBtn');
+    if (cancel) cancel.addEventListener('click', closeAddOnModal);
+    const close = document.getElementById('closeAddOnModal');
+    if (close) close.addEventListener('click', closeAddOnModal);
+    const modal = document.getElementById('addonModal');
+    if (modal) modal.addEventListener('click', (e) => { if (e.target === modal) closeAddOnModal(); });
+    const list = document.getElementById('addonsList');
+    if (list) {
+      list.addEventListener('click', async (e) => {
+        const editBtn = e.target.closest('[data-addon-edit]');
+        const deBtn = e.target.closest('[data-addon-deactivate]');
+        if (editBtn) {
+          // Re-fetch the catalog to get the row's full record (incl. translations).
+          const response = await adminFetch('/api/v1/administrators/addons');
+          const data = await response.json();
+          const found = (data.addOns || []).find(a => a.addOnId === editBtn.getAttribute('data-addon-edit'));
+          if (found) openAddOnModal(found);
+        } else if (deBtn) {
+          await deactivateAddOn(deBtn.getAttribute('data-addon-deactivate'));
+        }
+      });
+    }
   })();
 
   // Print Bag Labels modal functionality. Tracks the active affiliate so the

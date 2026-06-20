@@ -12,7 +12,7 @@
     <link href="/assets/css/theme.css" rel="stylesheet">
     <link href="/assets/css/modal-utils.css" rel="stylesheet">
     <link href="/assets/css/swirl-spinner.css" rel="stylesheet">
-    <link href="/assets/css/claim.css?v=20260617c" rel="stylesheet">
+    <link href="/assets/css/claim.css?v=20260620" rel="stylesheet">
 </head>
 <body class="bg-white font-sans">
     <div id="language-switcher-container" class="language-switcher-container"></div>
@@ -77,6 +77,10 @@
                 <h1 class="text-2xl font-bold mb-2" data-i18n="claim.registeredTitle">You're all set!</h1>
                 <p class="text-gray-600" data-i18n="claim.registeredBody">Your bag is now linked to your account.</p>
 
+                <!-- Add-ons + special instructions (rendered from the catalog by
+                     claim.js). Shown alongside the Start button. -->
+                <div id="pickup-order-options" class="order-options" hidden></div>
+
                 <!-- Start the order now, or scan the bag QR code later. Shown for
                      every partner type (id kept for back-compat with the start flow). -->
                 <button type="button" id="requestPickupBtn" class="claim-submit" hidden data-i18n="claim.start.button">Start order</button>
@@ -136,6 +140,8 @@
                  their info or start an order. -->
             <section id="claim-customer-actions" class="claim-panel" hidden>
                 <h1 data-i18n="claim.scan.actionsTitle">What would you like to do?</h1>
+                <!-- Add-ons + special instructions (rendered from the catalog by claim.js). -->
+                <div id="customer-order-options" class="order-options"></div>
                 <button id="customer-start-order" type="button" class="btn btn-primary" data-i18n="claim.scan.customerStartButton">Start my order</button>
                 <button id="customer-edit-info" type="button" class="btn btn-secondary" data-i18n="claim.edit.button">Edit my info</button>
                 <p id="customer-start-error" class="claim-error" hidden></p>

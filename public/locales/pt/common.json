@@ -133,6 +133,11 @@
       "saveError": "Não foi possível salvar. Verifique suas informações e tente novamente.",
       "dupEmail": "Esse e-mail já está em uso.",
       "phoneVerifyFailed": "A verificação do telefone falhou. Tente novamente."
+    },
+    "order": {
+      "addonsTitle": "Complementos (opcional)",
+      "instructionsLabel": "Instruções especiais (opcional)",
+      "instructionsPlaceholder": "Algo que devemos saber? (ex.: preferências de dobra)"
     }
   },
   "bag": {
@@ -769,7 +774,9 @@
       "centsSyncWarning": "Telefone alterado — atualize este número no Cents:",
       "confirm": "Confirmar",
       "cancel": "Cancelar",
-      "statusNone": "Sem pedido ativo"
+      "statusNone": "Sem pedido ativo",
+      "addonsLabel": "Complementos",
+      "instructionsLabel": "Instruções especiais"
     }
   },
   "expediter": {
@@ -854,7 +861,8 @@
         "affiliates": "Afiliados",
         "auditlog": "Registro de Auditoria",
         "config": "Configuração",
-        "invites": "Convites"
+        "invites": "Convites",
+        "addons": "Complementos"
       },
       "subtabs": {
         "overview": "Visão Geral",
@@ -1420,6 +1428,34 @@
       "success": "Etiquetas de sacolas geradas.",
       "error": "Não foi possível gerar as etiquetas de sacolas.",
       "quantityInvalid": "Insira uma quantidade entre 1 e 200."
+    },
+    "addons": {
+      "title": "Gerenciamento de complementos",
+      "add": "Adicionar complemento",
+      "name": "Nome",
+      "key": "Chave",
+      "sortOrder": "Ordem",
+      "active": "Ativo",
+      "inactive": "Inativo",
+      "actions": "Ações",
+      "edit": "Editar",
+      "deactivate": "Desativar",
+      "save": "Salvar",
+      "cancel": "Cancelar",
+      "modalTitleAdd": "Adicionar complemento",
+      "modalTitleEdit": "Editar complemento",
+      "noAddOns": "Ainda não há complementos",
+      "nameEnglish": "Nome (inglês)",
+      "nameSpanish": "Nome (espanhol)",
+      "namePortuguese": "Nome (português)",
+      "nameGerman": "Nome (alemão)",
+      "activeLabel": "Ativo (visível para os clientes)",
+      "nameRequired": "O nome é obrigatório",
+      "saved": "Complemento salvo",
+      "saveError": "Falha ao salvar o complemento",
+      "deactivated": "Complemento desativado",
+      "deactivateConfirm": "Desativar este complemento? Os clientes não o verão mais.",
+      "loadError": "Falha ao carregar os complementos"
     }
   },
   "email": {
