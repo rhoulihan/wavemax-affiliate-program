@@ -35,12 +35,12 @@ exports.resolve = ControllerHelpers.asyncWrapper(async (req, res) => {
   }
 });
 
-/** POST /api/v1/scan/apply  { bagToken, expectedAction, reopen?, paymentConfirmed? }  (scanAuth) */
+/** POST /api/v1/scan/apply  { bagToken, expectedAction, reopen?, paymentConfirmed?, addOns?, specialInstructions? }  (scanAuth) */
 exports.apply = ControllerHelpers.asyncWrapper(async (req, res) => {
   try {
-    const { bagToken, expectedAction, reopen, paymentConfirmed } = req.body;
+    const { bagToken, expectedAction, reopen, paymentConfirmed, addOns, specialInstructions } = req.body;
     const result = await scanService.applyScan({
-      bagToken, expectedAction, reopen, paymentConfirmed,
+      bagToken, expectedAction, reopen, paymentConfirmed, addOns, specialInstructions,
       actor: req.scanActor, req
     });
     return ControllerHelpers.sendSuccess(res, result, `Scan applied: ${result.action}`);

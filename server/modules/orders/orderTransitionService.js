@@ -15,6 +15,7 @@
 const Order = require('../../models/Order');
 const Customer = require('../../models/Customer');
 const Affiliate = require('../../models/Affiliate');
+const AddOn = require('../../models/AddOn');
 const SystemConfig = require('../../models/SystemConfig');
 const emailService = require('../../utils/emailService');
 const {
@@ -43,18 +44,49 @@ function findOpenOrder(bagId) {
   return Order.findOne({ bagId, status: { $in: OPEN_STATUSES } }).sort({ createdAt: -1 });
 }
 
+const MAX_INSTRUCTIONS_LEN = 1000;
+
+/**
+ * Reduce client-supplied add-on keys to the trustworthy set: strings only,
+ * normalized (trim + lowercase), de-duplicated, and intersected with the
+ * ACTIVE catalog. Returned in catalog order (sortOrder, name) for deterministic
+ * display. Unknown / inactive / non-string entries are silently dropped — a
+ * stale client must never fail an order, and these are label-only (money is in
+ * Cents). Returns [] for anything non-array/empty.
+ */
+async function sanitizeAddOns(rawAddOns) {
+  if (!Array.isArray(rawAddOns) || rawAddOns.length === 0) return [];
+  const requested = new Set(
+    rawAddOns
+      .filter(k => typeof k === 'string')
+      .map(k => k.trim().toLowerCase())
+      .filter(Boolean)
+  );
+  if (requested.size === 0) return [];
+  const active = await AddOn.getActive();
+  return active.filter(a => requested.has(a.key)).map(a => a.key);
+}
+
+/** Trim + hard-cap free-text instructions; never throws. */
+function sanitizeInstructions(raw) {
+  if (raw === undefined || raw === null) return '';
+  return String(raw).trim().slice(0, MAX_INSTRUCTIONS_LEN);
+}
+
 /**
  * Scan 1 — pickup at partner. Creates exactly one pending order. The customer/
  * affiliate ids come from the registered bag, never from client input.
  * @param {Object} args
  * @param {Object} args.bag   - resolved Bag doc (status 'active', has customerId)
  * @param {string} args.by    - scanner id
- * @param {string} args.role  - 'affiliate' | 'operator'
+ * @param {string} args.role  - 'affiliate' | 'operator' | 'customer'
+ * @param {string[]} [args.addOns] - selected add-on keys (validated vs catalog)
+ * @param {string} [args.specialInstructions] - free-text wash notes
  * @param {Object} [args.req] - Express request (audit context)
  * @returns {Promise<{order: Order}>}
  * @throws {TransitionServiceError} bag_not_registered | order_already_open
  */
-async function createPendingOrder({ bag, by, role, req }) {
+async function createPendingOrder({ bag, by, role, addOns, specialInstructions, req }) {
   if (!bag || bag.status !== 'active' || !bag.customerId) {
     throw new TransitionServiceError('bag_not_registered',
       'Bag is not registered to a customer', 409);
@@ -78,7 +110,9 @@ async function createPendingOrder({ bag, by, role, req }) {
     bagId: bag.bagId,
     bagToken: bag.token,
     status: 'pending',
-    pickup: { at: now, by, role }
+    pickup: { at: now, by, role },
+    addOns: await sanitizeAddOns(addOns),
+    specialInstructions: sanitizeInstructions(specialInstructions)
   });
 
   await order.save();
@@ -123,10 +157,12 @@ async function createPendingOrder({ bag, by, role, req }) {
  * @param {string} args.by
  * @param {string} args.role
  * @param {boolean} [args.paymentConfirmed] - store-pickup manual payment checkbox
+ * @param {string[]} [args.addOns] - add-ons, used only if this advance opens a new pending order
+ * @param {string} [args.specialInstructions] - ditto
  * @param {Object} [args.req]
  * @returns {Promise<{order?: Order, action: string, to?: string, orderId?: string}>}
  */
-async function advanceOrder({ bag, by, role, paymentConfirmed, req }) {
+async function advanceOrder({ bag, by, role, paymentConfirmed, addOns, specialInstructions, req }) {
   if (!bag || bag.status !== 'active' || !bag.customerId) {
     throw new TransitionServiceError('bag_not_registered',
       'Bag is not registered to a customer', 409);
@@ -146,7 +182,7 @@ async function advanceOrder({ bag, by, role, paymentConfirmed, req }) {
   const decision = resolveScanAction(referenceOrder, { now, reopenWindowMs });
 
   if (decision.action === 'create-pending') {
-    const { order: created } = await createPendingOrder({ bag, by, role, req });
+    const { order: created } = await createPendingOrder({ bag, by, role, addOns, specialInstructions, req });
     return { order: created, action: 'create-pending' };
   }
 

@@ -119,10 +119,14 @@
   }
 
   // POST /scan/apply — apply the confirmed transition. expectedAction REQUIRED.
+  // addOns[] + specialInstructions ride along on the start (create-pending) call;
+  // the server ignores them on a mid-lifecycle advance.
   function apply(bagToken, expectedAction, opts) {
     var payload = { bagToken: bagToken, expectedAction: expectedAction };
     if (opts && typeof opts.reopen === 'boolean') payload.reopen = opts.reopen;
     if (opts && opts.paymentConfirmed) payload.paymentConfirmed = true;
+    if (opts && Array.isArray(opts.addOns) && opts.addOns.length) payload.addOns = opts.addOns;
+    if (opts && opts.specialInstructions) payload.specialInstructions = opts.specialInstructions;
     return postScan('apply', payload);
   }
 

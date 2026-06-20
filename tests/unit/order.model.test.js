@@ -70,10 +70,23 @@ describe('Order model (slim state record)', () => {
       expect(order.paymentConfirmedManually).toBe(true);
     });
 
+    it('captures add-ons (key list) + special instructions on the order', async () => {
+      const order = await buildOrder({
+        addOns: ['premium_detergent', 'stain_remover'],
+        specialInstructions: 'Fold shirts on hangers, please.'
+      }).save();
+      expect(order.addOns).toEqual(['premium_detergent', 'stain_remover']);
+      expect(order.specialInstructions).toBe('Fold shirts on hangers, please.');
+      // defaults: empty list, no instructions
+      const bare = await buildOrder().save();
+      expect(bare.addOns).toEqual([]);
+      expect(bare.specialInstructions === '' || bare.specialInstructions === undefined).toBe(true);
+    });
+
     it('has dropped every removed money/weight/lifecycle field', () => {
       for (const gone of [
         'actualWeight', 'washInstructions', 'bags',
-        'addOns', 'addOnTotal', 'addOnsEnteredBy', 'addOnsEnteredAt',
+        'addOnTotal', 'addOnsEnteredBy', 'addOnsEnteredAt',
         'freshAddOnsFormPlaced', 'baseRate', 'feeBreakdown', 'actualTotal',
         'wdfCreditApplied', 'wdfCreditGenerated', 'affiliateCommission',
         'zeroCommission', 'commissionRealized', 'commissionRealizedAt',

@@ -45,6 +45,14 @@ const orderSchema = new mongoose.Schema({
   storePickup: scanEventSchema,   // scan 3 — store pickup    -> out_for_delivery
   delivery: scanEventSchema,      // scan 4 — partner delivery-> complete
 
+  // Customer service selections captured at order start (spec: add-ons). These
+  // are LABEL/INSTRUCTION ONLY — money/pricing lives in Cents. `addOns` holds
+  // AddOn `key` slugs (validated against the active catalog at creation); the
+  // operator sees them + `specialInstructions` when scanning the pending bag at
+  // intake (hidden on scan-out).
+  addOns: { type: [String], default: [] },
+  specialInstructions: { type: String, default: '', maxlength: 1000, trim: true },
+
   // Manual payment confirmation at store-pickup — a flag only (no payment data;
   // money lives in Cents). Set when the operator checks the payment box.
   paymentConfirmedManually: { type: Boolean, default: false },

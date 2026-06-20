@@ -18,6 +18,7 @@ const jwt = require('jsonwebtoken');
 const Affiliate = require('../../models/Affiliate');
 const Operator = require('../../models/Operator');
 const Customer = require('../../models/Customer');
+const AddOn = require('../../models/AddOn');
 const SystemConfig = require('../../models/SystemConfig');
 const bagService = require('../bags/bagService');
 const orderTransitionService = require('../orders/orderTransitionService');
@@ -191,9 +192,30 @@ async function resolveScan({ bagToken }) {
   const currentStatus = reference && OPEN_STATUSES.includes(reference.status)
     ? reference.status : 'none';
 
+  // The operator sees the order's add-ons + special instructions ONLY at intake
+  // (i.e. while the order is still PENDING — the next scan checks it in). On any
+  // later scan they're suppressed (empty), per spec ("not needed on scan-out").
+  let orderAddOns = [];
+  let orderInstructions = '';
+  if (reference && reference.status === 'pending') {
+    orderInstructions = reference.specialInstructions || '';
+    if (Array.isArray(reference.addOns) && reference.addOns.length) {
+      const catalog = await AddOn.find({ key: { $in: reference.addOns } });
+      const byKey = new Map(catalog.map(a => [a.key, a]));
+      orderAddOns = reference.addOns.map(k => {
+        const a = byKey.get(k);
+        return a
+          ? { key: a.key, name: a.name, translations: { es: a.translations.es || '', pt: a.translations.pt || '', de: a.translations.de || '' } }
+          : { key: k, name: k, translations: { es: '', pt: '', de: '' } }; // retired key — show the slug
+      });
+    }
+  }
+
   return {
     bagId: bag.bagId,
     currentStatus,
+    addOns: orderAddOns,
+    specialInstructions: orderInstructions,
     customer: customer ? {
       firstName: customer.firstName, lastName: customer.lastName,
       phone: customer.phone, email: customer.email || '',
@@ -213,10 +235,12 @@ async function resolveScan({ bagToken }) {
 
 /**
  * POST /api/v1/scan/apply — re-resolve (drift guard), then apply via the
- * transition service stamping by/role from req.scanActor.
+ * transition service stamping by/role from req.scanActor. addOns +
+ * specialInstructions are honoured only when this scan CREATES the order
+ * (create-pending / reopen) — they're ignored on a mid-lifecycle advance.
  * @returns {{orderId, newStatus, action}}
  */
-async function applyScan({ bagToken, expectedAction, reopen, paymentConfirmed, actor, req }) {
+async function applyScan({ bagToken, expectedAction, reopen, paymentConfirmed, addOns, specialInstructions, actor, req }) {
   // expectedAction is required: without it the drift guard below is skipped
   // entirely, so an operator could apply a stale action against a bag whose
   // state has since changed. Reject up front (400) before touching the order.
@@ -255,11 +279,13 @@ async function applyScan({ bagToken, expectedAction, reopen, paymentConfirmed, a
 
   let result;
   if (decision.action === 'create-pending') {
-    const { order, firstOrder, emailVerified } = await orderTransitionService.createPendingOrder({ bag, by, role, req });
+    const { order, firstOrder, emailVerified } = await orderTransitionService.createPendingOrder({
+      bag, by, role, addOns, specialInstructions, req
+    });
     result = { orderId: order.orderId, newStatus: order.status, action: 'create-pending', firstOrder, emailVerified };
   } else if (decision.action === 'advance') {
     const adv = await orderTransitionService.advanceOrder({
-      bag, by, role, paymentConfirmed: !!paymentConfirmed, req
+      bag, by, role, paymentConfirmed: !!paymentConfirmed, addOns, specialInstructions, req
     });
     result = {
       orderId: adv.order ? adv.order.orderId : decision.orderId,
@@ -268,7 +294,7 @@ async function applyScan({ bagToken, expectedAction, reopen, paymentConfirmed, a
     };
   } else if (decision.action === 'delivery-rescan-prompt') {
     if (reopen === true) {
-      const { order } = await orderTransitionService.createPendingOrder({ bag, by, role, req });
+      const { order } = await orderTransitionService.createPendingOrder({ bag, by, role, addOns, specialInstructions, req });
       result = { orderId: order.orderId, newStatus: order.status, action: 'create-pending' };
     } else {
       // reopen:false -> explicit no-op (the operator chose not to start a new cycle)
