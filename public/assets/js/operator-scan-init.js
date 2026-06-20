@@ -304,37 +304,35 @@
   }
 
   // --- scanner input (keyboard-wedge) --------------------------------------
-  // Accumulate keystrokes directly from keydown, in browser-event order, into a
-  // JS buffer — then finalize on the scanner's Enter (CR) suffix, or after a
-  // short idle as a fallback. This is the ONLY scan-capture path on the kiosk.
+  // Read the input field's NATIVELY-accumulated value and finalize on the
+  // scanner's Enter/Tab (CR) terminator. This is the ONLY scan-capture path.
   //
-  // Why not read the <input> value: the field-value approach (append each input
-  // event + clear, OR read .value once) raced with fast wedge scanners and
-  // corrupted the 32-hex token — dropped/duplicated chars and one char
-  // consistently delayed to the end (e.g. "…cc808…"->"…cc80…8"), giving the WRONG
-  // token -> "bag not registered". keydown delivers each character once, in
-  // order, in a single synchronous handler, with no field-value/clear/focus race.
-  var scanKeyBuffer = '';
-
+  // Why the field value (not keydown e.key): the kiosk is an Android tablet and
+  // the scanner-as-keyboard delivers most letters via COMPOSITION (the 'input'
+  // event, keyCode 229 / e.key 'Unidentified'), NOT discrete keydown — so a
+  // keydown buffer captured digits/symbols but DROPPED every hex letter (a-f),
+  // e.g. token "e5c7…b2d" arrived as "2&5748497056603020989992" -> wrong token
+  // -> "bag not registered". The <input> value captures composition correctly.
+  // We never modify the field mid-scan (no per-event append/clear race); we read
+  // it once at the terminator (or after an idle fallback) and then clear it.
   function commitScan() {
     if (scanTimeout) { clearTimeout(scanTimeout); scanTimeout = null; }
-    var data = scanKeyBuffer.trim();
-    scanKeyBuffer = '';
-    if (scanInput) scanInput.value = '';
+    var data = (scanInput.value || '').trim();
+    scanInput.value = '';
     if (data.length > 0) processScan(data);
   }
 
+  // Every keystroke/composed char resets the idle fallback, so it only fires
+  // once the scan has truly stopped (inter-char gaps are far under 400ms).
+  function handleScanActivity() {
+    if (scanTimeout) clearTimeout(scanTimeout);
+    scanTimeout = setTimeout(commitScan, 400);
+  }
+
+  // The scanner's CR/Tab terminator → finalize immediately (the field value is
+  // complete at this point). Enter/Tab are real keydown events even on Android.
   function handleScanKey(e) {
-    if (e.key === 'Enter' || e.key === 'Tab') {
-      e.preventDefault();
-      commitScan();
-      return;
-    }
-    if (e.key && e.key.length === 1) { // a single printable character
-      scanKeyBuffer += e.key;
-      if (scanTimeout) clearTimeout(scanTimeout);
-      scanTimeout = setTimeout(commitScan, 200); // fallback if no Enter suffix
-    }
+    if (e.key === 'Enter' || e.key === 'Tab') { e.preventDefault(); commitScan(); }
   }
 
   function processScan(scanData) {
@@ -406,9 +404,10 @@
       document.addEventListener('touchstart', enableFullscreen);
     }
 
-    // Wire events. Single scan-capture path: keydown accumulation (handles the
-    // character stream + the Enter/Tab suffix). No 'input' listener — reading the
-    // field value raced and corrupted the token.
+    // Wire events. The field accumulates the scan natively (input/composition);
+    // keydown only watches for the CR/Tab terminator. We read the field value at
+    // the terminator (or idle fallback) — see commitScan.
+    scanInput.addEventListener('input', handleScanActivity);
     scanInput.addEventListener('keydown', handleScanKey);
     scanInput.addEventListener('blur', function () {
       setTimeout(function () {

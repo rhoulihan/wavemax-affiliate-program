@@ -51,19 +51,19 @@ describe('operator-scan confirm modal', () => {
     expect(js).not.toMatch(/\btally\b/);
   });
 
-  it('captures the scan via keydown accumulation (single path), finalizing on Enter', () => {
-    // The field-value approaches (append-each-input-event, or read .value once)
-    // both raced with fast wedge scanners and corrupted the 32-hex token (chars
-    // dropped/duplicated/reordered -> "bag not registered"). The robust fix
-    // accumulates keystrokes directly from keydown, in order, and finalizes on
-    // the Enter/Tab suffix (or an idle fallback). There must be exactly ONE
-    // scan-capture path — keydown — and NO 'input'-listener field read.
+  it('reads the field value (Android composition) and finalizes on the CR terminator', () => {
+    // The kiosk is an Android tablet: the scanner-as-keyboard delivers letters
+    // via composition (the 'input' event, keyCode 229), NOT keydown — so a
+    // keydown-only buffer dropped every hex letter (token "e5c7…"→"2&5748…").
+    // Robust fix: let the <input> accumulate natively, read its value ONCE at the
+    // scanner's Enter/Tab (CR) terminator (idle fallback otherwise), then clear.
+    // No per-event append/clear race; no keydown-only accumulation.
     expect(js).not.toMatch(/scanBuffer\s*\+=/);
-    expect(js).not.toMatch(/addEventListener\('input'/); // no field-value scan path
-    expect(js).toContain('function handleScanKey');
-    expect(js).toMatch(/scanKeyBuffer\s*\+=\s*e\.key/);
-    expect(js).toMatch(/addEventListener\('keydown', handleScanKey\)/);
-    expect(js).toMatch(/e\.key === 'Enter'[\s\S]{0,120}commitScan\(\)/); // CR/Enter (or Tab) suffix → finalize
+    expect(js).not.toMatch(/scanKeyBuffer\s*\+=/); // keydown-only path dropped Android letters
+    expect(js).toContain('function commitScan');
+    expect(js).toMatch(/scanInput\.value\s*\|\|\s*''/);            // reads the native field value
+    expect(js).toMatch(/addEventListener\('input', handleScanActivity\)/); // composition capture
+    expect(js).toMatch(/e\.key === 'Enter'[\s\S]{0,80}commitScan\(\)/);     // CR/Tab terminator → finalize
   });
 
   it('stays CSP-clean (no inline handlers/styles/innerHTML)', () => {
