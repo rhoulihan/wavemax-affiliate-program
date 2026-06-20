@@ -124,6 +124,36 @@ router.get('/env-variables', checkAdminPermission(['system_config']), administra
 // System Health
 router.get('/system/health', administratorController.getSystemHealth);
 
+// Add-on catalog management (admin-managed order add-ons). Defined before the
+// administrator '/:id' routes so '/addons' + '/addons/:addOnId' win. Perm:
+// system_config (business-config surface). CSRF enforced globally on writes.
+const addonController = require('../controllers/addonController');
+router.get('/addons', checkAdminPermission(['system_config']), addonController.listAll);
+router.post('/addons',
+  checkAdminPermission(['system_config']),
+  [
+    body('name').trim().notEmpty().isLength({ max: 100 }).withMessage('Name is required'),
+    body('key').optional().isString().trim().isLength({ max: 100 }),
+    body('sortOrder').optional().isInt({ min: 0, max: 9999 }),
+    body('isActive').optional().isBoolean(),
+    body('translations.es').optional().isString().trim().isLength({ max: 100 }),
+    body('translations.pt').optional().isString().trim().isLength({ max: 100 }),
+    body('translations.de').optional().isString().trim().isLength({ max: 100 })
+  ],
+  addonController.create);
+router.patch('/addons/:addOnId',
+  checkAdminPermission(['system_config']),
+  [
+    body('name').optional().trim().notEmpty().isLength({ max: 100 }).withMessage('Name cannot be empty'),
+    body('sortOrder').optional().isInt({ min: 0, max: 9999 }),
+    body('isActive').optional().isBoolean(),
+    body('translations.es').optional().isString().trim().isLength({ max: 100 }),
+    body('translations.pt').optional().isString().trim().isLength({ max: 100 }),
+    body('translations.de').optional().isString().trim().isLength({ max: 100 })
+  ],
+  addonController.update);
+router.delete('/addons/:addOnId', checkAdminPermission(['system_config']), addonController.deactivate);
+
 // Administrator CRUD routes (these have :id params so must come after specific routes)
 router.get('/', checkAdminPermission(['administrators.read']), administratorController.getAdministrators);
 router.get('/permissions', administratorController.getPermissions);

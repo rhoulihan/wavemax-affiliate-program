@@ -158,4 +158,10 @@ beforeEach(async () => {
   } catch (err) {
     // Intentionally ignored — see comment above.
   }
+  try {
+    const AddOn = require('../server/models/AddOn');
+    await AddOn.initializeDefaults();
+  } catch (err) {
+    // Intentionally ignored — same module-mock caveat as SystemConfig above.
+  }
 });

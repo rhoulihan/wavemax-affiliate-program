@@ -136,6 +136,15 @@ if (process.env.NODE_ENV !== 'test') {
         logger.error('Error initializing system config:', { error: error.message });
       }
 
+      // Seed the add-on catalog defaults (idempotent, non-clobbering).
+      try {
+        const AddOn = require('./server/models/AddOn');
+        await AddOn.initializeDefaults();
+        logger.info('Add-on catalog defaults initialized');
+      } catch (error) {
+        logger.error('Error initializing add-on catalog:', { error: error.message });
+      }
+
       // Initialize default accounts (admin and operator)
       try {
         const { initializeDefaults } = require('./init-defaults');
@@ -946,6 +955,7 @@ apiV1Router.use('/customers', customerRoutes);
 apiV1Router.use('/bags', require('./server/routes/bagRoutes'));  // Durable bags: mint/issue/labels/resolve/inventory
 apiV1Router.use('/scan', require('./server/routes/scanRoutes'));  // PR 4 — scan-session engine (auth-once, state-driven resolve/apply/undo)
 apiV1Router.use('/expediter', require('./server/routes/expediterRoutes'));  // Order Expediter — read-only in-store display (EXPEDITER_TOKEN)
+apiV1Router.use('/addons', require('./server/routes/addonRoutes'));  // Public add-on catalog (active only) for the order form
 apiV1Router.use('/orders', orderRoutes);
 apiV1Router.use('/administrators', adminIpGate, administratorRoutes);
 apiV1Router.use('/operators', operatorRoutes);

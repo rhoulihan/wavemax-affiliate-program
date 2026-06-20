@@ -11,6 +11,7 @@
 //   - Operator       (scanCodeHmac unique sparse)
 //   - AffiliateInvite (inviteId unique, tokenHash/email/status/expiresAt)
 //   - Customer       (customerId unique, email unique SPARSE — email is optional)
+//   - AddOn          (addOnId unique, key unique — order add-on catalog)
 //
 // Note: "at most one open order per bag" is enforced at the application layer
 // (orderTransitionService read-guard), not by a partial unique index — the
@@ -28,8 +29,9 @@ const Order = require('../server/models/Order');
 const Operator = require('../server/models/Operator');
 const AffiliateInvite = require('../server/modules/onboarding/AffiliateInvite');
 const Customer = require('../server/models/Customer');
+const AddOn = require('../server/models/AddOn');
 
-const MODELS = [Bag, Order, Operator, AffiliateInvite, Customer];
+const MODELS = [Bag, Order, Operator, AffiliateInvite, Customer, AddOn];
 
 (async () => {
   let failed = false;
