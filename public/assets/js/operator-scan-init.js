@@ -342,10 +342,6 @@
   }
 
   function processScan(scanData) {
-    // TEMP DIAGNOSTIC (kiosk triage 2026-06-20): log the RAW field value for EVERY
-    // scan (before extraction) so we can see exactly what the field captured vs
-    // what the parser extracts. Remove after triage.
-    try { window.ScanSession.resolve('RAWSCAN:' + scanData).catch(function () {}); } catch (e) { /* noop */ }
     var bagToken = window.BagTokenParser.extractBagToken(scanData);
     if (!bagToken) {
       showError(t('operator.scan.notRegistered', 'Bag not registered'));
