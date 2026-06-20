@@ -21,12 +21,16 @@ jest.mock('express-rate-limit', () => {
   });
 });
 
-jest.mock('rate-limit-mongo', () => {
+// The published `rate-limit-mongo` package was removed in the
+// prod-lockdown-2026-05-20 refactor (it pulled in vulnerable
+// underscore@1.12.1). It's replaced by the in-house
+// server/middleware/rateLimitMongoStore.js, constructed as
+// `new MongoRateLimitStore({ windowMs, name })`. Mock that instead.
+jest.mock('../../server/middleware/rateLimitMongoStore', () => {
   return jest.fn().mockImplementation((options) => {
     return {
-      uri: options.uri,
-      collectionName: options.collectionName,
-      expireTimeMs: options.expireTimeMs,
+      windowMs: options.windowMs,
+      name: options.name,
       _isMongoStore: true
     };
   });
@@ -75,63 +79,34 @@ describe('Rate Limiting Middleware', () => {
     it('should create MongoStore in non-test environment', () => {
       process.env.NODE_ENV = 'production';
       process.env.MONGODB_URI = 'mongodb://localhost:27017/test';
-      
+
       rateLimitingModule = require('../../server/middleware/rateLimiting');
-      const MongoStore = require('rate-limit-mongo');
-      
+      const MongoStore = require('../../server/middleware/rateLimitMongoStore');
+
       const limiter = rateLimitingModule.createCustomLimiter({ windowMs: 60000 });
-      
+
       const req = {};
       const res = {};
       const next = jest.fn();
-      
+
       limiter(req, res, next);
-      
+
       expect(req.rateLimitConfig.store).toBeDefined();
       expect(req.rateLimitConfig.store._isMongoStore).toBe(true);
+      // createMongoStore(windowMs, name) -> new MongoRateLimitStore({ windowMs, name }).
+      // createCustomLimiter defaults the name to 'custom' when none is given.
       expect(MongoStore).toHaveBeenCalledWith({
-        uri: 'mongodb://localhost:27017/test',
-        collectionName: 'rate_limits',
-        expireTimeMs: 60000,
-        errorHandler: expect.any(Function)
+        windowMs: 60000,
+        name: 'custom'
       });
     });
-    
-    it('should handle MongoStore creation errors', () => {
-      process.env.NODE_ENV = 'production';
-      process.env.MONGODB_URI = 'invalid-uri';
-      
-      // Clear module cache to ensure fresh require, then spy on the
-      // same cached logger the SUT will later resolve via require.
-      jest.resetModules();
-      logger = require('../../server/utils/logger');
-      const consoleErrorSpy = jest.spyOn(logger, 'error').mockImplementation();
 
-      // Make MongoStore throw error
-      jest.doMock('rate-limit-mongo', () => {
-        return jest.fn().mockImplementation(() => {
-          throw new Error('Invalid MongoDB URI');
-        });
-      });
-      
-      rateLimitingModule = require('../../server/middleware/rateLimiting');
-      const limiter = rateLimitingModule.createCustomLimiter({ windowMs: 60000 });
-      
-      const req = {};
-      const res = {};
-      const next = jest.fn();
-      
-      limiter(req, res, next);
-      
-      // Should fall back to undefined (memory store)
-      expect(req.rateLimitConfig.store).toBeUndefined();
-      expect(consoleErrorSpy).toHaveBeenCalledWith(
-        'Failed to create MongoDB rate limit store:',
-        expect.any(Error)
-      );
-      
-      consoleErrorSpy.mockRestore();
-    });
+    // The "should handle MongoStore creation errors" case was removed: the
+    // graceful try/catch fallback to the in-memory store (which logged
+    // 'Failed to create MongoDB rate limit store:') was deleted in the
+    // prod-lockdown-2026-05-20 refactor (H-6). createMongoStore now simply
+    // constructs the in-house MongoRateLimitStore with no error handling,
+    // so there is no fallback-to-undefined behavior left to assert.
   });
   
   describe('Key Generators', () => {
@@ -324,7 +299,11 @@ describe('Rate Limiting Middleware', () => {
     it('should not skip admin operation limiter for admin users', () => {
       const app = express();
       app.use((req, res, next) => {
-        req.user = { role: 'admin' };
+        // Role string is 'administrator' (Administrator model + token signer).
+        // The prod-lockdown-2026-05-20 re-audit (N-3) corrected the skip
+        // check from the unreachable 'admin' to 'administrator'; using
+        // 'admin' here would (correctly) skip and is no longer valid.
+        req.user = { role: 'administrator' };
         req.skipTest = true;
         next();
       });
@@ -405,25 +384,25 @@ describe('Rate Limiting Middleware', () => {
     });
     
     it('should use custom windowMs for store creation', () => {
-      const MongoStore = require('rate-limit-mongo');
+      const MongoStore = require('../../server/middleware/rateLimitMongoStore');
       jest.clearAllMocks();
-      
+
       const customOptions = {
         windowMs: 120000, // 2 minutes
         max: 200
       };
-      
+
       const limiter = rateLimitingModule.createCustomLimiter(customOptions);
       const req = {};
       const res = {};
       const next = jest.fn();
-      
+
       limiter(req, res, next);
-      
-      // Check that MongoStore was called with correct expireTimeMs
+
+      // The in-house store takes windowMs (not the old package's expireTimeMs).
       expect(MongoStore).toHaveBeenCalledWith(
         expect.objectContaining({
-          expireTimeMs: 120000
+          windowMs: 120000
         })
       );
     });

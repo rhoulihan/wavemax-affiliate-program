@@ -218,9 +218,16 @@ describe('Encryption Utility - Enhanced Coverage', () => {
         encryptionUtil.verifyPassword('password', undefined, hash);
       }).toThrow('Failed to verify password');
 
-      // Null/undefined hash (returns false, doesn't throw)
-      expect(encryptionUtil.verifyPassword('password', salt, null)).toBe(false);
-      expect(encryptionUtil.verifyPassword('password', salt, undefined)).toBe(false);
+      // Null/undefined hash: the timing-safe-compare hardening (commit 95daec2)
+      // does Buffer.from(storedHash, 'hex'), which throws on null/undefined and
+      // is caught/re-thrown — so it now fails closed by throwing, not returning false.
+      expect(() => {
+        encryptionUtil.verifyPassword('password', salt, null);
+      }).toThrow('Failed to verify password');
+
+      expect(() => {
+        encryptionUtil.verifyPassword('password', salt, undefined);
+      }).toThrow('Failed to verify password');
     });
 
     test('should return false for invalid salt format', () => {

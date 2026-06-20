@@ -1,18 +1,12 @@
 const path = require('path');
 
-// Mock fs.promises.readFile only
-jest.mock('fs', () => {
-  const originalModule = jest.requireActual('fs');
-  return {
-    ...originalModule,
-    promises: {
-      ...originalModule.promises,
-      readFile: jest.fn()
-    }
-  };
-});
-
+// Stub ONLY fs.promises.readFile via a spy — NOT a whole-module mock. A
+// `jest.mock('fs')` replaces the module for the entire file, which starves the
+// global tests/setup.js mongodb-memory-server fallback (it needs the real
+// fs.statSync/existsSync) and makes the beforeAll DB connect throw, failing
+// every test here. spyOn leaves the rest of fs intact.
 const fs = require('fs').promises;
+const logger = require('../../server/utils/logger');
 const { injectNonce, readHTMLWithNonce, serveHTMLWithNonce } = require('../../server/utils/cspHelper');
 
 // Mock console.error and console.log
@@ -30,6 +24,14 @@ afterAll(() => {
 describe('CSP Helper Utilities', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    // Re-create the readFile spy each test (jest config restoreMocks:true tears
+    // spies down after every test). Spying — not module-mocking — keeps the rest
+    // of fs real so the global mongodb-memory-server fallback can still start.
+    jest.spyOn(fs, 'readFile');
+    // The util logs via Winston (logger), not console (console.* is ESLint-banned
+    // in server/). Spy on the logger so the log-message assertions hold.
+    jest.spyOn(logger, 'error').mockImplementation(() => {});
+    jest.spyOn(logger, 'info').mockImplementation(() => {});
   });
 
   describe('injectNonce', () => {
@@ -151,7 +153,7 @@ describe('CSP Helper Utilities', () => {
       fs.readFile.mockRejectedValue(error);
       
       await expect(readHTMLWithNonce(testFilePath, testNonce)).rejects.toThrow('File not found');
-      expect(console.error).toHaveBeenCalledWith(`Error reading HTML file ${testFilePath}:`, error);
+      expect(logger.error).toHaveBeenCalledWith(`Error reading HTML file ${testFilePath}:`, error);
     });
 
     it('should pass empty nonce through to injectNonce', async () => {
@@ -186,7 +188,7 @@ describe('CSP Helper Utilities', () => {
       
       await middleware(req, res);
       
-      expect(console.log).toHaveBeenCalledWith(
+      expect(logger.info).toHaveBeenCalledWith(
         `[CSP] Serving HTML with nonce: ${htmlPath}, nonce: ${testNonce}`
       );
       expect(fs.readFile).toHaveBeenCalledWith(
@@ -206,7 +208,7 @@ describe('CSP Helper Utilities', () => {
       
       await middleware(req, res);
       
-      expect(console.error).toHaveBeenCalledWith('Error serving HTML with nonce:', error);
+      expect(logger.error).toHaveBeenCalledWith('Error serving HTML with nonce:', error);
       expect(res.status).toHaveBeenCalledWith(500);
       expect(res.send).toHaveBeenCalledWith('Internal Server Error');
     });
@@ -217,7 +219,7 @@ describe('CSP Helper Utilities', () => {
       
       await middleware(req, res);
       
-      expect(console.log).toHaveBeenCalledWith(
+      expect(logger.info).toHaveBeenCalledWith(
         `[CSP] Serving HTML with nonce: ${htmlPath}, nonce: undefined`
       );
       expect(res.send).toHaveBeenCalledWith(testHTML); // Original HTML without nonce

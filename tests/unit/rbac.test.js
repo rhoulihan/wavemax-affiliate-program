@@ -10,6 +10,7 @@ const {
 } = require('../../server/middleware/rbac');
 const Administrator = require('../../server/models/Administrator');
 const Operator = require('../../server/models/Operator');
+const logger = require('../../server/utils/logger');
 
 // Mock the models
 jest.mock('../../server/models/Administrator');
@@ -385,12 +386,13 @@ describe('RBAC Middleware', () => {
     it('should handle database errors', async () => {
       req.user = { role: 'administrator', id: '123' };
       Administrator.findById.mockRejectedValue(new Error('DB Error'));
-      console.error = jest.fn();
+      // Production migrated console.* -> Winston logger (console.* is ESLint-banned in server/)
+      const loggerErrorSpy = jest.spyOn(logger, 'error').mockImplementation(() => {});
 
       const middleware = checkAdminPermission('manage_users');
       await middleware(req, res, next);
 
-      expect(console.error).toHaveBeenCalledWith('Permission check error:', expect.any(Error));
+      expect(loggerErrorSpy).toHaveBeenCalledWith('Permission check error:', expect.any(Error));
       expect(res.status).toHaveBeenCalledWith(500);
       expect(res.json).toHaveBeenCalledWith({
         success: false,
@@ -478,12 +480,13 @@ describe('RBAC Middleware', () => {
     it('should handle database errors', async () => {
       req.user = { role: 'operator', id: '123' };
       Operator.findById.mockRejectedValue(new Error('DB Error'));
-      console.error = jest.fn();
+      // Production migrated console.* -> Winston logger (console.* is ESLint-banned in server/)
+      const loggerErrorSpy = jest.spyOn(logger, 'error').mockImplementation(() => {});
 
       const middleware = checkOperatorStatus();
       await middleware(req, res, next);
 
-      expect(console.error).toHaveBeenCalledWith('Operator status check error:', expect.any(Error));
+      expect(loggerErrorSpy).toHaveBeenCalledWith('Operator status check error:', expect.any(Error));
       expect(res.status).toHaveBeenCalledWith(500);
       expect(res.json).toHaveBeenCalledWith({
         success: false,

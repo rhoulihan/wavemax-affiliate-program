@@ -82,7 +82,11 @@ describe('Auth Controller', () => {
         firstName: 'John',
         lastName: 'Doe',
         email: 'john@example.com',
-      save: jest.fn()
+      save: jest.fn(),
+      // prod-lockdown-2026-05-20: login now records attempts via these model
+      // methods instead of save() — success resets the counter.
+      resetLoginAttempts: jest.fn().mockResolvedValue(true),
+      incLoginAttempts: jest.fn().mockResolvedValue(true)
       };
 
       req.body = {
@@ -110,7 +114,7 @@ describe('Auth Controller', () => {
         'salt',
         'hashedPassword'
       );
-      expect(mockAffiliate.save).toHaveBeenCalled();
+      expect(mockAffiliate.resetLoginAttempts).toHaveBeenCalled();
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.json).toHaveBeenCalledWith({
         success: true,
@@ -147,7 +151,11 @@ describe('Auth Controller', () => {
         username: 'testaffiliate',
         passwordHash: 'hashedPassword',
         passwordSalt: 'salt'
-      , save: jest.fn().mockResolvedValue(true)};
+      , save: jest.fn().mockResolvedValue(true),
+        // prod-lockdown-2026-05-20: a bad password increments the lockout
+        // counter via this model method before returning 401.
+        incLoginAttempts: jest.fn().mockResolvedValue(true),
+        resetLoginAttempts: jest.fn().mockResolvedValue(true)};
 
       req.body = {
         username: 'testaffiliate',
@@ -477,10 +485,13 @@ describe('Auth Controller', () => {
     });
 
     test('should handle non-existent email gracefully (APP-013: no user-enumeration)', async () => {
-      req.body = { email: 'notfound@example.com', userType: 'customer' };
+      // PR 7: 'customer' is no longer a password-reset user type (customers are
+      // registration-only). Use 'affiliate' with no matching record to exercise
+      // the silent-200 (no-enumeration) path.
+      req.body = { email: 'notfound@example.com', userType: 'affiliate' };
 
-      Customer.findOne = createFindOneMock(null);
-      Customer.findOne.mockResolvedValue(null);
+      Affiliate.findOne = createFindOneMock(null);
+      Affiliate.findOne.mockResolvedValue(null);
 
       await authController.forgotPassword(req, res, next);
 
@@ -555,14 +566,16 @@ describe('Auth Controller', () => {
     });
 
     test('should reject expired token', async () => {
+      // PR 7: 'customer' is no longer a password-reset user type. Use 'affiliate'
+      // with no matching record so the expired/invalid-token path is exercised.
       req.body = {
         token: 'expired-token',
         password: 'NewPass123!',
-        userType: 'customer'
+        userType: 'affiliate'
       };
 
-      Customer.findOne = createFindOneMock(null);
-      Customer.findOne.mockResolvedValue(null);
+      Affiliate.findOne = createFindOneMock(null);
+      Affiliate.findOne.mockResolvedValue(null);
 
       await authController.resetPassword(req, res, next);
 

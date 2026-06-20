@@ -5,32 +5,12 @@ jest.mock('nodemailer', () => ({
   }))
 }));
 
-jest.mock('fs', () => ({
-  readFile: jest.fn(),
-  mkdir: jest.fn().mockImplementation((path, options, callback) => {
-    if (typeof options === 'function') {
-      callback = options;
-      options = {};
-    }
-    if (callback) callback(null);
-  }),
-  promises: {
-    readFile: jest.fn(),
-    mkdir: jest.fn().mockResolvedValue(undefined)
-  }
-}));
-
-// Mock promisify to work with our mocked fs
-jest.mock('util', () => ({
-  ...jest.requireActual('util'),
-  promisify: (fn) => {
-    if (fn && fn.name === 'readFile') {
-      return jest.fn().mockResolvedValue('mock file content');
-    }
-    return jest.requireActual('util').promisify(fn);
-  }
-}));
-
+// NOTE: a previous version of this suite did jest.mock('fs', ...) (plus a
+// matching jest.mock('util') for promisify) to stub the email template
+// manager's file IO. That global fs replacement starved winston's logger
+// (it needs real fs.existsSync at module load) and broke the whole suite at
+// require time. formatSize is a pure function that never touches the
+// filesystem, so those mocks are unnecessary here and have been removed.
 const { formatSize } = require('../../server/utils/emailService');
 
 describe('EmailService Helper Functions', () => {

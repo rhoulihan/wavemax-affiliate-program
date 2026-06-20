@@ -62,7 +62,7 @@ describe('Auth Middleware', () => {
 
       await authenticate(req, res, next);
 
-      expect(jwt.verify).toHaveBeenCalledWith('validtoken', process.env.JWT_SECRET);
+      expect(jwt.verify).toHaveBeenCalledWith('validtoken', process.env.JWT_SECRET, { algorithms: ['HS256'] });
       expect(TokenBlacklist.isBlacklisted).toHaveBeenCalledWith('validtoken');
       expect(req.user).toEqual({
         id: 'user123',
@@ -86,7 +86,7 @@ describe('Auth Middleware', () => {
 
       await authenticate(req, res, next);
 
-      expect(jwt.verify).toHaveBeenCalledWith('validtoken', process.env.JWT_SECRET);
+      expect(jwt.verify).toHaveBeenCalledWith('validtoken', process.env.JWT_SECRET, { algorithms: ['HS256'] });
       expect(TokenBlacklist.isBlacklisted).toHaveBeenCalledWith('validtoken');
       expect(req.user).toEqual({
         id: 'user123',
@@ -169,7 +169,7 @@ describe('Auth Middleware', () => {
 
       await authenticate(req, res, next);
 
-      expect(jwt.verify).toHaveBeenCalledWith('blacklistedtoken', process.env.JWT_SECRET);
+      expect(jwt.verify).toHaveBeenCalledWith('blacklistedtoken', process.env.JWT_SECRET, { algorithms: ['HS256'] });
       expect(TokenBlacklist.isBlacklisted).toHaveBeenCalledWith('blacklistedtoken');
       expect(res.status).toHaveBeenCalledWith(401);
       expect(res.json).toHaveBeenCalledWith({

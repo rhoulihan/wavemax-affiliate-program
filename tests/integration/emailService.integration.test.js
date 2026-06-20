@@ -1,51 +1,13 @@
 // Email Service Integration Tests
 // These tests verify the email service functionality without conflicting with global mocks
+//
+// NOTE: this suite previously did `jest.mock('fs', ...)` to stub template reads.
+// That replaced fs for the whole file, which starved the global tests/setup.js
+// mongodb-memory-server fallback (it needs real fs.statSync/existsSync), so every
+// test failed at DB connect. The real templates exist on disk under
+// server/templates/emails/, so the production template-manager loads them fine
+// with the real fs — no mock is needed.
 
-// Mock fs module before any imports
-jest.mock('fs', () => {
-  const actualFs = jest.requireActual('fs');
-  return {
-    ...actualFs,
-    readFile: jest.fn((path, encoding, callback) => {
-      // Mock template reading
-      if (typeof encoding === 'function') {
-        callback = encoding;
-      }
-      callback(null, `
-        <!DOCTYPE html>
-        <html>
-        <head><title>Test Email</title></head>
-        <body>
-          <h1>Test Email Template</h1>
-          <p>[EMAIL_CONTENT]</p>
-          <p>Reset Link: [RESET_LINK]</p>
-          <p>User: [USER_NAME]</p>
-          <p>Email: [USER_EMAIL]</p>
-        </body>
-        </html>
-      `);
-    }),
-    promises: {
-      ...actualFs.promises,
-      readFile: jest.fn().mockResolvedValue(`
-        <!DOCTYPE html>
-        <html>
-        <head><title>Test Email</title></head>
-        <body>
-          <h1>Test Email Template</h1>
-          <p>[EMAIL_CONTENT]</p>
-          <p>Reset Link: [RESET_LINK]</p>
-          <p>User: [USER_NAME]</p>
-          <p>Email: [USER_EMAIL]</p>
-        </body>
-        </html>
-      `),
-      access: jest.fn().mockResolvedValue(true)
-    }
-  };
-});
-
-const fs = require('fs').promises;
 let logger;
 const path = require('path');
 

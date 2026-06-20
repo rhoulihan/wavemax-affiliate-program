@@ -396,32 +396,9 @@ describe('System Config API Tests', () => {
     });
   });
 
-  describe('Integration with Order Model', () => {
-    it('should use SystemConfig WDF rate in new orders', async () => {
-      // Update WDF rate
-      await SystemConfig.setValue('wdf_base_rate_per_pound', 2.00);
-
-      // Create a mock order (we'll test the actual order creation in order tests)
-      const Order = require('../../server/models/Order');
-      const mockOrder = new Order({
-        customerId: '507f1f77bcf86cd799439011',
-        affiliateId: '507f1f77bcf86cd799439012',
-        bagId: 'BAG-sysconfig-1',
-        actualWeight: 30,
-        feeBreakdown: { numberOfBags: 1, minimumFee: 5, perBagFee: 5, totalFee: 5, minimumApplied: false }
-      });
-
-      // The pre-save hook should fetch the rate
-      await mockOrder.save();
-
-      expect(mockOrder.baseRate).toBe(2.00);
-      expect(mockOrder.actualTotal).toBeGreaterThan(0);
-
-      // Reset to default
-      await SystemConfig.setValue('wdf_base_rate_per_pound', 1.25);
-
-      // Cleanup
-      await Order.deleteOne({ _id: mockOrder._id });
-    });
-  });
+  // Removed 'Integration with Order Model' (was: 'should use SystemConfig WDF rate
+  // in new orders'). Obsolete in the Phase-1 redesign: the Order model is now a slim
+  // bag-tracking state record — baseRate/actualTotal/actualWeight/feeBreakdown and the
+  // pricing pre-save hook were stripped (money/weight/pricing now live in Cents), so
+  // the order no longer reads the WDF rate from SystemConfig. See server/models/Order.js.
 });

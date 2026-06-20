@@ -43,7 +43,11 @@ describe('Static asset caching — /assets immutable', () => {
   });
 
   it('does NOT immutable-cache the franchise host HTML', async () => {
-    const res = await request(app).get('/austin-tx/').set('Host', 'rundberglaundry.com');
+    // Use the default request host: rundberglaundry.com is now held behind the
+    // comingSoon middleware, which serves a no-store placeholder for non-exempt
+    // paths and never reaches the franchise controller. The franchise HTML is
+    // served identically on any non-held host, so omit the Host override.
+    const res = await request(app).get('/austin-tx/');
     expect(res.status).toBe(200);
     expect(res.headers['cache-control'] || '').not.toMatch(/immutable/);
     // The HTML keeps its short-lived cache window set by the controller.

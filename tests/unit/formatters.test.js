@@ -78,7 +78,10 @@ describe('Formatters', () => {
     });
 
     it('should handle string dates', () => {
-      const result = Formatters.date('2024-01-15');
+      // Use a full UTC timestamp: a date-only string ('2024-01-15') is parsed as
+      // UTC midnight, which renders as the previous local day in non-UTC zones
+      // (e.g. America/Chicago). Mirror the sibling tests' Z-suffixed input.
+      const result = Formatters.date('2024-01-15T10:30:00Z');
       expect(result).toMatch(/1\/15\/2024|1\/15\/24/);
     });
 

@@ -12,19 +12,11 @@ jest.mock('../../server/models/Customer');
 jest.mock('../../server/models/Order');
 jest.mock('../../server/models/Operator');
 
-jest.mock('fs', () => ({
-  promises: {
-    access: jest.fn(),
-    readFile: jest.fn(),
-    mkdir: jest.fn()
-  },
-  mkdir: jest.fn((path, options, callback) => {
-    if (typeof options === 'function') {
-      callback = options;
-    }
-    if (callback) callback(null);
-  })
-}));
+// Stub ONLY fs.promises.access via a spy (in the docs beforeEach) — NOT a
+// whole-module jest.mock('fs'). A module mock replaces fs for the entire file,
+// which starves the global tests/setup.js mongodb-memory-server fallback (it
+// needs the real fs.statSync/existsSync) and makes the beforeAll DB connect
+// throw, failing every test here. spyOn leaves the rest of fs intact.
 
 jest.mock('../../server/middleware/rbac', () => ({
   checkAdminPermission: (permissions) => (req, res, next) => next()
@@ -168,10 +160,16 @@ describe('Simple Route Handlers', () => {
     
     beforeEach(() => {
       jest.clearAllMocks();
-      
+
+      // Re-create the fs.promises.access spy each test (jest config
+      // restoreMocks:true tears spies down after every test). Spying — not
+      // module-mocking fs — keeps the rest of fs real so the global
+      // mongodb-memory-server fallback in tests/setup.js can still start.
+      jest.spyOn(require('fs').promises, 'access');
+
       // Create Express app
       app = express();
-      
+
       // Add CSP nonce middleware
       app.use((req, res, next) => {
         res.locals.cspNonce = 'test-nonce-123';
@@ -232,35 +230,41 @@ describe('Simple Route Handlers', () => {
     it('should skip nonce injection for example files', async () => {
       const response = await request(app)
         .get('/docs/examples/sample.html');
-      
-      // Example files skip nonce injection and go to static middleware
-      // Since we're mocking express.static, it results in error handler (500)
-      expect(response.status).toBe(500);
+
+      // Example files skip nonce injection and fall through to express.static.
+      // The file doesn't exist in docs/, so static calls next() and the request
+      // reaches the test 404 handler. (Previously this asserted 500, an artifact
+      // of the old whole-fs jest.mock that broke express.static; with real fs
+      // the genuine outcome is 404.) The point of the case stands: nonce is skipped.
+      expect(response.status).toBe(404);
       const { readHTMLWithNonce } = require('../../server/utils/cspHelper');
       expect(readHTMLWithNonce).not.toHaveBeenCalled();
     });
-    
+
     it('should skip non-HTML files', async () => {
       const response = await request(app)
         .get('/docs/styles.css');
-      
-      // Non-HTML files skip nonce injection and go to static middleware
-      // Since we're mocking express.static, it results in error handler (500)
-      expect(response.status).toBe(500);
+
+      // Non-HTML files skip nonce injection and fall through to express.static.
+      // The file doesn't exist in docs/, so static calls next() → test 404 handler.
+      // (Was 500 under the old broken whole-fs mock; real fs yields 404.)
+      expect(response.status).toBe(404);
       const { readHTMLWithNonce } = require('../../server/utils/cspHelper');
       expect(readHTMLWithNonce).not.toHaveBeenCalled();
     });
-    
+
     it('should handle non-existent files', async () => {
       const fs = require('fs').promises;
       fs.access.mockRejectedValue(new Error('File not found'));
-      
+
       const response = await request(app)
         .get('/docs/nonexistent.html');
-      
-      // Non-existent files skip nonce injection and go to static middleware
-      // Since we're mocking express.static, it results in error handler (500)
-      expect(response.status).toBe(500);
+
+      // fs.access rejects, so serveDocsWithNonce calls next() and the request
+      // falls through to express.static; the file doesn't exist in docs/, so it
+      // reaches the test 404 handler. (Was 500 under the old broken whole-fs
+      // mock; real fs yields 404.)
+      expect(response.status).toBe(404);
     });
     
     it('should handle errors during file processing', async () => {
