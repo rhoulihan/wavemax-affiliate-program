@@ -342,12 +342,12 @@
   }
 
   function processScan(scanData) {
+    // TEMP DIAGNOSTIC (kiosk triage 2026-06-20): log the RAW field value for EVERY
+    // scan (before extraction) so we can see exactly what the field captured vs
+    // what the parser extracts. Remove after triage.
+    try { window.ScanSession.resolve('RAWSCAN:' + scanData).catch(function () {}); } catch (e) { /* noop */ }
     var bagToken = window.BagTokenParser.extractBagToken(scanData);
     if (!bagToken) {
-      // TEMP DIAGNOSTIC (kiosk "bag not registered" triage 2026-06-20): the parser
-      // found no token in the scanner output — send the raw string to the server
-      // log so we can see exactly what the hardware scanner emitted. Remove after.
-      try { window.ScanSession.resolve('RAWSCAN:' + scanData).catch(function () {}); } catch (e) { /* noop */ }
       showError(t('operator.scan.notRegistered', 'Bag not registered'));
       return;
     }
