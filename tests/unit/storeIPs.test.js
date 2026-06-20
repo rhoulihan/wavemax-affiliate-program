@@ -261,6 +261,34 @@ describe('storeIPs configuration', () => {
       expect(storeIPs.isInRange('192.168.1.1', '192.168.1.0/31')).toBe(true);
       expect(storeIPs.isInRange('192.168.1.2', '192.168.1.0/31')).toBe(false);
     });
+
+    it('matches an IPv6 address inside a /64 (store kiosk over IPv6)', () => {
+      // the store's rotating privacy host within its /64 must match the prefix
+      expect(storeIPs.isInRange('2603:8080:db00:21b9:1d5b:e02c:7105:97f6', '2603:8080:db00:21b9::/64')).toBe(true);
+      expect(storeIPs.isInRange('2603:8080:db00:21b9::1', '2603:8080:db00:21b9::/64')).toBe(true);
+      // a different /64 (and a neighbouring prefix) must NOT match
+      expect(storeIPs.isInRange('2603:8080:db00:21ba::1', '2603:8080:db00:21b9::/64')).toBe(false);
+      expect(storeIPs.isInRange('2603:8080:db00:0021::1', '2603:8080:db00:21b9::/64')).toBe(false);
+    });
+
+    it('handles IPv6 /128, /48, /0 and compressed forms', () => {
+      expect(storeIPs.isInRange('::1', '::1/128')).toBe(true);
+      expect(storeIPs.isInRange('::2', '::1/128')).toBe(false);
+      expect(storeIPs.isInRange('2603:8080:db00:ffff::5', '2603:8080:db00::/48')).toBe(true);
+      expect(storeIPs.isInRange('2603:8081:db00::5', '2603:8080:db00::/48')).toBe(false);
+      expect(storeIPs.isInRange('2001:db8::1', '::/0')).toBe(true);
+    });
+
+    it('does not cross-match IPv4 and IPv6 families', () => {
+      expect(storeIPs.isInRange('192.168.1.1', '2603:8080:db00:21b9::/64')).toBe(false);
+      expect(storeIPs.isInRange('2603:8080:db00:21b9::1', '10.0.0.0/8')).toBe(false);
+    });
+
+    it('rejects invalid IPv6 masks and malformed IPv6', () => {
+      expect(storeIPs.isInRange('2603:8080:db00:21b9::1', '2603:8080:db00:21b9::/129')).toBe(false);
+      expect(storeIPs.isInRange('2603:::1', '2603:8080:db00:21b9::/64')).toBe(false);
+      expect(storeIPs.isInRange('gggg::1', '2603:8080:db00:21b9::/64')).toBe(false);
+    });
   });
 
   describe('Configuration export structure', () => {
