@@ -19,11 +19,15 @@ describe('operator-scan confirm modal', () => {
     expect(js).toMatch(/confirmModal\.classList\.remove\('block'\)/);
   });
 
-  it('shows customer info (name + phone) and the current order status', () => {
+  it('shows the full customer record (name + phone + email + address) and order status', () => {
     expect(html).toContain('id="scanConfirmCustomer"');
     expect(html).toContain('id="scanConfirmPhone"');
+    expect(html).toContain('id="scanConfirmEmail"');
+    expect(html).toContain('id="scanConfirmAddress"');
     expect(html).toContain('id="scanOrderStatus"');
-    expect(js).toContain('scanConfirmPhone');
+    expect(js).toContain('scanConfirmEmail');
+    expect(js).toContain('scanConfirmAddress');
+    expect(js).toContain('setDetail');
     expect(js).toContain('statusLabel');
     expect(js).toMatch(/order\.status\./); // status pill uses order.status.* labels
   });

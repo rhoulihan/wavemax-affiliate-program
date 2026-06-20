@@ -176,11 +176,12 @@ async function resolveScan({ bagToken }) {
   const reference = await referenceOrderFor(bag.bagId);
   const decision = resolveScanAction(reference, { now, reopenWindowMs });
 
-  // Customer display info (intake screen only — first/last name, no PII beyond).
-  // centsSyncNeeded warns staff that the customer changed their phone and Cents
-  // needs updating; the new phone is included so the operator can copy it across.
+  // Customer display info for the operator scan modal — the full contact record so
+  // the operator can verify/serve the order (behind scanAuth; for a customer
+  // session it's the customer's own record). centsSyncNeeded warns staff that the
+  // customer changed their phone and Cents needs updating.
   const customer = await Customer.findOne({ customerId: bag.customerId })
-    .select('firstName lastName centsSyncNeeded phone');
+    .select('firstName lastName phone email address city state zipCode centsSyncNeeded');
 
   // The partner's pickup instructions — shown to the customer after they start
   // their order (not to staff). Public partner copy, not sensitive.
@@ -193,7 +194,12 @@ async function resolveScan({ bagToken }) {
   return {
     bagId: bag.bagId,
     currentStatus,
-    customer: customer ? { firstName: customer.firstName, lastName: customer.lastName, phone: customer.phone } : null,
+    customer: customer ? {
+      firstName: customer.firstName, lastName: customer.lastName,
+      phone: customer.phone, email: customer.email || '',
+      address: customer.address || '', city: customer.city || '',
+      state: customer.state || '', zipCode: customer.zipCode || ''
+    } : null,
     proposedAction: decision.action,
     ...(decision.to ? { to: decision.to } : {}),
     ...(decision.orderId ? { orderId: decision.orderId } : {}),

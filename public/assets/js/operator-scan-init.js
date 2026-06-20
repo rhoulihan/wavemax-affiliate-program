@@ -24,6 +24,8 @@
   var confirmPrompt = document.getElementById('scanConfirmPrompt');
   var confirmCustomer = document.getElementById('scanConfirmCustomer');
   var confirmPhone = document.getElementById('scanConfirmPhone');
+  var confirmEmail = document.getElementById('scanConfirmEmail');
+  var confirmAddress = document.getElementById('scanConfirmAddress');
   var orderStatusEl = document.getElementById('scanOrderStatus');
   var centsWarning = document.getElementById('scanCentsWarning');
   var paymentRow = document.getElementById('scanPaymentRow');
@@ -47,6 +49,13 @@
   function statusLabel(status) {
     if (!status || status === 'none') return t('operator.scan.statusNone', 'No active order');
     return t('order.status.' + status, status);
+  }
+
+  // Set a customer-detail line, hiding it when there's no value.
+  function setDetail(el, value) {
+    if (!el) return;
+    if (value) { el.textContent = value; el.hidden = false; }
+    else { el.textContent = ''; el.hidden = true; }
   }
 
   // --- toast ----------------------------------------------------------------
@@ -90,12 +99,14 @@
       ? t(promptKey, t('operator.scan.confirmGeneric', 'Apply this scan?'))
       : t('operator.scan.confirmGeneric', 'Apply this scan?');
 
-    // Customer first/last + phone for the intake screen.
-    var c = resolveData.customer;
-    confirmCustomer.textContent = c
-      ? ((c.firstName || '') + ' ' + (c.lastName || '')).trim()
-      : '';
-    if (confirmPhone) confirmPhone.textContent = (c && c.phone) || resolveData.customerPhone || '';
+    // Full customer record for the operator (name, phone, email, address, notes).
+    var c = resolveData.customer || {};
+    confirmCustomer.textContent = ((c.firstName || '') + ' ' + (c.lastName || '')).trim();
+    if (confirmPhone) confirmPhone.textContent = c.phone || resolveData.customerPhone || '';
+    setDetail(confirmEmail, c.email);
+    var cityLine = [c.city, c.state].filter(Boolean).join(', ');
+    var addr = [c.address, [cityLine, c.zipCode].filter(Boolean).join(' ')].filter(Boolean).join(', ');
+    setDetail(confirmAddress, addr);
 
     // Current order status pill.
     if (orderStatusEl) {
