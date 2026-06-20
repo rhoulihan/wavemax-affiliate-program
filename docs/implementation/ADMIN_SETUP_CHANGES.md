@@ -19,8 +19,8 @@ The administrator account setup process has been changed from using a manual scr
 - Created dedicated change password endpoint
 
 ### 3. Automatic Account Creation
-- Created `init-admin.js` script for automatic admin creation
-- Integrated into server startup process
+- Created `scripts/setup/init-admin.js` script for automatic admin creation
+- Integrated into the `server.js` startup process
 - Default credentials:
   - Email: admin@wavemaxlaundry.com
   - Password: WaveMAX!2024
@@ -41,7 +41,7 @@ The administrator account setup process has been changed from using a manual scr
 
 ## Migration Notes
 
-- The old `create-admin-directly.js` script is now deprecated
+- The old `scripts/admin/create-admin-directly.js` script is now deprecated
 - Existing administrator accounts are not affected
 - Default admin is only created if no administrators exist
 - Password history tracking starts with first password change
@@ -61,6 +61,6 @@ The administrator account setup process has been changed from using a manual scr
 - `/server/routes/administratorRoutes.js` - Added change password route
 - `/server/middleware/auth.js` - Added password change enforcement
 - `/public/assets/js/administrator-login-init.js` - Added password change UI
-- `/init-admin.js` - New automatic initialization script
-- `/server.js` - Integrated admin initialization
+- `/scripts/setup/init-admin.js` - New automatic initialization script
+- `/server.js` - Runs default-account initialization at startup
 - `/README.md` - Updated setup documentation

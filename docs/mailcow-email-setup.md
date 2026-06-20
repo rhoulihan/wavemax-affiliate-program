@@ -10,7 +10,7 @@
 1. Visit: https://mail.wavemax.promo:8443
 2. Login with:
    - Username: `admin`
-   - Password: `admin123` (TEMPORARY PASSWORD - CHANGE THIS IMMEDIATELY!)
+   - Password: `<set via env>` (never commit the real admin password)
 
 ## Create Email Account for Application
 
@@ -37,12 +37,16 @@ The WaveMAX application is already configured in `.env`:
 ```
 EMAIL_PROVIDER=smtp
 EMAIL_USER=no-reply@wavemax.promo
-EMAIL_PASS=zsUoLLT4pcNIznRbYRWK
-EMAIL_HOST=mail.wavemax.promo
+EMAIL_PASS=<set via env>
+EMAIL_HOST=mail.crhsent.com
 EMAIL_PORT=587
 EMAIL_SECURE=false
 EMAIL_FROM=no-reply@wavemax.promo
 ```
+
+> **Note:** Production mail is sent through the Ultahost (mail-only) box by IP. The TLS
+> servername MUST be `mail.crhsent.com` because that is the name on the mail cert — using
+> any other host (e.g. `mail.wavemax.promo`) fails the TLS handshake silently.
 
 ## Testing Email Configuration
 Once the mailbox is created/updated through the web interface:

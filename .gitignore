@@ -250,3 +250,7 @@ mhr-payment-*.png
 serve-explorer.scratch.js
 start-local.sh
 bing_austin.md
+
+# Lighthouse / Chrome temp profiles (WSL maps Windows AppData paths into the tree)
+C:\\Users*
+lighthouse.*

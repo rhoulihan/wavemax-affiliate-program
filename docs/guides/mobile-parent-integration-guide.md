@@ -7,10 +7,10 @@ This guide explains how to integrate the mobile-friendly features on your parent
 Add the following inline script to your parent page (wavemaxlaundry.com):
 
 ```html
-<script src="https://wavemax.promo/assets/js/parent-iframe-bridge-complete-inline.js"></script>
+<script src="https://wavemax.promo/assets/js/parent-iframe-bridge-v3.min.js"></script>
 ```
 
-Or copy the contents of that file directly into your page within `<script>` tags.
+(Use `parent-iframe-bridge-v3.js` for the unminified version.) Or copy the contents of that file directly into your page within `<script>` tags.
 
 That's it! The script will automatically:
 - Detect mobile devices and viewport sizes
@@ -63,7 +63,7 @@ On mobile devices, the iframe can request to hide the parent page's header and f
 If your header/footer use different selectors, you can modify the script:
 
 ```javascript
-// In parent-iframe-bridge.js, update the hideChrome function:
+// In parent-iframe-bridge-v3.js, update the hideChrome function:
 const header = document.querySelector('.your-custom-header-class');
 const footer = document.querySelector('.your-custom-footer-class');
 ```
@@ -105,9 +105,14 @@ Add these CSS classes to your parent page for custom transitions:
 
 ### Real Device Testing
 1. Open the page on a mobile device
-2. The landing page should automatically hide headers/footers
-3. Navigate to login/register pages - headers should reappear
-4. Go to dashboards - headers should hide again
+2. Full-width/landing-style routes should automatically hide headers/footers
+3. Navigate to login/register routes - headers should reappear
+4. Go to dashboards/scan views - headers should hide again
+
+> The route-to-chrome behavior above is illustrative. Chrome show/hide is
+> driven by the iframe app's `hide-chrome`/`show-chrome` messages per route,
+> not by fixed page names. Verify against the current routes in
+> `public/assets/js/embed-app-v2.js`.
 
 ### Debug Mode
 Add `?debug=true` to your URL to see console logs:
@@ -189,7 +194,7 @@ Here's a complete example of a parent page:
     </footer>
     
     <!-- Add the bridge script -->
-    <script src="https://affiliate.wavemax.promo/assets/js/parent-iframe-bridge.js"></script>
+    <script src="https://wavemax.promo/assets/js/parent-iframe-bridge-v3.min.js"></script>
 </body>
 </html>
 ```

@@ -7,16 +7,14 @@ This document provides comprehensive information about all environment variables
 1. [Application Settings](#application-settings)
 2. [Database Configuration](#database-configuration)
 3. [Security & Authentication](#security--authentication)
-4. [Email Configuration](#email-configuration)
-5. [DocuSign Configuration](#docusign-configuration)
-6. [Payment Configuration](#payment-configuration)
-7. [AWS Configuration](#aws-configuration)
-8. [Social Login Configuration](#social-login-configuration)
-9. [Rate Limiting](#rate-limiting)
-10. [CORS Configuration](#cors-configuration)
-11. [Business Configuration](#business-configuration)
-12. [Default Accounts](#default-accounts)
-13. [Development Settings](#development-settings)
+4. [Store IP Configuration](#store-ip-configuration)
+5. [Email Configuration](#email-configuration)
+6. [AWS Configuration](#aws-configuration)
+7. [Rate Limiting](#rate-limiting)
+8. [CORS Configuration](#cors-configuration)
+9. [Business Configuration](#business-configuration)
+10. [Default Accounts](#default-accounts)
+11. [Development Settings](#development-settings)
 
 ## Application Settings
 
@@ -243,113 +241,6 @@ This document provides comprehensive information about all environment variables
 - **Security**: Set to `false` only for development with self-signed certificates
 - **Example**: `EXCHANGE_REJECT_UNAUTHORIZED=true`
 
-## DocuSign Configuration
-
-### DOCUSIGN_CLIENT_ID
-- **Type**: String
-- **Description**: DocuSign application integration key
-- **Where to find**: DocuSign Admin > Apps and Keys
-- **Example**: `DOCUSIGN_CLIENT_ID=your-docusign-client-id`
-
-### DOCUSIGN_CLIENT_SECRET
-- **Type**: String
-- **Description**: DocuSign application secret key
-- **Security**: Keep this secure and never commit to version control
-- **Example**: `DOCUSIGN_CLIENT_SECRET=your-docusign-client-secret`
-
-### DOCUSIGN_ACCOUNT_ID
-- **Type**: String
-- **Description**: DocuSign account ID
-- **Where to find**: DocuSign Admin > Account Information
-- **Example**: `DOCUSIGN_ACCOUNT_ID=your-account-id`
-
-### DOCUSIGN_BASE_URI
-- **Type**: String (URL)
-- **Default**: `https://demo.docusign.net/restapi` (demo)
-- **Production**: `https://na4.docusign.net/restapi`
-- **Description**: DocuSign API base URL
-- **Example**: `DOCUSIGN_BASE_URI=https://demo.docusign.net/restapi`
-
-### DOCUSIGN_AUTH_BASE_URI
-- **Type**: String (URL)
-- **Default**: `https://account-d.docusign.com` (demo)
-- **Production**: `https://account.docusign.com`
-- **Description**: DocuSign authentication base URL
-- **Example**: `DOCUSIGN_AUTH_BASE_URI=https://account-d.docusign.com`
-
-### DOCUSIGN_REDIRECT_URI
-- **Type**: String (URL)
-- **Description**: OAuth callback URL registered with DocuSign
-- **Example**: `DOCUSIGN_REDIRECT_URI=https://wavemax.promo/api/v1/auth/docusign/callback`
-
-### DOCUSIGN_TEMPLATE_ID
-- **Type**: String
-- **Description**: DocuSign W9 template ID
-- **Where to find**: DocuSign > Templates
-- **Example**: `DOCUSIGN_TEMPLATE_ID=your-w9-template-id`
-
-### DOCUSIGN_USER_ID
-- **Type**: String
-- **Description**: DocuSign user ID for JWT authentication
-- **Example**: `DOCUSIGN_USER_ID=your-docusign-user-id`
-
-## Payment Configuration
-
-### Paygistix Configuration
-
-#### PAYGISTIX_ENVIRONMENT
-- **Type**: String
-- **Values**: `production`, `sandbox`
-- **Default**: `production`
-- **Description**: Paygistix environment to use
-- **Example**: `PAYGISTIX_ENVIRONMENT=production`
-
-#### PAYGISTIX_MERCHANT_ID
-- **Type**: String
-- **Required**: Yes
-- **Description**: Your Paygistix merchant ID
-- **Where to find**: Paygistix Dashboard > Account Settings
-- **Example**: `PAYGISTIX_MERCHANT_ID=wmaxaustWEB`
-
-#### PAYGISTIX_FORM_ID
-- **Type**: String
-- **Required**: Yes
-- **Description**: Paygistix hosted form ID
-- **Where to find**: Paygistix Dashboard > Hosted Forms
-- **Example**: `PAYGISTIX_FORM_ID=55015901455`
-
-#### PAYGISTIX_FORM_HASH
-- **Type**: String
-- **Required**: Yes
-- **Description**: Security hash for the hosted form
-- **Security**: Keep this secure
-- **Example**: `PAYGISTIX_FORM_HASH=c701523a33721cdbe999f7a4406a0a98`
-
-#### PAYGISTIX_FORM_ACTION_URL
-- **Type**: String (URL)
-- **Default**: `https://safepay.paymentlogistics.net/transaction.asp`
-- **Description**: Paygistix form submission URL
-- **Example**: `PAYGISTIX_FORM_ACTION_URL=https://safepay.paymentlogistics.net/transaction.asp`
-
-#### PAYGISTIX_RETURN_URL
-- **Type**: String (URL)
-- **Description**: URL where users are redirected after payment
-- **Example**: `PAYGISTIX_RETURN_URL=https://wavemax.promo/payment-callback-handler.html`
-
-### QuickBooks Configuration
-
-#### QUICKBOOKS_CLIENT_ID
-- **Type**: String
-- **Description**: QuickBooks OAuth client ID
-- **Where to find**: QuickBooks Developer Dashboard
-- **Example**: `QUICKBOOKS_CLIENT_ID=your-quickbooks-client-id`
-
-#### QUICKBOOKS_CLIENT_SECRET
-- **Type**: String
-- **Description**: QuickBooks OAuth client secret
-- **Security**: Keep this secure
-- **Example**: `QUICKBOOKS_CLIENT_SECRET=your-quickbooks-client-secret`
-
 ## AWS Configuration
 
 ### AWS_S3_BUCKET
@@ -373,76 +264,6 @@ This document provides comprehensive information about all environment variables
 - **Default**: `us-east-2`
 - **Description**: AWS region where your S3 bucket is located
 - **Example**: `AWS_REGION=us-east-2`
-
-## Service Area Configuration
-
-### SERVICE_STATE
-- **Type**: String
-- **Required**: Yes
-- **Description**: The state where service is available (used for address validation and restrictions)
-- **Example**: `SERVICE_STATE=TX`
-
-### SERVICE_CITY
-- **Type**: String
-- **Required**: Yes
-- **Description**: The city that serves as the center point for the service radius
-- **Example**: `SERVICE_CITY=Austin`
-
-### SERVICE_RADIUS_MILES
-- **Type**: Number
-- **Required**: Yes
-- **Description**: The maximum service radius in miles from the city center
-- **Example**: `SERVICE_RADIUS_MILES=50`
-- **Note**: All affiliate and customer addresses must be within this radius to register
-
-## Social Login Configuration
-
-### Google OAuth
-
-#### GOOGLE_CLIENT_ID
-- **Type**: String
-- **Description**: Google OAuth 2.0 client ID
-- **Where to find**: Google Cloud Console > APIs & Services > Credentials
-- **Example**: `GOOGLE_CLIENT_ID=your-client-id.apps.googleusercontent.com`
-
-#### GOOGLE_CLIENT_SECRET
-- **Type**: String
-- **Description**: Google OAuth 2.0 client secret
-- **Security**: Keep this secure
-- **Example**: `GOOGLE_CLIENT_SECRET=your-google-client-secret`
-
-### Facebook OAuth
-
-#### FACEBOOK_APP_ID
-- **Type**: String
-- **Description**: Facebook application ID
-- **Where to find**: Facebook Developers > Your App > Settings > Basic
-- **Example**: `FACEBOOK_APP_ID=your-facebook-app-id`
-
-#### FACEBOOK_APP_SECRET
-- **Type**: String
-- **Description**: Facebook application secret
-- **Security**: Keep this secure
-- **Example**: `FACEBOOK_APP_SECRET=your-facebook-app-secret`
-
-### LinkedIn OAuth
-
-#### LINKEDIN_CLIENT_ID
-- **Type**: String
-- **Description**: LinkedIn OAuth client ID
-- **Where to find**: LinkedIn Developer Portal > Your App
-- **Example**: `LINKEDIN_CLIENT_ID=your-linkedin-client-id`
-
-#### LINKEDIN_CLIENT_SECRET
-- **Type**: String
-- **Description**: LinkedIn OAuth client secret
-- **Security**: Keep this secure
-- **Example**: `LINKEDIN_CLIENT_SECRET=your-linkedin-client-secret`
-
-### OAUTH_CALLBACK_URI
-- **Type**: String (URL)
-- **Description**: Base URL for OAuth provider callbacks
-- **Example**: `OAUTH_CALLBACK_URI=https://wavemax.promo`
 
 ## Rate Limiting
 

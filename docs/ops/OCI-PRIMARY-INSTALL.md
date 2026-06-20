@@ -1,14 +1,16 @@
-# OCI Ampere Primary — Install Runbook (WaveMAX full stack)
+# OCI Ampere — Install Runbook (WaveMAX web app)
 
-> Repeatable runbook for standing up the **OCI Phoenix Ampere** box as the full-stack
-> **primary** (app + Mailcow + DRBD), co-located with the Oracle ADB. Captures the
-> real gotchas from the 2026-05-23 bare-metal build. **Living doc** — sections marked
-> TODO are completed as the migration proceeds.
+> Repeatable runbook for standing up an **OCI Phoenix Ampere** box as a web-app node,
+> co-located with the Oracle ADB. The web tier runs **dual-AZ active-active** — oci1
+> `161.153.71.201` (PHX-AD-2) + oci2 `144.24.4.202` (PHX-AD-1), behind a Cloudflare LB
+> (round-robin). Run this runbook once per box. Captures the real gotchas from the
+> 2026-05-23 bare-metal build. **Living doc** — sections marked TODO are completed as
+> the build-out proceeds.
 
 ## Why OCI Phoenix
 Co-locate the **Node web app** with the Oracle ADB (`us-phoenix-1`) for sub-ms DB
-latency (the app is DB-chatty). Mailcow uses its own MySQL (ADB-independent) but rides
-along on the same box. Ultahost (Dallas) becomes the HA secondary / DRBD peer behind Cloudflare.
+latency (the app is DB-chatty). Both OCI boxes are app-only; **Ultahost is mail-only**
+(its web tier is off) and stays single-homed as the SMTP host.
 
 ## 0. Provisioning (OCI CLI, session-token auth)
 - Shape **`VM.Standard.A1.Flex` (Ampere ARM64)**, 4 OCPU / 24 GB, Ubuntu 22.04, 50 GB boot, public IP.
@@ -39,8 +41,8 @@ Relay from the existing box **host-to-host so secrets never hit a terminal/log**
 sudo ssh wavemax-promo 'cat /var/www/wavemax/wavemax-affiliate-program/.env' \
   | ssh -i ~/.ssh/oci_wavemax ubuntu@<OCI_IP> 'cat > /var/www/wavemax/wavemax-affiliate-program/.env && chmod 600 .../.env'
 ```
-- The four crypto secrets **must be byte-identical** across hosts (`JWT_SECRET`, `ENCRYPTION_KEY`, `SESSION_SECRET`, `CSRF_SECRET`) + same `MONGODB_URI`, or sessions/JWTs/encrypted fields break on failover.
-- Set **`RUN_BACKGROUND_JOBS=false`** on every non-leader instance (only the single job-leader runs cron, or payment/reminder jobs double-execute).
+- The four crypto secrets **must be byte-identical** across hosts (`JWT_SECRET`, `ENCRYPTION_KEY`, `SESSION_SECRET`, `CSRF_SECRET`) + same `MONGODB_URI`, or sessions/JWTs/encrypted fields break when the LB sends a request to the other box.
+- **Mail relay:** prod mail is sent **through the Ultahost box by IP**, but the TLS `servername` **must** be `mail.crhsent.com` (that's the cert CN) — pinning it elsewhere fails the handshake silently. Match the live `.env` mail vars; don't substitute defaults.
 
 ## 4. ★★ GOTCHA: ADB Access Control List (the #1 bare-metal blocker)
 **Symptom:** the app crash-loops immediately —
@@ -64,7 +66,7 @@ pm2 save && pm2 startup    # boot persistence (TODO: run the printed sudo line)
 ```bash
 grep -E "Connected to MongoDB|Server running" logs/combined.log | tail
 ```
-Confirmed 2026-05-23: 4 cluster workers online, `Connected to MongoDB`, `Oracle cursor diagnostics attached`, `Background jobs disabled` (correct — Ultahost stays the job leader).
+Confirmed 2026-05-23: 4 cluster workers online, `Connected to MongoDB`, `Oracle cursor diagnostics attached`. Startup also runs the default-account init (`scripts/setup/init-admin.js` + `init-defaults.js`, invoked from `server.js`) — idempotent, safe to repeat per box.
 - **Health probe:** the app forces HTTPS, so plain HTTP redirects. Spoof the proxy header to test locally: `curl -H "X-Forwarded-Proto: https" http://localhost:3000/health` → `{"status":"UP",...}`. (`/api/health` path differs; `/health` is the simple liveness route.)
 - **Direct ADB reachability test** (isolates ACL from app): `openssl s_client -connect <db-host>:27017 -servername <db-host>` → expect `Verify return code: 0 (ok)`.
 - **Pre-existing finding (NOT OCI-specific):** `Cannot find module './server/services/dataRetentionService'` repeats in `error.log` — the file was deleted in `01645cd` but `server.js:161` still requires it; it's caught, so non-fatal, but the GDPR data-retention job never initializes. Present on the live Ultahost box too. Track + fix separately.
@@ -92,14 +94,17 @@ sudo nginx -t && sudo systemctl reload nginx
 ## 7. OCI security list: allow Cloudflare on 80/443 — TODO
 Add ingress for 80/443 from the **Cloudflare IP ranges** so the CF Load Balancer/proxy can reach this origin (Cloudflare-only origin).
 
-## 8. Mailcow on ARM — TODO  ⚠️ TWO HARD MAIL PREREQS ON OCI
-Docker + `mailcow-dockerized` (multi-arch, ARM-native since 2024). Migrate data from Ultahost via backup/restore — **do NOT copy the rspamd cache** (architecture-specific; let it rebuild). **Before OCI can be an active mail node, resolve both:**
-1. **Outbound TCP 25 is blocked by default on every OCI tenancy** (anti-spam). Either file an OCI service request to lift it (free-tier often denied; **PAYG** improves odds) **or** relay outbound through a smarthost on 587 (Brevo/SendGrid — app + Mailcow support a `relayhost`).
-2. **PTR / reverse DNS** for the box must be set to the mail HELO hostname with **forward-confirmed rDNS (FCrDNS)**, or outbound is rejected/spam-binned. Needs a **reserved (static) public IP** first; confirm OCI self-service PTR availability (may require a support request).
-If OCI can't get both, fall back to OCI-relays-via-smarthost or keep mail single-homed on Ultahost. Tracked in task #97.
+## 8. Mail — RESOLVED: stays single-homed on Ultahost
+Mail did **not** move to OCI. Both hard OCI mail prereqs — outbound TCP 25 blocked by
+default on every OCI tenancy, and FCrDNS/PTR requiring a reserved static IP — made an
+active OCI mail node not worth it. **Ultahost remains the mail host.** The OCI app boxes
+relay outbound through it (see §3: by IP, with TLS `servername` pinned to
+`mail.crhsent.com`). No Mailcow on OCI.
 
-## 9. DRBD replication to Ultahost — TODO
-Loop-file backing device on each box (no extra disk/repartition); DRBD active/passive; **Cloudflare as the failover arbiter** (see `HA-FAILOVER-PLAN.md`).
+## 9. Data replication — RESOLVED: handled by Oracle ADB, no DRBD
+No DRBD. Both OCI boxes are stateless app nodes pointing at the same **Oracle ADB**
+(Mongo API), which owns durability/replication; there's no local DB to mirror. HA is the
+**Cloudflare LB round-robin** across the two AZs (no app-level failover arbiter needed).
 
 ## OCI operational caveats (learned)
 - **Auth:** session token (`oci session authenticate`), ~1 h; refresh with `oci session refresh --profile DEFAULT` (re-auth if the refresh window lapsed). It expires mid-build — expect to refresh.

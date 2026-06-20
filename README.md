@@ -1,8 +1,8 @@
 # WaveMAX Laundry Affiliate Program
 
-A Node.js / Express / MongoDB platform that powers a laundry pickup-delivery affiliate network: affiliates onboard customers, manage pickups and deliveries, track individual bags via QR codes, and earn commissions.
+A Node.js / Express / MongoDB platform that powers a laundry pickup-delivery affiliate network: affiliates are onboarded by invite, customers claim a durable bag QR, and orders walk a 4-state scan-gate machine (`pending → in_progress → out_for_delivery → complete`). All money, weight, and payment live externally in **Cents** — this app holds none of it.
 
-> **Status:** production system, active refactor in progress. See [`docs/refactor/`](docs/refactor/) for the design + phased plan.
+> **Status:** production system, Phase-1 redesign live. See [`docs/refactor/`](docs/refactor/) for the design + phased plan and [`docs/superpowers/specs/`](docs/superpowers/specs/) for the authoritative specs. V1 Paygistix, V2 post-weigh payment, customer scheduling, geographic service-area matching, DocuSign W-9, and OAuth/social-auth have been **removed**.
 
 ## Quick start (development)
 
@@ -28,8 +28,8 @@ npm run test:coverage       # with coverage report
 
 ## Production
 
-- Deployment: PM2 cluster behind Nginx on a single host. See `ecosystem.config.js`.
-- Database: MongoDB Atlas.
+- Deployment: PM2 cluster behind Nginx, dual-AZ OCI active-active behind Cloudflare. See `ecosystem.config.js` and [`docs/ops/`](docs/ops/).
+- Database: Oracle Autonomous Database (Mongo API).
 - Embed domain: `wavemax.promo` — iframe-embedded on the WaveMAX marketing site at `www.wavemaxlaundry.com`.
 
 ## What's inside
@@ -46,7 +46,7 @@ npm run test:coverage       # with coverage report
 
 ## Implementation overview
 
-The application is a multi-role iframe SPA at `wavemax.promo` backed by a REST API at `/api/v1` (with a `/api/v2` namespace for the post-weigh payment flow). It runs as a PM2 cluster behind Nginx, talks to MongoDB Atlas, and is embedded inside the WaveMAX marketing site over `postMessage`. The codebase is engineered around three deliberate constraints, each addressed below.
+The application is a multi-role iframe SPA at `wavemax.promo` backed by a REST API at `/api/v1`. It runs as a PM2 cluster behind Nginx (dual-AZ OCI active-active behind Cloudflare), talks to the Oracle Autonomous Database over the Mongo API, and is embedded inside the WaveMAX marketing site over `postMessage`. The codebase is engineered around three deliberate constraints, each addressed below.
 
 ### Security features
 
@@ -56,15 +56,14 @@ Defense-in-depth, with each control implemented as a discrete module so it can b
 |---|---|---|
 | Password storage | `server/utils/passwordUtils.js`, `server/utils/passwordValidator.js` | PBKDF2-SHA512, 100k iterations, 16-byte random salt, 64-byte hash; constant-time compare on verify; minimum-strength enforcement |
 | JWT auth | `server/middleware/auth.js` | 1-hour access token + 30-day refresh token; refresh tokens tracked in `RefreshToken` model and rotated on use; `TokenBlacklist` for logout |
-| OAuth | `server/config/passport-config.js` | Google / Facebook / LinkedIn; provider tokens encrypted at rest before being stored on the user record |
 | RBAC | `server/middleware/rbac.js`, `server/middleware/authorizationHelpers.js` | Role-based gates on every protected route — `administrator`, `operator`, `affiliate`, `customer` |
-| CSRF | `server/config/csrf-config.js` | Conditional CSRF — required on state-changing critical endpoints (W-9, payment, account deletion); skipped on read-only and rate-limited public endpoints (auth, registration) |
+| CSRF | `server/config/csrf-config.js` | Conditional CSRF — required on state-changing critical endpoints (account deletion, admin mutations); skipped on read-only and rate-limited public endpoints (auth, registration) and on the credential-light scan endpoints |
 | Rate limiting | `server/middleware/rateLimiting.js` | MongoDB-backed for distributed enforcement: `authLimiter` (5/15min), `passwordResetLimiter` (3/hr), `registrationLimiter` (10/hr), `apiLimiter` (100/15min), `sensitiveOperationLimiter` (10/hr) |
 | Input sanitization | `server/middleware/sanitization.js` | `mongoSanitize()` strips `$` / `.` against NoSQL injection; `sanitizeRequest` HTML-escapes for XSS; Joi + express-validator for schema validation |
-| Encryption at rest | `server/utils/encryption.js` | AES-256-GCM with a fresh 16-byte IV per value; `{iv, encryptedData, authTag}` envelope; used for OAuth tokens, payment handles (PayPal email, Venmo handle), and W-9 documents |
+| Encryption at rest | `server/utils/encryption.js` | AES-256-GCM with a fresh 16-byte IV per value; `{iv, encryptedData, authTag}` envelope; used for sensitive at-rest fields |
 | CSP | `server/middleware/cspNonce.js`, Helmet config | Strict CSP v2 — no inline scripts or styles; per-request nonce surfaced via `<meta name="csp-nonce">`; explicit allow-list for `frame-ancestors` (the WordPress parent only) |
-| Audit logging | `server/utils/auditLogger.js` | Security-relevant events (auth, RBAC denials, W-9 verification, payment unlock) write to a separate `audit.log` stream for retention and SIEM ingestion |
-| Validation | `server/utils/validators.js`, `server/middleware/locationValidation.js` | Server-side validation for all user input; geocoding-based service-area validation (Nominatim) prevents customers being routed outside their affiliate's radius |
+| Audit logging | `server/utils/auditLogger.js` | Security-relevant events (auth, RBAC denials, invites, bag/order scans, add-on catalog changes) write to a separate `audit.log` stream for retention and SIEM ingestion |
+| Validation | `server/utils/validators.js` | Server-side validation for all user input (Joi + express-validator) |
 | Secrets | `keys/`, `secure/`, `*.pem`, `*.key` | All gitignored; runtime secrets via `process.env`; business-config values via `SystemConfig` (Mongo) — never hardcoded |
 
 The CSP is the most opinionated control: every page is rendered with a per-request nonce, so any third-party script that gets injected anywhere in the stack runs with no privilege unless it has the matching nonce. There are no inline `<script>` blocks anywhere in `public/` and ESLint blocks new ones.
@@ -122,7 +121,7 @@ Styles live in matching `*-modern.css` files; client behavior in `*-modern.js`. 
 
 ### What's instrumented
 
-Each content page ships a structured SEO config object that the iframe pushes to the parent frame over `postMessage` via [`public/assets/js/parent-iframe-bridge-v2.js`](public/assets/js/parent-iframe-bridge-v2.js). The parent (the WaveMAX marketing site) injects the values into the actual `<head>` so search engine crawlers see them on the canonical URL, not on the iframe origin.
+Each content page ships a structured SEO config object that the iframe pushes to the parent frame over `postMessage` via [`public/assets/js/parent-iframe-bridge-v3.js`](public/assets/js/parent-iframe-bridge-v3.js). The parent (the WaveMAX marketing site) injects the values into the actual `<head>` so search engine crawlers see them on the canonical URL, not on the iframe origin.
 
 What gets injected, per page:
 
@@ -148,33 +147,29 @@ What gets injected, per page:
 
 The marketing site (`wavemaxlaundry.com`) historically rendered location pages from a content management system, and pushing per-page schema and OG tags through that pipeline required the marketing-site vendor to be in the loop for every change. By moving the SEO-instrumented content into iframes served from `wavemax.promo` and pushing meta-tag updates over `postMessage`, page-level SEO becomes a code change in this repository — reviewable, testable, versioned, and deployable on the same cadence as the rest of the application.
 
-The `parent-iframe-bridge-v2.js` contract is also what allows multiple cities to share a single content template: the iframe knows its slug from the parent URL, the loader chooses the right SEO config bundle, and the location-specific values (telephone, address, geo, hours) flow into the schema before the parent frame writes it into the DOM.
+The `parent-iframe-bridge-v3.js` contract is also what allows multiple cities to share a single content template: the iframe knows its slug from the parent URL, the loader chooses the right SEO config bundle, and the location-specific values (telephone, address, geo, hours) flow into the schema before the parent frame writes it into the DOM.
 
 ---
 
 ## Key integrations
 
-- **OAuth** — Google, Facebook, LinkedIn (affiliate + customer login)
-- **Mailcow SMTP** — transactional email; **IMAP** for post-weigh payment verification
-- **OpenStreetMap Nominatim** — address geocoding and service-area validation
-- **QuickBooks Online** — vendor + commission export
-- **Venmo / PayPal / CashApp** — V2 post-weigh payments, detected via email scanning
-
-_(Paygistix V1 upfront payment and DocuSign W-9 automation are being retired — see [`docs/refactor/REFACTORING_PLAN.md`](docs/refactor/REFACTORING_PLAN.md) §4.1 and §4.1.1.)_
+- **Mailcow SMTP** — transactional email (sent via the Ultahost mail box; TLS servername `mail.crhsent.com`)
+- **Firebase Phone Auth** — SMS phone verification at customer bag-claim registration
+- **Cents** — external system of record for money, weight, and payment (the app links out to it; it holds none of that data)
 
 ## Roles
 
 | Role | Purpose |
 |---|---|
-| **Administrator** | System management, operator + affiliate CRUD, system configuration, payment unlock |
-| **Operator** | Facility staff; scans bags through the three-stage workflow |
-| **Affiliate** | Independent service provider; onboards customers, earns commissions |
-| **Customer** | End user; registers via affiliate link, schedules pickups |
+| **Administrator** | System management, operator + affiliate CRUD, add-on catalog, system configuration |
+| **Operator** | Facility staff; scans bag QRs through the 4-state order machine |
+| **Affiliate** | Independent service provider; onboarded by invite, manages pickups/deliveries |
+| **Customer** | End user; onboards by claiming a bag QR (`/claim`) with phone + email verification |
 
 ## Documentation
 
 - [`docs/README.md`](docs/README.md) — full documentation index
-- [`docs/FEATURES.md`](docs/FEATURES.md) — current feature list
+- [`.claude/CLAUDE.md`](.claude/CLAUDE.md) — architecture handbook (models, routes, business logic)
 - [`docs/refactor/DESIGN.md`](docs/refactor/DESIGN.md) — current and target architecture
 - [`docs/refactor/REFACTORING_PLAN.md`](docs/refactor/REFACTORING_PLAN.md) — phased execution plan
 - [`docs/guides/`](docs/guides/) — embed, i18n, mobile integration guides
@@ -188,7 +183,7 @@ See [`.env.example`](.env.example) for the full set. The critical ones:
 - `MONGODB_URI` — MongoDB connection string
 - `JWT_SECRET`, `SESSION_SECRET`, `CSRF_SECRET`, `ENCRYPTION_KEY` — generate with `openssl rand -hex 32`
 - `EMAIL_PROVIDER` / `EMAIL_HOST` etc. — email transport
-- OAuth provider credentials for Google, Facebook, LinkedIn
+- Firebase service-account credentials for SMS phone verification
 
 ## License
 

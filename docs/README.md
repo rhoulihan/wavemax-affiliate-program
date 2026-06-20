@@ -1,101 +1,64 @@
 # WaveMAX Documentation Index
 
-Welcome to the WaveMAX Affiliate Program documentation. This directory contains all technical documentation, implementation details, and development guides.
+Technical documentation for the WaveMAX Affiliate Program. The application is in
+its **Phase-1 redesign**: bag-registration + a 4-state scan-gate order machine
+(`pending → in_progress → out_for_delivery → complete`, plus `cancelled`),
+invite-only affiliate onboarding, durable per-customer bag QRs, and order
+add-ons. All money/weight/payment lives externally in **Cents** — the app holds
+none of it. (V1 Paygistix, V2 post-weigh payment, customer scheduling,
+service-area matching, DocuSign W-9, and OAuth/social-auth were all removed.)
 
-## 📁 Documentation Structure
+## 🧭 Start Here (canonical references)
 
-### 🔧 [Implementation Details](./implementation/)
-Technical implementation documentation for specific features:
-- [Paygistix Integration Guide](./implementation/PAYGISTIX_INTEGRATION_GUIDE.md) - Complete payment integration documentation
-- [Paygistix Integration Summary](./implementation/PAYGISTIX_INTEGRATION_SUMMARY.md) - Quick overview of payment system
-- [Paygistix Form Pool Guide](./implementation/PAYGISTIX_FORM_POOL_GUIDE.md) - Callback URL pool system
-- [Paygistix Environment Config](./implementation/PAYGISTIX_ENV_CONFIG.md) - Environment configuration guide
-- [Paygistix Context Filtering](./implementation/PAYGISTIX_CONTEXT_FILTERING.md) - Context-based payment filtering
-- [Paygistix Integration Complete](./implementation/PAYGISTIX_INTEGRATION_COMPLETE.md) - Final integration notes
-- [Paygistix Callback Analysis](./implementation/paygistix-callback-analysis.md) - Callback parameter documentation
-- [Customer Registration with Paygistix](./implementation/CUSTOMER_REGISTRATION_PAYGISTIX.md) - Customer payment setup
-- [Window Detection Analysis](./implementation/WINDOW_DETECTION_ANALYSIS.md) - Payment window detection
-- [Service Area Component](./implementation/service-area-component-complete.md) - Address validation implementation
-- [Bag Fee Line Item](./implementation/BAG_FEE_LINE_ITEM.md) - Delivery fee structure
-- [Admin Setup Changes](./implementation/ADMIN_SETUP_CHANGES.md) - Administrator configuration
-- [Operator Scanning Workflow](./implementation/OPERATOR_SCANNING_WORKFLOW.md) - Three-stage QR code scanning process
+- **Architecture handbook:** [`../.claude/CLAUDE.md`](../.claude/CLAUDE.md) — models, routes, security, business logic.
+- **Redesign design + plan:** [`refactor/DESIGN.md`](./refactor/DESIGN.md) · [`refactor/REFACTORING_PLAN.md`](./refactor/REFACTORING_PLAN.md)
+- **Authoritative specs:** [`superpowers/specs/`](./superpowers/specs/) — the Phase-1 bag-registration design and the invite/bag-workflow redesign.
+- **Project rules + session startup:** root [`../CLAUDE.md`](../CLAUDE.md)
 
-### 📊 [System Monitoring](../monitoring/)
-System health and connectivity monitoring:
-- [Monitoring Dashboard](../monitoring-dashboard.html) - Real-time service health dashboard
-- [Mailcow Email Setup](./mailcow-email-setup.md) - Self-hosted email server configuration
-- [Mailcow Installation Guide](./mailcow-installation.md) - Email server installation steps
+## 🛠️ Development
 
-### 📚 [Integration Guides](./guides/)
-Step-by-step guides for integrating and using the system:
-- [Embed Integration Guide](./guides/embed-integration-guide.md) - How to embed the application
-- [Mobile Parent Integration](./guides/mobile-parent-integration-guide.md) - Mobile-responsive iframe setup
-- [Embed Test Pages Guide](./guides/embed-test-pages-guide.md) - Testing embedded implementations
-- [i18n Best Practices](./guides/i18n-best-practices.md) - Internationalization guidelines
-- [DocuSign W9 Migration Guide](./guides/docusign-w9-migration-guide.md) - Migrating to electronic W-9 signatures
-- [Facebook OAuth Setup Guide](./facebook-oauth-setup.md) - Complete Facebook OAuth configuration
+- [Operating Best Practices](./development/OPERATING_BEST_PRACTICES.md) — known issues and workarounds
+- [Pitfalls](./development/PITFALLS.md) — common traps with fixes
+- [Refactoring Guide](./development/REFACTORING_GUIDE.md) — utility modules + controller patterns
+- [Lighthouse Quality Bar](./development/LIGHTHOUSE-QUALITY-BAR.md) — the per-page release gate
+- [Corporate Rebuild Checklist](./CORPORATE-REBUILD-CHECKLIST.md) — corporate handoff record
 
-### 🛠️ [Development](./development/)
-Development tools, best practices, and ongoing work:
-- [Operating Best Practices](./development/OPERATING_BEST_PRACTICES.md) - Known issues and workarounds
-- [Backlog](./development/BACKLOG.md) - Pending work items and future features
-- [DocuSign W9 Integration Plan](./development/docusign-w9-integration-plan.md) - Technical plan for DocuSign integration
-- [Code Audit Report](./development/CODE_AUDIT_REPORT.md) - Code quality analysis
-- [Test Coverage Summary](./development/test-coverage-final-summary-2025-01-07.md) - Test coverage analysis
-- [Unused Functions Report](./development/unused-functions-report.md) - Dead code analysis
-- [Claude Instructions](./development/CLAUDE.md) - AI assistant configuration
+## 📚 Guides
 
-### 📜 [Project History](./project-history/)
-Historical documentation and change tracking:
-- [Changelog](./project-history/CHANGELOG.md) - Detailed change history
-- [Recent Updates](./project-history/RECENT_UPDATES.md) - Major feature updates
-- [Project Logs](../project-logs/) - Detailed implementation logs for major features
+- [i18n Best Practices](./guides/i18n-best-practices.md) — four-language (en/es/pt/de) workflow
+- [Mobile Parent Integration](./guides/mobile-parent-integration-guide.md) — iframe parent bridge (`parent-iframe-bridge-v3.js`)
 
-### 💡 [Examples](./examples/)
-Working examples and implementation templates:
-- [Iframe Embed Examples](./examples/README.md) - Complete embedding implementations
-- [WaveMAX Laundry Integration](./examples/wavemaxlaundry-iframe-embed.html) - Full-featured embed
-- [Simple Embed](./examples/wavemaxlaundry-simple-embed.html) - Basic implementation
-- [Embed Code Snippet](./examples/wavemaxlaundry-iframe-code.txt) - Copy-paste ready code
+## ⚙️ Operations & Setup
 
-### 🔍 [API Documentation](./paygistix/)
-Detailed API and parameter documentation:
-- [Paygistix Callback Parameters](./paygistix/paygistix-callback-parameters.md)
-- [Paygistix Implementation](./paygistix/paygistix-implementation.md)
-- [Paygistix Quick Reference](./paygistix/paygistix-quick-reference.md)
+- [Environment Variables](./environment-variables.md)
+- [OCI Install Runbook](./ops/OCI-PRIMARY-INSTALL.md) — dual-AZ active-active web tier
+- [HA Failover Plan](./ops/HA-FAILOVER-PLAN.md) · [HA Phase-1 Web](./ops/HA-PHASE1-WEB.md)
+- [Mail OCI Cutover Runbook](./ops/MAIL-OCI-CUTOVER-RUNBOOK.md) · [Mailcow Email Setup](./mailcow-email-setup.md)
+- [Firebase Phone Verification](./setup/firebase-phone-verification.md)
 
-## 🚀 Quick Start
+## 🔐 Security
 
-If you're new to the project, start with:
-1. The main [README](../README.md) for project overview
-2. [Embed Integration Guide](./guides/embed-integration-guide.md) for deployment
-3. [Operating Best Practices](./development/OPERATING_BEST_PRACTICES.md) for known issues
+- [Encryption Key Migration](./security/ENCRYPTION_KEY_MIGRATION.md)
+- [Immediate Security Actions](./security/IMMEDIATE_SECURITY_ACTIONS.md)
+- [Security Remediation Plan](./security/SECURITY_REMEDIATION_PLAN.md) · [Status](./security/SECURITY_REMEDIATION_STATUS.md)
 
-## 📊 Test Documentation
+## 💡 Examples
 
-For testing information, see:
-- [Test Suite README](../tests/README.md) - How to run tests
-- [Test Coverage Analysis](../public/coverage-analysis/README.md) - Coverage reports
+- [Iframe Embed Examples](./examples/README.md)
 
-## 🔐 Security Documentation
+## 📜 Project History
 
-Security-related documentation is integrated throughout:
-- W-9 document encryption details in the main README
-- DocuSign W-9 integration security in [DocuSign Integration Plan](./development/docusign-w9-integration-plan.md)
-- CSRF protection in [Operating Best Practices](./development/OPERATING_BEST_PRACTICES.md)
-- Authentication flows in the API documentation section of the main README
+- [Changelog](./project-history/CHANGELOG.md) · [Recent Updates](./project-history/RECENT_UPDATES.md)
+- [`archive/`](./archive/), [`stash/`](./stash/), [`project-history/`](./project-history/) — historical records (kept for reference; not current).
+
+## 📊 Testing
+
+- [Test Suite README](../tests/README.md) — how to run tests
+- [Isolated Route Testing Strategy](./testing/isolated-route-testing-strategy.md)
 
 ## 📝 Contributing
 
-When adding new documentation:
-1. Place implementation details in `docs/implementation/`
-2. Place user guides in `docs/guides/`
-3. Place development tools in `docs/development/`
-4. Update this index file with links to new documents
-5. Keep the main README focused on project overview and setup
-
-## 🔗 External Resources
-
-- [Main Project README](../README.md)
-- [Project Repository](https://github.com/yourusername/wavemax-affiliate-program)
-- [WaveMAX Laundry Website](https://wavemaxlaundry.com)
+When adding documentation: put implementation details in `docs/development/`,
+guides in `docs/guides/`, ops runbooks in `docs/ops/`, and **update this index**.
+Keep the root README focused on overview + setup, and the architecture handbook
+(`.claude/CLAUDE.md`) as the source of truth for models/routes/business logic.

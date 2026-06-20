@@ -100,7 +100,7 @@ global.console = {
 NODE_ENV=test npx jest --config=jest.config.isolated.js
 
 # Run specific isolated test
-NODE_ENV=test npx jest --config=jest.config.isolated.js tests/unit/paymentRoutes.isolated.test.js
+NODE_ENV=test npx jest --config=jest.config.isolated.js tests/unit/orderRoutes.isolated.test.js
 ```
 
 ## Benefits
@@ -126,8 +126,7 @@ Use isolated tests when:
 
 ## Examples in This Project
 
-- `tests/unit/paymentRoutes.isolated.test.js`
-- `tests/unit/orderRoutes.isolated.test.js`
+- `tests/unit/orderRoutes.isolated.test.js` — note: orders are no longer created via `POST /api/v1/orders`; they're created at operator intake (scan), so these routes cover read/update/cancel and status transitions only.
 
 ## Migration Guide
 

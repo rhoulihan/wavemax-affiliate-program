@@ -176,7 +176,7 @@ Translation files are located in `/public/locales/[language]/common.json`:
 
 ## Adding New Translations
 
-1. Add the key to all language files (en, es, pt)
+1. Add the key to all four language files (en, es, pt, de)
 2. Use hierarchical structure for organization
 3. Keep keys descriptive and consistent
 4. Use parameters for dynamic content
@@ -184,4 +184,4 @@ Translation files are located in `/public/locales/[language]/common.json`:
 
 ---
 
-*Last Updated: 2025-01-07*
+*Last Updated: 2026-06-20*
