@@ -370,28 +370,81 @@ body {
     display: block;
     text-align: center;
     background: #fff;
-    border-radius: 16px;
-    padding: 28px 24px;
+    border-radius: 18px;
+    padding: 26px 24px;
     max-width: 440px;
     width: 100%;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 24px 70px rgba(0, 0, 0, 0.35);
 }
-#scanConfirmModal h4 { font-size: 1.25rem; margin-bottom: 8px; }
-#scanConfirmModal #scanConfirmCustomer { font-weight: 600; margin-bottom: 4px; font-size: 1.05rem; }
-.scan-customer-details { margin: 0 0 12px; color: #334155; font-size: 0.92rem; line-height: 1.4; }
+#scanConfirmModal h4 {
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0 0 14px;
+    line-height: 1.3;
+}
+#scanConfirmModal #scanConfirmCustomer {
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: #0f172a;
+    margin: 0 0 2px;
+}
+/* Customer record — a quiet, left-aligned info card under the name. */
+.scan-customer-details {
+    margin: 10px 0 16px;
+    padding: 12px 14px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    color: #334155;
+    font-size: 0.92rem;
+    line-height: 1.5;
+    text-align: left;
+}
 .scan-customer-details p { margin: 2px 0; }
 .scan-order-status {
     display: inline-block;
-    margin-bottom: 14px;
-    padding: 4px 12px;
+    margin-bottom: 16px;
+    padding: 5px 14px;
     border-radius: 999px;
     background: #e0e7ff;
     color: #1e3a8a;
     font-size: 0.85rem;
-    font-weight: 600;
+    font-weight: 700;
+    letter-spacing: 0.01em;
 }
-.scan-confirm-payment { display: block; margin: 14px 0; text-align: left; }
-#scanConfirmModal .action-buttons { display: flex; gap: 12px; justify-content: center; margin-top: 18px; }
+/* Payment + receipt confirmation (out-for-delivery) — deliberately prominent:
+   an amber call-out with an oversized checkbox so the operator can't miss it. */
+.scan-confirm-payment {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 16px 0;
+    padding: 16px 18px;
+    background: #fffbeb;
+    border: 2px solid #f59e0b;
+    border-radius: 12px;
+    text-align: left;
+    font-weight: 600;
+    color: #92400e;
+    cursor: pointer;
+}
+.scan-confirm-payment input[type="checkbox"] {
+    width: 26px;
+    height: 26px;
+    flex: 0 0 26px;
+    accent-color: #d97706;
+    cursor: pointer;
+}
+.scan-confirm-payment span { font-size: 0.98rem; line-height: 1.35; }
+#scanConfirmModal .action-buttons { display: flex; gap: 12px; margin-top: 20px; }
+#scanConfirmModal .action-buttons .btn {
+    flex: 1;
+    padding: 12px 16px;
+    font-size: 1rem;
+    font-weight: 600;
+    border-radius: 10px;
+}
 
 .confirmation-icon {
     font-size: 40px;
