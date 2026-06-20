@@ -1456,6 +1456,12 @@
       "deactivated": "Add-on deactivated",
       "deactivateConfirm": "Deactivate this add-on? Customers will no longer see it.",
       "loadError": "Failed to load add-ons"
+    },
+    "kioskScanner": {
+      "title": "Kiosk Scanner Setup",
+      "intro": "If kiosk scans fail with \"bag not registered,\" the hardware scanner is sending characters faster than the tablet can read, dropping some. Slow its output: scan Enter Setup, then Set Data Transmission Interval 32 ms (or 64 ms if needed), then Exit and Save.",
+      "link": "Open Data Transmission Speed barcodes",
+      "note": "Scanner: Inateck BCST-75S. Barcodes are from the BCST-54 manual (same firmware family) — verify a scan after changing the setting."
     }
   },
   "email": {

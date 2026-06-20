@@ -404,6 +404,24 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Kiosk scanner setup helper: the BCST-75S drops characters from
+                     the long claim-URL QR on the Android tablet, causing "bag not
+                     registered". Slowing the scanner's output interval fixes it. -->
+                <div class="card" id="kioskScannerCard">
+                    <div class="card-header">
+                        <h2 class="card-title" data-i18n="admin.kioskScanner.title">Kiosk Scanner Setup</h2>
+                    </div>
+                    <div class="padding-20">
+                        <p data-i18n="admin.kioskScanner.intro">If kiosk scans fail with "bag not registered," the hardware scanner is sending characters faster than the tablet can read, dropping some. Slow its output: scan Enter Setup, then Set Data Transmission Interval 32 ms (or 64 ms if needed), then Exit and Save.</p>
+                        <p>
+                            <a href="https://files.inateck.com/BCST-54_Complete%20Manual_EN.pdf#page=9"
+                               target="_blank" rel="noopener" class="btn btn-primary"
+                               data-i18n="admin.kioskScanner.link">Open Data Transmission Speed barcodes</a>
+                        </p>
+                        <p class="text-muted" data-i18n="admin.kioskScanner.note">Scanner: Inateck BCST-75S. Barcodes are from the BCST-54 manual (same firmware family) — verify a scan after changing the setting.</p>
+                    </div>
+                </div>
             </div>
 
             <!-- Environment Variables Sub-tab -->

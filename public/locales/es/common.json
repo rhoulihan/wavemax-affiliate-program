@@ -1456,6 +1456,12 @@
       "deactivated": "Complemento desactivado",
       "deactivateConfirm": "¿Desactivar este complemento? Los clientes ya no lo verán.",
       "loadError": "No se pudieron cargar los complementos"
+    },
+    "kioskScanner": {
+      "title": "Configuración del escáner del kiosco",
+      "intro": "Si los escaneos del kiosco fallan con \"bolsa no registrada\", el escáner envía los caracteres más rápido de lo que la tableta puede leer y pierde algunos. Reduce su velocidad: escanea Enter Setup, luego Set Data Transmission Interval 32 ms (o 64 ms si hace falta) y después Exit and Save.",
+      "link": "Abrir los códigos de velocidad de transmisión",
+      "note": "Escáner: Inateck BCST-75S. Los códigos son del manual del BCST-54 (misma familia de firmware); verifica un escaneo tras cambiar el ajuste."
     }
   },
   "email": {

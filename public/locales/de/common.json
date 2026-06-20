@@ -1456,6 +1456,12 @@
       "deactivated": "Zusatzoption deaktiviert",
       "deactivateConfirm": "Diese Zusatzoption deaktivieren? Kunden sehen sie dann nicht mehr.",
       "loadError": "Zusatzoptionen konnten nicht geladen werden"
+    },
+    "kioskScanner": {
+      "title": "Kiosk-Scanner-Einrichtung",
+      "intro": "Wenn Kiosk-Scans mit \"Beutel nicht registriert\" fehlschlagen, sendet der Scanner die Zeichen schneller, als das Tablet sie lesen kann, und lässt einige aus. Verlangsamen Sie die Ausgabe: Enter Setup scannen, dann Set Data Transmission Interval 32 ms (oder 64 ms bei Bedarf), dann Exit and Save.",
+      "link": "Barcodes für Übertragungsgeschwindigkeit öffnen",
+      "note": "Scanner: Inateck BCST-75S. Die Barcodes stammen aus dem BCST-54-Handbuch (gleiche Firmware-Familie) – nach der Änderung einen Scan überprüfen."
     }
   },
   "email": {

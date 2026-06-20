@@ -1456,6 +1456,12 @@
       "deactivated": "Complemento desativado",
       "deactivateConfirm": "Desativar este complemento? Os clientes não o verão mais.",
       "loadError": "Falha ao carregar os complementos"
+    },
+    "kioskScanner": {
+      "title": "Configuração do leitor do quiosque",
+      "intro": "Se as leituras do quiosque falharem com \"sacola não registrada\", o leitor envia os caracteres mais rápido do que o tablet consegue ler e perde alguns. Reduza a velocidade: leia Enter Setup, depois Set Data Transmission Interval 32 ms (ou 64 ms se necessário) e depois Exit and Save.",
+      "link": "Abrir os códigos de velocidade de transmissão",
+      "note": "Leitor: Inateck BCST-75S. Os códigos são do manual do BCST-54 (mesma família de firmware) — confirme uma leitura após alterar a configuração."
     }
   },
   "email": {
