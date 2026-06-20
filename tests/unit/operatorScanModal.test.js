@@ -51,15 +51,19 @@ describe('operator-scan confirm modal', () => {
     expect(js).not.toMatch(/\btally\b/);
   });
 
-  it('reads the scanner input natively (no buffer-append race) and finalizes on Enter', () => {
-    // The old `scanBuffer += e.target.value; scanInput.value = ''` per-input-event
-    // pattern raced with fast wedge scanners and corrupted the 32-hex token
-    // (dropped/duplicated chars -> "bag not registered"). The fix reads the
-    // field's accumulated value once on a debounce + on the Enter suffix.
+  it('captures the scan via keydown accumulation (single path), finalizing on Enter', () => {
+    // The field-value approaches (append-each-input-event, or read .value once)
+    // both raced with fast wedge scanners and corrupted the 32-hex token (chars
+    // dropped/duplicated/reordered -> "bag not registered"). The robust fix
+    // accumulates keystrokes directly from keydown, in order, and finalizes on
+    // the Enter/Tab suffix (or an idle fallback). There must be exactly ONE
+    // scan-capture path — keydown — and NO 'input'-listener field read.
     expect(js).not.toMatch(/scanBuffer\s*\+=/);
-    expect(js).toContain('function finalizeScan');
-    expect(js).toMatch(/scanInput\.value\s*\|\|\s*''|scanInput\.value\)/); // reads the native value
-    expect(js).toMatch(/e\.key === 'Enter'[\s\S]{0,60}finalizeScan\(\)/);
+    expect(js).not.toMatch(/addEventListener\('input'/); // no field-value scan path
+    expect(js).toContain('function handleScanKey');
+    expect(js).toMatch(/scanKeyBuffer\s*\+=\s*e\.key/);
+    expect(js).toMatch(/addEventListener\('keydown', handleScanKey\)/);
+    expect(js).toMatch(/e\.key === 'Enter'[\s\S]{0,120}commitScan\(\)/); // CR/Enter (or Tab) suffix → finalize
   });
 
   it('stays CSP-clean (no inline handlers/styles/innerHTML)', () => {

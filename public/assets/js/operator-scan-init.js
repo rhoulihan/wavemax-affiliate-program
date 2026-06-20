@@ -304,23 +304,37 @@
   }
 
   // --- scanner input (keyboard-wedge) --------------------------------------
-  // Read the input's NATIVE accumulated value once the scan settles. The old
-  // approach (append-each-input-event-then-clear-the-field) raced with fast
-  // wedge scanners typing a long URL QR, dropping and duplicating characters
-  // (e.g. "cc"->"c", overlapping "rrundbrundbergl…") so the 32-hex token came
-  // out corrupted -> "bag not registered". Letting the field accumulate
-  // natively and reading it once eliminates the race.
-  function finalizeScan() {
+  // Accumulate keystrokes directly from keydown, in browser-event order, into a
+  // JS buffer — then finalize on the scanner's Enter (CR) suffix, or after a
+  // short idle as a fallback. This is the ONLY scan-capture path on the kiosk.
+  //
+  // Why not read the <input> value: the field-value approach (append each input
+  // event + clear, OR read .value once) raced with fast wedge scanners and
+  // corrupted the 32-hex token — dropped/duplicated chars and one char
+  // consistently delayed to the end (e.g. "…cc808…"->"…cc80…8"), giving the WRONG
+  // token -> "bag not registered". keydown delivers each character once, in
+  // order, in a single synchronous handler, with no field-value/clear/focus race.
+  var scanKeyBuffer = '';
+
+  function commitScan() {
     if (scanTimeout) { clearTimeout(scanTimeout); scanTimeout = null; }
-    var data = (scanInput.value || '').trim();
-    scanInput.value = '';
+    var data = scanKeyBuffer.trim();
+    scanKeyBuffer = '';
+    if (scanInput) scanInput.value = '';
     if (data.length > 0) processScan(data);
   }
 
-  function handleScanInput() {
-    // Debounce: finalize ~150ms after the last keystroke of the burst.
-    if (scanTimeout) clearTimeout(scanTimeout);
-    scanTimeout = setTimeout(finalizeScan, 150);
+  function handleScanKey(e) {
+    if (e.key === 'Enter' || e.key === 'Tab') {
+      e.preventDefault();
+      commitScan();
+      return;
+    }
+    if (e.key && e.key.length === 1) { // a single printable character
+      scanKeyBuffer += e.key;
+      if (scanTimeout) clearTimeout(scanTimeout);
+      scanTimeout = setTimeout(commitScan, 200); // fallback if no Enter suffix
+    }
   }
 
   function processScan(scanData) {
@@ -392,12 +406,10 @@
       document.addEventListener('touchstart', enableFullscreen);
     }
 
-    // Wire events.
-    scanInput.addEventListener('input', handleScanInput);
-    // Most wedge scanners send Enter (CR) as a suffix — finalize immediately.
-    scanInput.addEventListener('keydown', function (e) {
-      if (e.key === 'Enter') { e.preventDefault(); finalizeScan(); }
-    });
+    // Wire events. Single scan-capture path: keydown accumulation (handles the
+    // character stream + the Enter/Tab suffix). No 'input' listener — reading the
+    // field value raced and corrupted the token.
+    scanInput.addEventListener('keydown', handleScanKey);
     scanInput.addEventListener('blur', function () {
       setTimeout(function () {
         if (confirmModal.hidden && document.activeElement !== scanInput) focusScanner();
