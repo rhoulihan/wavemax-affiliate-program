@@ -33,8 +33,11 @@
             <h2 data-i18n="operator.scan.heading">Scan a bag</h2>
             <p data-i18n="operator.scan.subheading">Each scan moves the bag to its next step automatically.</p>
 
-            <!-- Hidden input for scanner (keyboard-wedge) -->
-            <input type="text" id="scanInput" autocomplete="off" inputmode="none">
+            <!-- Hidden input for scanner (keyboard-wedge). autocorrect/autocapitalize/
+                 spellcheck OFF so Android's text-assist doesn't mangle the composed
+                 hex token; inputmode=none keeps the soft keyboard hidden. -->
+            <input type="text" id="scanInput" autocomplete="off" autocorrect="off"
+                   autocapitalize="off" spellcheck="false" inputmode="none">
 
             <!-- State-driven explanation (replaces the old fixed 3-stage legend) -->
             <div class="scan-types">

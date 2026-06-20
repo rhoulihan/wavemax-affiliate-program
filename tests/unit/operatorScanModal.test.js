@@ -63,7 +63,7 @@ describe('operator-scan confirm modal', () => {
     expect(js).toContain('function commitScan');
     expect(js).toMatch(/scanInput\.value\s*\|\|\s*''/);            // reads the native field value
     expect(js).toMatch(/addEventListener\('input', handleScanActivity\)/); // composition capture
-    expect(js).toMatch(/e\.key === 'Enter'[\s\S]{0,80}commitScan\(\)/);     // CR/Tab terminator → finalize
+    expect(js).toMatch(/e\.key === 'Enter'[\s\S]{0,200}commitScan/);        // CR/Tab terminator → finalize (deferred read)
   });
 
   it('stays CSP-clean (no inline handlers/styles/innerHTML)', () => {

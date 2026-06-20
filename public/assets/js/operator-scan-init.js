@@ -329,10 +329,16 @@
     scanTimeout = setTimeout(commitScan, 400);
   }
 
-  // The scanner's CR/Tab terminator → finalize immediately (the field value is
-  // complete at this point). Enter/Tab are real keydown events even on Android.
+  // The scanner's CR/Tab terminator → finalize, but DEFER the read briefly so any
+  // still-pending Android composition commits to the field value first (reading
+  // synchronously on Enter could miss the last composed char). Enter/Tab are real
+  // keydown events even on Android.
   function handleScanKey(e) {
-    if (e.key === 'Enter' || e.key === 'Tab') { e.preventDefault(); commitScan(); }
+    if (e.key === 'Enter' || e.key === 'Tab') {
+      e.preventDefault();
+      if (scanTimeout) clearTimeout(scanTimeout);
+      scanTimeout = setTimeout(commitScan, 80);
+    }
   }
 
   function processScan(scanData) {
