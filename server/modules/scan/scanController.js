@@ -5,6 +5,7 @@
 
 const ControllerHelpers = require('../../utils/controllerHelpers');
 const scanService = require('./scanService');
+const logger = require('../../utils/logger');
 
 function sendTypedError(res, err) {
   const status = err.status || err.statusCode;
@@ -28,6 +29,8 @@ exports.createSession = ControllerHelpers.asyncWrapper(async (req, res) => {
 /** POST /api/v1/scan/resolve  { bagToken }  (scanAuth) */
 exports.resolve = ControllerHelpers.asyncWrapper(async (req, res) => {
   try {
+    // TEMP DIAGNOSTIC (kiosk triage 2026-06-20): log exactly what the client sent.
+    logger.info(`[scan-debug] resolve bagToken=${JSON.stringify(req.body && req.body.bagToken)} len=${String((req.body && req.body.bagToken) || '').length}`);
     const result = await scanService.resolveScan({ bagToken: req.body.bagToken });
     return ControllerHelpers.sendSuccess(res, result, 'Scan resolved');
   } catch (err) {
