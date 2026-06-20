@@ -41,7 +41,6 @@
   var toastMessage = document.getElementById('confirmMessage');
 
   // --- state ----------------------------------------------------------------
-  var scanBuffer = '';
   var scanTimeout = null;
   var toastTimeout = null;
   var lastBagToken = null; // last bag this session applied a transition to (undo target)
@@ -305,17 +304,23 @@
   }
 
   // --- scanner input (keyboard-wedge) --------------------------------------
-  function handleScanInput(e) {
-    var value = e.target.value;
-    if (scanTimeout) clearTimeout(scanTimeout);
-    scanBuffer += value;
+  // Read the input's NATIVE accumulated value once the scan settles. The old
+  // approach (append-each-input-event-then-clear-the-field) raced with fast
+  // wedge scanners typing a long URL QR, dropping and duplicating characters
+  // (e.g. "cc"->"c", overlapping "rrundbrundbergl…") so the 32-hex token came
+  // out corrupted -> "bag not registered". Letting the field accumulate
+  // natively and reading it once eliminates the race.
+  function finalizeScan() {
+    if (scanTimeout) { clearTimeout(scanTimeout); scanTimeout = null; }
+    var data = (scanInput.value || '').trim();
     scanInput.value = '';
-    scanTimeout = setTimeout(function () {
-      if (scanBuffer.length > 0) {
-        processScan(scanBuffer.trim());
-        scanBuffer = '';
-      }
-    }, 100);
+    if (data.length > 0) processScan(data);
+  }
+
+  function handleScanInput() {
+    // Debounce: finalize ~150ms after the last keystroke of the burst.
+    if (scanTimeout) clearTimeout(scanTimeout);
+    scanTimeout = setTimeout(finalizeScan, 150);
   }
 
   function processScan(scanData) {
@@ -389,6 +394,10 @@
 
     // Wire events.
     scanInput.addEventListener('input', handleScanInput);
+    // Most wedge scanners send Enter (CR) as a suffix — finalize immediately.
+    scanInput.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') { e.preventDefault(); finalizeScan(); }
+    });
     scanInput.addEventListener('blur', function () {
       setTimeout(function () {
         if (confirmModal.hidden && document.activeElement !== scanInput) focusScanner();
