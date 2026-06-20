@@ -204,24 +204,29 @@ describe('Admin affiliate settings API', () => {
     expect(res.status).toBe(403);
   });
 
-  it('PATCH updates fees and rejects out-of-range fees (400)', async () => {
-    const aff = await makeAffiliate();
-    const ok = await agent
+  it('ignores deprecated V1 fee fields (minimumDeliveryFee/perBagDeliveryFee) — no longer editable here', async () => {
+    const aff = await makeAffiliate(); // defaults: minimumDeliveryFee 25, perBagDeliveryFee 5
+    const res = await agent
       .patch(`/api/v1/administrators/affiliates/${aff.affiliateId}`)
       .set('Authorization', `Bearer ${adminToken}`)
       .set('x-csrf-token', csrfToken)
       .send({ minimumDeliveryFee: 50, perBagDeliveryFee: 25 });
-    expect(ok.status).toBe(200);
+    expect(res.status).toBe(200); // accepted but the V1 fields are dropped from the whitelist
     const reloaded = await Affiliate.findOne({ affiliateId: aff.affiliateId });
-    expect(reloaded.minimumDeliveryFee).toBe(50);
-    expect(reloaded.perBagDeliveryFee).toBe(25);
+    expect(reloaded.minimumDeliveryFee).toBe(25); // unchanged
+    expect(reloaded.perBagDeliveryFee).toBe(5); // unchanged
+  });
 
-    const bad = await agent
+  it('updates the flat deliveryFee and persists', async () => {
+    const aff = await makeAffiliate();
+    const res = await agent
       .patch(`/api/v1/administrators/affiliates/${aff.affiliateId}`)
       .set('Authorization', `Bearer ${adminToken}`)
       .set('x-csrf-token', csrfToken)
-      .send({ minimumDeliveryFee: 999 });
-    expect(bad.status).toBe(400);
+      .send({ deliveryFee: 8.5 });
+    expect(res.status).toBe(200);
+    expect(res.body.affiliate.deliveryFee).toBe(8.5);
+    expect((await Affiliate.findOne({ affiliateId: aff.affiliateId })).deliveryFee).toBe(8.5);
   });
 
   it('PATCH can toggle isActive', async () => {
@@ -277,5 +282,107 @@ describe('Admin affiliate settings API', () => {
     expect(row).toBeTruthy();
     expect(row.serviceType).toBe('full_service');
     expect(row.orderNotificationsEnabled).toBe(true);
+  });
+
+  // ── GET a single affiliate (raw editable record for the admin edit form) ───
+  it('GET /affiliates/:affiliateId returns the raw editable record', async () => {
+    const aff = await makeAffiliate({
+      businessName: 'Bubbles Co', serviceType: 'full_service',
+      pickupInstructions: 'Leave on porch', deliveryInstructions: 'Ring twice', deliveryFee: 7.25
+    });
+    const res = await agent
+      .get(`/api/v1/administrators/affiliates/${aff.affiliateId}`)
+      .set('Authorization', `Bearer ${adminToken}`);
+    expect(res.status).toBe(200);
+    expect(res.body.success).toBe(true);
+    const a = res.body.affiliate;
+    expect(a.affiliateId).toBe(aff.affiliateId);
+    expect(a.username).toBe(aff.username); // shown read-only in the form
+    expect(a.firstName).toBe('Aff');
+    expect(a.businessName).toBe('Bubbles Co');
+    expect(a.serviceType).toBe('full_service');
+    expect(a.pickupInstructions).toBe('Leave on porch');
+    expect(a.deliveryInstructions).toBe('Ring twice');
+    expect(a.deliveryFee).toBe(7.25); // raw number, not a formatted currency string
+    expect(a.orderNotificationsEnabled).toBe(true);
+  });
+
+  it('GET /affiliates/:affiliateId is 404 for an unknown affiliate', async () => {
+    const res = await agent
+      .get('/api/v1/administrators/affiliates/AFF-nope')
+      .set('Authorization', `Bearer ${adminToken}`);
+    expect(res.status).toBe(404);
+  });
+
+  it('GET /affiliates/:affiliateId forbids an admin lacking manage_affiliates (403)', async () => {
+    const aff = await makeAffiliate();
+    const res = await agent
+      .get(`/api/v1/administrators/affiliates/${aff.affiliateId}`)
+      .set('Authorization', `Bearer ${limitedToken}`);
+    expect(res.status).toBe(403);
+  });
+
+  // ── Full affiliate edit (all fields except username) ──────────────────────
+  it('edits the full affiliate record (contact, address, fee, both instruction sets)', async () => {
+    const aff = await makeAffiliate({ pickupInstructions: 'old pickup' });
+    const res = await agent
+      .patch(`/api/v1/administrators/affiliates/${aff.affiliateId}`)
+      .set('Authorization', `Bearer ${adminToken}`)
+      .set('x-csrf-token', csrfToken)
+      .send({
+        firstName: 'Edited', lastName: 'Partner', phone: '5125559999',
+        businessName: 'Edited Wash Co', address: '99 New St', city: 'Pflugerville',
+        state: 'TX', zipCode: '78660', languagePreference: 'es', affiliateType: 'location',
+        deliveryFee: 12.5, pickupInstructions: 'Leave at the front desk.',
+        deliveryInstructions: 'Ring the bell; hand to staff.', isActive: true
+      });
+    expect(res.status).toBe(200);
+    const r = await Affiliate.findOne({ affiliateId: aff.affiliateId });
+    expect(r.firstName).toBe('Edited');
+    expect(r.lastName).toBe('Partner');
+    expect(r.phone).toBe('5125559999');
+    expect(r.businessName).toBe('Edited Wash Co');
+    expect(r.address).toBe('99 New St');
+    expect(r.city).toBe('Pflugerville');
+    expect(r.zipCode).toBe('78660');
+    expect(r.languagePreference).toBe('es');
+    expect(r.affiliateType).toBe('location');
+    expect(r.deliveryFee).toBe(12.5);
+    expect(r.pickupInstructions).toBe('Leave at the front desk.');
+    expect(r.deliveryInstructions).toBe('Ring the bell; hand to staff.');
+  });
+
+  it('changes the email when the new address is free', async () => {
+    const aff = await makeAffiliate();
+    const fresh = `moved${Date.now()}@example.com`;
+    const res = await agent
+      .patch(`/api/v1/administrators/affiliates/${aff.affiliateId}`)
+      .set('Authorization', `Bearer ${adminToken}`)
+      .set('x-csrf-token', csrfToken)
+      .send({ email: fresh });
+    expect(res.status).toBe(200);
+    expect((await Affiliate.findOne({ affiliateId: aff.affiliateId })).email).toBe(fresh);
+  });
+
+  it('rejects an email change that collides with another affiliate (409)', async () => {
+    const a = await makeAffiliate();
+    const b = await makeAffiliate();
+    const res = await agent
+      .patch(`/api/v1/administrators/affiliates/${b.affiliateId}`)
+      .set('Authorization', `Bearer ${adminToken}`)
+      .set('x-csrf-token', csrfToken)
+      .send({ email: a.email });
+    expect(res.status).toBe(409);
+    expect((await Affiliate.findOne({ affiliateId: b.affiliateId })).email).toBe(b.email); // unchanged
+  });
+
+  it('rejects an out-of-range deliveryFee (400)', async () => {
+    const aff = await makeAffiliate();
+    const res = await agent
+      .patch(`/api/v1/administrators/affiliates/${aff.affiliateId}`)
+      .set('Authorization', `Bearer ${adminToken}`)
+      .set('x-csrf-token', csrfToken)
+      .send({ deliveryFee: 99999 });
+    expect(res.status).toBe(400);
   });
 });

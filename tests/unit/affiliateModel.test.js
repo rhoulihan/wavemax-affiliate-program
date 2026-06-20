@@ -120,4 +120,43 @@ describe('Affiliate Model Methods', () => {
       await expect(a.save()).rejects.toThrow();
     });
   });
+
+  describe('flat deliveryFee + deliveryInstructions', () => {
+    const base = {
+      firstName: 'Pat', lastName: 'Lee', phone: '555-0000',
+      address: '1 A St', city: 'Austin', state: 'TX', zipCode: '78701',
+      password: 'StrongPassword123!', paymentMethod: 'check'
+    };
+
+    it('defaults deliveryFee to 0 and leaves deliveryInstructions unset', async () => {
+      const a = await new Affiliate(createAffiliateData({
+        ...base, email: 'df0@example.com', username: 'df0'
+      })).save();
+      expect(a.deliveryFee).toBe(0);
+      expect(a.deliveryInstructions).toBeUndefined();
+    });
+
+    it('persists a non-zero deliveryFee and trimmed deliveryInstructions', async () => {
+      const a = await new Affiliate(createAffiliateData({
+        ...base, email: 'df1@example.com', username: 'df1',
+        deliveryFee: 9.99, deliveryInstructions: '  Ring the bell.  '
+      })).save();
+      expect(a.deliveryFee).toBe(9.99);
+      expect(a.deliveryInstructions).toBe('Ring the bell.');
+    });
+
+    it('rejects a deliveryFee above the max', async () => {
+      const a = new Affiliate(createAffiliateData({
+        ...base, email: 'df2@example.com', username: 'df2', deliveryFee: 2000
+      }));
+      await expect(a.save()).rejects.toThrow();
+    });
+
+    it('rejects a negative deliveryFee', async () => {
+      const a = new Affiliate(createAffiliateData({
+        ...base, email: 'df3@example.com', username: 'df3', deliveryFee: -1
+      }));
+      await expect(a.save()).rejects.toThrow();
+    });
+  });
 });

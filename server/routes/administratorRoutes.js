@@ -35,6 +35,11 @@ router.get('/affiliates', checkAdminPermission(['view_analytics']), administrato
 // Manual affiliate creation (no invite) — zero-commission 'location'
 // collection points by default; 'standard' accepted. CSRF: CRITICAL_ENDPOINTS.
 const manualAffiliateController = require('../modules/onboarding/manualAffiliateController');
+// Single affiliate — raw editable record for the admin edit form. Defined
+// before the administrator '/:id' routes so '/affiliates/:affiliateId' wins.
+router.get('/affiliates/:affiliateId',
+  checkAdminPermission(['manage_affiliates']),
+  manualAffiliateController.getAffiliateForEdit);
 router.post('/affiliates',
   checkAdminPermission(['manage_affiliates']),
   sensitiveOperationLimiter,
@@ -68,15 +73,27 @@ router.post('/affiliates',
 router.patch('/affiliates/:affiliateId',
   checkAdminPermission(['manage_affiliates']),
   [
+    // Identity/contact (username is NOT editable — login identity).
+    body('firstName').optional().trim().notEmpty().isLength({ max: 50 }),
+    body('lastName').optional().trim().notEmpty().isLength({ max: 50 }),
+    body('email').optional().isEmail().withMessage('Valid email is required'),
+    body('phone').optional().trim().notEmpty().isLength({ max: 25 }),
+    body('businessName').optional({ nullable: true }).isString().trim().isLength({ max: 100 }),
+    body('address').optional().trim().notEmpty().isLength({ max: 200 }),
+    body('city').optional().trim().notEmpty().isLength({ max: 100 }),
+    body('state').optional().trim().notEmpty().isLength({ max: 50 }),
+    body('zipCode').optional().trim().notEmpty().isLength({ max: 20 }),
+    body('languagePreference').optional().isIn(['en', 'es', 'pt', 'de']),
+    body('affiliateType').optional().isIn(['standard', 'location']),
+    // Settings.
     body('serviceType').optional().isIn(['pickup_location', 'full_service']),
     body('orderNotificationsEnabled').optional().isBoolean(),
     body('isActive').optional().isBoolean(),
-    // Optional on edit, but if present it can't be blanked (every partner keeps
-    // non-empty instructions). trim() BEFORE notEmpty() rejects whitespace-only.
+    body('deliveryFee').optional().isFloat({ min: 0, max: 1000 }),
+    // Optional on edit; if present, pickup can't be blanked (trim BEFORE notEmpty).
     body('pickupInstructions').optional().trim().notEmpty().isLength({ max: 2000 })
       .withMessage('Pickup instructions cannot be empty'),
-    body('minimumDeliveryFee').optional().isFloat({ min: 0, max: 100 }),
-    body('perBagDeliveryFee').optional().isFloat({ min: 0, max: 50 })
+    body('deliveryInstructions').optional({ nullable: true }).isString().trim().isLength({ max: 2000 })
   ],
   manualAffiliateController.updateAffiliateSettings);
 

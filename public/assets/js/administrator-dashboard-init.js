@@ -2044,11 +2044,8 @@
                                 <button class="btn btn-sm btn-secondary affiliate-settings-btn"
                                         data-affiliate-id="${aff.affiliateId}"
                                         data-affiliate-name="${escapeHtml(name)}"
-                                        data-service-type="${escapeHtml(serviceType)}"
-                                        data-notifications="${notifyOn ? '1' : '0'}"
-                                        data-pickup-instructions="${escapeHtml(aff.pickupInstructions || '')}"
-                                        title="${escapeHtml(t('admin.affiliateSettings.button', 'Settings'))}">
-                                    <i class="fas fa-cog"></i> ${escapeHtml(t('admin.affiliateSettings.button', 'Settings'))}
+                                        title="${escapeHtml(t('admin.affiliateSettings.button', 'Edit'))}">
+                                    <i class="fas fa-pen"></i> ${escapeHtml(t('admin.affiliateSettings.button', 'Edit'))}
                                 </button>
                                 <button class="btn btn-sm btn-secondary print-labels-btn"
                                         data-affiliate-id="${aff.affiliateId}"
@@ -2082,35 +2079,71 @@
         if (settingsBtn) {
           e.preventDefault();
           e.stopPropagation();
-          showAffiliateSettingsModal({
-            affiliateId: settingsBtn.getAttribute('data-affiliate-id'),
-            name: settingsBtn.getAttribute('data-affiliate-name'),
-            serviceType: settingsBtn.getAttribute('data-service-type'),
-            notifications: settingsBtn.getAttribute('data-notifications') === '1',
-            pickupInstructions: settingsBtn.getAttribute('data-pickup-instructions') || ''
-          });
+          showAffiliateSettingsModal(
+            settingsBtn.getAttribute('data-affiliate-id'),
+            settingsBtn.getAttribute('data-affiliate-name')
+          );
         }
       });
     }
   }
 
-  // ── Per-affiliate settings modal (serviceType + order notifications) ──────
+  // ── Per-affiliate edit modal (full record except username) ────────────────
   let affiliateSettingsId = null;
 
-  function showAffiliateSettingsModal({ affiliateId, name, serviceType, notifications, pickupInstructions }) {
+  // Set a field's value by element id, tolerating a missing node.
+  function setVal(id, value) {
+    const el = document.getElementById(id);
+    if (el) el.value = value == null ? '' : value;
+  }
+  function setChecked(id, value) {
+    const el = document.getElementById(id);
+    if (el) el.checked = !!value;
+  }
+
+  async function showAffiliateSettingsModal(affiliateId, name) {
     const modal = document.getElementById('affiliateSettingsModal');
     if (!modal) return;
+    const t = window.i18n ? window.i18n.t.bind(window.i18n) : (k, f) => f || k;
     affiliateSettingsId = affiliateId;
+
     const nameEl = document.getElementById('affiliateSettingsName');
     if (nameEl) nameEl.textContent = name || affiliateId;
-    const typeSel = document.getElementById('affiliateSettingsServiceType');
-    if (typeSel) typeSel.value = serviceType === 'full_service' ? 'full_service' : 'pickup_location';
-    const notifyChk = document.getElementById('affiliateSettingsNotifications');
-    if (notifyChk) notifyChk.checked = !!notifications;
-    const instrEl = document.getElementById('affiliateSettingsPickupInstructions');
-    if (instrEl) instrEl.value = pickupInstructions || '';
     const errEl = document.getElementById('affiliateSettingsError');
     if (errEl) errEl.hidden = true;
+
+    // Fetch the raw editable record (analytics list rows lack the full fields).
+    let aff = {};
+    try {
+      const response = await adminFetch(`/api/v1/administrators/affiliates/${affiliateId}`);
+      const data = await response.json();
+      if (response.ok && data.success) aff = data.affiliate || {};
+      else showNotification(data.message || t('admin.affiliateSettings.loadError', 'Failed to load affiliate'), 'error');
+    } catch (err) {
+      console.error('Error loading affiliate for edit:', err);
+      showNotification(t('admin.affiliateSettings.loadError', 'Failed to load affiliate'), 'error');
+    }
+
+    const usernameEl = document.getElementById('affiliateSettingsUsername');
+    if (usernameEl) usernameEl.textContent = aff.username || '';
+    setVal('affEditFirstName', aff.firstName);
+    setVal('affEditLastName', aff.lastName);
+    setVal('affEditEmail', aff.email);
+    setVal('affEditPhone', aff.phone);
+    setVal('affEditBusinessName', aff.businessName);
+    setVal('affEditAddress', aff.address);
+    setVal('affEditCity', aff.city);
+    setVal('affEditState', aff.state);
+    setVal('affEditZipCode', aff.zipCode);
+    setVal('affEditLanguage', aff.languagePreference || 'en');
+    setVal('affEditAffiliateType', aff.affiliateType || 'standard');
+    setVal('affiliateSettingsServiceType', aff.serviceType === 'full_service' ? 'full_service' : 'pickup_location');
+    setVal('affEditDeliveryFee', aff.deliveryFee != null ? aff.deliveryFee : 0);
+    setChecked('affiliateSettingsNotifications', aff.orderNotificationsEnabled);
+    setChecked('affEditIsActive', aff.isActive !== false);
+    setVal('affiliateSettingsPickupInstructions', aff.pickupInstructions);
+    setVal('affEditDeliveryInstructions', aff.deliveryInstructions);
+
     modal.classList.remove('hidden');
     modal.style.display = 'flex';
   }
@@ -2121,13 +2154,17 @@
     affiliateSettingsId = null;
   }
 
+  function getVal(id) {
+    const el = document.getElementById(id);
+    return el ? (el.value || '').trim() : '';
+  }
+
   async function saveAffiliateSettings() {
     if (!affiliateSettingsId) return;
     const t = window.i18n ? window.i18n.t.bind(window.i18n) : (k, f) => f || k;
-    const serviceType = document.getElementById('affiliateSettingsServiceType').value;
-    const orderNotificationsEnabled = document.getElementById('affiliateSettingsNotifications').checked;
-    const pickupInstructions = (document.getElementById('affiliateSettingsPickupInstructions').value || '').trim();
     const errEl = document.getElementById('affiliateSettingsError');
+
+    const pickupInstructions = getVal('affiliateSettingsPickupInstructions');
     // Every partner must have customer-facing pickup instructions.
     if (!pickupInstructions) {
       if (errEl) {
@@ -2137,24 +2174,45 @@
       return;
     }
     if (errEl) errEl.hidden = true;
+
+    const payload = {
+      firstName: getVal('affEditFirstName'),
+      lastName: getVal('affEditLastName'),
+      email: getVal('affEditEmail'),
+      phone: getVal('affEditPhone'),
+      businessName: getVal('affEditBusinessName'),
+      address: getVal('affEditAddress'),
+      city: getVal('affEditCity'),
+      state: getVal('affEditState'),
+      zipCode: getVal('affEditZipCode'),
+      languagePreference: getVal('affEditLanguage'),
+      affiliateType: getVal('affEditAffiliateType'),
+      serviceType: document.getElementById('affiliateSettingsServiceType').value,
+      orderNotificationsEnabled: document.getElementById('affiliateSettingsNotifications').checked,
+      isActive: document.getElementById('affEditIsActive').checked,
+      deliveryFee: parseFloat(getVal('affEditDeliveryFee') || '0') || 0,
+      pickupInstructions,
+      deliveryInstructions: getVal('affEditDeliveryInstructions')
+    };
+
     const saveBtn = document.getElementById('saveAffiliateSettings');
     try {
       if (saveBtn) saveBtn.disabled = true;
       const response = await adminFetch(`/api/v1/administrators/affiliates/${affiliateSettingsId}`, {
         method: 'PATCH',
-        body: JSON.stringify({ serviceType, orderNotificationsEnabled, pickupInstructions })
+        body: JSON.stringify(payload)
       });
       const data = await response.json();
       if (response.ok && data.success) {
-        showNotification(t('admin.affiliateSettings.saved', 'Affiliate settings saved'), 'success');
+        showNotification(t('admin.affiliateSettings.saved', 'Affiliate saved'), 'success');
         closeAffiliateSettingsModal();
         await loadAffiliates();
       } else {
-        showNotification(data.message || t('admin.affiliateSettings.saveError', 'Failed to save settings'), 'error');
+        showNotification(data.message || t('admin.affiliateSettings.saveError', 'Failed to save'), 'error');
       }
     } catch (err) {
-      console.error('Error saving affiliate settings:', err);
-      showNotification(t('admin.affiliateSettings.saveError', 'Failed to save settings'), 'error');
+      console.error('Error saving affiliate:', err);
+      showNotification(t('admin.affiliateSettings.saveError', 'Failed to save'), 'error');
     } finally {
       if (saveBtn) saveBtn.disabled = false;
     }

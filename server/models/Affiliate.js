@@ -41,6 +41,8 @@ const affiliateSchema = new mongoose.Schema({
   // config layer (create + settings); left optional at the schema level so
   // invite self-registration — which doesn't collect it — still saves.
   pickupInstructions: { type: String, trim: true },
+  // Customer-facing delivery instructions, shown in the out-for-delivery email.
+  deliveryInstructions: { type: String, trim: true, maxlength: 2000 },
   firstName: { type: String, required: true },
   lastName: { type: String, required: true },
   email: { type: String, required: true, unique: true },
@@ -50,7 +52,17 @@ const affiliateSchema = new mongoose.Schema({
   city: { type: String, required: true },
   state: { type: String, required: true },
   zipCode: { type: String, required: true }, // Keep required for now - can geocode later
-  // Delivery fee structure
+  // Flat per-affiliate delivery fee — display-only (money lives in Cents); shown
+  // in the order-confirmation email when non-zero. 0 = no delivery fee.
+  deliveryFee: {
+    type: Number,
+    default: 0,
+    min: 0,
+    max: 1000
+  },
+  // DEPRECATED (V1): superseded by the flat `deliveryFee` above; no longer
+  // surfaced in the admin edit UI. Kept for back-compat with affiliate
+  // dashboard/landing + bagClaimService until those are migrated.
   minimumDeliveryFee: {
     type: Number,
     required: true,

@@ -1029,3 +1029,17 @@ input:focus, select:focus {
     color: #6c757d;
 }
 .docusign-status { display: inline-flex; align-items: center; gap: 8px; }
+
+/* Stacked checkbox rows in the affiliate edit modal (label + control inline) */
+.checkbox-stack {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+    font-weight: 600;
+    cursor: pointer;
+}
+.checkbox-stack input[type="checkbox"] {
+    width: auto;
+    margin: 0;
+}

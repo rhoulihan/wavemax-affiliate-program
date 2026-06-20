@@ -156,12 +156,42 @@ exports.createAffiliateManually = ControllerHelpers.asyncWrapper(async (req, res
 });
 
 /**
+ * GET /api/v1/administrators/affiliates/:affiliateId
+ *
+ * Returns the RAW editable affiliate record for the admin edit form (unformatted
+ * values — deliveryFee is a number, not a currency string). Username is included
+ * so the form can show it read-only. Credentials/delivery-code are never exposed.
+ * 200 with { affiliate }; 404 unknown affiliate.
+ */
+exports.getAffiliateForEdit = ControllerHelpers.asyncWrapper(async (req, res) => {
+  const affiliate = await Affiliate.findOne({ affiliateId: req.params.affiliateId });
+  if (!affiliate) {
+    return ControllerHelpers.sendError(res, 'Affiliate not found', 404, [{ code: 'not_found' }]);
+  }
+  return ControllerHelpers.sendSuccess(res, {
+    affiliate: {
+      affiliateId: affiliate.affiliateId, username: affiliate.username,
+      firstName: affiliate.firstName, lastName: affiliate.lastName,
+      email: affiliate.email, phone: affiliate.phone, businessName: affiliate.businessName,
+      address: affiliate.address, city: affiliate.city, state: affiliate.state, zipCode: affiliate.zipCode,
+      languagePreference: affiliate.languagePreference, affiliateType: affiliate.affiliateType,
+      serviceType: affiliate.serviceType, orderNotificationsEnabled: affiliate.orderNotificationsEnabled,
+      deliveryFee: affiliate.deliveryFee, pickupInstructions: affiliate.pickupInstructions,
+      deliveryInstructions: affiliate.deliveryInstructions, isActive: affiliate.isActive
+    }
+  }, 'Affiliate retrieved');
+});
+
+/**
  * PATCH /api/v1/administrators/affiliates/:affiliateId
  *
- * Admin edits an affiliate's operational settings. Whitelisted fields only:
- * serviceType, orderNotificationsEnabled, isActive, minimumDeliveryFee,
- * perBagDeliveryFee. Never touches credentials, identity, or the delivery code.
- * Responds 200 with the updated subset; 404 if the affiliate doesn't exist.
+ * Admin edits an affiliate's full record (everything except the username, which
+ * is the login identity, and credentials/delivery-code, which are never touched
+ * here). Whitelisted fields: firstName, lastName, email (uniqueness-checked),
+ * phone, businessName, address, city, state, zipCode, languagePreference,
+ * affiliateType, serviceType, orderNotificationsEnabled, deliveryFee,
+ * pickupInstructions, deliveryInstructions, isActive.
+ * Responds 200 with the updated record; 404 unknown affiliate; 409 email taken.
  */
 exports.updateAffiliateSettings = ControllerHelpers.asyncWrapper(async (req, res) => {
   const errors = validationResult(req);
@@ -175,61 +205,88 @@ exports.updateAffiliateSettings = ControllerHelpers.asyncWrapper(async (req, res
   }
 
   const changed = {};
-  const serviceTypeProvided = req.body.serviceType !== undefined;
-  const notificationsProvided = req.body.orderNotificationsEnabled !== undefined;
 
-  if (serviceTypeProvided) {
-    affiliate.serviceType = req.body.serviceType;
-    changed.serviceType = req.body.serviceType;
+  // Email change → normalize + enforce uniqueness across other affiliates.
+  if (req.body.email !== undefined) {
+    const newEmail = String(req.body.email).trim().toLowerCase();
+    if (newEmail && newEmail !== String(affiliate.email || '').toLowerCase()) {
+      const taken = await Affiliate.findOne({
+        email: newEmail, affiliateId: { $ne: affiliate.affiliateId }
+      }).select('_id');
+      if (taken) {
+        return ControllerHelpers.sendError(res, 'Email already in use', 409, [{ code: 'duplicate_email' }]);
+      }
+      affiliate.email = newEmail;
+      changed.email = newEmail;
+    }
   }
-  if (notificationsProvided) {
-    // Explicit value always wins.
-    affiliate.orderNotificationsEnabled = !!req.body.orderNotificationsEnabled;
-    changed.orderNotificationsEnabled = affiliate.orderNotificationsEnabled;
-  } else if (serviceTypeProvided) {
-    // serviceType changed without an explicit notifications value → re-apply the
-    // serviceType default (full_service → on, pickup_location → off) so the two
-    // never drift out of sync on a type change.
-    affiliate.orderNotificationsEnabled = (affiliate.serviceType === 'full_service');
-    changed.orderNotificationsEnabled = affiliate.orderNotificationsEnabled;
+
+  // Plain trimmed-string fields.
+  for (const f of ['firstName', 'lastName', 'phone', 'businessName', 'address', 'city', 'state', 'zipCode',
+    'pickupInstructions', 'deliveryInstructions']) {
+    if (req.body[f] !== undefined) {
+      affiliate[f] = String(req.body[f]).trim();
+      changed[f] = affiliate[f];
+    }
+  }
+  // Enum fields (validated at the route layer).
+  for (const f of ['languagePreference', 'affiliateType']) {
+    if (req.body[f] !== undefined) {
+      affiliate[f] = req.body[f];
+      changed[f] = affiliate[f];
+    }
+  }
+  if (req.body.deliveryFee !== undefined) {
+    affiliate.deliveryFee = parseFloat(req.body.deliveryFee);
+    changed.deliveryFee = affiliate.deliveryFee;
   }
   if (req.body.isActive !== undefined) {
     affiliate.isActive = !!req.body.isActive;
     changed.isActive = affiliate.isActive;
   }
-  if (req.body.pickupInstructions !== undefined) {
-    affiliate.pickupInstructions = String(req.body.pickupInstructions).trim();
-    changed.pickupInstructions = affiliate.pickupInstructions;
+
+  // serviceType + notifications keep their coupled default (explicit value wins;
+  // a type change without an explicit notifications value re-applies the default).
+  const serviceTypeProvided = req.body.serviceType !== undefined;
+  const notificationsProvided = req.body.orderNotificationsEnabled !== undefined;
+  if (serviceTypeProvided) {
+    affiliate.serviceType = req.body.serviceType;
+    changed.serviceType = req.body.serviceType;
   }
-  if (req.body.minimumDeliveryFee !== undefined) {
-    affiliate.minimumDeliveryFee = parseFloat(req.body.minimumDeliveryFee);
-    changed.minimumDeliveryFee = affiliate.minimumDeliveryFee;
-  }
-  if (req.body.perBagDeliveryFee !== undefined) {
-    affiliate.perBagDeliveryFee = parseFloat(req.body.perBagDeliveryFee);
-    changed.perBagDeliveryFee = affiliate.perBagDeliveryFee;
+  if (notificationsProvided) {
+    affiliate.orderNotificationsEnabled = !!req.body.orderNotificationsEnabled;
+    changed.orderNotificationsEnabled = affiliate.orderNotificationsEnabled;
+  } else if (serviceTypeProvided) {
+    affiliate.orderNotificationsEnabled = (affiliate.serviceType === 'full_service');
+    changed.orderNotificationsEnabled = affiliate.orderNotificationsEnabled;
   }
 
-  await affiliate.save();
+  try {
+    await affiliate.save();
+  } catch (err) {
+    if (err && err.code === 11000) { // unique-index backstop (email race)
+      return ControllerHelpers.sendError(res, 'Email already in use', 409, [{ code: 'duplicate_email' }]);
+    }
+    throw err;
+  }
 
   logAuditEvent(AuditEvents.AFFILIATE_UPDATED, {
-    adminId: req.user.id,
-    affiliateId: affiliate.affiliateId,
-    changed
+    adminId: req.user.id, affiliateId: affiliate.affiliateId, changed: Object.keys(changed)
   }, req);
-  logger.info('Affiliate settings updated by administrator', {
+  logger.info('Affiliate updated by administrator', {
     affiliateId: affiliate.affiliateId, changed: Object.keys(changed)
   });
 
   return ControllerHelpers.sendSuccess(res, {
     affiliate: {
       affiliateId: affiliate.affiliateId,
-      serviceType: affiliate.serviceType,
-      orderNotificationsEnabled: affiliate.orderNotificationsEnabled,
-      isActive: affiliate.isActive,
-      pickupInstructions: affiliate.pickupInstructions,
-      minimumDeliveryFee: affiliate.minimumDeliveryFee,
-      perBagDeliveryFee: affiliate.perBagDeliveryFee
+      firstName: affiliate.firstName, lastName: affiliate.lastName,
+      email: affiliate.email, phone: affiliate.phone, businessName: affiliate.businessName,
+      address: affiliate.address, city: affiliate.city, state: affiliate.state, zipCode: affiliate.zipCode,
+      languagePreference: affiliate.languagePreference, affiliateType: affiliate.affiliateType,
+      serviceType: affiliate.serviceType, orderNotificationsEnabled: affiliate.orderNotificationsEnabled,
+      deliveryFee: affiliate.deliveryFee, pickupInstructions: affiliate.pickupInstructions,
+      deliveryInstructions: affiliate.deliveryInstructions, isActive: affiliate.isActive
     }
   }, 'Affiliate updated');
 });

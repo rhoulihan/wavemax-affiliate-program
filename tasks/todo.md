@@ -1,34 +1,34 @@
-# Active task — order-start redesign on /claim (no persistent session) — DONE
+# Active todo — affiliate editing + instructions + delivery fee + priced add-ons
 
-Scope: /claim QR flow ONLY (kiosk unchanged). In-progress bags: keep the existing advance flow;
-the new start/cancel prompt is only for the no-order case.
+Plan: `~/.claude/plans/parsed-spinning-unicorn.md` (approved 2026-06-20).
 
-Decisions:
-- Remove the PERSISTENT (batch) scan session → each bag = fresh scan + code (customer phone/email or staff code).
-- CUSTOMER start (two-button [Start my order]) → directly start → show partner pickup instructions + "order received".
-- STAFF start (code) → if no order: confirm "Start an order?" [Start]/[Cancel] → "order received", NO instructions.
-- In-progress bag (staff) → existing state-driven advance (unchanged).
-- Either start → customer order-created email if emailVerified (already wired in notifyTransition).
+## PR 1 — Affiliate model + full admin edit
+- [x] Affiliate model: add `deliveryInstructions`, `deliveryFee`; mark V1 fees deprecated
+- [x] `updateAffiliateSettings`: full editable-field whitelist + email-uniqueness 409
+- [x] administratorRoutes PATCH validation: new/expanded fields; drop min/perBag
+- [x] GET /affiliates/:affiliateId raw-record endpoint for the edit form
+- [x] Admin dashboard: full affiliate-edit form (username read-only) + save
+- [x] Tests (model + integration); i18n for new field labels (0 parity errors)
+- [x] Gate green (170 suites / 2743 tests) → commit → deploy
 
-## Backend
-- [x] scanService.resolveScan: include affiliate pickupInstructions (+ serviceType) in the response.
+## PR 2 — Add-on pricing
+- [ ] AddOn model: add `price`; flip the no-price model test
+- [ ] addonController + routes: accept/return `price`
+- [ ] Admin add-on modal: Price input + list column
+- [ ] Tests; gate → commit → deploy
 
-## Frontend
-- [x] scan-session.js: session held IN-MEMORY (drop sessionStorage) → no persistence across bag QR loads.
-- [x] claim.js: enterStaffScan always shows the code panel; customerStartOrder() starts directly →
-      #claim-order-result (+ instructions, "already in progress" on race); staff create-pending →
-      "Start an order?" [Start]/[Cancel] → result with NO instructions; advance → existing confirm;
-      dropped endSession / showSessionActive.
-- [x] claim-embed.html: #claim-order-result (title + customer-only instructions) + customer-start-error;
-      removed #scan-end-session / #scan-session-active.
-- [x] i18n en/es/pt/de: claim.scan.startAnOrder/startBtn/cancelBtn/orderReceived/alreadyInProgress
-      (+ claim.networkError fix). Parity: 0 errors.
-- [x] claimPageWiring + i18nScanKeys tests updated; all 8 scan/order backend suites green.
+## PR 3 — Order form Premium/Free tables
+- [ ] claim.js renderOrderOptions: Premium (price>0) + Free tables, price column
+- [ ] claim.css table layout + `?v=` bump
+- [ ] i18n `claim.order.*`; tests; Lighthouse `/claim`
+- [ ] gate → commit → deploy
 
-## Review / gate / deploy
-- [x] Two adversarial reviewers; fixes: dead selfStartByCustomer removed, redundant inner requires cleaned,
-      hardcoded network-error string i18n'd, instruction-gate tests added. (PROMPT_KEYS namespacing = false alarm.)
-- [x] Full gate: failing set ⊆ 14-suite environmental baseline (exit 0).
-- [x] Deploy both OCI boxes (git pull --ff-only + pm2 reload) + verify live. Commit 80ccfa5; both boxes
-      online; CF-live verified (claim.js customerStartOrder×3, scan-session in-memory, #claim-order-result,
-      en/es/pt/de startAnOrder).
+## PR 4 — Emails + notification routing
+- [ ] notifyTransition: affiliate notify on ANY start (opted-in), drop out_for_delivery affiliate email; resolve add-ons for email
+- [ ] customer order-status email: pickup instr + delivery fee + paid add-ons (pending); delivery instr (out_for_delivery)
+- [ ] Tests (transition/email seam); i18n email copy
+- [ ] gate → commit → deploy
+
+## Final
+- [ ] Adversarial review workflow over the whole diff; fix confirmed findings
+- [ ] End-to-end verify on prod; update memory

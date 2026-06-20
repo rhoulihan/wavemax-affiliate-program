@@ -7,7 +7,7 @@
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'nonce-{{nonce}}' https://cdn.jsdelivr.net; style-src 'self' 'nonce-{{nonce}}' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self'; frame-ancestors 'self'; base-uri 'self'; form-action 'self';">
     <title data-i18n="administrator.dashboard.title">Administrator Dashboard - WaveMAX</title>
     <link rel="stylesheet" href="/assets/css/language-switcher.css">
-    <link rel="stylesheet" href="/assets/css/administrator-dashboard.css">
+    <link rel="stylesheet" href="/assets/css/administrator-dashboard.css?v=20260620">
 </head>
 <body>
     <header class="header">
@@ -466,35 +466,120 @@
         </div>
     </div>
 
-    <!-- Per-affiliate settings modal (serviceType + order notifications) -->
+    <!-- Per-affiliate edit modal (full record except username) -->
     <div class="modal hidden" id="affiliateSettingsModal">
-        <div class="modal-content max-width-400">
+        <div class="modal-content max-width-600">
             <div class="modal-header">
-                <h3 data-i18n="admin.affiliateSettings.modalTitle">Affiliate settings</h3>
+                <h3 data-i18n="admin.affiliateSettings.modalTitle">Edit affiliate</h3>
                 <button class="modal-close" id="closeAffiliateSettingsModal">&times;</button>
             </div>
             <div class="modal-body padding-30">
-                <p class="font-weight-600 margin-bottom-20" id="affiliateSettingsName"></p>
-                <div class="form-group margin-bottom-20">
-                    <label class="font-weight-600 margin-bottom-10" for="affiliateSettingsServiceType"
-                           data-i18n="admin.affiliateSettings.serviceTypeLabel">Service type</label>
-                    <select id="affiliateSettingsServiceType" class="form-control">
-                        <option value="pickup_location" data-i18n="admin.affiliateSettings.pickupLocation">Pickup location</option>
-                        <option value="full_service" data-i18n="admin.affiliateSettings.fullService">Full service</option>
-                    </select>
+                <p class="font-weight-600 margin-bottom-10" id="affiliateSettingsName"></p>
+                <p class="text-muted margin-bottom-20">
+                    <span data-i18n="admin.affiliateSettings.usernameLabel">Username</span>:
+                    <span id="affiliateSettingsUsername" class="font-weight-600"></span>
+                </p>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="affEditFirstName" data-i18n="admin.affiliateSettings.firstName">First name</label>
+                        <input type="text" id="affEditFirstName" class="form-control" maxlength="50">
+                    </div>
+                    <div class="form-group">
+                        <label for="affEditLastName" data-i18n="admin.affiliateSettings.lastName">Last name</label>
+                        <input type="text" id="affEditLastName" class="form-control" maxlength="50">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="affEditEmail" data-i18n="admin.affiliateSettings.email">Email</label>
+                        <input type="email" id="affEditEmail" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label for="affEditPhone" data-i18n="admin.affiliateSettings.phone">Phone</label>
+                        <input type="tel" id="affEditPhone" class="form-control" maxlength="25">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="affEditBusinessName" data-i18n="admin.affiliateSettings.businessName">Business name</label>
+                        <input type="text" id="affEditBusinessName" class="form-control" maxlength="100">
+                    </div>
+                    <div class="form-group">
+                        <label for="affEditAddress" data-i18n="admin.affiliateSettings.address">Street address</label>
+                        <input type="text" id="affEditAddress" class="form-control" maxlength="200">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="affEditCity" data-i18n="admin.affiliateSettings.city">City</label>
+                        <input type="text" id="affEditCity" class="form-control" maxlength="100">
+                    </div>
+                    <div class="form-group">
+                        <label for="affEditState" data-i18n="admin.affiliateSettings.state">State</label>
+                        <input type="text" id="affEditState" class="form-control" maxlength="50">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="affEditZipCode" data-i18n="admin.affiliateSettings.zipCode">ZIP code</label>
+                        <input type="text" id="affEditZipCode" class="form-control" maxlength="20">
+                    </div>
+                    <div class="form-group">
+                        <label for="affEditLanguage" data-i18n="admin.affiliateSettings.language">Language</label>
+                        <select id="affEditLanguage" class="form-control">
+                            <option value="en">English</option>
+                            <option value="es">Español</option>
+                            <option value="pt">Português</option>
+                            <option value="de">Deutsch</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="affEditAffiliateType" data-i18n="admin.affiliateSettings.affiliateTypeLabel">Affiliate type</label>
+                        <select id="affEditAffiliateType" class="form-control">
+                            <option value="standard" data-i18n="admin.affiliateSettings.standard">Standard</option>
+                            <option value="location" data-i18n="admin.affiliateSettings.location">Location</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="affiliateSettingsServiceType" data-i18n="admin.affiliateSettings.serviceTypeLabel">Service type</label>
+                        <select id="affiliateSettingsServiceType" class="form-control">
+                            <option value="pickup_location" data-i18n="admin.affiliateSettings.pickupLocation">Pickup location</option>
+                            <option value="full_service" data-i18n="admin.affiliateSettings.fullService">Full service</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="affEditDeliveryFee" data-i18n="admin.affiliateSettings.deliveryFeeLabel">Delivery fee ($)</label>
+                        <input type="number" id="affEditDeliveryFee" class="form-control" min="0" max="1000" step="0.01">
+                    </div>
+                    <div class="form-group">
+                        <label class="checkbox-stack">
+                            <input type="checkbox" id="affiliateSettingsNotifications">
+                            <span data-i18n="admin.affiliateSettings.notificationsLabel">Send order notifications to this affiliate</span>
+                        </label>
+                        <label class="checkbox-stack">
+                            <input type="checkbox" id="affEditIsActive">
+                            <span data-i18n="admin.affiliateSettings.activeLabel">Account active</span>
+                        </label>
+                    </div>
                 </div>
                 <div class="form-group margin-bottom-20">
-                    <label class="font-weight-600">
-                        <input type="checkbox" id="affiliateSettingsNotifications">
-                        <span data-i18n="admin.affiliateSettings.notificationsLabel">Send order notifications to this affiliate</span>
-                    </label>
-                </div>
-                <div class="form-group margin-bottom-20">
-                    <label class="font-weight-600 margin-bottom-10" for="affiliateSettingsPickupInstructions"
+                    <label for="affiliateSettingsPickupInstructions"
                            data-i18n="admin.affiliateSettings.pickupInstructionsLabel">Customer pickup / drop-off instructions</label>
-                    <textarea id="affiliateSettingsPickupInstructions" class="form-control" rows="4"
+                    <textarea id="affiliateSettingsPickupInstructions" class="form-control" rows="3" maxlength="2000"
                               data-i18n-placeholder="admin.affiliateSettings.pickupInstructionsPlaceholder"
                               placeholder="Shown to the customer after they register a bag."></textarea>
+                </div>
+                <div class="form-group margin-bottom-20">
+                    <label for="affEditDeliveryInstructions"
+                           data-i18n="admin.affiliateSettings.deliveryInstructionsLabel">Delivery instructions</label>
+                    <textarea id="affEditDeliveryInstructions" class="form-control" rows="3" maxlength="2000"
+                              data-i18n-placeholder="admin.affiliateSettings.deliveryInstructionsPlaceholder"
+                              placeholder="Shown to the customer in the out-for-delivery email."></textarea>
                     <p id="affiliateSettingsError" class="claim-error" hidden></p>
                 </div>
                 <div class="form-actions justify-content-center margin-top-30">
@@ -652,7 +737,7 @@
     <!-- Label Printing Utils - Must load after QRCode and jsPDF -->
     <script src="/assets/js/label-print-utils.js" nonce="{{nonce}}"></script>
     
-    <script src="/assets/js/administrator-dashboard-init.js?v=20260617" nonce="{{nonce}}"></script>
+    <script src="/assets/js/administrator-dashboard-init.js?v=20260620" nonce="{{nonce}}"></script>
     <script src="/assets/js/administrator-dashboard-i18n.js" nonce="{{nonce}}"></script>
 
   <!-- Hibu Dynamic Phone Insertion — swaps the WaveMAX Austin number for a
