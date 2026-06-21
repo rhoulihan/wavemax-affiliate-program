@@ -140,6 +140,7 @@
       "freeOptionsTitle": "Kostenlose Optionen",
       "optionColumn": "Option",
       "priceColumn": "Preis",
+      "perPoundSuffix": "/lb",
       "instructionsLabel": "Besondere Hinweise (optional)",
       "instructionsPlaceholder": "Sollen wir etwas wissen? (z. B. Faltvorlieben)"
     }
@@ -1473,6 +1474,9 @@
       "namePortuguese": "Name (Portugiesisch)",
       "nameGerman": "Name (Deutsch)",
       "priceLabel": "Preis ($) — 0 = kostenlos",
+      "priceUnitLabel": "Preiseinheit",
+      "priceUnitFlat": "Pauschal ($)",
+      "priceUnitPerLb": "Pro Pfund ($/lb)",
       "priceColumn": "Preis",
       "free": "Kostenlos",
       "activeLabel": "Aktiv (für Kunden sichtbar)",

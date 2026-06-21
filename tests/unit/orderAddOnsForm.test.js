@@ -54,6 +54,12 @@ describe('start-order form: add-ons + special instructions', () => {
     expect(claimJs).toMatch(/claim\.order\.priceColumn/);
   });
 
+  it('renders per-pound prices with a localized /lb suffix (display-only)', () => {
+    expect(claimJs).toMatch(/per_lb/);                          // unit-aware formatPrice
+    expect(claimJs).toMatch(/claim\.order\.perPoundSuffix/);    // localized "/lb"
+    expect(claimJs).toMatch(/formatPrice\(a\.price,\s*a\.priceUnit\)/); // unit threaded through
+  });
+
   it('re-localizes the options on a language switch (static via data-i18n, dynamic in place)', () => {
     // titles carry data-i18n (key threaded through buildAddOnTable) so
     // translatePage() handles them; both title keys are referenced.
@@ -68,7 +74,7 @@ describe('start-order form: add-ons + special instructions', () => {
   it('ships claim.order.* form keys in all four languages', () => {
     for (const lang of ['en', 'es', 'pt', 'de']) {
       const dict = JSON.parse(fs.readFileSync(path.join(ROOT, `public/locales/${lang}/common.json`), 'utf8'));
-      for (const k of ['premiumOptionsTitle', 'freeOptionsTitle', 'optionColumn', 'priceColumn', 'instructionsLabel', 'instructionsPlaceholder']) {
+      for (const k of ['premiumOptionsTitle', 'freeOptionsTitle', 'optionColumn', 'priceColumn', 'perPoundSuffix', 'instructionsLabel', 'instructionsPlaceholder']) {
         expect(`${lang}:claim.order.${k}:${typeof (dict.claim.order && dict.claim.order[k])}`)
           .toBe(`${lang}:claim.order.${k}:string`);
       }

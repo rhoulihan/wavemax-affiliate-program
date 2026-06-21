@@ -73,6 +73,16 @@ describe('Add-on catalog API', () => {
       expect(res.body.addOns.find(a => a.key === 'paid').price).toBe(5.5);
       expect(res.body.addOns.find(a => a.key === 'free').price).toBe(0);
     });
+
+    it('exposes each add-on priceUnit (defaults flat; per_lb passes through)', async () => {
+      await AddOn.create([
+        { key: 'perlb', name: 'Per Lb', sortOrder: 1, isActive: true, price: 0.5, priceUnit: 'per_lb' },
+        { key: 'flatone', name: 'Flat One', sortOrder: 2, isActive: true, price: 5 }
+      ]);
+      const res = await agent.get('/api/v1/addons');
+      expect(res.body.addOns.find(a => a.key === 'perlb').priceUnit).toBe('per_lb');
+      expect(res.body.addOns.find(a => a.key === 'flatone').priceUnit).toBe('flat');
+    });
   });
 
   describe('admin GET /api/v1/administrators/addons', () => {
@@ -154,6 +164,33 @@ describe('Add-on catalog API', () => {
       expect(res.status).toBe(400);
     });
 
+    it('stores priceUnit per_lb on create (defaults flat when omitted)', async () => {
+      const perlb = await agent
+        .post('/api/v1/administrators/addons')
+        .set('Authorization', `Bearer ${adminToken}`)
+        .set('x-csrf-token', csrfToken)
+        .send({ name: 'Per Pound Wash', price: 0.5, priceUnit: 'per_lb' });
+      expect(perlb.status).toBe(201);
+      expect(perlb.body.addOn.priceUnit).toBe('per_lb');
+      expect((await AddOn.findOne({ key: 'per_pound_wash' })).priceUnit).toBe('per_lb');
+
+      const flat = await agent
+        .post('/api/v1/administrators/addons')
+        .set('Authorization', `Bearer ${adminToken}`)
+        .set('x-csrf-token', csrfToken)
+        .send({ name: 'Flat Wash', price: 5 });
+      expect(flat.body.addOn.priceUnit).toBe('flat');
+    });
+
+    it('rejects an invalid priceUnit (400)', async () => {
+      const res = await agent
+        .post('/api/v1/administrators/addons')
+        .set('Authorization', `Bearer ${adminToken}`)
+        .set('x-csrf-token', csrfToken)
+        .send({ name: 'Bad Unit', price: 1, priceUnit: 'per_kg' });
+      expect(res.status).toBe(400);
+    });
+
     it('rejects a missing name (400)', async () => {
       const res = await agent
         .post('/api/v1/administrators/addons')
@@ -232,6 +269,18 @@ describe('Add-on catalog API', () => {
       expect(res.status).toBe(200);
       expect(res.body.addOn.price).toBe(7.5);
       expect((await AddOn.findOne({ addOnId: a.addOnId })).price).toBe(7.5);
+    });
+
+    it('updates the priceUnit (flat -> per_lb)', async () => {
+      const a = await AddOn.create({ key: 'unitable', name: 'Unitable', price: 0.5 });
+      const res = await agent
+        .patch(`/api/v1/administrators/addons/${a.addOnId}`)
+        .set('Authorization', `Bearer ${adminToken}`)
+        .set('x-csrf-token', csrfToken)
+        .send({ priceUnit: 'per_lb' });
+      expect(res.status).toBe(200);
+      expect(res.body.addOn.priceUnit).toBe('per_lb');
+      expect((await AddOn.findOne({ addOnId: a.addOnId })).priceUnit).toBe('per_lb');
     });
 
     it('rejects an out-of-range price on update (400)', async () => {

@@ -22,15 +22,19 @@ describe('admin add-on management UI', () => {
     expect(html).toContain('id="addonNamePt"');
     expect(html).toContain('id="addonNameDe"');
     expect(html).toContain('id="addonPrice"');
+    expect(html).toContain('id="addonPriceUnit"'); // flat | per_lb selector
     expect(html).toContain('id="addonSortOrder"');
     expect(html).toContain('id="addonActive"');
     expect(html).toContain('id="saveAddOnBtn"');
   });
 
-  it('carries price through the list, modal prefill, and save payload', () => {
+  it('carries price + priceUnit through the list, modal prefill, and save payload', () => {
     expect(js).toContain("t('admin.addons.priceColumn'"); // list column header
     expect(js).toMatch(/getElementById\('addonPrice'\)\.value/); // modal prefill
     expect(js).toMatch(/price:\s*parseFloat/); // save payload
+    expect(js).toMatch(/getElementById\('addonPriceUnit'\)\.value/); // unit prefill + save
+    expect(js).toMatch(/priceUnit:/); // unit in save payload
+    expect(js).toContain("'per_lb'"); // list renders the /lb suffix off the unit
   });
 
   it('loads the tab and renders/saves via the admin add-on API', () => {
@@ -48,7 +52,7 @@ describe('admin add-on management UI', () => {
   it('ships admin.addons.* + the Add-ons tab label in all four languages', () => {
     for (const lang of ['en', 'es', 'pt', 'de']) {
       const dict = JSON.parse(fs.readFileSync(path.join(ROOT, `public/locales/${lang}/common.json`), 'utf8'));
-      for (const k of ['title', 'add', 'name', 'priceLabel', 'priceColumn', 'free', 'sortOrder', 'active', 'edit', 'deactivate', 'save', 'cancel', 'modalTitleAdd', 'modalTitleEdit', 'noAddOns']) {
+      for (const k of ['title', 'add', 'name', 'priceLabel', 'priceUnitLabel', 'priceUnitFlat', 'priceUnitPerLb', 'priceColumn', 'free', 'sortOrder', 'active', 'edit', 'deactivate', 'save', 'cancel', 'modalTitleAdd', 'modalTitleEdit', 'noAddOns']) {
         expect(`${lang}:admin.addons.${k}:${typeof (dict.admin.addons && dict.admin.addons[k])}`)
           .toBe(`${lang}:admin.addons.${k}:string`);
       }

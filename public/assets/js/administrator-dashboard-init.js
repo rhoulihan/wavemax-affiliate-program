@@ -2281,7 +2281,7 @@
                         <tr>
                             <td>${escapeHtml(a.name)}</td>
                             <td><code>${escapeHtml(a.key)}</code></td>
-                            <td>${(a.price || 0) > 0 ? '$' + Number(a.price).toFixed(2) : t('admin.addons.free', 'Free')}</td>
+                            <td>${(a.price || 0) > 0 ? '$' + Number(a.price).toFixed(2) + (a.priceUnit === 'per_lb' ? '/lb' : '') : t('admin.addons.free', 'Free')}</td>
                             <td>${a.sortOrder}</td>
                             <td>
                                 <span class="status-badge ${a.isActive ? 'active' : 'inactive'}">
@@ -2314,6 +2314,7 @@
     document.getElementById('addonNamePt').value = tr.pt || '';
     document.getElementById('addonNameDe').value = tr.de || '';
     document.getElementById('addonPrice').value = addOn ? (addOn.price || 0) : 0;
+    document.getElementById('addonPriceUnit').value = (addOn && addOn.priceUnit === 'per_lb') ? 'per_lb' : 'flat';
     document.getElementById('addonSortOrder').value = addOn ? (addOn.sortOrder || 0) : 0;
     document.getElementById('addonActive').checked = addOn ? !!addOn.isActive : true;
     // The English name field is the source of the key on create; on edit the key
@@ -2347,6 +2348,7 @@
         de: (document.getElementById('addonNameDe').value || '').trim()
       },
       price: parseFloat(document.getElementById('addonPrice').value || '0') || 0,
+      priceUnit: document.getElementById('addonPriceUnit').value === 'per_lb' ? 'per_lb' : 'flat',
       sortOrder: parseInt(document.getElementById('addonSortOrder').value, 10) || 0,
       isActive: document.getElementById('addonActive').checked
     };

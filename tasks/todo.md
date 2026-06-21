@@ -1,38 +1,32 @@
-# Active todo — affiliate editing + instructions + delivery fee + priced add-ons
+# Active todo — add-on price units + delivery-fee line item + operator order-total + partner revenue/commission
 
-Plan: `~/.claude/plans/parsed-spinning-unicorn.md` (approved 2026-06-20).
+Plan: `~/.claude/plans/parsed-spinning-unicorn.md` (approved 2026-06-21).
 
-## PR 1 — Affiliate model + full admin edit
-- [x] Affiliate model: add `deliveryInstructions`, `deliveryFee`; mark V1 fees deprecated
-- [x] `updateAffiliateSettings`: full editable-field whitelist + email-uniqueness 409
-- [x] administratorRoutes PATCH validation: new/expanded fields; drop min/perBag
-- [x] GET /affiliates/:affiliateId raw-record endpoint for the edit form
-- [x] Admin dashboard: full affiliate-edit form (username read-only) + save
-- [x] Tests (model + integration); i18n for new field labels (0 parity errors)
-- [x] Gate green (170 suites / 2743 tests) → commit → deploy
+## PR 1 — Add-on price unit (flat | per-pound, display-only) — CODE DONE (deploy with wave)
+- [x] AddOn model: `priceUnit` enum (flat|per_lb); resolveKeys carries it
+- [x] addonController present/listPublic/create/update + routes validation
+- [x] Admin modal: unit select; list shows `$5.00` vs `$0.50/lb`
+- [x] claim.js formatPrice unit-aware
+- [x] i18n en/es/pt/de; tests green (49); i18n parity 0
+- [ ] asset rebuild + cache-bump + full gate + deploy (batched at end of wave)
 
-## PR 2 — Add-on pricing
-- [x] AddOn model: add `price`; flip the no-price model test
-- [x] addonController + routes: accept/return `price`
-- [x] Admin add-on modal: Price input + list column
-- [x] Tests; gate → commit → deploy
+## PR 2 — Partner delivery fee line item (order form + confirmation summary)
+- [ ] Surface affiliate.deliveryFee to the claim flow (validate/resolve + register response)
+- [ ] claim.js renderOrderOptions: non-optional delivery-fee line (fee>0); confirmation summary lists add-ons+prices + fee + pickup instructions
+- [ ] i18n; tests; gate → commit → deploy
 
-## PR 3 — Order form Premium/Free tables
-- [x] claim.js renderOrderOptions: Premium (price>0) + Free tables, price column
-- [x] claim.css table layout + `?v=` bump (+ embed-app-v2 SPA bumps + rebuild)
-- [x] i18n `claim.order.*`; tests
-- [ ] Lighthouse `/claim` (post-deploy)
-- [x] clean full gate (169 suites green; 1 version-string test updated)
+## PR 3 — Operator: delivery-fee pricing at intake + required final total at send-out + persistence
+- [ ] Order model: orderTotal + deliveryFeeCharged (snapshot at out_for_delivery)
+- [ ] scanService.resolveScan returns deliveryFee for operator; advanceOrder/applyScan record orderTotal + snapshot; require total at out_for_delivery
+- [ ] operator-scan: delivery-fee line w/ price at intake; required total input at send-out; add-ons price-less
+- [ ] scanRoutes validation; tests; gate → commit → deploy
 
-## PR 4 — Emails + notification routing
-- [x] AddOn.resolveKeys shared helper (scanService refactored onto it)
-- [x] notifyTransition: affiliate notify on ANY start (opted-in), drop out_for_delivery affiliate email; resolve add-ons for email
-- [x] customer order-status email: pickup instr + delivery fee + paid add-ons (pending); delivery instr (out_for_delivery); [EXTRA_BLOCK] template
-- [x] sendAffiliateOrderReadyEmail marked dead (call site removed)
-- [x] Tests (transition/email seam + dispatcher render); en/es/pt/de email labels
-- [x] full gate (171 suites / 2760 tests green) → commit → deploy
+## PR 4 — Revenue/commission surfacing + emails
+- [ ] adminDashboardService.getAffiliateAnalytics: totalRevenue + totalCommission sums
+- [ ] affiliateController earnings/dashboard/ytd: commission = Σ deliveryFeeCharged (commission-only)
+- [ ] affiliate dashboard Earnings relabel + wire; emails unit-aware add-on price
+- [ ] i18n; tests; gate → commit → deploy
 
 ## Final
-- [x] Adversarial review workflow over the whole diff (20 agents, 15 raised → 3 confirmed real, all low); fixed all 3 (error-element placement, optionColumn i18n guard, in_progress opts pinned)
-- [x] End-to-end verify on prod (admin GET 401-gated, addons price live, claim Premium/Free tables live, bundle bumps live); store-unblock deployed
-- [x] update memory
+- [ ] Adversarial review workflow over the whole diff; fix confirmed findings
+- [ ] End-to-end verify on prod; update memory

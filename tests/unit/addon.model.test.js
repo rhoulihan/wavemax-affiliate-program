@@ -60,6 +60,17 @@ describe('AddOn model', () => {
       await expect(build({ key: 'neg', name: 'Neg', price: -1 }).save()).rejects.toThrow();
       await expect(build({ key: 'huge', name: 'Huge', price: 20000 }).save()).rejects.toThrow();
     });
+
+    it('carries a priceUnit (defaults flat; accepts per_lb)', async () => {
+      const a = await build().save();
+      expect(a.priceUnit).toBe('flat');
+      const b = await build({ key: 'perlb', name: 'Per Lb', price: 0.5, priceUnit: 'per_lb' }).save();
+      expect(b.priceUnit).toBe('per_lb');
+    });
+
+    it('rejects an invalid priceUnit', async () => {
+      await expect(build({ key: 'bad_unit', name: 'Bad', priceUnit: 'per_kg' }).save()).rejects.toThrow();
+    });
   });
 
   describe('initializeDefaults', () => {

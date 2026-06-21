@@ -30,6 +30,7 @@ function present(a) {
     key: a.key,
     name: a.name,
     price: a.price || 0,
+    priceUnit: a.priceUnit || 'flat',
     translations: { es: a.translations.es || '', pt: a.translations.pt || '', de: a.translations.de || '' },
     isActive: a.isActive,
     sortOrder: a.sortOrder
@@ -44,6 +45,12 @@ function sanitizePrice(value) {
   return n;
 }
 
+// Normalize a priceUnit input to a valid enum, or undefined if absent/invalid.
+function sanitizePriceUnit(value) {
+  if (value === undefined || value === null || value === '') return undefined;
+  return (value === 'flat' || value === 'per_lb') ? value : undefined;
+}
+
 /** GET /api/v1/addons — public, active only (key + name + translations, sorted). */
 exports.listPublic = asyncWrapper(async (req, res) => {
   const addOns = await AddOn.getActive();
@@ -52,6 +59,7 @@ exports.listPublic = asyncWrapper(async (req, res) => {
       key: a.key,
       name: a.name,
       price: a.price || 0,
+      priceUnit: a.priceUnit || 'flat',
       translations: { es: a.translations.es || '', pt: a.translations.pt || '', de: a.translations.de || '' }
     }))
   }, 'Add-ons retrieved');
@@ -83,10 +91,12 @@ exports.create = asyncWrapper(async (req, res) => {
 
   const t = req.body.translations || {};
   const price = sanitizePrice(req.body.price);
+  const priceUnit = sanitizePriceUnit(req.body.priceUnit);
   const addOn = await AddOn.create({
     key,
     name,
     price: price !== undefined ? price : 0,
+    priceUnit: priceUnit !== undefined ? priceUnit : 'flat',
     translations: {
       es: String(t.es || '').trim(),
       pt: String(t.pt || '').trim(),
@@ -134,6 +144,13 @@ exports.update = asyncWrapper(async (req, res) => {
     if (price !== undefined) {
       addOn.price = price;
       changed.price = addOn.price;
+    }
+  }
+  if (req.body.priceUnit !== undefined) {
+    const priceUnit = sanitizePriceUnit(req.body.priceUnit);
+    if (priceUnit !== undefined) {
+      addOn.priceUnit = priceUnit;
+      changed.priceUnit = addOn.priceUnit;
     }
   }
   if (req.body.sortOrder !== undefined) {

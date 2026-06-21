@@ -140,6 +140,7 @@
       "freeOptionsTitle": "Free Options",
       "optionColumn": "Option",
       "priceColumn": "Price",
+      "perPoundSuffix": "/lb",
       "instructionsLabel": "Special instructions (optional)",
       "instructionsPlaceholder": "Anything we should know? (e.g. fold preferences)"
     }
@@ -1473,6 +1474,9 @@
       "namePortuguese": "Name (Portuguese)",
       "nameGerman": "Name (German)",
       "priceLabel": "Price ($) — 0 = free",
+      "priceUnitLabel": "Price unit",
+      "priceUnitFlat": "Flat ($)",
+      "priceUnitPerLb": "Per pound ($/lb)",
       "priceColumn": "Price",
       "free": "Free",
       "activeLabel": "Active (shown to customers)",

@@ -34,7 +34,11 @@ const addOnSchema = new mongoose.Schema({
     de: { type: String, trim: true, default: '', maxlength: 100 }
   },
   // Display-only price (USD). 0 = free option. Money still settles in Cents.
+  // `priceUnit` is how the rate reads on the form/confirmation — a flat amount
+  // ("$5.00") or a per-pound rate ("$0.50/lb"). Per-pound is DISPLAY-ONLY (we
+  // never weigh in-app); it changes the label, not any calculation.
   price: { type: Number, default: 0, min: 0, max: 10000 },
+  priceUnit: { type: String, enum: ['flat', 'per_lb'], default: 'flat' },
   isActive: { type: Boolean, default: true },
   sortOrder: { type: Number, default: 0 }
 }, { timestamps: true });
@@ -55,9 +59,9 @@ addOnSchema.statics.resolveKeys = async function (keys) {
   return keys.map(k => {
     const a = byKey.get(k);
     return a
-      ? { key: a.key, name: a.name, price: a.price || 0,
+      ? { key: a.key, name: a.name, price: a.price || 0, priceUnit: a.priceUnit || 'flat',
         translations: { es: a.translations.es || '', pt: a.translations.pt || '', de: a.translations.de || '' } }
-      : { key: k, name: k, price: 0, translations: { es: '', pt: '', de: '' } };
+      : { key: k, name: k, price: 0, priceUnit: 'flat', translations: { es: '', pt: '', de: '' } };
   });
 };
 

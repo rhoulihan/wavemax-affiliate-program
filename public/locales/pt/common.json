@@ -140,6 +140,7 @@
       "freeOptionsTitle": "Opções gratuitas",
       "optionColumn": "Opção",
       "priceColumn": "Preço",
+      "perPoundSuffix": "/lb",
       "instructionsLabel": "Instruções especiais (opcional)",
       "instructionsPlaceholder": "Algo que devemos saber? (ex.: preferências de dobra)"
     }
@@ -1473,6 +1474,9 @@
       "namePortuguese": "Nome (português)",
       "nameGerman": "Nome (alemão)",
       "priceLabel": "Preço ($) — 0 = grátis",
+      "priceUnitLabel": "Unidade de preço",
+      "priceUnitFlat": "Fixo ($)",
+      "priceUnitPerLb": "Por libra ($/lb)",
       "priceColumn": "Preço",
       "free": "Grátis",
       "activeLabel": "Ativo (visível para os clientes)",

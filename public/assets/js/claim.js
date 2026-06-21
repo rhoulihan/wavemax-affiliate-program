@@ -62,8 +62,12 @@
     return a.name;
   }
 
-  // Display price → "$5.00".
-  function formatPrice(p) { return '$' + Number(p || 0).toFixed(2); }
+  // Display price → "$5.00" (flat) or "$0.50/lb" (per_lb). Display-only; we
+  // never weigh in-app — per-pound just changes the label.
+  function formatPrice(price, unit) {
+    var s = '$' + Number(price || 0).toFixed(2);
+    return unit === 'per_lb' ? s + t('claim.order.perPoundSuffix', '/lb') : s;
+  }
 
   // Build one options table (CSP-clean via createElement). `withPrice` adds a
   // right-aligned price column (Premium); omit it for the Free table. Each
@@ -134,7 +138,7 @@
       if (withPrice) {
         var tdPrice = document.createElement('td');
         tdPrice.className = 'addon-price-cell';
-        tdPrice.textContent = formatPrice(a.price);
+        tdPrice.textContent = formatPrice(a.price, a.priceUnit);
         row.appendChild(tdPrice);
       }
       tbody.appendChild(row);
