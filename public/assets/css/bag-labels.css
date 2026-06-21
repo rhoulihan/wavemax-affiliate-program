@@ -72,6 +72,16 @@ html, body {
   margin: 0 0 0.14in;
 }
 
+/* Partner (affiliate) address, under the customer-name line — the bag's
+   pickup/return point. */
+.label-partner-address {
+  font-size: 10pt;
+  line-height: 1.25;
+  color: #000;
+  margin: 0 0 0.1in;
+  align-self: flex-start;
+}
+
 .label-ref {
   font-size: 10pt;
   letter-spacing: 1px;

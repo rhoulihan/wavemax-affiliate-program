@@ -60,6 +60,22 @@ describe('labelSheetService — 4x6 thermal labels', () => {
     }
   });
 
+  it('prints the partner address under the customer-name line on every label', async () => {
+    const affiliate = await createAffiliate('Austin Wash Co');
+    const { batchId } = await bagService.mintBatch({
+      affiliateId: affiliate.affiliateId, quantity: 2, adminId: affiliate._id
+    });
+    await bagService.issueBatch({ batchId, adminId: affiliate._id });
+
+    const html = await labelSheetService.renderLabelSheet(batchId);
+    // partner address line once per bag, after the blank customer-name line
+    expect((html.match(/class="label-partner-address"/g) || [])).toHaveLength(2);
+    expect(html).toContain('123 Test St, Austin, TX 78701');
+    const lineIdx = html.indexOf('label-customer-line');
+    const addrIdx = html.indexOf('label-partner-address');
+    expect(addrIdx).toBeGreaterThan(lineIdx); // address sits BELOW the write-in line
+  });
+
   it('uses errorCorrectionLevel M and the existing claim URL for the QR', async () => {
     const affiliate = await createAffiliate('QR Co');
     const { batchId, bags } = await bagService.mintBatch({

@@ -69,15 +69,26 @@ async function renderLabelSheet(batchId) {
   if (bags.length === 0) return null;
 
   const affiliate = await Affiliate.findOne({ affiliateId: bags[0].affiliateId })
-    .select('businessName firstName lastName');
+    .select('businessName firstName lastName address city state zipCode');
   const affiliateName = affiliate
     ? (affiliate.businessName || `${affiliate.firstName} ${affiliate.lastName}`)
     : bags[0].affiliateId;
+
+  // Partner address printed under the customer-name line so the bag's
+  // pickup/return point (the partner) is always on the sticker.
+  const cityLine = affiliate
+    ? [affiliate.city, affiliate.state].filter(Boolean).join(', ')
+    : '';
+  const affiliateAddress = affiliate
+    ? [affiliate.address, [cityLine, affiliate.zipCode].filter(Boolean).join(' ').trim()]
+      .filter(Boolean).join(', ')
+    : '';
 
   const qrSize = await SystemConfig.getValue('bag_label_qr_size_px', 300);
   const baseUrl = process.env.BASE_URL || 'https://rundberglaundry.com';
   const logo = getLogoDataUri();
   const safeName = escapeHtml(affiliateName);
+  const safeAddress = escapeHtml(affiliateAddress);
 
   const labels = await Promise.all(bags.map(async (bag) => {
     const claimUrl = `${baseUrl}/embed-app-v2.html?route=/claim&bag=${bag.token}`;
@@ -94,7 +105,7 @@ ${logoImg}      <p class="label-affiliate">${safeName}</p>
       <img class="label-qr" src="${qrDataUri}" alt="Bag claim QR code">
       <p class="label-customer">Customer name:</p>
       <span class="label-customer-line"></span>
-      <p class="label-ref">Bag ref: ${escapeHtml(bag.bagId.slice(-6))}</p>
+${safeAddress ? `      <p class="label-partner-address">${safeAddress}</p>\n` : ''}      <p class="label-ref">Bag ref: ${escapeHtml(bag.bagId.slice(-6))}</p>
     </section>`;
   }));
 
