@@ -427,3 +427,35 @@ describe('Location quarantine middleware', () => {
     });
   });
 });
+
+// Direct-call tests (isolateModules) so storeIPs loads with store env — the
+// pre-loaded supertest `app` captured storeIPs before these vars were set.
+describe('Location quarantine — store-IP bypass (store is never quarantined)', () => {
+  const ORIG = { ...process.env };
+  afterEach(() => { process.env = { ...ORIG }; });
+  function freshMw(env) {
+    let mod;
+    jest.isolateModules(() => { Object.assign(process.env, env); mod = require('../../server/middleware/locationQuarantine'); });
+    return mod;
+  }
+  const mkRes = () => { const r = { locals: {} }; r.redirect = jest.fn(); r.status = jest.fn(() => r); r.type = jest.fn(() => r); r.send = jest.fn(() => r); r.setHeader = jest.fn(); return r; };
+  const req = (ip) => ({ path: '/about/', originalUrl: '/about/', hostname: 'rundberglaundry.com', headers: { 'cf-connecting-ip': ip } });
+
+  it('lets a store IP (IPv4 + IPv6 /64) through a non-Austin path when quarantine is ON', () => {
+    const mw = freshMw({ QUARANTINE_NON_AUSTIN: 'true', STORE_IP_ADDRESS: '72.190.1.227', STORE_IP_RANGES: '2603:8080:db00:21b9::/64' });
+    for (const ip of ['72.190.1.227', '2603:8080:db00:21b9::5']) {
+      const res = mkRes(); const next = jest.fn();
+      mw(req(ip), res, next);
+      expect(next).toHaveBeenCalled();
+      expect(res.redirect).not.toHaveBeenCalled();
+    }
+  });
+
+  it('still redirects a non-store IP on a non-Austin path', () => {
+    const mw = freshMw({ QUARANTINE_NON_AUSTIN: 'true', STORE_IP_ADDRESS: '72.190.1.227', STORE_IP_RANGES: '2603:8080:db00:21b9::/64' });
+    const res = mkRes(); const next = jest.fn();
+    mw(req('8.8.8.8'), res, next);
+    expect(next).not.toHaveBeenCalled();
+    expect(res.redirect).toHaveBeenCalledWith(302, expect.stringContaining('wavemaxlaundry.com'));
+  });
+});

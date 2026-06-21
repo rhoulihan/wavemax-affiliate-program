@@ -85,3 +85,47 @@ describe('comingSoon middleware', () => {
     expect(res.status).toHaveBeenCalledWith(200);
   });
 });
+
+// The store location must reach the REAL app on EVERY route while the public is
+// still held — a store-IP bypass (IPv4 + the store's IPv6 /64).
+describe('comingSoon store-IP bypass', () => {
+  const ORIG = { ...process.env };
+  afterEach(() => { process.env = { ...ORIG }; });
+
+  function freshComingSoon(env) {
+    let mod;
+    jest.isolateModules(() => {
+      Object.assign(process.env, env);
+      mod = require('../../server/middleware/comingSoon');
+    });
+    return mod;
+  }
+  const STORE_ENV = { STORE_IP_ADDRESS: '72.190.1.227', STORE_IP_RANGES: '2603:8080:db00:21b9::/64' };
+  const mkRes2 = () => { const r = { headers: {} }; r.status = jest.fn(() => r); r.type = jest.fn(() => r); r.send = jest.fn(() => r); r.set = jest.fn((k, v) => { r.headers[k] = v; return r; }); return r; };
+  const heldReq = (ip) => ({ method: 'GET', path: '/austin-tx/', headers: { host: 'rundberglaundry.com', 'cf-connecting-ip': ip } });
+
+  it('serves the real app (next) for the store IPv4 on a held marketing path', () => {
+    const cs = freshComingSoon(STORE_ENV);
+    const res = mkRes2(); const next = jest.fn();
+    cs(heldReq('72.190.1.227'), res, next);
+    expect(next).toHaveBeenCalled();
+    expect(res.send).not.toHaveBeenCalled();
+  });
+
+  it('serves the real app for a store IPv6 within the /64 (incl. IPv4-mapped form)', () => {
+    const cs = freshComingSoon(STORE_ENV);
+    for (const ip of ['2603:8080:db00:21b9:1d5b:e02c:7105:97f6', '::ffff:72.190.1.227']) {
+      const res = mkRes2(); const next = jest.fn();
+      cs(heldReq(ip), res, next);
+      expect(next).toHaveBeenCalled();
+    }
+  });
+
+  it('still holds (placeholder) for a non-store IP on the same path', () => {
+    const cs = freshComingSoon(STORE_ENV);
+    const res = mkRes2(); const next = jest.fn();
+    cs(heldReq('8.8.8.8'), res, next);
+    expect(next).not.toHaveBeenCalled();
+    expect(res.status).toHaveBeenCalledWith(200);
+  });
+});

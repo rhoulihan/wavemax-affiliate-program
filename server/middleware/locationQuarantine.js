@@ -25,7 +25,15 @@ const {
   isQuarantineEnabled,
 } = require('../config/quarantineConfig');
 const { readHTMLWithNonce } = require('../utils/cspHelper');
+const storeIPs = require('../config/storeIPs');
 const logger = require('../utils/logger');
+
+// The store location (STORE_IP_ADDRESS + ADDITIONAL_STORE_IPS + STORE_IP_RANGES,
+// IPv4 and the store's IPv6 /64) is a trusted origin — never quarantine it.
+function isStoreReq(req) {
+  const ip = String((req.headers && req.headers['cf-connecting-ip']) || req.ip || '').trim().replace(/^::ffff:/, '');
+  return !!ip && storeIPs.isWhitelisted(ip);
+}
 
 // Branded 404 served from crhsent.com (see below). Lives under the crhsent
 // content root alongside the rest of that domain's pages.
@@ -59,6 +67,7 @@ async function serveCrhsent404(req, res) {
 function locationQuarantine(req, res, next) {
   if (!isQuarantineEnabled()) return next();
   if (isAllowed(req.path)) return next();
+  if (isStoreReq(req)) return next(); // store location is never quarantined
   // A gated/unknown path on crhsent.com 404s from its own domain rather than
   // redirecting to the corporate site.
   if (isCrhsentHost(req)) return serveCrhsent404(req, res);
