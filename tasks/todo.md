@@ -37,12 +37,12 @@ Plan: `~/.claude/plans/parsed-spinning-unicorn.md` (approved 2026-06-21).
 - [ ] commit asset bumps + test fixes + deploy both boxes (pm2 reload — server code changed)
 - [ ] adversarial review workflow; e2e verify; update memory
 
-## NEXT FEATURE — /scanbag mobile PWA (queued, build after the wave deploys)
-Decisions (2026-06-21): scope = START + COMPLETE orders only (hand off to /claim&bag=<token>, which already permits create-pending + advance→complete and blocks store-middle steps); iOS supported (jsQR fallback + Add-to-Home-Screen hint); Android primary (native BarcodeDetector + beforeinstallprompt Install button); STANDALONE /scanbag mini-app (own manifest + icon + minimal service worker).
-- [ ] /scanbag route (server) + camera Permissions-Policy carve-out for that route only
-- [ ] camera scan page: BarcodeDetector + jsQR fallback; decode bag QR → redirect to embedded claim URL
-- [ ] PWA: manifest.json (standalone, start_url /scanbag, icon), minimal service worker, install button (Android) + iOS A2HS hint
-- [ ] tests; deploy
+## /scanbag mobile PWA — CODE DONE
+- [x] /scanbag route + camera Permissions-Policy carve-out (camera=(self)); coming-soon + quarantine exemptions for /scanbag + sw + manifest
+- [x] scan page: native BarcodeDetector (Android) + jsQR fallback (iOS, vendored 130KB); decode bag QR → redirect to a LOCALLY-built /claim URL (open-redirect-safe, 32-hex token validated)
+- [x] PWA: scanbag-manifest.json (standalone, start_url/scope /scanbag, 192/270 icons), scanbag-sw.js (scoped /scanbag), Android install button + iOS A2HS hint
+- [x] tests (18: source wiring + gate exemptions + route headers); gate-affected suites green
+- [ ] full gate → commit → deploy
 
 ## Final
 - [ ] Adversarial review workflow over the whole diff; fix confirmed findings

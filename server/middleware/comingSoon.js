@@ -41,6 +41,8 @@ function isExempt(p) {
     p === '/embed-app-v2.html' ||
     p === '/admin' || p === '/admin/' ||     // clean admin URL (IP-gated)
     p === '/operator' || p === '/operator/' || // clean operator URL (IP-gated)
+    p === '/scanbag' || p === '/scanbag/' ||   // mobile bag-scanner PWA
+    p === '/scanbag-sw.js' || p === '/scanbag-manifest.json' || // its service worker + manifest
     p.endsWith('-embed.html') ||
     p.startsWith('/locales/') ||
     p.startsWith('/.well-known/') ||         // ACME cert renewal, etc.

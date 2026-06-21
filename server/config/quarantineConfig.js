@@ -33,6 +33,9 @@ const ALLOWLIST = [
   /^\/embed-app(-v2)?\.html$/,      // SPA shell
   /^\/admin\/?$/,                   // clean admin URL (IP-gated by adminIpGate; must reach its handler, not redirect to corporate)
   /^\/operator\/?$/,                // clean operator URL (IP-gated by operatorIpGate; must reach its handler)
+  /^\/scanbag\/?$/,                 // mobile bag-scanner PWA (public; hands off to /claim)
+  /^\/scanbag-sw\.js$/,             // its service worker
+  /^\/scanbag-manifest\.json$/,     // its web app manifest
   /^\/[a-z0-9-]+-embed\.html$/,     // any *-embed.html (affiliate-login, customer-register, etc.)
   /^\/design-explorer(\/.*)?$/,     // token-gated franchisor design review tool (explorerGuard enforces EXPLORER_TOKEN)
   /^\/registration-success\.html$/,

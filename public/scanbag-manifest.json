@@ -1,0 +1,15 @@
+{
+  "name": "WaveMAX Scan Bag",
+  "short_name": "Scan Bag",
+  "description": "Scan a WaveMAX bag QR code to start or complete an order.",
+  "start_url": "/scanbag",
+  "scope": "/scanbag",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#ffffff",
+  "theme_color": "#1e3a8a",
+  "icons": [
+    { "src": "/assets/images/brand/favicon-192x192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "/assets/images/brand/favicon-270x270.png", "sizes": "270x270", "type": "image/png", "purpose": "any" }
+  ]
+}

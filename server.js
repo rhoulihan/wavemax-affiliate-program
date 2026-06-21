@@ -1092,6 +1092,24 @@ app.get(['/operator', '/operator/'], operatorIpGate, async (req, res) => {
   }
 });
 
+// /scanbag — standalone mobile PWA that scans a bag QR with the phone camera and
+// hands off to the /claim flow (start/complete an order). PUBLIC (it adds no
+// access beyond pointing a phone camera at the QR, which opens /claim anyway).
+// The camera needs a Permissions-Policy carve-out (the global header disables it).
+app.get(['/scanbag', '/scanbag/'], async (req, res) => {
+  try {
+    const nonce = res.locals.cspNonce;
+    const html = await adminReadHTML(path.join(__dirname, 'public', 'scanbag.html'), nonce);
+    res.setHeader('Permissions-Policy',
+      'geolocation=(), microphone=(), camera=(self), payment=(), usb=(), magnetometer=(), accelerometer=(), gyroscope=()');
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.type('html').send(html);
+  } catch (err) {
+    logger.error('Error serving /scanbag page:', err);
+    res.status(500).send('Internal Server Error');
+  }
+});
+
 // Health check endpoint
 // (/health is defined earlier, before the session middleware, so health-check
 // traffic doesn't create sessions.)

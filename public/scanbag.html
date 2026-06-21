@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0">
+    <meta name="csp-nonce" content="">
+    <meta name="theme-color" content="#1e3a8a">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Scan Bag">
+    <title>WaveMAX — Scan Bag</title>
+    <link rel="manifest" href="/scanbag-manifest.json">
+    <link rel="apple-touch-icon" href="/assets/images/brand/favicon-180x180.png">
+    <link rel="stylesheet" href="/assets/css/scanbag.css?v=20260621">
+</head>
+<body>
+    <div class="scanbag-app">
+        <header class="scanbag-header">
+            <img class="scanbag-logo" src="/assets/images/brand/logo-wavemax.png" alt="WaveMAX Laundry">
+            <p class="scanbag-title">Scan a bag</p>
+            <p class="scanbag-sub">Point the camera at the bag's QR code to start or complete an order.</p>
+        </header>
+
+        <div class="scanbag-viewport">
+            <video id="scanbag-video" class="scanbag-video" playsinline muted autoplay></video>
+            <div class="scanbag-reticle"></div>
+        </div>
+
+        <p id="scanbag-status" class="scanbag-status">Starting camera…</p>
+
+        <div class="scanbag-actions">
+            <button type="button" id="scanbag-start" class="scanbag-btn" hidden>Enable camera</button>
+            <button type="button" id="scanbag-install" class="scanbag-btn secondary" hidden>Add to home screen</button>
+            <p id="scanbag-ios-hint" class="scanbag-hint" hidden>
+                To install: tap the <strong>Share</strong> icon, then <strong>Add to Home Screen</strong>.
+            </p>
+        </div>
+    </div>
+
+    <script src="/assets/js/jsqr.min.js?v=20260621"></script>
+    <script src="/assets/js/scanbag.js?v=20260621"></script>
+</body>
+</html>

@@ -1,0 +1,77 @@
+/* /scanbag — mobile-first full-screen bag QR scanner (standalone PWA). */
+* { box-sizing: border-box; }
+html, body {
+  margin: 0;
+  height: 100%;
+  background: #0f172a;
+  color: #fff;
+  font-family: 'Segoe UI', system-ui, -apple-system, Arial, sans-serif;
+  -webkit-text-size-adjust: 100%;
+}
+.scanbag-app {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: env(safe-area-inset-top) 16px env(safe-area-inset-bottom);
+}
+.scanbag-header {
+  padding: 16px 0 8px;
+}
+.scanbag-logo { max-width: 150px; height: auto; }
+.scanbag-title { font-size: 1.05rem; font-weight: 700; margin: 8px 0 0; }
+.scanbag-sub { font-size: 0.9rem; color: #cbd5e1; margin: 4px 0 0; }
+
+/* Camera viewport with a centered reticle. */
+.scanbag-viewport {
+  position: relative;
+  width: 100%;
+  max-width: 420px;
+  aspect-ratio: 1 / 1;
+  margin: 16px 0;
+  border-radius: 18px;
+  overflow: hidden;
+  background: #000;
+}
+.scanbag-video { width: 100%; height: 100%; object-fit: cover; display: block; }
+.scanbag-reticle {
+  position: absolute;
+  inset: 14%;
+  border: 3px solid rgba(255, 255, 255, 0.85);
+  border-radius: 16px;
+  box-shadow: 0 0 0 100vmax rgba(0, 0, 0, 0.35);
+  pointer-events: none;
+}
+
+.scanbag-status {
+  min-height: 1.4em;
+  font-size: 0.95rem;
+  margin: 4px 0 12px;
+  color: #e2e8f0;
+}
+.scanbag-status.error { color: #fca5a5; }
+.scanbag-status.success { color: #86efac; }
+
+.scanbag-actions { width: 100%; max-width: 420px; margin-top: auto; padding-bottom: 16px; }
+.scanbag-btn {
+  display: block;
+  width: 100%;
+  padding: 14px;
+  margin: 8px 0;
+  font-size: 1rem;
+  font-weight: 700;
+  border: 0;
+  border-radius: 12px;
+  background: #2563eb;
+  color: #fff;
+  cursor: pointer;
+}
+.scanbag-btn.secondary { background: #334155; }
+.scanbag-hint {
+  font-size: 0.85rem;
+  color: #cbd5e1;
+  line-height: 1.4;
+  margin: 8px 0;
+}
+[hidden] { display: none !important; }
