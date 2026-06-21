@@ -1,8 +1,7 @@
 // Store kiosk scanner (Phase 1 PR 5/§6). Operator is already authenticated
 // (JWT). Each scan is STATE-DRIVEN: resolve the bag against the PR 4 engine,
 // then show ONE confirm dialog (customer + current order status + next step)
-// and apply on Confirm. Undo reverses the last bag scanned this session.
-// Order metrics live on the expediter, not here.
+// and apply on Confirm. Order metrics live on the expediter, not here.
 //
 // No weight / add-ons / pricing in Phase 1 — the old intake/processed modals and
 // their retired operator endpoints are gone; everything goes through ScanSession
@@ -18,7 +17,6 @@
 
   // --- DOM ------------------------------------------------------------------
   var scanInput = document.getElementById('scanInput');
-  var undoBtn = document.getElementById('undoBtn');
 
   var confirmModal = document.getElementById('scanConfirmModal');
   var confirmPrompt = document.getElementById('scanConfirmPrompt');
@@ -43,7 +41,6 @@
   // --- state ----------------------------------------------------------------
   var scanTimeout = null;
   var toastTimeout = null;
-  var lastBagToken = null; // last bag this session applied a transition to (undo target)
   var pending = null;      // { bagToken, resolveData }
 
   // Order-status display labels (current state shown in the confirm modal).
@@ -240,13 +237,11 @@
   async function applyAction(bagToken, expectedAction, opts) {
     try {
       var result = await window.ScanSession.apply(bagToken, expectedAction, opts);
-      lastBagToken = bagToken;
       if (result.action === 'no-op') {
         // e.g. delivery-rescan-prompt answered "No" — the order was deliberately
         // left as-is. Acknowledge with a neutral toast, not a success one.
         showToast(t('operator.scan.noChange', 'No change — order left as delivered'), 'ℹ️', 'info');
       } else {
-        undoBtn.hidden = false;
         showToast(t('operator.scan.applied', 'Done'), '✅', 'success');
       }
     } catch (err) {
@@ -282,24 +277,6 @@
       goToLogin();
     } else {
       showError(err.message || t('operator.scan.networkError', 'Network error — please try again.'));
-    }
-  }
-
-  async function onUndo() {
-    if (!lastBagToken) return;
-    try {
-      var result = await window.ScanSession.undo(lastBagToken);
-      if (result.undone) {
-        showToast(t('operator.scan.undone', 'Last scan undone'), '↩️', 'success');
-      } else {
-        showError(t('operator.scan.nothingToUndo', 'Nothing to undo'));
-      }
-      lastBagToken = null;
-      undoBtn.hidden = true;
-    } catch (err) {
-      handleScanError(err);
-    } finally {
-      focusScanner();
     }
   }
 
@@ -422,7 +399,6 @@
     paymentCheckbox.addEventListener('change', function () {
       if (!paymentRow.hidden) confirmYes.disabled = !paymentCheckbox.checked;
     });
-    undoBtn.addEventListener('click', onUndo);
     document.addEventListener('keydown', function (e) {
       if (e.key === 'Escape') hideConfirm();
     });

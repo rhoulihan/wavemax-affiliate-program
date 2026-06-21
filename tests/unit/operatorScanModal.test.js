@@ -51,6 +51,15 @@ describe('operator-scan confirm modal', () => {
     expect(js).not.toMatch(/\btally\b/);
   });
 
+  it('has no "undo last scan" button or client wiring (removed)', () => {
+    expect(html).not.toContain('id="undoBtn"');
+    expect(html).not.toContain('operator.scan.undo'); // the button label marker is gone
+    expect(js).not.toContain('undoBtn');
+    expect(js).not.toContain('onUndo');
+    expect(js).not.toContain('lastBagToken');
+    expect(js).not.toMatch(/ScanSession\.undo/); // operator no longer calls the undo endpoint
+  });
+
   it('reads the field value (Android composition) and finalizes on the CR terminator', () => {
     // The kiosk is an Android tablet: the scanner-as-keyboard delivers letters
     // via composition (the 'input' event, keyCode 229), NOT keydown — so a
