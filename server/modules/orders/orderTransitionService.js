@@ -157,12 +157,15 @@ async function createPendingOrder({ bag, by, role, addOns, specialInstructions, 
  * @param {string} args.by
  * @param {string} args.role
  * @param {boolean} [args.paymentConfirmed] - store-pickup manual payment checkbox
+ * @param {number}  [args.orderTotal] - final order total the operator transferred
+ *   from Cents; recorded ONLY on the out_for_delivery ("sent out") transition.
+ *   The UI requires it there; the server records it when present (validates ≥0).
  * @param {string[]} [args.addOns] - add-ons, used only if this advance opens a new pending order
  * @param {string} [args.specialInstructions] - ditto
  * @param {Object} [args.req]
  * @returns {Promise<{order?: Order, action: string, to?: string, orderId?: string}>}
  */
-async function advanceOrder({ bag, by, role, paymentConfirmed, addOns, specialInstructions, req }) {
+async function advanceOrder({ bag, by, role, paymentConfirmed, orderTotal, addOns, specialInstructions, req }) {
   if (!bag || bag.status !== 'active' || !bag.customerId) {
     throw new TransitionServiceError('bag_not_registered',
       'Bag is not registered to a customer', 409);
@@ -192,6 +195,24 @@ async function advanceOrder({ bag, by, role, paymentConfirmed, addOns, specialIn
 
   // advance
   applyTransition(order, decision.to, { by, role, at: now, paymentConfirmed });
+
+  // Revenue capture at send-out (out_for_delivery): snapshot the partner's OWN
+  // delivery fee as commission (0 for the WaveMAX-Associates default — that fee
+  // is house revenue), and record the operator-entered order total when present
+  // (the UI requires it here; the server validates ≥0). Frozen now so later fee
+  // changes never alter this order's historical commission.
+  if (decision.to === 'out_for_delivery') {
+    const aff = await Affiliate.findOne({ affiliateId: order.affiliateId }).select('deliveryFee');
+    order.deliveryFeeCharged = aff && Number(aff.deliveryFee) > 0 ? Number(aff.deliveryFee) : 0;
+    if (orderTotal !== undefined && orderTotal !== null && orderTotal !== '') {
+      const n = Number(orderTotal);
+      if (!Number.isFinite(n) || n < 0) {
+        throw new TransitionServiceError('invalid_order_total',
+          'Order total must be a non-negative number', 400);
+      }
+      order.orderTotal = n;
+    }
+  }
   await order.save();
 
   await logAuditEvent(AuditEvents.OPERATOR_SCAN, {

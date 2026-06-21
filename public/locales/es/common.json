@@ -782,7 +782,9 @@
       "cancel": "Cancelar",
       "statusNone": "Sin pedido activo",
       "addonsLabel": "Complementos",
-      "instructionsLabel": "Instrucciones especiales"
+      "instructionsLabel": "Instrucciones especiales",
+      "deliveryFeeLabel": "Tarifa de entrega",
+      "orderTotalLabel": "Total final del pedido ($)"
     }
   },
   "expediter": {

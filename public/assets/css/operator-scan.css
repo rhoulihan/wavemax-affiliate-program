@@ -766,6 +766,44 @@ body {
   color: #334155;
 }
 .scan-addons-list li { margin: 2px 0; }
+
+/* Delivery fee (operator-only, WITH price) shown at intake. */
+.scan-delivery-fee {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  text-align: left;
+  margin: 12px 0;
+  padding: 12px 14px;
+  background: #ecfdf5;
+  border: 1px solid #a7f3d0;
+  border-radius: 12px;
+  font-weight: 700;
+  color: #0f172a;
+}
+.scan-delivery-fee-amount { font-variant-numeric: tabular-nums; }
+
+/* Final order total input at the send-out (out-for-delivery) scan. */
+.scan-order-total-row {
+  text-align: left;
+  margin: 12px 0;
+}
+.scan-order-total-row label {
+  display: block;
+  font-weight: 700;
+  color: #0f172a;
+  font-size: 0.9rem;
+  margin-bottom: 6px;
+}
+.scan-order-total-row input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px 14px;
+  font-size: 1.1rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 12px;
+}
 .scan-instructions-text {
   margin: 0;
   color: #334155;

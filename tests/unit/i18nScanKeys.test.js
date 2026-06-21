@@ -25,7 +25,8 @@ const KEYS = [
   'operator.scan.stateChanged', 'operator.scan.notRegistered',
   'operator.scan.networkError', 'operator.scan.confirmGeneric',
   'operator.scan.successTitle', 'operator.scan.errorTitle',
-  'operator.scan.infoTitle', 'operator.scan.noChange'
+  'operator.scan.infoTitle', 'operator.scan.noChange',
+  'operator.scan.deliveryFeeLabel', 'operator.scan.orderTotalLabel'
 ];
 
 function dig(obj, dotted) {

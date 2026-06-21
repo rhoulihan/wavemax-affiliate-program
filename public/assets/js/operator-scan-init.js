@@ -27,6 +27,9 @@
   var orderStatusEl = document.getElementById('scanOrderStatus');
   var addOnsEl = document.getElementById('scanAddOns');
   var instructionsEl = document.getElementById('scanInstructions');
+  var deliveryFeeEl = document.getElementById('scanDeliveryFee');
+  var orderTotalRow = document.getElementById('scanOrderTotalRow');
+  var orderTotalInput = document.getElementById('scanOrderTotal');
   var centsWarning = document.getElementById('scanCentsWarning');
   var paymentRow = document.getElementById('scanPaymentRow');
   var paymentCheckbox = document.getElementById('scanPaymentConfirmed');
@@ -110,6 +113,26 @@
         instructionsEl.hidden = true;
       }
     }
+
+    // Delivery fee WITH price — operator-only, at intake; they use it to pick the
+    // right fee in Cents (it varies by partner). Add-ons stay price-less above.
+    if (deliveryFeeEl) {
+      clearChildren(deliveryFeeEl);
+      var fee = Number(resolveData.deliveryFee) || 0;
+      if (atIntake && fee > 0) {
+        var fLabel = document.createElement('span');
+        fLabel.className = 'scan-delivery-fee-label';
+        fLabel.textContent = t('operator.scan.deliveryFeeLabel', 'Delivery fee');
+        var fAmt = document.createElement('span');
+        fAmt.className = 'scan-delivery-fee-amount';
+        fAmt.textContent = '$' + fee.toFixed(2);
+        deliveryFeeEl.appendChild(fLabel);
+        deliveryFeeEl.appendChild(fAmt);
+        deliveryFeeEl.hidden = false;
+      } else {
+        deliveryFeeEl.hidden = true;
+      }
+    }
   }
 
   // --- toast ----------------------------------------------------------------
@@ -136,12 +159,30 @@
   function showError(message) { showToast(message, '❌', 'error'); }
 
   // --- confirm dialog -------------------------------------------------------
+  // The out-for-delivery scan requires BOTH the payment box ticked AND a valid
+  // final order total before Confirm is enabled (the operator-entered total is
+  // recorded for partner revenue/commission).
+  function validOrderTotal() {
+    if (!orderTotalRow || orderTotalRow.hidden) return true; // not required for this scan
+    var v = (orderTotalInput.value || '').trim();
+    if (v === '') return false;
+    var n = Number(v);
+    return isFinite(n) && n >= 0;
+  }
+  function recomputeConfirmEnabled() {
+    var needPay = !paymentRow.hidden;
+    confirmYes.disabled = (needPay && !paymentCheckbox.checked) || !validOrderTotal();
+  }
+
   function hideConfirm() {
     confirmModal.hidden = true;
     confirmModal.classList.remove('block');
     paymentRow.hidden = true;
     paymentCheckbox.checked = false;
     confirmYes.disabled = false;
+    if (orderTotalRow) orderTotalRow.hidden = true;
+    if (orderTotalInput) orderTotalInput.value = '';
+    if (deliveryFeeEl) deliveryFeeEl.hidden = true;
     if (addOnsEl) addOnsEl.hidden = true;
     if (instructionsEl) instructionsEl.hidden = true;
     pending = null;
@@ -191,7 +232,9 @@
       resolveData.to === 'out_for_delivery';
     paymentRow.hidden = !needsPayment;
     paymentCheckbox.checked = false;
-    confirmYes.disabled = needsPayment; // must tick the box first
+    if (orderTotalRow) orderTotalRow.hidden = !needsPayment; // require the final total at send-out
+    if (orderTotalInput) orderTotalInput.value = '';
+    recomputeConfirmEnabled(); // disabled until payment ticked AND a valid total entered
 
     confirmModal.hidden = false;
     confirmModal.classList.add('block'); // actually reveal it (base style is display:none)
@@ -211,6 +254,7 @@
     var opts = {};
     if (resolveData.proposedAction === 'advance' && resolveData.to === 'out_for_delivery') {
       opts.paymentConfirmed = paymentCheckbox.checked;
+      opts.orderTotal = Number((orderTotalInput.value || '').trim());
     }
     if (resolveData.proposedAction === 'delivery-rescan-prompt') {
       opts.reopen = true; // Yes → start a new order
@@ -395,10 +439,10 @@
     });
     confirmYes.addEventListener('click', onConfirmYes);
     confirmNo.addEventListener('click', onConfirmNo);
-    // Payment+receipt gate: Confirm stays disabled until the box is ticked.
-    paymentCheckbox.addEventListener('change', function () {
-      if (!paymentRow.hidden) confirmYes.disabled = !paymentCheckbox.checked;
-    });
+    // Send-out gate: Confirm stays disabled until the payment box is ticked AND
+    // a valid final order total is entered.
+    paymentCheckbox.addEventListener('change', recomputeConfirmEnabled);
+    if (orderTotalInput) orderTotalInput.addEventListener('input', recomputeConfirmEnabled);
     document.addEventListener('keydown', function (e) {
       if (e.key === 'Escape') hideConfirm();
     });

@@ -236,7 +236,7 @@ async function resolveScan({ bagToken }) {
  * (create-pending / reopen) — they're ignored on a mid-lifecycle advance.
  * @returns {{orderId, newStatus, action}}
  */
-async function applyScan({ bagToken, expectedAction, reopen, paymentConfirmed, addOns, specialInstructions, actor, req }) {
+async function applyScan({ bagToken, expectedAction, reopen, paymentConfirmed, orderTotal, addOns, specialInstructions, actor, req }) {
   // expectedAction is required: without it the drift guard below is skipped
   // entirely, so an operator could apply a stale action against a bag whose
   // state has since changed. Reject up front (400) before touching the order.
@@ -281,7 +281,7 @@ async function applyScan({ bagToken, expectedAction, reopen, paymentConfirmed, a
     result = { orderId: order.orderId, newStatus: order.status, action: 'create-pending', firstOrder, emailVerified };
   } else if (decision.action === 'advance') {
     const adv = await orderTransitionService.advanceOrder({
-      bag, by, role, paymentConfirmed: !!paymentConfirmed, addOns, specialInstructions, req
+      bag, by, role, paymentConfirmed: !!paymentConfirmed, orderTotal, addOns, specialInstructions, req
     });
     result = {
       orderId: adv.order ? adv.order.orderId : decision.orderId,

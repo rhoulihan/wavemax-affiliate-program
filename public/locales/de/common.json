@@ -782,7 +782,9 @@
       "cancel": "Abbrechen",
       "statusNone": "Kein aktiver Auftrag",
       "addonsLabel": "Zusatzoptionen",
-      "instructionsLabel": "Besondere Hinweise"
+      "instructionsLabel": "Besondere Hinweise",
+      "deliveryFeeLabel": "Liefergebühr",
+      "orderTotalLabel": "Endbetrag der Bestellung ($)"
     }
   },
   "expediter": {

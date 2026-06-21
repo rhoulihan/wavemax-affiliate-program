@@ -16,11 +16,11 @@ Plan: `~/.claude/plans/parsed-spinning-unicorn.md` (approved 2026-06-21).
 - [x] claim.js renderOrderOptions: non-optional delivery-fee line; confirmation summary shows fee + pickup instructions
 - [x] i18n; tests (form + util, 6 scan/claim suites green); deploy with wave
 
-## PR 3 — Operator: delivery-fee pricing at intake + required final total at send-out + persistence
-- [ ] Order model: orderTotal + deliveryFeeCharged (snapshot at out_for_delivery)
-- [ ] scanService.resolveScan returns deliveryFee for operator; advanceOrder/applyScan record orderTotal + snapshot; require total at out_for_delivery
-- [ ] operator-scan: delivery-fee line w/ price at intake; required total input at send-out; add-ons price-less
-- [ ] scanRoutes validation; tests; gate → commit → deploy
+## PR 3 — Operator: delivery-fee pricing at intake + required final total at send-out + persistence — CODE DONE
+- [x] Order model: orderTotal + deliveryFeeCharged (snapshot at out_for_delivery)
+- [x] resolveScan returns effective deliveryFee; advanceOrder records orderTotal + snapshots partner fee; validates ≥0
+- [x] operator-scan: delivery-fee line w/ price at intake; required total input at send-out (client-gated); add-ons price-less
+- [x] tests (transition snapshot/freeze + operator modal + i18n); 6 scan suites green; deploy with wave
 
 ## PR 4 — Revenue/commission surfacing + emails
 - [ ] adminDashboardService.getAffiliateAnalytics: totalRevenue + totalCommission sums

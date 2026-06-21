@@ -130,6 +130,43 @@ describe('orderTransitionService', () => {
       expect(order.paymentConfirmedManually).toBe(true);
     });
 
+    it('records orderTotal + snapshots the partner delivery fee as commission at send-out', async () => {
+      affiliate.deliveryFee = 8; await affiliate.save();
+      await openPending();
+      await svc.advanceOrder({ bag: await freshBag(), ...opRole }); // -> in_progress
+      const { order } = await svc.advanceOrder({ bag: await freshBag(), ...opRole, paymentConfirmed: true, orderTotal: 42.5 });
+      expect(order.status).toBe('out_for_delivery');
+      expect(order.orderTotal).toBe(42.5);
+      expect(order.deliveryFeeCharged).toBe(8); // partner's own fee = commission
+    });
+
+    it('snapshots deliveryFeeCharged = 0 for a default-fee partner (house revenue, not commission)', async () => {
+      affiliate.deliveryFee = 0; await affiliate.save(); // no own fee → WaveMAX Associates default
+      await openPending();
+      await svc.advanceOrder({ bag: await freshBag(), ...opRole });
+      const { order } = await svc.advanceOrder({ bag: await freshBag(), ...opRole, paymentConfirmed: true, orderTotal: 30 });
+      expect(order.orderTotal).toBe(30);
+      expect(order.deliveryFeeCharged).toBe(0);
+    });
+
+    it('rejects an invalid (negative) order total at send-out', async () => {
+      await openPending();
+      await svc.advanceOrder({ bag: await freshBag(), ...opRole });
+      await expect(svc.advanceOrder({ bag: await freshBag(), ...opRole, orderTotal: -5 }))
+        .rejects.toThrow();
+    });
+
+    it('freezes commission against a later partner fee change', async () => {
+      affiliate.deliveryFee = 8; await affiliate.save();
+      await openPending();
+      await svc.advanceOrder({ bag: await freshBag(), ...opRole });
+      const { order } = await svc.advanceOrder({ bag: await freshBag(), ...opRole, orderTotal: 50 });
+      expect(order.deliveryFeeCharged).toBe(8);
+      affiliate.deliveryFee = 12; await affiliate.save();
+      const reloaded = await Order.findOne({ orderId: order.orderId });
+      expect(reloaded.deliveryFeeCharged).toBe(8); // snapshot unchanged
+    });
+
     it('out_for_delivery -> complete stamps delivery + completedAt + sends delivered email', async () => {
       const emailService = require('../../server/utils/emailService');
       await openPending();

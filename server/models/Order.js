@@ -57,6 +57,15 @@ const orderSchema = new mongoose.Schema({
   // money lives in Cents). Set when the operator checks the payment box.
   paymentConfirmedManually: { type: Boolean, default: false },
 
+  // Revenue capture at the out_for_delivery ("sent out") scan — the only money
+  // recorded in-app (everything else settles in Cents). `orderTotal` is the
+  // amount the operator transferred from Cents; `deliveryFeeCharged` is the
+  // partner's OWN delivery fee snapshotted at send-out (the partner commission)
+  // — 0 when the order used the WaveMAX-Associates default (that fee stays house
+  // revenue). Snapshotting freezes commission history against later fee changes.
+  orderTotal: { type: Number, min: 0 },
+  deliveryFeeCharged: { type: Number, min: 0, default: 0 },
+
   // Terminal timestamps. completedAt is the 4h delivery-rescan reference.
   completedAt: Date,
   cancelledAt: Date,

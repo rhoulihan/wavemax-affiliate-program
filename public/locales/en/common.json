@@ -782,7 +782,9 @@
       "cancel": "Cancel",
       "statusNone": "No active order",
       "addonsLabel": "Add-ons",
-      "instructionsLabel": "Special instructions"
+      "instructionsLabel": "Special instructions",
+      "deliveryFeeLabel": "Delivery fee",
+      "orderTotalLabel": "Final order total ($)"
     }
   },
   "expediter": {

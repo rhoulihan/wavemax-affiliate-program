@@ -32,11 +32,24 @@ describe('operator-scan confirm modal', () => {
     expect(js).toMatch(/order\.status\./); // status pill uses order.status.* labels
   });
 
-  it('requires the payment+receipt checkbox before the out-for-delivery step', () => {
-    // Confirm is disabled until the box is ticked when handing back for delivery.
-    expect(js).toMatch(/confirmYes\.disabled = needsPayment/);
-    expect(js).toMatch(/paymentCheckbox\.addEventListener\('change'/);
+  it('gates the out-for-delivery step on the payment checkbox AND a valid final total', () => {
+    // Confirm stays disabled until the payment box is ticked AND a valid order
+    // total is entered when handing a bag back for delivery.
+    expect(js).toMatch(/recomputeConfirmEnabled/);
+    expect(js).toMatch(/validOrderTotal/);
+    expect(js).toMatch(/paymentCheckbox\.addEventListener\('change',\s*recomputeConfirmEnabled\)/);
+    expect(js).toMatch(/orderTotalInput\.addEventListener\('input',\s*recomputeConfirmEnabled\)/);
     expect(html).toContain('data-i18n="operator.scan.paymentConfirmed"');
+  });
+
+  it('captures the final order total at send-out and the delivery fee (with price) at intake', () => {
+    expect(html).toContain('id="scanOrderTotalRow"');
+    expect(html).toContain('id="scanOrderTotal"');
+    expect(html).toContain('data-i18n="operator.scan.orderTotalLabel"');
+    expect(html).toContain('id="scanDeliveryFee"'); // operator-only delivery fee WITH price
+    expect(js).toMatch(/opts\.orderTotal = Number/);   // total threaded to ScanSession.apply
+    expect(js).toMatch(/deliveryFeeEl/);               // delivery-fee render
+    expect(js).toMatch(/fee\.toFixed\(2\)/);           // fee shown with price (add-ons stay price-less)
   });
 
   it('buttons are Confirm / Cancel (cancel available at every stage)', () => {
