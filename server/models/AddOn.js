@@ -44,6 +44,23 @@ addOnSchema.statics.getActive = function () {
   return this.find({ isActive: true }).sort({ sortOrder: 1, name: 1 });
 };
 
+// Resolve an order's stored add-on keys to display rows {key,name,price,
+// translations}, preserving the order of `keys`. A retired/unknown key falls
+// back to its slug with price 0 (history still renders). Shared by the operator
+// intake modal (scanService) and the order emails (orderTransitionService).
+addOnSchema.statics.resolveKeys = async function (keys) {
+  if (!Array.isArray(keys) || keys.length === 0) return [];
+  const catalog = await this.find({ key: { $in: keys } });
+  const byKey = new Map(catalog.map(a => [a.key, a]));
+  return keys.map(k => {
+    const a = byKey.get(k);
+    return a
+      ? { key: a.key, name: a.name, price: a.price || 0,
+        translations: { es: a.translations.es || '', pt: a.translations.pt || '', de: a.translations.de || '' } }
+      : { key: k, name: k, price: 0, translations: { es: '', pt: '', de: '' } };
+  });
+};
+
 // The three current add-ons, all four languages. Idempotent + non-clobbering:
 // $setOnInsert only, so re-running never overwrites an admin's edits (rename /
 // deactivate / reorder all survive a redeploy).

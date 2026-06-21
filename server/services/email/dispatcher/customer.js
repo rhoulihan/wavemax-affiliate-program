@@ -8,6 +8,62 @@ const { sendEmail } = require('../transport');
 // Customer Emails
 // =============================================================================
 
+// Escape user/affiliate-supplied text before embedding it in HTML email.
+function escapeHtml(s) {
+  return String(s == null ? '' : s)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
+// Localized add-on label: the customer's language translation, else English name.
+function addOnLabel(a, language) {
+  if (language && language !== 'en' && a.translations && a.translations[language]) {
+    return a.translations[language];
+  }
+  return a.name || a.key;
+}
+
+/**
+ * Build the [EXTRA_BLOCK] HTML for the customer order-status email.
+ * - 'pending' (order started): pickup instructions + delivery fee (if > 0) +
+ *   selected paid add-ons (label + price).
+ * - 'out_for_delivery': the affiliate's delivery instructions.
+ * Returns '' when there's nothing to show (placeholder collapses cleanly).
+ * @param {string} status
+ * @param {{pickupInstructions?:string, deliveryInstructions?:string, deliveryFee?:number, addOns?:Array}} opts
+ * @param {Object} L - resolved translation labels for the active language
+ * @param {string} language
+ * @returns {string} HTML
+ */
+function buildOrderExtraBlock(status, opts = {}, L = {}, language = 'en') {
+  const rows = [];
+  const rowStyle = 'margin: 10px 0;';
+  const labelStyle = 'font-weight: bold; color: #555;';
+
+  if (status === 'pending') {
+    if (opts.pickupInstructions && String(opts.pickupInstructions).trim()) {
+      rows.push(`<div style="${rowStyle}"><span style="${labelStyle}">${escapeHtml(L.PICKUP_INSTRUCTIONS_LABEL)}:</span><br>${escapeHtml(opts.pickupInstructions)}</div>`);
+    }
+    if (Number(opts.deliveryFee) > 0) {
+      rows.push(`<div style="${rowStyle}"><span style="${labelStyle}">${escapeHtml(L.DELIVERY_FEE_LABEL)}:</span> $${Number(opts.deliveryFee).toFixed(2)}</div>`);
+    }
+    const paid = Array.isArray(opts.addOns) ? opts.addOns.filter(a => Number(a.price) > 0) : [];
+    if (paid.length) {
+      const items = paid
+        .map(a => `<li>${escapeHtml(addOnLabel(a, language))} — $${Number(a.price).toFixed(2)}</li>`)
+        .join('');
+      rows.push(`<div style="${rowStyle}"><span style="${labelStyle}">${escapeHtml(L.PREMIUM_OPTIONS_LABEL)}:</span><ul style="margin: 6px 0 0; padding-left: 20px;">${items}</ul></div>`);
+    }
+  } else if (status === 'out_for_delivery') {
+    if (opts.deliveryInstructions && String(opts.deliveryInstructions).trim()) {
+      rows.push(`<div style="${rowStyle}"><span style="${labelStyle}">${escapeHtml(L.DELIVERY_INSTRUCTIONS_LABEL)}:</span><br>${escapeHtml(opts.deliveryInstructions)}</div>`);
+    }
+  }
+
+  if (!rows.length) return '';
+  return `<div class="status-update" style="background-color: #f1f8e9; border: 1px solid #8bc34a;">${rows.join('')}</div>`;
+}
+
 /**
  * Send welcome email to a new customer
  */
@@ -193,7 +249,7 @@ exports.sendCustomerWelcomeEmail = async (customer, affiliate, bagInfo = {}) => 
 /**
  * Send order status update email to customer
  */
-exports.sendOrderStatusUpdateEmail = async (customer, order, status) => {
+exports.sendOrderStatusUpdateEmail = async (customer, order, status, opts = {}) => {
   try {
     const language = customer.languagePreference || 'en';
     const template = await loadTemplate('customer-order-status', language);
@@ -208,6 +264,10 @@ exports.sendOrderStatusUpdateEmail = async (customer, order, status) => {
         STATUS_UPDATE_TITLE: 'Status Update',
         ORDER_ID_LABEL: 'Order ID',
         STATUS_LABEL: 'Status',
+        PICKUP_INSTRUCTIONS_LABEL: 'Pickup instructions',
+        DELIVERY_INSTRUCTIONS_LABEL: 'Delivery instructions',
+        DELIVERY_FEE_LABEL: 'Delivery fee',
+        PREMIUM_OPTIONS_LABEL: 'Premium options',
         THANK_YOU_MESSAGE: 'Thank you for choosing WaveMAX Laundry!',
         CLOSING_MESSAGE: 'Best regards,<br>The WaveMAX Laundry Team',
         FOOTER_RIGHTS: 'All rights reserved.',
@@ -233,6 +293,10 @@ exports.sendOrderStatusUpdateEmail = async (customer, order, status) => {
         STATUS_UPDATE_TITLE: 'Actualización de Estado',
         ORDER_ID_LABEL: 'ID del Pedido',
         STATUS_LABEL: 'Estado',
+        PICKUP_INSTRUCTIONS_LABEL: 'Instrucciones de recogida',
+        DELIVERY_INSTRUCTIONS_LABEL: 'Instrucciones de entrega',
+        DELIVERY_FEE_LABEL: 'Tarifa de entrega',
+        PREMIUM_OPTIONS_LABEL: 'Opciones premium',
         THANK_YOU_MESSAGE: '¡Gracias por elegir WaveMAX Laundry!',
         CLOSING_MESSAGE: 'Saludos cordiales,<br>El Equipo de WaveMAX Laundry',
         FOOTER_RIGHTS: 'Todos los derechos reservados.',
@@ -258,6 +322,10 @@ exports.sendOrderStatusUpdateEmail = async (customer, order, status) => {
         STATUS_UPDATE_TITLE: 'Atualização de Status',
         ORDER_ID_LABEL: 'ID do Pedido',
         STATUS_LABEL: 'Status',
+        PICKUP_INSTRUCTIONS_LABEL: 'Instruções de coleta',
+        DELIVERY_INSTRUCTIONS_LABEL: 'Instruções de entrega',
+        DELIVERY_FEE_LABEL: 'Taxa de entrega',
+        PREMIUM_OPTIONS_LABEL: 'Opções premium',
         THANK_YOU_MESSAGE: 'Obrigado por escolher WaveMAX Laundry!',
         CLOSING_MESSAGE: 'Atenciosamente,<br>A Equipe WaveMAX Laundry',
         FOOTER_RIGHTS: 'Todos os direitos reservados.',
@@ -283,6 +351,10 @@ exports.sendOrderStatusUpdateEmail = async (customer, order, status) => {
         STATUS_UPDATE_TITLE: 'Status-Update',
         ORDER_ID_LABEL: 'Bestell-ID',
         STATUS_LABEL: 'Status',
+        PICKUP_INSTRUCTIONS_LABEL: 'Abholhinweise',
+        DELIVERY_INSTRUCTIONS_LABEL: 'Lieferhinweise',
+        DELIVERY_FEE_LABEL: 'Liefergebühr',
+        PREMIUM_OPTIONS_LABEL: 'Premium-Optionen',
         THANK_YOU_MESSAGE: 'Vielen Dank, dass Sie sich für WaveMAX Laundry entschieden haben!',
         CLOSING_MESSAGE: 'Mit freundlichen Grüßen,<br>Das WaveMAX Laundry Team',
         FOOTER_RIGHTS: 'Alle Rechte vorbehalten.',
@@ -312,6 +384,7 @@ exports.sendOrderStatusUpdateEmail = async (customer, order, status) => {
       status_message: statusMessages[status] || '',
       weight_info: '',
       total_info: '',
+      extra_block: buildOrderExtraBlock(status, opts, emailTranslations, language),
       current_year: new Date().getFullYear(),
       ...emailTranslations
     };

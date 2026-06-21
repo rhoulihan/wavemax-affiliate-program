@@ -189,42 +189,72 @@ describe('orderTransitionService', () => {
 
   describe('transition notifications (PR B)', () => {
     const email = require('../../server/utils/emailService');
+    const AddOn = require('../../server/models/AddOn');
     const custRole = () => ({ by: customer.customerId, role: 'customer' });
 
     it('customer gets a status email on create / in_progress / out_for_delivery; cancel sends cancellation', async () => {
       await svc.createPendingOrder({ bag: await freshBag(), ...affRole() });
       expect(email.sendOrderStatusUpdateEmail).toHaveBeenCalledWith(
-        expect.objectContaining({ customerId: customer.customerId }), expect.anything(), 'pending');
+        expect.objectContaining({ customerId: customer.customerId }), expect.anything(), 'pending', expect.anything());
 
       const { order: ip } = await svc.advanceOrder({ bag: await freshBag(), ...opRole });
-      expect(email.sendOrderStatusUpdateEmail).toHaveBeenCalledWith(expect.anything(), expect.anything(), 'in_progress');
+      expect(email.sendOrderStatusUpdateEmail).toHaveBeenCalledWith(expect.anything(), expect.anything(), 'in_progress', expect.anything());
 
       await svc.advanceOrder({ bag: await freshBag(), ...opRole }); // -> out_for_delivery
-      expect(email.sendOrderStatusUpdateEmail).toHaveBeenCalledWith(expect.anything(), expect.anything(), 'out_for_delivery');
+      expect(email.sendOrderStatusUpdateEmail).toHaveBeenCalledWith(expect.anything(), expect.anything(), 'out_for_delivery', expect.anything());
 
       await svc.cancelOrder({ order: await Order.findOne({ orderId: ip.orderId }), ...opRole });
       expect(email.sendOrderCancellationEmail).toHaveBeenCalledTimes(1);
     });
 
-    it('affiliate (opted-in) gets new-order email ONLY when the order is customer-initiated', async () => {
+    it('start email carries pickup instructions + delivery fee + resolved paid add-ons', async () => {
+      affiliate.pickupInstructions = 'Leave on porch';
+      affiliate.deliveryFee = 7.5;
+      await affiliate.save();
+      await AddOn.updateOne({ key: 'premium_detergent' }, { $set: { price: 5 } });
+
+      await svc.createPendingOrder({ bag: await freshBag(), ...affRole(), addOns: ['premium_detergent'] });
+      expect(email.sendOrderStatusUpdateEmail).toHaveBeenCalledWith(
+        expect.anything(), expect.anything(), 'pending',
+        expect.objectContaining({
+          pickupInstructions: 'Leave on porch',
+          deliveryFee: 7.5,
+          addOns: expect.arrayContaining([expect.objectContaining({ key: 'premium_detergent', price: 5 })])
+        }));
+    });
+
+    it('out_for_delivery email carries the affiliate delivery instructions', async () => {
+      affiliate.deliveryInstructions = 'Ring the bell; hand to staff.';
+      await affiliate.save();
+      await svc.createPendingOrder({ bag: await freshBag(), ...affRole() });
+      await svc.advanceOrder({ bag: await freshBag(), ...opRole }); // in_progress
+      await svc.advanceOrder({ bag: await freshBag(), ...opRole }); // out_for_delivery
+      expect(email.sendOrderStatusUpdateEmail).toHaveBeenCalledWith(
+        expect.anything(), expect.anything(), 'out_for_delivery',
+        expect.objectContaining({ deliveryInstructions: 'Ring the bell; hand to staff.' }));
+    });
+
+    it('affiliate (opted-in) gets a new-order email on ANY start (customer OR staff)', async () => {
       affiliate.orderNotificationsEnabled = true; await affiliate.save();
 
-      // operator-initiated → no affiliate new-order email
+      // operator/staff-initiated → affiliate new-order email STILL fires
       await svc.createPendingOrder({ bag: await freshBag(), ...opRole });
-      expect(email.sendAffiliateNewOrderEmail).not.toHaveBeenCalled();
+      expect(email.sendAffiliateNewOrderEmail).toHaveBeenCalledTimes(1);
+      jest.clearAllMocks();
       await Order.deleteMany({});
 
-      // customer-initiated → affiliate new-order email fires
+      // customer-initiated → also fires
       await svc.createPendingOrder({ bag: await freshBag(), ...custRole() });
       expect(email.sendAffiliateNewOrderEmail).toHaveBeenCalledTimes(1);
     });
 
-    it('affiliate (opted-in) gets a ready-for-pickup email at out_for_delivery', async () => {
+    it('affiliate (opted-in) gets NO email at out_for_delivery (ready email removed; they manage their own schedule)', async () => {
       affiliate.orderNotificationsEnabled = true; await affiliate.save();
-      await svc.createPendingOrder({ bag: await freshBag(), ...affRole() });
+      await svc.createPendingOrder({ bag: await freshBag(), ...affRole() }); // 1 new-order email
       await svc.advanceOrder({ bag: await freshBag(), ...opRole }); // in_progress
       await svc.advanceOrder({ bag: await freshBag(), ...opRole }); // out_for_delivery
-      expect(email.sendAffiliateOrderReadyEmail).toHaveBeenCalledTimes(1);
+      expect(email.sendAffiliateOrderReadyEmail).not.toHaveBeenCalled();
+      expect(email.sendAffiliateNewOrderEmail).toHaveBeenCalledTimes(1); // only the start email
     });
 
     it('affiliate (opted-OUT, the default) gets NO affiliate emails', async () => {

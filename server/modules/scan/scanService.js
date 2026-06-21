@@ -199,16 +199,7 @@ async function resolveScan({ bagToken }) {
   let orderInstructions = '';
   if (reference && reference.status === 'pending') {
     orderInstructions = reference.specialInstructions || '';
-    if (Array.isArray(reference.addOns) && reference.addOns.length) {
-      const catalog = await AddOn.find({ key: { $in: reference.addOns } });
-      const byKey = new Map(catalog.map(a => [a.key, a]));
-      orderAddOns = reference.addOns.map(k => {
-        const a = byKey.get(k);
-        return a
-          ? { key: a.key, name: a.name, translations: { es: a.translations.es || '', pt: a.translations.pt || '', de: a.translations.de || '' } }
-          : { key: k, name: k, translations: { es: '', pt: '', de: '' } }; // retired key — show the slug
-      });
-    }
+    orderAddOns = await AddOn.resolveKeys(reference.addOns); // [{key,name,price,translations}]
   }
 
   return {

@@ -472,8 +472,11 @@ exports.sendAffiliateNewOrderEmail = async (affiliate, customer, order) => {
 };
 
 /**
- * Send "order ready for pickup" notification to affiliate (Phase 1 — fired at
- * the store-pickup scan when notifications are enabled for the affiliate).
+ * @deprecated DEAD CODE since 2026-06-20. The affiliate is now emailed only ONCE
+ * — when an order starts (sendAffiliateNewOrderEmail) — because partners manage
+ * their own pickup schedule. notifyTransition no longer calls this at
+ * out_for_delivery. Kept (unwired) to avoid template/test churn; safe to delete
+ * with affiliate-order-ready.html next cleanup.
  */
 exports.sendAffiliateOrderReadyEmail = async (affiliate, order, customer) => {
   try {

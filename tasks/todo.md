@@ -25,10 +25,12 @@ Plan: `~/.claude/plans/parsed-spinning-unicorn.md` (approved 2026-06-20).
 - [x] clean full gate (169 suites green; 1 version-string test updated)
 
 ## PR 4 — Emails + notification routing
-- [ ] notifyTransition: affiliate notify on ANY start (opted-in), drop out_for_delivery affiliate email; resolve add-ons for email
-- [ ] customer order-status email: pickup instr + delivery fee + paid add-ons (pending); delivery instr (out_for_delivery)
-- [ ] Tests (transition/email seam); i18n email copy
-- [ ] gate → commit → deploy
+- [x] AddOn.resolveKeys shared helper (scanService refactored onto it)
+- [x] notifyTransition: affiliate notify on ANY start (opted-in), drop out_for_delivery affiliate email; resolve add-ons for email
+- [x] customer order-status email: pickup instr + delivery fee + paid add-ons (pending); delivery instr (out_for_delivery); [EXTRA_BLOCK] template
+- [x] sendAffiliateOrderReadyEmail marked dead (call site removed)
+- [x] Tests (transition/email seam + dispatcher render); en/es/pt/de email labels
+- [x] full gate (171 suites / 2760 tests green) → commit → deploy
 
 ## Final
 - [ ] Adversarial review workflow over the whole diff; fix confirmed findings

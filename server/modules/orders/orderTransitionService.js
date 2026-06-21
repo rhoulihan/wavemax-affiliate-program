@@ -208,12 +208,15 @@ async function advanceOrder({ bag, by, role, paymentConfirmed, addOns, specialIn
 /**
  * Best-effort per-transition notifications. NEVER throws into the scan flow.
  *
- * Customer is emailed on EVERY state change. The affiliate is emailed only when
- * a customer starts an order (pickup.role === 'customer') and when the order is
- * ready for pickup — and only if the affiliate has order notifications enabled
- * (default off; full_service defaults on — see Affiliate model). Both sends run
- * in parallel and failures are swallowed (logged), so a flaky SMTP never blocks
- * or fails a scan.
+ * Customer is emailed on EVERY state change (to a verified email). The start
+ * email itemizes the affiliate's pickup instructions, per-affiliate delivery
+ * fee (if non-zero) and any selected paid add-ons; the out_for_delivery email
+ * carries the affiliate's delivery instructions. The affiliate is emailed once
+ * — when an order STARTS, regardless of who started it (customer or staff) —
+ * and only if they have order notifications enabled (default off; full_service
+ * defaults on). No affiliate email at out_for_delivery: partners manage their
+ * own pickup schedule. Sends run in parallel; failures are swallowed (logged),
+ * so a flaky SMTP never blocks or fails a scan.
  *
  * @param {Order} order
  * @param {{event: 'created'|'in_progress'|'out_for_delivery'|'complete'|'cancelled'}} opts
@@ -236,9 +239,20 @@ async function notifyTransition(order, { event }) {
     // no order emails.
     if (customer && customer.email && customer.emailVerified) {
       if (event === 'created') {
-        sends.push(emailService.sendOrderStatusUpdateEmail(customer, order, 'pending'));
-      } else if (event === 'in_progress' || event === 'out_for_delivery') {
-        sends.push(emailService.sendOrderStatusUpdateEmail(customer, order, event));
+        // Itemize the start email: pickup instructions + per-affiliate delivery
+        // fee + resolved paid add-ons (label + price).
+        const addOns = await AddOn.resolveKeys(order.addOns);
+        sends.push(emailService.sendOrderStatusUpdateEmail(customer, order, 'pending', {
+          pickupInstructions: affiliate ? affiliate.pickupInstructions : '',
+          deliveryFee: affiliate ? affiliate.deliveryFee : 0,
+          addOns
+        }));
+      } else if (event === 'in_progress') {
+        sends.push(emailService.sendOrderStatusUpdateEmail(customer, order, event, {}));
+      } else if (event === 'out_for_delivery') {
+        sends.push(emailService.sendOrderStatusUpdateEmail(customer, order, event, {
+          deliveryInstructions: affiliate ? affiliate.deliveryInstructions : ''
+        }));
       } else if (event === 'complete') {
         sends.push(emailService.sendCustomerDeliveredEmail(customer, order, { affiliateName }));
       } else if (event === 'cancelled') {
@@ -246,12 +260,11 @@ async function notifyTransition(order, { event }) {
       }
     }
 
-    // Affiliate — gated on opt-in; only on customer-started creation + ready.
+    // Affiliate — gated on opt-in; one email when the order STARTS (any starter).
+    // No out_for_delivery email: partners manage their own pickup schedule.
     if (affiliate && affiliate.orderNotificationsEnabled && affiliate.email) {
-      if (event === 'created' && order.pickup && order.pickup.role === 'customer') {
+      if (event === 'created') {
         sends.push(emailService.sendAffiliateNewOrderEmail(affiliate, customer, order));
-      } else if (event === 'out_for_delivery') {
-        sends.push(emailService.sendAffiliateOrderReadyEmail(affiliate, order, customer));
       }
     }
 
