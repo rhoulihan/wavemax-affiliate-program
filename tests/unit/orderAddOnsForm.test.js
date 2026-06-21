@@ -60,6 +60,27 @@ describe('start-order form: add-ons + special instructions', () => {
     expect(claimJs).toMatch(/formatPrice\(a\.price,\s*a\.priceUnit\)/); // unit threaded through
   });
 
+  it('renders a non-optional delivery-fee line item (CSP-clean) when a fee applies', () => {
+    expect(claimJs).toMatch(/currentDeliveryFee/);              // effective fee threaded from resolve/register
+    expect(claimJs).toMatch(/order-delivery-fee/);             // the line item class
+    expect(claimJs).toMatch(/claim\.order\.deliveryFee/);       // localized label
+    expect(claimJs).toMatch(/Number\(currentDeliveryFee\)\s*>\s*0/); // only when there is a fee
+    // built via createElement (claim.js is innerHTML-banned)
+    expect(claimJs).toMatch(/createElement\('div'\)/);
+  });
+
+  it('captures the effective delivery fee from the resolve + register responses', () => {
+    expect(claimJs).toMatch(/currentDeliveryFee = Number\(rd\.deliveryFee\)/);
+    expect(claimJs).toMatch(/currentDeliveryFee = Number\(registeredAffiliate\.deliveryFee\)/);
+  });
+
+  it('ships the claim.order.deliveryFee key in all four languages', () => {
+    for (const lang of ['en', 'es', 'pt', 'de']) {
+      const dict = JSON.parse(fs.readFileSync(path.join(ROOT, `public/locales/${lang}/common.json`), 'utf8'));
+      expect(typeof (dict.claim.order && dict.claim.order.deliveryFee)).toBe('string');
+    }
+  });
+
   it('re-localizes the options on a language switch (static via data-i18n, dynamic in place)', () => {
     // titles carry data-i18n (key threaded through buildAddOnTable) so
     // translatePage() handles them; both title keys are referenced.

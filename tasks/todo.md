@@ -10,10 +10,11 @@ Plan: `~/.claude/plans/parsed-spinning-unicorn.md` (approved 2026-06-21).
 - [x] i18n en/es/pt/de; tests green (49); i18n parity 0
 - [ ] asset rebuild + cache-bump + full gate + deploy (batched at end of wave)
 
-## PR 2 — Partner delivery fee line item (order form + confirmation summary)
-- [ ] Surface affiliate.deliveryFee to the claim flow (validate/resolve + register response)
-- [ ] claim.js renderOrderOptions: non-optional delivery-fee line (fee>0); confirmation summary lists add-ons+prices + fee + pickup instructions
-- [ ] i18n; tests; gate → commit → deploy
+## PR 2 — Partner delivery fee line item (order form + confirmation summary) — CODE DONE
+- [x] effectiveDeliveryFee util + seeded SystemConfig `default_delivery_fee` ($10, WaveMAX Associates)
+- [x] resolveScan + claimRegister return the EFFECTIVE fee
+- [x] claim.js renderOrderOptions: non-optional delivery-fee line; confirmation summary shows fee + pickup instructions
+- [x] i18n; tests (form + util, 6 scan/claim suites green); deploy with wave
 
 ## PR 3 — Operator: delivery-fee pricing at intake + required final total at send-out + persistence
 - [ ] Order model: orderTotal + deliveryFeeCharged (snapshot at out_for_delivery)

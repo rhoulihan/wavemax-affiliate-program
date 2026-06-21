@@ -165,6 +165,22 @@
       if (free.length) {
         c.appendChild(buildAddOnTable(free, containerId, 'claim.order.freeOptionsTitle', 'Free Options', false));
       }
+      // Non-optional delivery-fee line item (every order has an effective fee —
+      // the partner's own or the WaveMAX-Associates default). Display-only.
+      if (Number(currentDeliveryFee) > 0) {
+        var dfRow = document.createElement('div');
+        dfRow.className = 'order-delivery-fee';
+        var dfLabel = document.createElement('span');
+        dfLabel.className = 'order-delivery-fee-label';
+        dfLabel.setAttribute('data-i18n', 'claim.order.deliveryFee');
+        dfLabel.textContent = t('claim.order.deliveryFee', 'Delivery fee');
+        var dfAmt = document.createElement('span');
+        dfAmt.className = 'order-delivery-fee-amount';
+        dfAmt.textContent = formatPrice(currentDeliveryFee);
+        dfRow.appendChild(dfLabel);
+        dfRow.appendChild(dfAmt);
+        c.appendChild(dfRow);
+      }
       var instrLabel = document.createElement('label');
       instrLabel.className = 'order-options-label';
       instrLabel.setAttribute('data-i18n', 'claim.order.instructionsLabel');
@@ -245,6 +261,7 @@
 
   var pending = null; // last resolveData awaiting confirm
   var pendingPickupInstructions = ''; // partner instructions from the last resolve (shown to the customer on start)
+  var currentDeliveryFee = 0; // effective delivery fee (partner's own or WaveMAX-Associates default) for the order form + summary
 
   function enterStaffScan() {
     // No persistent session anymore: every bag QR requires a fresh code, so we
@@ -314,6 +331,7 @@
       .then(function () { return window.ScanSession.resolve(bagToken); })
       .then(function (rd) {
         pendingPickupInstructions = rd.pickupInstructions || '';
+        currentDeliveryFee = Number(rd.deliveryFee) || 0;
         if (rd.proposedAction === 'advance' && rd.to === 'complete') {
           // Bag is out for delivery → this scan is the DELIVERY confirmation, not
           // a new order. Confirm "mark delivered?" then complete.
@@ -491,6 +509,7 @@
   function renderConfirm(resolveData) {
     pending = resolveData;
     pendingPickupInstructions = resolveData.pickupInstructions || '';
+    currentDeliveryFee = Number(resolveData.deliveryFee) || 0;
     // The "update this number in Cents" warning is for STORE STAFF — never show it
     // to a customer confirming their own delivery (it's an out-of-context message).
     var sess = window.ScanSession && window.ScanSession.getSession();
@@ -556,6 +575,7 @@
     window.ScanSession.resolve(bagToken)
       .then(function (rd) {
         pendingPickupInstructions = rd.pickupInstructions || '';
+        currentDeliveryFee = Number(rd.deliveryFee) || 0;
         if (rd.proposedAction === 'create-pending') {
           return window.ScanSession.apply(bagToken, 'create-pending', orderOptions)
             .then(function (res) {
@@ -609,6 +629,16 @@
       if (block) block.hidden = false;
     } else if (block) {
       block.hidden = true;
+    }
+    // Delivery-fee line on the confirmation summary (new order start only).
+    var feeEl = document.getElementById('order-result-delivery-fee');
+    if (feeEl) {
+      if (opts.customer && !opts.delivered && Number(currentDeliveryFee) > 0) {
+        feeEl.textContent = t('claim.order.deliveryFee', 'Delivery fee') + ': ' + formatPrice(currentDeliveryFee);
+        feeEl.hidden = false;
+      } else {
+        feeEl.hidden = true;
+      }
     }
     showStartReminders(opts);
   }
@@ -930,6 +960,7 @@
 
   function renderRegistered(affiliateData) {
     registeredAffiliate = affiliateData || {};
+    currentDeliveryFee = Number(registeredAffiliate.deliveryFee) || 0;
     show('registered');
     // Every partner type: offer to start the order now (or scan the bag QR later),
     // and tell the customer to confirm their email for future notifications.

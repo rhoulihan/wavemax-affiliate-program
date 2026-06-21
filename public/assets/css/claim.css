@@ -313,3 +313,20 @@
   color: #0f172a;
   font-weight: 600;
 }
+
+/* Non-optional delivery-fee line item on the order start form. */
+.order-delivery-fee {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 8px 0 4px;
+  padding: 8px 10px;
+  border-top: 1px solid #e2e8f0;
+  font-size: 15px;
+  font-weight: 700;
+  color: #0f172a;
+}
+.order-delivery-fee-amount {
+  font-variant-numeric: tabular-nums;
+}

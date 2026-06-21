@@ -20,6 +20,7 @@ const emailService = require('../utils/emailService');
 const ControllerHelpers = require('../utils/controllerHelpers');
 const AuthorizationHelpers = require('../middleware/authorizationHelpers');
 const Formatters = require('../utils/formatters');
+const { effectiveDeliveryFee } = require('../utils/deliveryFee');
 
 // ============================================================================
 // Customer Controllers
@@ -235,7 +236,10 @@ exports.claimRegister = ControllerHelpers.asyncWrapper(async (req, res) => {
           // Drives the confirmation page: full_service → "Request pickup now"
           // then show the instructions; pickup_location → show them directly.
           serviceType: affiliate.serviceType,
-          pickupInstructions: affiliate.pickupInstructions || ''
+          pickupInstructions: affiliate.pickupInstructions || '',
+          // Effective delivery fee (partner's own or the WaveMAX-Associates
+          // default) — a non-optional line item on the start form/summary.
+          deliveryFee: await effectiveDeliveryFee(affiliate)
         }
       },
       'Customer registration successful',

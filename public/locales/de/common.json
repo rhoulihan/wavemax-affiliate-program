@@ -141,6 +141,7 @@
       "optionColumn": "Option",
       "priceColumn": "Preis",
       "perPoundSuffix": "/lb",
+      "deliveryFee": "Liefergebühr",
       "instructionsLabel": "Besondere Hinweise (optional)",
       "instructionsPlaceholder": "Sollen wir etwas wissen? (z. B. Faltvorlieben)"
     }

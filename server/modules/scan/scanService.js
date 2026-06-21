@@ -20,6 +20,7 @@ const Operator = require('../../models/Operator');
 const Customer = require('../../models/Customer');
 const AddOn = require('../../models/AddOn');
 const SystemConfig = require('../../models/SystemConfig');
+const { effectiveDeliveryFee } = require('../../utils/deliveryFee');
 const bagService = require('../bags/bagService');
 const orderTransitionService = require('../orders/orderTransitionService');
 const { resolveScanAction, OPEN_STATUSES } = require('../orders/orderStateMachine');
@@ -187,7 +188,7 @@ async function resolveScan({ bagToken }) {
   // The partner's pickup instructions — shown to the customer after they start
   // their order (not to staff). Public partner copy, not sensitive.
   const affiliate = await Affiliate.findOne({ affiliateId: bag.affiliateId })
-    .select('pickupInstructions serviceType');
+    .select('pickupInstructions serviceType deliveryFee');
 
   const currentStatus = reference && OPEN_STATUSES.includes(reference.status)
     ? reference.status : 'none';
@@ -218,6 +219,10 @@ async function resolveScan({ bagToken }) {
     ...(decision.orderId ? { orderId: decision.orderId } : {}),
     ...(customer && customer.centsSyncNeeded ? { centsSyncNeeded: true, customerPhone: customer.phone } : {}),
     pickupInstructions: affiliate ? (affiliate.pickupInstructions || '') : '',
+    // Effective delivery fee (partner's own, or the WaveMAX-Associates default) —
+    // a non-optional line item shown to the customer on the start form/summary,
+    // and shown to the operator WITH price so they pick the right fee in Cents.
+    deliveryFee: await effectiveDeliveryFee(affiliate),
     serviceType: affiliate ? affiliate.serviceType : undefined,
     promptKey: promptKeyFor(decision),
     requiresConfirm: true

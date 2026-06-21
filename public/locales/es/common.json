@@ -141,6 +141,7 @@
       "optionColumn": "Opción",
       "priceColumn": "Precio",
       "perPoundSuffix": "/lb",
+      "deliveryFee": "Tarifa de entrega",
       "instructionsLabel": "Instrucciones especiales (opcional)",
       "instructionsPlaceholder": "¿Algo que debamos saber? (p. ej., preferencias de doblado)"
     }

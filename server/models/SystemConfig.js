@@ -165,6 +165,20 @@ systemConfigSchema.statics.getPublicConfigs = function() {
 // Static method to initialize default configurations
 systemConfigSchema.statics.initializeDefaults = async function() {
   const defaultConfigs = [
+    // Delivery — default fee for partners with no delivery fee of their own
+    // (they use WaveMAX Associates). Displays like any delivery fee but stays as
+    // house revenue (not partner commission). See server/utils/deliveryFee.js.
+    {
+      key: 'default_delivery_fee',
+      value: 10,
+      defaultValue: 10,
+      description: 'Default delivery fee (USD) for partners with no fee of their own (WaveMAX Associates pickup/delivery)',
+      category: 'affiliate',
+      dataType: 'number',
+      isEditable: true,
+      validation: { min: 0, max: 1000 }
+    },
+
     // Operator settings
     {
       key: 'max_operators_per_shift',
