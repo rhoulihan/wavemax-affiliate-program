@@ -35,4 +35,4 @@ Plan: `~/.claude/plans/parsed-spinning-unicorn.md` (approved 2026-06-20).
 ## Final
 - [x] Adversarial review workflow over the whole diff (20 agents, 15 raised → 3 confirmed real, all low); fixed all 3 (error-element placement, optionColumn i18n guard, in_progress opts pinned)
 - [x] End-to-end verify on prod (admin GET 401-gated, addons price live, claim Premium/Free tables live, bundle bumps live); store-unblock deployed
-- [ ] update memory
+- [x] update memory
