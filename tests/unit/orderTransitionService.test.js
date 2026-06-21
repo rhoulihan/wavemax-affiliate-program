@@ -199,6 +199,9 @@ describe('orderTransitionService', () => {
 
       const { order: ip } = await svc.advanceOrder({ bag: await freshBag(), ...opRole });
       expect(email.sendOrderStatusUpdateEmail).toHaveBeenCalledWith(expect.anything(), expect.anything(), 'in_progress', expect.anything());
+      // in_progress carries NO envelope extras (no pickup/delivery instructions, no fee) — pin opts to {}
+      const ipCall = email.sendOrderStatusUpdateEmail.mock.calls.find(c => c[2] === 'in_progress');
+      expect(ipCall[3]).toEqual({});
 
       await svc.advanceOrder({ bag: await freshBag(), ...opRole }); // -> out_for_delivery
       expect(email.sendOrderStatusUpdateEmail).toHaveBeenCalledWith(expect.anything(), expect.anything(), 'out_for_delivery', expect.anything());

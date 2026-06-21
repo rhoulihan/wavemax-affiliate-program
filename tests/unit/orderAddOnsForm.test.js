@@ -68,7 +68,7 @@ describe('start-order form: add-ons + special instructions', () => {
   it('ships claim.order.* form keys in all four languages', () => {
     for (const lang of ['en', 'es', 'pt', 'de']) {
       const dict = JSON.parse(fs.readFileSync(path.join(ROOT, `public/locales/${lang}/common.json`), 'utf8'));
-      for (const k of ['premiumOptionsTitle', 'freeOptionsTitle', 'priceColumn', 'instructionsLabel', 'instructionsPlaceholder']) {
+      for (const k of ['premiumOptionsTitle', 'freeOptionsTitle', 'optionColumn', 'priceColumn', 'instructionsLabel', 'instructionsPlaceholder']) {
         expect(`${lang}:claim.order.${k}:${typeof (dict.claim.order && dict.claim.order[k])}`)
           .toBe(`${lang}:claim.order.${k}:string`);
       }
