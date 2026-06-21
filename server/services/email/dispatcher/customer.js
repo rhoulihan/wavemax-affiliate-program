@@ -50,7 +50,7 @@ function buildOrderExtraBlock(status, opts = {}, L = {}, language = 'en') {
     const paid = Array.isArray(opts.addOns) ? opts.addOns.filter(a => Number(a.price) > 0) : [];
     if (paid.length) {
       const items = paid
-        .map(a => `<li>${escapeHtml(addOnLabel(a, language))} — $${Number(a.price).toFixed(2)}</li>`)
+        .map(a => `<li>${escapeHtml(addOnLabel(a, language))} — $${Number(a.price).toFixed(2)}${a.priceUnit === 'per_lb' ? '/lb' : ''}</li>`)
         .join('');
       rows.push(`<div style="${rowStyle}"><span style="${labelStyle}">${escapeHtml(L.PREMIUM_OPTIONS_LABEL)}:</span><ul style="margin: 6px 0 0; padding-left: 20px;">${items}</ul></div>`);
     }

@@ -76,6 +76,15 @@ describe('customer order-status email — itemized extras', () => {
     expect(html).toContain('&lt;script&gt;');
   });
 
+  it('renders per-pound add-on prices with a /lb suffix in the email', async () => {
+    await customerDispatcher.sendOrderStatusUpdateEmail(customer, order, 'pending', {
+      addOns: [{ key: 'pp', name: 'Per Pound Wash', price: 0.5, priceUnit: 'per_lb', translations: {} }]
+    });
+    const html = lastHtml();
+    expect(html).toContain('Per Pound Wash');
+    expect(html).toContain('$0.50/lb');
+  });
+
   it('localizes the add-on label and premium heading to the customer language', async () => {
     await customerDispatcher.sendOrderStatusUpdateEmail(
       { ...customer, languagePreference: 'es' }, order, 'pending', {

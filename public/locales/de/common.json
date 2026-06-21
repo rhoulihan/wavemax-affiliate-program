@@ -582,6 +582,7 @@
         "registrationLinkDesc": "Direkter Link für Kunden zur Registrierung unter Ihrem Partnerkonto",
         "personalInfo": "Persönliche Informationen",
         "deliveryFeeStructure": "Liefergebührenstruktur",
+        "deliveryByAssociates": "WaveMAX Associates",
         "dynamicPricing": "Dynamische Preisgestaltung:",
         "dynamicPricingDesc": "Ihre Kunden zahlen den höheren Betrag: die Mindestgebühr oder die berechnete Gebühr pro Tasche. Sie behalten 100% der Liefergebühren.",
         "minimumDeliveryFee": "Mindestliefergebühr ($)",

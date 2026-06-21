@@ -794,7 +794,7 @@ describe('Affiliate Controller', () => {
   });
 
   describe('getAffiliateDashboardStats', () => {
-    it('should return count-based dashboard statistics (earnings 0 post Phase 1)', async () => {
+    it('returns counts + commission (delivery fees) for the dashboard', async () => {
       req.params.affiliateId = 'AFF123';
       req.user = { role: 'affiliate', affiliateId: 'AFF123' };
 
@@ -804,6 +804,8 @@ describe('Affiliate Controller', () => {
         .mockResolvedValueOnce(3)
         .mockResolvedValueOnce(2)
         .mockResolvedValueOnce(1);
+      // commission aggregation (month, then week)
+      Order.aggregate = jest.fn().mockResolvedValue([]); // no delivery-fee commission
 
       const handler = affiliateController.getAffiliateDashboardStats;
       await handler(req, res, next);
@@ -830,6 +832,7 @@ describe('Affiliate Controller', () => {
 
       Customer.countDocuments = jest.fn().mockResolvedValue(0);
       Order.countDocuments = jest.fn().mockResolvedValue(0);
+      Order.aggregate = jest.fn().mockResolvedValue([]);
       Order.find = jest.fn().mockResolvedValue([]);
       Transaction.find.mockResolvedValue([]);
 

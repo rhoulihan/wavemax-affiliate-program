@@ -582,6 +582,7 @@
         "registrationLinkDesc": "Direct link for customers to register under your affiliate account",
         "personalInfo": "Personal Information",
         "deliveryFeeStructure": "Delivery Fee Structure",
+        "deliveryByAssociates": "WaveMAX Associates",
         "dynamicPricing": "Dynamic Pricing:",
         "dynamicPricingDesc": "Your customers pay whichever is higher: the minimum fee or the calculated per-bag rate. You keep 100% of delivery fees.",
         "minimumDeliveryFee": "Minimum Delivery Fee ($)",

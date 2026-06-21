@@ -16,6 +16,7 @@ const Order = require('../../models/Order');
 const Customer = require('../../models/Customer');
 const Affiliate = require('../../models/Affiliate');
 const AddOn = require('../../models/AddOn');
+const { effectiveDeliveryFee } = require('../../utils/deliveryFee');
 const SystemConfig = require('../../models/SystemConfig');
 const emailService = require('../../utils/emailService');
 const {
@@ -265,7 +266,9 @@ async function notifyTransition(order, { event }) {
         const addOns = await AddOn.resolveKeys(order.addOns);
         sends.push(emailService.sendOrderStatusUpdateEmail(customer, order, 'pending', {
           pickupInstructions: affiliate ? affiliate.pickupInstructions : '',
-          deliveryFee: affiliate ? affiliate.deliveryFee : 0,
+          // Effective fee (partner's own or the WaveMAX-Associates default) — same
+          // as the customer saw on the order form.
+          deliveryFee: await effectiveDeliveryFee(affiliate),
           addOns
         }));
       } else if (event === 'in_progress') {

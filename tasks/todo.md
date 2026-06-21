@@ -22,11 +22,20 @@ Plan: `~/.claude/plans/parsed-spinning-unicorn.md` (approved 2026-06-21).
 - [x] operator-scan: delivery-fee line w/ price at intake; required total input at send-out (client-gated); add-ons price-less
 - [x] tests (transition snapshot/freeze + operator modal + i18n); 6 scan suites green; deploy with wave
 
-## PR 4 — Revenue/commission surfacing + emails
-- [ ] adminDashboardService.getAffiliateAnalytics: totalRevenue + totalCommission sums
-- [ ] affiliateController earnings/dashboard/ytd: commission = Σ deliveryFeeCharged (commission-only)
-- [ ] affiliate dashboard Earnings relabel + wire; emails unit-aware add-on price
-- [ ] i18n; tests; gate → commit → deploy
+## PR 4 — Revenue/commission surfacing + emails — CODE DONE
+- [x] adminDashboardService.getAffiliateAnalytics: totalRevenue + totalCommission sums
+- [x] affiliateController earnings/dashboard/ytd: commission = Σ deliveryFeeCharged (commission-only)
+- [x] affiliate dashboard delivery-fee display (flat fee / WaveMAX Associates); emails effective fee + unit-aware add-on price
+- [x] i18n; tests (partnerRevenue + email-extras + fixed controller mocks)
+
+## Bag sticker (interjected) — DONE
+- [x] partner address printed under the customer-name write-in line (labelSheetService + bag-labels.css + test)
+
+## Wave deploy + final
+- [ ] asset rebuild + cache-bumps (claim.js / admin-init / operator-scan-init via embed pageScripts + min) + adminIpAuthz ?v=
+- [ ] ensure-indexes? (no new unique idx) ; full gate green
+- [ ] commit + deploy both boxes (pm2 reload — server code changed)
+- [ ] adversarial review workflow; e2e verify; update memory
 
 ## Final
 - [ ] Adversarial review workflow over the whole diff; fix confirmed findings

@@ -582,6 +582,7 @@
         "registrationLinkDesc": "Enlace directo para que los clientes se registren bajo tu cuenta de afiliado",
         "personalInfo": "Información Personal",
         "deliveryFeeStructure": "Estructura de Tarifas de Entrega",
+        "deliveryByAssociates": "WaveMAX Associates",
         "dynamicPricing": "Precios Dinámicos:",
         "dynamicPricingDesc": "Tus clientes pagan lo que sea mayor: la tarifa mínima o la tarifa calculada por bolsa. Conservas el 100% de las tarifas de entrega.",
         "minimumDeliveryFee": "Tarifa Mínima de Entrega ($)",

@@ -307,7 +307,12 @@ async function getAffiliateAnalytics({ startDate, endDate }) {
               $filter: { input: '$customers', cond: { $eq: ['$$this.isActive', true] } }
             }
           },
-          totalOrders: { $size: '$periodOrders' }
+          totalOrders: { $size: '$periodOrders' },
+          // Revenue = Σ operator-entered order totals (only set on sent-out orders).
+          // Commission = Σ the partner's own delivery fee snapshot (0 for orders
+          // that used the WaveMAX-Associates default — that stays house revenue).
+          totalRevenue: { $sum: '$periodOrders.orderTotal' },
+          totalCommission: { $sum: '$periodOrders.deliveryFeeCharged' }
         }
       }
     },

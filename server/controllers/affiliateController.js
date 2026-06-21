@@ -225,6 +225,9 @@ exports.getAffiliateProfile = ControllerHelpers.asyncWrapper(async (req, res) =>
     zipCode: affiliate.zipCode,
     minimumDeliveryFee: Formatters.currency(affiliate.minimumDeliveryFee),
     perBagDeliveryFee: Formatters.currency(affiliate.perBagDeliveryFee),
+    // Flat per-affiliate delivery fee (raw number) — the partner's commission per
+    // order; replaces the deprecated V1 min/per-bag pair in the dashboard.
+    deliveryFee: affiliate.deliveryFee || 0,
     paymentMethod: affiliate.paymentMethod,
     isActive: affiliate.isActive,
     dateRegistered: Formatters.datetime(affiliate.dateRegistered),
@@ -399,9 +402,13 @@ exports.getAffiliateEarnings = async (req, res) => {
       customerMap[customer.customerId] = customer;
     });
 
+    // Commission = the partner's own delivery fee snapshot per order (frozen at
+    // send-out). Order totals (revenue) are admin-only — not returned here.
+    const totalEarnings = orders.reduce((sum, o) => sum + (o.deliveryFeeCharged || 0), 0);
+
     res.status(200).json({
       success: true,
-      totalEarnings: 0,
+      totalEarnings, // commission = partner delivery fees
       pendingAmount: 0,
       orderCount: orders.length,
       orders: orders.map(order => {
@@ -410,6 +417,7 @@ exports.getAffiliateEarnings = async (req, res) => {
           orderId: order.orderId,
           customerId: order.customerId,
           customerName: customer ? `${customer.firstName} ${customer.lastName}` : 'Unknown Customer',
+          commission: order.deliveryFeeCharged || 0,
           completedAt: order.completedAt
         };
       })
@@ -750,18 +758,20 @@ exports.getAffiliateYtdStats = async (req, res) => {
 
     const yearStart = new Date(new Date().getFullYear(), 0, 1);
 
-    // completedAt is the ground truth for YTD. Money/commission moved to
-    // Cents (external) in Phase 1; this endpoint returns order counts only.
-    const orderCount = await Order.countDocuments({
-      affiliateId,
-      status: 'complete',
-      completedAt: { $gte: yearStart }
-    });
+    // completedAt is the ground truth for YTD. Commission = Σ the partner's own
+    // delivery fee snapshot (frozen at send-out). Order totals (revenue) are
+    // admin-only — the partner sees commission only.
+    const match = { affiliateId, status: 'complete', completedAt: { $gte: yearStart } };
+    const orderCount = await Order.countDocuments(match);
+    const agg = await Order.aggregate([
+      { $match: match },
+      { $group: { _id: null, commission: { $sum: '$deliveryFeeCharged' } } }
+    ]);
+    const totalEarnings = agg.length ? (agg[0].commission || 0) : 0;
 
     res.status(200).json({
       success: true,
-      totalEarnings: 0,
-      totalRevenue: 0,
+      totalEarnings, // commission = partner delivery fees
       orderCount,
       yearStart,
       asOf: new Date()
@@ -804,16 +814,22 @@ exports.getAffiliateDashboardStats = async (req, res) => {
     firstDayOfWeek.setDate(now.getDate() - now.getDay());
     firstDayOfWeek.setHours(0, 0, 0, 0);
 
-    const monthlyOrders = await Order.countDocuments({
-      affiliateId,
-      status: 'complete',
-      completedAt: { $gte: firstDayOfMonth }
-    });
-    const weeklyOrders = await Order.countDocuments({
-      affiliateId,
-      status: 'complete',
-      completedAt: { $gte: firstDayOfWeek }
-    });
+    const monthMatch = { affiliateId, status: 'complete', completedAt: { $gte: firstDayOfMonth } };
+    const weekMatch = { affiliateId, status: 'complete', completedAt: { $gte: firstDayOfWeek } };
+    const monthlyOrders = await Order.countDocuments(monthMatch);
+    const weeklyOrders = await Order.countDocuments(weekMatch);
+
+    // Commission = Σ the partner's own delivery fee snapshot (frozen at send-out).
+    // The partner sees commission only; order totals (revenue) are admin-only.
+    const sumCommission = async (match) => {
+      const agg = await Order.aggregate([
+        { $match: match },
+        { $group: { _id: null, commission: { $sum: '$deliveryFeeCharged' } } }
+      ]);
+      return agg.length ? (agg[0].commission || 0) : 0;
+    };
+    const monthEarnings = await sumCommission(monthMatch);
+    const weekEarnings = await sumCommission(weekMatch);
 
     // Calculate next payout date (typically weekly on Fridays)
     const nextPayoutDate = new Date();
@@ -824,9 +840,9 @@ exports.getAffiliateDashboardStats = async (req, res) => {
       stats: {
         customerCount,
         activeOrderCount,
-        totalEarnings: 0,
-        monthEarnings: 0,
-        weekEarnings: 0,
+        totalEarnings: monthEarnings, // dashboard headline = this month's commission
+        monthEarnings,
+        weekEarnings,
         pendingEarnings: 0,
         monthlyOrders,
         weeklyOrders,

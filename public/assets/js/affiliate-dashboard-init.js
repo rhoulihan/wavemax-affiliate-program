@@ -495,16 +495,14 @@ async function loadAffiliateData(affiliateId) {
       const businessElement = document.getElementById('businessName');
       if (businessElement) businessElement.textContent = data.businessName || 'N/A';
 
-      // Display delivery fee structure
+      // Display the flat per-affiliate delivery fee (the partner's commission per
+      // order). 0 / unset = WaveMAX Associates handles delivery (house fee).
       const deliveryFeeElement = document.getElementById('deliveryFee');
       if (deliveryFeeElement) {
-        if (data.minimumDeliveryFee !== undefined && data.perBagDeliveryFee !== undefined) {
-          const minFee = parseFloat(data.minimumDeliveryFee);
-          const perBag = parseFloat(data.perBagDeliveryFee);
-          deliveryFeeElement.textContent = `$${minFee.toFixed(2)} min, $${perBag.toFixed(2)}/bag`;
-        } else {
-          deliveryFeeElement.textContent = 'Contact support';
-        }
+        const fee = parseFloat(data.deliveryFee);
+        deliveryFeeElement.textContent = (fee > 0)
+          ? `$${fee.toFixed(2)}`
+          : (window.i18n ? window.i18n.t('affiliate.dashboard.settings.deliveryByAssociates') : 'WaveMAX Associates');
       }
 
       // Generate and display landing page link
