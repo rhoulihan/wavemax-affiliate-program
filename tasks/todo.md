@@ -32,10 +32,17 @@ Plan: `~/.claude/plans/parsed-spinning-unicorn.md` (approved 2026-06-21).
 - [x] partner address printed under the customer-name write-in line (labelSheetService + bag-labels.css + test)
 
 ## Wave deploy + final
-- [ ] asset rebuild + cache-bumps (claim.js / admin-init / operator-scan-init via embed pageScripts + min) + adminIpAuthz ?v=
-- [ ] ensure-indexes? (no new unique idx) ; full gate green
-- [ ] commit + deploy both boxes (pm2 reload — server code changed)
+- [x] asset rebuild + cache-bumps (claim.js / admin-init via embed pageScripts + min 20260621) + adminIpAuthz ?v=
+- [x] full gate run: 2787 passed, 3 fails — all stale test mocks/assertions (claimPageWiring operator-undo + 2 dashboard-stats Order.aggregate mocks), fixed + reverified
+- [ ] commit asset bumps + test fixes + deploy both boxes (pm2 reload — server code changed)
 - [ ] adversarial review workflow; e2e verify; update memory
+
+## NEXT FEATURE — /scanbag mobile PWA (queued, build after the wave deploys)
+Decisions (2026-06-21): scope = START + COMPLETE orders only (hand off to /claim&bag=<token>, which already permits create-pending + advance→complete and blocks store-middle steps); iOS supported (jsQR fallback + Add-to-Home-Screen hint); Android primary (native BarcodeDetector + beforeinstallprompt Install button); STANDALONE /scanbag mini-app (own manifest + icon + minimal service worker).
+- [ ] /scanbag route (server) + camera Permissions-Policy carve-out for that route only
+- [ ] camera scan page: BarcodeDetector + jsQR fallback; decode bag QR → redirect to embedded claim URL
+- [ ] PWA: manifest.json (standalone, start_url /scanbag, icon), minimal service worker, install button (Android) + iOS A2HS hint
+- [ ] tests; deploy
 
 ## Final
 - [ ] Adversarial review workflow over the whole diff; fix confirmed findings

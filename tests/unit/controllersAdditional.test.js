@@ -293,6 +293,7 @@ describe('Controllers - Additional Function Coverage', () => {
         
         // Mock empty results
         Order.countDocuments = jest.fn().mockResolvedValue(0);
+        Order.aggregate = jest.fn().mockResolvedValue([]); // no delivery-fee commission
         Customer.countDocuments = jest.fn().mockResolvedValue(0);
         Order.find = jest.fn().mockResolvedValue([]);
         Transaction.find = jest.fn().mockResolvedValue([]);
@@ -324,6 +325,7 @@ describe('Controllers - Additional Function Coverage', () => {
           .mockResolvedValueOnce(2) // active orders
           .mockResolvedValueOnce(5) // monthly complete
           .mockResolvedValueOnce(3); // weekly complete
+        Order.aggregate = jest.fn().mockResolvedValue([]); // no delivery-fee commission
         Customer.countDocuments = jest.fn().mockResolvedValue(10);
 
         await getAffiliateDashboardStats(req, res, next);

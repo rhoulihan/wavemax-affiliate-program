@@ -340,8 +340,10 @@ describe('scan UIs drive the PR 4 /scan/* engine', () => {
     for (const src of [claimJs, kioskJs]) {
       expect(src).toMatch(/ScanSession\.resolve/);
       expect(src).toMatch(/ScanSession\.apply/);
-      expect(src).toMatch(/ScanSession\.undo/);
     }
+    // undo is the customer's own start-undo; the operator scanner dropped its
+    // "undo last scan" button, so only claim.js references ScanSession.undo.
+    expect(claimJs).toMatch(/ScanSession\.undo/);
     expect(claimJs).toMatch(/ScanSession\.mint/); // field/staff code flow
   });
 
