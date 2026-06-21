@@ -342,5 +342,18 @@ describe('orderTransitionService', () => {
       const res = await svc.undoLastTransition({ order, by: opRole.by });
       expect(res.order.status).toBe('in_progress');
     });
+
+    it('clears the revenue snapshot when undoing from out_for_delivery', async () => {
+      affiliate.deliveryFee = 8; await affiliate.save();
+      await svc.createPendingOrder({ bag: await freshBag(), ...affRole() });
+      await svc.advanceOrder({ bag: await freshBag(), ...opRole });
+      const { order } = await svc.advanceOrder({ bag: await freshBag(), ...opRole, orderTotal: 50 });
+      expect(order.orderTotal).toBe(50);
+      expect(order.deliveryFeeCharged).toBe(8);
+      const res = await svc.undoLastTransition({ order, by: opRole.by });
+      expect(res.order.status).toBe('in_progress');
+      expect(res.order.orderTotal).toBeUndefined();   // snapshot cleared
+      expect(res.order.deliveryFeeCharged).toBe(0);
+    });
   });
 });

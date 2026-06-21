@@ -634,7 +634,14 @@
     var feeEl = document.getElementById('order-result-delivery-fee');
     if (feeEl) {
       if (opts.customer && !opts.delivered && Number(currentDeliveryFee) > 0) {
-        feeEl.textContent = t('claim.order.deliveryFee', 'Delivery fee') + ': ' + formatPrice(currentDeliveryFee);
+        // Label as a data-i18n span so it re-localizes on a language switch;
+        // amount follows as a plain text node. CSP-clean (no innerHTML).
+        while (feeEl.firstChild) feeEl.removeChild(feeEl.firstChild);
+        var feeLbl = document.createElement('span');
+        feeLbl.setAttribute('data-i18n', 'claim.order.deliveryFee');
+        feeLbl.textContent = t('claim.order.deliveryFee', 'Delivery fee');
+        feeEl.appendChild(feeLbl);
+        feeEl.appendChild(document.createTextNode(': ' + formatPrice(currentDeliveryFee)));
         feeEl.hidden = false;
       } else {
         feeEl.hidden = true;

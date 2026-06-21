@@ -354,6 +354,11 @@ async function undoLastTransition({ order, by, req }) {
   if (from === 'out_for_delivery') {
     order.storePickup = undefined;
     order.paymentConfirmedManually = false;
+    // Also clear the send-out revenue snapshot — it'll be re-entered on the
+    // next out_for_delivery scan; leaving it stale would over-count revenue/
+    // commission if the rolled-back order is later cancelled.
+    order.orderTotal = undefined;
+    order.deliveryFeeCharged = 0;
   } else if (from === 'in_progress') {
     order.intake = undefined;
   }

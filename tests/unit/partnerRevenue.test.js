@@ -38,4 +38,20 @@ describe('admin affiliate analytics — revenue + commission', () => {
     expect(row.metrics.totalCommission).toBeCloseTo(8, 2);   // only the partner's own fee
     expect(row.metrics.totalOrders).toBe(3);
   });
+
+  it('excludes a cancelled-after-send-out order (stale snapshot never settled)', async () => {
+    const aff = await makeAffiliate();
+    const base = { affiliateId: aff.affiliateId, customerId: 'CUST-x', bagId: 'BAG-x' };
+    await Order.create({ ...base, status: 'complete', orderTotal: 40, deliveryFeeCharged: 5 });
+    // sent out, then cancelled — keeps its snapshot but must NOT count
+    await Order.create({ ...base, status: 'cancelled', orderTotal: 99, deliveryFeeCharged: 99 });
+
+    const start = new Date(Date.now() - 86400000);
+    const end = new Date(Date.now() + 86400000);
+    const { affiliates } = await adminDashboardService.getAffiliateAnalytics({ startDate: start, endDate: end });
+    const row = affiliates.find(a => a.affiliateId === aff.affiliateId);
+    expect(row.metrics.totalRevenue).toBeCloseTo(40, 2);     // cancelled $99 excluded
+    expect(row.metrics.totalCommission).toBeCloseTo(5, 2);   // cancelled $99 excluded
+    expect(row.metrics.totalOrders).toBe(2);                 // count still includes the cancelled order
+  });
 });

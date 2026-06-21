@@ -311,8 +311,20 @@ async function getAffiliateAnalytics({ startDate, endDate }) {
           // Revenue = Σ operator-entered order totals (only set on sent-out orders).
           // Commission = Σ the partner's own delivery fee snapshot (0 for orders
           // that used the WaveMAX-Associates default — that stays house revenue).
-          totalRevenue: { $sum: '$periodOrders.orderTotal' },
-          totalCommission: { $sum: '$periodOrders.deliveryFeeCharged' }
+          // Exclude CANCELLED orders: one cancelled after send-out keeps its
+          // snapshot, which never settled — counting it would inflate the totals.
+          totalRevenue: {
+            $sum: { $map: {
+              input: { $filter: { input: '$periodOrders', as: 'o', cond: { $ne: ['$$o.status', 'cancelled'] } } },
+              as: 'o', in: '$$o.orderTotal'
+            } }
+          },
+          totalCommission: {
+            $sum: { $map: {
+              input: { $filter: { input: '$periodOrders', as: 'o', cond: { $ne: ['$$o.status', 'cancelled'] } } },
+              as: 'o', in: '$$o.deliveryFeeCharged'
+            } }
+          }
         }
       }
     },
