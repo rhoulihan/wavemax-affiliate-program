@@ -42,7 +42,7 @@ Plan: `~/.claude/plans/parsed-spinning-unicorn.md` (approved 2026-06-21).
 - [x] scan page: native BarcodeDetector (Android) + jsQR fallback (iOS, vendored 130KB); decode bag QR → redirect to a LOCALLY-built /claim URL (open-redirect-safe, 32-hex token validated)
 - [x] PWA: scanbag-manifest.json (standalone, start_url/scope /scanbag, 192/270 icons), scanbag-sw.js (scoped /scanbag), Android install button + iOS A2HS hint
 - [x] tests (18: source wiring + gate exemptions + route headers); gate-affected suites green
-- [ ] full gate → commit → deploy
+- [x] full gate (175 suites / 2810 green) → commit (8dbed7c) → deploy both boxes → live-verified (camera=(self), manifest/sw/JS 200)
 
 ## Final
 - [ ] Adversarial review workflow over the whole diff; fix confirmed findings
