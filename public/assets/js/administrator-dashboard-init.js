@@ -2270,6 +2270,7 @@
                     <tr>
                         <th>${t('admin.addons.name', 'Name')}</th>
                         <th>${t('admin.addons.key', 'Key')}</th>
+                        <th>${t('admin.addons.priceColumn', 'Price')}</th>
                         <th>${t('admin.addons.sortOrder', 'Sort order')}</th>
                         <th>${t('admin.addons.active', 'Active')}</th>
                         <th>${t('admin.addons.actions', 'Actions')}</th>
@@ -2280,6 +2281,7 @@
                         <tr>
                             <td>${escapeHtml(a.name)}</td>
                             <td><code>${escapeHtml(a.key)}</code></td>
+                            <td>${(a.price || 0) > 0 ? '$' + Number(a.price).toFixed(2) : t('admin.addons.free', 'Free')}</td>
                             <td>${a.sortOrder}</td>
                             <td>
                                 <span class="status-badge ${a.isActive ? 'active' : 'inactive'}">
@@ -2311,6 +2313,7 @@
     document.getElementById('addonNameEs').value = tr.es || '';
     document.getElementById('addonNamePt').value = tr.pt || '';
     document.getElementById('addonNameDe').value = tr.de || '';
+    document.getElementById('addonPrice').value = addOn ? (addOn.price || 0) : 0;
     document.getElementById('addonSortOrder').value = addOn ? (addOn.sortOrder || 0) : 0;
     document.getElementById('addonActive').checked = addOn ? !!addOn.isActive : true;
     // The English name field is the source of the key on create; on edit the key
@@ -2343,6 +2346,7 @@
         pt: (document.getElementById('addonNamePt').value || '').trim(),
         de: (document.getElementById('addonNameDe').value || '').trim()
       },
+      price: parseFloat(document.getElementById('addonPrice').value || '0') || 0,
       sortOrder: parseInt(document.getElementById('addonSortOrder').value, 10) || 0,
       isActive: document.getElementById('addonActive').checked
     };

@@ -3,8 +3,9 @@
 // `key` slug(s); the per-language labels (en `name` + es/pt/de `translations`)
 // render on the customer order form and the operator intake modal.
 //
-// Money lives in Cents (external) — add-ons are LABEL-ONLY here. There is no
-// price/amount/fee field by design.
+// Money still settles in Cents (external). The `price` here is DISPLAY-ONLY:
+// it itemizes premium add-ons on the customer order form and the confirmation
+// email. 0 = a free option (rendered in the Free Options table).
 
 const mongoose = require('mongoose');
 const { v4: uuidv4 } = require('uuid');
@@ -32,6 +33,8 @@ const addOnSchema = new mongoose.Schema({
     pt: { type: String, trim: true, default: '', maxlength: 100 },
     de: { type: String, trim: true, default: '', maxlength: 100 }
   },
+  // Display-only price (USD). 0 = free option. Money still settles in Cents.
+  price: { type: Number, default: 0, min: 0, max: 10000 },
   isActive: { type: Boolean, default: true },
   sortOrder: { type: Number, default: 0 }
 }, { timestamps: true });

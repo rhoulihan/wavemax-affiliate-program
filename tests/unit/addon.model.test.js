@@ -49,10 +49,16 @@ describe('AddOn model', () => {
       expect(b.translations.es).toBe('Suavizante');
     });
 
-    it('holds NO price/money field (money lives in Cents)', () => {
-      for (const gone of ['price', 'amount', 'cost', 'fee']) {
-        expect(AddOn.schema.path(gone)).toBeUndefined();
-      }
+    it('carries a display-only price (defaults 0)', async () => {
+      const a = await build().save();
+      expect(a.price).toBe(0);
+      const b = await build({ key: 'paid', name: 'Paid', price: 5.5 }).save();
+      expect(b.price).toBe(5.5);
+    });
+
+    it('rejects a negative price and a price above the max', async () => {
+      await expect(build({ key: 'neg', name: 'Neg', price: -1 }).save()).rejects.toThrow();
+      await expect(build({ key: 'huge', name: 'Huge', price: 20000 }).save()).rejects.toThrow();
     });
   });
 

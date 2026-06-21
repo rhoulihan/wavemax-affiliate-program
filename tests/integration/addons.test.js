@@ -62,6 +62,17 @@ describe('Add-on catalog API', () => {
       expect(b.name).toBe('B One');
       expect(b.translations.es).toBe('B Uno');
     });
+
+    it('exposes each add-on price (free = 0)', async () => {
+      await AddOn.create([
+        { key: 'paid', name: 'Paid', sortOrder: 1, isActive: true, price: 5.5 },
+        { key: 'free', name: 'Free', sortOrder: 2, isActive: true }
+      ]);
+      const res = await agent.get('/api/v1/addons');
+      expect(res.status).toBe(200);
+      expect(res.body.addOns.find(a => a.key === 'paid').price).toBe(5.5);
+      expect(res.body.addOns.find(a => a.key === 'free').price).toBe(0);
+    });
   });
 
   describe('admin GET /api/v1/administrators/addons', () => {
@@ -113,6 +124,34 @@ describe('Add-on catalog API', () => {
         .send({ key: 'Extra_Starch', name: 'Extra Starch' });
       expect(res.status).toBe(201);
       expect(res.body.addOn.key).toBe('extra_starch');
+    });
+
+    it('stores a price on create and returns it (defaults 0 when omitted)', async () => {
+      const paid = await agent
+        .post('/api/v1/administrators/addons')
+        .set('Authorization', `Bearer ${adminToken}`)
+        .set('x-csrf-token', csrfToken)
+        .send({ name: 'Premium Soap', price: 4.25 });
+      expect(paid.status).toBe(201);
+      expect(paid.body.addOn.price).toBe(4.25);
+      expect((await AddOn.findOne({ key: 'premium_soap' })).price).toBe(4.25);
+
+      const free = await agent
+        .post('/api/v1/administrators/addons')
+        .set('Authorization', `Bearer ${adminToken}`)
+        .set('x-csrf-token', csrfToken)
+        .send({ name: 'Free Extra' });
+      expect(free.status).toBe(201);
+      expect(free.body.addOn.price).toBe(0);
+    });
+
+    it('rejects an out-of-range price (400)', async () => {
+      const res = await agent
+        .post('/api/v1/administrators/addons')
+        .set('Authorization', `Bearer ${adminToken}`)
+        .set('x-csrf-token', csrfToken)
+        .send({ name: 'Too Pricey', price: 99999 });
+      expect(res.status).toBe(400);
     });
 
     it('rejects a missing name (400)', async () => {
@@ -181,6 +220,28 @@ describe('Add-on catalog API', () => {
         expect.objectContaining({ addOnId: a.addOnId }),
         expect.anything()
       );
+    });
+
+    it('updates the price', async () => {
+      const a = await AddOn.create({ key: 'priceable', name: 'Priceable', price: 1 });
+      const res = await agent
+        .patch(`/api/v1/administrators/addons/${a.addOnId}`)
+        .set('Authorization', `Bearer ${adminToken}`)
+        .set('x-csrf-token', csrfToken)
+        .send({ price: 7.5 });
+      expect(res.status).toBe(200);
+      expect(res.body.addOn.price).toBe(7.5);
+      expect((await AddOn.findOne({ addOnId: a.addOnId })).price).toBe(7.5);
+    });
+
+    it('rejects an out-of-range price on update (400)', async () => {
+      const a = await AddOn.create({ key: 'pr2', name: 'Pr2', price: 1 });
+      const res = await agent
+        .patch(`/api/v1/administrators/addons/${a.addOnId}`)
+        .set('Authorization', `Bearer ${adminToken}`)
+        .set('x-csrf-token', csrfToken)
+        .send({ price: -5 });
+      expect(res.status).toBe(400);
     });
 
     it('404 for an unknown add-on', async () => {

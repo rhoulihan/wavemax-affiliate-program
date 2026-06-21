@@ -29,10 +29,19 @@ function present(a) {
     addOnId: a.addOnId,
     key: a.key,
     name: a.name,
+    price: a.price || 0,
     translations: { es: a.translations.es || '', pt: a.translations.pt || '', de: a.translations.de || '' },
     isActive: a.isActive,
     sortOrder: a.sortOrder
   };
+}
+
+// Coerce a price input to a non-negative number, or undefined if absent/invalid.
+function sanitizePrice(value) {
+  if (value === undefined || value === null || value === '') return undefined;
+  const n = Number(value);
+  if (!Number.isFinite(n) || n < 0) return undefined;
+  return n;
 }
 
 /** GET /api/v1/addons — public, active only (key + name + translations, sorted). */
@@ -42,6 +51,7 @@ exports.listPublic = asyncWrapper(async (req, res) => {
     addOns: addOns.map(a => ({
       key: a.key,
       name: a.name,
+      price: a.price || 0,
       translations: { es: a.translations.es || '', pt: a.translations.pt || '', de: a.translations.de || '' }
     }))
   }, 'Add-ons retrieved');
@@ -72,9 +82,11 @@ exports.create = asyncWrapper(async (req, res) => {
   }
 
   const t = req.body.translations || {};
+  const price = sanitizePrice(req.body.price);
   const addOn = await AddOn.create({
     key,
     name,
+    price: price !== undefined ? price : 0,
     translations: {
       es: String(t.es || '').trim(),
       pt: String(t.pt || '').trim(),
@@ -116,6 +128,13 @@ exports.update = asyncWrapper(async (req, res) => {
       }
     }
     changed.translations = true;
+  }
+  if (req.body.price !== undefined) {
+    const price = sanitizePrice(req.body.price);
+    if (price !== undefined) {
+      addOn.price = price;
+      changed.price = addOn.price;
+    }
   }
   if (req.body.sortOrder !== undefined) {
     addOn.sortOrder = Number(req.body.sortOrder);
