@@ -260,3 +260,56 @@
   font: inherit;
   resize: vertical;
 }
+
+/* Premium / Free add-on tables: checkbox · option · (price) columns, aligned. */
+.premium-options-table,
+.free-options-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 4px 0 14px;
+  font-size: 15px;
+}
+.premium-options-table th,
+.free-options-table th {
+  text-align: left;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: #64748b;
+  font-weight: 700;
+  padding: 4px 8px;
+  border-bottom: 1px solid #e2e8f0;
+}
+.premium-options-table td,
+.free-options-table td {
+  padding: 8px;
+  border-bottom: 1px solid #f1f5f9;
+  vertical-align: middle;
+}
+.addon-check-col,
+.addon-check-cell {
+  width: 32px;
+  text-align: center;
+}
+.premium-options-table input[type="checkbox"],
+.free-options-table input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  accent-color: #1e3a8a;
+  cursor: pointer;
+  margin: 0;
+}
+.addon-label-cell label {
+  display: block;
+  cursor: pointer;
+}
+.premium-options-table .addon-price-col,
+.premium-options-table .addon-price-cell {
+  text-align: right;
+  white-space: nowrap;
+}
+.addon-price-cell {
+  font-variant-numeric: tabular-nums;
+  color: #0f172a;
+  font-weight: 600;
+}

@@ -136,6 +136,10 @@
     },
     "order": {
       "addonsTitle": "Add-ons (optional)",
+      "premiumOptionsTitle": "Premium Options",
+      "freeOptionsTitle": "Free Options",
+      "optionColumn": "Option",
+      "priceColumn": "Price",
       "instructionsLabel": "Special instructions (optional)",
       "instructionsPlaceholder": "Anything we should know? (e.g. fold preferences)"
     }
@@ -1468,6 +1472,9 @@
       "nameSpanish": "Name (Spanish)",
       "namePortuguese": "Name (Portuguese)",
       "nameGerman": "Name (German)",
+      "priceLabel": "Price ($) — 0 = free",
+      "priceColumn": "Price",
+      "free": "Free",
       "activeLabel": "Active (shown to customers)",
       "nameRequired": "Name is required",
       "saved": "Add-on saved",

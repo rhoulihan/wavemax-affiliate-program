@@ -62,34 +62,104 @@
     return a.name;
   }
 
-  // Render the add-on checkboxes + special-instructions textarea into a container.
-  // Idempotent: renders once (re-showing keeps the customer's selections).
+  // Display price → "$5.00".
+  function formatPrice(p) { return '$' + Number(p || 0).toFixed(2); }
+
+  // Build one options table (CSP-clean via createElement). `withPrice` adds a
+  // right-aligned price column (Premium); omit it for the Free table. Each
+  // checkbox keeps class `order-addon-check` + data-key so collectOrderOptions
+  // is unchanged; the label span carries `order-addon-label`/data-key so the
+  // languageChanged handler can re-localize it in place.
+  function buildAddOnTable(addOns, containerId, titleKey, titleFallback, withPrice) {
+    var frag = document.createDocumentFragment();
+    var title = document.createElement('p');
+    title.className = 'order-options-title';
+    title.setAttribute('data-i18n', titleKey); // re-translates on language switch
+    title.textContent = t(titleKey, titleFallback);
+    frag.appendChild(title);
+
+    var table = document.createElement('table');
+    table.className = withPrice ? 'premium-options-table' : 'free-options-table';
+
+    var thead = document.createElement('thead');
+    var hr = document.createElement('tr');
+    var thCheck = document.createElement('th');
+    thCheck.className = 'addon-check-col';
+    thCheck.setAttribute('scope', 'col');
+    var thLabel = document.createElement('th');
+    thLabel.setAttribute('scope', 'col');
+    thLabel.setAttribute('data-i18n', 'claim.order.optionColumn');
+    thLabel.textContent = t('claim.order.optionColumn', 'Option');
+    hr.appendChild(thCheck);
+    hr.appendChild(thLabel);
+    if (withPrice) {
+      var thPrice = document.createElement('th');
+      thPrice.className = 'addon-price-col';
+      thPrice.setAttribute('scope', 'col');
+      thPrice.setAttribute('data-i18n', 'claim.order.priceColumn');
+      thPrice.textContent = t('claim.order.priceColumn', 'Price');
+      hr.appendChild(thPrice);
+    }
+    thead.appendChild(hr);
+    table.appendChild(thead);
+
+    var tbody = document.createElement('tbody');
+    addOns.forEach(function (a) {
+      var id = 'addon-' + containerId + '-' + a.key;
+      var row = document.createElement('tr');
+
+      var tdCheck = document.createElement('td');
+      tdCheck.className = 'addon-check-cell';
+      var cb = document.createElement('input');
+      cb.type = 'checkbox';
+      cb.className = 'order-addon-check';
+      cb.id = id;
+      cb.value = a.key;
+      cb.setAttribute('data-key', a.key);
+      tdCheck.appendChild(cb);
+
+      var tdLabel = document.createElement('td');
+      tdLabel.className = 'addon-label-cell';
+      var label = document.createElement('label');
+      label.setAttribute('for', id);
+      var span = document.createElement('span');
+      span.className = 'order-addon-label';
+      span.setAttribute('data-key', a.key);
+      span.textContent = addonLabel(a);
+      label.appendChild(span);
+      tdLabel.appendChild(label);
+
+      row.appendChild(tdCheck);
+      row.appendChild(tdLabel);
+      if (withPrice) {
+        var tdPrice = document.createElement('td');
+        tdPrice.className = 'addon-price-cell';
+        tdPrice.textContent = formatPrice(a.price);
+        row.appendChild(tdPrice);
+      }
+      tbody.appendChild(row);
+    });
+    table.appendChild(tbody);
+    frag.appendChild(table);
+    return frag;
+  }
+
+  // Render the add-on tables (Premium = price>0, Free = price===0) + the
+  // special-instructions textarea into a container. Idempotent: renders once
+  // (re-showing keeps the customer's selections). Empty groups are omitted.
   function renderOrderOptions(containerId) {
     var c = document.getElementById(containerId);
     if (!c) return Promise.resolve();
     if (c.getAttribute('data-rendered') === '1') { c.hidden = false; return Promise.resolve(); }
     return loadAddOnCatalog().then(function (addOns) {
       while (c.firstChild) c.removeChild(c.firstChild);
-      if (addOns.length) {
-        var title = document.createElement('p');
-        title.className = 'order-options-title';
-        title.setAttribute('data-i18n', 'claim.order.addonsTitle'); // re-translates on language switch
-        title.textContent = t('claim.order.addonsTitle', 'Add-ons (optional)');
-        c.appendChild(title);
-        addOns.forEach(function (a) {
-          var label = document.createElement('label');
-          label.className = 'order-addon';
-          var cb = document.createElement('input');
-          cb.type = 'checkbox';
-          cb.className = 'order-addon-check';
-          cb.value = a.key;
-          cb.setAttribute('data-key', a.key);
-          var span = document.createElement('span');
-          span.textContent = addonLabel(a);
-          label.appendChild(cb);
-          label.appendChild(span);
-          c.appendChild(label);
-        });
+      var premium = addOns.filter(function (a) { return Number(a.price) > 0; });
+      var free = addOns.filter(function (a) { return !(Number(a.price) > 0); });
+      if (premium.length) {
+        c.appendChild(buildAddOnTable(premium, containerId, 'claim.order.premiumOptionsTitle', 'Premium Options', true));
+      }
+      if (free.length) {
+        c.appendChild(buildAddOnTable(free, containerId, 'claim.order.freeOptionsTitle', 'Free Options', false));
       }
       var instrLabel = document.createElement('label');
       instrLabel.className = 'order-options-label';
@@ -130,10 +200,9 @@
       ['customer-order-options', 'pickup-order-options'].forEach(function (id) {
         var c = document.getElementById(id);
         if (!c || c.getAttribute('data-rendered') !== '1') return;
-        Array.prototype.slice.call(c.querySelectorAll('.order-addon-check')).forEach(function (cb) {
-          var a = byKey[cb.getAttribute('data-key')];
-          var span = cb.parentNode && cb.parentNode.querySelector('span');
-          if (a && span) span.textContent = addonLabel(a);
+        Array.prototype.slice.call(c.querySelectorAll('.order-addon-label')).forEach(function (span) {
+          var a = byKey[span.getAttribute('data-key')];
+          if (a) span.textContent = addonLabel(a);
         });
       });
     });

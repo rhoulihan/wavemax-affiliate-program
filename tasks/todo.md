@@ -12,16 +12,17 @@ Plan: `~/.claude/plans/parsed-spinning-unicorn.md` (approved 2026-06-20).
 - [x] Gate green (170 suites / 2743 tests) → commit → deploy
 
 ## PR 2 — Add-on pricing
-- [ ] AddOn model: add `price`; flip the no-price model test
-- [ ] addonController + routes: accept/return `price`
-- [ ] Admin add-on modal: Price input + list column
-- [ ] Tests; gate → commit → deploy
+- [x] AddOn model: add `price`; flip the no-price model test
+- [x] addonController + routes: accept/return `price`
+- [x] Admin add-on modal: Price input + list column
+- [x] Tests; gate → commit → deploy
 
 ## PR 3 — Order form Premium/Free tables
-- [ ] claim.js renderOrderOptions: Premium (price>0) + Free tables, price column
-- [ ] claim.css table layout + `?v=` bump
-- [ ] i18n `claim.order.*`; tests; Lighthouse `/claim`
-- [ ] gate → commit → deploy
+- [x] claim.js renderOrderOptions: Premium (price>0) + Free tables, price column
+- [x] claim.css table layout + `?v=` bump (+ embed-app-v2 SPA bumps + rebuild)
+- [x] i18n `claim.order.*`; tests
+- [ ] Lighthouse `/claim` (post-deploy)
+- [x] clean full gate (169 suites green; 1 version-string test updated)
 
 ## PR 4 — Emails + notification routing
 - [ ] notifyTransition: affiliate notify on ANY start (opted-in), drop out_for_delivery affiliate email; resolve add-ons for email

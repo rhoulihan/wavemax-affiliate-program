@@ -39,9 +39,27 @@ describe('start-order form: add-ons + special instructions', () => {
     expect(claimJs).toMatch(/translations/);
   });
 
+  it('splits the catalog into Premium (price>0) and Free (price===0) tables', () => {
+    // price-driven partition (Number(a.price) > 0)
+    expect(claimJs).toMatch(/\.price\)\s*>\s*0/);
+    // two distinct tables with their own classes
+    expect(claimJs).toMatch(/premium-options-table/);
+    expect(claimJs).toMatch(/free-options-table/);
+    // a table element is created (CSP-clean table build)
+    expect(claimJs).toMatch(/createElement\('table'\)/);
+  });
+
+  it('shows a formatted price column in the Premium table', () => {
+    expect(claimJs).toMatch(/toFixed\(2\)/); // e.g. $5.00
+    expect(claimJs).toMatch(/claim\.order\.priceColumn/);
+  });
+
   it('re-localizes the options on a language switch (static via data-i18n, dynamic in place)', () => {
-    // static title/label/placeholder carry data-i18n so translatePage() handles them
-    expect(claimJs).toMatch(/setAttribute\('data-i18n',\s*'claim\.order\.addonsTitle'\)/);
+    // titles carry data-i18n (key threaded through buildAddOnTable) so
+    // translatePage() handles them; both title keys are referenced.
+    expect(claimJs).toMatch(/setAttribute\('data-i18n',\s*titleKey\)/);
+    expect(claimJs).toContain("'claim.order.premiumOptionsTitle'");
+    expect(claimJs).toContain("'claim.order.freeOptionsTitle'");
     expect(claimJs).toMatch(/setAttribute\('data-i18n-placeholder',\s*'claim\.order\.instructionsPlaceholder'\)/);
     // dynamic catalog labels re-localized in place on the languageChanged event
     expect(claimJs).toMatch(/addEventListener\('languageChanged'/);
@@ -50,7 +68,7 @@ describe('start-order form: add-ons + special instructions', () => {
   it('ships claim.order.* form keys in all four languages', () => {
     for (const lang of ['en', 'es', 'pt', 'de']) {
       const dict = JSON.parse(fs.readFileSync(path.join(ROOT, `public/locales/${lang}/common.json`), 'utf8'));
-      for (const k of ['addonsTitle', 'instructionsLabel', 'instructionsPlaceholder']) {
+      for (const k of ['premiumOptionsTitle', 'freeOptionsTitle', 'priceColumn', 'instructionsLabel', 'instructionsPlaceholder']) {
         expect(`${lang}:claim.order.${k}:${typeof (dict.claim.order && dict.claim.order[k])}`)
           .toBe(`${lang}:claim.order.${k}:string`);
       }

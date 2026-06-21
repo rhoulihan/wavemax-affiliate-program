@@ -136,6 +136,10 @@
     },
     "order": {
       "addonsTitle": "Zusatzoptionen (optional)",
+      "premiumOptionsTitle": "Premium-Optionen",
+      "freeOptionsTitle": "Kostenlose Optionen",
+      "optionColumn": "Option",
+      "priceColumn": "Preis",
       "instructionsLabel": "Besondere Hinweise (optional)",
       "instructionsPlaceholder": "Sollen wir etwas wissen? (z. B. Faltvorlieben)"
     }
@@ -1468,6 +1472,9 @@
       "nameSpanish": "Name (Spanisch)",
       "namePortuguese": "Name (Portugiesisch)",
       "nameGerman": "Name (Deutsch)",
+      "priceLabel": "Preis ($) — 0 = kostenlos",
+      "priceColumn": "Preis",
+      "free": "Kostenlos",
       "activeLabel": "Aktiv (für Kunden sichtbar)",
       "nameRequired": "Name ist erforderlich",
       "saved": "Zusatzoption gespeichert",
