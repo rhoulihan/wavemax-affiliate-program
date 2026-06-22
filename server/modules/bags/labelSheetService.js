@@ -37,7 +37,7 @@ const LOGO_PATH = path.join(__dirname, '../../../public/assets/images/brand/logo
 // Cache-buster for the label's external CSS/JS — these are served immutable
 // (1y) and fronted by Cloudflare, so bump this whenever bag-labels.css or
 // print-labels.js changes or stale styling will print after a deploy.
-const ASSET_VERSION = '20260621';
+const ASSET_VERSION = '20260621b';
 let logoDataUri = null;
 function getLogoDataUri() {
   if (logoDataUri === null) {
