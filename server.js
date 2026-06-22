@@ -565,11 +565,15 @@ app.use(async (req, res, next) => {
   const host = (req.hostname || '').toLowerCase().replace(/^www\./, '');
   if (host !== 'crhsent.com') return next();
   try {
-    let rel = decodeURIComponent(req.path);
-    if (rel.endsWith('/')) rel += 'index.html';
-    const full = path.normalize(path.join(CRHSENT_ROOT, rel));
+    const rel = decodeURIComponent(req.path);
+    let full = path.normalize(path.join(CRHSENT_ROOT, rel));
     if (full !== CRHSENT_ROOT && !full.startsWith(CRHSENT_ROOT + path.sep)) {
       return res.status(403).end();
+    }
+    // Clean URLs: any path without a file extension maps to its folder's
+    // index.html, so "/", "/work" and "/work/" all serve the same page.
+    if (!path.extname(full)) {
+      full = path.join(full, 'index.html');
     }
     if (full.endsWith('.html')) {
       const html = await crhsentReadHTML(full, res.locals.cspNonce);

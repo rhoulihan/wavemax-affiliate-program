@@ -68,3 +68,13 @@ AND reviewers on the most capable model (Opus), not Sonnet, even for mechanical 
 Rationale: ultracode session, correctness >> token cost; the skill's "least powerful
 model that works" heuristic optimizes the wrong variable here. (Context: PR 1 sonnet
 implementers all passed first-try, but the margin isn't worth the savings.)
+
+## 2026-06-22 — CRHS corporate site: tenure phrasing + positioning
+- **Rick's tenure on crhsent.com = "over 30 years" (stat: "30+"), NOT 40.** The existing
+  `crhsent/owners/index.html` says "40 years / four decades" — do NOT propagate that to the
+  corporate site; Rick corrected 40 → "over 30". (If the owners page is ever rebuilt, ask
+  before changing its number too.)
+- **CRHS home positioning (locked rev 2):** sole proprietor + AI-driven development +
+  enterprise architecture → secure, highly-available, enterprise-grade systems *without the
+  enterprise price tag*. The DB/AI IP is the credibility/evidence spine, not the headline.
+  Keep H1 "WE BUILD THE REAL THING." Generic competitor framing; nothing legal/tax/personal.

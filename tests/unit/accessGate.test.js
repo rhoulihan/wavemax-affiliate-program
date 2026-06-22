@@ -88,12 +88,28 @@ describe('accessGate middleware', () => {
     expect(res.redirect).not.toHaveBeenCalled(); // no redirect off to another site
   });
 
-  it('GATES www.crhsent.com the same way', async () => {
-    const req = mkReq({ ip: '8.8.8.8', path: '/', originalUrl: '/', headers: { host: 'www.crhsent.com' } });
+  it('GATES www.crhsent.com the same way (on a non-public path)', async () => {
+    const req = mkReq({ ip: '8.8.8.8', path: '/wavemax/', originalUrl: '/wavemax/', headers: { host: 'www.crhsent.com' } });
     const res = mkRes(); const next = jest.fn();
     await accessGate(req, res, next);
     expect(res.status).toHaveBeenCalledWith(401);
     expect(res.send.mock.calls[0][0]).toContain('name="email"');
+  });
+
+  it('lets the public CRHS corporate routes + assets + SEO files through even when gated', async () => {
+    const publicPaths = [
+      '/', '/capabilities', '/capabilities/', '/work', '/work/',
+      '/about', '/about/', '/contact', '/contact/',
+      '/assets/css/site.css', '/assets/js/site.js', '/assets/fonts/inter-400.woff2',
+      '/assets/img/og-home.png', '/robots.txt', '/sitemap.xml'
+    ];
+    for (const p of publicPaths) {
+      const req = mkReq({ ip: '8.8.8.8', path: p, originalUrl: p, headers: { host: 'crhsent.com' } });
+      const res = mkRes(); const next = jest.fn();
+      await accessGate(req, res, next);
+      expect(next).toHaveBeenCalled();                 // passes through
+      expect(res.status).not.toHaveBeenCalledWith(401); // not gated
+    }
   });
 
   it('does NOT gate any other host — wavemax.promo and the per-location domains pass through', async () => {
@@ -109,7 +125,7 @@ describe('accessGate middleware', () => {
 
   it('passes a whitelisted IP on the gated host and records the click when trackClicks=true', async () => {
     accessGate._cache.ips.set('1.2.3.4', { trackClicks: true });
-    const req = mkReq({ ip: '1.2.3.4', headers: { host: 'crhsent.com' } }); const res = mkRes(); const next = jest.fn();
+    const req = mkReq({ ip: '1.2.3.4', path: '/wavemax/', headers: { host: 'crhsent.com' } }); const res = mkRes(); const next = jest.fn();
     await accessGate(req, res, next);
     expect(next).toHaveBeenCalled();
     expect(AccessClick.create).toHaveBeenCalledTimes(1);
@@ -117,7 +133,7 @@ describe('accessGate middleware', () => {
 
   it('passes the admin IP on the gated host WITHOUT recording a click (trackClicks=false)', async () => {
     accessGate._cache.ips.set('5.5.5.5', { trackClicks: false });
-    const req = mkReq({ ip: '5.5.5.5', headers: { host: 'crhsent.com' } }); const res = mkRes(); const next = jest.fn();
+    const req = mkReq({ ip: '5.5.5.5', path: '/wavemax/', headers: { host: 'crhsent.com' } }); const res = mkRes(); const next = jest.fn();
     await accessGate(req, res, next);
     expect(next).toHaveBeenCalled();
     expect(AccessClick.create).not.toHaveBeenCalled();
@@ -125,7 +141,7 @@ describe('accessGate middleware', () => {
 
   it('uses the real client IP from CF-Connecting-IP for the whitelist check', async () => {
     accessGate._cache.ips.set('203.0.113.7', { trackClicks: true });
-    const req = mkReq({ ip: '172.16.0.1', headers: { host: 'crhsent.com', 'cf-connecting-ip': '203.0.113.7' } });
+    const req = mkReq({ ip: '172.16.0.1', path: '/wavemax/', headers: { host: 'crhsent.com', 'cf-connecting-ip': '203.0.113.7' } });
     const res = mkRes(); const next = jest.fn();
     await accessGate(req, res, next);
     expect(next).toHaveBeenCalled();
@@ -133,7 +149,7 @@ describe('accessGate middleware', () => {
 
   it('falls back to a DB whitelist lookup on cache miss (cross-worker unlock)', async () => {
     AccessWhitelist.findOne.mockReturnValue({ lean: () => Promise.resolve({ ip: '4.4.4.4', trackClicks: true }) });
-    const req = mkReq({ ip: '4.4.4.4', headers: { host: 'crhsent.com' } }); const res = mkRes(); const next = jest.fn();
+    const req = mkReq({ ip: '4.4.4.4', path: '/wavemax/', headers: { host: 'crhsent.com' } }); const res = mkRes(); const next = jest.fn();
     await accessGate(req, res, next);
     expect(next).toHaveBeenCalled();
     expect(accessGate._cache.ips.get('4.4.4.4')).toEqual({ trackClicks: true });

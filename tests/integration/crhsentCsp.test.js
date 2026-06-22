@@ -56,3 +56,60 @@ describe('crhsent.com — full security model (app-served, strict CSP)', () => {
     expect(res.status).not.toBe(200);
   });
 });
+
+describe('crhsent.com — corporate site (clean URLs, SEO, nonce)', () => {
+  it('serves the home page at /', async () => {
+    const res = await request(app).get('/').set('Host', HOST);
+    expect(res.status).toBe(200);
+    expect(res.text).toContain('WE BUILD THE');
+    // nonce injected, placeholder consumed
+    expect(res.text).not.toContain('{{CSP_NONCE}}');
+    expect(res.text).toMatch(/<meta name="csp-nonce" content="[^"]{10,}"/);
+    expect(res.text).toContain('og:image');
+  });
+
+  it('serves sub-pages at clean URLs WITHOUT a trailing slash', async () => {
+    for (const [path, needle] of [
+      ['/capabilities', 'What I build'],
+      ['/work', 'Proof of work'],
+      ['/about', 'Houlihan'],
+      ['/contact', 'Start a']
+    ]) {
+      const res = await request(app).get(path).set('Host', HOST);
+      expect(res.status).toBe(200);
+      expect(res.text).toContain(needle);
+    }
+  });
+
+  it('serves the same page WITH a trailing slash', async () => {
+    const res = await request(app).get('/about/').set('Host', HOST);
+    expect(res.status).toBe(200);
+    expect(res.text).toContain('Houlihan');
+  });
+
+  it('exposes the verified patent dossier on /about (links to Google Patents)', async () => {
+    const res = await request(app).get('/about').set('Host', HOST);
+    expect(res.text).toContain('US 11,461,302 B1');
+    expect(res.text).toContain('patents.google.com/patent/US11461302B1');
+  });
+
+  it('serves robots.txt (text) pointing at the sitemap', async () => {
+    const res = await request(app).get('/robots.txt').set('Host', HOST);
+    expect(res.status).toBe(200);
+    expect(res.headers['content-type']).toMatch(/text\/plain/);
+    expect(res.text).toContain('Sitemap: https://crhsent.com/sitemap.xml');
+  });
+
+  it('serves sitemap.xml (xml) listing the corporate URLs', async () => {
+    const res = await request(app).get('/sitemap.xml').set('Host', HOST);
+    expect(res.status).toBe(200);
+    expect(res.headers['content-type']).toMatch(/xml/);
+    expect(res.text).toContain('https://crhsent.com/work');
+  });
+
+  it('serves the self-hosted webfont with a font content-type', async () => {
+    const res = await request(app).get('/assets/fonts/inter-400.woff2').set('Host', HOST);
+    expect(res.status).toBe(200);
+    expect(res.headers['content-type']).toMatch(/font|woff2|octet-stream/);
+  });
+});

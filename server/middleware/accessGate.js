@@ -98,6 +98,16 @@ function isExempt(p) {
     // Public owner-portal marketing page (crhsent.com/owners/) + its assets —
     // meant to be shared openly, so it bypasses the gate even when enabled.
     p === '/owners' || p === '/owners/' || p.startsWith('/owners/') ||
+    // Public CRHS corporate site (crhsent.com): the home + marketing pages, their
+    // shared /assets/ bundle (css/js/fonts/img), and SEO files are public even
+    // when the gate is enabled. Other crhsent paths (e.g. /wavemax/) stay gated.
+    p === '/' ||
+    p === '/capabilities' || p === '/capabilities/' ||
+    p === '/work' || p === '/work/' ||
+    p === '/about' || p === '/about/' ||
+    p === '/contact' || p === '/contact/' ||
+    p.startsWith('/assets/') ||
+    p === '/robots.txt' || p === '/sitemap.xml' ||
     p === '/api/health' ||
     p === '/health'
   );

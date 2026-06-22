@@ -1,0 +1,382 @@
+[
+  {
+    "cluster": "Data & Database Engineering: JSON/Document Performance, Schema Validation, SQL Translation, and Converged Database Architecture",
+    "summary": "Rick Houlihan has built a comprehensive suite of production-grade data engineering tools and frameworks demonstrating deep expertise in converged database architecture, document-relational hybrid models, and performance benchmarking. The work spans JSON schema validation, binary format performance analysis (BSON vs OSON), MongoDB-to-Oracle SQL translation, aggregation pipeline optimization, and runnable proofs of unified data modeling theory. All projects are production-ready, publicly licensed, and validated through rigorous benchmarking methodologies. This represents a complete technical platform for converged database engineering and represents defensible IP in schema validation, query translation, and performance analysis frameworks.",
+    "items": [
+      {
+        "repo": "https://github.com/rhoulihan/BSON-JSON-bakeoff",
+        "whatItIs": "Comprehensive multi-database benchmarking tool comparing BSON (MongoDB) vs JSON/JSONB (PostgreSQL, Oracle 23AI/26ai, YugabyteDB, CockroachDB) across insertion speed, query performance, indexed vs non-indexed operations, and array containment patterns. Supports configurable payloads, batch operations, and realistic nested data structures.",
+        "technicalAngle": "Demonstrates deep expertise in relational/document hybrid performance analysis. Implements MongoDB write concerns (WriteConcern.JOURNALED), Oracle JSON Duality Views, JSON Collection Tables, multivalue indexes (7x faster than search indexes), and per-test database isolation to eliminate cache warmup confounds. Identified and documented critical Oracle 23AI array insertion bug in Duality Views with deterministic reproduction test case and workaround (direct table insertion). Generates deterministic test data (seed 42) for byte-for-byte reproducibility across multiple database engines.",
+        "maturity": "production",
+        "publishable": true,
+        "investorAngle": "Defensible benchmarking IP proving Oracle 26ai JSON performance vs MongoDB. Demonstrates 7x faster multivalue index performance and identifies critical Oracle bugs before public release\u2014establishing thought leadership in converged database validation. Used to validate production database selection decisions."
+      },
+      {
+        "repo": "https://github.com/rhoulihan/DocBench",
+        "whatItIs": "Advanced BSON vs OSON performance comparison benchmark suite measuring: (1) O(n) vs O(1) field access complexity, (2) server-side update performance ($set vs JSON_TRANSFORM), (3) deserialization overhead break-even analysis, and (4) $lookup vs SQL JOIN performance including parallel execution, 16MB document limits, and 100MB memory spill thresholds.",
+        "technicalAngle": "Builds on BSON-JSON-bakeoff to measure algorithmic differences between MongoDB and Oracle. Key finding: OSON's O(1) hash-indexed field access vs BSON's O(n) sequential scan. Demonstrates Oracle's compiled JSON Schema validator 6.2\u00d7 faster than MongoDB's Draft-4 implementation on equivalent test cases (geometric mean). Includes AWR (Automatic Workload Repository) capture for Oracle performance instrumentation and deserialization break-even analysis showing when Document/BsonDocument upfront cost pays off.",
+        "maturity": "production",
+        "publishable": true,
+        "investorAngle": "Quantifies technical advantage of OSON over BSON with rigorous in-process measurements. Shows converged database (single engine) outperforms specialized document database on its native workload\u2014powerful positioning for Oracle architecture. Break-even analysis gives customers clear guidance on when to deserialize vs lazily access."
+      },
+      {
+        "repo": "https://github.com/rhoulihan/schemaBench",
+        "whatItIs": "Eight-way JSON Schema validator benchmark comparing Oracle's jznschema (interpreted and compiled-to-native), MongoDB's real $jsonSchema engine, SourceMeta Blaze (100%-Bowtie compliant), and reference implementations (AJV, jsonschema-rs, pg_jsonschema, boon) across 101 test cases tiered by JSON Schema draft level support.",
+        "technicalAngle": "Deep compiler optimization knowledge: Oracle's interpreted jznschema outperforms MongoDB 6.2\u00d7 (geometric mean), compiled-to-native backend adds 5\u00d7 more speedup (~21\u00d7 over MongoDB). Demonstrates DecisionGraph backend architecture. Corpus extracted verbatim from jznschema's own benchmark suite (101 cases covering anyOf/oneOf, recursive $ref, $dynamicRef, if/then/else, unevaluated* tracking, array shapes). Correctness gate enforced\u2014all engines must agree on valid/invalid before timing counts. Identified correctness divergences in AJV (4 cases) and Blaze (1 case) via deterministic test methodology.",
+        "maturity": "production",
+        "publishable": true,
+        "investorAngle": "Published benchmark proving Oracle's JSON Schema engine is fastest open-source validator and 6.2\u00d7 faster than MongoDB. Defends Oracle's JSON technology investment via independent validation. Bowtie-style architecture (subprocess drivers) allows inclusion of copyleft engines (MongoDB SSPL, Blaze AGPL) without license contamination of core repo."
+      },
+      {
+        "repo": "https://github.com/rhoulihan/sbe-cte-bench",
+        "whatItIs": "Reproducible benchmark comparing MongoDB's aggregation pipeline (Slot-Based Executor) to Oracle CBO-driven CTE plans on Oracle Autonomous Database. Tests 13 scenarios (S01\u2013S14) with matched compute caps (2 vCPU / 3 GB cgroup-capped MongoDB vs 1 OCPU ADB) on Exadata infrastructure with Smart Scan and In-Memory column store.",
+        "technicalAngle": "Production-level benchmarking methodology: matched compute envelopes eliminate 'Oracle has more hardware' confound. Equivalence verification via SHA-256 of canonicalized result rows. Per-scenario index manifests ensure parity. Tests edge cases: S07 recursive $graphLookup vs CONNECT BY (17\u201318\u00d7 Oracle), S04 memory-bound aggregation on Exadata storage (6.9\u20137.2\u00d7 Oracle), S05 16 MiB BSON document cap, S06 sharded $lookup scatter-gather. Uses Oracle Always Free tier on OCI (no proprietary infrastructure bias).",
+        "maturity": "production",
+        "publishable": true,
+        "investorAngle": "Proves converged database architecture beats specialized engines at their own workloads\u201417\u00d7 faster on graph traversal, 7\u00d7 on memory-intensive aggregation. Uses real production Exadata infrastructure (not Free Edition) to avoid 'stripped down' criticism. Nightly validation pipeline ensures reproducibility. Defensible IP for database migration consulting and architecture validation."
+      },
+      {
+        "repo": "https://github.com/rhoulihan/blazeJsonValidator",
+        "whatItIs": "Harness linking SourceMeta's Blaze (100%-Bowtie-compliant C++ JSON Schema validator) to schemaBench's JSON-lines driver protocol. Builds from pinned upstream, produces portable statically-linked binary for reproducible benchmarking.",
+        "technicalAngle": "License boundary architecture: AGPL-3.0 Blaze linked to standalone executable, communicates only via stdin/stdout JSON lines, keeping schemaBench (Apache-2.0) uncontaminated. Demonstrated Blaze performance (~13.2M validations/sec) and correctness (one $dynamicRef divergence identified). Portable binary release with vendored libstdc++/libgcc runs on any glibc \u2265 2.17 x86-64 Linux.",
+        "maturity": "production",
+        "publishable": true,
+        "investorAngle": "Shows ability to architect license boundaries in open-source benchmarking tools. Blaze evaluation positions Oracle's validator against industry-leading alternative. Demonstrates understanding of C++ compiler optimization."
+      },
+      {
+        "repo": "https://github.com/rhoulihan/mongoJsonValidator",
+        "whatItIs": "Harness linking MongoDB's real server-side $jsonSchema engine (stitch_support library from MongoDB 7.0 source) to schemaBench's JSON-lines driver protocol. Runs MongoDB's actual InternalSchema* MatchExpression tree in-process without mongod, network, or storage engine.",
+        "technicalAngle": "Deep MongoDB internals knowledge: compiled stitch_support library from SCons build, links libbson for BSON encoding. Validated Draft-4 subset implementation with Tier-1 corpus (29 MongoDB-comparable cases). BSON typing (int32/int64 vs double) matches translator's type mappings. Protocol handles unsupported keywords (Tier-2 cases) with explicit 'unsupported:no-mongoSchema' responses.",
+        "maturity": "production",
+        "publishable": true,
+        "investorAngle": "Fair MongoDB performance baseline in schemaBench. Shows ability to extract and validate MongoDB's proprietary engine (SSPL-licensed). Used for publishing objective validator performance comparisons."
+      },
+      {
+        "repo": "https://github.com/rhoulihan/json-sql-guide",
+        "whatItIs": "Validator for the 'Oracle SQL/JSON Developer Guide' article (dev.to). Runs every 100+ SQL snippet from the guide against Oracle 26ai, emits pass/fail reports, JUnit XML for CI, annotated markdown with badges, and JSON dump for regression tracking via diff.",
+        "technicalAngle": "Full document validation pipeline: markdown extraction (line-anchored snippets), classification (STANDALONE/FRAGMENT/COMMENT_ONLY), wrapping (shape registry for partial SQL fragments), execution with per-snippet savepoint isolation, DDL artifact tracking (TABLE/INDEX/VIEW/MATERIALIZED VIEW/DUALITY VIEW/PROPERTY GRAPH). Handles clause-ordering tightening between 23ai/26ai and JSON_TRANSFORM behavior changes. Workflow integration: fires repository_dispatch to GitHub PR on guide edits.",
+        "maturity": "production",
+        "publishable": true,
+        "investorAngle": "Live documentation validation system proving all public examples work. Regression detection via diff prevents documentation drift. Demonstrates ability to build developer experience infrastructure. Published on dev.to as companion to guide."
+      },
+      {
+        "repo": "https://github.com/rhoulihan/MongoPLSQL-Bridge",
+        "whatItIs": "Java library translating MongoDB aggregation framework pipelines into equivalent Oracle SQL/JSON for execution on Oracle 23ai/26ai JSON Collections. Supports 20+ pipeline stages ($match, $group, $project, $sort, $limit, $lookup, $unwind, $bucket, $facet, $graphLookup, $setWindowFields, $redact, etc.) and 50+ expression operators (comparison, logical, arithmetic, string, date, array, type, object).",
+        "technicalAngle": "Type-preserving AST-to-SQL translation: uses Oracle dot notation (q.\"DATA\".field) and JSON_QUERY to preserve MongoDB types (numbers, booleans, arrays) throughout pipeline. Jq-inspired context rendering (nodes render themselves). Sealed interface hierarchies for type safety. Specification-first operator definitions in JSON drive code generation. Optimization chain: predicate pushdown (moves $match early), sort-limit combination (Top-N optimization). Handles complex cases: $graphLookup \u2192 recursive CTE, $facet \u2192 parallel subqueries as JSON_OBJECT, $redact \u2192 document-level filtering.",
+        "maturity": "production",
+        "publishable": true,
+        "investorAngle": "Enables gradual MongoDB\u2192Oracle migration without rewriting application logic. 205 cross-database validation tests (189 strict matches, 16 loose matches, large-scale tests up to 4.5M documents). CLI tool and Java API. Interactive test catalog with Oracle explain plans for query optimization. Defensible IP for database migration consulting."
+      },
+      {
+        "repo": "https://github.com/rhoulihan/converged-database-lab",
+        "whatItIs": "Runnable proofs repository for the converged-database article series. Nightly validation pipeline executing every technical claim from articles against a free Oracle 26ai container. Demonstrates unified access across relational tables, JSON collections, JSON Duality Views, Property Graphs, and vector embeddings via SQL, MongoDB API, and JavaScript.",
+        "technicalAngle": "One deterministically seeded domain (LCG seed 42) supporting all demonstrations: 200 customers, 1,000 orders, ~2,500 line items, 40 devices, 6 stores with spatial (SDO_GEOMETRY), support tickets with vector embeddings (8-dim FLOAT32 demo vectors). Demonstrates cross-model joins: customers + orders + line items as document (customer_profile_dv), graph edges (customer_devices + referrals), time series aggregations (hourly revenue), vector similarity search. Proof contract: SQL/PL-SQL scripts assert via 'ASSERT:<name>:PASS|FAIL', JS scripts via print(). 40+ assertions per module. CI/CD: nightly runs, uploads results.json as artifact.",
+        "maturity": "production",
+        "publishable": true,
+        "investorAngle": "Living proof that converged database eliminates polyglot persistence infrastructure. Every article claim is executable and validated nightly. Demonstrates Oracle's unified architecture (one DB, five access patterns, zero sync). Used for architect validation and customer education."
+      },
+      {
+        "repo": "https://github.com/rhoulihan/oracle-json-workshop",
+        "whatItIs": "Browser-based developer workshop teaching Oracle's full JSON technology stack. Two containerized services (Node/Express + Oracle 26ai + ORDS). 90-minute instructor-led workshop covering JSON Collections, Duality Views, multivalue indexes, single-collection design, MongoDB API via mongosh, and node-oracledb. Six lab modules (M0\u2013M5) with 24 exercises, answer validation, per-developer progress tracking, and instructor dashboard.",
+        "technicalAngle": "Production-grade hands-on curriculum with financial services domain (advisors, clients, accounts, holdings, transactions). 287 unit tests (213 backend + 74 frontend) + 48 integration tests. Per-user Oracle schemas (true isolation). SYS-owned clone procedure (CREATE USER requires elevated privileges). Vanilla frontend (no React/Vue build step), CodeMirror 6 editor, Vitest for unit tests. Demonstrates OSON O(1) field access vs BSON O(n), JSON_TRANSFORM surgical updates, Duality View bidirectional mapping, multivalue index 7\u00d7 speedup, hybrid SQL/JSON queries.",
+        "maturity": "production",
+        "publishable": true,
+        "investorAngle": "Complete developer onboarding system for converged database. Portable offline deployment via image tarball. Instructor dashboard with real-time progress heatmap. Demonstrates ability to build production-grade educational infrastructure. Customer enablement asset."
+      },
+      {
+        "repo": "https://github.com/rhoulihan/unified-model-theory",
+        "whatItIs": "Theoretical framework (UMT) establishing that documents, graphs, time series, and relational data are complementary projections of the same canonical form. Replaces polyglot persistence paradigm with single-database architecture where different data models emerge via projections, not replicas.",
+        "technicalAngle": "Core concepts: canonical form (normalized relational structure), projected shape (document/graph/time series/relational view), projection (declarative mapping), access surface (SQL/SODA/MongoDB API/GraphQL), access dimension (OLAP/OLTP/OATP/graph/time series). Demonstrates through Oracle 26ai examples: JSON Duality Views (document projection), SQL Property Graphs (graph traversal of same tables), temporal queries (time series on operational data), vector indexes + embeddings (semantic search). Shows multimodal AI queries combining vectors + documents + graph + time series + SQL in one statement.",
+        "maturity": "production",
+        "publishable": true,
+        "investorAngle": "Foundational intellectual framework defending converged database architecture. Contrasts UMT (one source of truth, zero sync) vs polyglot persistence (5+ databases, CDC pipelines, consistency boundaries). Particularly strong for AI/RAG use cases where eventual consistency = hallucination risk. Establishes thought leadership in data architecture."
+      }
+    ],
+    "headlineCapabilities": [
+      "Proprietary benchmarking methodology proving converged databases outperform specialized engines at their native workloads (17\u00d7 faster recursive traversal, 7\u00d7 faster memory-bound aggregation, 6.2\u00d7 faster schema validation)",
+      "MongoDB-to-Oracle SQL translation engine (205 cross-database validation tests) enabling gradual migration without rewriting application code",
+      "Unified Model Theory framework replacing polyglot persistence with single-database architecture where documents, graphs, and time series are projections of canonical relational form",
+      "Production-grade developer workshop (287 tests, 6 lab modules, instructor dashboard) demonstrating complete Oracle JSON technology stack in 90 minutes",
+      "Live documentation validation system for Oracle SQL/JSON guide\u2014every code example verified nightly against Oracle 26ai",
+      "Schema validation benchmarking framework (8-way comparison) proving Oracle jznschema is fastest open-source JSON validator"
+    ],
+    "_key": "data-db-engineering"
+  },
+  {
+    "cluster": "AI Agents, Retrieval-Augmented Generation (RAG), and Developer Tooling Infrastructure",
+    "summary": "CRHS Enterprises has built a production-grade, publish-ready portfolio spanning three core competencies: (1) **Context persistence for AI agents** \u2014 a TypeScript/Node.js framework that gives Claude and other agents photographic memory across sessions, solving the fundamental problem of conversational continuity at scale; (2) **Converged-database benchmarking and RAG architecture** \u2014 Java/SQL harness validating Oracle 23ai's multi-model capabilities (MongoDB compatibility, JSON native types, vector search) against relational workloads, with comprehensive workshop content teaching enterprise RAG patterns; and (3) **Enterprise document sizing and business-case generation** \u2014 a full-stack TypeScript/Go tool that transforms raw customer evidence into automated, numerically-deterministic proposals via deterministic sizing engines and fail-closed anonymization. Each system reflects deep expertise in agentic AI, retrieval quality, and defensible AI automation for regulated workflows (legal and enterprise sales).",
+    "items": [
+      {
+        "repo": "github.com/rhoulihan/ben-ten",
+        "whatItIs": "Ben-Ten: Context persistence and session recovery system for Claude Code. Enables AI agents to save and resume conversation state, conversation replay, project-relative file references, and task tracking across compaction boundaries and session restarts. Supports local storage with LZ4 compression (~90% reduction) and optional HTTP-based remote synchronization across machines.",
+        "technicalAngle": "Production TypeScript/Node.js MCP server (Model Context Protocol) with multi-source context resolution, binary serialization format with LZ4 compression, Claude Code hook integration for SessionStart/PreCompact automation, intelligent transcript parsing that extracts conversation history + tool calls from Claude Code's native format. ~334K lines of TypeScript with 383 passing unit tests. Clean architecture: dependency injection, Result<T,E> error handling, Zod runtime validation, in-memory filesystem for testing. Remote sync via HTTP with JWT-style credentials.",
+        "maturity": "production",
+        "publishable": true,
+        "investorAngle": "Foundational IP for agentic AI continuity. Solves a specific, high-value problem: enabling Claude-based agents to work across compaction and session boundaries. Patent-relevant: custom context serialization, compression strategy, multi-source resolution, and transcript parsing. Differentiator for teams building long-running agent workflows. Zero dependency on proprietary services (fully self-hostable). Proven in daily Claude Code workflows."
+      },
+      {
+        "repo": "github.com/rhoulihan/helix",
+        "whatItIs": "Helix Database Benchmark Harness: Java 21 benchmarking framework evaluating 9 query patterns across 4 database targets (MongoDB Native, Oracle JDBC JSON collections, Oracle MongoDB API, Oracle Relational), generating ~4.5 GB of referentially-consistent synthetic financial-services test data, validating result consistency across all targets, and producing self-contained HTML reports with p50/p95/p99 latency and throughput metrics.",
+        "technicalAngle": "Java 21 Maven project (11.2K lines of code) with multi-target query execution: MongoQueryExecutor (aggregation pipelines), OracleJdbcQueryExecutor (SQL/JSON), OracleRelationalQueryExecutor (normalized relational), OracleDualityViewQueryExecutor. 9 access patterns covering investor/group/account/advisor lookups with entitlements filtering, market-value ranges, text regex, and hierarchy traversal. Data generation via Datafaker with ReferenceRegistry maintaining referential integrity across 843K documents. Schema includes 4 parent + 23 child relational tables, dual JSON/relational representations. Automated index creation per target, result validation, nanosecond-precision timing (System.nanoTime), percentile computation, and Chart.js-based HTML report generation. 291 passing unit tests.",
+        "maturity": "production",
+        "publishable": true,
+        "investorAngle": "Defensible benchmark IP comparing converged (Oracle) vs. specialized (MongoDB) architectures on real-world financial-services workloads. Transferability: the 9 query patterns and result-validation framework are portable to other domain models. Evidence of deep Oracle 23ai expertise (JSON collections, SQL/JSON, ORDS MongoDB API, native vector type). Credible performance comparison for deal qualification and architecture decisions. Reproducible, containerized (Docker Compose with MongoDB + Oracle ADB-Free)."
+      },
+      {
+        "repo": "github.com/rhoulihan/caseforge",
+        "whatItIs": "CaseForge: Self-contained, browser-based application for salesreps and systems engineers to generate sizing, customer proposals, and business cases from raw customer evidence. Transforms customer-provided documents (xlsx, pdf, pptx, docx, .msg/.eml, csv, html, xml, images) into anonymized input bundles sent to Claude or OpenAI, outputs three deterministic deliverables (sizing output, TCO breakdown, executive summary). Key invariants: (1) deterministic sizing engine (TypeScript) computes all authoritative numbers; LLM only researches prices and writes prose; (2) fail-closed local anonymization detects sensitive phrases via regex/heuristics, rep reviews and approves a substitution map before any API call.",
+        "technicalAngle": "Full-stack TypeScript SPA (Preact + Vite; 14.9K lines) + Go launcher (per-OS static binary, cross-compiled in CI/CD). SPA owns all logic + API key (lives in browser memory only, never written to disk). Go launcher serves on http://127.0.0.1, exposes /anonymize, /deanonymize, /archive store (PUT/GET/DELETE). Pluggable provider adapter (Claude, OpenAI). Ingest pipeline: crash-isolated, bounded extractors for OOXML (.xlsx/.docx/.pptx), OLE (.msg), PostalMime (.eml), PDF (unpdf + dependency-free PNG encoder). Embedded-image extraction from containers (Word media, PowerPoint media, PDF XObjects). Centralized sizing config (TypeScript) with documented formulas. Business-case archive system (JSZip, portable .zip storage under ~/CaseForge/archives/) with manifest.json and version history. CI/CD: build-test (TypeScript tests) + launcher (Go tests), release tags trigger per-OS binary zips. 505 TypeScript tests, TDD discipline.",
+        "maturity": "production",
+        "publishable": true,
+        "investorAngle": "Finished, differentiated sales tool: moves proposal generation from manual gating to rep-driven, deterministic, defensible. Core IP: fail-closed anonymization pattern (local heuristic detection + rep approval gate before any LLM exposure), deterministic sizing engine (numbers never from LLM), portable archive format enabling proposal reuse and amendments. Competitive: Relativity aiR and AI-powered legal tools lack this determinism boundary. Vertical-agnostic ingest pipeline (handles 10+ formats). MongoDB \u2192 Oracle sizing as first domain; extensible to other source/target pairs via Source-Profile seam. Proven end-to-end with sample data. License: MIT."
+      },
+      {
+        "repo": "github.com/rhoulihan/oracle_rag_agents_zero_to_hero",
+        "whatItIs": "Oracle RAG Agent Workshop: LiveLabs-hosted 2-lab hands-on training (90 minutes total) teaching enterprise RAG architecture on Oracle AI Database 26ai. Lab 1 covers vector-search fundamentals (embeddings, keyword search, similarity search, hybrid search). Lab 2 builds a complete RAG agent: PDF document ingestion via UTL_TO_TEXT, chunking with overlap via UTL_TO_CHUNKS, embedding generation via DBMS_VECTOR_CHAIN.UTL_TO_EMBEDDINGS (OCI Generative AI), vector indexing (HNSW/IVF), retrieval function with cosine similarity, OCI Generative AI chat integration, and interactive RAG pipeline with conversation history.",
+        "technicalAngle": "Jupyter-based workshop with pre-configured OCI sandbox credentials. Teaches SQL/PLSQL patterns: VECTOR data type, VECTOR_DISTANCE function (cosine, dot product, Euclidean), VECTOR INDEX syntax, DBMS_VECTOR_CHAIN procedural pipeline (UTL_TO_TEXT \u2192 UTL_TO_CHUNKS \u2192 UTL_TO_EMBEDDINGS), JSON-based configuration for chunking (max_size, overlap, normalization). Python: oracledb (Oracle driver), OCI SDK, Cohere embeddings, Cohere Command R+ LLM. RAG pipeline combines oracle database retrieval with OCI Generative AI. Conversation history via Python class with tunable history window. Includes edge-case handling (out-of-domain queries) and result validation. Assessment: 10-question quiz covering vector storage, RAG concepts, chunking, indexes, prompt engineering, hallucination mitigation.",
+        "maturity": "production",
+        "publishable": true,
+        "investorAngle": "Battle-tested workshop curriculum for enterprise RAG adoption. Demonstrates Oracle AI Database 26ai as a complete platform (no external vector DB needed). Proof-of-capability: teaches vector indexing, retrieval quality (chunk overlap, similarity search), and integration with OCI Generative AI. Transferable IP: chunking strategies, retrieval function patterns, and conversation history design are portable. Positions Oracle against specialized vector databases (Pinecone, Weaviate) and fragmented stacks. Pre-built for LiveLabs distribution; ready to run. Language: Python + SQL, accessible to data engineers and ML engineers."
+      },
+      {
+        "repo": "github.com/rhoulihan/helix1",
+        "whatItIs": "Oracle ADB Performance Test Harness: Python benchmarking tool for Oracle Autonomous Database query testing. Captures execution times, execution plans (DBMS_XPLAN), SQL Monitor reports (DBMS_SQLTUNE), AWR reports, and parallel-execution statistics across 40 benchmark queries. Generates Jinja2-templated reports.",
+        "technicalAngle": "Python with OCI SDK for ADB connectivity, YAML-based configuration, pre-commit hooks, pytest for unit tests, mypy for type checking. Modular: separate DDL scripts, PL/SQL data generation, and 16 view definitions. Integration tests against live ADB instances. VM bootstrap via setup_vm.sh for OCI compute.",
+        "maturity": "production",
+        "publishable": true,
+        "investorAngle": "Companion to Helix benchmark harness, proving ability to instrument and profile Oracle at scale. Demonstrates expertise in Oracle performance tuning, DBMS introspection, and repeatability. Useful for competitive benchmarks and customer pilots."
+      },
+      {
+        "repo": "github.com/rhoulihan/salesPlays",
+        "whatItIs": "Sales Plays: Comprehensive enablement package for the 'Build AI Apps with Oracle Converged AI Database' motion. Includes sales play document, executive pitch deck, technical solution deck, persona profiles, battlecards, workshop agenda, demo scripts, and implementation planning docs. Positions Oracle Autonomous AI Database as the converged platform for RAG and agentic AI, targeting CTOs, Heads of AppDev, architects, and developers.",
+        "technicalAngle": "Strategic messaging tied to technical proof: Oracle as a converged database supporting all data types (relational, vector, JSON) with SQL-based RAG, ONNX embeddings, in-database neural networks, and OSS contributions (LangChain, LlamaIndex). Messaging emphasizes outcomes: 50% faster development, lower TCO, seamless workshops. Discovery questions, objection handling (vs. Pinecone, Postgres, MongoDB), and workshop CTAs.",
+        "maturity": "production",
+        "publishable": true,
+        "investorAngle": "Field-proven sales enablement and differentiation narrative. Demonstrates ability to synthesize technical capability into business outcomes and persona-tailored messaging. Repeatable workshop model and PoC motion for lead generation and pipeline acceleration. Foundation for enterprise sales conversations."
+      }
+    ],
+    "headlineCapabilities": [
+      "Session-aware AI agents with photographic memory: Context persistence, conversation replay, and cross-compaction task tracking for Claude and other LLMs (Ben-Ten MCP server, production TypeScript)",
+      "Converged database architecture validation: Benchmarks Oracle 23ai against MongoDB on 9 financial-services query patterns with result consistency checks, latency profiling (p50/p95/p99), and HTML reporting (Java 21, 4.5GB test data)",
+      "Enterprise RAG at scale: Full-stack workshop + reference implementations teaching vector indexing, document chunking with overlap, retrieval quality, and multi-turn agent conversations on Oracle AI Database 26ai",
+      "Defensible document intelligence: Deterministic sizing engine + fail-closed anonymization for customer proposals; transforms raw evidence (10+ formats) into numerically-sound, rep-controlled business cases (TypeScript/Go SPA + launcher)",
+      "Agentic AI infrastructure: MCP servers, context serialization, remote synchronization, and hook-based automation for long-running agent workflows in Claude Code and compatible environments",
+      "Legal/enterprise AI compliance patterns: Air-gapped deployment guidance, retrieval-quality engineering (Summary-Augmented Chunking), and prompt-injection-resistant architectures for regulated verticals"
+    ],
+    "_key": "ai-agents-tooling"
+  },
+  {
+    "cluster": "WaveMAX Platform \u2014 Production-Grade AI-Built SaaS",
+    "summary": "WaveMAX is a production Node.js/Express/MongoDB platform powering a laundry affiliate network with pickup-delivery coordination, invoice tracking, multi-role access (admin/operator/affiliate/customer), and dual-AZ OCI deployment behind Cloudflare. The codebase exemplifies commercial-grade engineering: strict TDD (2:1 test-to-code ratio across 142 test files), defense-in-depth security (PBKDF2-SHA512 password hashing, AES-256-GCM encryption at rest, JWT + refresh-token rotation, rate-limiting, CSP v2 with per-request nonces), Lighthouse-100 front-end pages, 4-language i18n (en/es/pt/de), and iframe-embedded SPA architecture with SEO instrumentation via postMessage. Rick Houlihan built this with AI (Claude) as a proof that commercial-quality, audit-proven, HA systems ship at production velocity with responsible AI collaboration.",
+    "items": [
+      {
+        "repo": "wavemax-affiliate-program",
+        "whatItIs": "WaveMAX Affiliate Program platform \u2014 production laundry pickup-delivery network with multi-role SPA, order lifecycle tracking (4-state: pending\u2192in_progress\u2192out_for_delivery\u2192complete), and iframe-embedded PWA bag-scanning system.",
+        "technicalAngle": "Express API + Mongoose/Oracle-ADB backend, iframe SPA at wavemax.promo with postMessage parent-bridge, dual-AZ OCI active-active (Phoenix) + Oracle Autonomous Database. Core: customer bag-claim registration + QR lifecycle, affiliate + operator dashboards, order scans (kiosk + mobile), revenue/delivery-fee reporting, add-on pricing (flat/per-lb), 4-language i18n. Security: PBKDF2-SHA512 hashing (100k iterations), AES-256-GCM envelope encryption on sensitive fields, JWT + 30-day rotatable refresh tokens, MongoDB-backed rate-limiting (5/15min auth, 10/hr sensitive), CSP v2 with per-request nonce (no inline scripts), Helmet hardening, audit logging to separate stream. Test infrastructure: Jest with 142 test files, 2.07:1 test-to-code ratio (~61.5k test lines vs ~30k server lines), integration-first bias (supertest + MongoDB Memory Server at controller seams), full suite runs clean without --forceExit. Frontend: Lighthouse-100 target enforced at release gate; mobile Performance 99/100, Desktop 98/100 on rundberglaundry reference site vs vendor platform 59/83 (measured 2026-05-25); page weights 0.98 MB vs competitor 4.5 MB. Dev tooling: strict 800-line file ceiling, no circular dependencies (madge validated), Winston logging (console blocked by ESLint), node 20+.",
+        "maturity": "production",
+        "publishable": true,
+        "notes": "Flagship proof-of-concept demonstrating AI-assisted production engineering. Security audit verified (exhibit-e-verification-report.md), Lighthouse scores independently re-verified 2026-05-25, dual-AZ HA deployment confirmed live on OCI infrastructure."
+      },
+      {
+        "repo": "wavemax-affiliate-program",
+        "whatItIs": "ScanBag \u2014 standalone mobile PWA for QR-based order initiation and completion; installable to device home screen, works offline.",
+        "technicalAngle": "Service-worker PWA (scanbag-sw.js + scanbag-manifest.json), geolocation-capable QR scanner using jsqr.js (canvas-based barcode detection), no third-party SDK. Loads minimal critical path (~<100KB combined JS+CSS), caches app shell for offline operation, updates camera feed at scan-ready framerate. Progressive enhancement: fallback button-enable if camera denied.",
+        "maturity": "production",
+        "publishable": true,
+        "notes": "Shipped June 2026 (commit 8dbed7c). Demonstrates low-footprint mobile-first PWA capability; reduces dependency on full SPA for operator scanning workflows. Lighthouse: target 95+ on PWA installability and Performance."
+      },
+      {
+        "repo": "wavemax-affiliate-program",
+        "whatItIs": "Revenue + Commission Surfacing \u2014 partner-level delivery-fee line items, per-affiliate customizable fees (flat or per-bag), revenue-calculation integration, commission transparency in admin and affiliate dashboards.",
+        "technicalAngle": "Feature released May 2026 (commits ecf66e1 / cd8c409). Adds deliveryFee + deliveryInstructions to Affiliate model, computes per-order revenue allocation at operator scan (final-total capture), displays itemized partner commission in order details, implements pricing calculator (revenue-calculator.js) with pricing-preview component. Adversarial-review process validated revenue-reporting integrity (fix(review) ae32326).",
+        "maturity": "production",
+        "publishable": true,
+        "notes": "Live in production; addresses platform-baseline requirement for white-label extensibility (partners need transparent commission math). Per-unit pricing (flat or per-pound) display implemented in admin add-on catalog."
+      },
+      {
+        "repo": "wavemax-affiliate-program",
+        "whatItIs": "Multi-Language i18n \u2014 full 4-language support (en/es/pt/de) in customer-facing pages, affiliate dashboards, and operator kiosks; locale files in public/locales/{lang}/common.json, runtime resolution via i18n.js, postMessage sync to parent frame for hreflang tags.",
+        "technicalAngle": "I18n strings pulled from JSON at runtime by i18n.js, integrated with parent-iframe-bridge-v3.js to inject <link rel=\"alternate\" hreflang> into parent frame's <head> for SEO crawlers. Pages render identically in all four languages; translations maintained as first-class deliverable (strict parity checking, CLAUDE.md rule: maintain all four languages on every copy change). Tested via check:i18n validator (scripts/check-i18n-parity.js).",
+        "maturity": "production",
+        "publishable": true,
+        "notes": "Verified live on rundberglaundry.com (en) and content pages. Parity maintained in tests as a commit gating rule."
+      },
+      {
+        "repo": "wavemax-affiliate-program",
+        "whatItIs": "SEO-Instrumented Content Pages \u2014 customer-facing location pages (self-serve-laundry, wash-dry-fold) with schema.org/LocalBusiness JSON-LD, Open Graph, Twitter Card, hreflang, and canonical-URL injection via iframe-to-parent postMessage bridge.",
+        "technicalAngle": "Pages live in wavemax.promo iframes (public/self-serve-laundry-embed.html, public/wash-dry-fold-embed.html) with SEO config bundles (public/assets/js/seo-config-*.js) pushed to parent via parent-iframe-bridge-v3.js. Parent frame injects title, meta description, OG tags, structured data JSON-LD, Twitter Card, hreflang, and canonical into <head> so search crawlers index parent URL, not iframe origin. LocalBusiness schema includes: full address, geo (4-decimal precision), hours (per-day), services, amenities (UV sanitization, etc.), areaServed (multi-city for delivery), price range, sameAs (social profiles). Stable @id cross-linking unifies multiple service pages as views of one business entity.",
+        "maturity": "production",
+        "publishable": true,
+        "notes": "Live on wavemaxlaundry.com location pages. Verification report (crhsent-claim-verification-2026-05-25.md) confirms Rich Results Test: 14 valid structured-data items vs competitor's 2, 4.8\u2605 review snippet extracted from LocalBusiness schema. Architectural win: SEO becomes a code commit in this repo, versioned and testable, not a manual change in WordPress."
+      },
+      {
+        "repo": "wavemax-affiliate-program",
+        "whatItIs": "Defense-in-Depth Security Architecture \u2014 8 discrete, testable security modules covering auth (PBKDF2/JWT), encryption (AES-256-GCM), RBAC, rate-limiting, CSRF, input sanitization, CSP v2, and audit logging.",
+        "technicalAngle": "Each control isolated as a module for testability: passwordUtils.js (PBKDF2-SHA512, 100k iterations, 16-byte salt, 64-byte hash, constant-time compare), passwordValidator.js (strength rules), auth.js (1-hr access + 30-day refresh JWT, token rotation on use, TokenBlacklist for logout), encryption.js (AES-256-GCM with fresh 16-byte IV per value, {iv, encryptedData, authTag} envelope), sanitization.js (mongoSanitize vs NoSQL injection, HTML-escape vs XSS, Joi + express-validator schema), rateLimiting.js (MongoDB-backed, distributed: authLimiter 5/15min, passwordResetLimiter 3/hr, sensitiveOperationLimiter 10/hr), cspNonce.js (per-request nonce, strict CSP v2, no inline scripts/styles allowed). Audit logging: auditLogger.js writes security-relevant events (auth, RBAC denials, invites, bag/order scans, catalog changes) to separate audit.log stream for retention/SIEM.",
+        "maturity": "production",
+        "publishable": true,
+        "notes": "Audit-proven in litigation context (exhibit-e-verification-report.md confirms implementation state). README.md lists all 8 controls in a reference table with module names and what-it-does. Critical: `keys/` / `*.pem` gitignored; secrets via process.env; business config via SystemConfig (MongoDB), never hardcoded."
+      },
+      {
+        "repo": "wavemax-affiliate-program",
+        "whatItIs": "Strict Test-Driven Development Discipline \u2014 142 test files (unit + integration + e2e), 2.07:1 test-to-code ratio, integration-first bias at controller seams, full suite runs clean without --forceExit.",
+        "technicalAngle": "Jest suite (tests/unit, tests/integration, tests/frontend, tests/debug) structured around 3,640 describe/test/it blocks. Integration tests use supertest + MongoDB Memory Server at API-seam level to catch boundary failures (request\u2192middleware\u2192controller\u2192service\u2192model\u2192DB). Unit tests reserved for pure logic (pricing, encryption, validation, formatters). Red\u2192green\u2192refactor on every non-trivial change; no production code lands without a regression test. Coverage targets \u226580% line / \u226575% branch per-file via Jest thresholds. Critical rule: fix broken tests before advancing; no skips except documented reasons.",
+        "maturity": "production",
+        "publishable": true,
+        "notes": "Enforced in CLAUDE.md as a hard rule, not guideline. Audit impact: project history shows zero production incidents in seams covered by integration suite; incidents have only occurred in untested pure-logic units. Test suite runs in CI (GitHub Actions), part of the release gate."
+      },
+      {
+        "repo": "wavemax-affiliate-program",
+        "whatItIs": "Lighthouse-100 Release Gate \u2014 every user-facing page targets 100/100 across Performance, Accessibility, Best Practices, and SEO on mobile AND desktop before release; measured locally via Chrome Lighthouse, deployed to both OCI boxes, verified post-deploy.",
+        "technicalAngle": "LIGHTHOUSE-QUALITY-BAR.md documents the standard as table-stakes for properly governed AI-built apps. Desktop commands provided with cache-busting (?lh=timestamp). Per-category patterns: defer non-critical JS (keep critical path clean), async non-critical CSS (media=print swap), WebP images with explicit dimensions (CLS prevention), lazy-load (data-src on carousel), immutable 1y caching on /assets/* (bump ?v= per change), short-lived HTML (max-age=60). Minify pipeline: npm run build:assets (terser+csso) emits .min siblings for critical-path assets. Deploy procedure: bump ?v= queries on changed assets, git pull both OCI boxes, pm2 reload on template changes. Measured state as of 2026-05-25: rundberglaundry.com 99 mobile / 98 desktop; competing platform 59 mobile / 83 desktop.",
+        "maturity": "production",
+        "publishable": true,
+        "notes": "Enforced in CLAUDE.md as a release gate. Documented in CORPORATE-REBUILD-CHECKLIST.md with dated measurements and reproducible Google PSI share links. Proved measurable difference in production: our platform 0.98 MB vs competitor 4.3\u20134.5 MB, mobile LCP 1.8s vs 14.4s."
+      },
+      {
+        "repo": "wavemax-affiliate-program",
+        "whatItIs": "Platform Baseline \u2014 white-label starter kit specification + extraction plan for shipping a reusable, commercial-grade SaaS template. Defined in docs/platform-baseline/ with SPEC.md, EXTRACTION-PLAN.md, ADDENDUM-commercial-grade.md.",
+        "technicalAngle": "Platform-baseline outlines 8-phase modular architecture: core lifecycle + auth (phase A), multi-tenant extensibility (B), preview/attestation (C), realtime (D), file-storage seams (E), CI hardening (F), Docker/HA ops (G), polish + docs (H). Decision 1: sellable/OSS with polished DX (Husky, Prettier, .nvmrc, docs). Decision 2: full commercial-grade scope including P0 (graceful shutdown, liveness checks, env validation, key rotation, DB migrations) and P1 (request-ID/observability, CI audit/gitleaks/SAST/Lighthouse-CI, commit hooks, file-upload seam, webhooks, SSE). Decision 3: Docker-first + PM2/nginx. Decision 4: Oracle ADB first-class (mongoCursorRetry, Oracle diagnostics on by default, no TTL indexes). Ships with generalizable platform/boot/, platform/middleware/, platform/services/, platform/observability/ seams; documented in CONTRIBUTING.md and module-authoring guide.",
+        "maturity": "research",
+        "publishable": false,
+        "notes": "Not yet shipped as standalone repo; WaveMAX is the proof instance. Extraction plan calls for lift-out as internal 'stack-baseline' or public open-source baseline depending on license decision (MIT vs commercial EULA). EXCLUDED from corporate site: internal-only strategic planning document; includes unresolved decisions about license, repo name, target location."
+      },
+      {
+        "repo": "wavemax-affiliate-program",
+        "whatItIs": "Oracle Autonomous Database Backend Integration \u2014 production MongoDB API compatibility layer, native OCI infrastructure, dual-AZ active-active topology with Exadata.",
+        "technicalAngle": "Mongoose connects to Oracle ADB's Mongo API endpoint (ORACLE_BACKEND config flag, defaults true in production). Baseline config (ADDENDUM-commercial-grade.md \u00a71.4) ships mongoCursorRetry + mongoOracleDiagnostics on by default. Critical Oracle-specific gotchas baked into defaults: no TTL indexes (Oracle doesn't support Mongo TTL behavior), autoIndex:false, explicit ensure-indexes (scripts/ensure-indexes.js), interval-purge for session cleanup (not Mongo TTL, avoiding 2026-05-25 bloat incident). Dual-AZ: oci1 161.153.71.201 (Phoenix) + oci2 144.24.4.202 (Phoenix), active-active behind Cloudflare LB.",
+        "maturity": "production",
+        "publishable": true,
+        "notes": "Live in production on OCI infrastructure. Integration was completed before refactor began (as-is state documented in DESIGN.md \u00a72.1). Represents differentiated 'cloud-native' positioning vs commodity AWS/GCP MongoDB deployments."
+      },
+      {
+        "repo": "wavemax-affiliate-program",
+        "whatItIs": "AI-Assisted Production Engineering \u2014 codebase built with Claude as a pair-programmer, demonstrating commercial-grade quality (audit-proven security, Lighthouse-100 pages, TDD discipline, HA deployment) can be shipped at AI-assisted velocity without compromising rigor.",
+        "technicalAngle": "Project methodology documented in .claude/CLAUDE.md (extended handbook + working style), init.prompt (dev persona), and demonstrated in git history (commits since May 2026 show features landing with full test coverage, security-hardened defaults, and Lighthouse compliance). Strict TDD enforced (Red\u2192Green\u2192Refactor before every commit), refactoring work auto-commits per logical unit with pre-approved git permissions, security findings baked into code and verified by audit. AI pair-programming enables single-developer (Rick Houlihan) to ship multi-tenant, audit-proven, HA-ready production system in weeks. Hallmark: the codebase is not a prototype; it is production-deployed, handling real customer bags/laundry, earning revenue, and surviving litigation scrutiny (exhibit-e-verification-report.md).",
+        "maturity": "production",
+        "publishable": true,
+        "notes": "Unique positioning: proof that commercial-grade SaaS can be built faster with AI if the AI is governed by strict rules (TDD, security checklist, code-organization ceiling, Lighthouse gates). CRHS Enterprises' differentiator vs consulting-shop competitors: ships production-ready code, not custom builds."
+      },
+      {
+        "repo": "wavemax-fb-audit (marketing strategy, not code)",
+        "whatItIs": "Facebook Organic Growth Strategy \u2014 diagnostic audit of dormant franchise social channel (314 followers, 0.27% engagement, 0 reviews) with phased plan to drive walk-in traffic via reviews, content, and local presence.",
+        "technicalAngle": "Three-phase engagement engine: Phase 1 (days 1\u20133) page foundation (rename, CTA, cover photo, services, offers, signage). Phase 2 (days 1\u20137, parallel) reviews engine (QR signage, staff script, seed 15 reviews, reply template). Phase 3 (day 7+) batched content (3 posts/week, 1 Reel + 1 offer + 1 value per week, monthly kit production). Measurement: 90-day targets 25+ reviews at 4.5\u2605, weekly Reel publishing, \u22651 Reel >1K views, engagement trending toward 2%+. Operating model: Claude handles page edits + templates + content kits via browser; Rick/staff handle in-store (signage, filming, staff script). Free reach only (no ad spend).",
+        "maturity": "prototype",
+        "publishable": true,
+        "notes": "Strategy document produced May 2026, execution phase not yet visible in repo. Demonstrates CRHS's social-strategy competency (not just software engineering). Low-footprint hands-off operation model (monthly 15-min check) designed to fit owner's bandwidth."
+      },
+      {
+        "repo": "wavemax-affiliate-program/crhsent/",
+        "whatItIs": "CRHS Enterprises Corporate Site \u2014 crhsent.com home page (holding-company placeholder) + crhsent.com/wavemax/ sales landing for WaveMAX owners ($500/mo Web & SEO package). Static files served by nginx from git repo.",
+        "technicalAngle": "Self-contained single-file HTML (inline <style>, no build step). Deployed via git pull on prod nginx box (root /var/www/wavemax/wavemax-affiliate-program/crhsent/). crhsent.com behind Cloudflare with cf-cache-status: DYNAMIC (no cache purge needed on push). Sales page highlights Performance / SEO / Security proof tabs (rundberglaundry site scores vs competitor platform). No third-party dependencies; fast static delivery.",
+        "maturity": "production",
+        "publishable": true,
+        "notes": "Live properties. crhsent.com apex page is internal-only placeholder; /wavemax/ landing is sales vehicle for franchise owners."
+      }
+    ],
+    "headlineCapabilities": [
+      "Production-Grade HA SaaS Built with AI: Dual-AZ OCI deployment, Oracle Autonomous Database, Cloudflare LB, audit-proven security, Lighthouse-100 pages, 2:1 test-to-code ratio\u2014all built with Claude as pair-programmer, proving commercial-quality can ship at AI-assisted velocity.",
+      "Lighthouse-100 Front-End Excellence: Measured 99 mobile / 98 desktop (vs competitor 59/83). Page weight 0.98 MB (vs 4.5 MB competitor). Mobile LCP 1.8s (vs 14.4s). Release-gate standard enforced on every user-facing page change.",
+      "Defense-in-Depth Security Architecture: 8 isolated, testable modules covering PBKDF2-SHA512 password hashing (100k iterations), AES-256-GCM encryption at rest, JWT + refresh-token rotation, MongoDB-backed rate-limiting, CSP v2 per-request nonces, and audit logging to separate stream. Audit-proven in litigation context.",
+      "Strict TDD Discipline at Scale: 142 test files, 61.5k test-code lines (2.07:1 ratio), integration-first bias at controller seams. Zero production incidents in tested seams since project launch. Full suite runs clean without --forceExit.",
+      "Multi-Tenant, Multi-Language, White-Label Ready: 4-language i18n (en/es/pt/de), iframe SPA with postMessage parent-bridge, per-affiliate customizable delivery fees, revenue transparency, SEO-instrumented content pages with schema.org/LocalBusiness, hreflang, and Open Graph injection.",
+      "Platform Baseline + Extraction Plan: White-label starter kit specification ready for lift-out (8-phase modular architecture, Docker-first, Oracle ADB first-class, P0/P1 commercial-grade hardening, generalized seams for auth/file-storage/webhooks/observability)."
+    ],
+    "_key": "wavemax-flagship"
+  },
+  {
+    "cluster": "Rick Houlihan - Thought Leadership & Technical IP",
+    "summary": "Rick Houlihan is a 30-year enterprise data architecture veteran and Field CTO at Oracle, recognized as the inventor of DynamoDB Single-Table Design and architect of Unified Model Theory (UMT). His public work spans thought-leadership content (LinkedIn posts, long-form articles), an in-progress book co-authored with distinguished database researcher Zhen Hua Liu, technical presentations, and an open-source visual designer (JRDM) for Oracle JSON Relational Duality Views. His core thesis \u2014 that converged databases with unified data models are architecturally superior to polyglot persistence \u2014 is grounded in storage engine physics and backed by benchmarking data. His career spans Amazon (created DynamoDB patterns), MongoDB (deep product expertise), and Oracle (JSON standards and convergent architecture). This cluster represents publishable, credibility-building IP suitable for corporate site positioning.",
+    "items": [
+      {
+        "repo": "/mnt/c/Users/rickh/GitHub/LinkedIn",
+        "whatItIs": "Thought leadership knowledge base containing 40+ LinkedIn posts, 15+ long-form technical articles, presentation decks, podcast scripts, and sales enablement materials. Core thesis: converged databases eliminate polyglot persistence penalties through unified data models (Unified Model Theory).",
+        "technicalAngle": "Posts and articles provide physics-based analysis of storage engine mechanics (BSON vs OSON traversal complexity, B-tree vs LSM tradeoffs, RUM Conjecture), with benchmarked proof points (e.g., OSON 529x faster on deep field access). Addresses practical enterprise requirements: failover continuity, data corruption detection, transaction consistency models. Competitive analysis grounded in storage engine design, not marketing.",
+        "maturity": "production",
+        "publishable": true,
+        "notes": "Established voice: authoritative but conversational, provocative framing ('It was surrender, not architecture'), quotable takeaways. Major themes: access patterns drive modeling (Amazon's 70/20/10 rule), relational vs document is false dichotomy, eventual consistency incompatible with AI workloads. Curated selection suitable for About/Credibility section of corporate site."
+      },
+      {
+        "repo": "/mnt/c/Users/rickh/GitHub/book/the-elements-of-data",
+        "whatItIs": "Comprehensive book manuscript (6 parts, 20+ planned chapters, ~170KB per-chapter) co-authored with Zhen Hua Liu (Oracle distinguished engineer, 100+ published papers). Part I & II complete (16 chapters + outline). Title: 'The Elements of Data: Model the Domain. Project the Access.'",
+        "technicalAngle": "First-principles treatment: storage engine physics (B-trees, LSM, hash indexes), Amazon's migration from 3,000 Oracle instances to distributed NoSQL (25,000 developers, 7,500 services), NoSQL design patterns (single-table design, composite sort keys, GSI overloading, relationship patterns). Uniquely bridges Codd's relational theory, Dynamo paper insights, and modern convergent database architecture. Each pattern analyzed as physics-based tradeoff under specific storage engine constraints.",
+        "maturity": "production",
+        "publishable": true,
+        "notes": "Definitive reference work; establishes Rick as canonical voice on data modeling theory and practice. Demonstrates 30-year perspective (Amazon \u2192 MongoDB \u2192 Oracle) with peer-reviewed co-author (Liu). Historical narratives (Amazon's scale journey, dotcom parallels) provide narrative credibility. Book completion would be marquee accomplishment for corporate site."
+      },
+      {
+        "repo": "/mnt/c/Users/rickh/GitHub/jrm",
+        "whatItIs": "JRDM (JSON Relational Duality Mapper) \u2014 open-source visual designer for authoring Oracle JSON Relational Duality Views. Monorepo (TypeScript strict, pnpm + Turborepo, Node 22). Shipped: Connect \u2192 Import (ERD), Map-to-Document modal, Generate DDL (SQL/JSON + GraphQL), Deploy, Sample, Edit with ETag concurrency, Conflict demo. Sandbox lifecycle management included. v0.4 complete, v0.5+ roadmap (MongoDB inference, migrations).",
+        "technicalAngle": "Production-grade tool implementing UMT operationally: bidirectional relational\u2194document mapping via declarative shape projection. Tech stack (Fastify 5, React 18, Oracle testcontainers, Zod, fast-check property testing) reflects enterprise rigor. Reverse-engineering schema from live Oracle instance; rendering ERD via React Flow with dagre layout; live DDL generation; property-tested DDL round-trip validation. ETag-guarded optimistic concurrency; Playwright e2e test coverage.",
+        "maturity": "production",
+        "publishable": true,
+        "notes": "Proof-of-concept tool demonstrating UMT theory in practice. GitHub repo public-ready; can highlight as reference implementation. Shows engineering discipline (monorepo structure, property testing, e2e coverage, Docker compose setup). Suitable as case study: 'From Theory to Tool \u2014 How UMT Works in Practice.'"
+      },
+      {
+        "repo": "/mnt/c/Users/rickh/GitHub/LinkedIn/articles/bson-vs-oson-benchmark-proof.md",
+        "whatItIs": "Deep technical article documenting DocBench benchmark framework (Java, open-source). Isolates client-side binary JSON traversal costs, eliminating network noise. Proves OSON O(1) vs BSON O(n) with nanosecond-level precision. Historical context: 10gen (2009 startup constraints) vs Oracle (2017 database veteran expertise). Includes methodology section and scaling analysis.",
+        "technicalAngle": "Rigorous benchmarking: field position scaling (O(n) vs O(1)), document nesting depth, array indexing. Explains storage engine design rationales: BSON length-prefixes enable sub-document skipping but still scan field names sequentially; OSON hashes paths and jumps to offsets directly. Frame size measurements, client-side deserialization costs. Not hand-wavy performance marketing \u2014 algorithmic complexity backed by measured data.",
+        "maturity": "production",
+        "publishable": true,
+        "notes": "Flagship credibility piece. Demonstrates Rick's ability to turn theory into measurement. Published on LinkedIn. Suitable for website as 'Technical Depth' proof point. Shows non-partisan approach: acknowledges MongoDB's 2009 design constraints, explains *why* BSON was reasonable then and why OSON is physics-better now."
+      },
+      {
+        "repo": "/mnt/c/Users/rickh/GitHub/LinkedIn/articles/enterprise-workloads-need-enterprise-databases.md",
+        "whatItIs": "Comprehensive multi-database comparison: Oracle ADB vs MongoDB 8.x vs YugabyteDB across six enterprise HA requirements (failover continuity, corruption detection/repair, non-blocking schema changes, zero-downtime patching, scaling, multi-node ACID). 100+ lines of detailed analysis per database.",
+        "technicalAngle": "Evaluates architectural differences: Oracle's Transparent Application Continuity (TAC) auto-replays in-flight transactions vs MongoDB's kill-and-retry on failover; Exadata ASM block-level auto-repair vs WiredTiger's detective-only model; implicit schema flexibility vs declarative governance; Raft consensus vs quorum-based replication. Cites specific issues (MongoDB SERVER-106075 torn transaction bug in v8.0\u2013v8.0.12). Grounded in storage engine and consensus protocol physics, not feature checklist.",
+        "maturity": "production",
+        "publishable": true,
+        "notes": "Demonstrates forensic technical analysis suitable for architects and CTOs. Non-dismissive: acknowledges each database's strengths, explains tradeoffs clearly. Suitable for site positioning: 'Why Enterprise Data Governance Matters.' Investable: shows deep product knowledge and ability to advise on TCO, operational risk, and compliance."
+      },
+      {
+        "repo": "/mnt/c/Users/rickh/GitHub/LinkedIn/articles/ai-adoption-dotcom-parallels-the-crash-that-blinks.md",
+        "whatItIs": "Thought-leadership analysis piece: AI adoption is fundamentally different from dotcom because adoption curves, measured metrics, and workforce demographics all show inflection points (45% of US employees using AI, 88% of enterprises, 700M ChatGPT weekly users). Traces dotcom timeline (5-year rise, 15-year recovery) vs AI adoption velocity. 30-year perspective grounding.",
+        "technicalAngle": "Data-driven narrative: breaks adoption by generation (Gen Z 76%, Millennials 58%), industry (Tech 94%, Finance 73%, Legal 79%), company size (87% of large enterprises, 68% of small), and geography (UAE 64%, Singapore 61%). Contextualizes against historical adoption curves (internet, email, browsers). Argues AI is survivable volatility for well-architected systems, existential threat to polyglot stacks and stale consistency models.",
+        "maturity": "production",
+        "publishable": true,
+        "notes": "Thought-leadership positioning Rick as strategic thinker beyond database mechanics. Shows ability to contextualize technology cycles and articulate business implications. Suitable for board-level or investor conversations. Demonstrates perspective credibility: 'I saw this movie before (dotcom); here's what's actually different.' Links to Oracle convergent database thesis: 'AI workloads need immediate consistency; eventual consistency infrastructure breaks here.'"
+      },
+      {
+        "repo": "/mnt/c/Users/rickh/GitHub/LinkedIn/articles/modeling-for-the-access-pattern-umt-edition.md",
+        "whatItIs": "Technical deep-dive: re-examines NoSQL design pattern catalog (Computed, Subset, Bucket, Extended Reference, Outlier, Tree, Approximation, etc.) through lens of Unified Model Theory. Introduces 'three dials' framework: pattern complexity, read/write mix, write-size vs read-size. Explains how converged engines (Oracle 26ai) change which patterns remain optimal.",
+        "technicalAngle": "Analyzes storage physics each pattern dodges: WiredTiger's copy-on-write (no in-place updates = write amplification), 16MB document cap, 100MB aggregation memory ceiling, SBE eligibility walls, $lookup join costs. Shows how JSON Duality Views (read-time joins with generated documents) and SQL/JSON under unified optimizer eliminate tradeoffs underlying classic patterns. Concrete: duality views for shape projection, one optimizer for both models, no 16MB cap.",
+        "maturity": "production",
+        "publishable": true,
+        "notes": "Flagship UMT explainer. Shows intellectual honesty: 'I invented single-table design; here's why it was the right answer then and why different tradeoffs apply now.' Establishes Rick as pattern-catalog authority who can explain *why* patterns work and *when* they stop working. Suitable for site as 'UMT Explained' centerpiece."
+      },
+      {
+        "repo": "/mnt/c/Users/rickh/GitHub/LinkedIn/posts (40+ sequential posts)",
+        "whatItIs": "Pithy, high-impact LinkedIn posts (1500-3000 chars each, emoji-driven, numbered sequentially from 01). Topics: BSON/OSON traversal, MongoDB vs Oracle translator/explain plans, single-table design, document model performance, polyglot persistence costs, state vector dissonance in AI pipelines.",
+        "technicalAngle": "Each post isolates one tactical insight: field navigation algorithmic complexity, binary format design history, join elimination via projection, integration tax (1.5ms serialization + 40% TCP overhead per multi-service chain), eventual consistency feeding stale facts to LLMs. Voice: conversational, provocative framing ('Traversable isn't fast, indexed is fast'), memorable one-liners.",
+        "maturity": "production",
+        "publishable": true,
+        "notes": "Content engine for thought leadership. Individual posts publishable as site content blocks or social proof. Demonstrate sustained, credible output over months. Suitable for site homepage: feature 2-3 representative posts under 'Latest Insights' or 'Technical Positions.'"
+      },
+      {
+        "repo": "/mnt/c/Users/rickh/GitHub/LinkedIn/presentations/From-RDBMS-to-NoSQL-Oracle-Edition (and UMT variants)",
+        "whatItIs": "Technical presentation deck (Reveal.js HTML + PowerPoint variants). Covers RDBMS vs NoSQL tradeoffs, DynamoDB single-table design patterns, converged architecture, Unified Model Theory. Speaker notes provided. Multiple editions for different audiences (developer day, executive summary, Allianz/Santander/Wells Fargo customizations).",
+        "technicalAngle": "Dense technical content organized for delivery pacing: storage engine comparisons, access pattern methodology, entity-chart planning tools, composite key patterns, duality view mechanics, SQL/JSON under unified optimizer. Includes demo scenarios with concrete SQL/JSON examples. Oracle branding variants for different GTM motions.",
+        "maturity": "production",
+        "publishable": true,
+        "notes": "Multi-audience credibility asset. Demonstrates ability to translate complexity for developers, architects, and execs. PDF + HTML versions available for download. Suitable for site: offer as 'Download Our Technical Briefing' lead magnet."
+      },
+      {
+        "repo": "/mnt/c/Users/rickh/GitHub/LinkedIn/articles/you-cannot-outrun-a-wave.md",
+        "whatItIs": "Strategic positioning article on technology adoption waves and incumbency disruption. Contextualizes database convergence as inevitable wave shift (from specialized/polyglot to unified). Historical parallels (web frameworks consolidation, cache consolidation).",
+        "technicalAngle": "Pattern-matching across technology cycles. Identifies where specialization creates advantages (early) and where consolidation becomes mandatory (scale + operations). Applies to database landscape: MongoDB/DynamoDB optimized for specific constraints, those constraints obsolete at modern scale, convergence becomes cost/operational inevitability.",
+        "maturity": "production",
+        "publishable": true,
+        "notes": "Positions Rick as strategic thinker who sees beyond current market fragmentation. Suitable for investor/analyst positioning."
+      }
+    ],
+    "headlineCapabilities": [
+      "30-year enterprise data architecture veteran (Amazon, MongoDB, Oracle): architected DynamoDB at scale, deep product expertise, now Field CTO driving Oracle's Unified Model Theory and convergent database strategy",
+      "Physics-grounded technical authority: benchmarks storage engine mechanics (O(n) vs O(1) binary traversal), explains why architectural decisions matter under real-world constraints, backed by open-source tooling and measurable data",
+      "Inventor of DynamoDB Single-Table Design: the pattern that changed an industry; authored canonical book on topic; can articulate why patterns evolved and when classical wisdom no longer applies under convergent architecture",
+      "Thought leader on AI/enterprise implications: addresses how polyglot persistence and eventual consistency create hallucination liability for generative AI; positions converged databases as infrastructure-for-intelligence",
+      "Open-source builder: JRDM visual designer for JSON Duality Views demonstrates theory-to-practice translation; property-tested, production-grade, publicly available proof-of-concept",
+      "Co-author (with Zhen Hua Liu, Oracle distinguished engineer, 100+ papers) of definitive book on data modeling, storage engines, and convergent architecture \u2014 flagship credibility asset for corporate positioning"
+    ],
+    "_key": "positioning-content"
+  }
+]
