@@ -52,6 +52,19 @@ const affiliateSchema = new mongoose.Schema({
   city: { type: String, required: true },
   state: { type: String, required: true },
   zipCode: { type: String, required: true }, // Keep required for now - can geocode later
+  // ---- Customer geolocation radius gate (admin opt-in, per partner) ----
+  // When enabled, a customer's bag-claim registration is allowed only if the
+  // customer's supplied address geocodes within `geoRadiusMiles` of this
+  // partner's address. The partner's geocode is stored here (placeId is
+  // storable indefinitely; lat/lng are refreshed when stale, per Google ToS).
+  // Enforced server-side in customerRegistrationService; FAIL-OPEN on any
+  // geocoding error so an outage never blocks signups.
+  geoValidationEnabled: { type: Boolean, default: false },
+  geoRadiusMiles: { type: Number, min: 1, max: 50 },
+  geoLat: { type: Number },
+  geoLng: { type: Number },
+  geoPlaceId: { type: String },
+  geocodedAt: { type: Date },
   // Flat per-affiliate delivery fee — display-only (money lives in Cents); shown
   // in the order-confirmation email when non-zero. 0 = no delivery fee.
   deliveryFee: {

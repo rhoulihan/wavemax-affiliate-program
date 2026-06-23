@@ -1,37 +1,40 @@
-# Active todo — CRHS Enterprises corporate site (crhsent.com), RED BUREAU constructivism
+# Active todo — Partner-opt-in customer geolocation radius gate (bag registration)
 
-Proposal + locked decisions: `docs/crhsent-proposal/` (PROPOSAL.md, DESIGN-DIRECTIONS.md, DECISIONS.md, WORK-SURVEY.json).
-Locked: RED BUREAU (editorial/technical) · 5 pages · **DB/AI IP-dominant** (WaveMAX = one exhibit) · public+indexable, generic competitor framing.
+Feature: partners opt into customer geolocation; specify a radius (miles) from the partner address;
+bag-registration (customer claim) is allowed only if the customer's supplied address is within radius.
 
-## Phase 1 — design system + Home (review gate)
-- [x] `crhsent/assets/css/site.css` — RED BUREAU tokens (palette/type/grid) + components (FIG-plate, kicker-bar, diagonal divider, stat rail, pillar cards, buttons, mobile hamburger nav, focus-visible); AA contrast; reduced-motion safe
-- [x] `crhsent/index.html` — Home (IP-dominant): hero + proof strip + 4 pillars (benchmarks→UMT→AppliedAI→WaveMAX) + operator + CTA; SEO meta + Organization/Person JSON-LD; noindex REMOVED; generic competitor framing ("single-purpose engines")
-- [x] `crhsent/assets/js/site.js` — external, nonce-clean: count-up + scroll reveals (IntersectionObserver, prefers-reduced-motion + no-IO fallback) + accessible mobile nav toggle
-- [x] hero SVG motif — constructivist UMT diagram (one canonical form → document/graph/time-series/relational projections) + crop marks; system-font fallbacks (Archivo Expanded/Inter/IBM Plex Mono) until webfonts self-hosted
-- [x] `crhsent/assets/img/favicon.svg` (same-origin; avoids the /favicon.ico → wavemaxlaundry redirect CSP trip)
-- [x] Self-hosted webfonts — Archivo Expanded (Archivo variable pinned to 125% width axis), Inter, IBM Plex Mono; latin-subset woff2 under `crhsent/assets/fonts/`, `font-display:swap`, 3 above-the-fold faces preloaded (`crossorigin`), CSP `font-src 'self'` (no external origins). Verified rendering.
-- [x] **REV 2 — repositioned per Rick (2026-06-22):** sole proprietor + AI-driven development + enterprise architecture → secure, highly-available, enterprise-grade systems **without the enterprise price tag**. H1 kept. New hero lede + stat rail (40/09/2/1); NEW "FIG.01 / The offer" section; proof strip reframed (17× · 8-layer · Dual-AZ · 99/98); pillars reframed (Enterprise architecture · AI-driven delivery · Secure & HA · Without the price tag); first-person operator section + creds (pulled from existing owners page); CTA "Tell me what you need built." Copy produced + adversarially fact-checked via Workflow (40 yrs reconciled from owners page; generic competitors; nothing legal/personal). SEO/JSON-LD updated.
-- [~] GATE: **awaiting Rick's review of REV 2** — Home (desktop+mobile). Lighthouse re-run (local preview, both devices): **A11y 100 · Best Practices 100 · SEO 100 · Agentic 100**, perf LCP 63ms / CLS 0.00. NOT deployed (public-facing → deploy only after approval at P4).
+## Locked decisions (Rick, 2026-06-22)
+- **Provider:** Google **Address Validation API** (validate + geocode in one server call). Haversine for distance (radius = circle). NOT Distance Matrix.
+- **Opt-in control:** **Admin-managed** per affiliate (affiliate-edit modal, where deliveryFee/serviceType live). Not partner self-service.
+- **Failure mode:** **Fail-open** — if geocoding errors/times out/no result, ALLOW the registration + log/audit (an API outage never blocks signups).
+- **Autocomplete:** **Deferred** (radius gate first; Places Autocomplete is a later polish PR).
 
-## Phase 2 — Work/Proof — BUILT (2026-06-22), awaiting gate review
-- [x] `crhsent/work/index.html` — intro (FIG.00) → WaveMAX flagship (FIG.01, dual-AZ topology blueprint FIG.02 + sub-exhibits FIG.03 Lighthouse / FIG.04 Security / FIG.05 Engineering) → exhibit grid (FIG.06–15: 7 enterprise-architecture + 3 applied-AI plates) → CTA. Content produced + adversarially fact-checked via Workflow (13 ok / 1 softened / 0 cut; generic competitors; topology IP-free; tenure 30+).
-- [x] Dual-AZ topology SVG — constructivist blueprint, **AZs/roles only, NO IPs/hostnames/infra paths** (EDGE Cloudflare LB → active-active APP zones A/B Phoenix → DATA Oracle ADB Exadata). Authored + visually verified.
-- [x] Lighthouse (local, both devices): **A11y 100 · BP 100 · SEO 100 · Agentic 100**. Reveal IntersectionObserver hardened (dropped negative bottom rootMargin → last card always reveals).
-- [~] GATE: **awaiting Rick** — topology + plates review. **OPEN:** per-exhibit GitHub links rendered as TEXT (not links) pending Rick confirming which repos are public. NOT deployed.
-## Phase 3 — Capabilities + Contact BUILT (2026-06-22); About pending Rick's inputs
-- [x] Work page: per-repo GitHub links wired LIVE (Rick: all public) — `target=_blank rel=noopener`.
-- [x] `crhsent/capabilities/index.html` — intro + 3 practice areas (FIG.01 Data at scale · FIG.02 Applied AI · FIG.03 Product & delivery), each desc + service bullets + "see the Work →" proof link; CTA. Adversarially fact-checked (CLEAN: figures supported, generic competitors, 30+, no legal/IP). Lighthouse 100×4 both devices.
-- [x] `crhsent/contact/index.html` — mailto CTA + fineprint (email/github/LLC) + "helpful to include" list. ContactPage JSON-LD. Lighthouse 100×4 both devices.
-- [x] a11y fix (shared): prose links (`p a:not(.btn)`) now underlined — fixes WCAG link-in-text-block on the "see the Work →" inline links.
-- [x] `crhsent/about/index.html` — hero (real headshot → `assets/img/rick-houlihan.webp`, 29KB) + first-person bio + creds; career arc; **9-patent dossier** (verified via Google Patents inventor "John Richard Houlihan" — IBM ×7, Zenoss ×1, Amazon ×1 incl. the DynamoDB key-overloading patent; each links to patents.google.com); UMT thesis; CTA. Book omitted (unpublished, per Rick). ProfilePage+Person JSON-LD. Lighthouse 100×4 both devices (fixed a patent-grid auto-placement bug). 
+## Research findings (key)
+- Claim form ALREADY collects customer address (address/city/state/zip, required) → no new capture fields.
+- Gate seam: `server/services/customerRegistrationService.js` `registerCustomer()`, right after the affiliate is resolved from the bag (~line 69), before customer build/save + bag claim. Throw `RegistrationError('outside_service_area', 422)`; controller `claimRegister` already maps it to JSON.
+- Reusable: Haversine `calculateDistance` (miles, R=3959) in `server/services/addressValidationService.js`. The old Nominatim radius gate was client-side only (bypassable) — this MUST be server-side.
+- `Affiliate.serviceLocation`/`serviceRadius` were removed in redesign (f3c8422); we add fresh fields.
+- AV response paths: `result.geocode.location.latitude/longitude`, `result.geocode.placeId`, `result.address.formattedAddress`, `result.verdict.{addressComplete,validationGranularity,hasUnconfirmedComponents}`.
+- ToS: cache lat/lng ≤30 days; placeId storable indefinitely; no map-display/attribution for backend-only use. Need a SEPARATE server-side, IP-restricted key (oci1/oci2) — do NOT reuse the referrer-restricted GOOGLE_PLACES_API_KEY.
 
-## ALL 5 PAGES BUILT — Home · Capabilities · Work · About · Contact — each Lighthouse A11y/BP/SEO 100 desktop+mobile, CLS 0, self-hosted fonts, nonce-clean. NOT deployed.
+## PREREQUISITE (Rick / ops) — Google Cloud server key
+- In the existing GCP project: enable **Address Validation API**; create a NEW API key, **IP-restricted** to oci1 `161.153.71.201` + oci2 `144.24.4.202`, **API-restricted** to Address Validation API.
+- Add `GOOGLE_GEOCODING_API_KEY=…` to `.env` on both boxes (and `.env.example` — needs Rick's confirm). Code reads it server-side only; no CSP change.
+- Not needed for dev/tests (mocked). Required before live use / deploy.
 
-## Phase 4 — SEO/robots + deploy
-- [x] OG share images — 5 on-brand 1200×630 cards (`crhsent/assets/img/og-{home,work,capabilities,about,contact}.png`), generated from a temp generator (since removed). Wired og:image + og:image:width/height + twitter:card=summary_large_image + twitter:image on all 5 pages.
-- [x] `crhsent/robots.txt` (allow all + sitemap) + `crhsent/sitemap.xml` (5 URLs). Served by the crhsent host handler (runs before the main L1144 robots route) when the gate is off. Verified 200 + valid; Home SEO still 100.
-- [x] Access-gate investigation: **`accessGate` IS the crhsent.com password gate** (GATED_HOSTS=crhsent.com/www; only `/owners/` exempt). `comingSoon` only gates rundberglaundry.com (crhsent unaffected). **Single launch toggle = SystemConfig `access_gate_enabled`** (runtime, no redeploy): false ⇒ crhsent.com fully public; true ⇒ password-gated. Defaults false (fail-open).
-- [ ] **DEPLOY (needs Rick's go-ahead + the gate decision):** (a) ensure `access_gate_enabled=false` to make crhsent.com public — NOTE this opens ALL of crhsent.com (corporate + /wavemax/ + /owners/); or (b) keep gate on + add corporate routes to accessGate isExempt() (server change). Then: git pull both OCI boxes (static → NO pm2 reload), live-verify both, PSI spot-check, validate share cards (no `pm2` unless server.js changes).
-## Phase 4 — SEO/JSON-LD + OG, robots flip, full Lighthouse ×4 ×2, access-gate verify, deploy both boxes, live verify
+## PR 1 — Affiliate geo fields + geocoding service + admin opt-in UI
+- [ ] `server/models/Affiliate.js`: add `geoValidationEnabled` (bool, default false), `geoRadiusMiles` (Number, min 1, max 50), `geoLat`, `geoLng`, `geoPlaceId` (String), `geocodedAt` (Date). Tests.
+- [ ] `server/services/geocodingService.js`: `geocodeAddress({address,city,state,zipCode})` → Google AV (`v1:validateAddress`), returns `{ ok, lat, lng, placeId, formatted, granularity }` or `{ ok:false, reason }`. Defensive parsing; timeout; never throws (fail-open caller). Reuse/keep Haversine. Unit test with mocked fetch (no live calls).
+- [ ] Partner geocode-on-save: when admin enables geo + saves with an address (new/changed), geocode the partner → store geoLat/geoLng/geoPlaceId/geocodedAt; warn if it won't geocode. (`manualAffiliateController.updateAffiliateSettings`.)
+- [ ] Admin UI: opt-in toggle (`affEditGeoValidation`) + radius input (`affEditGeoRadius`) in `#affiliateSettingsModal`; load+save in `administrator-dashboard-init.js`; validation in `administratorRoutes.js` PATCH; whitelist + return in `manualAffiliateController` (`updateAffiliateSettings` + `getAffiliateForEdit`). i18n labels en/es/pt/de. SPA cache-bust if admin JS changes.
+- [ ] Tests: affiliate model fields; `affiliateSettings.test.js` (toggle+radius persist + validation); geocodingService unit.
 
-## Inputs needed from Rick (block About/final, not P1): 9 patent IDs+titles · bio confirmations · hi-res portrait · webfont .woff2 (Archivo Expanded/Inter/IBM Plex Mono) approval · book title+co-author
+## PR 2 — Server-side radius gate at registration
+- [ ] `customerRegistrationService.registerCustomer()`: if `affiliate.geoValidationEnabled` → ensure partner geocode fresh (re-geocode if missing/stale >30d) → geocode customer address → Haversine vs partner geo → if > `geoRadiusMiles`, throw `RegistrationError('outside_service_area', 422)`. **Fail-open** on any geocoding error (allow + audit log).
+- [ ] Customer-facing rejection message in claim.js / claim-embed (i18n en/es/pt/de).
+- [ ] Tests: inside allows / outside blocks (422) / disabled bypasses / geocode-failure fail-open (mock geocodingService). Extend `tests/integration/customerClaim.test.js`.
+
+## PR 3 — (deferred) Places Autocomplete on the claim form (typo reduction). Browser key + CSP entry.
+
+## Process
+- Strict TDD (red→green). i18n parity 0 errors. Full jest gate green per PR. Commit + deploy per PR (git pull both boxes; pm2 reload — server code changes). Lighthouse re-check /claim if the form changes (it shouldn't, only an error path).

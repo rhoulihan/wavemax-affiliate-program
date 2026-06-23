@@ -90,6 +90,9 @@ router.patch('/affiliates/:affiliateId',
     body('orderNotificationsEnabled').optional().isBoolean(),
     body('isActive').optional().isBoolean(),
     body('deliveryFee').optional().isFloat({ min: 0, max: 1000 }),
+    // Customer-geolocation radius gate (opt-in).
+    body('geoValidationEnabled').optional().isBoolean(),
+    body('geoRadiusMiles').optional({ nullable: true }).isFloat({ min: 1, max: 50 }),
     // Optional on edit; if present, pickup can't be blanked (trim BEFORE notEmpty).
     body('pickupInstructions').optional().trim().notEmpty().isLength({ max: 2000 })
       .withMessage('Pickup instructions cannot be empty'),
@@ -199,31 +202,31 @@ router.post('/change-password', [
 router.post('/reset-rate-limits', checkAdminPermission(['system.manage']), async (req, res) => {
   try {
     const { type, ip } = req.body;
-    
+
     // Get the rate_limits collection
     const db = require('mongoose').connection.db;
     const collection = db.collection('rate_limits');
-    
+
     // Build filter
     let filter = {};
-    
+
     if (type) {
       filter.key = new RegExp(type, 'i');
     }
-    
+
     if (ip) {
       filter.key = new RegExp(ip.replace(/\./g, '\\.'));
     }
-    
+
     // Delete matching records
     const result = await collection.deleteMany(filter);
-    
+
     res.json({
       success: true,
       message: `Reset ${result.deletedCount} rate limit records`,
       deletedCount: result.deletedCount
     });
-    
+
   } catch (error) {
     logger.error('Error resetting rate limits:', error);
     res.status(500).json({

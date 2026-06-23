@@ -8,6 +8,11 @@ jest.mock('../../server/utils/emailService', () => ({
   sendCustomerWelcomeEmail: jest.fn().mockResolvedValue(true),
   sendAffiliateNewCustomerEmail: jest.fn().mockResolvedValue(true)
 }));
+// Geo gate: mock geocodeAddress (no live Google); distanceMiles stays real.
+jest.mock('../../server/services/geocodingService', () => {
+  const actual = jest.requireActual('../../server/services/geocodingService');
+  return { geocodeAddress: jest.fn(), distanceMiles: actual.distanceMiles, isConfigured: jest.fn(() => true) };
+});
 
 const request = require('supertest');
 const app = require('../../server');
@@ -19,6 +24,7 @@ const firebasePhoneService = require('../../server/services/firebasePhoneService
 const emailService = require('../../server/utils/emailService');
 const { hashPassword } = require('../../server/utils/encryption');
 const { getCsrfToken, createAgent } = require('../helpers/csrfHelper');
+const geocodingService = require('../../server/services/geocodingService');
 
 async function createAffiliate() {
   const { salt, hash } = hashPassword('TestAffiliatePass123!');
@@ -377,6 +383,57 @@ describe('Customer claim', () => {
       expect(res.status).toBe(400);
       expect(res.body.code).toBe('phone_not_verified');
       expect(await Customer.countDocuments({})).toBe(0);
+    });
+  });
+
+  describe('geo radius gate (partner opt-in)', () => {
+    beforeEach(() => {
+      geocodingService.geocodeAddress.mockReset();
+      jest.spyOn(firebasePhoneService, 'isEnabled').mockReturnValue(false); // phone-verify off for these
+    });
+
+    async function enableGeo(radiusMiles) {
+      affiliate.geoValidationEnabled = true;
+      affiliate.geoRadiusMiles = radiusMiles;
+      affiliate.geoLat = 30.2672;        // partner pre-geocoded (fresh) — no re-geocode needed
+      affiliate.geoLng = -97.7431;
+      affiliate.geocodedAt = new Date();
+      await affiliate.save();
+    }
+
+    it('allows registration when the customer address is within the radius', async () => {
+      await enableGeo(10);
+      geocodingService.geocodeAddress.mockResolvedValue({ ok: true, lat: 30.27, lng: -97.74 }); // ~same point
+      const token = await issuedBag(affiliate);
+      const res = await request(app).post(`/api/v1/customers/claim/${token}/register`).send(registrationBody());
+      expect(res.status).toBe(201);
+      expect(await Customer.countDocuments({})).toBe(1);
+    });
+
+    it('blocks registration when the customer address is outside the radius (422)', async () => {
+      await enableGeo(10);
+      geocodingService.geocodeAddress.mockResolvedValue({ ok: true, lat: 31.5, lng: -97.7431 }); // ~85 mi north
+      const token = await issuedBag(affiliate);
+      const res = await request(app).post(`/api/v1/customers/claim/${token}/register`).send(registrationBody());
+      expect(res.status).toBe(422);
+      expect(res.body.code).toBe('outside_service_area');
+      expect(await Customer.countDocuments({})).toBe(0); // nothing created on rejection
+    });
+
+    it('bypasses the gate when geo validation is disabled (default)', async () => {
+      const token = await issuedBag(affiliate); // affiliate.geoValidationEnabled defaults false
+      const res = await request(app).post(`/api/v1/customers/claim/${token}/register`).send(registrationBody());
+      expect(res.status).toBe(201);
+      expect(geocodingService.geocodeAddress).not.toHaveBeenCalled();
+    });
+
+    it('fails OPEN (allows) when customer geocoding errors', async () => {
+      await enableGeo(10);
+      geocodingService.geocodeAddress.mockResolvedValue({ ok: false, reason: 'request_failed' });
+      const token = await issuedBag(affiliate);
+      const res = await request(app).post(`/api/v1/customers/claim/${token}/register`).send(registrationBody());
+      expect(res.status).toBe(201);
+      expect(await Customer.countDocuments({})).toBe(1);
     });
   });
 

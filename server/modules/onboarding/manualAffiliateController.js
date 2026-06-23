@@ -12,6 +12,7 @@ const crypto = require('crypto');
 const { validationResult } = require('express-validator');
 const Affiliate = require('../../models/Affiliate');
 const SystemConfig = require('../../models/SystemConfig');
+const geocodingService = require('../../services/geocodingService');
 const encryptionUtil = require('../../utils/encryption');
 const roleCodes = require('../../utils/roleCodes');
 const ControllerHelpers = require('../../utils/controllerHelpers');
@@ -177,7 +178,9 @@ exports.getAffiliateForEdit = ControllerHelpers.asyncWrapper(async (req, res) =>
       languagePreference: affiliate.languagePreference, affiliateType: affiliate.affiliateType,
       serviceType: affiliate.serviceType, orderNotificationsEnabled: affiliate.orderNotificationsEnabled,
       deliveryFee: affiliate.deliveryFee, pickupInstructions: affiliate.pickupInstructions,
-      deliveryInstructions: affiliate.deliveryInstructions, isActive: affiliate.isActive
+      deliveryInstructions: affiliate.deliveryInstructions,
+      geoValidationEnabled: affiliate.geoValidationEnabled, geoRadiusMiles: affiliate.geoRadiusMiles,
+      isActive: affiliate.isActive
     }
   }, 'Affiliate retrieved');
 });
@@ -261,6 +264,37 @@ exports.updateAffiliateSettings = ControllerHelpers.asyncWrapper(async (req, res
     changed.orderNotificationsEnabled = affiliate.orderNotificationsEnabled;
   }
 
+  // Customer-geolocation radius gate (opt-in).
+  if (req.body.geoValidationEnabled !== undefined) {
+    affiliate.geoValidationEnabled = !!req.body.geoValidationEnabled;
+    changed.geoValidationEnabled = affiliate.geoValidationEnabled;
+  }
+  if (req.body.geoRadiusMiles !== undefined && req.body.geoRadiusMiles !== null && req.body.geoRadiusMiles !== '') {
+    affiliate.geoRadiusMiles = parseFloat(req.body.geoRadiusMiles);
+    changed.geoRadiusMiles = affiliate.geoRadiusMiles;
+  }
+
+  // Geocode the partner's address when geo-validation is on and we lack a fresh
+  // geocode (or the address changed). Non-fatal: surfaced as a warning so the
+  // admin knows the radius gate will FAIL OPEN until the address geocodes.
+  let geocodeWarning = null;
+  if (affiliate.geoValidationEnabled) {
+    const addrChanged = ['address', 'city', 'state', 'zipCode'].some((f) => changed[f] !== undefined);
+    if (addrChanged || affiliate.geoLat == null || affiliate.geoLng == null) {
+      const g = await geocodingService.geocodeAddress({
+        address: affiliate.address, city: affiliate.city, state: affiliate.state, zipCode: affiliate.zipCode
+      });
+      if (g.ok) {
+        affiliate.geoLat = g.lat;
+        affiliate.geoLng = g.lng;
+        if (g.placeId) affiliate.geoPlaceId = g.placeId;
+        affiliate.geocodedAt = new Date();
+      } else {
+        geocodeWarning = 'partner_address_not_geocoded';
+      }
+    }
+  }
+
   try {
     await affiliate.save();
   } catch (err) {
@@ -286,7 +320,10 @@ exports.updateAffiliateSettings = ControllerHelpers.asyncWrapper(async (req, res
       languagePreference: affiliate.languagePreference, affiliateType: affiliate.affiliateType,
       serviceType: affiliate.serviceType, orderNotificationsEnabled: affiliate.orderNotificationsEnabled,
       deliveryFee: affiliate.deliveryFee, pickupInstructions: affiliate.pickupInstructions,
-      deliveryInstructions: affiliate.deliveryInstructions, isActive: affiliate.isActive
-    }
+      deliveryInstructions: affiliate.deliveryInstructions,
+      geoValidationEnabled: affiliate.geoValidationEnabled, geoRadiusMiles: affiliate.geoRadiusMiles,
+      isActive: affiliate.isActive
+    },
+    warning: geocodeWarning
   }, 'Affiliate updated');
 });

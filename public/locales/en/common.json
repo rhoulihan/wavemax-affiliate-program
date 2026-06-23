@@ -144,7 +144,8 @@
       "deliveryFee": "Delivery fee",
       "instructionsLabel": "Special instructions (optional)",
       "instructionsPlaceholder": "Anything we should know? (e.g. fold preferences)"
-    }
+    },
+    "outsideServiceArea": "This address is outside this provider's service area. Please use an address within range, or contact the provider."
   },
   "bag": {
     "label": {
@@ -1445,7 +1446,11 @@
       "pickupInstructionsPlaceholder": "Shown to the customer after they register a bag.",
       "deliveryInstructionsLabel": "Delivery instructions",
       "deliveryInstructionsPlaceholder": "Shown to the customer in the out-for-delivery email.",
-      "instructionsRequired": "Pickup instructions are required."
+      "instructionsRequired": "Pickup instructions are required.",
+      "geoValidationLabel": "Restrict customer registration to within a service radius of this partner's address",
+      "geoRadiusLabel": "Service radius (miles)",
+      "radiusRequired": "Enter a service radius between 1 and 50 miles.",
+      "geoWarning": "Saved, but this partner address could not be geocoded — the distance restriction will not apply until it does."
     },
     "bagLabels": {
       "button": "Print Labels",

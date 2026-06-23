@@ -1119,6 +1119,11 @@
           showFormError(raceMsg);
           return;
         }
+        if (result.body && result.body.code === 'outside_service_area') {
+          showFormError(t('claim.outsideServiceArea',
+            'This address is outside this provider\'s service area. Please use an address within range, or contact the provider.'));
+          return;
+        }
         var msg = result.body.message || 'Registration failed';
         if (result.body.errors && result.body.errors.length) {
           msg = result.body.errors.map(function (e) { return e.msg; }).join(' ');

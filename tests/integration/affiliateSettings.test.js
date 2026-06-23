@@ -9,6 +9,13 @@ const encryptionUtil = require('../../server/utils/encryption');
 const { createTestToken } = require('../helpers/authHelper');
 const { getCsrfToken, createAgent } = require('../helpers/csrfHelper');
 
+// Mock the geocoding service — no live Google calls. distanceMiles stays real.
+jest.mock('../../server/services/geocodingService', () => {
+  const actual = jest.requireActual('../../server/services/geocodingService');
+  return { geocodeAddress: jest.fn(), distanceMiles: actual.distanceMiles, isConfigured: jest.fn(() => true) };
+});
+const geocodingService = require('../../server/services/geocodingService');
+
 describe('Admin affiliate settings API', () => {
   let agent, csrfToken, adminToken, limitedToken;
 
@@ -384,5 +391,65 @@ describe('Admin affiliate settings API', () => {
       .set('x-csrf-token', csrfToken)
       .send({ deliveryFee: 99999 });
     expect(res.status).toBe(400);
+  });
+
+  // ── Customer-geolocation radius gate (opt-in) ─────────────────────────────
+  it('enables geo validation + radius and geocodes the partner address on save', async () => {
+    geocodingService.geocodeAddress.mockReset();
+    geocodingService.geocodeAddress.mockResolvedValue({ ok: true, lat: 30.2672, lng: -97.7431, placeId: 'P-1' });
+    const aff = await makeAffiliate();
+    const res = await agent
+      .patch(`/api/v1/administrators/affiliates/${aff.affiliateId}`)
+      .set('Authorization', `Bearer ${adminToken}`)
+      .set('x-csrf-token', csrfToken)
+      .send({ geoValidationEnabled: true, geoRadiusMiles: 10 });
+    expect(res.status).toBe(200);
+    expect(res.body.affiliate.geoValidationEnabled).toBe(true);
+    expect(res.body.affiliate.geoRadiusMiles).toBe(10);
+    expect(res.body.warning).toBeFalsy();
+    expect(geocodingService.geocodeAddress).toHaveBeenCalledTimes(1);
+    const r = await Affiliate.findOne({ affiliateId: aff.affiliateId });
+    expect(r.geoValidationEnabled).toBe(true);
+    expect(r.geoRadiusMiles).toBe(10);
+    expect(r.geoLat).toBeCloseTo(30.2672, 3);
+    expect(r.geoLng).toBeCloseTo(-97.7431, 3);
+    expect(r.geoPlaceId).toBe('P-1');
+    expect(r.geocodedAt).toBeTruthy();
+  });
+
+  it('returns a warning when the partner address cannot be geocoded', async () => {
+    geocodingService.geocodeAddress.mockReset();
+    geocodingService.geocodeAddress.mockResolvedValue({ ok: false, reason: 'no_geocode' });
+    const aff = await makeAffiliate();
+    const res = await agent
+      .patch(`/api/v1/administrators/affiliates/${aff.affiliateId}`)
+      .set('Authorization', `Bearer ${adminToken}`)
+      .set('x-csrf-token', csrfToken)
+      .send({ geoValidationEnabled: true, geoRadiusMiles: 8 });
+    expect(res.status).toBe(200);
+    expect(res.body.warning).toBe('partner_address_not_geocoded');
+    const r = await Affiliate.findOne({ affiliateId: aff.affiliateId });
+    expect(r.geoValidationEnabled).toBe(true);
+    expect(r.geoLat == null).toBe(true);
+  });
+
+  it('rejects an out-of-range geoRadiusMiles (400)', async () => {
+    const aff = await makeAffiliate();
+    const res = await agent
+      .patch(`/api/v1/administrators/affiliates/${aff.affiliateId}`)
+      .set('Authorization', `Bearer ${adminToken}`)
+      .set('x-csrf-token', csrfToken)
+      .send({ geoValidationEnabled: true, geoRadiusMiles: 999 });
+    expect(res.status).toBe(400);
+  });
+
+  it('GET edit + list expose the geo fields', async () => {
+    const aff = await makeAffiliate({ geoValidationEnabled: true, geoRadiusMiles: 15 });
+    const res = await agent
+      .get(`/api/v1/administrators/affiliates/${aff.affiliateId}`)
+      .set('Authorization', `Bearer ${adminToken}`);
+    expect(res.status).toBe(200);
+    expect(res.body.affiliate.geoValidationEnabled).toBe(true);
+    expect(res.body.affiliate.geoRadiusMiles).toBe(15);
   });
 });

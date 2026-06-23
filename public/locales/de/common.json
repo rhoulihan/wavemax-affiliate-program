@@ -144,7 +144,8 @@
       "deliveryFee": "Liefergebühr",
       "instructionsLabel": "Besondere Hinweise (optional)",
       "instructionsPlaceholder": "Sollen wir etwas wissen? (z. B. Faltvorlieben)"
-    }
+    },
+    "outsideServiceArea": "Diese Adresse liegt außerhalb des Servicebereichs dieses Anbieters. Bitte verwenden Sie eine Adresse in Reichweite oder kontaktieren Sie den Anbieter."
   },
   "bag": {
     "label": {
@@ -1445,7 +1446,11 @@
       "pickupInstructionsPlaceholder": "Wird dem Kunden nach der Beutelregistrierung angezeigt.",
       "deliveryInstructionsLabel": "Lieferhinweise",
       "deliveryInstructionsPlaceholder": "Wird dem Kunden in der Lieferbenachrichtigung angezeigt.",
-      "instructionsRequired": "Abholhinweise sind erforderlich."
+      "instructionsRequired": "Abholhinweise sind erforderlich.",
+      "geoValidationLabel": "Kundenregistrierung auf einen Servicebereich um die Adresse dieses Partners beschränken",
+      "geoRadiusLabel": "Serviceradius (Meilen)",
+      "radiusRequired": "Geben Sie einen Serviceradius zwischen 1 und 50 Meilen ein.",
+      "geoWarning": "Gespeichert, aber die Adresse dieses Partners konnte nicht geokodiert werden – die Entfernungsbeschränkung gilt erst, wenn dies möglich ist."
     },
     "bagLabels": {
       "button": "Etiketten drucken",

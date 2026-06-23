@@ -17,6 +17,7 @@ const { v4: uuidv4 } = require('uuid');
 
 const Customer = require('../models/Customer');
 const bagClaimService = require('./bagClaimService');
+const geocodingService = require('./geocodingService');
 const emailService = require('../utils/emailService');
 const firebasePhoneService = require('./firebasePhoneService');
 const Formatters = require('../utils/formatters');
@@ -30,10 +31,67 @@ const logger = require('../utils/logger');
 class RegistrationError extends Error {
   constructor(code, message, extras = {}) {
     super(message);
-    this.code = code;        // 'bag_not_claimable' | 'bag_already_claimed' | 'duplicate_email' | 'email_required' | 'phone_not_verified' | 'phone_mismatch'
+    this.code = code;        // 'bag_not_claimable' | 'bag_already_claimed' | 'duplicate_email' | 'email_required' | 'phone_not_verified' | 'phone_mismatch' | 'outside_service_area'
     this.status = extras.status || 400;
     this.extras = extras;
     this.isRegistrationError = true;
+  }
+}
+
+// Google Maps Service Terms §5.3: cached lat/lng must be refreshed within 30 days.
+const STALE_GEO_MS = 30 * 24 * 60 * 60 * 1000;
+
+/**
+ * Enforce a partner's opt-in service radius against the customer's supplied
+ * address. Throws RegistrationError('outside_service_area', 422) ONLY on a
+ * confident out-of-range result. FAILS OPEN (returns, allowing registration)
+ * on any geocoding failure — an outage must never block signups. Refreshes +
+ * persists the partner's geocode when it's missing or stale.
+ */
+async function enforceServiceRadius(affiliate, customerAddress) {
+  let geoLat = affiliate.geoLat;
+  let geoLng = affiliate.geoLng;
+  const stale = !affiliate.geocodedAt ||
+    (Date.now() - new Date(affiliate.geocodedAt).getTime()) > STALE_GEO_MS;
+
+  if (geoLat == null || geoLng == null || stale) {
+    const g = await geocodingService.geocodeAddress({
+      address: affiliate.address, city: affiliate.city, state: affiliate.state, zipCode: affiliate.zipCode
+    });
+    if (g.ok) {
+      affiliate.geoLat = geoLat = g.lat;
+      affiliate.geoLng = geoLng = g.lng;
+      if (g.placeId) affiliate.geoPlaceId = g.placeId;
+      affiliate.geocodedAt = new Date();
+      try {
+        await affiliate.save();
+      } catch (e) {
+        logger.warn('Partner geocode refresh save failed', { affiliateId: affiliate.affiliateId, error: e.message });
+      }
+    }
+  }
+
+  // No partner geocode available → cannot enforce → fail open.
+  if (geoLat == null || geoLng == null) {
+    logger.warn('Geo gate: partner not geocoded — allowing (fail-open)', { affiliateId: affiliate.affiliateId });
+    return;
+  }
+
+  const c = await geocodingService.geocodeAddress(customerAddress);
+  if (!c.ok) {
+    logger.warn('Geo gate: customer geocode failed — allowing (fail-open)', {
+      affiliateId: affiliate.affiliateId, reason: c.reason
+    });
+    return;
+  }
+
+  const miles = geocodingService.distanceMiles(geoLat, geoLng, c.lat, c.lng);
+  if (miles > affiliate.geoRadiusMiles) {
+    throw new RegistrationError(
+      'outside_service_area',
+      'This address is outside the service area for this provider.',
+      { status: 422, distanceMiles: Math.round(miles * 10) / 10, radiusMiles: affiliate.geoRadiusMiles }
+    );
   }
 }
 
@@ -67,6 +125,16 @@ async function registerCustomer(payload) {
     });
   }
   const { bag, affiliate } = resolved;
+
+  // --- Customer geolocation radius gate (partner opt-in) -------------------
+  // When the partner has opted in, the customer's supplied address must geocode
+  // within geoRadiusMiles of the partner's address. Enforced before any DB
+  // write so a rejection leaves nothing behind. FAIL-OPEN on any geocoding
+  // error — an outage must never block signups (only a confident out-of-range
+  // result blocks).
+  if (affiliate.geoValidationEnabled && affiliate.geoRadiusMiles > 0) {
+    await enforceServiceRadius(affiliate, { address, city, state, zipCode });
+  }
 
   // --- Email (required; verified later via a confirm link) -----------------
   // Required field (route validator enforces format); registration does NOT

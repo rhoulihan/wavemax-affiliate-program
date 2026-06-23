@@ -144,7 +144,8 @@
       "deliveryFee": "Taxa de entrega",
       "instructionsLabel": "Instruções especiais (opcional)",
       "instructionsPlaceholder": "Algo que devemos saber? (ex.: preferências de dobra)"
-    }
+    },
+    "outsideServiceArea": "Este endereço está fora da área de serviço deste fornecedor. Use um endereço dentro do alcance ou entre em contato com o fornecedor."
   },
   "bag": {
     "label": {
@@ -1445,7 +1446,11 @@
       "pickupInstructionsPlaceholder": "Mostradas ao cliente após registrar uma sacola.",
       "deliveryInstructionsLabel": "Instruções de entrega",
       "deliveryInstructionsPlaceholder": "Mostradas ao cliente no e-mail de saída para entrega.",
-      "instructionsRequired": "As instruções de coleta são obrigatórias."
+      "instructionsRequired": "As instruções de coleta são obrigatórias.",
+      "geoValidationLabel": "Restringir o registro de clientes a um raio de serviço do endereço deste parceiro",
+      "geoRadiusLabel": "Raio de serviço (milhas)",
+      "radiusRequired": "Insira um raio de serviço entre 1 e 50 milhas.",
+      "geoWarning": "Salvo, mas não foi possível geocodificar o endereço deste parceiro — a restrição de distância não será aplicada até que isso aconteça."
     },
     "bagLabels": {
       "button": "Imprimir etiquetas",

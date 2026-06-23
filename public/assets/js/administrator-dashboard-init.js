@@ -2143,6 +2143,8 @@
     setChecked('affEditIsActive', aff.isActive !== false);
     setVal('affiliateSettingsPickupInstructions', aff.pickupInstructions);
     setVal('affEditDeliveryInstructions', aff.deliveryInstructions);
+    setChecked('affEditGeoValidation', aff.geoValidationEnabled === true);
+    setVal('affEditGeoRadius', aff.geoRadiusMiles != null ? aff.geoRadiusMiles : '');
 
     modal.classList.remove('hidden');
     modal.style.display = 'flex';
@@ -2173,6 +2175,16 @@
       }
       return;
     }
+    // Geo radius gate: if opt-in is on, require a valid radius.
+    const geoEnabled = document.getElementById('affEditGeoValidation').checked;
+    const geoRadius = parseFloat(getVal('affEditGeoRadius'));
+    if (geoEnabled && (isNaN(geoRadius) || geoRadius < 1 || geoRadius > 50)) {
+      if (errEl) {
+        errEl.textContent = t('admin.affiliateSettings.radiusRequired', 'Enter a service radius between 1 and 50 miles.');
+        errEl.hidden = false;
+      }
+      return;
+    }
     if (errEl) errEl.hidden = true;
 
     const payload = {
@@ -2192,8 +2204,10 @@
       isActive: document.getElementById('affEditIsActive').checked,
       deliveryFee: parseFloat(getVal('affEditDeliveryFee') || '0') || 0,
       pickupInstructions,
-      deliveryInstructions: getVal('affEditDeliveryInstructions')
+      deliveryInstructions: getVal('affEditDeliveryInstructions'),
+      geoValidationEnabled: geoEnabled
     };
+    if (!isNaN(geoRadius)) payload.geoRadiusMiles = geoRadius;
 
     const saveBtn = document.getElementById('saveAffiliateSettings');
     try {
@@ -2204,7 +2218,11 @@
       });
       const data = await response.json();
       if (response.ok && data.success) {
-        showNotification(t('admin.affiliateSettings.saved', 'Affiliate saved'), 'success');
+        if (data.warning === 'partner_address_not_geocoded') {
+          showNotification(t('admin.affiliateSettings.geoWarning', 'Saved, but this partner address could not be geocoded — the distance restriction will not apply until it does.'), 'warning');
+        } else {
+          showNotification(t('admin.affiliateSettings.saved', 'Affiliate saved'), 'success');
+        }
         closeAffiliateSettingsModal();
         await loadAffiliates();
       } else {

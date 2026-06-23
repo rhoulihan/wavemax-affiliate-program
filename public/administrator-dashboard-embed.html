@@ -582,6 +582,18 @@
                               data-i18n-placeholder="admin.affiliateSettings.deliveryInstructionsPlaceholder"
                               placeholder="Shown to the customer in the out-for-delivery email."></textarea>
                 </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="checkbox-stack">
+                            <input type="checkbox" id="affEditGeoValidation">
+                            <span data-i18n="admin.affiliateSettings.geoValidationLabel">Restrict customer registration to within a service radius of this partner's address</span>
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label for="affEditGeoRadius" data-i18n="admin.affiliateSettings.geoRadiusLabel">Service radius (miles)</label>
+                        <input type="number" id="affEditGeoRadius" class="form-control" min="1" max="50" step="1">
+                    </div>
+                </div>
                 <div class="form-actions justify-content-center margin-top-30">
                     <button type="button" class="btn btn-secondary" id="cancelAffiliateSettings" data-i18n="common.buttons.cancel">Cancel</button>
                     <button type="button" class="btn btn-primary" id="saveAffiliateSettings" data-i18n="common.buttons.save">Save</button>
@@ -750,7 +762,7 @@
     <!-- Label Printing Utils - Must load after QRCode and jsPDF -->
     <script src="/assets/js/label-print-utils.js" nonce="{{nonce}}"></script>
     
-    <script src="/assets/js/administrator-dashboard-init.js?v=20260621" nonce="{{nonce}}"></script>
+    <script src="/assets/js/administrator-dashboard-init.js?v=20260622a" nonce="{{nonce}}"></script>
     <script src="/assets/js/administrator-dashboard-i18n.js" nonce="{{nonce}}"></script>
 
   <!-- Hibu Dynamic Phone Insertion — swaps the WaveMAX Austin number for a
