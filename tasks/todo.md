@@ -21,7 +21,9 @@ Full gate running (bg4n48i8n). NOT yet committed.
 - [x] Live-verify: /health 200 both boxes; secret preflight `[]` both (no boot exit); CF edge — claim route 200, health 200.
 
 ## REMAINING WORKSTREAMS — sequenced, each its own PR (decisions locked)
-1. [~] **cf-connecting-ip rate-limit keyGen** — CODE-COMPLETE, awaiting full gate → commit + deploy.
+1. [x] **cf-connecting-ip rate-limit keyGen** — ✅ DONE & LIVE (2026-06-23, commit 0d80d73). Full gate
+   179 suites / 2890 passed / 6 skipped. Deployed both OCI boxes (git pull + npm ci + pm2 reload);
+   live-verified /health 200 + CF claim route 200.
    Canonical `server/utils/clientIp.js` (`clientIp` + `ipBucketKey`: cf-connecting-ip first, IPv6
    collapsed to /64 via pinned `ipaddr.js`), wired into all 13 limiters + `createCustomLimiter` default;
    `scanRoutes` inherits it; `codeAttemptLockout` lockout counter migrated to `ipBucketKey` (defeats
