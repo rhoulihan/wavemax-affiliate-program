@@ -1,7 +1,7 @@
 /**
  * Rate Limiting Middleware for WaveMAX
  * Implements different rate limits for various endpoint types
- * 
+ *
  * Configuration:
  * - NODE_ENV=test : Rate limiting is disabled
  * - RELAX_RATE_LIMITING=true : Higher limits for development/staging
@@ -10,6 +10,7 @@
 
 const rateLimit = require('express-rate-limit');
 const logger = require('../utils/logger');
+const { ipBucketKey } = require('../utils/clientIp');
 
 // Check if rate limiting should be relaxed
 const isRelaxed = process.env.RELAX_RATE_LIMITING === 'true';
@@ -50,6 +51,30 @@ const createMongoStore = (windowMs, name) => {
 // Helper to skip rate limiting in test environment
 const skipInTest = () => isTest;
 
+// Canonical key generators. Every IP-based limiter MUST bucket by the real
+// visitor IP (cf-connecting-ip via ipBucketKey), never Express's req.ip — which,
+// behind Cloudflare → nginx (trust proxy = 1), is the CF EDGE IP. Keying on the
+// edge collapses many distinct visitors into one shared counter (a throttle a
+// few users, or one abuser, can exhaust for everyone behind that edge).
+// Exported as `_keyGenerators` for unit tests; the limiters are skipped in
+// NODE_ENV=test so the generators are otherwise un-exercised by the suite.
+const keyGenerators = {
+  // Anonymous surfaces — pure visitor IP (IPv6 collapsed to /64).
+  ip: (req) => ipBucketKey(req),
+  // Authenticated-or-not: prefer the stable user id, else the visitor IP.
+  userOrIp: (req) => (req.user && req.user.id ? `user_${req.user.id}` : ipBucketKey(req)),
+  // Email-verification: the email is the abuse unit; fall back to user, then IP.
+  emailOrUserOrIp: (req) =>
+    (req.body && req.body.email) || (req.user && req.user.id) || ipBucketKey(req),
+  // Admin login: IP + username so one IP can't lock out every admin, and one
+  // username can't be brute-forced across rotating addresses unbounded.
+  adminLogin: (req) => {
+    const username = (req.body && (req.body.username || req.body.email)) || '';
+    return `admin_login_${ipBucketKey(req)}_${username}`;
+  }
+};
+exports._keyGenerators = keyGenerators;
+
 // Authentication endpoints - strict limits
 exports.authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
@@ -67,6 +92,7 @@ exports.authLimiter = rateLimit({
   validate: { singleCount: false },
   skipSuccessfulRequests: true,
   skip: skipInTest,
+  keyGenerator: keyGenerators.ip,
   store: createMongoStore(15 * 60 * 1000, 'auth')
 });
 
@@ -87,6 +113,7 @@ exports.passwordResetLimiter = rateLimit({
   validate: { singleCount: false },
   skipSuccessfulRequests: true,
   skip: skipInTest,
+  keyGenerator: keyGenerators.ip,
   store: createMongoStore(60 * 60 * 1000, 'pwreset')
 });
 
@@ -106,6 +133,7 @@ exports.registrationLimiter = rateLimit({
   // crash-loop). The count may be off by one in rare cases; that's acceptable.
   validate: { singleCount: false },
   skip: skipInTest,
+  keyGenerator: keyGenerators.ip,
   store: createMongoStore(60 * 60 * 1000, 'register')
 });
 
@@ -123,7 +151,7 @@ exports.apiLimiter = rateLimit({
   // Oracle-backed store and was escalating to unhandledRejection → worker
   // crash-loop). The count may be off by one in rare cases; that's acceptable.
   validate: { singleCount: false },
-  skip: (req) => {
+  skip: () => {
     // Skip in test environment only. The previous code also skipped for
     // `req.user.role === 'admin'`, but the legitimate role string is
     // 'administrator' (per server/models/Administrator.js + the token
@@ -132,6 +160,7 @@ exports.apiLimiter = rateLimit({
     // APP-006 / prod-lockdown-2026-05-20.
     return skipInTest();
   },
+  keyGenerator: keyGenerators.ip,
   store: createMongoStore(15 * 60 * 1000, 'api')
 });
 
@@ -151,10 +180,7 @@ exports.sensitiveOperationLimiter = rateLimit({
   // crash-loop). The count may be off by one in rare cases; that's acceptable.
   validate: { singleCount: false },
   skip: skipInTest,
-  keyGenerator: (req) => {
-    // Rate limit by user ID if authenticated, otherwise by IP
-    return req.user ? `user_${req.user.id}` : req.ip;
-  },
+  keyGenerator: keyGenerators.userOrIp,
   store: createMongoStore(60 * 60 * 1000, 'sensitive')
 });
 
@@ -175,7 +201,7 @@ exports.contactFormBurstLimiter = rateLimit({
   // crash-loop). The count may be off by one in rare cases; that's acceptable.
   validate: { singleCount: false },
   skip: skipInTest,
-  keyGenerator: (req) => req.ip,
+  keyGenerator: keyGenerators.ip,
   store: createMongoStore(30 * 1000, 'contact_burst')
 });
 
@@ -189,7 +215,7 @@ exports.contactFormLimiter = rateLimit({
   max: isRelaxed ? 50 : 5,
   message: {
     success: false,
-    message: "You've sent the maximum number of messages for now — please try again later, or call us directly.",
+    message: 'You\'ve sent the maximum number of messages for now — please try again later, or call us directly.',
     retryAfter: 60 * 60
   },
   standardHeaders: true,
@@ -199,7 +225,7 @@ exports.contactFormLimiter = rateLimit({
   // crash-loop). The count may be off by one in rare cases; that's acceptable.
   validate: { singleCount: false },
   skip: skipInTest,
-  keyGenerator: (req) => req.ip,
+  keyGenerator: keyGenerators.ip,
   store: createMongoStore(60 * 60 * 1000, 'contact_hourly')
 });
 
@@ -218,10 +244,7 @@ exports.emailVerificationLimiter = rateLimit({
   // Oracle-backed store and was escalating to unhandledRejection → worker
   // crash-loop). The count may be off by one in rare cases; that's acceptable.
   validate: { singleCount: false },
-  keyGenerator: (req) => {
-    // Rate limit by email or user ID
-    return req.body.email || (req.user && req.user.id) || req.ip;
-  },
+  keyGenerator: keyGenerators.emailOrUserOrIp,
   store: createMongoStore(60 * 60 * 1000, 'email_verify')
 });
 
@@ -240,10 +263,7 @@ exports.fileUploadLimiter = rateLimit({
   // Oracle-backed store and was escalating to unhandledRejection → worker
   // crash-loop). The count may be off by one in rare cases; that's acceptable.
   validate: { singleCount: false },
-  keyGenerator: (req) => {
-    // Rate limit by user ID if authenticated, otherwise by IP
-    return req.user ? `user_${req.user.id}` : req.ip;
-  },
+  keyGenerator: keyGenerators.userOrIp,
   store: createMongoStore(60 * 60 * 1000, 'upload')
 });
 
@@ -269,6 +289,7 @@ exports.adminOperationLimiter = rateLimit({
     // the 2026-05-20 prod-lockdown re-audit as finding N-3.
     return !req.user || req.user.role !== 'administrator';
   },
+  keyGenerator: keyGenerators.ip,
   store: createMongoStore(15 * 60 * 1000, 'admin_op')
 });
 
@@ -289,11 +310,7 @@ exports.adminLoginLimiter = rateLimit({
   validate: { singleCount: false },
   skipSuccessfulRequests: true,
   skip: skipInTest,
-  keyGenerator: (req) => {
-    // Rate limit by IP + username combination to prevent lockout of legitimate users
-    const username = req.body.username || req.body.email || '';
-    return `admin_login_${req.ip}_${username}`;
-  },
+  keyGenerator: keyGenerators.adminLogin,
   store: createMongoStore(15 * 60 * 1000, 'admin_login')
 });
 
@@ -315,7 +332,7 @@ exports.conciergeLimiter = rateLimit({
   // crash-loop). The count may be off by one in rare cases; that's acceptable.
   validate: { singleCount: false },
   skip: skipInTest,
-  keyGenerator: (req) => req.ip,
+  keyGenerator: keyGenerators.ip,
   store: createMongoStore(15 * 60 * 1000, 'concierge')
 });
 
@@ -324,16 +341,17 @@ exports.createCustomLimiter = (options) => {
   const defaults = {
     standardHeaders: true,
     legacyHeaders: false,
-  // Don't throw ERR_ERL_DOUBLE_COUNT into the request (it surfaced on the
-  // Oracle-backed store and was escalating to unhandledRejection → worker
-  // crash-loop). The count may be off by one in rare cases; that's acceptable.
-  validate: { singleCount: false },
+    // Don't throw ERR_ERL_DOUBLE_COUNT into the request (it surfaced on the
+    // Oracle-backed store and was escalating to unhandledRejection → worker
+    // crash-loop). The count may be off by one in rare cases; that's acceptable.
+    validate: { singleCount: false },
+    keyGenerator: keyGenerators.ip,
     store: createMongoStore(options.windowMs || 15 * 60 * 1000, options.name || 'custom'),
     message: {
       success: false,
       message: 'Too many requests, please try again later'
     }
   };
-  
+
   return rateLimit({ ...defaults, ...options });
 };

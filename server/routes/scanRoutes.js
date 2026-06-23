@@ -15,12 +15,15 @@ const scanController = require('../modules/scan/scanController');
 const scanAuth = require('../middleware/scanAuth');
 const { createCustomLimiter } = require('../middleware/rateLimiting');
 
-// Real client IP behind Cloudflare (matches accessGate / codeAttemptLockout).
+// Keyed by the real client IP behind Cloudflare — inherits createCustomLimiter's
+// canonical keyGenerator (ipBucketKey: cf-connecting-ip, IPv6 collapsed to /64).
+// codeAttemptLockout (the same scan surface) now shares this /64 bucketing; the
+// allowlist IP gates still inline their own resolver pending the consolidation
+// workstream.
 const scanLimiter = createCustomLimiter({
   windowMs: 15 * 60 * 1000,
   max: 120,
   name: 'scan_actions',
-  keyGenerator: (req) => req.headers['cf-connecting-ip'] || req.ip,
   skip: () => process.env.NODE_ENV === 'test' // lockout still enforced in tests
 });
 

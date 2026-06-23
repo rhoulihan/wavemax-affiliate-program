@@ -47,4 +47,17 @@ describe('codeAttemptLockout.attemptKey', () => {
     });
     expect(key).not.toContain(bagToken);
   });
+
+  it('collapses IPv6 to a /64 bucket so an attacker cannot rotate within their /64', () => {
+    // Two addresses in the same /64 must produce the SAME lockout key, or an
+    // IPv6 attacker would get a fresh failure budget per address.
+    const keyA = codeAttemptLockout.attemptKey({
+      scope: 'op', bagToken, req: fakeReq({ cfIp: '2001:db8:abcd:1::1' })
+    });
+    const keyB = codeAttemptLockout.attemptKey({
+      scope: 'op', bagToken, req: fakeReq({ cfIp: '2001:db8:abcd:1:ffff:ffff:ffff:ffff' })
+    });
+    expect(keyA).toBe(keyB);
+    expect(keyA.endsWith(':2001:db8:abcd:1::/64')).toBe(true);
+  });
 });

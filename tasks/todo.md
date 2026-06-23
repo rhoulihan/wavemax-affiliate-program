@@ -21,9 +21,24 @@ Full gate running (bg4n48i8n). NOT yet committed.
 - [x] Live-verify: /health 200 both boxes; secret preflight `[]` both (no boot exit); CF edge — claim route 200, health 200.
 
 ## REMAINING WORKSTREAMS — sequenced, each its own PR (decisions locked)
-1. [ ] **cf-connecting-ip rate-limit keyGen** (NEXT fast follow) — derive the rate-limit key from the
-   real client IP behind Cloudflare (cf-connecting-ip / trusted XFF), not the proxy IP. Closes the
-   shared-key throttle bug. Own PR.
+1. [~] **cf-connecting-ip rate-limit keyGen** — CODE-COMPLETE, awaiting full gate → commit + deploy.
+   Canonical `server/utils/clientIp.js` (`clientIp` + `ipBucketKey`: cf-connecting-ip first, IPv6
+   collapsed to /64 via pinned `ipaddr.js`), wired into all 13 limiters + `createCustomLimiter` default;
+   `scanRoutes` inherits it; `codeAttemptLockout` lockout counter migrated to `ipBucketKey` (defeats
+   IPv6 /64 rotation), audit log keeps full IP. Adversarial-reviewed (4 lenses, 21 agents) — fixed:
+   whitespace-header empty-bucket regression, garbage-header → req.ip fallback, the stale
+   `rateLimitingMiddleware.test.js` assertions, trust-comment correction. New tests: clientIp (18),
+   rateLimitKeyGen (11), wiring-identity guards, IPv6 /64 lockout guard.
+   - Deploy note: store keys shift (::ffff:/IPv6 forms change) → old IPv6 / IPv4-mapped rate-limit +
+     lockout buckets orphan; pure-IPv4 unaffected; self-heals in one window. No action needed.
+   - Backlog surfaced by the review (fold into the listed workstreams):
+     - WS6: migrate the 6 IP gates (accessGate/adminIpGate/operatorIpGate/comingSoon/locationQuarantine/
+       franchisePreview) onto canonical `clientIp` — they inline divergent `::ffff:` handling.
+     - WS5/6: 3 limiters wired to no route (emailVerification/fileUpload/adminOperation) — wire or remove.
+     - WS9: when express-rate-limit bumps to a version exporting `ipKeyGenerator`/`ipv6Subnet`, adopt it
+       (canonical IPv6 key form; one-time bucket orphan).
+     - Infra (needs Rick): nginx `set_real_ip_from <CF ranges>; real_ip_header CF-Connecting-IP;` so the
+       trust is protocol-enforced, not firewall-only. Production nginx edit — confirm first.
 2. [ ] **Delivery-fee single source of truth** — collapse to the flat per-affiliate `deliveryFee`;
    remove the V1 `minimumDeliveryFee`/`perBagDeliveryFee` fee fields end-to-end.
 3. [ ] **Order-status snapshot consistency** + DELETE the unused bulk order endpoints + monitoring

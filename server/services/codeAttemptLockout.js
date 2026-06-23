@@ -7,15 +7,17 @@
 // security behavior under test, and it counts FAILURES (a request limiter
 // counts requests).
 //
-// Key shape: "<scope>:<sha256(bagToken)[0..16]>:<ip>" — the raw token never
-// touches the store. The IP is the real client IP: Cloudflare sits in front
-// of nginx (trust proxy = 1), so req.ip is the CF edge IP — keying on it
-// would lock out every user behind one edge. Use cf-connecting-ip first
-// (same pattern as server/middleware/accessGate.js clientIp).
+// Key shape: "<scope>:<sha256(bagToken)[0..16]>:<ipBucket>" — the raw token
+// never touches the store. The IP portion is the real client IP behind
+// Cloudflare (req.ip is the CF edge under trust proxy = 1, so keying on it
+// would lock out every user behind one edge), collapsed to an IPv6 /64 via
+// the canonical ipBucketKey so an attacker can't rotate within a /64 to defeat
+// the failure lockout. Audit logging still records the full visitor IP.
 
 const crypto = require('crypto');
 const mongoose = require('mongoose');
 const MongoRateLimitStore = require('../middleware/rateLimitMongoStore');
+const { clientIp, ipBucketKey } = require('../utils/clientIp');
 
 const WINDOW_MS = 15 * 60 * 1000;
 const STORE_NAME = 'bag_codes';
@@ -29,16 +31,10 @@ function getStore() {
   return store;
 }
 
-/** Real client IP behind Cloudflare (accessGate.js precedent). */
-function clientIp(req) {
-  if (!req) return '';
-  return String((req.headers && req.headers['cf-connecting-ip']) || req.ip || '').trim();
-}
-
 function attemptKey({ scope, bagToken, req }) {
   const tokenDigest = crypto.createHash('sha256')
     .update(String(bagToken || '')).digest('hex').slice(0, 16);
-  return `${scope}:${tokenDigest}:${clientIp(req) || 'no-ip'}`;
+  return `${scope}:${tokenDigest}:${ipBucketKey(req) || 'no-ip'}`;
 }
 
 /** Record a failed attempt; returns the running failure count. */
