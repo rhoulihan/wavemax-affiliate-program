@@ -15,10 +15,10 @@ Full gate running (bg4n48i8n). NOT yet committed.
 - [x] QW4 — Secret fail-fast at boot (`validateSecrets.js`: JWT_SECRET/SESSION_SECRET present, ENCRYPTION_KEY=64hex; prod-only `process.exit(1)`) + dev-default HMAC literals gated to non-prod (server.js session secret + previewUnlockCookie). Prod env confirmed to carry all three → won't brick boot.
 - [x] QW5 — ADB rate-limit window reset (rateLimitMongoStore.increment two-step: $inc only in active window, else $set reset) + window-boundary test.
 
-### Deploy gate (PASS 1)
-- [ ] Full jest gate (bg4n48i8n) green → commit (one logical commit) + push main.
-- [ ] `git pull --ff-only origin main` both OCI boxes + `pm2 reload wavemax --update-env` (server-code changes).
-- [ ] Live-verify: /health 200 on both boxes; no boot exit (secrets present).
+### Deploy gate (PASS 1) — ✅ DONE & LIVE (2026-06-23, commit 7f30797)
+- [x] Full jest gate green (177 suites / 2847 passed, 6 skipped) → committed + pushed main.
+- [x] `git pull --ff-only` + `npm ci` (applies QW1 patched deps) + secret-preflight-gated `pm2 reload --update-env` on BOTH OCI boxes.
+- [x] Live-verify: /health 200 both boxes; secret preflight `[]` both (no boot exit); CF edge — claim route 200, health 200.
 
 ## REMAINING WORKSTREAMS — sequenced, each its own PR (decisions locked)
 1. [ ] **cf-connecting-ip rate-limit keyGen** (NEXT fast follow) — derive the rate-limit key from the
