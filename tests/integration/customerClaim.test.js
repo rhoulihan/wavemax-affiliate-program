@@ -386,6 +386,15 @@ describe('Customer claim', () => {
     });
   });
 
+  it('claim confirmation returns the partner OWN delivery fee, not the SystemConfig default', async () => {
+    affiliate.deliveryFee = 8; // partner's own flat fee
+    await affiliate.save();
+    const token = await issuedBag(affiliate);
+    const res = await request(app).post(`/api/v1/customers/claim/${token}/register`).send(registrationBody());
+    expect(res.status).toBe(201);
+    expect(res.body.affiliateData.deliveryFee).toBe(8); // not the $10 default
+  });
+
   describe('geo radius gate (partner opt-in)', () => {
     beforeEach(() => {
       geocodingService.geocodeAddress.mockReset();

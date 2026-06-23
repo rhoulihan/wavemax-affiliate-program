@@ -297,6 +297,19 @@ describe('Affiliate invites API', () => {
       expect(consumed.acceptedAffiliateId).toBe(res.body.affiliateId);
     });
 
+    test('non-TX address is accepted — no service-area gate (nationwide invite model)', async () => {
+      const { raw } = await seedInvite({ email: 'oos.invitee@example.com' });
+      const res = await register(basePayload({
+        inviteToken: raw, username: 'oosaffiliate',
+        address: '350 5th Ave', city: 'New York', state: 'NY', zipCode: '10118'
+      }));
+      expect(res.status).toBe(201);
+      const affiliate = await Affiliate.findOne({ affiliateId: res.body.affiliateId });
+      expect(affiliate).not.toBeNull();
+      expect(affiliate.state).toBe('NY');
+      expect(affiliate.city).toBe('New York');
+    });
+
     test('client-sent email is IGNORED — the account email comes from the invite', async () => {
       const { raw } = await seedInvite({ email: 'real.invitee@example.com' });
       const res = await register(basePayload({ inviteToken: raw, email: 'attacker@evil.com' }));

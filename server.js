@@ -37,6 +37,18 @@ const PORT = process.env.PORT || 3000;
 
 const logger = require('./server/utils/logger');
 
+// Fail-fast secret validation (production only): a missing/short secret must
+// surface at boot, not silently fall back to a dev-default HMAC (session /
+// preview-unlock cookies) or blow up on the first AES-256-GCM encrypt.
+if (process.env.NODE_ENV === 'production') {
+  const { validateRequiredSecrets } = require('./server/utils/validateSecrets');
+  const secretProblems = validateRequiredSecrets();
+  if (secretProblems.length) {
+    logger.error('FATAL: missing or invalid required secrets at boot', { problems: secretProblems });
+    process.exit(1);
+  }
+}
+
 const MongoStore = require('connect-mongo');
 
 // Oracle ADB MongoDB-API resilience: transparently retry the intermittent
@@ -172,11 +184,11 @@ if (process.env.NODE_ENV === 'production') {
     'affiliate.wavemax.promo',
     'localhost:3000' // For development if needed
   ];
-  
+
   app.use((req, res, next) => {
     if (req.header('x-forwarded-proto') !== 'https') {
       const host = req.header('host');
-      
+
       // Validate host header against whitelist
       if (host && allowedHosts.includes(host.toLowerCase())) {
         res.redirect(`https://${host}${req.url}`);
@@ -278,7 +290,7 @@ app.use((req, res, next) => {
 // Manual CSP implementation with nonce support
 app.use((req, res, next) => {
   const nonce = res.locals.cspNonce;
-  
+
   // Check if this is a migrated page that should use strict CSP
   const strictCSPPages = [
     '/terms-and-conditions-embed.html',
@@ -345,12 +357,12 @@ app.use((req, res, next) => {
 
   // All embed pages now use nonces since embed-app.html was converted to CSP-compliant redirect to embed-app-v2.html
   const skipNonce = false;
-  
+
   // Build CSP directives
   const directives = {
-    'default-src': ["'self'"],
+    'default-src': ['\'self\''],
     'script-src': [
-      "'self'",
+      '\'self\'',
       'https://cdnjs.cloudflare.com',
       'https://cdn.jsdelivr.net',
       'https://code.jquery.com',
@@ -379,42 +391,42 @@ app.use((req, res, next) => {
       'https://apis.google.com'
     ],
     'style-src': [
-      "'self'",
+      '\'self\'',
       'https://cdnjs.cloudflare.com',
       'https://cdn.jsdelivr.net',
       'https://fonts.googleapis.com',
       'https://stackpath.bootstrapcdn.com'
     ],
-    'img-src': ["'self'", 'data:', 'https://wavemax.promo', 'https://www.wavemax.promo', 'https://atxwashateria.com', 'https://atxwashdryfold.com', 'https://runberglaundry.com', 'https://rundberglaundry.com', 'https://*.tile.openstreetmap.org', 'https://tile.openstreetmap.org', 'https://cdnjs.cloudflare.com', 'https://flagcdn.com', 'https://secure.walibu.com', 'https://upload.wikimedia.org', 'https://*.googleusercontent.com', 'https://maps.googleapis.com', 'https://maps.gstatic.com', 'https://*.googleapis.com', 'https://*.gstatic.com', 'https://www.facebook.com'],
-    'connect-src': ["'self'", 'https://wavemax.promo', 'https://atxwashateria.com', 'https://atxwashdryfold.com', 'https://runberglaundry.com', 'https://rundberglaundry.com', 'https://cdn.jsdelivr.net', 'https://cdnjs.cloudflare.com', 'https://stackpath.bootstrapcdn.com', 'https://router.project-osrm.org', 'https://graphhopper.com', 'https://api.openrouteservice.org', 'https://valhalla1.openstreetmap.de', 'https://nominatim.openstreetmap.org', 'https://www.local-marketing-reports.com', 'https://places.googleapis.com', 'https://maps.googleapis.com', 'https://maps.gstatic.com', 'https://connect.facebook.net', 'https://www.facebook.com',
+    'img-src': ['\'self\'', 'data:', 'https://wavemax.promo', 'https://www.wavemax.promo', 'https://atxwashateria.com', 'https://atxwashdryfold.com', 'https://runberglaundry.com', 'https://rundberglaundry.com', 'https://*.tile.openstreetmap.org', 'https://tile.openstreetmap.org', 'https://cdnjs.cloudflare.com', 'https://flagcdn.com', 'https://secure.walibu.com', 'https://upload.wikimedia.org', 'https://*.googleusercontent.com', 'https://maps.googleapis.com', 'https://maps.gstatic.com', 'https://*.googleapis.com', 'https://*.gstatic.com', 'https://www.facebook.com'],
+    'connect-src': ['\'self\'', 'https://wavemax.promo', 'https://atxwashateria.com', 'https://atxwashdryfold.com', 'https://runberglaundry.com', 'https://rundberglaundry.com', 'https://cdn.jsdelivr.net', 'https://cdnjs.cloudflare.com', 'https://stackpath.bootstrapcdn.com', 'https://router.project-osrm.org', 'https://graphhopper.com', 'https://api.openrouteservice.org', 'https://valhalla1.openstreetmap.de', 'https://nominatim.openstreetmap.org', 'https://www.local-marketing-reports.com', 'https://places.googleapis.com', 'https://maps.googleapis.com', 'https://maps.gstatic.com', 'https://connect.facebook.net', 'https://www.facebook.com',
       // Firebase Phone Auth (PR 7) — Identity Toolkit + secure-token endpoints,
       // plus the reCAPTCHA origins the v2 fallback fetches from (www.google.com
       // /recaptcha/... and gstatic). Without www.google.com here the reCAPTCHA
       // verification XHRs are CSP-blocked and signInWithPhoneNumber hangs.
       'https://identitytoolkit.googleapis.com', 'https://securetoken.googleapis.com', 'https://www.googleapis.com',
       'https://www.google.com', 'https://www.gstatic.com', 'https://www.recaptcha.net'],
-    'font-src': ["'self'", 'https://cdnjs.cloudflare.com', 'https://cdn.jsdelivr.net', 'https://fonts.gstatic.com'],
-    'object-src': ["'none'"],
-    'media-src': ["'self'"],
+    'font-src': ['\'self\'', 'https://cdnjs.cloudflare.com', 'https://cdn.jsdelivr.net', 'https://fonts.gstatic.com'],
+    'object-src': ['\'none\''],
+    'media-src': ['\'self\''],
     'frame-src': isClickjackingDemo
-      ? ["'self'", 'https://www.google.com', 'https://maps.google.com', 'https://my.matterport.com', 'https://challenges.cloudflare.com',
-         // Firebase Phone Auth (PR 7) — the auth helper iframe.
-         'https://wavemax-bag-registration.firebaseapp.com',
-         // Educational clickjacking demo only — see isClickjackingDemo comment above.
-         'https://www.wavemaxlaundry.com', 'https://wavemaxlaundry.com', 'https://rundberglaundry.com']
-      : ["'self'", 'https://www.google.com', 'https://maps.google.com', 'https://my.matterport.com', 'https://challenges.cloudflare.com',
-         // reCAPTCHA v2 challenge iframe (fallback when Enterprise can't init).
-         'https://www.recaptcha.net',
-         // Firebase Phone Auth (PR 7) — the auth helper iframe.
-         'https://wavemax-bag-registration.firebaseapp.com'],
-    'form-action': ["'self'"],
-    'frame-ancestors': ["'self'", 'https://www.wavemaxlaundry.com', 'https://wavemaxlaundry.com'],
-    'base-uri': ["'self'"],
-    'child-src': ["'none'"],
-    'worker-src': ["'self'"],
-    'manifest-src': ["'self'"]
+      ? ['\'self\'', 'https://www.google.com', 'https://maps.google.com', 'https://my.matterport.com', 'https://challenges.cloudflare.com',
+        // Firebase Phone Auth (PR 7) — the auth helper iframe.
+        'https://wavemax-bag-registration.firebaseapp.com',
+        // Educational clickjacking demo only — see isClickjackingDemo comment above.
+        'https://www.wavemaxlaundry.com', 'https://wavemaxlaundry.com', 'https://rundberglaundry.com']
+      : ['\'self\'', 'https://www.google.com', 'https://maps.google.com', 'https://my.matterport.com', 'https://challenges.cloudflare.com',
+        // reCAPTCHA v2 challenge iframe (fallback when Enterprise can't init).
+        'https://www.recaptcha.net',
+        // Firebase Phone Auth (PR 7) — the auth helper iframe.
+        'https://wavemax-bag-registration.firebaseapp.com'],
+    'form-action': ['\'self\''],
+    'frame-ancestors': ['\'self\'', 'https://www.wavemaxlaundry.com', 'https://wavemaxlaundry.com'],
+    'base-uri': ['\'self\''],
+    'child-src': ['\'none\''],
+    'worker-src': ['\'self\''],
+    'manifest-src': ['\'self\'']
   };
-  
+
   // CSP3 quirk: when a nonce is present in a directive, `'unsafe-inline'`
   // is silently ignored for that directive — even for JS-driven inline
   // style mutations like `el.style.display = 'block'`. The language
@@ -431,19 +443,19 @@ app.use((req, res, next) => {
     // Intentionally NOT adding the nonce to style-src: the CSP3 quirk
     // above would then silently kill 'unsafe-inline' for styles.
   }
-  directives['style-src'].push("'unsafe-inline'");
+  directives['style-src'].push('\'unsafe-inline\'');
 
   // Add unsafe-inline for non-migrated pages (script-src only — style-src
   // is already permissive above).
   if (!useStrictCSP) {
-    directives['script-src'].push("'unsafe-inline'");
+    directives['script-src'].push('\'unsafe-inline\'');
   }
-  
+
   // Add upgrade-insecure-requests in production
   if (process.env.NODE_ENV === 'production') {
     directives['upgrade-insecure-requests'] = [];
   }
-  
+
   // Build CSP header string
   const cspHeader = Object.entries(directives)
     .map(([key, values]) => {
@@ -451,7 +463,7 @@ app.use((req, res, next) => {
       return `${key} ${values.join(' ')}`;
     })
     .join('; ');
-  
+
   res.setHeader('Content-Security-Policy', cspHeader);
   next();
 });
@@ -655,7 +667,7 @@ app.get('/health', (req, res) => {
 
 app.use(session({
   name: sessionCookieName,
-  secret: process.env.SESSION_SECRET || process.env.JWT_SECRET || 'default-dev-secret',
+  secret: process.env.SESSION_SECRET || process.env.JWT_SECRET || (process.env.NODE_ENV === 'production' ? '' : 'default-dev-secret'),
   resave: false, // Don't resave session if unmodified
   saveUninitialized: true, // Changed to true to ensure sessions are created for CSRF
   rolling: false, // Disable rolling to avoid maxAge issues
@@ -827,12 +839,12 @@ app.get('/api/austin-tx/places-config', (req, res) => {
   res.set('Cloudflare-CDN-Cache-Control', 'no-store');
   res.set('Pragma', 'no-cache');
   res.send(
-    "/* Server-rendered. Reads from process.env at request time. */\n" +
-    "(function () {\n" +
-    "  'use strict';\n" +
-    "  window.GOOGLE_PLACES_API_KEY = window.GOOGLE_PLACES_API_KEY || '" + apiKey + "';\n" +
-    "  window.LOCATION_PLACE_ID     = window.LOCATION_PLACE_ID     || '" + placeId + "';\n" +
-    "})();\n"
+    '/* Server-rendered. Reads from process.env at request time. */\n' +
+    '(function () {\n' +
+    '  \'use strict\';\n' +
+    '  window.GOOGLE_PLACES_API_KEY = window.GOOGLE_PLACES_API_KEY || \'' + apiKey + '\';\n' +
+    '  window.LOCATION_PLACE_ID     = window.LOCATION_PLACE_ID     || \'' + placeId + '\';\n' +
+    '})();\n'
   );
 });
 
@@ -1158,26 +1170,26 @@ app.get('/robots.txt', (req, res) => {
     // SEO at 92. Standard `User-agent`/`Disallow` directives are valid, so
     // governance is preserved while SEO scores 100. (Disable CF's "Manage
     // robots.txt" so this origin file is served, not CF's injected one.)
-    `User-agent: Amazonbot\nDisallow: /\n\n` +
-    `User-agent: Applebot-Extended\nDisallow: /\n\n` +
-    `User-agent: Bytespider\nDisallow: /\n\n` +
-    `User-agent: CCBot\nDisallow: /\n\n` +
-    `User-agent: ClaudeBot\nDisallow: /\n\n` +
-    `User-agent: CloudflareBrowserRenderingCrawler\nDisallow: /\n\n` +
-    `User-agent: Google-Extended\nDisallow: /\n\n` +
-    `User-agent: GPTBot\nDisallow: /\n\n` +
-    `User-agent: meta-externalagent\nDisallow: /\n\n` +
+    'User-agent: Amazonbot\nDisallow: /\n\n' +
+    'User-agent: Applebot-Extended\nDisallow: /\n\n' +
+    'User-agent: Bytespider\nDisallow: /\n\n' +
+    'User-agent: CCBot\nDisallow: /\n\n' +
+    'User-agent: ClaudeBot\nDisallow: /\n\n' +
+    'User-agent: CloudflareBrowserRenderingCrawler\nDisallow: /\n\n' +
+    'User-agent: Google-Extended\nDisallow: /\n\n' +
+    'User-agent: GPTBot\nDisallow: /\n\n' +
+    'User-agent: meta-externalagent\nDisallow: /\n\n' +
     // NOTE: do NOT Disallow /embed-app-v2.html — the franchise host pages render
     // their real content inside an iframe pointed at that route. Blocking it left
     // Googlebot able to crawl only the thin host shell, never the content a
     // visitor actually sees. It carries no inbound links and is in no sitemap, so
     // it won't index standalone; allowing it lets crawlers render the full page.
-    `User-agent: *\n` +
-    `Allow: /\n` +
-    `Disallow: /api/\n` +
-    `Disallow: /admin/\n` +
-    `Disallow: /monitoring/\n` +
-    `\n` +
+    'User-agent: *\n' +
+    'Allow: /\n' +
+    'Disallow: /api/\n' +
+    'Disallow: /admin/\n' +
+    'Disallow: /monitoring/\n' +
+    '\n' +
     `Sitemap: https://${host}/sitemap.xml\n`
   );
 });
@@ -1298,7 +1310,7 @@ app.use(errorHandler);
 if (process.env.NODE_ENV !== 'test') {
   app.listen(PORT, () => {
     logger.info(`Server running on port ${PORT} in ${process.env.NODE_ENV || 'development'} mode`);
-    
+
     // Start connectivity monitoring
     const { startMonitoring } = require('./server/monitoring/connectivity-monitor');
     startMonitoring();

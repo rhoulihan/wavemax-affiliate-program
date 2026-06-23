@@ -68,6 +68,20 @@ describe('rateLimitMongoStore', () => {
     expect(totalHits).toBe(1);
   });
 
+  it('RESETS the window when the prior counter has expired (Oracle ADB TTL is inert, doc lingers)', async () => {
+    await store.increment('user-E');
+    await store.increment('user-E');
+    expect((await store.increment('user-E')).totalHits).toBe(3);
+    // Force the doc to look expired while STILL present — the exact ADB case
+    // where the TTL sweep never purges it.
+    const coll = mongoose.connection.collection('ratelimit_unit-test');
+    await coll.updateOne({ _id: 'user-E' }, { $set: { _expiresAt: new Date(Date.now() - 1000) } });
+    // The next hit must START A NEW WINDOW at 1, not climb to 4 (the old bug).
+    const after = await store.increment('user-E');
+    expect(after.totalHits).toBe(1);
+    expect(after.resetTime.getTime()).toBeGreaterThan(Date.now());
+  });
+
   it('different store names (windowMs buckets) do not collide', async () => {
     const otherStore = new MongoStore({ windowMs: 60 * 1000, name: 'unit-test-other' });
     await otherStore.init({ windowMs: 60 * 1000 });

@@ -11,7 +11,7 @@ const COOKIE_NAME = 'pv_unlock';
 const UNLOCK_TTL_MS = 60 * 60 * 1000; // 1 hour
 
 function secret() {
-  return process.env.SESSION_SECRET || process.env.JWT_SECRET || 'pv-unlock-dev-secret';
+  return process.env.SESSION_SECRET || process.env.JWT_SECRET || (process.env.NODE_ENV === 'production' ? '' : 'pv-unlock-dev-secret');
 }
 
 // Sign an unlock for a given preview token. Value = base64url("token:exp:sig").

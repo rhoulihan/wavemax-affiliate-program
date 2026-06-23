@@ -70,31 +70,37 @@ class MongoRateLimitStore {
    */
   async increment(key) {
     const now = Date.now();
+    const nowDate = new Date(now);
     const expiresAt = new Date(now + this.windowMs);
 
     const coll = mongoose.connection.collection(this.collectionName);
+    const unwrap = (r) => (r && r.value !== undefined ? r.value : r); // driver-version compat
 
-    // findOneAndUpdate atomic:
-    //  - $inc hits by 1
-    //  - $setOnInsert _expiresAt (only if a new doc is created — keep the
-    //    original window the first hit established; subsequent hits don't
-    //    extend it).
-    const result = await coll.findOneAndUpdate(
+    // Step 1 — increment ONLY within an active (unexpired) window. Critical on
+    // Oracle ADB, where the TTL index is inert: an expired counter lingers, and
+    // the old blind $inc kept incrementing it forever (the window never reset),
+    // so a limiter could jam permanently once it crossed `max`. This filter
+    // ignores any doc whose _expiresAt has passed.
+    const active = unwrap(await coll.findOneAndUpdate(
+      { _id: key, _expiresAt: { $gt: nowDate } },
+      { $inc: { hits: 1 } },
+      { returnDocument: 'after' }
+    ));
+    if (active) {
+      return { totalHits: active.hits, resetTime: active._expiresAt };
+    }
+
+    // Step 2 — no active window (new key, or an expired/lingering doc) → start a
+    // fresh window. $set (not $inc) RESETS hits to 1 and rolls _expiresAt.
+    const fresh = unwrap(await coll.findOneAndUpdate(
       { _id: key },
-      {
-        $inc: { hits: 1 },
-        $setOnInsert: { _expiresAt: expiresAt }
-      },
-      {
-        upsert: true,
-        returnDocument: 'after'
-      }
-    );
-
-    const doc = result.value || result; // driver-version compatibility
-    const totalHits = doc.hits;
-    const resetTime = doc._expiresAt || expiresAt;
-    return { totalHits, resetTime };
+      { $set: { hits: 1, _expiresAt: expiresAt } },
+      { upsert: true, returnDocument: 'after' }
+    ));
+    return {
+      totalHits: (fresh && fresh.hits) || 1,
+      resetTime: (fresh && fresh._expiresAt) || expiresAt
+    };
   }
 
   /**
