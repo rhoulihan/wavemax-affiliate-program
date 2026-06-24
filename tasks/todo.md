@@ -61,8 +61,9 @@ Full gate running (bg4n48i8n). NOT yet committed.
      affiliate self-update of deliveryFee still allowed (pre-existing; "read-only" is a dashboard UI
      convenience); pre-existing dashboard JS smells (#deliveryFee dead read, listener re-init on a
      disabled input) → opportunistic.
-3. [~] **Order-status snapshot consistency + bulk removal + monitoring mock** — CODE-COMPLETE, awaiting
-   gate → commit + deploy. (A) Monitoring: mock `/status` (random metrics + phantom Payment Gateway)
+3. [x] **Order-status snapshot consistency + bulk removal + monitoring mock** — ✅ DONE & LIVE
+   (2026-06-23, commit 3e16fa9). Full gate 180 suites / 2885 passed. Deployed both boxes (pull + reload);
+   CF-edge verified (claim/health 200; /monitoring/status no longer serves data unauthenticated). (A) Monitoring: mock `/status` (random metrics + phantom Payment Gateway)
    replaced by real connectivity-monitor; shadowed server.js duplicate removed → one source; **gated
    behind adminIpGate** (was public — real infra data). (B) Bulk endpoints removed (locked unused→remove):
    PUT /bulk/status, POST /bulk/cancel, controller handlers, orderBulkService.js, tests; stale CSRF entry
