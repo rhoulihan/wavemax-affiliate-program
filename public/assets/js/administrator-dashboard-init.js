@@ -1886,6 +1886,7 @@
       state: value('locAffState'),
       zipCode: value('locAffZipCode'),
       username: value('locAffUsername'),
+      pickupInstructions: value('locAffPickupInstructions'),
       languagePreference: value('locAffLanguage') || 'en'
     };
     const businessName = value('locAffBusinessName');
