@@ -13,6 +13,7 @@ const AuthorizationHelpers = require('../middleware/authorizationHelpers');
 const Formatters = require('../utils/formatters');
 const logger = require('../utils/logger');
 const { canTransition, applyTransition } = require('../modules/orders/orderStateMachine');
+const orderTransitionService = require('../modules/orders/orderTransitionService');
 
 // ============================================================================
 // Order Controllers
@@ -121,6 +122,12 @@ exports.updateOrderStatus = async (req, res) => {
       role,
       paymentConfirmed: status === 'out_for_delivery' ? !!req.body.paymentConfirmed : undefined
     });
+    // Revenue snapshot at send-out — the SAME helper the scan path uses, so the
+    // REST and scan paths can't diverge (freezes deliveryFeeCharged + the
+    // operator-entered orderTotal). Was previously skipped here.
+    if (status === 'out_for_delivery') {
+      await orderTransitionService.recordSendOutSnapshot(order, { orderTotal: req.body.orderTotal });
+    }
     await order.save();
 
     // Status-update notice to the customer (no money framing). Only to a verified
@@ -140,6 +147,10 @@ exports.updateOrderStatus = async (req, res) => {
       message: 'Order status updated successfully!'
     });
   } catch (error) {
+    // A bad operator-entered order total is a client error, not a server fault.
+    if (error.isTransitionError) {
+      return res.status(error.status || 400).json({ success: false, message: error.message });
+    }
     logger.error('Order status update error:', error);
     res.status(500).json({
       success: false,
@@ -202,43 +213,6 @@ exports.cancelOrder = ControllerHelpers.asyncWrapper(async (req, res) => {
     cancelledAt: Formatters.datetime(order.cancelledAt)
   }, 'Order cancelled successfully');
 });
-
-/**
- * Bulk update order status
- */
-exports.bulkUpdateOrderStatus = async (req, res) => {
-  const orderBulkService = require('../services/orderBulkService');
-  try {
-    const summary = await orderBulkService.bulkUpdateStatus({
-      orderIds: req.body.orderIds,
-      status: req.body.status,
-      user: req.user
-    });
-    res.status(200).json({ success: true, ...summary });
-  } catch (err) {
-    if (err.isBulkError) return res.status(err.status || 400).json({ success: false, message: err.message });
-    logger.error('Bulk update order status error:', err);
-    res.status(500).json({ success: false, message: 'An error occurred while updating orders' });
-  }
-};
-
-/**
- * Bulk cancel orders
- */
-exports.bulkCancelOrders = async (req, res) => {
-  const orderBulkService = require('../services/orderBulkService');
-  try {
-    const summary = await orderBulkService.bulkCancel({
-      orderIds: req.body.orderIds,
-      user: req.user
-    });
-    res.status(200).json({ success: true, ...summary });
-  } catch (err) {
-    if (err.isBulkError) return res.status(err.status || 400).json({ success: false, message: err.message });
-    logger.error('Bulk cancel orders error:', err);
-    res.status(500).json({ success: false, message: 'An error occurred while cancelling orders' });
-  }
-};
 
 /**
  * Export orders (CSV or JSON)

@@ -139,7 +139,6 @@ const CSRF_CONFIG = {
     '/api/v1/orders/:orderId/status',
     '/api/v1/orders/:orderId/cancel',
     '/api/v1/orders/:orderId/payment-status',
-    '/api/v1/orders/bulk/status',
 
     // Data deletion
     '/api/v1/affiliates/:affiliateId/delete-all-data',

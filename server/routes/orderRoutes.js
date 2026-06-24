@@ -4,8 +4,6 @@ const express = require('express');
 const router = express.Router();
 const orderController = require('../controllers/orderController');
 const { authenticate } = require('../middleware/auth');
-const { checkRole } = require('../middleware/rbac');
-const { body } = require('express-validator');
 
 /**
  * @route   GET /api/orders/export
@@ -27,25 +25,6 @@ router.get('/search', authenticate, orderController.searchOrders);
  * @access  Private (affiliate or admin)
  */
 router.get('/statistics', authenticate, orderController.getOrderStatistics);
-
-/**
- * @route   PUT /api/orders/bulk/status
- * @desc    Bulk update order status
- * @access  Private (affiliate or admin)
- */
-router.put('/bulk/status', authenticate, [
-  body('orderIds').isArray().withMessage('Order IDs must be an array'),
-  body('status').isIn(['in_progress', 'out_for_delivery', 'complete', 'cancelled']).withMessage('Invalid status')
-], orderController.bulkUpdateOrderStatus);
-
-/**
- * @route   POST /api/orders/bulk/cancel
- * @desc    Bulk cancel orders
- * @access  Private (affiliate or admin)
- */
-router.post('/bulk/cancel', authenticate, [
-  body('orderIds').isArray().withMessage('Order IDs must be an array')
-], orderController.bulkCancelOrders);
 
 /**
  * @route   GET /api/orders/:orderId

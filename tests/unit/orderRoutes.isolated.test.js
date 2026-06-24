@@ -12,8 +12,6 @@ describe('Order Routes - Isolated V2', () => {
       exportOrders: jest.fn((req, res) => res.json({ exported: true })),
       searchOrders: jest.fn((req, res) => res.json({ orders: [], total: 0 })),
       getOrderStatistics: jest.fn((req, res) => res.json({ stats: {} })),
-      bulkUpdateOrderStatus: jest.fn((req, res) => res.json({ updated: 2 })),
-      bulkCancelOrders: jest.fn((req, res) => res.json({ cancelled: 2 })),
       getOrderDetails: jest.fn((req, res) => res.json({ orderId: req.params.orderId })),
       updateOrderStatus: jest.fn((req, res) => res.json({ updated: true })),
       cancelOrder: jest.fn((req, res) => res.json({ cancelled: true }))
@@ -36,8 +34,6 @@ describe('Order Routes - Isolated V2', () => {
     router.get('/export', authenticate, mockController.exportOrders);
     router.get('/search', authenticate, mockController.searchOrders);
     router.get('/statistics', authenticate, mockController.getOrderStatistics);
-    router.put('/bulk/status', authenticate, mockController.bulkUpdateOrderStatus);
-    router.post('/bulk/cancel', authenticate, mockController.bulkCancelOrders);
     router.get('/:orderId', authenticate, mockController.getOrderDetails);
     router.put('/:orderId/status', authenticate, mockController.updateOrderStatus);
     router.post('/:orderId/cancel', authenticate, mockController.cancelOrder);
@@ -94,26 +90,6 @@ describe('Order Routes - Isolated V2', () => {
 
     expect(response.body).toEqual({ stats: {} });
     expect(mockController.getOrderStatistics).toHaveBeenCalledTimes(1);
-  });
-
-  test('PUT /api/orders/bulk/status - should bulk update', async () => {
-    const response = await request(app)
-      .put('/api/orders/bulk/status')
-      .send({ orderIds: ['ORD-1', 'ORD-2'], status: 'processing' })
-      .expect(200);
-
-    expect(response.body).toEqual({ updated: 2 });
-    expect(mockController.bulkUpdateOrderStatus).toHaveBeenCalledTimes(1);
-  });
-
-  test('POST /api/orders/bulk/cancel - should bulk cancel', async () => {
-    const response = await request(app)
-      .post('/api/orders/bulk/cancel')
-      .send({ orderIds: ['ORD-1', 'ORD-2'] })
-      .expect(200);
-
-    expect(response.body).toEqual({ cancelled: 2 });
-    expect(mockController.bulkCancelOrders).toHaveBeenCalledTimes(1);
   });
 
   test('GET /api/orders/:orderId - should get order details', async () => {

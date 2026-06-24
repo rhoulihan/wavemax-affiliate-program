@@ -1,6 +1,5 @@
 // Order integration tests — 4-state scan-gate machine (Phase 1 PR 3).
 // Orders are slim state records; all money/weight/commission live in Cents.
-const request = require('supertest');
 const app = require('../../server');
 const Order = require('../../server/models/Order');
 const Customer = require('../../server/models/Customer');
@@ -248,57 +247,40 @@ describe('Order Integration Tests', () => {
     });
   });
 
-  describe('Bulk order operations', () => {
-    beforeEach(async () => {
-      await Order.insertMany([1, 2, 3].map(i => ({
-        orderId: `ORD00${i}`,
-        customerId: 'CUST123',
-        affiliateId: 'AFF123',
-        bagId: `BAG-bulk-${i}`,
-        status: 'in_progress',
-        pickup: { at: new Date(), by: 'AFF123', role: 'affiliate' }
-      })));
-    });
+  // The bulk order endpoints (PUT /bulk/status, POST /bulk/cancel) were removed
+  // in the 2026-06-23 audit (zero callers; raw status= bypass skipped stamps +
+  // the revenue snapshot). The single-order PUT /:orderId/status now records the
+  // same send-out revenue snapshot the scan path does — no longer a divergence.
+  describe('Order status revenue snapshot (out_for_delivery)', () => {
+    it('records deliveryFeeCharged + operator orderTotal on send-out via PUT /:orderId/status', async () => {
+      await Affiliate.updateOne({ affiliateId: 'AFF123' }, { deliveryFee: 8 });
+      const order = await seedOrder({ status: 'in_progress' });
 
-    it('should update multiple orders status in bulk', async () => {
       const response = await agent
-        .put('/api/v1/orders/bulk/status')
+        .put(`/api/v1/orders/${order.orderId}/status`)
         .set('Authorization', `Bearer ${affiliateToken}`)
         .set('X-CSRF-Token', csrfToken)
-        .send({ orderIds: ['ORD001', 'ORD002'], status: 'out_for_delivery' });
+        .send({ status: 'out_for_delivery', orderTotal: 42.5 });
 
       expect(response.status).toBe(200);
-      expect(response.body).toMatchObject({ success: true, updated: 2, failed: 0 });
-      const updated = await Order.find({ orderId: { $in: ['ORD001', 'ORD002'] } });
-      expect(updated.every(o => o.status === 'out_for_delivery')).toBe(true);
+      const saved = await Order.findOne({ orderId: order.orderId });
+      expect(saved.status).toBe('out_for_delivery');
+      expect(saved.deliveryFeeCharged).toBe(8); // partner's OWN fee, frozen as commission
+      expect(saved.orderTotal).toBeCloseTo(42.5, 2);
     });
 
-    it('should handle partial bulk update failures', async () => {
-      await Order.updateOne({ orderId: 'ORD001' }, { status: 'complete' });
+    it('rejects a negative orderTotal with 400 and does not persist the transition', async () => {
+      const order = await seedOrder({ status: 'in_progress' });
+
       const response = await agent
-        .put('/api/v1/orders/bulk/status')
+        .put(`/api/v1/orders/${order.orderId}/status`)
         .set('Authorization', `Bearer ${affiliateToken}`)
         .set('X-CSRF-Token', csrfToken)
-        .send({ orderIds: ['ORD001', 'ORD002', 'ORD003'], status: 'out_for_delivery' });
+        .send({ status: 'out_for_delivery', orderTotal: -5 });
 
-      expect(response.status).toBe(200);
-      expect(response.body).toMatchObject({ success: true, updated: 2, failed: 1 });
-      expect(response.body.results).toEqual(expect.arrayContaining([
-        { orderId: 'ORD001', success: false, message: expect.stringContaining('Cannot transition from complete to out_for_delivery') }
-      ]));
-    });
-
-    it('should cancel multiple orders in bulk', async () => {
-      const response = await agent
-        .post('/api/v1/orders/bulk/cancel')
-        .set('Authorization', `Bearer ${affiliateToken}`)
-        .set('X-CSRF-Token', csrfToken)
-        .send({ orderIds: ['ORD001', 'ORD002', 'ORD003'] });
-
-      expect(response.status).toBe(200);
-      expect(response.body).toMatchObject({ success: true, cancelled: 3, failed: 0 });
-      const cancelled = await Order.find({ orderId: { $in: ['ORD001', 'ORD002', 'ORD003'] } });
-      expect(cancelled.every(o => o.status === 'cancelled')).toBe(true);
+      expect(response.status).toBe(400);
+      const saved = await Order.findOne({ orderId: order.orderId });
+      expect(saved.status).toBe('in_progress'); // unchanged — threw before save
     });
   });
 

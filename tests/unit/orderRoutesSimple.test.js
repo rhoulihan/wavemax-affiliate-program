@@ -34,14 +34,6 @@ describe('Order Routes - Simple', () => {
       res.json({ stats: {} });
     });
 
-    app.put('/api/orders/bulk/status', mockAuth, (req, res) => {
-      res.json({ updated: true });
-    });
-
-    app.post('/api/orders/bulk/cancel', mockAuth, (req, res) => {
-      res.json({ cancelled: true });
-    });
-
     app.get('/api/orders/:orderId', mockAuth, (req, res) => {
       res.json({ order: { id: req.params.orderId } });
     });
@@ -101,33 +93,6 @@ describe('Order Routes - Simple', () => {
 
       expect(response.status).toBe(200);
       expect(response.body).toEqual({ stats: {} });
-    });
-  });
-
-  describe('PUT /api/orders/bulk/status', () => {
-    it('should bulk update order status', async () => {
-      const response = await request(app)
-        .put('/api/orders/bulk/status')
-        .send({
-          orderIds: ['ORD-1', 'ORD-2'],
-          status: 'processing'
-        });
-
-      expect(response.status).toBe(200);
-      expect(response.body).toEqual({ updated: true });
-    });
-  });
-
-  describe('POST /api/orders/bulk/cancel', () => {
-    it('should bulk cancel orders', async () => {
-      const response = await request(app)
-        .post('/api/orders/bulk/cancel')
-        .send({
-          orderIds: ['ORD-1', 'ORD-2']
-        });
-
-      expect(response.status).toBe(200);
-      expect(response.body).toEqual({ cancelled: true });
     });
   });
 

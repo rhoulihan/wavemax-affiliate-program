@@ -61,8 +61,15 @@ Full gate running (bg4n48i8n). NOT yet committed.
      affiliate self-update of deliveryFee still allowed (pre-existing; "read-only" is a dashboard UI
      convenience); pre-existing dashboard JS smells (#deliveryFee dead read, listener re-init on a
      disabled input) → opportunistic.
-3. [ ] **Order-status snapshot consistency** + DELETE the unused bulk order endpoints + monitoring
-   `/status` mock removal.
+3. [~] **Order-status snapshot consistency + bulk removal + monitoring mock** — CODE-COMPLETE, awaiting
+   gate → commit + deploy. (A) Monitoring: mock `/status` (random metrics + phantom Payment Gateway)
+   replaced by real connectivity-monitor; shadowed server.js duplicate removed → one source; **gated
+   behind adminIpGate** (was public — real infra data). (B) Bulk endpoints removed (locked unused→remove):
+   PUT /bulk/status, POST /bulk/cancel, controller handlers, orderBulkService.js, tests; stale CSRF entry
+   removed. (C) Snapshot consistency: shared `recordSendOutSnapshot` in orderTransitionService (advanceOrder
+   + updateOrderStatus both use it; out_for_delivery freezes deliveryFeeCharged+orderTotal, 400 on bad
+   total). Single-order PUT/cancel KEPT+fixed (external callers unverifiable). Adversarial review (13
+   agents): 1 blocker (monitoring exposure) fixed; nit (dead test-scaffolding bulk refs) left.
 4. [ ] **Service-area / Nominatim cluster removal** front-to-back — delete `serviceAreaService`, the
    `locationValidation` validator fns + import, any remaining Nominatim/geocode-by-radius legacy.
 5. [ ] **Orphan sweep** — server: dead payment-email/mailcow service, OAuth/DocuSign scripts, 3 dead

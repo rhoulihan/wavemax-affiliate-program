@@ -15,88 +15,17 @@ const securityHeaders = (req, res, next) => {
 // Apply security headers to all monitoring routes
 router.use(securityHeaders);
 
-// API endpoint for monitoring status
-router.get('/status', async (req, res) => {
-  try {
-    // Mock monitoring data for now - in production, this would gather real metrics
-    const monitoringData = {
-      overallHealth: 'healthy',
-      uptime: process.uptime() * 1000, // Convert to milliseconds
-      services: {
-        'API Server': {
-          status: 'up',
-          critical: true,
-          availability: '99.9%',
-          responseTime: 45,
-          totalChecks: 1440,
-          failedChecks: 1,
-          lastCheck: new Date().toISOString(),
-          history: Array(60).fill(0).map((_, i) => ({
-            timestamp: Date.now() - (59 - i) * 60000,
-            responseTime: Math.floor(Math.random() * 50) + 30,
-            success: Math.random() > 0.01
-          }))
-        },
-        'Database': {
-          status: 'up',
-          critical: true,
-          availability: '99.8%',
-          responseTime: 12,
-          totalChecks: 1440,
-          failedChecks: 3,
-          lastCheck: new Date().toISOString(),
-          history: Array(60).fill(0).map((_, i) => ({
-            timestamp: Date.now() - (59 - i) * 60000,
-            responseTime: Math.floor(Math.random() * 20) + 10,
-            success: Math.random() > 0.02
-          }))
-        },
-        'Payment Gateway': {
-          status: 'up',
-          critical: true,
-          availability: '99.9%',
-          responseTime: 120,
-          totalChecks: 1440,
-          failedChecks: 1,
-          lastCheck: new Date().toISOString(),
-          history: Array(60).fill(0).map((_, i) => ({
-            timestamp: Date.now() - (59 - i) * 60000,
-            responseTime: Math.floor(Math.random() * 50) + 100,
-            success: Math.random() > 0.01
-          }))
-        },
-        'Email Service': {
-          status: 'up',
-          critical: false,
-          availability: '99.7%',
-          responseTime: 89,
-          totalChecks: 1440,
-          failedChecks: 4,
-          lastCheck: new Date().toISOString(),
-          history: Array(60).fill(0).map((_, i) => ({
-            timestamp: Date.now() - (59 - i) * 60000,
-            responseTime: Math.floor(Math.random() * 50) + 50,
-            success: Math.random() > 0.03
-          }))
-        },
-        'DNS Resolution': {
-          status: 'up',
-          critical: true,
-          availability: '100%',
-          responseTime: 5,
-          totalChecks: 1440,
-          failedChecks: 0,
-          lastCheck: new Date().toISOString(),
-          history: Array(60).fill(0).map((_, i) => ({
-            timestamp: Date.now() - (59 - i) * 60000,
-            responseTime: Math.floor(Math.random() * 5) + 3,
-            success: true
-          }))
-        }
-      }
-    };
+// Real connectivity-monitor data — the SINGLE source for GET /monitoring/status.
+// (Previously this served fabricated Math.random metrics + a phantom 'Payment
+// Gateway' service and, being mounted before server.js's app.get('/monitoring/
+// status'), shadowed the real handler. Money is external in Cents, so there is
+// no payment-gateway service to monitor.)
+const monitoringModule = require('../monitoring/connectivity-monitor');
 
-    res.json(monitoringData);
+// API endpoint for monitoring status
+router.get('/status', (req, res) => {
+  try {
+    res.json(monitoringModule.getMonitoringStatus());
   } catch (error) {
     logger.error('Error generating monitoring status:', error);
     res.status(500).json({

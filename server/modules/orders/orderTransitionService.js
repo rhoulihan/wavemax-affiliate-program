@@ -75,6 +75,33 @@ function sanitizeInstructions(raw) {
 }
 
 /**
+ * Record the send-out (out_for_delivery) revenue snapshot on an order: freeze
+ * the partner's OWN delivery fee as commission (0 for the WaveMAX-Associates
+ * default — that fee is house revenue), and record the operator-entered order
+ * total when present (validated ≥ 0). Frozen now so later fee changes never alter
+ * this order's historical commission. The SINGLE place this snapshot is applied
+ * — both the scan path (advanceOrder) and the REST path (updateOrderStatus) call
+ * it so they can't diverge.
+ *
+ * @param {Order} order  the order being moved to out_for_delivery
+ * @param {Object} [opts]
+ * @param {number|string} [opts.orderTotal] operator-entered final total
+ * @throws {TransitionServiceError} invalid_order_total
+ */
+async function recordSendOutSnapshot(order, { orderTotal } = {}) {
+  const aff = await Affiliate.findOne({ affiliateId: order.affiliateId }).select('deliveryFee');
+  order.deliveryFeeCharged = aff && Number(aff.deliveryFee) > 0 ? Number(aff.deliveryFee) : 0;
+  if (orderTotal !== undefined && orderTotal !== null && orderTotal !== '') {
+    const n = Number(orderTotal);
+    if (!Number.isFinite(n) || n < 0) {
+      throw new TransitionServiceError('invalid_order_total',
+        'Order total must be a non-negative number', 400);
+    }
+    order.orderTotal = n;
+  }
+}
+
+/**
  * Scan 1 — pickup at partner. Creates exactly one pending order. The customer/
  * affiliate ids come from the registered bag, never from client input.
  * @param {Object} args
@@ -197,22 +224,9 @@ async function advanceOrder({ bag, by, role, paymentConfirmed, orderTotal, addOn
   // advance
   applyTransition(order, decision.to, { by, role, at: now, paymentConfirmed });
 
-  // Revenue capture at send-out (out_for_delivery): snapshot the partner's OWN
-  // delivery fee as commission (0 for the WaveMAX-Associates default — that fee
-  // is house revenue), and record the operator-entered order total when present
-  // (the UI requires it here; the server validates ≥0). Frozen now so later fee
-  // changes never alter this order's historical commission.
+  // Revenue capture at send-out — the shared snapshot (see recordSendOutSnapshot).
   if (decision.to === 'out_for_delivery') {
-    const aff = await Affiliate.findOne({ affiliateId: order.affiliateId }).select('deliveryFee');
-    order.deliveryFeeCharged = aff && Number(aff.deliveryFee) > 0 ? Number(aff.deliveryFee) : 0;
-    if (orderTotal !== undefined && orderTotal !== null && orderTotal !== '') {
-      const n = Number(orderTotal);
-      if (!Number.isFinite(n) || n < 0) {
-        throw new TransitionServiceError('invalid_order_total',
-          'Order total must be a non-negative number', 400);
-      }
-      order.orderTotal = n;
-    }
+    await recordSendOutSnapshot(order, { orderTotal });
   }
   await order.save();
 
@@ -375,5 +389,6 @@ module.exports = {
   advanceOrder,
   cancelOrder,
   undoLastTransition,
+  recordSendOutSnapshot,
   TransitionServiceError
 };

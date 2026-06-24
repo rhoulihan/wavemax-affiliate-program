@@ -805,8 +805,12 @@ app.use((req, res, next) => {
 app.use('/', embedRoutes);
 
 
-// Mount monitoring dashboard BEFORE static files for CSP nonce injection
-app.use('/monitoring', monitoringRoutes);
+// Mount monitoring dashboard BEFORE static files for CSP nonce injection.
+// IP-gated to the admin allowlist (same as /admin): /monitoring/status serves
+// real connectivity-monitor data (service names, host error strings), so it must
+// not be publicly reachable. adminIpGate fails CLOSED in prod (stealth 404) and
+// is transparent in dev/test.
+app.use('/monitoring', adminIpGate, monitoringRoutes);
 
 // Handle direct monitoring-dashboard.html path
 app.get('/monitoring-dashboard.html', (req, res) => {
@@ -996,17 +1000,8 @@ apiV1Router.get('/environment', (req, res) => {
 });
 
 
-// Monitoring routes - use /monitoring/status instead of /api/monitoring/status
-const monitoringModule = require('./server/monitoring/connectivity-monitor');
-app.get('/monitoring/status', (req, res) => {
-  try {
-    const status = monitoringModule.getMonitoringStatus();
-    res.json(status);
-  } catch (error) {
-    logger.error('Monitoring status error:', error);
-    res.status(500).json({ error: 'Failed to get monitoring status' });
-  }
-});
+// GET /monitoring/status is served by monitoringRoutes (mounted at /monitoring
+// above) from the real connectivity-monitor — single source, no duplicate here.
 
 // Mount versioned API
 app.use('/api/v1', apiV1Router);

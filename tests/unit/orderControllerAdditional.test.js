@@ -4,10 +4,7 @@ const orderController = require('../../server/controllers/orderController');
 const logger = require('../../server/utils/logger');
 const Order = require('../../server/models/Order');
 const Customer = require('../../server/models/Customer');
-const Affiliate = require('../../server/models/Affiliate');
-const emailService = require('../../server/utils/emailService');
-const { extractHandler } = require('../helpers/testUtils');
-const { createFindOneMock, createFindMock } = require('../helpers/mockHelpers');
+const { createFindOneMock } = require('../helpers/mockHelpers');
 
 // Mock dependencies
 jest.mock('../../server/models/Order');
@@ -211,48 +208,6 @@ describe('Order Controller - Additional Coverage', () => {
     });
   });
 
-  describe('bulkUpdateOrderStatus', () => {
-    it('should handle invalid order IDs format', async () => {
-      req.body = { orderIds: 'not-an-array', status: 'in_progress' };
-      req.user = { role: 'operator' };
-
-      await orderController.bulkUpdateOrderStatus(req, res, next);
-
-      expect(res.status).toHaveBeenCalledWith(400);
-      expect(res.json).toHaveBeenCalledWith({
-        success: false,
-        message: 'Order IDs must be provided as an array'
-      });
-    });
-
-    it('should handle empty order IDs array', async () => {
-      req.body = { orderIds: [], status: 'in_progress' };
-      req.user = { role: 'operator' };
-
-      await orderController.bulkUpdateOrderStatus(req, res, next);
-
-      expect(res.status).toHaveBeenCalledWith(400);
-      expect(res.json).toHaveBeenCalledWith({
-        success: false,
-        message: 'Order IDs must be provided as an array'
-      });
-    });
-
-    it('should handle unauthorized access', async () => {
-      req.body = { orderIds: ['ORD001'], status: 'in_progress' };
-      req.user = { role: 'customer' }; // Wrong role
-
-      Order.find = jest.fn().mockResolvedValue([
-        { orderId: 'ORD001', affiliateId: 'AFF123' }
-      ]);
-
-      await orderController.bulkUpdateOrderStatus(req, res, next);
-
-      expect(res.status).toHaveBeenCalledWith(403);
-      expect(res.json).toHaveBeenCalledWith({
-        success: false,
-        message: 'Unauthorized'
-      });
-    });
-  });
+  // bulkUpdateOrderStatus / bulkCancelOrders were removed in the 2026-06-23 audit
+  // (zero callers; raw status= bypass). See orderRoutes — the bulk routes are gone.
 });
