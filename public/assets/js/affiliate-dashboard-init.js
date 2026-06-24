@@ -434,35 +434,27 @@ function switchToCustomersTab(affiliateId, customerIdToHighlight) {
   loadCustomersWithHighlight(affiliateId, customerIdToHighlight);
 }
 
-// Function to initialize pricing preview component
+// Function to initialize pricing preview component (flat-fee model)
 function initializePricingPreview(affiliateData) {
   if (!window.PricingPreviewComponent) {
     console.warn('PricingPreviewComponent still not available');
     return;
   }
 
+  // Set the read-only flat-fee input before init so the preview reflects it.
+  const feeInput = document.getElementById('settingsDeliveryFee');
+  if (feeInput) feeInput.value = parseFloat(affiliateData.deliveryFee) || 0;
+
   // Initialize the pricing preview in the settings tab
   window.settingsPricingPreview = window.PricingPreviewComponent.init(
     'settingsPricingPreview',
-    'settingsMinimumDeliveryFee',
-    'settingsPerBagDeliveryFee',
+    'settingsDeliveryFee',
     {
       titleText: 'Earnings Preview',
       titleI18n: 'affiliate.dashboard.settings.earningsPreview',
       showNotes: true
     }
   );
-  console.log('Pricing preview initialized (delayed):', !!window.settingsPricingPreview);
-
-  // Set initial values
-  const minimumFee = parseFloat(affiliateData.minimumDeliveryFee) || 20;
-  const perBagFee = parseFloat(affiliateData.perBagDeliveryFee) || 10;
-
-  // Update inputs
-  const minInput = document.getElementById('settingsMinimumDeliveryFee');
-  const perBagInput = document.getElementById('settingsPerBagDeliveryFee');
-  if (minInput) minInput.value = minimumFee;
-  if (perBagInput) perBagInput.value = perBagFee;
 
   // Trigger update
   if (window.settingsPricingPreview) {
@@ -513,43 +505,13 @@ async function loadAffiliateData(affiliateId) {
       // Store affiliate data in localStorage for other uses
       localStorage.setItem('currentAffiliate', JSON.stringify(data));
 
-      // Initialize pricing preview component if available
-      console.log('Checking for PricingPreviewComponent:', !!window.PricingPreviewComponent);
+      // Initialize the pricing preview (flat-fee) in the settings tab.
       if (window.PricingPreviewComponent) {
-        console.log('PricingPreviewComponent found, initializing...');
-        // Initialize the pricing preview in the settings tab
-        window.settingsPricingPreview = window.PricingPreviewComponent.init(
-          'settingsPricingPreview',
-          'settingsMinimumDeliveryFee',
-          'settingsPerBagDeliveryFee',
-          {
-            titleText: 'Earnings Preview',
-            titleI18n: 'affiliate.dashboard.settings.earningsPreview',
-            showNotes: true
-          }
-        );
-        console.log('Pricing preview initialized:', !!window.settingsPricingPreview);
-
-        // Set initial values
-        const minimumFee = parseFloat(data.minimumDeliveryFee) || 20;
-        const perBagFee = parseFloat(data.perBagDeliveryFee) || 10;
-
-        // Update inputs
-        const minInput = document.getElementById('settingsMinimumDeliveryFee');
-        const perBagInput = document.getElementById('settingsPerBagDeliveryFee');
-        if (minInput) minInput.value = minimumFee;
-        if (perBagInput) perBagInput.value = perBagFee;
-
-        // Trigger update
-        if (window.settingsPricingPreview) {
-          window.settingsPricingPreview.update();
-        }
+        initializePricingPreview(data);
       } else {
-        console.warn('PricingPreviewComponent not available yet');
-        // Try again after a short delay
+        // Component script may not have loaded yet — retry shortly.
         setTimeout(() => {
           if (window.PricingPreviewComponent) {
-            console.log('PricingPreviewComponent now available, initializing...');
             initializePricingPreview(data);
           }
         }, 500);
@@ -904,54 +866,20 @@ async function loadSettingsData(affiliateId) {
         const emailField = document.getElementById('settingsEmail');
         const phoneField = document.getElementById('settingsPhone');
         const businessNameField = document.getElementById('settingsBusinessName');
-        const minimumDeliveryFeeField = document.getElementById('settingsMinimumDeliveryFee');
-        const perBagDeliveryFeeField = document.getElementById('settingsPerBagDeliveryFee');
-
-        console.log('Setting field values:', {
-          firstName: data.firstName,
-          lastName: data.lastName,
-          email: data.email,
-          phone: data.phone,
-          businessName: data.businessName,
-          minimumDeliveryFee: data.minimumDeliveryFee,
-          perBagDeliveryFee: data.perBagDeliveryFee
-        });
+        const deliveryFeeField = document.getElementById('settingsDeliveryFee');
 
         if (firstNameField) firstNameField.value = data.firstName || '';
         if (lastNameField) lastNameField.value = data.lastName || '';
         if (emailField) emailField.value = data.email || '';
         if (phoneField) phoneField.value = data.phone || '';
         if (businessNameField) businessNameField.value = data.businessName || '';
-        
-        // Set select dropdown values
-        if (minimumDeliveryFeeField) {
-          const mdfValue = String(data.minimumDeliveryFee || 20);
-          // Ensure the value exists in the dropdown options
-          if (minimumDeliveryFeeField.querySelector(`option[value="${mdfValue}"]`)) {
-            minimumDeliveryFeeField.value = mdfValue;
-          } else {
-            minimumDeliveryFeeField.value = '20'; // Default to $20
-          }
-        }
-        
-        if (perBagDeliveryFeeField) {
-          const pbfValue = String(data.perBagDeliveryFee || 10);
-          // Ensure the value exists in the dropdown options
-          if (perBagDeliveryFeeField.querySelector(`option[value="${pbfValue}"]`)) {
-            perBagDeliveryFeeField.value = pbfValue;
-          } else {
-            perBagDeliveryFeeField.value = '10'; // Default to $10
-          }
-        }
 
-        // Initialize pricing preview component
+        // Flat delivery fee (read-only; admin-managed).
+        if (deliveryFeeField) deliveryFeeField.value = parseFloat(data.deliveryFee) || 0;
+
+        // Initialize pricing preview component (flat-fee)
         if (window.PricingPreviewComponent) {
-          console.log('Initializing pricing preview in loadSettingsData');
           initializePricingPreview(data);
-        } else {
-          console.warn('PricingPreviewComponent not available in loadSettingsData, falling back to legacy');
-          // Fallback to old calculator
-          updateFeeCalculatorPreview();
         }
 
         // Set landing page link
@@ -1022,14 +950,14 @@ function disableEditMode() {
 async function saveSettings(affiliateId) {
   try {
     const formData = new FormData(document.getElementById('settingsForm'));
+    // Delivery fee is admin-managed (read-only here), so it is intentionally not
+    // submitted from the affiliate dashboard.
     const data = {
       firstName: formData.get('firstName'),
       lastName: formData.get('lastName'),
       email: formData.get('email'),
       phone: formData.get('phone'),
-      businessName: formData.get('businessName'),
-      minimumDeliveryFee: parseFloat(formData.get('minimumDeliveryFee')) || null,
-      perBagDeliveryFee: parseFloat(formData.get('perBagDeliveryFee')) || null
+      businessName: formData.get('businessName')
     };
 
     const token = localStorage.getItem('affiliateToken');
@@ -1173,36 +1101,6 @@ async function deleteAllData(affiliateId) {
     console.error('Delete error:', error);
     alert('An error occurred while deleting data');
   }
-}
-
-// Fee calculator preview function
-function updateFeeCalculatorPreview() {
-  const minFeeInput = document.getElementById('settingsMinimumDeliveryFee');
-  const perBagInput = document.getElementById('settingsPerBagDeliveryFee');
-
-  if (!minFeeInput || !perBagInput) return;
-
-  const minFee = parseFloat(minFeeInput.value) || 25;
-  const perBag = parseFloat(perBagInput.value) || 5;
-
-  // Calculate fees for different bag quantities (round trip = x2)
-  const bags = [1, 3, 5, 10];
-  bags.forEach(qty => {
-    const calculated = qty * perBag * 2; // Round trip
-    const total = Math.max(minFee * 2, calculated); // Round trip minimum
-    const elem = document.getElementById(`preview${qty}bag${qty > 1 ? 's' : ''}`);
-    if (elem) {
-      elem.textContent = `$${total}`;
-      // Add visual indicator if minimum applies
-      if (total === minFee * 2 && calculated < minFee * 2) {
-        elem.classList.add('font-bold');
-        elem.title = 'Minimum fee applies';
-      } else {
-        elem.classList.remove('font-bold');
-        elem.title = `${qty} × $${perBag} × 2 trips = $${calculated}`;
-      }
-    }
-  });
 }
 
 // ---- PR 9: vendor delivery code card ---------------------------------------

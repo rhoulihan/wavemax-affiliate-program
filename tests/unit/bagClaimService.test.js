@@ -14,7 +14,7 @@ async function createAffiliate() {
     phone: '+15125550100', address: '1 Main', city: 'Austin', state: 'TX',
     zipCode: '78701', businessName: 'Claim Wash Co',
     serviceArea: 'Downtown', serviceLatitude: 30.2672, serviceLongitude: -97.7431,
-    serviceRadius: 10, minimumDeliveryFee: 25, perBagDeliveryFee: 5,
+    serviceRadius: 10,
     paymentMethod: 'check'
   });
   await affiliate.save();

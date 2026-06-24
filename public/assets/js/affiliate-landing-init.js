@@ -133,13 +133,10 @@
       });
     }
 
-    // Update pricing if available
-    if (affiliate.minimumDeliveryFee) {
-      document.getElementById('minimumFee').textContent = affiliate.minimumDeliveryFee;
-    }
-
-    if (affiliate.perBagDeliveryFee) {
-      document.getElementById('perBagFee').textContent = affiliate.perBagDeliveryFee;
+    // Update pricing if available — flat delivery fee (effective fee from the API).
+    if (affiliate.deliveryFee !== undefined && affiliate.deliveryFee !== null) {
+      const feeEl = document.getElementById('deliveryFee');
+      if (feeEl) feeEl.textContent = affiliate.deliveryFee;
     }
 
     // Update year in footer

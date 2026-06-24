@@ -19,7 +19,7 @@ async function createAffiliate(businessName) {
     phone: '+15125550100', address: '123 Test St', city: 'Austin',
     state: 'TX', zipCode: '78701', businessName,
     serviceArea: 'Downtown', serviceLatitude: 30.2672, serviceLongitude: -97.7431,
-    serviceRadius: 10, minimumDeliveryFee: 25, perBagDeliveryFee: 5,
+    serviceRadius: 10,
     paymentMethod: 'check'
   });
   await affiliate.save();

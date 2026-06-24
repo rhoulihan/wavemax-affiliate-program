@@ -145,8 +145,7 @@
 
       // These fields are always required
       requiredFields.push(
-        { id: 'minimumDeliveryFee', name: 'Minimum Delivery Fee' },
-        { id: 'perBagDeliveryFee', name: 'Per-Bag Delivery Fee' },
+        { id: 'deliveryFee', name: 'Delivery Fee' },
         { id: 'paymentMethod', name: 'Payment Method' }
       );
       // Note: Service area fields are checked separately below with component-generated IDs
@@ -518,7 +517,7 @@
             'inviteToken',
             'firstName', 'lastName', 'email', 'phone', 'businessName',
             'address', 'city', 'state', 'zipCode',
-            'minimumDeliveryFee', 'perBagDeliveryFee',
+            'deliveryFee',
             'paymentMethod', 'accountNumber', 'routingNumber', 'paypalEmail',
             'languagePreference', 'termsAgreement'
           ];
@@ -893,130 +892,54 @@
       initializeFeeCalculator();
     }
 
-    // Fee calculator functionality
+    // Fee calculator functionality — single flat delivery-fee input.
     function initializeFeeCalculator() {
-      const minFeeInput = document.getElementById('minimumDeliveryFee');
-      const perBagInput = document.getElementById('perBagDeliveryFee');
+      const deliveryFeeInput = document.getElementById('deliveryFee');
+      if (!deliveryFeeInput) return;
 
-      if (!minFeeInput || !perBagInput) return;
-
-      // Prevent Enter key from submitting form in delivery fee fields
+      // Prevent Enter key from submitting the form in the fee field
       const preventEnterSubmit = function(event) {
         if (event.key === 'Enter' || event.keyCode === 13) {
           event.preventDefault();
           event.stopPropagation();
-
           // Trigger input event to update pricing preview
           this.dispatchEvent(new Event('input', { bubbles: true }));
           this.dispatchEvent(new Event('change', { bubbles: true }));
-
-          // Optional: Move focus to next input field
-          if (this.id === 'minimumDeliveryFee') {
-            perBagInput.focus();
-          }
-
           return false;
         }
       };
+      deliveryFeeInput.addEventListener('keydown', preventEnterSubmit);
 
-      // Add keydown event listeners to prevent form submission on Enter
-      minFeeInput.addEventListener('keydown', preventEnterSubmit);
-      perBagInput.addEventListener('keydown', preventEnterSubmit);
-
-      // Initialize the pricing preview component
+      // Initialize the pricing preview component (flat-fee model)
       if (window.PricingPreviewComponent) {
         window.registrationPricingPreview = window.PricingPreviewComponent.init(
           'registrationPricingPreview',
-          'minimumDeliveryFee',
-          'perBagDeliveryFee',
+          'deliveryFee',
           {
             titleText: 'Live Pricing Preview',
             titleI18n: 'affiliate.register.livePricingPreview',
             showNotes: true
           }
         );
-        console.log('Pricing preview component initialized for registration form');
       } else {
-        console.warn('PricingPreviewComponent not available, falling back to legacy calculator');
-        // Fallback to legacy functionality
-        minFeeInput.addEventListener('input', updateFeeCalculator);
-        perBagInput.addEventListener('input', updateFeeCalculator);
-        updateFeeCalculator();
+        console.warn('PricingPreviewComponent not available; pricing preview will not render');
       }
 
       // Clean up function to remove event listeners
       const cleanupFeeCalculator = function() {
-      // Remove keydown event listeners
-        minFeeInput.removeEventListener('keydown', preventEnterSubmit);
-        perBagInput.removeEventListener('keydown', preventEnterSubmit);
-
-        // Clean up pricing preview component if it exists
+        deliveryFeeInput.removeEventListener('keydown', preventEnterSubmit);
         if (window.registrationPricingPreview && window.registrationPricingPreview.destroy) {
           window.registrationPricingPreview.destroy();
         }
-
-        // Disconnect resize observer
         if (resizeObserver) {
           resizeObserver.disconnect();
           resizeObserver = null;
         }
       };
 
-      // Clean up before navigation
       window.addEventListener('beforeunload', cleanupFeeCalculator);
-
-      // Also clean up on custom events from parent
       window.addEventListener('page-cleanup', cleanupFeeCalculator);
-
       window.addEventListener('disconnect-observers', cleanupFeeCalculator);
-    }
-
-    // Delivery fee calculator update
-    function updateFeeCalculator() {
-      const minimumFee = parseFloat(document.getElementById('minimumDeliveryFee')?.value) || 20;
-      const perBagFee = parseFloat(document.getElementById('perBagDeliveryFee')?.value) || 10;
-
-      // Constants for commission calculation
-      const WDF_RATE = 1.25; // $1.25 per pound
-      const LBS_PER_BAG = 30; // 30 lbs per bag average
-      const COMMISSION_RATE = 0.10; // 10% commission
-
-      // Update all example calculations
-      [1, 3, 5, 10].forEach(bags => {
-        const calculatedFee = bags * perBagFee;
-        const deliveryFee = Math.max(minimumFee, calculatedFee); // Already round trip
-
-        // Calculate WDF commission
-        const wdfRevenue = bags * LBS_PER_BAG * WDF_RATE;
-        const commission = wdfRevenue * COMMISSION_RATE;
-
-        // Update delivery fee display
-        const feeElement = document.getElementById(`calc${bags}bag${bags > 1 ? 's' : ''}`);
-        if (feeElement) {
-          feeElement.textContent = `$${deliveryFee}`;
-          // Add visual indicator if minimum applies
-          if (deliveryFee === minimumFee && calculatedFee < minimumFee) {
-            feeElement.title = 'Minimum fee applies';
-          } else {
-            feeElement.title = `${bags} bags × $${perBagFee}/bag = $${calculatedFee}`;
-          }
-        }
-
-        // Calculate and update total earnings (delivery + commission)
-        const totalEarnings = deliveryFee + commission;
-        const totalElement = document.getElementById(`total${bags}bag${bags > 1 ? 's' : ''}`);
-        if (totalElement) {
-          totalElement.textContent = `$${totalEarnings.toFixed(2)}`;
-          totalElement.title = `Delivery: $${deliveryFee} + Commission: $${commission.toFixed(2)} = $${totalEarnings.toFixed(2)}`;
-        }
-
-        // Update commission display
-        const commElement = document.getElementById(`comm${bags}bag${bags > 1 ? 's' : ''}`);
-        if (commElement) {
-          commElement.textContent = `$${commission.toFixed(2)}`;
-          commElement.title = `${bags} bags × ${LBS_PER_BAG} lbs × $${WDF_RATE}/lb × ${COMMISSION_RATE * 100}% = $${commission.toFixed(2)}`;
-        }
-      });
     }
 
 

@@ -28,7 +28,9 @@
     "build:explorer": "node design-explorer/build.js",
     "check:i18n": "node scripts/check-i18n-parity.js",
     "clear:customer-data": "node scripts/admin/clear-customer-data.js",
-    "clear:customer-data:confirm": "node scripts/admin/clear-customer-data.js --yes"
+    "clear:customer-data:confirm": "node scripts/admin/clear-customer-data.js --yes",
+    "migrate:delivery-fee": "node scripts/migrate/backfill-delivery-fee.js",
+    "migrate:delivery-fee:confirm": "node scripts/migrate/backfill-delivery-fee.js --yes"
   },
   "repository": {
     "type": "git",

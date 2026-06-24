@@ -110,7 +110,7 @@ describe('/admin clean URL + gate wiring', () => {
   });
 
   it('embed-app-v2.html cache-busts the rebuilt bundle and the changed session-manager', () => {
-    expect(embedHtml).toMatch(/embed-app-v2\.min\.js\?v=20260622a/);
+    expect(embedHtml).toMatch(/embed-app-v2\.min\.js\?v=20260623a/);
     expect(embedHtml).toMatch(/session-manager\.js\?v=20260619/);
   });
 });

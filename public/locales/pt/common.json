@@ -299,8 +299,9 @@
       "delivery": {
         "title": "Entrega",
         "value": "${{perBagFee}}",
-        "unit": "/ sacola",
-        "minimum": "${{minimumFee}} mínimo"
+        "unit": "/ pedido",
+        "minimum": "${{minimumFee}} mínimo",
+        "flat": "taxa fixa"
       }
     },
     "howItWorks": {
@@ -509,7 +510,7 @@
       "confirmPasswordPlaceholder": "Digite novamente sua senha",
       "usernamePlaceholder": "Escolha um nome de usuário único",
       "serviceInfo": "Informações de Serviço",
-      "deliveryFeeStructure": "Estrutura de Taxas de Entrega",
+      "deliveryFeeStructure": "Taxa de entrega",
       "dynamicPricing": "Preços Dinâmicos:",
       "dynamicPricingDesc": "Defina uma taxa mínima de entrega e uma taxa por sacola. Os clientes pagam o valor que for maior. Você fica com 100% das taxas de entrega.",
       "minimumDeliveryFee": "Taxa Mínima de Entrega ($) *",
@@ -528,7 +529,7 @@
       "deliveryFee": "Entrega",
       "total": "Ganhos Totais",
       "yourCommission": "Sua Comissão",
-      "paymentNote": "Você receberá a taxa de entrega mínima ou as taxas por sacola, o que for maior.",
+      "paymentNote": "Sua taxa de entrega fixa é cobrada uma vez por pedido, independentemente do número de sacolas.",
       "deliveryNote": "1. Entrega: 100% das taxas de entrega são suas",
       "commissionNote": "2. Comissão: 10% do serviço WDF (30 lbs × $1.25/lb por sacola)",
       "totalNote": "3. Ganhos Totais: Taxa de entrega + Comissão",
@@ -555,7 +556,11 @@
       "venmoHandleHelp": "Digite seu nome de usuário do Venmo (ex: @joao-silva)",
       "termsAgree": "Eu concordo com os",
       "submitButton": "Registrar como Afiliado",
-      "alreadyHaveAccount": "Já tem uma conta?"
+      "alreadyHaveAccount": "Já tem uma conta?",
+      "deliveryFeeLabel": "Taxa de entrega ($) *",
+      "deliveryFeeDesc": "Sua taxa de entrega fixa cobrada por pedido",
+      "flatFeeTitle": "Taxa de entrega fixa:",
+      "flatFeeDesc": "Defina sua taxa de entrega fixa por pedido. Você fica com 100% como comissão. Defina $0 para usar a WaveMAX Associates para coleta e entrega."
     },
     "dashboard": {
       "title": "Painel do Afiliado",
@@ -582,7 +587,7 @@
         "landingPageDesc": "Página de destino profissional para mostrar seus serviços e preços para clientes potenciais",
         "registrationLinkDesc": "Link direto para clientes se registrarem sob sua conta de afiliado",
         "personalInfo": "Informações Pessoais",
-        "deliveryFeeStructure": "Estrutura de Taxas de Entrega",
+        "deliveryFeeStructure": "Taxa de entrega",
         "deliveryByAssociates": "WaveMAX Associates",
         "dynamicPricing": "Preços Dinâmicos:",
         "dynamicPricingDesc": "Seus clientes pagam o que for maior: a taxa mínima ou a taxa calculada por sacola. Você fica com 100% das taxas de entrega.",
@@ -607,7 +612,11 @@
         "taxIdType": "Tipo de ID Fiscal",
         "taxIdLast4": "ID Fiscal (Últimos 4)",
         "rejectionReason": "Motivo da Rejeição",
-        "authorizationCancelled": "A autorização foi cancelada."
+        "authorizationCancelled": "A autorização foi cancelada.",
+        "deliveryFee": "Taxa de entrega ($)",
+        "deliveryFeeDesc": "Sua taxa de entrega fixa cobrada por pedido",
+        "flatFeeTitle": "Taxa de entrega fixa:",
+        "flatFeeDesc": "Sua taxa de entrega fixa por pedido — você fica com 100% como comissão. Entre em contato para alterá-la."
       },
       "tabs": {
         "pickups": "Coletas e Entregas",

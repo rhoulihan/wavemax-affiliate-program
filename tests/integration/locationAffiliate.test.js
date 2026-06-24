@@ -88,9 +88,8 @@ describe('Location affiliates (admin manual-create)', () => {
       expect(persisted).toBeTruthy();
       expect(persisted.affiliateType).toBe('location');
       expect(persisted.isActive).toBe(true);
-      // Location affiliates charge no delivery fees by default
-      expect(persisted.minimumDeliveryFee).toBe(0);
-      expect(persisted.perBagDeliveryFee).toBe(0);
+      // Location affiliates charge no delivery fee by default (→ WaveMAX Associates default applies)
+      expect(persisted.deliveryFee).toBe(0);
       // The returned one-time secrets verify against the stored hashes
       expect(encryptionUtil.verifyPassword(
         res.body.temporaryPassword, persisted.passwordSalt, persisted.passwordHash
@@ -98,15 +97,14 @@ describe('Location affiliates (admin manual-create)', () => {
       expect(roleCodes.verifyCode(res.body.deliveryCode, persisted.affiliateDeliveryCodeHash)).toBe(true);
     });
 
-    test("accepts affiliateType 'standard' with normal fee defaults", async () => {
+    test("accepts affiliateType 'standard' with a provided flat delivery fee", async () => {
       const res = await post(createBody({
-        email: 'std@example.com', username: 'stdaff1', affiliateType: 'standard'
+        email: 'std@example.com', username: 'stdaff1', affiliateType: 'standard', deliveryFee: 25
       }));
       expect(res.status).toBe(201);
       const persisted = await Affiliate.findOne({ affiliateId: res.body.affiliateId });
       expect(persisted.affiliateType).toBe('standard');
-      expect(persisted.minimumDeliveryFee).toBe(25);
-      expect(persisted.perBagDeliveryFee).toBe(5);
+      expect(persisted.deliveryFee).toBe(25);
     });
 
     test('403 without the manage_affiliates permission', async () => {

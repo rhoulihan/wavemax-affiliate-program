@@ -66,29 +66,15 @@ const affiliateSchema = new mongoose.Schema({
   geoPlaceId: { type: String },
   geocodedAt: { type: Date },
   // Flat per-affiliate delivery fee — display-only (money lives in Cents); shown
-  // in the order-confirmation email when non-zero. 0 = no delivery fee.
+  // in the order-confirmation email when non-zero. 0 = no delivery fee (the
+  // WaveMAX-Associates `default_delivery_fee` applies; see utils/deliveryFee.js).
+  // This is the SINGLE source of truth — the V1 minimum/per-bag fee pair was
+  // removed in the 2026-06-23 audit (see docs/refactor/CODEBASE-AUDIT-2026-06-23.md).
   deliveryFee: {
     type: Number,
     default: 0,
     min: 0,
     max: 1000
-  },
-  // DEPRECATED (V1): superseded by the flat `deliveryFee` above; no longer
-  // surfaced in the admin edit UI. Kept for back-compat with affiliate
-  // dashboard/landing + bagClaimService until those are migrated.
-  minimumDeliveryFee: {
-    type: Number,
-    required: true,
-    default: 25,
-    min: 0,
-    max: 100
-  },
-  perBagDeliveryFee: {
-    type: Number,
-    required: true,
-    default: 5,
-    min: 0,
-    max: 50
   },
   // Vendor (affiliate) delivery code — short secret used to confirm door
   // deliveries on the overloaded claim URL (spec §4.6/§6.6). Verified only

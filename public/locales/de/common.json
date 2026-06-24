@@ -299,8 +299,9 @@
       "delivery": {
         "title": "Lieferung",
         "value": "${{perBagFee}}",
-        "unit": "/ Tasche",
-        "minimum": "${{minimumFee}} Minimum"
+        "unit": "/ Bestellung",
+        "minimum": "${{minimumFee}} Minimum",
+        "flat": "Pauschale"
       }
     },
     "howItWorks": {
@@ -509,7 +510,7 @@
       "confirmPasswordPlaceholder": "Passwort erneut eingeben",
       "usernamePlaceholder": "Wählen Sie einen eindeutigen Benutzernamen",
       "serviceInfo": "Serviceinformationen",
-      "deliveryFeeStructure": "Liefergebührenstruktur",
+      "deliveryFeeStructure": "Liefergebühr",
       "dynamicPricing": "Dynamische Preisgestaltung:",
       "dynamicPricingDesc": "Legen Sie eine Mindestliefergebühr und eine Gebühr pro Tasche fest. Kunden zahlen den höheren Betrag. Sie behalten 100% der Liefergebühren.",
       "minimumDeliveryFee": "Mindestliefergebühr ($) *",
@@ -528,7 +529,7 @@
       "deliveryFee": "Lieferung",
       "total": "Gesamteinnahmen",
       "yourCommission": "Ihre Provision",
-      "paymentNote": "Sie erhalten die Mindestliefergebühr oder die Gebühren pro Tasche, je nachdem, was höher ist.",
+      "paymentNote": "Ihre pauschale Liefergebühr wird einmal pro Bestellung berechnet, unabhängig von der Anzahl der Beutel.",
       "deliveryNote": "1. Lieferung: 100% der Liefergebühren gehören Ihnen",
       "commissionNote": "2. Provision: 10% des WDF-Service (30 lbs × $1.25/lb pro Tasche)",
       "totalNote": "3. Gesamteinnahmen: Liefergebühr + Provision",
@@ -555,7 +556,11 @@
       "venmoHandleHelp": "Geben Sie Ihren Venmo-Benutzernamen ein (z.B. @max-mustermann)",
       "termsAgree": "Ich stimme den",
       "submitButton": "Als Partner registrieren",
-      "alreadyHaveAccount": "Haben Sie bereits ein Konto?"
+      "alreadyHaveAccount": "Haben Sie bereits ein Konto?",
+      "deliveryFeeLabel": "Liefergebühr ($) *",
+      "deliveryFeeDesc": "Ihre pauschale Liefergebühr pro Bestellung",
+      "flatFeeTitle": "Pauschale Liefergebühr:",
+      "flatFeeDesc": "Legen Sie Ihre pauschale Liefergebühr pro Bestellung fest. Sie behalten 100 % als Provision. Setzen Sie $0, um WaveMAX Associates für Abholung und Lieferung zu nutzen."
     },
     "dashboard": {
       "title": "Partner-Dashboard",
@@ -582,7 +587,7 @@
         "landingPageDesc": "Professionelle Landingpage zur Präsentation Ihrer Dienstleistungen und Preise für potenzielle Kunden",
         "registrationLinkDesc": "Direkter Link für Kunden zur Registrierung unter Ihrem Partnerkonto",
         "personalInfo": "Persönliche Informationen",
-        "deliveryFeeStructure": "Liefergebührenstruktur",
+        "deliveryFeeStructure": "Liefergebühr",
         "deliveryByAssociates": "WaveMAX Associates",
         "dynamicPricing": "Dynamische Preisgestaltung:",
         "dynamicPricingDesc": "Ihre Kunden zahlen den höheren Betrag: die Mindestgebühr oder die berechnete Gebühr pro Tasche. Sie behalten 100% der Liefergebühren.",
@@ -607,7 +612,11 @@
         "taxIdType": "Steuer-ID-Typ",
         "taxIdLast4": "Steuer-ID (Letzte 4)",
         "rejectionReason": "Ablehnungsgrund",
-        "authorizationCancelled": "Die Autorisierung wurde abgebrochen."
+        "authorizationCancelled": "Die Autorisierung wurde abgebrochen.",
+        "deliveryFee": "Liefergebühr ($)",
+        "deliveryFeeDesc": "Ihre pauschale Liefergebühr pro Bestellung",
+        "flatFeeTitle": "Pauschale Liefergebühr:",
+        "flatFeeDesc": "Ihre pauschale Liefergebühr pro Bestellung – Sie behalten 100 % als Provision. Kontaktieren Sie uns, um sie zu ändern."
       },
       "tabs": {
         "pickups": "Abholungen & Lieferungen",

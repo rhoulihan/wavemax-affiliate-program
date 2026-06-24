@@ -299,8 +299,9 @@
       "delivery": {
         "title": "Entrega",
         "value": "${{perBagFee}}",
-        "unit": "/ bolsa",
-        "minimum": "${{minimumFee}} mínimo"
+        "unit": "/ pedido",
+        "minimum": "${{minimumFee}} mínimo",
+        "flat": "tarifa fija"
       }
     },
     "howItWorks": {
@@ -509,7 +510,7 @@
       "confirmPasswordPlaceholder": "Vuelva a ingresar su contraseña",
       "usernamePlaceholder": "Elija un nombre de usuario único",
       "serviceInfo": "Información de Servicio",
-      "deliveryFeeStructure": "Estructura de Tarifas de Entrega",
+      "deliveryFeeStructure": "Tarifa de entrega",
       "dynamicPricing": "Precios Dinámicos:",
       "dynamicPricingDesc": "Establezca una tarifa mínima de entrega y una tarifa por bolsa. Los clientes pagan la que sea mayor. Usted retiene el 100% de las tarifas de entrega.",
       "minimumDeliveryFee": "Tarifa Mínima de Entrega ($) *",
@@ -528,7 +529,7 @@
       "deliveryFee": "Entrega",
       "total": "Ganancias Totales",
       "yourCommission": "Tu Comisión",
-      "paymentNote": "Se te pagará la tarifa de entrega mínima o las tarifas por bolsa, lo que sea mayor.",
+      "paymentNote": "Su tarifa de entrega fija se cobra una vez por pedido, independientemente del número de bolsas.",
       "deliveryNote": "1. Entrega: 100% de las tarifas de entrega son para ti",
       "commissionNote": "2. Comisión: 10% del servicio WDF (30 lbs × $1.25/lb por bolsa)",
       "totalNote": "3. Ganancias Totales: Tarifa de entrega + Comisión",
@@ -555,7 +556,11 @@
       "venmoHandleHelp": "Ingrese su nombre de usuario de Venmo (ej., @juan-perez)",
       "termsAgree": "Acepto los",
       "submitButton": "Registrarse como Afiliado",
-      "alreadyHaveAccount": "¿Ya tiene una cuenta?"
+      "alreadyHaveAccount": "¿Ya tiene una cuenta?",
+      "deliveryFeeLabel": "Tarifa de entrega ($) *",
+      "deliveryFeeDesc": "Su tarifa de entrega fija cobrada por pedido",
+      "flatFeeTitle": "Tarifa de entrega fija:",
+      "flatFeeDesc": "Establezca su tarifa de entrega fija por pedido. Usted conserva el 100% como comisión. Ponga $0 para usar WaveMAX Associates para la recogida y entrega."
     },
     "dashboard": {
       "title": "Panel de Afiliado",
@@ -582,7 +587,7 @@
         "landingPageDesc": "Página de destino profesional para mostrar tus servicios y precios a clientes potenciales",
         "registrationLinkDesc": "Enlace directo para que los clientes se registren bajo tu cuenta de afiliado",
         "personalInfo": "Información Personal",
-        "deliveryFeeStructure": "Estructura de Tarifas de Entrega",
+        "deliveryFeeStructure": "Tarifa de entrega",
         "deliveryByAssociates": "WaveMAX Associates",
         "dynamicPricing": "Precios Dinámicos:",
         "dynamicPricingDesc": "Tus clientes pagan lo que sea mayor: la tarifa mínima o la tarifa calculada por bolsa. Conservas el 100% de las tarifas de entrega.",
@@ -607,7 +612,11 @@
         "taxIdType": "Tipo de ID Fiscal",
         "taxIdLast4": "ID Fiscal (Últimos 4)",
         "rejectionReason": "Razón de Rechazo",
-        "authorizationCancelled": "La autorización fue cancelada."
+        "authorizationCancelled": "La autorización fue cancelada.",
+        "deliveryFee": "Tarifa de entrega ($)",
+        "deliveryFeeDesc": "Su tarifa de entrega fija cobrada por pedido",
+        "flatFeeTitle": "Tarifa de entrega fija:",
+        "flatFeeDesc": "Su tarifa de entrega fija por pedido: usted conserva el 100% como comisión. Contáctenos para cambiarla."
       },
       "tabs": {
         "pickups": "Recogidas y Entregas",

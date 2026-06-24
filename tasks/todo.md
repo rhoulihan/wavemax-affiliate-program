@@ -41,8 +41,22 @@ Full gate running (bg4n48i8n). NOT yet committed.
        (canonical IPv6 key form; one-time bucket orphan).
      - Infra (needs Rick): nginx `set_real_ip_from <CF ranges>; real_ip_header CF-Connecting-IP;` so the
        trust is protocol-enforced, not firewall-only. Production nginx edit — confirm first.
-2. [ ] **Delivery-fee single source of truth** — collapse to the flat per-affiliate `deliveryFee`;
-   remove the V1 `minimumDeliveryFee`/`perBagDeliveryFee` fee fields end-to-end.
+2. [~] **Delivery-fee single source of truth** — CODE-COMPLETE, awaiting full gate → commit + deploy.
+   Removed V1 `minimumDeliveryFee`/`perBagDeliveryFee` end-to-end → flat `deliveryFee` (DECISION Rick:
+   flat-fee input on registration; one atomic PR). Model; affiliate/admin routes; affiliate/admin/
+   manualAffiliate controllers (2 public endpoints now use effectiveDeliveryFee); bagClaimService;
+   testRoutes; register+dashboard+landing HTML/JS; PricingPreviewComponent rewritten flat-fee; i18n×4
+   (parity 0); SPA cache-bust ?v=20260623a; factories + asserting suites flipped; ~12 test files cleaned.
+   - Adversarial review (23 agents, 4 lenses): 1 BLOCKER fixed → **legacy affiliates have deliveryFee=0
+     + real V1 values; effectiveDeliveryFee would flip them to the $10 default.** FIX: one-time backfill
+     `scripts/migrate/backfill-delivery-fee.js` (deliveryFee = perBag||min||0, then $unset V1; dry-run
+     default; tested 6/6). **DEPLOY GATE: run `npm run migrate:delivery-fee` (dry-run) then
+     `:confirm` on ONE box after git pull, before/with reload.**
+   - Review nits deferred (not blocking): orphaned V1 i18n keys → WS7; generate-sample-data.js (already
+     broken, dev-only) → WS5; manual-create defaults deliveryFee 0 (admin-managed, intentional);
+     affiliate self-update of deliveryFee still allowed (pre-existing; "read-only" is a dashboard UI
+     convenience); pre-existing dashboard JS smells (#deliveryFee dead read, listener re-init on a
+     disabled input) → opportunistic.
 3. [ ] **Order-status snapshot consistency** + DELETE the unused bulk order endpoints + monitoring
    `/status` mock removal.
 4. [ ] **Service-area / Nominatim cluster removal** front-to-back — delete `serviceAreaService`, the

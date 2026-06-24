@@ -81,8 +81,6 @@ describe('Password Validation Integration Tests', () => {
           state: 'TX',
           zipCode: '78701',
           serviceArea: 'Downtown',
-          minimumDeliveryFee: 25,
-          perBagDeliveryFee: 5,
           paymentMethod: 'check',
           termsAgreement: true
         };
@@ -132,8 +130,6 @@ describe('Password Validation Integration Tests', () => {
           state: 'TX',
           zipCode: '78701',
           serviceArea: 'Downtown',
-          minimumDeliveryFee: 25,
-          perBagDeliveryFee: 5,
           paymentMethod: 'check',
           termsAgreement: true
         };
@@ -162,8 +158,6 @@ describe('Password Validation Integration Tests', () => {
         state: 'TS',
         zipCode: '12345',
         serviceArea: 'Downtown',
-        minimumDeliveryFee: 25,
-        perBagDeliveryFee: 5,
         paymentMethod: 'check',
         termsAgreement: true
       };
@@ -198,8 +192,6 @@ describe('Password Validation Integration Tests', () => {
         state: 'TS',
         zipCode: '12345',
         serviceArea: 'Downtown',
-        minimumDeliveryFee: 25,
-        perBagDeliveryFee: 5,
         paymentMethod: 'check',
         termsAgreement: true
       };
@@ -243,8 +235,6 @@ describe('Password Validation Integration Tests', () => {
           state: 'TX',
           zipCode: '78701',
           serviceArea: 'Downtown',
-          minimumDeliveryFee: 25,
-          perBagDeliveryFee: 5,
           paymentMethod: 'check',
           termsAgreement: true
         };
@@ -458,8 +448,6 @@ describe('Password Validation Integration Tests', () => {
         state: 'RC',
         zipCode: '12345',
         serviceArea: 'Downtown',
-        minimumDeliveryFee: 25,
-        perBagDeliveryFee: 5,
         paymentMethod: 'check'
       });
       await affiliate.save();
@@ -518,8 +506,6 @@ describe('Password Validation Integration Tests', () => {
         state: 'RC',
         zipCode: '12345',
         serviceArea: 'Downtown',
-        minimumDeliveryFee: 25,
-        perBagDeliveryFee: 5,
         paymentMethod: 'check'
       });
       await affiliate.save();
@@ -575,8 +561,6 @@ describe('Password Validation Integration Tests', () => {
         state: 'LC',
         zipCode: '12345',
         serviceArea: 'Downtown',
-        minimumDeliveryFee: 25,
-        perBagDeliveryFee: 5,
         paymentMethod: 'check'
       });
       await affiliate.save();
@@ -609,8 +593,6 @@ describe('Password Validation Integration Tests', () => {
         state: 'TS',
         zipCode: '12345',
         serviceArea: 'Downtown',
-        minimumDeliveryFee: 25,
-        perBagDeliveryFee: 5,
         paymentMethod: 'check',
         termsAgreement: true
       };
@@ -654,8 +636,6 @@ describe('Password Validation Integration Tests', () => {
         state: 'EC',
         zipCode: '12345',
         serviceArea: 'Downtown',
-        minimumDeliveryFee: 25,
-        perBagDeliveryFee: 5,
         paymentMethod: 'check',
         termsAgreement: true
       };
@@ -695,8 +675,6 @@ describe('Password Validation Integration Tests', () => {
         state: 'TX',
         zipCode: '78701',
         serviceArea: 'Downtown',
-        minimumDeliveryFee: 25,
-        perBagDeliveryFee: 5,
         paymentMethod: 'check',
         termsAgreement: true
       };
@@ -728,8 +706,6 @@ describe('Password Validation Integration Tests', () => {
         state: 'UC',
         zipCode: '12345',
         serviceArea: 'Downtown',
-        minimumDeliveryFee: 25,
-        perBagDeliveryFee: 5,
         paymentMethod: 'check',
         termsAgreement: true
       };

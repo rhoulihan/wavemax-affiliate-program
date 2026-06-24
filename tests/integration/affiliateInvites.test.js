@@ -249,7 +249,6 @@ describe('Affiliate invites API', () => {
       phone: '555-5678',
       address: '456 Test St', city: 'Austin', state: 'TX', zipCode: '78701',
       serviceArea: 'Austin Area', // the plain string survives PR 2; the geo fields do NOT
-      minimumDeliveryFee: 25, perBagDeliveryFee: 5,
       username: 'newaffiliate', password: getStrongPassword('affiliate', 7),
       paymentMethod: 'check',
       ...overrides

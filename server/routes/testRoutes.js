@@ -77,8 +77,7 @@ router.post('/customer', async (req, res) => {
                 state: 'TX',
                 zipCode: '78702',
                 isActive: true,
-                minimumDeliveryFee: 1,  // Set to $1 for testing
-                perBagDeliveryFee: 1,   // Set to $1 for testing
+                deliveryFee: 1,  // Set to $1 for testing
                 paymentMethod: 'check',
                 passwordSalt: affSalt,
                 passwordHash: affHash

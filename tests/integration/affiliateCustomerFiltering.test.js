@@ -30,8 +30,7 @@ describe('Affiliate Customer Filtering Integration Tests', () => {
       state: 'TX',
       zipCode: '78701',
       serviceArea: 'Downtown',
-      minimumDeliveryFee: 25,
-      perBagDeliveryFee: 5,
+      deliveryFee: 25,
       username: 'john@testaffiliate.com',
       passwordSalt: salt,
       passwordHash: hash,
@@ -242,8 +241,7 @@ describe('Affiliate Customer Filtering Integration Tests', () => {
         lastName: testAffiliate.lastName,
         email: testAffiliate.email,
         businessName: testAffiliate.businessName,
-        minimumDeliveryFee: '$25.00',
-        perBagDeliveryFee: '$5.00'
+        deliveryFee: 25
       });
     });
 

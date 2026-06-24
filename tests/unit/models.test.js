@@ -21,8 +21,6 @@ describe('Model Tests', () => {
         state: 'TX',
         zipCode: '78701',
         serviceArea: 'Downtown Austin',
-        minimumDeliveryFee: 25,
-        perBagDeliveryFee: 5,
         username: 'johndoe',
         passwordHash: 'hashedpassword',
         passwordSalt: 'salt',
@@ -74,8 +72,6 @@ describe('Model Tests', () => {
         state: 'TX',
         zipCode: '78701',
         serviceArea: 'Downtown',
-        minimumDeliveryFee: 25,
-        perBagDeliveryFee: 5,
         paymentMethod: 'check'
       };
 
@@ -132,8 +128,6 @@ describe('Model Tests', () => {
         state: 'TX',
         zipCode: '78701',
         serviceArea: 'Downtown',
-        minimumDeliveryFee: 25,
-        perBagDeliveryFee: 5,
         paymentMethod: 'paypal',
         paypalEmail: 'paypal@example.com'
       });
@@ -158,8 +152,6 @@ describe('Model Tests', () => {
         state: 'TX',
         zipCode: '78701',
         serviceArea: 'Downtown',
-        minimumDeliveryFee: 25,
-        perBagDeliveryFee: 5,
         paymentMethod: 'venmo',
         venmoHandle: '@testuser-venmo'
       });

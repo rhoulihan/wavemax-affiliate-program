@@ -193,8 +193,7 @@ describe('Admin affiliate settings API', () => {
     expect(created.affiliateType).toBe('location');
     expect(created.serviceType).toBe('full_service');
     expect(created.orderNotificationsEnabled).toBe(true);
-    expect(created.minimumDeliveryFee).toBe(0);
-    expect(created.perBagDeliveryFee).toBe(0);
+    expect(created.deliveryFee).toBe(0);
   });
 
   it('forbids POST create for an admin lacking manage_affiliates (403)', async () => {
@@ -211,17 +210,18 @@ describe('Admin affiliate settings API', () => {
     expect(res.status).toBe(403);
   });
 
-  it('ignores deprecated V1 fee fields (minimumDeliveryFee/perBagDeliveryFee) — no longer editable here', async () => {
-    const aff = await makeAffiliate(); // defaults: minimumDeliveryFee 25, perBagDeliveryFee 5
+  it('ignores deprecated V1 fee fields (minimumDeliveryFee/perBagDeliveryFee) — removed from the schema', async () => {
+    const aff = await makeAffiliate({ deliveryFee: 7 });
     const res = await agent
       .patch(`/api/v1/administrators/affiliates/${aff.affiliateId}`)
       .set('Authorization', `Bearer ${adminToken}`)
       .set('x-csrf-token', csrfToken)
       .send({ minimumDeliveryFee: 50, perBagDeliveryFee: 25 });
-    expect(res.status).toBe(200); // accepted but the V1 fields are dropped from the whitelist
+    expect(res.status).toBe(200); // accepted, but the V1 fields no longer exist / aren't whitelisted
     const reloaded = await Affiliate.findOne({ affiliateId: aff.affiliateId });
-    expect(reloaded.minimumDeliveryFee).toBe(25); // unchanged
-    expect(reloaded.perBagDeliveryFee).toBe(5); // unchanged
+    expect(reloaded.minimumDeliveryFee).toBeUndefined(); // field removed from the schema
+    expect(reloaded.perBagDeliveryFee).toBeUndefined();
+    expect(reloaded.deliveryFee).toBe(7); // unchanged
   });
 
   it('updates the flat deliveryFee and persists', async () => {

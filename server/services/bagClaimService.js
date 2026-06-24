@@ -31,7 +31,7 @@ async function resolveClaimToken(bagToken) {
 
   if (outcome === 'unclaimed') {
     const affiliate = await Affiliate.findOne({ affiliateId: bag.affiliateId })
-      .select('affiliateId firstName lastName businessName deliveryFee minimumDeliveryFee perBagDeliveryFee city state serviceType pickupInstructions ' +
+      .select('affiliateId firstName lastName businessName deliveryFee city state serviceType pickupInstructions ' +
         'geoValidationEnabled geoRadiusMiles geoLat geoLng geoPlaceId geocodedAt address zipCode');
     if (!affiliate) return { state: 'invalid' }; // orphaned bag — treat as invalid
     return { state: 'claimable', bag, affiliate };

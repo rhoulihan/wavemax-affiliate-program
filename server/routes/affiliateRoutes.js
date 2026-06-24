@@ -23,8 +23,7 @@ router.post('/register', registrationLimiter, [
   body('email').optional({ checkFalsy: true }).isEmail().withMessage('Valid email is required'),
   body('phone').notEmpty().withMessage('Phone number is required'),
   ...registrationAddressValidation,
-  body('minimumDeliveryFee').optional().isNumeric().withMessage('Minimum delivery fee must be a number'),
-  body('perBagDeliveryFee').optional().isNumeric().withMessage('Per-bag delivery fee must be a number'),
+  body('deliveryFee').optional().isFloat({ min: 0, max: 1000 }).withMessage('Delivery fee must be a number between 0 and 1000'),
   body('username').notEmpty().withMessage('Username is required'),
   body('password').custom(customPasswordValidator()),
   body('paymentMethod').isIn(['check', 'paypal', 'venmo']).withMessage('Invalid payment method')

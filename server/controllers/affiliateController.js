@@ -20,6 +20,7 @@ const { OPEN_STATUSES } = require('../modules/orders/orderStateMachine');
 const { logAuditEvent, AuditEvents } = require('../utils/auditLogger');
 const SystemConfig = require('../models/SystemConfig');
 const roleCodes = require('../utils/roleCodes');
+const { effectiveDeliveryFee } = require('../utils/deliveryFee');
 
 /**
  * Register a new affiliate — INVITE-BOUND (spec §6.2).
@@ -52,8 +53,7 @@ exports.registerAffiliate = async (req, res) => {
       city,
       state,
       zipCode,
-      minimumDeliveryFee,
-      perBagDeliveryFee,
+      deliveryFee,
       username,
       password,
       paymentMethod,
@@ -119,8 +119,7 @@ exports.registerAffiliate = async (req, res) => {
       city,
       state,
       zipCode,
-      minimumDeliveryFee: parseFloat(minimumDeliveryFee) || 20,
-      perBagDeliveryFee: parseFloat(perBagDeliveryFee) || 5,
+      deliveryFee: parseFloat(deliveryFee) || 0,
       username,
       passwordSalt: salt,
       passwordHash: hash,
@@ -223,10 +222,8 @@ exports.getAffiliateProfile = ControllerHelpers.asyncWrapper(async (req, res) =>
     city: affiliate.city,
     state: affiliate.state,
     zipCode: affiliate.zipCode,
-    minimumDeliveryFee: Formatters.currency(affiliate.minimumDeliveryFee),
-    perBagDeliveryFee: Formatters.currency(affiliate.perBagDeliveryFee),
     // Flat per-affiliate delivery fee (raw number) — the partner's commission per
-    // order; replaces the deprecated V1 min/per-bag pair in the dashboard.
+    // order; single source of truth (the V1 min/per-bag pair was removed).
     deliveryFee: affiliate.deliveryFee || 0,
     paymentMethod: affiliate.paymentMethod,
     isActive: affiliate.isActive,
@@ -280,7 +277,7 @@ exports.updateAffiliateProfile = async (req, res) => {
     const updatableFields = [
       'firstName', 'lastName', 'phone', 'businessName',
       'address', 'city', 'state', 'zipCode',
-      'minimumDeliveryFee', 'perBagDeliveryFee', 'paymentMethod'
+      'deliveryFee', 'paymentMethod'
     ];
 
     // Update fields
@@ -944,7 +941,7 @@ exports.getPublicAffiliateInfo = async (req, res) => {
 
     // Find affiliate by code
     const affiliate = await Affiliate.findOne({ affiliateId: affiliateCode })
-      .select('firstName lastName businessName minimumDeliveryFee perBagDeliveryFee city state');
+      .select('firstName lastName businessName deliveryFee city state');
 
     if (!affiliate) {
       return res.status(404).json({
@@ -953,14 +950,14 @@ exports.getPublicAffiliateInfo = async (req, res) => {
       });
     }
 
-    // Return public information only
+    // Return public information only — the effective fee (partner's own, else the
+    // WaveMAX-Associates default) is what the customer is shown.
     res.status(200).json({
       success: true,
       firstName: affiliate.firstName,
       lastName: affiliate.lastName,
       businessName: affiliate.businessName,
-      minimumDeliveryFee: affiliate.minimumDeliveryFee,
-      perBagDeliveryFee: affiliate.perBagDeliveryFee,
+      deliveryFee: await effectiveDeliveryFee(affiliate),
       city: affiliate.city,
       state: affiliate.state
     });
@@ -980,7 +977,7 @@ exports.getPublicAffiliateInfoById = async (req, res) => {
 
     // Find affiliate by ID
     const affiliate = await Affiliate.findOne({ affiliateId: affiliateId })
-      .select('firstName lastName businessName minimumDeliveryFee perBagDeliveryFee city state');
+      .select('firstName lastName businessName deliveryFee city state');
 
     if (!affiliate) {
       return res.status(404).json({
@@ -989,8 +986,9 @@ exports.getPublicAffiliateInfoById = async (req, res) => {
       });
     }
 
-    // Calculate delivery fee (use perBagDeliveryFee if set, otherwise minimumDeliveryFee)
-    const deliveryFee = affiliate.perBagDeliveryFee || affiliate.minimumDeliveryFee || 0;
+    // The effective delivery fee: the partner's own flat fee, else the
+    // WaveMAX-Associates default (utils/deliveryFee.js).
+    const deliveryFee = await effectiveDeliveryFee(affiliate);
 
     // Return public information formatted for the success page
     res.status(200).json({
@@ -1000,8 +998,6 @@ exports.getPublicAffiliateInfoById = async (req, res) => {
         lastName: affiliate.lastName,
         businessName: affiliate.businessName,
         deliveryFee: deliveryFee,
-        minimumDeliveryFee: affiliate.minimumDeliveryFee,
-        perBagDeliveryFee: affiliate.perBagDeliveryFee,
         // Display label from city/state for the customer success page — not a service-area field
         serviceArea: `${affiliate.city}, ${affiliate.state}`
       }

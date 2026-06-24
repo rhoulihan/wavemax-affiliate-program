@@ -43,7 +43,6 @@ describe('Per-account login lockout (H-5)', () => {
         passwordHash: hash,
         businessName: 'Test', address: '1 Test', city: 'Austin',
         state: 'TX', zipCode: '78753',
-        minimumDeliveryFee: 25, perBagDeliveryFee: 5,
         paymentMethod: 'check',
         languagePreference: 'en',
         isActive: true

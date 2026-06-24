@@ -48,8 +48,7 @@ async function ensureTestAffiliate(options = {}) {
       zipCode: options.zipCode || '78701',
       paymentMethod: options.paymentMethod || 'check',
       commissionRate: options.commissionRate || 20,
-      minimumDeliveryFee: options.minimumDeliveryFee || 10,
-      perBagDeliveryFee: options.perBagDeliveryFee || 2.50,
+      deliveryFee: options.deliveryFee !== undefined ? options.deliveryFee : 10,
       isActive: true
     });
   }

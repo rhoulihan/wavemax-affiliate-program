@@ -34,8 +34,7 @@ describe('Affiliate API', () => {
       state: 'TX',
       zipCode: '12345',
       serviceArea: 'Test Area',
-      minimumDeliveryFee: 25,
-      perBagDeliveryFee: 5,
+      deliveryFee: 25,
       username: 'testaffiliate',
       passwordSalt: 'testsalt',
       passwordHash: 'testhash',
@@ -82,8 +81,7 @@ describe('Affiliate API', () => {
         state: 'TX',
         zipCode: '78701',
         serviceArea: 'Austin Area',
-        minimumDeliveryFee: 25,
-        perBagDeliveryFee: 5,
+        deliveryFee: 25,
         username: 'newaffiliate',
         password: getStrongPassword('affiliate', 1),
         paymentMethod: 'check'
@@ -112,8 +110,7 @@ describe('Affiliate API', () => {
       .set('X-CSRF-Token', csrfToken)
       .send({
         firstName: 'Updated',
-        minimumDeliveryFee: 30,
-        perBagDeliveryFee: 6
+        deliveryFee: 30
       });
 
     expect(res.statusCode).toEqual(200);
@@ -122,8 +119,7 @@ describe('Affiliate API', () => {
     // Verify the update
     const updatedAffiliate = await Affiliate.findOne({ affiliateId: testAffiliate.affiliateId });
     expect(updatedAffiliate.firstName).toBe('Updated');
-    expect(updatedAffiliate.minimumDeliveryFee).toBe(30);
-    expect(updatedAffiliate.perBagDeliveryFee).toBe(6);
+    expect(updatedAffiliate.deliveryFee).toBe(30);
   });
 
   test('should login affiliate', async () => {

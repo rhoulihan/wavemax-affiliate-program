@@ -34,7 +34,7 @@ describe('Order Integration Tests', () => {
       affiliateId: 'AFF123',
       firstName: 'John', lastName: 'Doe', email: 'john@example.com',
       phone: '555-123-4567', address: '123 Main St', city: 'Austin', state: 'TX', zipCode: '78701',
-      serviceArea: 'Downtown', minimumDeliveryFee: 25, perBagDeliveryFee: 5,
+      serviceArea: 'Downtown',
       username: 'johndoe', passwordHash: hash, passwordSalt: salt, paymentMethod: 'check'
     });
     await testAffiliate.save();

@@ -342,8 +342,7 @@ describe('Affiliate Controller', () => {
       req.body = {
         firstName: 'Jane',
         phone: '987-654-3210',
-        minimumDeliveryFee: 25,
-        perBagDeliveryFee: 5
+        deliveryFee: 25
       };
 
       Affiliate.findOne = createFindOneMock(mockAffiliate);
@@ -354,8 +353,7 @@ describe('Affiliate Controller', () => {
 
       expect(mockAffiliate.firstName).toBe('Jane');
       expect(mockAffiliate.phone).toBe('987-654-3210');
-      expect(mockAffiliate.minimumDeliveryFee).toBe(25);
-      expect(mockAffiliate.perBagDeliveryFee).toBe(5);
+      expect(mockAffiliate.deliveryFee).toBe(25);
       expect(mockAffiliate.save).toHaveBeenCalled();
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.json).toHaveBeenCalledWith({
@@ -859,8 +857,7 @@ describe('Affiliate Controller', () => {
         firstName: 'John',
         lastName: 'Doe',
         businessName: 'Johns Laundry',
-        minimumDeliveryFee: 25,
-        perBagDeliveryFee: 5,
+        deliveryFee: 25,
         city: 'New York',
         state: 'NY'
       , save: jest.fn().mockResolvedValue(true)};
@@ -880,8 +877,7 @@ describe('Affiliate Controller', () => {
       expect(response.firstName).toBe('John');
       expect(response.lastName).toBe('Doe');
       expect(response.businessName).toBe('Johns Laundry');
-      expect(response.minimumDeliveryFee).toBe(25);
-      expect(response.perBagDeliveryFee).toBe(5);
+      expect(response.deliveryFee).toBe(25);
       expect(response.email).toBeUndefined();
       expect(response.phone).toBeUndefined();
       expect(response.accountNumber).toBeUndefined();

@@ -299,8 +299,9 @@
       "delivery": {
         "title": "Delivery",
         "value": "${{perBagFee}}",
-        "unit": "/ bag",
-        "minimum": "${{minimumFee}} minimum"
+        "unit": "/ order",
+        "minimum": "${{minimumFee}} minimum",
+        "flat": "flat fee"
       }
     },
     "howItWorks": {
@@ -509,7 +510,7 @@
       "confirmPasswordPlaceholder": "Re-enter your password",
       "usernamePlaceholder": "Choose a unique username",
       "serviceInfo": "Service Information",
-      "deliveryFeeStructure": "Delivery Fee Structure",
+      "deliveryFeeStructure": "Delivery Fee",
       "dynamicPricing": "Dynamic Pricing:",
       "dynamicPricingDesc": "Set a minimum delivery fee and a per-bag fee. Customers pay whichever is higher. You keep 100% of delivery fees.",
       "minimumDeliveryFee": "Minimum Delivery Fee ($) *",
@@ -528,7 +529,7 @@
       "deliveryFee": "Delivery",
       "total": "Total Earnings",
       "yourCommission": "Your Commission",
-      "paymentNote": "You will be paid the minimum delivery fee or the per bag fees, whichever is greater.",
+      "paymentNote": "Your flat delivery fee is charged once per order, regardless of bag count.",
       "deliveryNote": "1. Delivery: 100% of delivery fees go to you",
       "commissionNote": "2. Commission: 10% of WDF service (30 lbs × $1.25/lb per bag)",
       "totalNote": "3. Total Earnings: Delivery fee + Commission",
@@ -555,7 +556,11 @@
       "venmoHandleHelp": "Enter your Venmo username (e.g., @john-doe)",
       "termsAgree": "I agree to the",
       "submitButton": "Register as an Affiliate",
-      "alreadyHaveAccount": "Already have an account?"
+      "alreadyHaveAccount": "Already have an account?",
+      "deliveryFeeLabel": "Delivery Fee ($) *",
+      "deliveryFeeDesc": "Your flat delivery fee charged per order",
+      "flatFeeTitle": "Flat delivery fee:",
+      "flatFeeDesc": "Set your flat delivery fee per order. You keep 100% of it as commission. Set $0 to use WaveMAX Associates for pickup & delivery."
     },
     "dashboard": {
       "title": "Affiliate Dashboard",
@@ -582,7 +587,7 @@
         "landingPageDesc": "Professional landing page to showcase your services and pricing to potential customers",
         "registrationLinkDesc": "Direct link for customers to register under your affiliate account",
         "personalInfo": "Personal Information",
-        "deliveryFeeStructure": "Delivery Fee Structure",
+        "deliveryFeeStructure": "Delivery Fee",
         "deliveryByAssociates": "WaveMAX Associates",
         "dynamicPricing": "Dynamic Pricing:",
         "dynamicPricingDesc": "Your customers pay whichever is higher: the minimum fee or the calculated per-bag rate. You keep 100% of delivery fees.",
@@ -607,7 +612,11 @@
         "taxIdType": "Tax ID Type",
         "taxIdLast4": "Tax ID (Last 4)",
         "rejectionReason": "Rejection Reason",
-        "authorizationCancelled": "Authorization was cancelled."
+        "authorizationCancelled": "Authorization was cancelled.",
+        "deliveryFee": "Delivery Fee ($)",
+        "deliveryFeeDesc": "Your flat delivery fee charged per order",
+        "flatFeeTitle": "Flat delivery fee:",
+        "flatFeeDesc": "Your flat delivery fee per order — you keep 100% of it as commission. Contact us to change it."
       },
       "tabs": {
         "pickups": "Pickups & Deliveries",

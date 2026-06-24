@@ -71,7 +71,7 @@ exports.createAffiliateManually = ControllerHelpers.asyncWrapper(async (req, res
     serviceType,
     orderNotificationsEnabled,
     pickupInstructions,
-    minimumDeliveryFee, perBagDeliveryFee
+    deliveryFee
   } = req.body;
 
   const normalizedEmail = String(email).toLowerCase().trim();
@@ -96,8 +96,6 @@ exports.createAffiliateManually = ControllerHelpers.asyncWrapper(async (req, res
   const deliveryCodeLength = await SystemConfig.getValue('affiliate_delivery_code_length', 6);
   const deliveryCode = roleCodes.generateNumericCode(deliveryCodeLength); // 6-digit partner staff code
 
-  // Location affiliates charge no delivery fees unless the admin says otherwise.
-  const isLocation = affiliateType === 'location';
   const affiliate = new Affiliate({
     affiliateType,
     // serviceType (pickup_location|full_service) is independent of commission
@@ -115,12 +113,9 @@ exports.createAffiliateManually = ControllerHelpers.asyncWrapper(async (req, res
     passwordHash: hash,
     paymentMethod: 'check',
     languagePreference: languagePreference || 'en',
-    minimumDeliveryFee: minimumDeliveryFee !== undefined
-      ? parseFloat(minimumDeliveryFee)
-      : (isLocation ? 0 : undefined),
-    perBagDeliveryFee: perBagDeliveryFee !== undefined
-      ? parseFloat(perBagDeliveryFee)
-      : (isLocation ? 0 : undefined),
+    // Flat per-affiliate delivery fee. Defaults to 0 (→ the WaveMAX-Associates
+    // default_delivery_fee applies); the V1 min/per-bag pair was removed.
+    deliveryFee: deliveryFee !== undefined ? parseFloat(deliveryFee) : 0,
     affiliateDeliveryCodeHash: roleCodes.hashCode(deliveryCode),
     affiliateDeliveryCodeSetAt: new Date()
   });
