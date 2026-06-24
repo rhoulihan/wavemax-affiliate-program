@@ -90,8 +90,16 @@ Full gate running (bg4n48i8n). NOT yet committed.
    companions). Kept (verified live): affiliate/customerController, qrcode.min.js, swirl-spinner,
    label-print-utils, self-serve-laundry-modern.css. Full gate 175 suites / 2791 passed; madge 0 cycles;
    deployed both boxes; verified /api/v1/test/* 404, deleted bundles 404, admin jspdf CDN intact, SPA 200.
-6. [ ] **Redundancy consolidation** — IP-gate factory + canonical `clientIp`/`reqHost`; delete the dead
-   `auth.js` XFF block; dedup `escapeHtml`/`escapeJsonForScript`/`isExempt`.
+6. [~] **Redundancy consolidation** — IP-gate factory + canonical clientIp DONE & LIVE (2026-06-24,
+   commit c35144e). New `server/middleware/ipGate.js` createIpGate factory; adminIpGate/operatorIpGate
+   thin wrappers (all exports preserved, rbac.js intact); accessGate/comingSoon/locationQuarantine/
+   franchisePreview migrated to canonical clientIp; dead spoofable auth.js XFF block removed.
+   Adversarially reviewed SOUND (net hardening). Full gate 176/2797. Deployed + verified BOTH gates in
+   prod: admin localhost→404 / admin-IP→401; operator non-store→404 / store-IP→200.
+   - [ ] **WS6b (remaining):** dedup `escapeHtml` (~9×) + `escapeJsonForScript` + `reqHost`/`isExempt`.
+   PLUS (separate, shipped same day): location-affiliate create-form fixes — added the required
+   pickupInstructions field (was a pre-existing 400, commit 079e61b) + a separate deliveryInstructions
+   field + renamed the "pickup/drop-off" label to "pickup" (commit b3645b8).
 7. [ ] **Deprecated email/config/i18n** — rewrite `sendAffiliateNewCustomerEmail` V1 copy (en/es/pt/de);
    remove dead dispatcher fns/templates; remove dead SystemConfig keys; `.env.example` Stripe/AWS/SERVICE_* removal.
 8. [ ] **Docs/tests** — handbook + EMBED_PAGES refresh; README/tests-README stats; re-enable 6 skipped
