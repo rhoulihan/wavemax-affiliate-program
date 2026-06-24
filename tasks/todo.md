@@ -81,9 +81,15 @@ Full gate running (bg4n48i8n). NOT yet committed.
    loads clean in browser (0 console errors, 0 cluster scripts, 0 /service-area calls, 0 404s), invite
    gate intact, new bundle ?v=20260624a live. (Address-step click-through not browser-tested — form is
    invite-gated — but rewire reviewed + load clean.)
-5. [ ] **Orphan sweep** — server: dead payment-email/mailcow service, OAuth/DocuSign scripts, 3 dead
-   `server.js` requires, retire `generate-sample-data.js`, remove `testRoutes` + `qrCodeGenerator` demo;
-   frontend: registration-success page, ~2.7 MB dead CSS, jspdf, dead bundles, embed-app redirect trio.
+5. [x] **Orphan sweep** — ✅ DONE & LIVE (2026-06-24, commits 9bed2c7 + earlier batch). Verified via
+   2-workflow map + per-item adversarial verification; 43 dead files removed (mailcow/payment + OAuth/
+   DocuSign scripts + generate-sample-data; helpers.js, qrCodeGenerator, testRoutes + gate + CSRF /test
+   exemptions, server/assets logos, 2 dead server.js requires [only 2 existed, not 3]; registration-success
+   + quarantine entry; 2.7 MB self-serve-laundry.css, jspdf.min.js, thermal-print-utils.js, 4 customer/
+   scheduling CSS; embed-app redirect trio + site-page-embed; 5 owner-confirmed direct-URL pages +
+   companions). Kept (verified live): affiliate/customerController, qrcode.min.js, swirl-spinner,
+   label-print-utils, self-serve-laundry-modern.css. Full gate 175 suites / 2791 passed; madge 0 cycles;
+   deployed both boxes; verified /api/v1/test/* 404, deleted bundles 404, admin jspdf CDN intact, SPA 200.
 6. [ ] **Redundancy consolidation** — IP-gate factory + canonical `clientIp`/`reqHost`; delete the dead
    `auth.js` XFF block; dedup `escapeHtml`/`escapeJsonForScript`/`isExempt`.
 7. [ ] **Deprecated email/config/i18n** — rewrite `sendAffiliateNewCustomerEmail` V1 copy (en/es/pt/de);
