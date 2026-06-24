@@ -7,9 +7,8 @@ Categorized utilities for running, maintaining, and diagnosing a WaveMAX deploym
 | Directory | Purpose | Example contents |
 |---|---|---|
 | `admin/` | Production admin tools — account management, password resets, backup/restore, rate-limit reset | `backup-database.js`, `create-admin-directly.js`, `reset-admin-password.js`, `rotate-credentials.sh` |
-| `setup/` | Development-environment and first-deploy bootstrap | `setup-database.js`, `init-defaults.js`, `init-mongo.js`, `generate-sample-data.js` |
-| `security/` | Security-critical utilities (rarely run) | `encrypt-oauth-tokens.js`, `decrypt-oauth-tokens.js`, `extract-public-key.js` |
-| `ops/` | Operational config — email (Mailcow), IMAP, log cleanup, payment interval tuning | `configure-mailcow.js`, `update-mailcow-url.js`, `clean-logs.sh`, `update-payment-interval.js` |
+| `setup/` | Development-environment and first-deploy bootstrap | `setup-database.js`, `init-defaults.js`, `init-mongo.js` |
+| `ops/` | Operational tasks — Hibu sync, log cleanup, transactional email resend | `refresh-hibu.sh`, `clean-logs.sh`, `resend-welcome-email.js` |
 | `diagnostics/` | Read-only data checks | `check-data-distribution.js`, `check-initialization.js`, `check-order-distribution.js` |
 
 ## Running scripts

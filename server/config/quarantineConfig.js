@@ -38,7 +38,6 @@ const ALLOWLIST = [
   /^\/scanbag-manifest\.json$/,     // its web app manifest
   /^\/[a-z0-9-]+-embed\.html$/,     // any *-embed.html (affiliate-login, customer-register, etc.)
   /^\/design-explorer(\/.*)?$/,     // token-gated franchisor design review tool (explorerGuard enforces EXPLORER_TOKEN)
-  /^\/registration-success\.html$/,
 
   // ── Legal/policy (required for payment processor + compliance) ───
   /^\/privacy-policy$/,

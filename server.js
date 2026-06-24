@@ -27,8 +27,6 @@ const operatorIpGate = require('./server/middleware/operatorIpGate');
 const operatorRoutes = require('./server/routes/operatorRoutes');
 const monitoringRoutes = require('./server/routes/monitoringRoutes');
 const systemConfigRoutes = require('./server/routes/systemConfigRoutes');
-const affiliateController = require('./server/controllers/affiliateController');
-const customerController = require('./server/controllers/customerController');
 
 // Create Express app
 const app = express();
@@ -984,11 +982,6 @@ apiV1Router.use('/contact', require('./server/routes/contactRoutes'));  // Per-l
 apiV1Router.use('/', require('./server/routes/corporateInquiryRoutes'));  // /corporate-contact + /franchise-lead
 apiV1Router.use('/', require('./server/routes/mapsConfigRoute'));  // /maps-config — Maps API key for corporate pages
 apiV1Router.use('/', require('./server/routes/firebaseConfigRoute'));  // /firebase-config — Firebase web config + phone-verify flag (PR 7)
-// Test routes (development only)
-if (process.env.NODE_ENV !== 'production' || process.env.ENABLE_TEST_ROUTES === 'true') {
-  const testRoutes = require('./server/routes/testRoutes');
-  apiV1Router.use('/test', testRoutes);
-}
 // Environment endpoint
 apiV1Router.get('/environment', (req, res) => {
   res.json({
