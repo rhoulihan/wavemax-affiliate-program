@@ -62,6 +62,7 @@ router.post('/affiliates',
     // trim() BEFORE notEmpty() so a whitespace-only value is rejected.
     body('pickupInstructions').trim().notEmpty().isLength({ max: 2000 })
       .withMessage('Pickup instructions are required'),
+    body('deliveryInstructions').optional({ nullable: true }).isString().trim().isLength({ max: 2000 }),
     body('deliveryFee').optional().isFloat({ min: 0, max: 1000 })
   ],
   manualAffiliateController.createAffiliateManually);

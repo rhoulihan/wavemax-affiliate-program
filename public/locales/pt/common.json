@@ -1451,7 +1451,7 @@
       "saved": "Afiliado salvo",
       "saveError": "Falha ao salvar",
       "loadError": "Falha ao carregar o afiliado",
-      "pickupInstructionsLabel": "Instruções de coleta / entrega para o cliente",
+      "pickupInstructionsLabel": "Instruções de coleta para o cliente",
       "pickupInstructionsPlaceholder": "Mostradas ao cliente após registrar uma sacola.",
       "deliveryInstructionsLabel": "Instruções de entrega",
       "deliveryInstructionsPlaceholder": "Mostradas ao cliente no e-mail de saída para entrega.",

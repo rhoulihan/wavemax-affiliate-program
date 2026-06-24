@@ -31,4 +31,14 @@ describe('admin location-affiliate create form <-> route field parity', () => {
   it('the create form has a pickupInstructions input (the field that was missing)', () => {
     expect(html).toMatch(/id="locAffPickupInstructions"/);
   });
+
+  it('the create form has a SEPARATE deliveryInstructions input + sends it', () => {
+    expect(html).toMatch(/id="locAffDeliveryInstructions"/);
+    expect(bodyBlock).toMatch(/\bdeliveryInstructions:/);
+  });
+
+  it('the pickup label no longer says "drop-off" (separate pickup vs delivery)', () => {
+    const en = require(path.join(ROOT, 'public/locales/en/common.json'));
+    expect(en.admin.affiliateSettings.pickupInstructionsLabel).not.toMatch(/drop.?off/i);
+  });
 });

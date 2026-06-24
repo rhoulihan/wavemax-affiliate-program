@@ -1451,7 +1451,7 @@
       "saved": "Afiliado guardado",
       "saveError": "No se pudo guardar",
       "loadError": "No se pudo cargar el afiliado",
-      "pickupInstructionsLabel": "Instrucciones de recogida / entrega para el cliente",
+      "pickupInstructionsLabel": "Instrucciones de recogida para el cliente",
       "pickupInstructionsPlaceholder": "Se muestran al cliente después de registrar una bolsa.",
       "deliveryInstructionsLabel": "Instrucciones de entrega",
       "deliveryInstructionsPlaceholder": "Se muestran al cliente en el correo de salida para entrega.",

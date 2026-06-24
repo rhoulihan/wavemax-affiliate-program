@@ -154,5 +154,23 @@ describe('Location affiliates (admin manual-create)', () => {
       const persisted = await Affiliate.findOne({ affiliateId: res.body.affiliateId });
       expect(persisted.pickupInstructions).toBe('Ring the bell at the side door for pickup.');
     });
+
+    test('persists deliveryInstructions on create (separate from pickup)', async () => {
+      const res = await post(createBody({
+        pickupInstructions: 'Front desk drop-off.',
+        deliveryInstructions: 'Leave with the doorman in the lobby.'
+      }));
+      expect(res.status).toBe(201);
+      const persisted = await Affiliate.findOne({ affiliateId: res.body.affiliateId });
+      expect(persisted.pickupInstructions).toBe('Front desk drop-off.');
+      expect(persisted.deliveryInstructions).toBe('Leave with the doorman in the lobby.');
+    });
+
+    test('deliveryInstructions is optional — create succeeds without it', async () => {
+      const body = createBody();
+      delete body.deliveryInstructions;
+      const res = await post(body);
+      expect(res.status).toBe(201);
+    });
   });
 });

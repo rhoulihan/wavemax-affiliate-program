@@ -1887,6 +1887,7 @@
       zipCode: value('locAffZipCode'),
       username: value('locAffUsername'),
       pickupInstructions: value('locAffPickupInstructions'),
+      deliveryInstructions: value('locAffDeliveryInstructions'),
       languagePreference: value('locAffLanguage') || 'en'
     };
     const businessName = value('locAffBusinessName');

@@ -330,10 +330,18 @@
                         </div>
                         <div class="form-row">
                             <div class="form-group" style="flex: 1 1 100%;">
-                                <label for="locAffPickupInstructions" data-i18n="admin.affiliateSettings.pickupInstructionsLabel">Customer pickup / drop-off instructions</label>
+                                <label for="locAffPickupInstructions" data-i18n="admin.affiliateSettings.pickupInstructionsLabel">Customer pickup instructions</label>
                                 <textarea id="locAffPickupInstructions" class="form-control" rows="3" maxlength="2000" required
                                           data-i18n-placeholder="admin.affiliateSettings.pickupInstructionsPlaceholder"
                                           placeholder="e.g. Drop bags at the front desk, Mon–Fri 8am–6pm."></textarea>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group" style="flex: 1 1 100%;">
+                                <label for="locAffDeliveryInstructions" data-i18n="admin.affiliateSettings.deliveryInstructionsLabel">Delivery instructions</label>
+                                <textarea id="locAffDeliveryInstructions" class="form-control" rows="3" maxlength="2000"
+                                          data-i18n-placeholder="admin.affiliateSettings.deliveryInstructionsPlaceholder"
+                                          placeholder="Shown to the customer in the out-for-delivery email."></textarea>
                             </div>
                         </div>
                         <div class="form-row">
@@ -770,7 +778,7 @@
     <!-- Label Printing Utils - Must load after QRCode and jsPDF -->
     <script src="/assets/js/label-print-utils.js" nonce="{{nonce}}"></script>
     
-    <script src="/assets/js/administrator-dashboard-init.js?v=20260624b" nonce="{{nonce}}"></script>
+    <script src="/assets/js/administrator-dashboard-init.js?v=20260624c" nonce="{{nonce}}"></script>
     <script src="/assets/js/administrator-dashboard-i18n.js" nonce="{{nonce}}"></script>
 
   <!-- Hibu Dynamic Phone Insertion — swaps the WaveMAX Austin number for a

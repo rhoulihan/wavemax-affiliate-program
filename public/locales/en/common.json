@@ -1451,7 +1451,7 @@
       "saved": "Affiliate saved",
       "saveError": "Failed to save",
       "loadError": "Failed to load affiliate",
-      "pickupInstructionsLabel": "Customer pickup / drop-off instructions",
+      "pickupInstructionsLabel": "Customer pickup instructions",
       "pickupInstructionsPlaceholder": "Shown to the customer after they register a bag.",
       "deliveryInstructionsLabel": "Delivery instructions",
       "deliveryInstructionsPlaceholder": "Shown to the customer in the out-for-delivery email.",

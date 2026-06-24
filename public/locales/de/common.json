@@ -1451,7 +1451,7 @@
       "saved": "Partner gespeichert",
       "saveError": "Speichern fehlgeschlagen",
       "loadError": "Partner konnte nicht geladen werden",
-      "pickupInstructionsLabel": "Abhol-/Abgabehinweise für Kunden",
+      "pickupInstructionsLabel": "Abholhinweise für Kunden",
       "pickupInstructionsPlaceholder": "Wird dem Kunden nach der Beutelregistrierung angezeigt.",
       "deliveryInstructionsLabel": "Lieferhinweise",
       "deliveryInstructionsPlaceholder": "Wird dem Kunden in der Lieferbenachrichtigung angezeigt.",

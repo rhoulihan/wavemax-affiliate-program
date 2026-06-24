@@ -71,6 +71,7 @@ exports.createAffiliateManually = ControllerHelpers.asyncWrapper(async (req, res
     serviceType,
     orderNotificationsEnabled,
     pickupInstructions,
+    deliveryInstructions,
     deliveryFee
   } = req.body;
 
@@ -104,6 +105,8 @@ exports.createAffiliateManually = ControllerHelpers.asyncWrapper(async (req, res
     ...(serviceType !== undefined ? { serviceType } : {}),
     ...(orderNotificationsEnabled !== undefined ? { orderNotificationsEnabled } : {}),
     pickupInstructions: String(pickupInstructions).trim(),
+    // Delivery instructions are optional (shown in the out-for-delivery email).
+    ...(deliveryInstructions !== undefined ? { deliveryInstructions: String(deliveryInstructions).trim() } : {}),
     firstName, lastName,
     email: normalizedEmail,
     phone, businessName,
