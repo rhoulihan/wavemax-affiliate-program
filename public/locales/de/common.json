@@ -517,8 +517,8 @@
       "minimumFeeDesc": "Die Mindestgebühr, die unabhängig von der Taschenanzahl erhoben wird",
       "perBagFee": "Gebühr pro Tasche ($) *",
       "perBagFeeDesc": "Gebühr für jede Wäschetasche",
-      "validateAddress": "Adresse validieren",
-      "validateAddressHelp": "Klicken Sie hier, um Ihre Adresse zu überprüfen, bevor Sie fortfahren",
+      "validateAddress": "Weiter",
+      "validateAddressHelp": "Weiter zum nächsten Schritt",
       "livePricingPreview": "Live-Preisvorschau",
       "1bag": "1 Tasche",
       "3bags": "3 Taschen",
@@ -560,7 +560,8 @@
       "deliveryFeeLabel": "Liefergebühr ($) *",
       "deliveryFeeDesc": "Ihre pauschale Liefergebühr pro Bestellung",
       "flatFeeTitle": "Pauschale Liefergebühr:",
-      "flatFeeDesc": "Legen Sie Ihre pauschale Liefergebühr pro Bestellung fest. Sie behalten 100 % als Provision. Setzen Sie $0, um WaveMAX Associates für Abholung und Lieferung zu nutzen."
+      "flatFeeDesc": "Legen Sie Ihre pauschale Liefergebühr pro Bestellung fest. Sie behalten 100 % als Provision. Setzen Sie $0, um WaveMAX Associates für Abholung und Lieferung zu nutzen.",
+      "addressIncomplete": "Bitte geben Sie Ihre vollständige Adresse ein: Straße, Stadt, Bundesland und eine 5-stellige PLZ."
     },
     "dashboard": {
       "title": "Partner-Dashboard",
@@ -1307,7 +1308,6 @@
     "loading": "Wird geladen...",
     "pleaseWait": "Bitte warten...",
     "creatingAccount": "Bitte warten Sie, während wir Ihr Konto erstellen",
-    "checkingServiceArea": "Wir prüfen, ob Ihre Adresse in unserem Servicegebiet liegt",
     "schedulingPickup": "Ihre Abholung wird geplant...",
     "confirmingPickup": "Bitte warten Sie, während wir Ihre Abholzeit bestätigen",
     "loadingDashboard": "Ihr Dashboard wird geladen...",

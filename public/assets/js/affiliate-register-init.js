@@ -1139,36 +1139,29 @@
         });
       }
 
-      // Monitor address fields and geocode when complete
+      // Advance the multi-step form once the address fields are filled. The
+      // legacy service-area (Nominatim) validation was removed — the app is
+      // invite-only nationwide, so there is no geographic gate. The server still
+      // re-validates address FORMAT on submit (registrationAddressValidation);
+      // this is just a local completeness check before revealing the next step.
       function validateAndSetAddress() {
-        console.log('[Address Validation] Using address validation component');
-        
-        // Use the new address validation component
-        if (window.affiliateAddressValidator) {
-          window.affiliateAddressValidator.validateAddress();
-        } else if (window.AddressValidationComponent) {
-          // Create validator if it doesn't exist
-          const validator = new window.AddressValidationComponent({
-            addressField: 'address',
-            cityField: 'city',
-            stateField: 'state',
-            zipField: 'zipCode',
-            validateButton: 'validateAddress',
-            onSuccess: handleAddressValidationSuccess,
-            onError: handleAddressValidationError
-          });
-          window.affiliateAddressValidator = validator;
-          validator.validateAddress();
-        } else {
-          console.error('[Address Validation] Address validation component not available');
-          alert('Address validation is temporarily unavailable. Please try again.');
+        const address = document.getElementById('address')?.value?.trim() || '';
+        const city = document.getElementById('city')?.value?.trim() || '';
+        const state = document.getElementById('state')?.value?.trim() || '';
+        const zipCode = document.getElementById('zipCode')?.value?.trim() || '';
+
+        if (!address || !city || !state || !/^\d{5}$/.test(zipCode)) {
+          const msg = (window.i18n && window.i18n.t)
+            ? window.i18n.t('affiliate.register.addressIncomplete')
+            : 'Please enter your full address: street, city, state, and a 5-digit ZIP code.';
+          alert(msg);
+          return;
         }
+        handleAddressValidationSuccess();
       }
 
-      // Handle successful address validation from the new component
-      function handleAddressValidationSuccess(data) {
-        console.log('[Address Validation] Address validation successful:', data);
-
+      // Reveal the remaining form sections once the address step is complete.
+      function handleAddressValidationSuccess() {
         // Store the validated address components
         const formAddress = document.getElementById('address')?.value?.trim() || '';
         const formCity = document.getElementById('city')?.value?.trim() || '';
@@ -1244,14 +1237,6 @@
           }
         }, 100);
       }
-
-      // Handle address validation errors from the new component
-      function handleAddressValidationError(message) {
-        console.error('[Address Validation] Address validation error:', message);
-      }
-
-      // DEPRECATED - Old address confirmation modal has been removed
-      // The new address validation component handles all validation with strict requirements
 
       // Make validation function globally accessible
       window.validateAndSetAddress = validateAndSetAddress;

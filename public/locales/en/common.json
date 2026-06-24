@@ -517,8 +517,8 @@
       "minimumFeeDesc": "The minimum fee charged regardless of bag count",
       "perBagFee": "Per-Bag Fee ($) *",
       "perBagFeeDesc": "Fee charged for each bag of laundry",
-      "validateAddress": "Validate Address",
-      "validateAddressHelp": "Click to verify your address before continuing",
+      "validateAddress": "Continue",
+      "validateAddressHelp": "Continue to the next step",
       "livePricingPreview": "Live Pricing Preview",
       "1bag": "1 bag",
       "3bags": "3 bags",
@@ -560,7 +560,8 @@
       "deliveryFeeLabel": "Delivery Fee ($) *",
       "deliveryFeeDesc": "Your flat delivery fee charged per order",
       "flatFeeTitle": "Flat delivery fee:",
-      "flatFeeDesc": "Set your flat delivery fee per order. You keep 100% of it as commission. Set $0 to use WaveMAX Associates for pickup & delivery."
+      "flatFeeDesc": "Set your flat delivery fee per order. You keep 100% of it as commission. Set $0 to use WaveMAX Associates for pickup & delivery.",
+      "addressIncomplete": "Please enter your full address: street, city, state, and a 5-digit ZIP code."
     },
     "dashboard": {
       "title": "Affiliate Dashboard",
@@ -1307,7 +1308,6 @@
     "loading": "Loading...",
     "pleaseWait": "Please wait...",
     "creatingAccount": "Please wait while we create your account",
-    "checkingServiceArea": "Checking if your address is within our service area",
     "schedulingPickup": "Scheduling your pickup...",
     "confirmingPickup": "Please wait while we confirm your pickup time",
     "loadingDashboard": "Loading your dashboard...",

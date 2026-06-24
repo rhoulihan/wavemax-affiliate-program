@@ -27,7 +27,6 @@ const operatorIpGate = require('./server/middleware/operatorIpGate');
 const operatorRoutes = require('./server/routes/operatorRoutes');
 const monitoringRoutes = require('./server/routes/monitoringRoutes');
 const systemConfigRoutes = require('./server/routes/systemConfigRoutes');
-const serviceAreaRoutes = require('./server/routes/serviceAreaRoutes');
 const affiliateController = require('./server/controllers/affiliateController');
 const customerController = require('./server/controllers/customerController');
 
@@ -980,7 +979,6 @@ apiV1Router.use('/orders', orderRoutes);
 apiV1Router.use('/administrators', adminIpGate, administratorRoutes);
 apiV1Router.use('/operators', operatorRoutes);
 apiV1Router.use('/system/config', systemConfigRoutes);
-apiV1Router.use('/service-area', serviceAreaRoutes);  // Service area and location validation
 apiV1Router.use('/location', require('./server/routes/locationRoutes'));  // Per-location reads (reviews, etc.)
 apiV1Router.use('/contact', require('./server/routes/contactRoutes'));  // Per-location contact-form submissions
 apiV1Router.use('/', require('./server/routes/corporateInquiryRoutes'));  // /corporate-contact + /franchise-lead

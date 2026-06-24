@@ -517,8 +517,8 @@
       "minimumFeeDesc": "La tarifa mínima cobrada independientemente del número de bolsas",
       "perBagFee": "Tarifa por Bolsa ($) *",
       "perBagFeeDesc": "Tarifa cobrada por cada bolsa de lavandería",
-      "validateAddress": "Validar Dirección",
-      "validateAddressHelp": "Haga clic para verificar su dirección antes de continuar",
+      "validateAddress": "Continuar",
+      "validateAddressHelp": "Continuar al siguiente paso",
       "livePricingPreview": "Vista Previa de Precios en Vivo",
       "1bag": "1 bolsa",
       "3bags": "3 bolsas",
@@ -560,7 +560,8 @@
       "deliveryFeeLabel": "Tarifa de entrega ($) *",
       "deliveryFeeDesc": "Su tarifa de entrega fija cobrada por pedido",
       "flatFeeTitle": "Tarifa de entrega fija:",
-      "flatFeeDesc": "Establezca su tarifa de entrega fija por pedido. Usted conserva el 100% como comisión. Ponga $0 para usar WaveMAX Associates para la recogida y entrega."
+      "flatFeeDesc": "Establezca su tarifa de entrega fija por pedido. Usted conserva el 100% como comisión. Ponga $0 para usar WaveMAX Associates para la recogida y entrega.",
+      "addressIncomplete": "Ingrese su dirección completa: calle, ciudad, estado y un código postal de 5 dígitos."
     },
     "dashboard": {
       "title": "Panel de Afiliado",
@@ -1307,7 +1308,6 @@
     "loading": "Cargando...",
     "pleaseWait": "Por favor espera...",
     "creatingAccount": "Espera mientras creamos tu cuenta",
-    "checkingServiceArea": "Comprobando si tu dirección está dentro de nuestra zona de servicio",
     "schedulingPickup": "Programando tu recogida...",
     "confirmingPickup": "Espera mientras confirmamos la hora de tu recogida",
     "loadingDashboard": "Cargando tu panel...",
