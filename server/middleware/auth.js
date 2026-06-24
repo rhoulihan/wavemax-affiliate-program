@@ -40,13 +40,6 @@ exports.authenticate = async (req, res, next) => {
       });
     }
 
-    // Get client IP first
-    const clientIP = req.headers['x-forwarded-for'] || 
-                    req.headers['x-real-ip'] || 
-                    req.connection.remoteAddress ||
-                    req.socket.remoteAddress ||
-                    req.ip;
-    
     // Verify token normally - no special handling for store IPs.
     // Algorithm is pinned to HS256 (matches authTokenService.js which
     // signs with the same default). Without this, a future jsonwebtoken

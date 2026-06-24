@@ -9,16 +9,12 @@
 // franchise/marketing pages stay held). To take the whole site live, remove
 // the host below and redeploy.
 const storeIPs = require('../config/storeIPs');
+const { clientIp } = require('../utils/clientIp');
 
 const COMING_SOON_HOSTS = ['rundberglaundry.com', 'www.rundberglaundry.com'];
 
 function reqHost(req) {
   return String(req.headers['x-forwarded-host'] || req.headers.host || '').toLowerCase().split(':')[0].trim();
-}
-
-// Real client IP behind Cloudflare -> nginx; normalize IPv4-mapped IPv6.
-function clientIp(req) {
-  return String((req.headers && req.headers['cf-connecting-ip']) || req.ip || '').trim().replace(/^::ffff:/, '');
 }
 
 // The store location (STORE_IP_ADDRESS + ADDITIONAL_STORE_IPS + STORE_IP_RANGES,

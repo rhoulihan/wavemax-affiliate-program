@@ -17,6 +17,7 @@ const crypto = require('crypto');
 const FranchisePreviewRequest = require('../models/FranchisePreviewRequest');
 const gbp = require('../services/gbpService');
 const { verifyTurnstile } = require('../utils/turnstile');
+const { clientIp } = require('../utils/clientIp');
 const { sendPreviewUnlockEmail } = require('../services/franchisePreviewEmail');
 const { hashPassword, verifyPassword } = require('../utils/encryption');
 const { DISCLAIMER_VERSION } = require('../config/franchisePreviewCopy');
@@ -61,7 +62,6 @@ function unlockThrottled(key) {
 
 function enabled() { return process.env.FRANCHISE_PREVIEW_ENABLED === 'true'; }
 function isPreviewHost(req) { return PREVIEW_HOSTS.has(String(req.hostname || '').toLowerCase()); }
-function clientIp(req) { return String(req.headers['cf-connecting-ip'] || req.ip || ''); }
 function cleanLink(s) { return String(s || '').replace(/&amp;/g, '&').trim(); }
 
 function slugify(s) {

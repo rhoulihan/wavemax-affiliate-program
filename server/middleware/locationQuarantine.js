@@ -27,11 +27,12 @@ const {
 const { readHTMLWithNonce } = require('../utils/cspHelper');
 const storeIPs = require('../config/storeIPs');
 const logger = require('../utils/logger');
+const { clientIp } = require('../utils/clientIp');
 
 // The store location (STORE_IP_ADDRESS + ADDITIONAL_STORE_IPS + STORE_IP_RANGES,
 // IPv4 and the store's IPv6 /64) is a trusted origin — never quarantine it.
 function isStoreReq(req) {
-  const ip = String((req.headers && req.headers['cf-connecting-ip']) || req.ip || '').trim().replace(/^::ffff:/, '');
+  const ip = clientIp(req);
   return !!ip && storeIPs.isWhitelisted(ip);
 }
 

@@ -31,6 +31,7 @@
 const crypto = require('crypto');
 const { verifyPassword } = require('../utils/encryption');
 const logger = require('../utils/logger');
+const { clientIp } = require('../utils/clientIp');
 const { sendEmail } = require('../services/email/transport');
 const AccessGate = require('../models/AccessGate');
 const AccessWhitelist = require('../models/AccessWhitelist');
@@ -80,9 +81,6 @@ function startCacheRefresh() {
   if (refreshTimer.unref) refreshTimer.unref();
 }
 
-function clientIp(req) {
-  return String(req.headers['cf-connecting-ip'] || req.ip || '').trim();
-}
 
 function reqHost(req) {
   return String(req.headers['x-forwarded-host'] || req.headers.host || '').toLowerCase().split(':')[0].trim();
