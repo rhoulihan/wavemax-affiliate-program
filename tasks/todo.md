@@ -71,8 +71,16 @@ Full gate running (bg4n48i8n). NOT yet committed.
    + updateOrderStatus both use it; out_for_delivery freezes deliveryFeeCharged+orderTotal, 400 on bad
    total). Single-order PUT/cancel KEPT+fixed (external callers unverifiable). Adversarial review (13
    agents): 1 blocker (monitoring exposure) fixed; nit (dead test-scaffolding bulk refs) left.
-4. [ ] **Service-area / Nominatim cluster removal** front-to-back — delete `serviceAreaService`, the
-   `locationValidation` validator fns + import, any remaining Nominatim/geocode-by-radius legacy.
+4. [x] **Service-area / Nominatim cluster removal** — ✅ DONE & LIVE (2026-06-24, commit 1aa286e). Mapped
+   (3-lens workflow) + adversarially reviewed (3-lens, SOUND). Deleted 10 files (serviceAreaRoutes,
+   serviceAreaService, addressValidationService, data/service-area.json, generate-service-area.js, 3
+   frontend JS, 2 tests); edited server.js/csrf/locationValidation (kept shared format validators +
+   handleValidationErrors) + register form (address step → synchronous "Continue", no /service-area) +
+   pageScripts/min/i18n. KEEP-set (Google geo gate, gbpToLocationData, claim.outsideServiceArea) intact.
+   Full gate 178 suites / 2841 passed. Deployed both boxes; verified: /service-area 404, register page
+   loads clean in browser (0 console errors, 0 cluster scripts, 0 /service-area calls, 0 404s), invite
+   gate intact, new bundle ?v=20260624a live. (Address-step click-through not browser-tested — form is
+   invite-gated — but rewire reviewed + load clean.)
 5. [ ] **Orphan sweep** — server: dead payment-email/mailcow service, OAuth/DocuSign scripts, 3 dead
    `server.js` requires, retire `generate-sample-data.js`, remove `testRoutes` + `qrCodeGenerator` demo;
    frontend: registration-success page, ~2.7 MB dead CSS, jspdf, dead bundles, embed-app redirect trio.
