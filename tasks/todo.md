@@ -41,7 +41,11 @@ Full gate running (bg4n48i8n). NOT yet committed.
        (canonical IPv6 key form; one-time bucket orphan).
      - Infra (needs Rick): nginx `set_real_ip_from <CF ranges>; real_ip_header CF-Connecting-IP;` so the
        trust is protocol-enforced, not firewall-only. Production nginx edit — confirm first.
-2. [~] **Delivery-fee single source of truth** — CODE-COMPLETE, awaiting full gate → commit + deploy.
+2. [x] **Delivery-fee single source of truth** — ✅ DONE & LIVE (2026-06-23, commit a1c2b0d). Full gate
+   179 suites / 2890 passed (+ migration suite 6/6). Deployed both boxes; migration ran on the shared
+   ADB (0 backfills — the 1 affiliate's $10 preserved; 1 orphan-V1 doc cleaned → 0 V1-bearing docs).
+   CF-edge verified: register/claim/dashboard render 200; register has the flat deliveryFee input + 0 V1;
+   pricing-preview + bundle live at ?v=20260623a.
    Removed V1 `minimumDeliveryFee`/`perBagDeliveryFee` end-to-end → flat `deliveryFee` (DECISION Rick:
    flat-fee input on registration; one atomic PR). Model; affiliate/admin routes; affiliate/admin/
    manualAffiliate controllers (2 public endpoints now use effectiveDeliveryFee); bagClaimService;
