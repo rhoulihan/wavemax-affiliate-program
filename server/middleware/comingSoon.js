@@ -1,5 +1,7 @@
-// Public "coming soon" placeholder for rundberglaundry.com while the site is held
-// pending the Section 6.1(a) approval. It serves the SAME page to everyone —
+// Public "coming soon" placeholder for the held Austin per-location domains
+// (rundberglaundry.com, runberglaundry.com, atxwashateria.com, atxwashdryfold.com)
+// while the sites are held pending the Section 6.1(a) approval. It serves the SAME
+// page (map + "Coming soon") to everyone —
 // users and crawlers alike — so there is no cloaking; the page is marked noindex
 // so it is not discoverable while held. Exempt paths pass through to normal
 // handling: the privacy policy, the API, ACME cert renewal, static assets (so
@@ -11,7 +13,12 @@
 const storeIPs = require('../config/storeIPs');
 const { clientIp } = require('../utils/clientIp');
 
-const COMING_SOON_HOSTS = ['rundberglaundry.com', 'www.rundberglaundry.com'];
+const COMING_SOON_HOSTS = [
+  'rundberglaundry.com', 'www.rundberglaundry.com',
+  'runberglaundry.com', 'www.runberglaundry.com',
+  'atxwashateria.com', 'www.atxwashateria.com',
+  'atxwashdryfold.com', 'www.atxwashdryfold.com'
+];
 
 function reqHost(req) {
   return String(req.headers['x-forwarded-host'] || req.headers.host || '').toLowerCase().split(':')[0].trim();

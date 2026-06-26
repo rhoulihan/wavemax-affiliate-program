@@ -37,6 +37,19 @@ describe('comingSoon middleware', () => {
     }
   });
 
+  it('also holds the other Austin per-location domains (atxwashateria, atxwashdryfold, runberglaundry + www)', () => {
+    for (const host of [
+      'atxwashateria.com', 'www.atxwashateria.com',
+      'atxwashdryfold.com', 'www.atxwashdryfold.com',
+      'runberglaundry.com', 'www.runberglaundry.com'
+    ]) {
+      const req = mkReq({ host: undefined, headers: { host }, path: '/' }); const res = mkRes(); const next = jest.fn();
+      comingSoon(req, res, next);
+      expect(next).not.toHaveBeenCalled();
+      expect(res.status).toHaveBeenCalledWith(200);
+    }
+  });
+
   it('lets exempt paths through to normal handling (privacy/api/well-known/assets/favicon/robots)', () => {
     for (const path of [
       '/privacy-policy', '/privacy-policy/', '/privacy-policy.html', '/terms-and-conditions',
