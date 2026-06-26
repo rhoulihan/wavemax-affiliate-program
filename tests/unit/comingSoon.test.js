@@ -20,9 +20,12 @@ describe('comingSoon middleware', () => {
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.headers['X-Robots-Tag']).toBe('noindex, nofollow');
     const html = res.send.mock.calls[0][0];
-    expect(html).toContain('coming soon');
+    expect(html).toMatch(/coming soon/i);
     expect(html).toContain('noindex, nofollow'); // meta tag too
     expect(html).not.toContain('<script'); // self-contained, no script (CSP-clean)
+    // De-WaveMAX'd: only the Google map + a "Coming soon" label remain.
+    expect(html).toContain('google.com/maps');
+    expect(html).not.toMatch(/wavemax/i);
   });
 
   it('serves the same page on www.rundberglaundry.com and for any non-exempt path', () => {
