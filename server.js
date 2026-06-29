@@ -554,13 +554,15 @@ app.use(compression());
 const accessGate = require('./server/middleware/accessGate');
 app.use(accessGate);
 
-// Coming-soon placeholder for rundberglaundry.com (held pending the Section 6.1(a)
-// approval). Public + noindex (no cloaking); runs before the location quarantine
-// and content routes so it covers every marketing path. Exempt paths (privacy
-// policy, API/health, .well-known, assets, favicon/robots/
-// sitemap) pass through to normal handling. crhsent.com is unaffected (gated above).
-const comingSoon = require('./server/middleware/comingSoon');
-app.use(comingSoon);
+// Partner-program landing page for the Austin per-location domains
+// (rundberglaundry.com + the runberg/atxwashateria/atxwashdryfold aliases).
+// Indexable public recruitment page for the pickup/delivery partner program;
+// runs before the location quarantine and content routes so it covers every
+// marketing path and prevents any other host handler from leaking onto these
+// domains. Exempt paths (API, .well-known, assets, locales, app surfaces,
+// favicon/robots/sitemap) pass through. crhsent.com is unaffected (gated above).
+const partnerLanding = require('./server/middleware/partnerLanding');
+app.use(partnerLanding);
 
 // ---- crhsent.com — first-class app page, mounted AFTER the access gate so the
 // gate fronts the CRHS content (gated when access_gate_enabled=true). Served
@@ -980,6 +982,7 @@ apiV1Router.use('/system/config', systemConfigRoutes);
 apiV1Router.use('/location', require('./server/routes/locationRoutes'));  // Per-location reads (reviews, etc.)
 apiV1Router.use('/contact', require('./server/routes/contactRoutes'));  // Per-location contact-form submissions
 apiV1Router.use('/', require('./server/routes/corporateInquiryRoutes'));  // /corporate-contact + /franchise-lead
+apiV1Router.use('/', require('./server/routes/partnerInquiryRoutes'));  // /partner-inquiry
 apiV1Router.use('/', require('./server/routes/mapsConfigRoute'));  // /maps-config — Maps API key for corporate pages
 apiV1Router.use('/', require('./server/routes/firebaseConfigRoute'));  // /firebase-config — Firebase web config + phone-verify flag (PR 7)
 // Environment endpoint

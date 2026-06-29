@@ -57,11 +57,11 @@ describe('/scanbag mobile PWA', () => {
     expect(manifest.icons.some(i => /192/.test(i.sizes))).toBe(true);
   });
 
-  describe('gate exemptions (reachable on the held rundberglaundry.com host)', () => {
-    const comingSoon = require('../../server/middleware/comingSoon');
+  describe('gate exemptions (reachable on the rundberglaundry.com partner-landing host)', () => {
+    const partnerLanding = require('../../server/middleware/partnerLanding');
     const quarantine = require('../../server/config/quarantineConfig');
     for (const p of ['/scanbag', '/scanbag/', '/scanbag-sw.js', '/scanbag-manifest.json']) {
-      it(`coming-soon exempts ${p}`, () => expect(comingSoon._isExempt(p)).toBe(true));
+      it(`partner-landing exempts ${p}`, () => expect(partnerLanding._isExempt(p)).toBe(true));
       it(`quarantine allows ${p}`, () => expect(quarantine.isAllowed(p)).toBe(true));
     }
   });

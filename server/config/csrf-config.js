@@ -84,7 +84,15 @@ const CSRF_CONFIG = {
     // Customer self-service edit (Edit my info) — authorized by the same
     // scan-session token (x-scan-session header), no ambient cookie, same
     // CSRF rationale as the scan engine above.
-    '/api/v1/customers/me'
+    '/api/v1/customers/me',
+
+    // Partner-program inquiry form — public marketing landing on the
+    // per-location domains. Credential-free, no ambient cookie/session, so a
+    // forged POST gains an attacker nothing (same rationale as /api/concierge
+    // above). Abuse is bounded by contactFormBurstLimiter + contactFormLimiter
+    // on the route. Lets the static cached page submit with a plain fetch.
+    '/api/v1/partner-inquiry',
+    '/api/partner-inquiry'
   ],
 
   // Authentication endpoints - will add rate limiting instead of CSRF

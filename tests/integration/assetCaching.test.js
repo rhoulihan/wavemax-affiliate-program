@@ -43,10 +43,10 @@ describe('Static asset caching — /assets immutable', () => {
   });
 
   it('does NOT immutable-cache the franchise host HTML', async () => {
-    // Use the default request host: rundberglaundry.com is now held behind the
-    // comingSoon middleware, which serves a no-store placeholder for non-exempt
+    // Use the default request host: the rundberglaundry.com family is served the
+    // partner-program landing page by the partnerLanding middleware for non-exempt
     // paths and never reaches the franchise controller. The franchise HTML is
-    // served identically on any non-held host, so omit the Host override.
+    // served identically on any other host, so omit the Host override.
     const res = await request(app).get('/austin-tx/');
     expect(res.status).toBe(200);
     expect(res.headers['cache-control'] || '').not.toMatch(/immutable/);
