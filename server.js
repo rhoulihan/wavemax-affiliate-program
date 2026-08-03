@@ -983,6 +983,7 @@ apiV1Router.use('/location', require('./server/routes/locationRoutes'));  // Per
 apiV1Router.use('/contact', require('./server/routes/contactRoutes'));  // Per-location contact-form submissions
 apiV1Router.use('/', require('./server/routes/corporateInquiryRoutes'));  // /corporate-contact + /franchise-lead
 apiV1Router.use('/', require('./server/routes/partnerInquiryRoutes'));  // /partner-inquiry
+apiV1Router.use('/', require('./server/routes/affiliateApplicationRoutes'));  // /affiliate-application
 apiV1Router.use('/', require('./server/routes/mapsConfigRoute'));  // /maps-config — Maps API key for corporate pages
 apiV1Router.use('/', require('./server/routes/firebaseConfigRoute'));  // /firebase-config — Firebase web config + phone-verify flag (PR 7)
 // Environment endpoint
@@ -1044,6 +1045,11 @@ app.get(['/contact', '/contact/'], (req, res) => {
 });
 app.get(['/laundromat-investment-guide', '/laundromat-investment-guide/'], (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'laundromat-investment-guide.html'));
+});
+// Public UT-student affiliate recruitment landing page (rundberglaundry.com/affiliate).
+// Exempted from partnerLanding + the quarantine allowlist so it is fully public.
+app.get(['/affiliate', '/affiliate/'], (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'affiliate.html'));
 });
 
 // Per-franchise dynamic routes — Phase 5a. Mounted AFTER /api/* and the

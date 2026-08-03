@@ -87,7 +87,7 @@ describe('partnerLanding — preview gate', () => {
       '/locales/es/common.json',
       '/.well-known/acme-challenge/abc',
       '/favicon.ico', '/robots.txt', '/sitemap.xml',
-      '/embed-app-v2.html', '/admin', '/operator', '/scanbag',
+      '/embed-app-v2.html', '/admin', '/operator', '/scanbag', '/affiliate', '/affiliate/',
       '/privacy-policy', '/terms-and-conditions',
     ]) {
       const res = mkRes(); const next = jest.fn();

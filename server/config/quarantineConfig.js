@@ -33,6 +33,7 @@ const ALLOWLIST = [
   /^\/embed-app(-v2)?\.html$/,      // SPA shell
   /^\/admin\/?$/,                   // clean admin URL (IP-gated by adminIpGate; must reach its handler, not redirect to corporate)
   /^\/operator\/?$/,                // clean operator URL (IP-gated by operatorIpGate; must reach its handler)
+  /^\/affiliate\/?$/,               // public UT-student affiliate recruitment landing page
   /^\/scanbag\/?$/,                 // mobile bag-scanner PWA (public; hands off to /claim)
   /^\/scanbag-sw\.js$/,             // its service worker
   /^\/scanbag-manifest\.json$/,     // its web app manifest

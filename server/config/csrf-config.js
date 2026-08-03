@@ -92,7 +92,12 @@ const CSRF_CONFIG = {
     // above). Abuse is bounded by contactFormBurstLimiter + contactFormLimiter
     // on the route. Lets the static cached page submit with a plain fetch.
     '/api/v1/partner-inquiry',
-    '/api/partner-inquiry'
+    '/api/partner-inquiry',
+
+    // Affiliate application form — same rationale as partner-inquiry above
+    // (credential-free public form, rate-limited on the route).
+    '/api/v1/affiliate-application',
+    '/api/affiliate-application'
   ],
 
   // Authentication endpoints - will add rate limiting instead of CSRF
