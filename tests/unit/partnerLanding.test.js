@@ -88,6 +88,7 @@ describe('partnerLanding — preview gate', () => {
       '/.well-known/acme-challenge/abc',
       '/favicon.ico', '/robots.txt', '/sitemap.xml',
       '/embed-app-v2.html', '/admin', '/operator', '/scanbag', '/affiliate', '/affiliate/',
+      '/wavemax-affiliate', '/wavemax-affiliate/',
       '/privacy-policy', '/terms-and-conditions',
     ]) {
       const res = mkRes(); const next = jest.fn();

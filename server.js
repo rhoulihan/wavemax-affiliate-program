@@ -1051,6 +1051,10 @@ app.get(['/laundromat-investment-guide', '/laundromat-investment-guide/'], (req,
 app.get(['/affiliate', '/affiliate/'], (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'affiliate.html'));
 });
+// WaveMAX-themed generic affiliate interest form (for ad campaigns).
+app.get(['/wavemax-affiliate', '/wavemax-affiliate/'], (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'wavemax-affiliate.html'));
+});
 
 // Per-franchise dynamic routes — Phase 5a. Mounted AFTER /api/* and the
 // static middleware so unknown slugs fall through to a 404 instead of

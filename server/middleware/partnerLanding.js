@@ -98,6 +98,7 @@ function isExempt(p) {
     p === '/admin' || p === '/admin/' ||     // clean admin URL (IP-gated)
     p === '/operator' || p === '/operator/' || // clean operator URL (IP-gated)
     p === '/affiliate' || p === '/affiliate/' || // public UT-student affiliate recruitment page
+    p === '/wavemax-affiliate' || p === '/wavemax-affiliate/' || // public WaveMAX-themed affiliate interest page (ads)
     p === '/scanbag' || p === '/scanbag/' ||   // mobile bag-scanner PWA
     p === '/scanbag-sw.js' || p === '/scanbag-manifest.json' || // its service worker + manifest
     p.endsWith('-embed.html') ||
