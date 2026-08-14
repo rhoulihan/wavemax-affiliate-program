@@ -254,3 +254,7 @@ bing_austin.md
 # Lighthouse / Chrome temp profiles (WSL maps Windows AppData paths into the tree)
 C:\\Users*
 lighthouse.*
+
+# Created when ${CLAUDE_PLUGIN_DATA} is left unexpanded — a literal directory
+# name, not a real path. Holds a stray SQLcl install; never part of the repo.
+${CLAUDE_PLUGIN_DATA}/
