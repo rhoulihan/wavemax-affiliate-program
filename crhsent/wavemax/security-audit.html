@@ -31,7 +31,7 @@
       <li><a href="#method">Methodology &amp; tools used</a></li>
       <li><a href="#links">Broken anchor links on the franchise-conversion page</a></li>
       <li><a href="#js">JavaScript crash on every page load — and why the menu won't close</a></li>
-      <li><a href="#html">HTML validity — 1,886 W3C errors across 4 franchise pages</a></li>
+      <li><a href="#html">HTML validity — ~1,790 W3C errors across 4 franchise pages</a></li>
       <li><a href="#sec">Security headers &amp; CORS — the OWASP-class misconfigurations</a></li>
       <li><a href="#perf">Performance — Google PageSpeed Insights</a></li>
       <li><a href="#seo">SEO — zero local-business schema across the network</a></li>
@@ -95,15 +95,15 @@ window.jQuery=jQuery, window.$=jQuery;   // a stand-in — no .on(), no .ajax(),
 
 <section id="html">
   <div class="wrap">
-    <h2 class="sec">4. HTML validity — 1,886 W3C errors across 4 pages</h2>
+    <h2 class="sec">4. HTML validity — ~1,790 W3C errors across 4 pages</h2>
     <p>The <code>html-validate</code> validator (W3C-aligned) returns the following error counts (severity = error, not warnings) on the four English franchise pages:</p>
     <table class="cmp">
       <thead><tr><th>Page</th><th>Errors</th><th>Notable</th></tr></thead>
       <tbody>
-        <tr><td><code>/become-a-franchisee/</code></td><td class="theirs">✗ 539</td><td>14 element-permitted-content violations</td></tr>
-        <tr><td><code>/laundromat-investment-guide/</code></td><td class="theirs">✗ 505</td><td>same template, same flaws</td></tr>
-        <tr><td><code>/why-invest-in-wavemax/</code></td><td class="theirs">✗ 448</td><td>same template</td></tr>
-        <tr><td><code>/franchise/</code></td><td class="theirs">✗ 394</td><td><strong>38 stray <code>&lt;/p&gt;</code></strong> end tags + 17 element-permitted-content</td></tr>
+        <tr><td><code>/become-a-franchisee/</code></td><td class="theirs">✗ 504</td><td>&lt;style&gt;-in-&lt;body&gt; + inline-style + permitted-content</td></tr>
+        <tr><td><code>/laundromat-investment-guide/</code></td><td class="theirs">✗ 489</td><td>same template, same flaws</td></tr>
+        <tr><td><code>/why-invest-in-wavemax/</code></td><td class="theirs">✗ 440</td><td>same template</td></tr>
+        <tr><td><code>/franchise/</code></td><td class="theirs">✗ 357</td><td>stray end tags (close-order) + permitted-content</td></tr>
       </tbody>
     </table>
     <p><strong>Template-level structural defects on every page</strong> — line numbers identical across all four pages, which is how you know it's a shared (broken) template, not isolated mistakes:</p>
@@ -143,7 +143,7 @@ window.jQuery=jQuery, window.$=jQuery;   // a stand-in — no .on(), no .ajax(),
       <p style="margin:0 0 8px">The first three rows of the table above (CSP, HSTS, X-Frame-Options / frame-ancestors) together permit any third party to embed any franchisee's location page on any attacker-controlled domain with a hostile overlay. We built a watermarked, educational demonstration that loads the real <code>wavemaxlaundry.com/austin-tx/</code> page in an iframe and walks through the attack mechanics — including a side-by-side comparison with a properly-configured site the browser refuses to embed.</p>
       <p style="margin:0"><a class="btn" id="demo-btn" href="/wavemax/clickjacking-demo.html">View the live clickjacking demonstration →</a></p>
     </div>
-    <p class="pb-foot"><strong>Verify it yourself:</strong> <code>curl -sI https://wavemaxlaundry.com/</code> and read the response headers. Or paste <code>wavemaxlaundry.com</code> into <a href="https://securityheaders.com/?q=wavemaxlaundry.com" target="_blank" rel="noopener">securityheaders.com</a> for the public scorecard.</p>
+    <p class="pb-foot"><strong>Verify it yourself:</strong> <code>curl -sI https://wavemaxlaundry.com/</code> and read the response headers. Or paste <code>wavemaxlaundry.com</code> into <a href="https://securityheaders.com/?q=wavemaxlaundry.com" target="_blank" rel="noopener">securityheaders.com</a> for the public scorecard. <strong>Re-verified live 2026-08-21:</strong> the platform still returns <em>zero</em> of the six standard security headers, and <code>/wp-json/</code> still reflects an arbitrary <code>Origin</code> with <code>Access-Control-Allow-Credentials: true</code>.</p>
   </div>
 </section>
 
@@ -170,9 +170,9 @@ window.jQuery=jQuery, window.$=jQuery;   // a stand-in — no .on(), no .ajax(),
     <h2 class="sec">7. SEO — zero local-business schema across the network</h2>
     <p>Google reads <strong>structured data (JSON-LD)</strong> on a laundromat page to decide whether the location belongs in the map pack, in "near me" results, in "laundromat in [city]" rich cards, and in the ★-rating cards. A passive rendered-DOM extraction on a 10-page sample of the corporate platform finds:</p>
     <ul class="checks">
-      <li class="warn"><strong>9 of 10 sampled franchise pages</strong> ship only <code>BreadcrumbList</code> + <code>ListItem</code> — <strong>zero local-business schema</strong>, zero review-star markup.</li>
-      <li>The lone outlier (the corporate Austin page) carries 7 JSON-LD types — a remnant of CRHS's prior tuning that survived the platform switch.</li>
-      <li>CRHS's own page on the same Cloudflare stack ships <strong>23 JSON-LD types</strong> including the complete local-business set (DryCleaningOrLaundry · hours · geo · services · ★ 4.8 from 48 reviews).</li>
+      <li class="warn">The corporate <strong>Austin page</strong> ships only <code>BreadcrumbList</code>, <code>FAQPage</code> and <code>WebSite</code> — <strong>zero LocalBusiness, hours, geo, service or review-star markup</strong> (re-read from the rendered DOM <strong>2026-08-21</strong>). The CRHS-era local-business schema a prior audit found on this page is now gone entirely.</li>
+      <li>Across a 10-page sample of the network (May 2026), <strong>9 of 10</strong> franchise pages shipped only breadcrumb/list markup — zero local-business schema, zero review stars.</li>
+      <li>Local-business + review schema (<code>DryCleaningOrLaundry</code> · hours · geo · services · ★ ratings) is exactly what Google reads to build the map pack and "near me" results — and it is absent from the pages franchisees are required to send customers to.</li>
     </ul>
     <p><strong>The Google Search Console export for the WaveMAX Austin location</strong> shows the consequence of shipping the platform with this gap. Monthly search impressions collapsed from <strong>28,882 in April 2026</strong> (the last full pre-cutover month) to <strong>79 in June and 6 in July</strong> — the location was effectively removed from Google. Its new canonical address only began reappearing on <strong>August 5, 2026</strong>, and is recovering at <strong>roughly half</strong> the pre-cutover rate.</p>
     <p><strong>Why the page weight matters here.</strong> Google's crawler does not wait for slow pages. A multi-megabyte page that takes 20 seconds to render on mobile is routinely logged as <em>"Crawled — currently not indexed"</em> and re-crawled less often, because Google spends its limited crawl budget where pages are fast and light. Heavy, slow pages and missing structured data compound: the platform is both hard for Google to index and missing the signals that would rank it once indexed.</p>
@@ -257,7 +257,7 @@ window.jQuery=jQuery, window.$=jQuery;   // a stand-in — no .on(), no .ajax(),
     <div>© 2026 CRHS Enterprises, LLC. All rights reserved.</div>
   </div>
   <div class="wrap">
-    <p class="disc">CRHS Enterprises, LLC is an independent WaveMAX® franchisee. This is an audit of publicly visible corporate-site behavior: the code-quality, security, SEO, and brand findings were captured between May 19 and May 26, 2026 with the open-source tools named in §1, and the performance figures were re-verified August 21, 2026. Every finding is reproducible from the cited public sources and tool versions; <code>rundberglaundry.com</code> is the reference build wherever the audit benchmarks against a known-good site. WaveMAX® and the WaveMAX logo are trademarks of WaveMAX Franchise, LLC. This page is not provided, endorsed, or required by WaveMAX Franchise, LLC.</p>
+    <p class="disc">CRHS Enterprises, LLC is an independent WaveMAX® franchisee. This is an audit of publicly visible corporate-site behavior: the code-quality and brand findings were captured between May 19 and May 26, 2026 with the open-source tools named in §1, and the performance, security-header, CORS, HTML-validity, and structured-data findings were re-verified live on August 21, 2026. Every finding is reproducible from the cited public sources and tool versions; <code>rundberglaundry.com</code> is the reference build wherever the audit benchmarks against a known-good site. WaveMAX® and the WaveMAX logo are trademarks of WaveMAX Franchise, LLC. This page is not provided, endorsed, or required by WaveMAX Franchise, LLC.</p>
   </div>
 </footer>
 

@@ -20,7 +20,11 @@
   'use strict';
   var $ = function (id) { return document.getElementById(id); };
 
-  var state = { bound: false, running: false };
+  var state = { bound: false, running: false, ranPlatform: false, ranCorrect: false };
+  var statusEl = $('status'), stageEl = document.querySelector('.stage'), explainEl = $('explain'), hintEl = $('run-hint');
+  function reveal(el) { if (el) { el.hidden = false; } }
+  function hide(el) { if (el) { el.hidden = true; } }
+  function revealStage() { hide(hintEl); reveal(statusEl); reveal(stageEl); }
 
   var menu = $('menu'), stuck = $('stuck'), toast = $('toast');
   var chipMenu = $('chip-menu'), chipForm = $('chip-form');
@@ -97,11 +101,13 @@
   });
 
   function afterReset() { clearTiles(); hideToast(); closeMenu(); }
+  function maybeShowExplain() { if (state.ranPlatform && state.ranCorrect) { reveal(explainEl); } }
 
   // ---- BROKEN: placeholder stub → page code crashes on it → real jQuery too late ----
   function runPlatform() {
     if (state.running) { return; }
-    state.running = true; state.bound = false;
+    state.running = true; state.bound = false; state.ranPlatform = true;
+    revealStage();
     afterReset(); clearConsole(); resetChipsNeutral();
     log('// Loading scripts in the platform’s actual order…', 'dim');
 
@@ -121,6 +127,7 @@
         setChips();
         openMenu();
         log('// Result: menu opens but won’t close; form does nothing. Try them →', 'dim');
+        maybeShowExplain();
         state.running = false;
       }]
     ]);
@@ -129,7 +136,8 @@
   // ---- CORRECT: real jQuery in place first, no placeholder → page code works ----
   function runCorrect() {
     if (state.running) { return; }
-    state.running = true; state.bound = true;
+    state.running = true; state.bound = true; state.ranCorrect = true;
+    revealStage();
     afterReset(); clearConsole(); resetChipsNeutral();
     log('// Loading scripts in a correct order…', 'dim');
 
@@ -148,6 +156,7 @@
       [250, function () {
         setChips();
         log('// Result: the close button and the form both work. Try them →', 'ok');
+        maybeShowExplain();
         state.running = false;
       }]
     ]);
@@ -165,11 +174,12 @@
 
   function reset() {
     if (state.running) { return; }
-    state.bound = false;
+    state.bound = false; state.ranPlatform = false; state.ranCorrect = false;
     afterReset();
     clearConsole();
     log('// Press a button above. This panel shows what the browser reports while the scripts load.', 'dim');
     resetChipsNeutral();
+    hide(statusEl); hide(stageEl); hide(explainEl); reveal(hintEl);
   }
 
   $('run-platform').addEventListener('click', runPlatform);

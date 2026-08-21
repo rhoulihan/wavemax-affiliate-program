@@ -17,7 +17,10 @@
   // the corresponding radio button so the panel is visible, then scroll the
   // callout into view. Otherwise the visitor lands on a hash that points
   // inside a hidden panel and sees nothing change.
-  var hashToTab = { 'audit-callout': 'tab-sec', 'clickjack-callout': 'tab-sec' };
+  var hashToTab = { 'audit-callout': 'tab-sec', 'clickjack-callout': 'tab-sec', 'vibe-callout': 'tab-sec' };
+  // When returning from a "see it happen" page via its Back-to-summary link, put
+  // keyboard focus back on the button that launched that demo.
+  var hashToFocus = { 'audit-callout': 'audit-demo-btn', 'clickjack-callout': 'clickjack-demo-btn', 'vibe-callout': 'vibe-demo-btn' };
   function activateFromHash() {
     var id = (location.hash || '').slice(1);
     if (!id || !hashToTab[id]) { return; }
@@ -27,7 +30,12 @@
     if (target) {
       // Slight delay so the radio-change has actually toggled panel visibility
       // before scrollIntoView measures the target's final position.
-      setTimeout(function () { target.scrollIntoView({ behavior: 'smooth', block: 'center' }); }, 80);
+      setTimeout(function () {
+        target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        var btn = hashToFocus[id] && document.getElementById(hashToFocus[id]);
+        // focus after the smooth-scroll starts; preventScroll so it doesn't fight it
+        if (btn) { setTimeout(function () { try { btn.focus({ preventScroll: true }); } catch (e) { btn.focus(); } }, 420); }
+      }, 80);
     }
   }
   activateFromHash();
