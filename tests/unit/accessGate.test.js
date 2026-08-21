@@ -88,6 +88,20 @@ describe('accessGate middleware', () => {
     expect(res.redirect).not.toHaveBeenCalled(); // no redirect off to another site
   });
 
+  it('EXEMPTS /wavemax when the mediator gate is enabled (mediatorGate takes over)', async () => {
+    const OLD = process.env.MEDIATOR_GATE_ENABLED;
+    process.env.MEDIATOR_GATE_ENABLED = 'true';
+    try {
+      const req = mkReq({ ip: '8.8.8.8', path: '/wavemax/', originalUrl: '/wavemax/', headers: { host: 'crhsent.com' } });
+      const res = mkRes(); const next = jest.fn();
+      await accessGate(req, res, next);
+      expect(next).toHaveBeenCalled();               // passes accessGate → reaches mediatorGate
+      expect(res.status).not.toHaveBeenCalledWith(401);
+    } finally {
+      if (OLD === undefined) delete process.env.MEDIATOR_GATE_ENABLED; else process.env.MEDIATOR_GATE_ENABLED = OLD;
+    }
+  });
+
   it('GATES www.crhsent.com the same way (on a non-public path)', async () => {
     const req = mkReq({ ip: '8.8.8.8', path: '/wavemax/', originalUrl: '/wavemax/', headers: { host: 'www.crhsent.com' } });
     const res = mkRes(); const next = jest.fn();

@@ -96,9 +96,16 @@ function isExempt(p) {
     // Public owner-portal marketing page (crhsent.com/owners/) + its assets —
     // meant to be shared openly, so it bypasses the gate even when enabled.
     p === '/owners' || p === '/owners/' || p.startsWith('/owners/') ||
+    // The /wavemax mediator documentation package has its OWN dedicated IP-binding
+    // gate (mediatorGate). When that gate is enabled, /wavemax is exempt HERE so the
+    // mediator reaches the IP-binding password prompt rather than accessGate's shared
+    // email flow. If the mediator gate is OFF, accessGate keeps protecting /wavemax so
+    // it never becomes fully public. (mediatorGate itself no-ops when disabled.)
+    (process.env.MEDIATOR_GATE_ENABLED === 'true' && (p === '/wavemax' || p.startsWith('/wavemax/'))) ||
     // Public CRHS corporate site (crhsent.com): the home + marketing pages, their
     // shared /assets/ bundle (css/js/fonts/img), and SEO files are public even
-    // when the gate is enabled. Other crhsent paths (e.g. /wavemax/) stay gated.
+    // when the gate is enabled. Other crhsent paths (e.g. /wavemax/) stay gated
+    // unless the mediator gate above has taken over.
     p === '/' ||
     p === '/capabilities' || p === '/capabilities/' ||
     p === '/work' || p === '/work/' ||
