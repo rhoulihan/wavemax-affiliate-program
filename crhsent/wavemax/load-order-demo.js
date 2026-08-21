@@ -21,10 +21,10 @@
   var $ = function (id) { return document.getElementById(id); };
 
   var state = { bound: false, running: false, ranPlatform: false, ranCorrect: false };
-  var statusEl = $('status'), stageEl = document.querySelector('.stage'), explainEl = $('explain'), hintEl = $('run-hint'), tryEl = $('try-prompt');
+  var explainEl = $('explain'), hintEl = $('run-hint'), tryEl = $('try-prompt'), zoneEl = $('interact-zone');
   function reveal(el) { if (el) { el.hidden = false; } }
   function hide(el) { if (el) { el.hidden = true; } }
-  function revealStage() { hide(hintEl); reveal(statusEl); reveal(stageEl); }
+  function revealStage() { hide(hintEl); reveal(zoneEl); }
   // Static, developer-authored strings only (no user input) → innerHTML is safe here.
   function showTry(kind, html) { if (!tryEl) { return; } tryEl.className = 'try-prompt ' + kind; tryEl.innerHTML = html; reveal(tryEl); }
 
@@ -183,7 +183,7 @@
     clearConsole();
     log('// Press a button above. This panel shows what the browser reports while the scripts load.', 'dim');
     resetChipsNeutral();
-    hide(statusEl); hide(stageEl); hide(explainEl); hide(tryEl); reveal(hintEl);
+    hide(zoneEl); hide(explainEl); hide(tryEl); reveal(hintEl);
   }
 
   $('run-platform').addEventListener('click', runPlatform);
