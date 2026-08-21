@@ -21,10 +21,12 @@
   var $ = function (id) { return document.getElementById(id); };
 
   var state = { bound: false, running: false, ranPlatform: false, ranCorrect: false };
-  var statusEl = $('status'), stageEl = document.querySelector('.stage'), explainEl = $('explain'), hintEl = $('run-hint');
+  var statusEl = $('status'), stageEl = document.querySelector('.stage'), explainEl = $('explain'), hintEl = $('run-hint'), tryEl = $('try-prompt');
   function reveal(el) { if (el) { el.hidden = false; } }
   function hide(el) { if (el) { el.hidden = true; } }
   function revealStage() { hide(hintEl); reveal(statusEl); reveal(stageEl); }
+  // Static, developer-authored strings only (no user input) → innerHTML is safe here.
+  function showTry(kind, html) { if (!tryEl) { return; } tryEl.className = 'try-prompt ' + kind; tryEl.innerHTML = html; reveal(tryEl); }
 
   var menu = $('menu'), stuck = $('stuck'), toast = $('toast');
   var chipMenu = $('chip-menu'), chipForm = $('chip-form');
@@ -127,6 +129,7 @@
         setChips();
         openMenu();
         log('// Result: menu opens but won’t close; form does nothing. Try them →', 'dim');
+        showTry('broken', '<span class="big">👉</span> Now try the controls below — with the crash above still showing. Click <strong>✕ Close</strong> on the open menu, then click <strong>Request Information</strong>. <strong>Nothing happens.</strong> Those buttons were never wired up, because the code that would have wired them crashed. That is the bug a real visitor hits on every page load.');
         maybeShowExplain();
         state.running = false;
       }]
@@ -156,6 +159,7 @@
       [250, function () {
         setChips();
         log('// Result: the close button and the form both work. Try them →', 'ok');
+        showTry('working', '<span class="big">👉</span> Now try the same controls again. <strong>✕ Close</strong> closes the menu, and <strong>Request Information</strong> submits. Same page, same buttons — working this time, because the code ran against the real jQuery instead of the placeholder.');
         maybeShowExplain();
         state.running = false;
       }]
@@ -179,7 +183,7 @@
     clearConsole();
     log('// Press a button above. This panel shows what the browser reports while the scripts load.', 'dim');
     resetChipsNeutral();
-    hide(statusEl); hide(stageEl); hide(explainEl); reveal(hintEl);
+    hide(statusEl); hide(stageEl); hide(explainEl); hide(tryEl); reveal(hintEl);
   }
 
   $('run-platform').addEventListener('click', runPlatform);
