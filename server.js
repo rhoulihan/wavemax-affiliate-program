@@ -572,6 +572,14 @@ app.use(partnerLanding);
 // directly. Path-traversal guarded. ----
 const { readHTMLWithNonce: crhsentReadHTML } = require('./server/utils/cspHelper');
 const CRHSENT_ROOT = path.join(__dirname, 'crhsent');
+
+// mediatorGate — password + IP-binding gate fronting crhsent.com/wavemax (the
+// documented-record package prepared for the mediator). Deploys DARK (no-op
+// unless MEDIATOR_GATE_ENABLED=true); mounted here so it has body + cookie
+// parsing and runs BEFORE the crhsent host handler that would otherwise serve
+// the /wavemax content ungated.
+app.use(require('./server/middleware/mediatorGate'));
+
 app.use(async (req, res, next) => {
   const host = (req.hostname || '').toLowerCase().replace(/^www\./, '');
   if (host !== 'crhsent.com') return next();

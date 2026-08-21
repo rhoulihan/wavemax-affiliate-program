@@ -12,6 +12,7 @@
 //   - AffiliateInvite (inviteId unique, tokenHash/email/status/expiresAt)
 //   - Customer       (customerId unique, email unique SPARSE — email is optional)
 //   - AddOn          (addOnId unique, key unique — order add-on catalog)
+//   - MediatorAccess (passwordHash unique — crhsent.com/wavemax gate IP-binding)
 //
 // Note: "at most one open order per bag" is enforced at the application layer
 // (orderTransitionService read-guard), not by a partial unique index — the
@@ -30,8 +31,9 @@ const Operator = require('../server/models/Operator');
 const AffiliateInvite = require('../server/modules/onboarding/AffiliateInvite');
 const Customer = require('../server/models/Customer');
 const AddOn = require('../server/models/AddOn');
+const MediatorAccess = require('../server/models/MediatorAccess');
 
-const MODELS = [Bag, Order, Operator, AffiliateInvite, Customer, AddOn];
+const MODELS = [Bag, Order, Operator, AffiliateInvite, Customer, AddOn, MediatorAccess];
 
 (async () => {
   let failed = false;

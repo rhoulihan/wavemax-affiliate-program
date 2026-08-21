@@ -8,18 +8,18 @@
 <meta name="description" content="A point-in-time audit of the WaveMAX corporate site's security posture, code quality, broken links, performance, and SEO — every finding reproducible from public sources with named open-source tools.">
 <meta name="csp-nonce" content="{{CSP_NONCE}}">
 <link rel="icon" type="image/svg+xml" href="/wavemax/favicon.svg">
-<link rel="stylesheet" href="/wavemax/styles.css?v=20260528a">
+<link rel="stylesheet" href="/wavemax/styles.css?v=20260821a">
 </head>
 <body>
 
 <header class="hero">
   <div class="wrap">
-    <div class="eyebrow">Public audit · May 26, 2026 · from a fellow owner</div>
+    <div class="eyebrow">Public audit · captured May 26, 2026 · performance re-verified Aug 21, 2026</div>
     <h1>WaveMAX corporate site — security &amp; code-quality audit</h1>
-    <p class="lede">A point-in-time scorecard of the franchisor's corporate platform — broken links, runtime errors, security headers, structured data, performance, the gap between what the mandated marketing vendor sells and what it ships. Every number below was measured with open-source tools on public URLs and is reproducible from your laptop.</p>
-    <p class="hero-note">If you're a WaveMAX franchisee on the required $300/month "Website Foundation," this is what the live pages do when you point a measuring tool at them. Every section names the tool and links to a free way to re-run it yourself.</p>
+    <p class="lede">A point-in-time scorecard of the franchisor's corporate platform — broken links, runtime errors, security headers, structured data, performance, the gap between what the mandated marketing vendor sells and what it ships. Every number below was measured with open-source tools on public URLs and is reproducible from any laptop.</p>
+    <p class="hero-note">The pages below are the corporate platform's live franchise and location pages, on the mandated $300/month "Website Foundation." This is what they do when a measuring tool is pointed at them. Every section names the tool and links to a free way to re-run it.</p>
     <div class="hero-actions">
-      <a class="btn ghost" href="/wavemax/#audit-callout" data-back-to-offer>← Back to the offer</a>
+      <a class="btn ghost" href="/wavemax/#audit-callout" data-back-to-offer>← Back to the summary</a>
     </div>
   </div>
 </header>
@@ -78,14 +78,18 @@
 <section id="js">
   <div class="wrap">
     <h2 class="sec">3. JavaScript crash on every load — and why the menu won't close</h2>
-    <p>The franchise-conversion page throws an uncaught <code>TypeError</code> on every page load. Captured live in headless Chrome 143:</p>
+    <p>The franchise-conversion page throws an uncaught <code>TypeError</code> on every page load. Captured live in headless Chrome (first in May, re-verified 2026-08-21 — the line number shifts as the page is edited, the crash does not):</p>
     <pre style="background:#f1f5f9;border:1px solid #e2e8f0;border-radius:8px;padding:12px 16px;font-size:13.5px;line-height:1.55;overflow-x:auto;color:#b42318;margin:10px 0 14px"><code>TypeError: $(...).on is not a function
-    at https://wavemaxlaundry.com/become-a-franchisee/:2295:19</code></pre>
-    <p>Line 2295 of the page itself contains an inline jQuery form binder:</p>
+    at https://wavemaxlaundry.com/become-a-franchisee/:2566</code></pre>
+    <p>That line of the page itself contains an inline jQuery form binder:</p>
     <pre style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:12px 16px;font-size:13.5px;line-height:1.55;overflow-x:auto;color:#0f172a;margin:10px 0 14px"><code>$('#formLaundry').on('submit', function(e) { ... });</code></pre>
-    <p>And the page loads jQuery <strong>twice</strong> — version 3.6.4 from <code>ajax.googleapis.com</code> at line 1655, and the WordPress-bundled 3.7.1 plus jquery-migrate at line 4200. That's a classic <code>$</code>-shadowing hazard that produces exactly the error above.</p>
+    <p>The page loads jQuery <strong>three times</strong> (3.6.4 from <code>ajax.googleapis.com</code>, WordPress's 3.7.1, and jquery-migrate) — but the crash's real cause is a <em>fourth</em> thing. A speed-optimization script in the page <code>&lt;head&gt;</code> installs a <strong>placeholder stub</strong> under the <code>$</code> / <code>jQuery</code> names that only queues calls and defines <em>no real methods</em>:</p>
+    <pre style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:12px 16px;font-size:13px;line-height:1.5;overflow-x:auto;color:#0f172a;margin:10px 0 14px"><code>let jqueryParams=[], jQuery=function(r){return jqueryParams=[...jqueryParams,r],jQuery},
+    $=function(r){return jqueryParams=[...jqueryParams,r],$};
+window.jQuery=jQuery, window.$=jQuery;   // a stand-in — no .on(), no .ajax(), no .click()…</code></pre>
+    <p>That <code>let $</code> declaration <strong>shadows</strong> the real jQuery inside every inline script on the page. So when the binder above runs <code>$('#formLaundry').on(…)</code>, <code>$</code> is the <em>stub</em> — which has no <code>.on</code> method — and it throws. The three real jQuery copies load afterward, but the page's own code already ran against the placeholder. <strong>Re-verified live 2026-08-21:</strong> the stub at document line 18; jQuery 3.6.4 at 1926, 3.7.1 at 4756, jquery-migrate 3.4.1 at 4757; and the <code>$('#formLaundry').on</code> binder at 2566 — the same broken configuration, still shipping. In plain terms: a bolt-on speed trick puts a fake stand-in in front of the real library, and the page's own hand-written code calls the real library's functions on the stand-in — the hallmark of parts assembled and never tested together.</p>
     <p><strong>The operational consequence.</strong> The form-submit handlers for the Laundry and Franchise lead forms never bind. And the same broken-<code>$</code> environment is the mechanism behind the user-visible behavior on the Franchise navigation: the menu's close handler — also a jQuery <code>.on()</code> binding in this theme — fails to attach. The menu opens; nothing closes it. The site is broken in a way the team running it could see in DevTools any time they reloaded the page.</p>
-    <p class="pb-foot"><strong>Verify it yourself:</strong> open <code>wavemaxlaundry.com/become-a-franchisee/</code>, open DevTools → Console, hard-reload. Watch for the red <code>$(...).on is not a function</code> error referencing line 2295 of the page itself. No external scripts; the bug is in the page's own HTML.</p>
+    <p class="pb-foot"><strong>Verify it yourself:</strong> open <code>wavemaxlaundry.com/become-a-franchisee/</code>, open DevTools → Console, hard-reload. Watch for the red <code>$(...).on is not a function</code> error referencing a line in the page's own HTML. No external scripts; the bug is in the page itself. <strong>Or see it interactively:</strong> the <a href="/wavemax/load-order-demo.html">load-order demonstration</a> lets you flip the script order and watch the menu and form break, then work.</p>
   </div>
 </section>
 
@@ -146,17 +150,17 @@
 <section id="perf">
   <div class="wrap">
     <h2 class="sec">6. Performance — Google PageSpeed Insights</h2>
-    <p>From Google's free <strong>PageSpeed Insights</strong> (the public Lighthouse scoring service):</p>
+    <p>From Google's free <strong>PageSpeed Insights</strong> (the public Lighthouse scoring service), <strong>re-verified August 21, 2026</strong> (0–100, higher is better):</p>
     <table class="cmp">
       <thead><tr><th>Page</th><th>Mobile</th><th>Desktop</th></tr></thead>
       <tbody>
-        <tr><td><code>wavemaxlaundry.com/</code> (corporate homepage)</td><td class="theirs">9</td><td class="theirs">35</td></tr>
-        <tr><td><code>wavemaxlaundry.com/austin-tx/</code> (location page)</td><td class="theirs">59</td><td class="theirs">83</td></tr>
-        <tr><td><code>mhrmarketing.com</code> (the marketing vendor's own site)</td><td class="theirs">66</td><td class="theirs">92</td></tr>
-        <tr><td><code>rundberglaundry.com</code> (CRHS, same Cloudflare stack)</td><td class="ours">99</td><td class="ours">98</td></tr>
+        <tr><td><code>wavemaxlaundry.com/</code> (corporate homepage)</td><td class="theirs">5</td><td class="theirs">47</td></tr>
+        <tr><td><code>wavemaxlaundry.com/austin-tx/</code> (location page)</td><td class="theirs">44</td><td class="theirs">62</td></tr>
+        <tr><td><code>mhrmarketing.com</code> (the marketing vendor's own site)</td><td class="theirs">69</td><td class="theirs">95</td></tr>
+        <tr><td><code>rundberglaundry.com</code> (reference build, same Cloudflare stack)</td><td class="ours">100</td><td class="ours">100</td></tr>
       </tbody>
     </table>
-    <p>The starkest gap is on mobile: <strong>Largest Contentful Paint takes 14.4 seconds</strong> on the corporate Austin page; the CRHS comparison page on the same CDN renders LCP in <strong>1.8 seconds</strong> — about <strong>8× faster</strong>. Same edge, different origin and build.</p>
+    <p>The corporate homepage now scores <strong>5 on mobile</strong> — and it has gotten <strong>worse</strong> since May 2026, not better (the homepage was 9 and the Austin page 59). The starkest gap is on mobile: <strong>Largest Contentful Paint takes 20.0 seconds</strong> on the corporate Austin page (whose page weighs <strong>5.6&nbsp;MB</strong>); the reference page on the same CDN renders LCP in <strong>0.8 seconds</strong> (<strong>0.9&nbsp;MB</strong>) — about <strong>25× faster</strong>. Same edge, different origin and build.</p>
     <p class="pb-foot"><strong>Verify it yourself:</strong> run <a href="https://pagespeed.web.dev/" target="_blank" rel="noopener">pagespeed.web.dev</a> on both <code>wavemaxlaundry.com</code> and <code>rundberglaundry.com</code> side by side.</p>
   </div>
 </section>
@@ -170,7 +174,8 @@
       <li>The lone outlier (the corporate Austin page) carries 7 JSON-LD types — a remnant of CRHS's prior tuning that survived the platform switch.</li>
       <li>CRHS's own page on the same Cloudflare stack ships <strong>23 JSON-LD types</strong> including the complete local-business set (DryCleaningOrLaundry · hours · geo · services · ★ 4.8 from 48 reviews).</li>
     </ul>
-    <p><strong>The 16-month Google Search Console export for <code>www.wavemaxlaundry.com/austin-tx/</code></strong> shows the consequence of shipping the platform with this gap: impressions fell from a 964/day pre-cutover average (1,427/day peak) to a <strong>32/day post-cutover floor — a 97.7% drop</strong>, below even the original 138/day launch baseline.</p>
+    <p><strong>The Google Search Console export for the WaveMAX Austin location</strong> shows the consequence of shipping the platform with this gap. Monthly search impressions collapsed from <strong>28,882 in April 2026</strong> (the last full pre-cutover month) to <strong>79 in June and 6 in July</strong> — the location was effectively removed from Google. Its new canonical address only began reappearing on <strong>August 5, 2026</strong>, and is recovering at <strong>roughly half</strong> the pre-cutover rate.</p>
+    <p><strong>Why the page weight matters here.</strong> Google's crawler does not wait for slow pages. A multi-megabyte page that takes 20 seconds to render on mobile is routinely logged as <em>"Crawled — currently not indexed"</em> and re-crawled less often, because Google spends its limited crawl budget where pages are fast and light. Heavy, slow pages and missing structured data compound: the platform is both hard for Google to index and missing the signals that would rank it once indexed.</p>
     <p class="pb-foot"><strong>Verify it yourself:</strong> point <a href="https://search.google.com/test/rich-results" target="_blank" rel="noopener">Google's Rich Results Test</a> at any franchise page on <code>wavemaxlaundry.com</code> and count the "Valid items" it reports. Compare with a CRHS page on the same tool.</p>
   </div>
 </section>
@@ -213,9 +218,9 @@
       <tbody>
         <tr><td>"Found on Google" / SEO</td><td class="theirs">Breadcrumb-only schema; zero local-business markup on 9 of 10 sampled pages</td></tr>
         <tr><td>"Security &amp; Malware Protection"</td><td class="theirs">No CSP, no HSTS, no XCTO, no Referrer-Policy; CORS reflects-Origin with credentials</td></tr>
-        <tr><td>"Performance Monitoring &amp; Optimization"</td><td class="theirs">PSI mobile 9 on the corporate homepage; LCP 14.4 s on the Austin page</td></tr>
+        <tr><td>"Performance Monitoring &amp; Optimization"</td><td class="theirs">PSI mobile 5 on the corporate homepage; LCP 20.0 s on the Austin page (re-verified 2026-08-21) — worse than in May</td></tr>
         <tr><td>"Multi-Language Translation"</td><td class="theirs">Translated pages exist; the switcher control is force-hidden (<code>display:none&nbsp;!important</code>) on corporate pages so visitors cannot use it</td></tr>
-        <tr><td>Hosting</td><td class="ours">Genuinely delivered — Cloudflare in front of GoDaddy Managed WordPress</td></tr>
+        <tr><td>Hosting</td><td class="ours">Delivered — the pages load (Cloudflare in front of GoDaddy Managed WordPress)</td></tr>
       </tbody>
     </table>
     <p>The <strong>paid add-on tiers ($1,050 – $1,500 / month)</strong> sell <em>"Custom Location-Specific Posts."</em> A May 25, 2026 census of 62 franchise Facebook pages across 22 states found:</p>
@@ -224,6 +229,7 @@
       <li class="warn"><strong>39 pages</strong> with no post at all since the May 1 platform switch.</li>
       <li><strong>2 pages</strong> with genuinely-unique content — neither shared anything with the MHR caption library, consistent with self-managed pages outside MHR's social service.</li>
     </ul>
+    <p><strong>Re-verified live on 2026-08-21</strong> (logged-in spot re-scan of the syndicated set): still the same national template. On that date <em>"Sometimes it really does feel like throwing in the towel"</em> and <em>"When was the last time you washed your sheets?"</em> each ran word-for-word on the <strong>Bedford, TX and Chandler, AZ</strong> pages simultaneously; <em>"Laundry should not slow you down"</em> was live in Colorado; and the library repeats on a single page over time — <strong>Chandler, AZ</strong> was still posting <em>"College life is busy. Laundry should not be,"</em> the exact caption that page ran three months earlier.</p>
     <p>(Recorded against interest: the corporate location pages themselves are populated with local store photos — 70 of 71. The website image build-out was done. The deficit is specific to the paid <em>social</em> product.)</p>
   </div>
 </section>
@@ -236,13 +242,13 @@
       <li class="danger">A franchise-conversion page that <strong>crashes on every load</strong> and <strong>404s a network-wide link</strong>.</li>
       <li class="warn"><strong>Zero structured data</strong> for the local-search results that are the product of the SEO line item the package sells.</li>
       <li class="danger"><strong>Multiple OWASP-class security misconfigurations</strong> on a platform that markets "Security &amp; Malware Protection."</li>
-      <li class="warn">Performance <strong>~3× slower</strong> than the comparator built by one franchisee on the same CDN — <strong>8× slower mobile LCP</strong> on the Austin page.</li>
+      <li class="warn">Performance <strong>far slower</strong> than the reference build on the same CDN — <strong>25× slower mobile LCP</strong> on the Austin page (20.0 s vs 0.8 s), and getting worse, not better.</li>
       <li class="warn"><strong>Zero franchise license attribution</strong>; no copyright claim in the franchisor's own content.</li>
       <li class="warn"><strong>Privacy / OAuth / consumer-disclosure gaps</strong> network-wide.</li>
       <li class="warn"><strong>Cross-state-identical "custom location-specific" posts</strong> on the third of franchise pages whose social feed it manages.</li>
     </ul>
     <p>Every finding is measured, named, and reproducible. Run the tools yourself.</p>
-    <p style="margin-top:18px"><a class="btn" href="/wavemax/#audit-callout" data-back-to-offer>← Back to the offer</a></p>
+    <p style="margin-top:18px"><a class="btn" href="/wavemax/#audit-callout" data-back-to-offer>← Back to the summary</a></p>
   </div>
 </section>
 
@@ -251,7 +257,7 @@
     <div>© 2026 CRHS Enterprises, LLC. All rights reserved.</div>
   </div>
   <div class="wrap">
-    <p class="disc">CRHS Enterprises, LLC is an independent WaveMAX® franchisee offering web, hosting, and marketing services to other franchisees. This is an audit of publicly visible corporate-site behavior, captured between May 19 and May 26, 2026 with the open-source tools named in §1. Every finding is reproducible from the cited public sources and tool versions; CRHS is the comparator wherever the audit benchmarks against a known-good build, and the comparison reflects measurement at capture time. WaveMAX® and the WaveMAX logo are trademarks of WaveMAX Franchise, LLC. This page is not provided, endorsed, or required by WaveMAX Franchise, LLC.</p>
+    <p class="disc">CRHS Enterprises, LLC is an independent WaveMAX® franchisee. This is an audit of publicly visible corporate-site behavior: the code-quality, security, SEO, and brand findings were captured between May 19 and May 26, 2026 with the open-source tools named in §1, and the performance figures were re-verified August 21, 2026. Every finding is reproducible from the cited public sources and tool versions; <code>rundberglaundry.com</code> is the reference build wherever the audit benchmarks against a known-good site. WaveMAX® and the WaveMAX logo are trademarks of WaveMAX Franchise, LLC. This page is not provided, endorsed, or required by WaveMAX Franchise, LLC.</p>
   </div>
 </footer>
 

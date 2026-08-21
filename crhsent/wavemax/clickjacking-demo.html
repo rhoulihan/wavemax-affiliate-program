@@ -462,7 +462,7 @@
   <h1>Clickjacking the WaveMAX corporate site</h1>
   <p>The frame below is loading the real <code style="background:rgba(255,255,255,0.1);padding:1px 6px;border-radius:3px">wavemaxlaundry.com/austin-tx/</code> page directly from the franchisor's servers. Because the franchisor's platform sets no <code style="background:rgba(255,255,255,0.1);padding:1px 6px;border-radius:3px">X-Frame-Options</code> response header and no <code style="background:rgba(255,255,255,0.1);padding:1px 6px;border-radius:3px">Content-Security-Policy: frame-ancestors</code> directive, any third party can wrap any franchisee's page in a hostile overlay on any domain.</p>
   <div class="header-links">
-    <a href="/wavemax/#clickjack-callout" data-back-to-offer>← Back to the offer</a>
+    <a href="/wavemax/#clickjack-callout" data-back-to-offer>← Back to the summary</a>
     <a href="/wavemax/security-audit.html#demo-callout" data-back-to-audit>← Back to the full audit</a>
   </div>
 </header>
@@ -515,28 +515,25 @@
 </section>
 
 <section class="explanation">
-  <h2>If you operate a WaveMAX location, here is what this means for you</h2>
+  <h2>What this means for a WaveMAX location and its customers</h2>
   <div style="background:#fef2f2;border-left:4px solid var(--danger);padding:18px 22px;border-radius:0 8px 8px 0;margin:14px 0 22px">
-    <p style="margin:0 0 10px;font-size:16px"><strong>Your franchise location's page on <code>wavemaxlaundry.com/&lt;your-city&gt;-&lt;your-state&gt;/</code> can be embedded by any third party, on any domain, today.</strong></p>
-    <p style="margin:0;font-size:15px">Whether or not you signed up for the MHR-built marketing platform, your location's subpath shares this exposure as long as it is hosted on the franchisor's current platform. An attacker does not need your credentials, your consent, or even your awareness. The page header, footer, branding, and content visible to a customer are genuinely WaveMAX. The interactive controls overlaid by the attacker are not. When the chargeback or complaint or lawsuit arrives, the name of the franchise location on the visible page is the name on the filing — yours.</p>
+    <p style="margin:0 0 10px;font-size:16px"><strong>Any WaveMAX location page at <code>wavemaxlaundry.com/&lt;city&gt;-&lt;state&gt;/</code> can be embedded by any third party, on any domain, today.</strong></p>
+    <p style="margin:0;font-size:15px">This exposure applies to every location on the franchisor's current platform. An attacker needs no credentials, no consent, and no awareness from the location owner. The page header, footer, branding, and content a customer sees are genuinely WaveMAX; the interactive controls overlaid by the attacker are not. When a chargeback, complaint, or lawsuit follows, the name of the franchise location on the visible page is the name on the filing.</p>
   </div>
 
-  <h2 style="margin-top:30px">What you just saw</h2>
-  <p>An attacker can register any domain (for example <em>wavemax-austin-pickup.com</em> or <em>book-laundry-pickup.com</em>), point a single HTML file at it, and serve the same experience you just saw to anyone who clicks an ad, a phishing email, or a social link. The customer sees the real WaveMAX page in the body. They see a button styled to match WaveMAX. They click. The attacker now controls the rest of the flow — a fake scheduling form, a fake credit-card capture, a chargeback your franchise has to defend.</p>
+  <h2 style="margin-top:30px">What the demonstration showed</h2>
+  <p>An attacker can register any domain (for example <em>wavemax-austin-pickup.com</em> or <em>book-laundry-pickup.com</em>), point a single HTML file at it, and serve the experience shown above to anyone who clicks an ad, a phishing email, or a social link. The customer sees the real WaveMAX page in the body. They see a button styled to match WaveMAX. They click. The attacker now controls the rest of the flow — a fake scheduling form, a fake credit-card capture, a chargeback the franchise location has to defend.</p>
 
   <p><strong>This is enabled by a missing HTTP response header.</strong> The franchisor's platform sets none of the standard browser-enforced framing controls: no <code>X-Frame-Options</code>, no <code>Content-Security-Policy: frame-ancestors</code>, no <code>Permissions-Policy</code>. The fix is roughly one line of nginx, Apache, or WordPress configuration on the franchisor's side. CRHS has notified the franchisor's senior leadership of this exposure in writing on at least six dates beginning April 29, 2026.</p>
 
-  <h2 style="margin-top:30px">What franchisees can do right now</h2>
+  <h2 style="margin-top:30px">How anyone can verify this independently</h2>
   <ol style="font-size:15.5px;line-height:1.7">
-    <li><strong>Verify your own exposure.</strong> From a terminal: <code>curl -sI https://www.wavemaxlaundry.com/&lt;your-city&gt;-&lt;your-state&gt;/</code>. If the response does not include <code>X-Frame-Options</code> or a <code>Content-Security-Policy</code> header naming a <code>frame-ancestors</code> directive, your location page can be embedded by a third party today. (As of this writing, no franchisee location page tested includes either header.)</li>
-    <li><strong>Document the exposure for your own records.</strong> Save the raw HTTP response. The franchisor's platform configuration is not something a franchisee can remediate; it is the franchisor's responsibility, but the documentation is yours to keep.</li>
-    <li><strong>Notify the franchisor in writing.</strong> A single email to franchisor leadership requesting the response headers be set, with a copy preserved, is enough to put your franchise on the record as having raised the issue. Form language is available — contact CRHS if you'd like a template.</li>
-    <li><strong>Watch for impersonation.</strong> Set Google Alerts on your franchise location's name + "WaveMAX" + your city. If a typosquat domain appears, your customers may already be encountering it.</li>
-    <li><strong>Read the published audit and the takedown demand.</strong> Both are at the bottom of this page. The audit is the full security and code-quality scorecard. The takedown demand is what CRHS-Austin is sending to franchisor's CEO over this exposure and the broader pattern.</li>
+    <li><strong>Check the response headers.</strong> From a terminal: <code>curl -sI https://www.wavemaxlaundry.com/austin-tx/</code>. If the response does not include <code>X-Frame-Options</code> or a <code>Content-Security-Policy</code> header naming a <code>frame-ancestors</code> directive, the page can be embedded by a third party. As of this writing, no franchisee location page tested includes either header.</li>
+    <li><strong>Compare with a properly-configured site.</strong> <code>curl -sI https://rundberglaundry.com/</code> returns <code>x-frame-options: SAMEORIGIN</code> and a strict <code>frame-ancestors</code> directive — which is why the browser refuses to embed it in the "Protected" tab above.</li>
   </ol>
 
   <div class="verify">
-    <strong>Reproduce it yourself in 60 seconds.</strong> Open the developer tools on this page. Inspect the iframe element above — its <code>src</code> is set to the real <code>https://www.wavemaxlaundry.com/austin-tx/</code>. Now create your own HTML file with one line: <code>&lt;iframe src="https://www.wavemaxlaundry.com/&lt;your-city&gt;-&lt;your-state&gt;/"&gt;&lt;/iframe&gt;</code>. Serve it on any domain you control, or open it locally. The real franchisor page will load. Try the same with <code>rundberglaundry.com</code> or any properly-configured site — the browser will refuse.
+    <strong>Reproduce it in 60 seconds.</strong> Open the developer tools on this page. Inspect the iframe element above — its <code>src</code> is set to the real <code>https://www.wavemaxlaundry.com/austin-tx/</code>. Now create an HTML file with one line: <code>&lt;iframe src="https://www.wavemaxlaundry.com/austin-tx/"&gt;&lt;/iframe&gt;</code>. Serve it on any domain, or open it locally. The real franchisor page will load. Try the same with <code>rundberglaundry.com</code> or any properly-configured site — the browser will refuse.
   </div>
 
   <h2 style="margin-top:36px">The "secure attacker" trap — why standard scanners don't catch this</h2>
@@ -552,7 +549,7 @@
 
   <p style="margin-top:30px"><strong>The §B finding in the CRHS takedown demand letter references this exact exposure.</strong> The full audit, with every finding stated alongside the open-source tool that produced it and a verify-it-yourself reproduction path, is at <a href="/wavemax/security-audit.html">crhsent.com/wavemax/security-audit.html</a>.</p>
 
-  <p style="margin-top:14px;font-size:14px;color:var(--muted)">CRHS Enterprises (the operator of WaveMAX Austin) is one independent franchisee speaking from one franchise location. The exposure documented here affects every franchisee location subject to the same franchisor platform configuration. If you operate a WaveMAX location and want to compare notes — or if you've experienced an impersonation incident already — get in touch.</p>
+  <p style="margin-top:14px;font-size:14px;color:var(--muted)">CRHS Enterprises (the operator of WaveMAX Austin) is one independent franchisee, documenting this from one franchise location. The exposure documented here affects every franchisee location subject to the same franchisor platform configuration.</p>
 </section>
 
 <!-- INTRO MODAL: shown on page load (combined intro + add-button explainer) -->
