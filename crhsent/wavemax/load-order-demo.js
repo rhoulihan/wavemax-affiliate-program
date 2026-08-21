@@ -159,7 +159,7 @@
       [250, function () {
         setChips();
         log('// Result: the close button and the form both work. Try them →', 'ok');
-        showTry('working', '<span class="big">👉</span> Now try the same controls again. <strong>✕ Close</strong> closes the menu, and <strong>Request Information</strong> submits. Same page, same buttons — working this time, because the code ran against the real jQuery instead of the placeholder.');
+        showTry('working', '<span class="big">👉</span> Now the menu works properly — <strong>open it with the ☰ button and close it with ✕ Close</strong> (the ☰ button toggles it too), and submit the <strong>Request Information</strong> form. Same page, same buttons, working this time — because the code ran against the real jQuery instead of the placeholder.');
         maybeShowExplain();
         state.running = false;
       }]
