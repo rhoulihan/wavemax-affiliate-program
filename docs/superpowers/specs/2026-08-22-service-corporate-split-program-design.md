@@ -88,6 +88,28 @@ Lifted (and, where inline, **modularized**) from `server.js`/`server/`:
 | `locationQuarantine` + `quarantineConfig` | Largely **retired** once nginx `server_name` routes hosts; any residual → web-core. |
 | Integration example HTML (`wavemaxlaundry-embed-code*`, `iframe-parent-example*`) | **Corporate** (franchisor-facing docs). |
 
+### E. Gate migration matrix (content gates — none may be lost)
+
+Every access-control gate, its destination, and how it is verified. **No gate is "migrated" until an integration test in its destination repo proves both its allow AND deny paths.** The shared `ipGate` factory is Phase 1 (web-core); service gates travel with the service repo; corporate gates get one migration task each in the Phase-2 plan.
+
+| Gate (file) | Guards | Dest | Key deps / models | Migration + verification |
+|---|---|---|---|---|
+| `ipGate.js` (factory) | reusable IP-allowlist middleware factory | **web-core** | clientIp, storeIPs | Phase 1 (T6). Unit test: allow / deny / `x-forwarded-for` parse. Both apps build their IP gates from it. |
+| `adminIpGate.js` | `/admin`, `/api/v1/administrators` (`ADMIN_ALLOWLIST`) | **service** | ipGate factory | Consumes web-core factory; port `adminIpGate.test.js` (stealth 404, fail-closed in prod). |
+| `operatorIpGate.js` | operator surfaces (`STORE_IP`) | **service** | ipGate factory | Port `operatorIpGate.test.js`. |
+| `scanAuth.js` | scan-session endpoints | **service** | — | Port scan-session auth test. |
+| `expediterGuard.js` | order-expediter display (`EXPEDITER_TOKEN`) | **service** | — | Token allow/deny test. |
+| `accessGate.js` | `crhsent.com` password/email gate (`GATED_HOSTS`) | **corporate** | `AccessGate`/`AccessWhitelist`/`AccessClick`/`AccessRequest`, SystemConfig, email; `loadCache`/`startCacheRefresh` on DB connect | Move models + cache; corporate app must run `loadCache` on connect. Test: gated host → 401 landing, correct password sets unlock cookie, whitelist-IP bypass, admin bypass. |
+| `mediatorGate.js` | `crhsent.com/wavemax` IP-binding | **corporate** | `MediatorAccess` model, ipGate factory (**was** service `adminIpGate`), HMAC via `SESSION`/`JWT` secret | **Rebuild its admin-IP check on the web-core factory** (drop the cross-import of service `adminIpGate`). Port `mediatorGate.test.js` (10 tests: prompt/bind/deny/home-bypass/admin-reset, IPv6 cookie parse). |
+| `franchisePreview.js` | `crhsent.com/__preview/*` + gated `/<slug>?key=` | **corporate** | gbpService, turnstile, franchisePreview{Email,Pages,Render}, gbpToLocationData, previewUnlockCookie + encryption + auditLogger (web-core), `FranchisePreviewRequest` model | DARK unless `FRANCHISE_PREVIEW_ENABLED`. Move model + services. Test: preview-request flow, unlock cookie, disabled-by-default. |
+| `explorerGuard.js` | `/design-explorer/*` (`EXPLORER_TOKEN`) | **corporate** | — | Port `explorerGuard.test.js`. |
+| `partnerLanding.js` | Austin per-location domains coming-soon/partner (`PARTNER_PREVIEW_ALLOWLIST`) | **corporate** | — | Move; **drop the hardcoded service-path exemptions** (moot once nginx routes app hosts to :3000). Test: gated host → partner page, allowlist-IP sees full site. |
+| `locationQuarantine.js` (+ `quarantineConfig.js`) | redirect non-Austin/non-app hosts → corporate site | **retired → corporate residual** | quarantineConfig, cspHelper (crhsent-404) | Largely superseded by nginx `server_name` (each host now lands on its own app). Keep only the crhsent-404 branch in corporate if still needed. **Verify with a per-host smoke test that nothing mis-routes** after removal. |
+
+Non-gate authZ for completeness: `auth.js`/`rbac.js`/`authorizationHelpers.js` (JWT/role) → **service**; `locationValidation.js` → **web-core** (onboarding + corporate location both use it).
+
+**Cross-surface coupling resolved:** today `mediatorGate` (corporate) imports `adminIpGate` (service). Post-split the **factory** lives in web-core and each app instantiates its own IP gates from it — no cross-repo import.
+
 ---
 
 ## 4. Deployment topology
