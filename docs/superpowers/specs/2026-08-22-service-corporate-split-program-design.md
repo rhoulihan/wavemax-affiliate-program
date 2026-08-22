@@ -58,7 +58,7 @@ Both apps depend on `@crhs/web-core`; both talk to the **shared** MongoDB.
 - **marketing HTML in public/:** franchise, become-a-franchisee, about, testimonials, why-invest-in-wavemax, wavemax-vs-zombiemat, virtual-tour, faq, contact, laundromat-investment-guide, wavemax-affiliate, franchise-host + `franchise-default/*`, the franchise `-embed.html` fragments (austin-landing-v3, about-us, self-serve-laundry, wash-dry-fold, commercial, contact), partner-program, integration examples.
 - **franchise host rendering:** `franchiseRoutes`, `franchiseController`, `franchisePreviewRender`, `franchisePreview` middleware, `franchiseRegistryService`, `equipmentProfileService`, `gbpService`, `gbpToLocationData`, `franchisePreviewPages/Email`, config `locationData`, `domainSeoOverrides`, `franchisePreviewCopy`, model `FranchisePreviewRequest`, `scripts/franchise-build/*`.
 - **corporate gates + models:** `accessGate` (+ `AccessGate/AccessRequest/AccessWhitelist/AccessClick`), `mediatorGate` (+ `MediatorAccess`), `explorerGuard`, `partnerLanding`.
-- **corporate intake/AI:** `corporateInquiryRoutes/Controller/Service`, partner/contact routes+controllers, `conciergeController` (+ `conciergeFaq`), review services (google/network).
+- **corporate intake/AI:** `corporateInquiryRoutes/Controller/Service`, `affiliateApplicationRoutes/Controller/Service` + `affiliate-inquiry.js` + `public/affiliate.html` (the UT-student recruitment lead form), partner/contact routes+controllers, `conciergeController` (+ `conciergeFaq`), review services (google/network).
 - **design-explorer/ (whole tree)** + generated `public/design-explorer/*`.
 - **corporate JS:** `corporate-*`, `site-page-loader`, `austin-*`, `franchise-*`, self-serve/wash-dry-fold marketing scripts, `lead-capture-form`, `partner-inquiry`, `network-reviews-init`, `faq-accordion`, `wm-image-config`.
 - **data/content:** `public/data/franchises*`, `public/content/site-pages.json`, marketing SEO assets (`flyers/`, brand logos, location imagery).
@@ -79,7 +79,7 @@ Lifted (and, where inline, **modularized**) from `server.js`/`server/`:
 
 | Item | Recommendation |
 |---|---|
-| `affiliateApplication*` + `affiliate-inquiry.js` (UT recruitment lead form) | **Service** — it's top-of-funnel for the affiliate service. |
+| `affiliateApplication*` + `affiliate-inquiry.js` + `public/affiliate.html` (UT recruitment lead form) | **Corporate** (Rick, 2026-08-22) — grouped with marketing/recruitment intake. |
 | Legal pages (terms/privacy/refund) | **web-core** shared static, served by both. |
 | `geocodingService` | **web-core** (service onboarding + corporate location both use it). |
 | `docsRoutes` (`/docs`, non-prod only) | **Service** (dev tooling). |
