@@ -3,7 +3,7 @@
 **Date:** 2026-08-22
 **Status:** Design — awaiting review
 **Author:** CRHS (Rick Houlihan) + Claude
-**Scope:** Phase 1 of a two-phase effort. Phase 1 = remove the "WaveMAX" literal from the codebase behind a single brand config. Phase 2 (separate spec) = migrate the `wavemax.promo` domain to the new primary domain.
+**Scope:** This is now **Phase 3** of the larger program in [`2026-08-22-service-corporate-split-program-design.md`](2026-08-22-service-corporate-split-program-design.md) (Phase 1 = extract `@crhs/web-core`, Phase 2 = repo/deploy split, **Phase 3 = this de-brand**, Phase 4 = domain migration). It runs against the *service-only* `wdf-affiliate-program` repo after the split, so most "about-WaveMAX" content (the §7 exclusions below) will already have moved to the corporate repo. Remove the "WaveMAX" literal from the service codebase behind a single brand config; the domain migration is Phase 4.
 
 ---
 
