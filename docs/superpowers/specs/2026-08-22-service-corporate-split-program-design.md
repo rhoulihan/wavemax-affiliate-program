@@ -34,6 +34,8 @@ Sequenced (locked):
 
 Both apps depend on `@crhs/web-core`; both talk to the **shared** MongoDB.
 
+**Execution model (Rick, 2026-08-22): build the new repos greenfield; leave the existing `wdf-affiliate-program` repo untouched.** Phases 1–2 create `crhs-web-core` and `crhs-corporate` as **new** repos by *copying* (never moving/deleting) the relevant code out of the existing monorepo and building it up under **strict TDD** (red → green → refactor; a failing test first for every non-trivial unit). The existing repo/app keeps running unmodified as the reference + fallback; corporate hosts are re-pointed to the new corporate app via nginx only once it is proven in production. Trimming/​de-branding the service repo (Phase 3) and the domain migration (Phase 4) are revisited after the split is live and stable.
+
 ---
 
 ## 3. Split inventory
@@ -103,9 +105,9 @@ Lifted (and, where inline, **modularized**) from `server.js`/`server/`:
 
 ## 5. Phases — scope, sequencing, acceptance
 
-### Phase 1 — Extract `@crhs/web-core`
-Modularize the inline `server.js` security core (§3.C) into `crhs-web-core`. **Done in-place first** as internal modules within the current repo (so the monorepo keeps working and tests stay green), then published as the package. Also resolves `server.js` > 800-line rule violation.
-**Acceptance:** `server.js` composes from `@crhs/web-core` modules; full suite green; no behavior change (CSP headers, gates, email, nonce injection byte-identical in an integration test); `madge --circular` clean.
+### Phase 1 — Build `crhs-web-core` (new repo)
+Create the `crhs-web-core` repo and build the shared security/infra core (§3.C) there by **copying** the modules out of the existing monorepo and **modularizing** what is currently inline in `server.js` (the CSP builder, header block, CORS) into clean package modules. The existing repo is **not** modified. Strict TDD: each core module gets a failing unit test first (CSP directive output, nonce injection, encryption round-trip, rate-limit store, email transport, SystemConfig defaults, etc.).
+**Acceptance:** `crhs-web-core` builds + publishes (git-installable package); its test suite is green and covers every exported module; a golden-master test asserts the CSP header + nonce-injection output is byte-identical to what the existing `server.js` produces today; `madge --circular` clean. The existing monorepo is unchanged (verified: no diff).
 
 ### Phase 2 — Repo + deploy split
 Create `crhs-corporate`; move §3.B; both apps depend on `@crhs/web-core`; two `server.js`; stand up PM2 :3001 + nginx `server_name`; split `ensure-indexes`; partition `build:assets`. wavemax.promo/hosts unchanged (still land where they do today, now via nginx).
